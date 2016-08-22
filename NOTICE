@@ -1,0 +1,23 @@
+MLeap
+Copyright 2016 Combust.ML, inc.
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+========================================================================
+Apache License 2.0
+========================================================================
+Code derived from Apache Spark is under the Apache License 2.0
+
+## Licensing
+
+Library (MLeap) is licensed under Apache License 2.0, as per accompanying LICENSE file.
+
+## Credit
+
+Library has been written by Hollin Wilkins (hollinrwilkins@gmail.com)
+Mikhail Semeniuk (seme0021@gmail.com)
+Ram Sriharsha (rsriharsha@hortonworks.com)
+
+It was started at TrueCar for their machine learning platform to deploy
+ML models to high throughput API servers.

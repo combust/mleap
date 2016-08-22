@@ -1,0 +1,3 @@
+[submodule "bundle-protobuf"]
+	path = bundle-protobuf
+	url = git@github.com:combust-ml/bundle-protobuf.git

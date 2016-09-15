@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer
 
 import java.util.UUID
 
-import ml.combust.mleap.runtime.transformer.builder.{LeapFrameBuilder, TransformBuilder}
+import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.runtime.LeapFrame
 
 import scala.util.Try
@@ -16,6 +16,7 @@ object Transformer {
 
 trait Transformer {
   val uid: String
-  def transform[L <: LeapFrame[L]](frame: L): Try[L] = build(LeapFrameBuilder(frame)).map(_.frame)
+
+  def transform[L <: LeapFrame[L] with TransformBuilder[L]](frame: L): Try[L] = build[L](frame)
   def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB]
 }

@@ -1,15 +1,15 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.runtime.types.{DataType, StructField, StructType}
 
-import scala.util.Try
-
+import scala.util.{Failure, Success, Try}
 
 /** Trait for a LeapFrame implementation.
   *
-  * @tparam T self-referential type
+  * @tparam LF self-referential type
   */
-trait LeapFrame[T <: LeapFrame[T]] extends Serializable {
+trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LeapFrame[LF]] with Serializable {
   /** Get the schema.
     *
     * @return schema
@@ -29,7 +29,7 @@ trait LeapFrame[T <: LeapFrame[T]] extends Serializable {
     * @param fieldNames field names to select
     * @return try new LeapFrame with selected fields
     */
-  def select(fieldNames: String *): Try[T] = {
+  def select(fieldNames: String *): Try[LF] = {
     schema.indicesOf(fieldNames: _*).flatMap {
       indices =>
         schema.selectIndices(indices: _*).map {
@@ -50,7 +50,7 @@ trait LeapFrame[T <: LeapFrame[T]] extends Serializable {
     * @return try new LeapFrame with new field
     */
   def withField(name: String, dataType: DataType)
-               (f: (Row) => Any): Try[T] = withField(StructField(name, dataType))(f)
+               (f: (Row) => Any): Try[LF] = withField(StructField(name, dataType))(f)
 
   /** Try to add a field to the LeapFrame.
     *
@@ -61,7 +61,7 @@ trait LeapFrame[T <: LeapFrame[T]] extends Serializable {
     * @return try new LeapFrame with new field
     */
   def withField(field: StructField)
-               (f: (Row) => Any): Try[T] = {
+               (f: (Row) => Any): Try[LF] = {
     schema.withField(field).map {
       schema2 =>
         val dataset2 = dataset.withValue(f)
@@ -78,7 +78,7 @@ trait LeapFrame[T <: LeapFrame[T]] extends Serializable {
     * @return try new LeapFrame with new fields
     */
   def withFields(fields: Seq[StructField])
-                (f: (Row) => Row): Try[T] = {
+                (f: (Row) => Row): Try[LF] = {
     schema.withFields(fields).map {
       schema2 =>
         val dataset2 = dataset.withValues(f)
@@ -93,7 +93,7 @@ trait LeapFrame[T <: LeapFrame[T]] extends Serializable {
     * @param name name of field to drop
     * @return try new LeapFrame with field dropped
     */
-  def dropField(name: String): Try[T] = {
+  def dropField(name: String): Try[LF] = {
     schema.indexOf(name).flatMap {
       index =>
         schema.dropIndex(index).map {
@@ -110,5 +110,28 @@ trait LeapFrame[T <: LeapFrame[T]] extends Serializable {
     * @param dataset new dataset
     * @return
     */
-  protected def withSchemaAndDataset(schema: StructType, dataset: Dataset): T
+  protected def withSchemaAndDataset(schema: StructType, dataset: Dataset): LF
+
+  override def withInput(name: String): Try[(LeapFrame[LF], Int)] = {
+    schema.indexOf(name).map((this, _))
+  }
+
+  override def withInput(name: String, dataType: DataType): Try[(LeapFrame[LF], Int)] = {
+    schema.indexedField(name).flatMap {
+      case (index, field) =>
+        if(field.dataType.fits(dataType)) {
+          Success(this, index)
+        } else {
+          Failure(new Error(s"Field $name expected data type ${field.dataType} but found $dataType"))
+        }
+    }
+  }
+
+  override def withOutput(name: String, dataType: DataType)(o: (Row) => Any): Try[LeapFrame[LF]] = {
+    withField(name, dataType)(o)
+  }
+
+  override def withOutputs(fields: Seq[StructField])(o: (Row) => Row): Try[LeapFrame[LF]] = {
+    withFields(fields)(o)
+  }
 }

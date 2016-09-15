@@ -71,10 +71,7 @@ trait BinaryClassificationModel extends ClassificationModel {
     * @return prediction with threshold
     */
   def predict(features: Vector): Double = {
-    threshold match {
-      case Some(t) => if (predictProbability(features) > t) 1.0 else 0.0
-      case None => predictProbability(features)
-    }
+    probabilityToPrediction(predictProbability(features))
   }
 
   /** Predict the class without taking into account threshold.
@@ -83,4 +80,20 @@ trait BinaryClassificationModel extends ClassificationModel {
     * @return probability that prediction is the predictable class
     */
   def predictProbability(features: Vector): Double
+
+  /** Predict class and probability.
+    *
+    * @param features features to predict
+    * @return (prediction, probability)
+    */
+  def predictWithProbability(features: Vector): (Double, Double) = {
+    val probability = predictProbability(features)
+
+    (probabilityToPrediction(probability), probability)
+  }
+
+  private def probabilityToPrediction(probability: Double): Double = threshold match {
+    case Some(t) => if (probability > t) 1.0 else 0.0
+    case None => probability
+  }
 }

@@ -19,7 +19,7 @@ class LinearRegressionSpec extends FunSpec {
       intercept = 73.0))
 
   describe("LinearRegression") {
-    describe("#build") {
+    describe("#transform") {
       it("executes the linear regression model and outputs a prediction") {
         val frame2 = linearRegression.transform(frame).get
         val prediction = frame2.dataset.toArray(0).getDouble(1)

@@ -41,9 +41,14 @@ object LogisticRegressionOp extends OpNode[LogisticRegression, LogisticRegressio
     LogisticRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,
+      probabilityCol = node.shape.getOutput("probability").map(_.name),
       model = model)
   }
 
-  override def shape(node: LogisticRegression): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction")
+  override def shape(node: LogisticRegression): Shape = {
+    val s = Shape().withInput(node.featuresCol, "features").
+      withOutput(node.predictionCol, "prediction")
+    node.probabilityCol.map(p => s.withOutput(p, "probability")).
+      getOrElse(s)
+  }
 }

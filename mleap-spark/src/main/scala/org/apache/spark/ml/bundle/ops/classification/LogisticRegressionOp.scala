@@ -43,13 +43,18 @@ object LogisticRegressionOp extends OpNode[LogisticRegressionModel, LogisticRegr
   override def model(node: LogisticRegressionModel): LogisticRegressionModel = node
 
   override def load(context: BundleContext, node: ReadableNode, model: LogisticRegressionModel): LogisticRegressionModel = {
-    new LogisticRegressionModel(uid = node.name,
+    val lr = new LogisticRegressionModel(uid = node.name,
       coefficients = model.coefficients,
       intercept = model.intercept).copy(model.extractParamMap).
       setFeaturesCol(node.shape.input("features").name).
       setPredictionCol(node.shape.output("prediction").name)
+    node.shape.getOutput("probability").map(p => lr.setProbabilityCol(p.name)).getOrElse(lr)
   }
 
-  override def shape(node: LogisticRegressionModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: LogisticRegressionModel): Shape = {
+    val s = Shape().withInput(node.getFeaturesCol, "features").
+      withOutput(node.getPredictionCol, "prediction")
+    node.get(node.probabilityCol).map(p => s.withOutput(p, "probability")).
+      getOrElse(s)
+  }
 }

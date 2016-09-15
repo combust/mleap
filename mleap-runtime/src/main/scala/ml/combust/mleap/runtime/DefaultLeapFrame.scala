@@ -8,6 +8,12 @@ import ml.combust.mleap.runtime.types.StructType
   * @param dataset dataset of leap frame
   */
 case class DefaultLeapFrame(schema: StructType, dataset: Dataset) extends LeapFrame[DefaultLeapFrame] {
+  /** Get this as underlying implementation.
+    *
+    * @return this as underlying implementation
+    */
+  override protected def lf: DefaultLeapFrame = this
+
   override protected def withSchemaAndDataset(schema: StructType,
                                               dataset: Dataset): DefaultLeapFrame = {
     copy(schema = schema, dataset = dataset)

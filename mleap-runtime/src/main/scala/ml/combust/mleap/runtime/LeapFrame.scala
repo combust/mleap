@@ -5,11 +5,15 @@ import ml.combust.mleap.runtime.types.{DataType, StructField, StructType}
 
 import scala.util.{Failure, Success, Try}
 
+object LeapFrame {
+  def apply(schema: StructType, dataset: Dataset): DefaultLeapFrame = DefaultLeapFrame(schema, dataset)
+}
+
 /** Trait for a LeapFrame implementation.
   *
   * @tparam LF self-referential type
   */
-trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LeapFrame[LF]] with Serializable {
+trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializable {
   /** Get the schema.
     *
     * @return schema
@@ -21,6 +25,12 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LeapFrame[LF]] wit
     * @return dataset
     */
   def dataset: Dataset
+
+  /** Get this as underlying implementation.
+    *
+    * @return this as underlying implementation
+    */
+  protected def lf: LF
 
   /** Try to select fields to create a new LeapFrame.
     *
@@ -108,30 +118,30 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LeapFrame[LF]] wit
     *
     * @param schema new schema
     * @param dataset new dataset
-    * @return
+    * @return new leap frame with schema and dataset
     */
   protected def withSchemaAndDataset(schema: StructType, dataset: Dataset): LF
 
-  override def withInput(name: String): Try[(LeapFrame[LF], Int)] = {
-    schema.indexOf(name).map((this, _))
+  override def withInput(name: String): Try[(LF, Int)] = {
+    schema.indexOf(name).map((this.lf, _))
   }
 
-  override def withInput(name: String, dataType: DataType): Try[(LeapFrame[LF], Int)] = {
+  override def withInput(name: String, dataType: DataType): Try[(LF, Int)] = {
     schema.indexedField(name).flatMap {
       case (index, field) =>
         if(field.dataType.fits(dataType)) {
-          Success(this, index)
+          Success(this.lf, index)
         } else {
           Failure(new Error(s"Field $name expected data type ${field.dataType} but found $dataType"))
         }
     }
   }
 
-  override def withOutput(name: String, dataType: DataType)(o: (Row) => Any): Try[LeapFrame[LF]] = {
+  override def withOutput(name: String, dataType: DataType)(o: (Row) => Any): Try[LF] = {
     withField(name, dataType)(o)
   }
 
-  override def withOutputs(fields: Seq[StructField])(o: (Row) => Row): Try[LeapFrame[LF]] = {
+  override def withOutputs(fields: Seq[StructField])(o: (Row) => Row): Try[LF] = {
     withFields(fields)(o)
   }
 }

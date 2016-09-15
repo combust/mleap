@@ -14,7 +14,7 @@ case class OneHotEncoder(uid: String = Transformer.uniqueName("one_hot_encoder")
                          inputCol: String,
                          outputCol: String,
                          model: OneHotEncoderModel) extends Transformer {
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(inputCol, DoubleType).flatMap {
       case(b, index) =>
         b.withOutput(outputCol, TensorType.doubleVector())(row => model(row.getDouble(index)))

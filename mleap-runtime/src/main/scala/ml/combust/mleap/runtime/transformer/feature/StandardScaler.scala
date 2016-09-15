@@ -14,7 +14,7 @@ case class StandardScaler(uid: String = Transformer.uniqueName("standard_scaler"
                           inputCol: String,
                           outputCol: String,
                           model: StandardScalerModel) extends Transformer {
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(inputCol, TensorType.doubleVector()).flatMap {
       case (b, inputIndex) =>
         b.withOutput(outputCol, TensorType.doubleVector())(row => model(row.getVector(inputIndex)))

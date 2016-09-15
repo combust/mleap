@@ -14,7 +14,7 @@ case class HashingTermFrequency(uid: String = Transformer.uniqueName("hashing_te
                                 inputCol: String,
                                 outputCol: String,
                                 hashingTermFrequency: HashingTermFrequencyModel) extends Transformer {
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(inputCol, StringType).flatMap {
       case (b, inputIndex) =>
         b.withOutput(outputCol, TensorType.doubleVector())(row => hashingTermFrequency(row.getString(inputIndex)))

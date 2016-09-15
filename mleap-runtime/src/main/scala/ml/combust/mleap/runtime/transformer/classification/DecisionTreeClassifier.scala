@@ -14,7 +14,7 @@ case class DecisionTreeClassifier(uid: String = Transformer.uniqueName("decision
                                   featuresCol: String,
                                   predictionCol: String,
                                   model: DecisionTreeClassifierModel) extends Transformer {
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(featuresCol, TensorType.doubleVector()).flatMap {
       case (b, featuresIndex) =>
         b.withOutput(predictionCol, DoubleType)(row => model(row.getVector(featuresIndex)))

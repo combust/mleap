@@ -15,7 +15,7 @@ case class VectorAssembler(uid: String = Transformer.uniqueName("vector_assemble
                            outputCol: String) extends Transformer {
   private val assembler: VectorAssemblerModel = VectorAssemblerModel.default
 
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     inputCols.foldLeft(Try((builder, Seq[Int]()))) {
       (result, col) => result.flatMap {
         case (b, indices) =>

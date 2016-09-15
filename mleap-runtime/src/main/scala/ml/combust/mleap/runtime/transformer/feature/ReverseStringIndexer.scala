@@ -14,7 +14,7 @@ case class ReverseStringIndexer(uid: String = Transformer.uniqueName("reverse_st
                                 inputCol: String,
                                 outputCol: String,
                                 model: ReverseStringIndexerModel) extends Transformer {
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(inputCol).flatMap {
       case (b, inputIndex) =>
         b.withOutput(outputCol, StringType)(row => model(row.getDouble(inputIndex).toInt))

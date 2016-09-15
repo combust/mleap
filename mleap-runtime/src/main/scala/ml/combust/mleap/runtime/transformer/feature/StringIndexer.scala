@@ -14,7 +14,7 @@ case class StringIndexer(uid: String = Transformer.uniqueName("string_indexer"),
                          inputCol: String,
                          outputCol: String,
                          model: StringIndexerModel) extends Transformer {
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(inputCol).flatMap {
       case (b, inputIndex) =>
         b.withOutput(outputCol, DoubleType)(row => model(row.get(inputIndex).toString))

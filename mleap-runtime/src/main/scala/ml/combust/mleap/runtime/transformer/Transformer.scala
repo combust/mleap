@@ -3,20 +3,32 @@ package ml.combust.mleap.runtime.transformer
 import java.util.UUID
 
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.LeapFrame
 
 import scala.util.Try
 
-/**
-  * Created by hwilkins on 10/22/15.
+/** Companion class for transformer.
   */
 object Transformer {
+  /** Generate a unique name with a base string.
+    *
+    * @param base base string
+    * @return unique name from base string
+    */
   def uniqueName(base: String): String = s"${base}_${UUID.randomUUID().toString}"
 }
 
+/** Trait for implementing an MLeap transformer.
+  */
 trait Transformer {
+  /** Unique identifier for this transformer.
+    */
   val uid: String
 
-  def transform[L <: LeapFrame[L] with TransformBuilder[L]](frame: L): Try[L] = build[L](frame)
-  def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB]
+  /** Transform a builder using this MLeap transformer.
+    *
+    * @param builder builder to transform
+    * @tparam TB underlying class of builder
+    * @return try new builder with transformation applied
+    */
+  def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB]
 }

@@ -14,7 +14,7 @@ case class SupportVectorMachine(uid: String = Transformer.uniqueName("support_ve
                                 featuresCol: String,
                                 predictionCol: String,
                                 model: SupportVectorMachineModel) extends Transformer {
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(featuresCol, TensorType.doubleVector()).flatMap {
       case(b, featuresIndex) =>
         b.withOutput(predictionCol, DoubleType)(row => model(row.getVector(featuresIndex)))

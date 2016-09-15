@@ -13,7 +13,7 @@ import scala.util.Try
 case class Tokenizer(uid: String = Transformer.uniqueName("tokenizer"),
                      inputCol: String,
                      outputCol: String) extends Transformer {
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(inputCol, StringType).flatMap {
       case (b, inputIndex) =>
         b.withOutput(outputCol, ListType(StringType))(row => TokenizerModel.defaultTokenizer(row.getString(inputIndex)))

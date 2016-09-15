@@ -16,7 +16,7 @@ case class OneVsRest(uid: String = Transformer.uniqueName("one_vs_rest"),
                      predictionCol: String,
                      probabilityCol: Option[String] = None,
                      model: OneVsRestModel) extends Transformer {
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(featuresCol, TensorType.doubleVector()).flatMap {
       case(b, featuresIndex) =>
         probabilityCol match {

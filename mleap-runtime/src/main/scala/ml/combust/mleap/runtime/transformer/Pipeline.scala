@@ -9,7 +9,7 @@ import scala.util.Try
  */
 case class Pipeline(uid: String = Transformer.uniqueName("pipeline"),
                     transformers: Seq[Transformer]) extends Transformer {
-  override def build[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    transformers.foldLeft(Try(builder))((b, stage) => b.flatMap(stage.build))
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+    transformers.foldLeft(Try(builder))((b, stage) => b.flatMap(stage.transform))
   }
 }

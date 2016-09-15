@@ -62,23 +62,9 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
 
   test("indicesOf should return the correct indices for valid fields") {
     Given("an array of valid String field names")
-    val selection = Array("first", "fifth", "second")
-
-    When("indicesOf is invoked")
-    val indices = testStruct.indicesOf(selection:_*).get
-
-    Then("the returned Seq should contain the correct indices")
-    assert(Seq(0, 4, 1).map(i => indices.contains(i)).forall(identity))
-
-    And("they should be in order")
-    assert(Seq(0, 4, 1) == indices)
-  }
-
-  test("tryIndicesOf should return the correct indices for valid fields") {
-    Given("an array of valid String field names")
     val selection = Array("fifth", "second", "fourth")
 
-    When("tryIndicesOf is invoked")
+    When("indicesOf is invoked")
     val indices = testStruct.indicesOf(selection:_*)
 
     Then("the returned object should be a successful Seq[Int]")
@@ -92,7 +78,7 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
     assert(Seq(4, 1, 3) == sequence)
   }
 
-  test("tryIndicesOf should return a failure for invalid fields") {
+  test("indicesOf should return a failure for invalid fields") {
     Given("an array of invalid field names")
     val names = Array("sixth", "seventh")
 
@@ -103,22 +89,22 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
     assert(failed.isFailure)
   }
 
-  test("tryIndexOf should return the correct index for a valid field") {
+  test("indexOf should return the correct index for a valid field") {
     Given("a valid String field name")
     val name = "fifth"
 
-    When("tryIndexOf is invoked")
+    When("indexOf is invoked")
     val successfulIndex = testStruct.indexOf(name)
 
     Then("the returned object should be a successful Int")
     assert(successfulIndex.isSuccess)
 
-    And("the Seq should contain the correct indices")
+    And("the try should contain the correct index")
     val index = successfulIndex.success.value
     assert(index == 4)
   }
 
-  test("tryIndexOf should return a failure for an invalid field") {
+  test("indexOf should return a failure for an invalid field") {
     assert(testStruct.indexOf("sixth").isFailure)
   }
 }

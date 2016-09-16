@@ -12,6 +12,8 @@ object StructType {
     nameToIndex = Map(),
     nameToField = Map())
 
+  def apply(field: StructField, fields: StructField *): Try[StructType] = apply(field +: fields)
+
   def apply(fields: Seq[StructField]): Try[StructType] = {
     StructType().withFields(fields)
   }

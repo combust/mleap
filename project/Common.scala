@@ -25,7 +25,7 @@ object Common {
     }
   )
 
-  val combustSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust")
+  val combustSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")
   val bundleSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.bundle")
 
   val sonatypeSettings: Seq[Def.Setting[_]] = Seq(

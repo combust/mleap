@@ -83,6 +83,20 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     *
     * Returns a Failure if trying to add any existing fields.
     *
+    * @param field first field to add
+    * @param fields fields to add
+    * @param f function for calculating new field values
+    * @return try new LeapFrame with new fields
+    */
+  def withFields(field: StructField, fields: StructField *)
+                (f: (Row) => Row): Try[LF] = {
+    withFields(field +: fields)(f)
+  }
+
+  /** Try to add multiple fields to the LeapFrame.
+    *
+    * Returns a Failure if trying to add any existing fields.
+    *
     * @param fields fields to add
     * @param f function for calculating new field values
     * @return try new LeapFrame with new fields

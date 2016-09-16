@@ -74,6 +74,16 @@ case class StructType private(fields: Seq[StructField],
 
   /** Try to add multiple fields to this struct.
     *
+    * @param field first field to add
+    * @param fields fields to add
+    * @return try new struct with fields added
+    */
+  def withFields(field: StructField, fields: StructField *): Try[StructType] = {
+    withFields(field +: fields)
+  }
+
+  /** Try to add multiple fields to this struct.
+    *
     * @param fields fields to add
     * @return try new struct with fields added
     */

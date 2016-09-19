@@ -6,7 +6,7 @@ import ml.bundle.serializer.BundleRegistry
   * Created by hollinwilkins on 8/22/16.
   */
 object MleapRegistry {
-  val instance: BundleRegistry = create()
+  implicit val defaultRegistry: BundleRegistry = create()
 
   def create(): BundleRegistry = BundleRegistry().
     // classification

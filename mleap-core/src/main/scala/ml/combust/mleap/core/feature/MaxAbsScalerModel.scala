@@ -12,7 +12,7 @@ case class MaxAbsScalerModel(
                          maxAbs: Vector
                        )  extends Serializable{
   def apply(vector: Vector): Vector = {
-    println("Here")
+
     val maxAbsUnzero = Vectors.dense(maxAbs.toArray.map(x => if (x == 0) 1 else x))
 
     vector match {

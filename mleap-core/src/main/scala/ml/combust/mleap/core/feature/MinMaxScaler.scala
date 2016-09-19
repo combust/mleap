@@ -1,0 +1,59 @@
+package ml.combust.mleap.core.feature
+
+import org.apache.spark.ml.linalg.mleap.Vector._
+import org.apache.spark.ml.linalg.{Vector, Vectors, SparseVector, DenseVector}
+import scala.math.{max, min}
+
+/** Class for MinMax Scaler Transformer
+  *
+  * MinMax Scaler will use the Min/Max values to scale input features
+  * Created by mikhail on 9/18/16.
+  *
+  * @param originalMin Minimum value from training features
+  * @param originalMax Maximum value from training features
+  */
+case class MinMaxScalerModel (originalMin: Vector,
+                              originalMax: Vector) extends Serializable{
+  /**Scale a feature vector using the min/max
+    *
+    * @param vector feature vector
+    * @return scaled feature fector
+    */
+  def apply(vector: Vector): Vector = {
+    val originalRange = (originalMax.toBreeze - originalMin.toBreeze).toArray
+    val minArray = originalMin.toArray
+
+    vector match {
+      case DenseVector(values) =>
+        val vs = values.clone()
+        val size = vs.length
+        var i = 0
+        while (i < size) {
+          if (!values(i).isNaN) {
+            val raw = if (originalRange(i) != 0) {
+              max(min(1.0, (values(i) - minArray(i)) / originalRange(i)), 0.0)
+            } else {
+              0.5
+            }
+            vs(i) = raw
+          }
+          i += 1
+        }
+        Vectors.dense(vs)
+      case SparseVector(size, indices, values) =>
+        val vs = values.clone()
+        val nnz = vs.length
+        var i = 0
+        while (i < nnz) {
+          val raw = if (originalRange(i) != 0) {
+            max(min(1.0, (indices(i) - minArray(i)) / originalRange(i)), 0.0)
+          } else {
+            0.5
+          }
+          vs(i) *= raw
+          i += 1
+        }
+        Vectors.sparse(size, indices, vs)
+    }
+  }
+}

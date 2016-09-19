@@ -15,7 +15,7 @@ class MinMaxScalerSpec extends FunSpec{
       val inputArray = Array(15.0, 5.0, 5.0, 19.0)
 
       val expectedVector = Array(1.0, 0.5, 0.0, 0.9)
-      
+
       assert(scaler(Vectors.dense(inputArray)).toArray.sameElements(expectedVector))
     }
   }

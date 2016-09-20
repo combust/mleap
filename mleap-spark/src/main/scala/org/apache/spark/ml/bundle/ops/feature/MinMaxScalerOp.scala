@@ -9,7 +9,7 @@ import org.apache.spark.ml.linalg.Vectors
 /**
   * Created by mikhail on 9/19/16.
   */
-class MinMaxScalerOp extends OpNode[MinMaxScalerModel, MinMaxScalerModel] {
+object MinMaxScalerOp extends OpNode[MinMaxScalerModel, MinMaxScalerModel] {
   override val Model: OpModel[MinMaxScalerModel] = new OpModel[MinMaxScalerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.min_max_scaler
 

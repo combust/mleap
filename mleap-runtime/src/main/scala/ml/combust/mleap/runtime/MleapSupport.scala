@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime
 
 import java.io.File
 
-import ml.combust.mleap.runtime.serialization.bundle.{MleapBundle, MleapRegistry}
+import ml.combust.mleap.runtime.serialization.bundle.MleapBundle
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.bundle.BundleDef.BundleDef
 import ml.bundle.dsl.{AttributeList, Bundle}
@@ -11,7 +11,7 @@ import ml.bundle.serializer._
 /** Object for support classes for easily working with Bundle.ML.
   */
 object MleapSupport {
-  /** Wrapper for [[Transformer]].
+  /** Wrapper for [[ml.combust.mleap.runtime.transformer.Transformer]].
     *
     * Makes it easy to serialize the wrapped transformer to Bundle.ML.
     *
@@ -35,7 +35,7 @@ object MleapSupport {
 
   /** Wrapper for java.io.File.
     *
-    * Makes it easy to deserialize a [[Transformer]] from the file.
+    * Makes it easy to deserialize a [[ml.combust.mleap.runtime.transformer.Transformer]] from the file.
     *
     * @param path file to wrap
     */

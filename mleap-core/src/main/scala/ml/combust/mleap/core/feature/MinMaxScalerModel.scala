@@ -12,17 +12,17 @@ import scala.math.{max, min}
   * @param originalMin Minimum value from training features
   * @param originalMax Maximum value from training features
   */
-case class MinMaxScalerModel (originalMin: Vector,
-                              originalMax: Vector) extends Serializable{
+case class MinMaxScalerModel(originalMin: Vector,
+                             originalMax: Vector) extends Serializable {
+  val originalRange = (originalMax.toBreeze - originalMin.toBreeze).toArray
+  val minArray = originalMin.toArray
+
   /**Scale a feature vector using the min/max
     *
     * @param vector feature vector
     * @return scaled feature fector
     */
   def apply(vector: Vector): Vector = {
-    val originalRange = (originalMax.toBreeze - originalMin.toBreeze).toArray
-    val minArray = originalMin.toArray
-
     vector match {
       case DenseVector(values) =>
         val vs = values.clone()

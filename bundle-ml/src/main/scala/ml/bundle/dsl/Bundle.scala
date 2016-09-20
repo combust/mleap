@@ -40,6 +40,7 @@ object Bundle {
       val tokenizer = "tokenizer"
       val vector_assembler = "vector_assembler"
       val one_hot_encoder = "one_hot_encoder"
+      val min_max_scaler = "min_max_scaler"
     }
 
     object classification {

@@ -12,7 +12,7 @@ class BucketizerModel(
   def apply(feature: Double): Double = {
 
     val bucket = binarySearchForBuckets(splits, feature)
-    
+
     bucket
 
   }

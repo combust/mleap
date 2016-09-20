@@ -1,27 +1,18 @@
 package ml.combust.mleap.core.feature
 
-import java.{util => ju}
-
 /**
   * Created by mikhail on 9/18/16.
   */
-class BucketizerModel(
-                     splits: Array[Double]
-                     ) extends Serializable{
-
+case class BucketizerModel(splits: Array[Double]) extends Serializable {
   def apply(feature: Double): Double = {
-
-    val bucket = binarySearchForBuckets(splits, feature)
-
-    bucket
-
+    binarySearchForBuckets(splits, feature)
   }
 
   def binarySearchForBuckets(splits: Array[Double], feature: Double): Double = {
     if (feature == splits.last) {
       splits.length - 2
     } else {
-      val idx = ju.Arrays.binarySearch(splits, feature)
+      val idx = java.util.Arrays.binarySearch(splits, feature)
       if (idx >= 0) {
         idx
       } else {

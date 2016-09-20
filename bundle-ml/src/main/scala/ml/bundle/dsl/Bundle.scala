@@ -42,6 +42,7 @@ object Bundle {
       val one_hot_encoder = "one_hot_encoder"
       val min_max_scaler = "min_max_scaler"
       val max_abs_scaler = "max_abs_scaler"
+      val bucketizer = "bucketizer"
     }
 
     object classification {

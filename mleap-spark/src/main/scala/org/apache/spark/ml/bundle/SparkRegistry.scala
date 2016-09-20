@@ -31,6 +31,7 @@ object SparkRegistry {
       register(ops.feature.TokenizerOp).
       register(ops.feature.VectorAssemblerOp).
       register(ops.feature.MinMaxScalerOp).
+      register(ops.feature.MaxAbsScalerOp).
 
       // other
       register(ops.PipelineOp)

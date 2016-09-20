@@ -41,6 +41,7 @@ object Bundle {
       val vector_assembler = "vector_assembler"
       val one_hot_encoder = "one_hot_encoder"
       val min_max_scaler = "min_max_scaler"
+      val max_abs_scaler = "max_abs_scaler"
     }
 
     object classification {

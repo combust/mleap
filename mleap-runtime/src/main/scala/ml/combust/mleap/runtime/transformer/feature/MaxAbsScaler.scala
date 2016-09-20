@@ -11,13 +11,10 @@ import scala.util.Try
 /**
   * Created by mikhail on 9/18/16.
   */
-case class MaxAbsScaler(
-                       uid: String = Transformer.uniqueName("max_abs_scaler"),
+case class MaxAbsScaler(uid: String = Transformer.uniqueName("max_abs_scaler"),
                        inputCol: String,
                        outputCol: String,
-                       model: MaxAbsScalerModel
-                       ) extends Transformer{
-
+                       model: MaxAbsScalerModel) extends Transformer {
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(inputCol, TensorType.doubleVector()).flatMap {
       case (b, inputIndex) =>

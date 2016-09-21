@@ -30,7 +30,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.annotation.Since
 import org.apache.spark.ml._
 import org.apache.spark.ml.attribute._
-import org.apache.spark.ml.classification.{ClassificationModel, Classifier}
+import org.apache.spark.ml.classification.{ClassificationModel, Classifier, ProbabilisticClassificationModel, ProbabilisticClassifier}
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.param.shared.HasProbabilityCol
 import org.apache.spark.ml.param.{Param, ParamMap, ParamPair, Params}
@@ -171,7 +171,10 @@ final class OneVsRestModel private[ml] (
     // update the accumulator column with the result of prediction of models
     val aggregatedDataset = models.zipWithIndex.foldLeft[DataFrame](newDataset) {
       case (df, (model, index)) =>
-        val rawPredictionCol = model.getRawPredictionCol
+        val rawPredictionCol = model match {
+          case model: ProbabilisticClassificationModel[_, _] => model.getProbabilityCol
+          case _ => model.getRawPredictionCol
+        }
         val columns = origCols ++ List(col(rawPredictionCol), col(accColName))
 
         // add temporary column to store intermediate scores and update

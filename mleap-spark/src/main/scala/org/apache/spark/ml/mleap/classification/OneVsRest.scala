@@ -197,12 +197,12 @@ final class OneVsRestModel private[ml] (
     }
 
     // output the index of the classifier with highest confidence as prediction
-    val labelUDF = udf { (lp: (Double, Double)) =>
+    val labelUDF = udf { (lp: (Int, Double)) =>
       lp._1
     }
 
     // output the probability
-    val probabilityUDF = udf { (lp: (Double, Double)) =>
+    val probabilityUDF = udf { (lp: (Int, Double)) =>
       lp._2
     }
 

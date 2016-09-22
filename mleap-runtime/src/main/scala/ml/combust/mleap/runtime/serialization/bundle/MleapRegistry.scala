@@ -23,6 +23,7 @@ object MleapRegistry {
     register(ops.feature.VectorAssemblerOp).
     register(ops.feature.MinMaxScalerOp).
     register(ops.feature.MaxAbsScalerOp).
+    register(ops.feature.BucketizerOp).
     // regression
     register(ops.regression.LinearRegressionOp).
     register(ops.regression.DecisionTreeRegressionOp).

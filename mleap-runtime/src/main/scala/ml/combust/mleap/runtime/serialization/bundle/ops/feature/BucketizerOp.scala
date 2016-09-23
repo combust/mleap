@@ -19,7 +19,7 @@ object BucketizerOp extends OpNode[Bucketizer, BucketizerModel]{
     }
 
     override def load(context: BundleContext, model: ReadableModel): BucketizerModel = {
-      BucketizerModel(splits = model.value("splits").getDoubleVector.toArray)
+      BucketizerModel(splits = model.value("splits").getDoubleList.toArray)
     }
 
   }

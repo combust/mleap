@@ -32,6 +32,7 @@ object SparkRegistry {
       register(ops.feature.VectorAssemblerOp).
       register(ops.feature.MinMaxScalerOp).
       register(ops.feature.MaxAbsScalerOp).
+      register(ops.feature.BucketizerOp).
 
       // other
       register(ops.PipelineOp)

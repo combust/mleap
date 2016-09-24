@@ -4,6 +4,7 @@ import ml.bundle.dsl._
 import ml.bundle.op.{OpModel, OpNode}
 import ml.bundle.serializer.BundleContext
 import org.apache.spark.ml.feature.ElementwiseProduct
+import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by mikhail on 9/23/16.
@@ -13,13 +14,12 @@ object ElementwiseProductOp extends OpNode[ElementwiseProduct, ElementwiseProduc
     override def opName: String = Bundle.BuiltinOps.feature.elementwise_product
 
     override def store(context: BundleContext, model: WritableModel, obj: ElementwiseProduct): WritableModel = {
-      model.withAttr(Attribute("scalingVec", Value.doubleVector(obj.getScalingVec.toArray)))
+      model.withAttr(Attribute("scaling_vec", Value.doubleVector(obj.getScalingVec.toArray)))
     }
 
     override def load(context: BundleContext, model: ReadableModel): ElementwiseProduct = {
-      new ElementwiseProduct(uid = "").setScalingVec(model.value("scalingVec").getDoubleVector.toArray)
+      new ElementwiseProduct(uid = "").setScalingVec(Vectors.dense(model.value("scaling_vec").getDoubleVector.toArray))
     }
-
   }
 
   override def name(node: ElementwiseProduct): String = node.uid

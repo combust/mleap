@@ -44,6 +44,7 @@ object Bundle {
       val max_abs_scaler = "max_abs_scaler"
       val bucketizer = "bucketizer"
       val elementwise_product = "elementwise_product"
+      val normalizer = "normalizer"
     }
 
     object classification {

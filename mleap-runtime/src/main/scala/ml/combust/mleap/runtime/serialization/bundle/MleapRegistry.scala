@@ -25,6 +25,7 @@ object MleapRegistry {
     register(ops.feature.MaxAbsScalerOp).
     register(ops.feature.BucketizerOp).
     register(ops.feature.ElementwiseProductOp).
+    register(ops.feature.NormalizerOp).
     // regression
     register(ops.regression.LinearRegressionOp).
     register(ops.regression.DecisionTreeRegressionOp).

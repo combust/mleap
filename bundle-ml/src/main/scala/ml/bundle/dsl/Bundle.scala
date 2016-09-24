@@ -30,6 +30,7 @@ object Bundle {
       val linear_regression = "linear_regression"
       val decision_tree_regression = "decision_tree_regression"
       val random_forest_regression = "random_forest_regression"
+      val gbt_regression = "gbt_regression"
     }
 
     object feature {
@@ -50,6 +51,7 @@ object Bundle {
     object classification {
       val logistic_regression = "logistic_regression"
       val random_forest_classifier = "random_forest_classifier"
+      val gbt_classifier = "gbt_classifier"
       val decision_tree_classifier = "decision_tree_classifier"
       val support_vector_machine = "support_vector_machine"
       val one_vs_rest = "one_vs_rest"

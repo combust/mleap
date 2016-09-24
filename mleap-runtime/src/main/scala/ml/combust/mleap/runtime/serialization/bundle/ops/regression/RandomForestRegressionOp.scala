@@ -26,17 +26,20 @@ object RandomForestRegressionOp extends OpNode[RandomForestRegression, RandomFor
           name
       }
       model.withAttr(Attribute("num_features", Value.long(obj.numFeatures))).
+        withAttr(Attribute("tree_weights", Value.doubleList(obj.treeWeights))).
         withAttr(Attribute("trees", Value.stringList(trees)))
     }
 
     override def load(context: BundleContext, model: ReadableModel): RandomForestRegressionModel = {
       val numFeatures = model.value("num_features").getLong.toInt
+      val treeWeights = model.value("tree_weights").getDoubleList
 
       val models = model.value("trees").getStringList.map {
         tree => ModelSerializer(context.bundleContext(tree)).read().asInstanceOf[DecisionTreeRegressionModel]
       }
 
       RandomForestRegressionModel(numFeatures = numFeatures,
+        treeWeights = treeWeights,
         trees = models)
     }
   }

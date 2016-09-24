@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.classification
 
-import ml.combust.mleap.core.classification.LogisticRegressionModel
+import ml.combust.mleap.core.classification.GBTClassifierModel
 import ml.combust.mleap.runtime.Row
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -9,13 +9,13 @@ import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
 import scala.util.Try
 
 /**
-  * Created by hwilkins on 10/22/15.
+  * Created by hollinwilkins on 9/24/16.
   */
-case class LogisticRegression(uid: String = Transformer.uniqueName("logistic_regression"),
-                              featuresCol: String,
-                              predictionCol: String,
-                              probabilityCol: Option[String] = None,
-                              model: LogisticRegressionModel) extends Transformer {
+case class GBTClassifier(override val uid: String = Transformer.uniqueName("gbt_classifier"),
+                         featuresCol: String,
+                         predictionCol: String,
+                         probabilityCol: Option[String] = None,
+                         model: GBTClassifierModel) extends Transformer {
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(featuresCol, TensorType.doubleVector()).flatMap {
       case(b, featuresIndex) =>

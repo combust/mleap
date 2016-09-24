@@ -16,6 +16,8 @@ object MleapRegistry {
     register(ops.classification.RandomForestClassifierOp).
     register(ops.classification.LogisticRegressionOp).
     register(ops.classification.OneVsRestOp).
+    register(ops.classification.GBTClassifierOp).
+
     // feature
     register(ops.feature.StandardScalerOp).
     register(ops.feature.StringIndexerOp).
@@ -26,10 +28,13 @@ object MleapRegistry {
     register(ops.feature.BucketizerOp).
     register(ops.feature.ElementwiseProductOp).
     register(ops.feature.NormalizerOp).
+
     // regression
     register(ops.regression.LinearRegressionOp).
     register(ops.regression.DecisionTreeRegressionOp).
     register(ops.regression.RandomForestRegressionOp).
+    register(ops.regression.GBTRegressionOp).
+
     // other
     register(ops.PipelineOp)
 }

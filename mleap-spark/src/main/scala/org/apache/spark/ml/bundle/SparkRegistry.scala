@@ -14,6 +14,7 @@ object SparkRegistry {
       register(ops.regression.LinearRegressionOp).
       register(ops.regression.DecisionTreeRegressionOp).
       register(ops.regression.RandomForestRegressionOp).
+      register(ops.regression.GBTRegressionOp).
 
       // classifiers
       register(ops.classification.LogisticRegressionOp).
@@ -21,6 +22,7 @@ object SparkRegistry {
       register(ops.classification.DecisionTreeClassifierOp).
       register(ops.classification.RandomForestClassifierOp).
       register(ops.classification.OneVsRestOp).
+      register(ops.classification.GBTClassifierOp).
 
       // features
       register(ops.feature.HashingTermFrequencyOp).

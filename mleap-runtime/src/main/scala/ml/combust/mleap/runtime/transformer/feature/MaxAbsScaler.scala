@@ -1,6 +1,5 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.bundle.dsl.Model
 import ml.combust.mleap.core.feature.MaxAbsScalerModel
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder

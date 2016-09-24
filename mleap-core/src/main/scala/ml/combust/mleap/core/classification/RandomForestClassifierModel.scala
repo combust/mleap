@@ -3,6 +3,8 @@ package ml.combust.mleap.core.classification
 import ml.combust.mleap.core.tree.TreeEnsemble
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
+/** Companion object for constructing [[RandomForestClassifierModel]].
+  */
 object RandomForestClassifierModel {
   def apply(trees: Seq[DecisionTreeClassifierModel],
             numFeatures: Int,

@@ -5,6 +5,8 @@ import ml.combust.mleap.core.tree.TreeEnsemble
 import org.apache.spark.ml.linalg.mleap.BLAS
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
+/** Companion object for constructing [[GBTClassifierModel]].
+  */
 object GBTClassifierModel {
   def apply(trees: Seq[DecisionTreeRegressionModel],
             threshold: Option[Double] = Some(0.0),
@@ -16,8 +18,12 @@ object GBTClassifierModel {
   }
 }
 
-/**
-  * Created by hollinwilkins on 9/24/16.
+/** Class for a gradient boost classifier model.
+  *
+  * @param trees trees in the gradient boost model
+  * @param treeWeights weights of each tree
+  * @param threshold threshold for prediction
+  * @param numFeatures number of features
   */
 case class GBTClassifierModel(override val trees: Seq[DecisionTreeRegressionModel],
                               override val treeWeights: Seq[Double],

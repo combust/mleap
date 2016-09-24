@@ -3,6 +3,8 @@ package ml.combust.mleap.core.regression
 import org.apache.spark.ml.linalg.Vector
 import ml.combust.mleap.core.tree.TreeEnsemble
 
+/** Companion object for constructing [[RandomForestRegressionModel]].
+  */
 object RandomForestRegressionModel {
   def apply(trees: Seq[DecisionTreeRegressionModel],
             numFeatures: Int): RandomForestRegressionModel = {

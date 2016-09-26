@@ -11,7 +11,6 @@ import ml.combust.mleap.runtime.transformer.feature.Bucketizer
   */
 object BucketizerOp extends OpNode[Bucketizer, BucketizerModel]{
   override val Model: OpModel[BucketizerModel] = new OpModel[BucketizerModel] {
-
     override def opName: String = Bundle.BuiltinOps.feature.bucketizer
 
     override def store(context: BundleContext, model: WritableModel, obj: BucketizerModel): WritableModel = {

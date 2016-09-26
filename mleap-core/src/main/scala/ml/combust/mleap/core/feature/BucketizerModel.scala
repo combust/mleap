@@ -1,7 +1,10 @@
 package ml.combust.mleap.core.feature
 
-/**
-  * Created by mikhail on 9/18/16.
+/** Class for a bucketizer model.
+  *
+  * Bucketizer will place incoming feature into a bucket.
+  *
+  * @param splits splits used to determine bucket
   */
 case class BucketizerModel(splits: Array[Double]) extends Serializable {
   def apply(feature: Double): Double = {

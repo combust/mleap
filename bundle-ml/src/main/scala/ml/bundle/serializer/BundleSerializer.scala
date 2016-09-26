@@ -12,11 +12,13 @@ import scala.io.Source
 
 /** Class for serializing/deserializing Bundle.ML [[ml.bundle.dsl.Bundle]] objects.
   *
-  * @param registry bundle registry of op nodes and custom types
   * @param path path to the Bundle.ML folder to serialize/deserialize
+  * @param hr bundle registry for custom types and ops
   */
-case class BundleSerializer(registry: BundleRegistry,
-                            path: File) {
+case class BundleSerializer(path: File)
+                           (implicit hr: HasBundleRegistry) {
+  val registry = hr.bundleRegistry
+
   /** Write a bundle to the path.
     *
     * @param bundle bundle to write

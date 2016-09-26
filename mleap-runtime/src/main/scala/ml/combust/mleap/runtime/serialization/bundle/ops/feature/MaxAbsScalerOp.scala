@@ -28,7 +28,6 @@ object MaxAbsScalerOp extends OpNode[MaxAbsScaler, MaxAbsScalerModel]{
 
   override def model(node: MaxAbsScaler): MaxAbsScalerModel = node.model
 
-
   override def load(context: BundleContext, node: ReadableNode, model: MaxAbsScalerModel): MaxAbsScaler = {
     MaxAbsScaler(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,

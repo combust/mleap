@@ -1,42 +1,39 @@
-package ml.combust.mleap.runtime.serialization.bundle
+package org.apache.spark.ml.bundle
 
 import java.io.File
 
-import ml.combust.mleap.runtime.transformer.{Pipeline, Transformer}
-import ml.bundle.BundleDef.BundleDef
-import ml.bundle.dsl._
-import ml.bundle.serializer._
+import ml.bundle.dsl.{AttributeList, Bundle}
+import ml.bundle.serializer.{BundleSerializer, HasBundleRegistry, SerializationFormat}
+import org.apache.spark.ml.{PipelineModel, Transformer}
 
 /**
-  * Created by hollinwilkins on 8/23/16.
+  * Created by hollinwilkins on 9/19/16.
   */
-object MleapBundle {
+object SparkBundle {
   def readTransformerGraph(path: File)
-                          (implicit hr: HasBundleRegistry): (Bundle, Pipeline) = {
+                          (implicit hr: HasBundleRegistry): PipelineModel = {
     val bundle = BundleSerializer(path).read()
-    val pipeline = Pipeline(uid = bundle.name, transformers = bundle.nodes.map(_.asInstanceOf[Transformer]))
-
-    (bundle, pipeline)
+    new PipelineModel(uid = bundle.name, stages = bundle.nodes.map(_.asInstanceOf[Transformer]).toArray)
   }
 
   def readTransformer(path: File)
                      (implicit hr: HasBundleRegistry): (Bundle, Transformer) = {
     val bundle = BundleSerializer(path).read()
-    val model = if(bundle.nodes.length == 1) {
+    val transformer = if(bundle.nodes.length == 1) {
       bundle.nodes.head.asInstanceOf[Transformer]
     } else {
-      Pipeline(uid = bundle.name, transformers = bundle.nodes.map(_.asInstanceOf[Transformer]))
+      new PipelineModel(uid = bundle.name, stages = bundle.nodes.map(_.asInstanceOf[Transformer]).toArray)
     }
 
-    (bundle, model)
+    (bundle, transformer)
   }
 
-  def writeTransformerGraph(graph: Pipeline,
+  def writeTransformerGraph(graph: PipelineModel,
                             path: File,
                             list: Option[AttributeList] = None,
                             format: SerializationFormat = SerializationFormat.Mixed)
                            (implicit hr: HasBundleRegistry): Unit = {
-    val bundle = Bundle.createBundle(graph.uid, format, graph.transformers, list)
+    val bundle = Bundle.createBundle(graph.uid, format, graph.stages, list)
     BundleSerializer(path).write(bundle)
   }
 
@@ -46,12 +43,9 @@ object MleapBundle {
                        format: SerializationFormat = SerializationFormat.Mixed)
                       (implicit hr: HasBundleRegistry): Unit = {
     transformer match {
-      case transformer: Pipeline => writeTransformerGraph(transformer, path, list, format)
+      case transformer: PipelineModel => writeTransformerGraph(transformer, path, list, format)(hr)
       case _ =>
-        val bundle = Bundle.createBundle(transformer.uid,
-          format,
-          Seq(transformer),
-          list)
+        val bundle = Bundle.createBundle(transformer.uid, format, Seq(transformer), list)
         BundleSerializer(path).write(bundle)
     }
   }

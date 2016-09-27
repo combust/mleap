@@ -1,6 +1,5 @@
 package org.apache.spark.ml.linalg.mleap
 
-import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.linalg
 
 /** BLAS public interface to the private mllib-local BLAS.
@@ -12,5 +11,5 @@ object BLAS {
     * @param v2 vector 2
     * @return dot product
     */
-  def dot(v1: Vector, v2: Vector): Double = linalg.BLAS.dot(v1, v2)
+  def dot(v1: linalg.Vector, v2: linalg.Vector): Double = linalg.BLAS.dot(v1, v2)
 }

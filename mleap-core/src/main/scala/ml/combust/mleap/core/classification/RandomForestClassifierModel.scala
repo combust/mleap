@@ -1,6 +1,20 @@
 package ml.combust.mleap.core.classification
 
+import ml.combust.mleap.core.tree.TreeEnsemble
 import org.apache.spark.ml.linalg.{Vector, Vectors}
+
+/** Companion object for constructing [[RandomForestClassifierModel]].
+  */
+object RandomForestClassifierModel {
+  def apply(trees: Seq[DecisionTreeClassifierModel],
+            numFeatures: Int,
+            numClasses: Int): RandomForestClassifierModel = {
+    RandomForestClassifierModel(trees,
+      Array.fill[Double](trees.length)(1.0),
+      numFeatures,
+      numClasses)
+  }
+}
 
 /** Class for random forest classification models.
   *
@@ -8,9 +22,11 @@ import org.apache.spark.ml.linalg.{Vector, Vectors}
   * @param numFeatures number of features in feature vector
   * @param numClasses number of predictable classes
   */
-case class RandomForestClassifierModel(trees: Seq[DecisionTreeClassifierModel],
+case class RandomForestClassifierModel(override val trees: Seq[DecisionTreeClassifierModel],
+                                       override val treeWeights: Seq[Double],
                                        numFeatures: Int,
-                                       override val numClasses: Int) extends MultinomialClassificationModel with Serializable {
+                                       override val numClasses: Int)
+  extends MultinomialClassificationModel with TreeEnsemble with Serializable {
   override def predictRaw(raw: Vector): Vector = {
     val votes = Array.fill[Double](numClasses)(0.0)
     trees.view.foreach { tree =>

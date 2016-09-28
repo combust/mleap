@@ -27,12 +27,14 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassifier, RandomFor
       }
       model.withAttr(Attribute("num_features", Value.long(obj.numFeatures))).
         withAttr(Attribute("num_classes", Value.long(obj.numClasses))).
+        withAttr(Attribute("tree_weights", Value.doubleList(obj.treeWeights))).
         withAttr(Attribute("trees", Value.stringList(trees)))
     }
 
     override def load(context: BundleContext, model: ReadableModel): RandomForestClassifierModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val numClasses = model.value("num_classes").getLong.toInt
+      val treeWeights = model.value("tree_weights").getDoubleList
 
       val models = model.value("trees").getStringList.map {
         tree => ModelSerializer(context.bundleContext(tree)).read().asInstanceOf[DecisionTreeClassifierModel]
@@ -40,7 +42,8 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassifier, RandomFor
 
       RandomForestClassifierModel(numFeatures = numFeatures,
         numClasses = numClasses,
-        trees = models)
+        trees = models,
+        treeWeights = treeWeights)
     }
   }
 

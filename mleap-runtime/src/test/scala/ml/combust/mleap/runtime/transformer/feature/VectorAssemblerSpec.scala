@@ -17,7 +17,7 @@ class VectorAssemblerSpec extends FunSpec {
   val vectorAssembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
     outputCol = "features")
 
-  describe("VectorAssembler") {
+  describe("#transform") {
     it("assembles its inputs into a new vector") {
       val frame2 = vectorAssembler.transform(frame).get
       val data = frame2.dataset.toArray

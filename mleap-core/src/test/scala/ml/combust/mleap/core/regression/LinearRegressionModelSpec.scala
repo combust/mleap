@@ -6,7 +6,7 @@ import org.apache.spark.ml.linalg.Vectors
 /**
   * Created by hwilkins on 1/21/16.
   */
-class LinearRegressionSpec extends FunSpec {
+class LinearRegressionModelSpec extends FunSpec {
   describe("#apply") {
     it("applies the linear regression to a feature vector") {
       val linearRegression = LinearRegressionModel(Vectors.dense(Array(0.5, 0.75, 0.25)), .33)

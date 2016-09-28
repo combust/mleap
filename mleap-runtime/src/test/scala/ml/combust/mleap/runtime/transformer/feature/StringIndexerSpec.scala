@@ -12,11 +12,12 @@ class StringIndexerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_string", StringType))).get
   val dataset = LocalDataset(Array(Row("index1"), Row("index2"), Row("index3")))
   val frame = LeapFrame(schema, dataset)
+
   val stringIndexer = StringIndexer(inputCol = "test_string",
     outputCol = "test_index",
     model = StringIndexerModel(Seq("index1", "index2", "index3")))
 
-  describe("StringIndexer") {
+  describe("#transform") {
     it("converts input string into an index") {
       val frame2 = stringIndexer.transform(frame).get
       val data = frame2.dataset.toArray

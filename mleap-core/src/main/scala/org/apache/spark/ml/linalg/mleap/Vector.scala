@@ -1,15 +1,14 @@
 package org.apache.spark.ml.linalg.mleap
 
-import breeze.linalg.{Vector => BreezeVector, DenseVector, SparseVector}
-import org.apache.spark.ml.linalg.{Vectors, Vector}
+import org.apache.spark.ml.linalg
 
 /**
   * Created by mikhail on 9/18/16.
   */
 object Vector {
-  implicit class VectorOps(vector: Vector) {
-    def toBreeze: BreezeVector[Double] = vector.asBreeze
+  implicit class VectorOps(vector: linalg.Vector) {
+    def toBreeze: breeze.linalg.Vector[Double] = vector.asBreeze
   }
-  def fromBreeze(breezeVector: BreezeVector[Double]): Vector = Vectors.fromBreeze(breezeVector)
+  def fromBreeze(breezeVector: breeze.linalg.Vector[Double]): linalg.Vector = linalg.Vectors.fromBreeze(breezeVector)
 
 }

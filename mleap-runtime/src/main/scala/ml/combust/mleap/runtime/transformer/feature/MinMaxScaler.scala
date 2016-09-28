@@ -10,8 +10,7 @@ import scala.util.Try
 /**
   * Created by mikhail on 9/18/16.
   */
-case class MinMaxScaler(
-                       uid: String = Transformer.uniqueName("min_max_scaler"),
+case class MinMaxScaler(uid: String = Transformer.uniqueName("min_max_scaler"),
                        inputCol: String,
                        outputCol: String,
                        model: MinMaxScalerModel) extends Transformer {

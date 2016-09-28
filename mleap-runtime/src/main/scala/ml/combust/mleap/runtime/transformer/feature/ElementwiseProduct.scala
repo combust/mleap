@@ -10,13 +10,10 @@ import scala.util.Try
 /**
   * Created by mikhail on 9/23/16.
   */
-case class ElementwiseProduct(
-                              uid: String = Transformer.uniqueName("elmentwise_product"),
+case class ElementwiseProduct(uid: String = Transformer.uniqueName("elmentwise_product"),
                               inputCol: String,
                               outputCol: String,
-                              model: ElementwiseProductModel
-                              ) extends Transformer{
-
+                              model: ElementwiseProductModel) extends Transformer {
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(inputCol, TensorType.doubleVector()).flatMap {
       case (b, inputIndex) =>

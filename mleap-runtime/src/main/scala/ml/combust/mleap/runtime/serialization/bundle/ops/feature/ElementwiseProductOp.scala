@@ -28,7 +28,6 @@ object ElementwiseProductOp extends OpNode[ElementwiseProduct, ElementwiseProduc
 
   override def model(node: ElementwiseProduct): ElementwiseProductModel = node.model
 
-
   override def load(context: BundleContext, node: ReadableNode, model: ElementwiseProductModel): ElementwiseProduct = {
     ElementwiseProduct(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,

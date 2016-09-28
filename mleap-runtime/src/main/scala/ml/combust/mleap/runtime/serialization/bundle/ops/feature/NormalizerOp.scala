@@ -10,7 +10,6 @@ import ml.combust.mleap.runtime.transformer.feature.Normalizer
   * Created by hollinwilkins on 9/24/16.
   */
 object NormalizerOp extends OpNode[Normalizer, NormalizerModel] {
-
   override val Model: OpModel[NormalizerModel] = new OpModel[NormalizerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.normalizer
 

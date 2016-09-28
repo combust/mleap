@@ -4,14 +4,12 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 import scala.math._
 
-/**
-  * Created by mikhail on 9/23/16.
+/** Class for an element wise product model.
+  *
+  * @param scalingVec vector for scaling feature vectors
   */
-case class ElementwiseProductModel(
-                               scalingVec: Vector
-                             ) extends Serializable{
+case class ElementwiseProductModel(scalingVec: Vector) extends Serializable{
   def apply(vector: Vector): Vector = {
-
     vector match {
       case DenseVector(values) =>
         val vs = values.clone()
@@ -33,7 +31,5 @@ case class ElementwiseProductModel(
         }
         Vectors.sparse(size, indices, vs)
     }
-
   }
-
 }

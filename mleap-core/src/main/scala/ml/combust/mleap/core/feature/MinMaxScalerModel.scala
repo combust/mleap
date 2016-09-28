@@ -6,11 +6,10 @@ import scala.math.{max, min}
 
 /** Class for MinMax Scaler Transformer
   *
-  * MinMax Scaler will use the Min/Max values to scale input features
-  * Created by mikhail on 9/18/16.
+  * MinMax Scaler will use the Min/Max values to scale input features.
   *
-  * @param originalMin Minimum value from training features
-  * @param originalMax Maximum value from training features
+  * @param originalMin minimum values from training features
+  * @param originalMax maximum values from training features
   */
 case class MinMaxScalerModel(originalMin: Vector,
                              originalMax: Vector) extends Serializable {

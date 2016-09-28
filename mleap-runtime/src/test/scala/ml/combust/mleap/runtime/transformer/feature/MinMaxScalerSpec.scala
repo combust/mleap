@@ -30,10 +30,10 @@ class MinMaxScalerSpec extends FunSpec{
       assert(norm(2) == 0.5)
     }
     describe("with invalid input column") {
-      val normalizer2 = minMaxScaler.copy(inputCol = "bad_input")
+      val minMaxScaler2 = minMaxScaler.copy(inputCol = "bad_input")
 
       it("returns a Failure") {
-        assert(normalizer2.transform(frame).isFailure)
+        assert(minMaxScaler2.transform(frame).isFailure)
       }
     }
   }

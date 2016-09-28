@@ -20,7 +20,7 @@ class MaxAbsScalerSpec extends FunSpec{
   )
 
   describe("#transform") {
-    it("Scales the input data by maximum value vector") {
+    it("scales the input data by maximum value vector") {
       val frame2 = maxAbsScaler.transform(frame).get
       val data = frame2.dataset.toArray
       val norm = data(0).getVector(1)
@@ -29,10 +29,11 @@ class MaxAbsScalerSpec extends FunSpec{
       assert(norm(1) == 1.0)
       assert(norm(2) == 0.5)
     }
-    describe("with invalid input column") {
-      val normalizer2 = maxAbsScaler.copy(inputCol = "bad_input")
 
-      it("returns a Failure") { assert(normalizer2.transform(frame).isFailure) }
+    describe("with invalid input column") {
+      val maxAbsScaler2 = maxAbsScaler.copy(inputCol = "bad_input")
+
+      it("returns a Failure") { assert(maxAbsScaler2.transform(frame).isFailure) }
     }
   }
 }

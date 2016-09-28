@@ -7,20 +7,19 @@ import org.scalatest.FunSpec
   */
 class BucketizerSpec extends FunSpec {
   describe("#apply") {
-    it("assigns a value to a bucket based on an input range. Bucket 1"){
-      val bucketizer = BucketizerModel(Array(0.0, 10.0, 20.0, 100.0))
-      val input = 11.0
-      val expectedOutput = 1.0
+    val bucketizer = BucketizerModel(Array(0.0, 10.0, 20.0, 100.0))
 
-      assert(bucketizer(input).toDouble.equals(expectedOutput))
+    it("assigns a value to a bucket based on an input range"){
+      val inputs = Array(11.0, 0.0, 55.0)
+      val expectedOutputs = Array(1.0, 0.0, 2.0)
+
+      assert(inputs.map(bucketizer.apply) sameElements expectedOutputs)
     }
 
-    it("assigns a value to a bucket based on an input range. Bucket -1"){
-      val bucketizer = BucketizerModel(Array(0.0, 10.0, 20.0, 100.0))
-      val input = 0.0
-      val expectedOutput = 0.0
-
-      assert(bucketizer(input).toDouble.equals(expectedOutput))
+    describe("with invalid feature") {
+      it("throws an error") {
+        assertThrows[Exception](bucketizer(-23.0))
+      }
     }
   }
 }

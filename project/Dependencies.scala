@@ -20,5 +20,5 @@ object Dependencies {
 
   lazy val bundleMlDependencies = baseDependencies.
     union(Seq("io.spray" %% "spray-json" % "1.3.2",
-      "com.jsuereth" %% "scala-arm" % "1.4"))
+      "com.jsuereth" %% "scala-arm" % "2.0-RC1"))
 }

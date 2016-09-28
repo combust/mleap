@@ -5,7 +5,7 @@ import org.scalatest.FunSpec
 /**
   * Created by mikhail on 9/19/16.
   */
-class BucketizerSpec extends FunSpec {
+class BucketizerModelSpec extends FunSpec {
   describe("#apply") {
     val bucketizer = BucketizerModel(Array(0.0, 10.0, 20.0, 100.0))
 

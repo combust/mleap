@@ -13,6 +13,7 @@ class NormalizerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType.doubleVector()))).get
   val dataset = LocalDataset(Array(Row(Vectors.dense(Array(0.0, 20.0, 40.0)))))
   val frame = LeapFrame(schema, dataset)
+
   val normalizer = Normalizer(inputCol = "test_vec",
     outputCol = "test_norm",
     model = NormalizerModel(20.0))

@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 /**
   * Created by hwilkins on 1/21/16.
   */
-class StandardScalerSpec extends FunSpec {
+class StandardScalerModelSpec extends FunSpec {
   describe("#apply") {
     describe("with mean") {
       it("scales based off of the mean") {

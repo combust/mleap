@@ -5,7 +5,7 @@ import org.scalatest.FunSpec
 /**
   * Created by hwilkins on 1/21/16.
   */
-class StringIndexerSpec extends FunSpec {
+class StringIndexerModelSpec extends FunSpec {
   describe("#apply") {
     it("returns the index of the string") {
       val indexer = StringIndexerModel(Array("hello", "there", "dude"))

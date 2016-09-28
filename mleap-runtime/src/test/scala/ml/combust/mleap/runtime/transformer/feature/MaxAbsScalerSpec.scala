@@ -16,8 +16,7 @@ class MaxAbsScalerSpec extends FunSpec{
 
   val maxAbsScaler = MaxAbsScaler(inputCol = "test_vec",
     outputCol = "test_normalized",
-    model = MaxAbsScalerModel(Vectors.dense(Array(10.0, 20.0, 40.0)))
-  )
+    model = MaxAbsScalerModel(Vectors.dense(Array(10.0, 20.0, 40.0))))
 
   describe("#transform") {
     it("scales the input data by maximum value vector") {

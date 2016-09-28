@@ -5,7 +5,7 @@ import org.scalatest.FunSpec
 /**
   * Created by hwilkins on 1/21/16.
   */
-class OneHotEncoderSpec extends FunSpec {
+class OneHotEncoderModelSpec extends FunSpec {
   describe("#apply") {
     it("encodes the value as a vector") {
       val encoder = OneHotEncoderModel(5)

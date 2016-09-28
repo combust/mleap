@@ -12,6 +12,7 @@ class BucketizerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_double", DoubleType))).get
   val dataset = LocalDataset(Array(Row(11.0), Row(0.0), Row(55.0)))
   val frame = LeapFrame(schema, dataset)
+
   val bucketizer = Bucketizer(inputCol = "test_double",
     outputCol = "test_bucket",
     model = BucketizerModel(Array(0.0, 10.0, 20.0, 100.0)))

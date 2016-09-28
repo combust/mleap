@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-class NormalizerSpec extends FunSpec {
+class NormalizerModelSpec extends FunSpec {
   describe("#apply") {
     it("normalizes the feature vector using the p normalization value") {
       val normalizer = NormalizerModel(20.0)

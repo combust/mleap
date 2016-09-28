@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 /**
   * Created by mikhail on 9/25/16.
   */
-class ElementwiseProductSpec extends FunSpec{
+class ElementwiseProductModelSpec extends FunSpec{
   describe("#apply") {
     it("multiplies each input vector by a provided weight vector"){
       val scaler = ElementwiseProductModel(Vectors.dense(Array(0.5, 1.0, 1.0)))

@@ -7,7 +7,7 @@ import org.scalatest.FunSpec
 /**
   * Created by hwilkins on 1/21/16.
   */
-class RandomForestRegressionSpec extends FunSpec {
+class RandomForestRegressionModelSpec extends FunSpec {
   describe("#predict") {
     it("uses the forest to make a prediction") {
       val tree1 = buildDecisionTree(.5, 0, goLeft = true)

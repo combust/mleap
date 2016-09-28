@@ -16,8 +16,7 @@ class MinMaxScalerSpec extends FunSpec{
 
   val minMaxScaler = MinMaxScaler(inputCol = "test_vec",
     outputCol = "test_normalized",
-    model = MinMaxScalerModel(Vectors.dense(Array(0.0, 0.0, 0.0)), Vectors.dense(Array(10.0, 20.0, 40.0)))
-  )
+    model = MinMaxScalerModel(Vectors.dense(Array(0.0, 0.0, 0.0)), Vectors.dense(Array(10.0, 20.0, 40.0))))
 
   describe("#transform") {
     it("Scales the input data between min / max value vectors") {

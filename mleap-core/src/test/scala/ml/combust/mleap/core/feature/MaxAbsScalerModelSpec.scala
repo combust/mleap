@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 /**
   * Created by mikhail on 9/18/16.
   */
-class MaxAbsScalerSpec extends FunSpec{
+class MaxAbsScalerModelSpec extends FunSpec{
   describe("#apply") {
     it("Scales the vector based on absolute max value"){
       val scaler = MaxAbsScalerModel(Vectors.dense(Array(20.0, 10.0, 10.0, 20.0)))

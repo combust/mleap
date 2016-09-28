@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 /**
   * Created by mikhail on 9/18/16.
   */
-class MinMaxScalerSpec extends FunSpec{
+class MinMaxScalerModelSpec extends FunSpec{
   describe("#apply") {
     it("scales vector based on min/max range"){
       val scaler = MinMaxScalerModel(Vectors.dense(Array(1.0, 0.0, 5.0, 10.0)), Vectors.dense(Array(15.0, 10.0, 15.0, 20.0)))

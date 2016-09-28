@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 /**
   * Created by hwilkins on 1/21/16.
   */
-class VectorAssemblerSpec extends FunSpec {
+class VectorAssemblerModelSpec extends FunSpec {
   describe("#apply") {
     it("assembles doubles and vectors into a new vector") {
       val assembler = VectorAssemblerModel.default

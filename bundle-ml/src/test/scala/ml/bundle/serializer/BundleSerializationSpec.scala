@@ -14,7 +14,7 @@ import scala.util.Random
   * Created by hollinwilkins on 8/21/16.
   */
 class BundleSerializationSpec extends FunSpec {
-  val registry = new BundleRegistry().
+  implicit val registry = new BundleRegistry().
     register(LinearRegressionOp).
     register(StringIndexerOp).
     register(PipelineOp).
@@ -37,7 +37,7 @@ class BundleSerializationSpec extends FunSpec {
       it("serializes/deserializes the same object") {
         val file = new File(TestUtil.baseDir, "lr_bundle")
         val bundle = Bundle.createBundle("my_bundle", SerializationFormat.Mixed, Seq(lr))
-        val serializer = BundleSerializer(registry, file)
+        val serializer = BundleSerializer(file)
         serializer.write(bundle)
         val bundleRead = serializer.read()
 
@@ -57,7 +57,7 @@ class BundleSerializationSpec extends FunSpec {
 
         val file = new File(TestUtil.baseDir, "decision_tree_bundle")
         val bundle = Bundle.createBundle("my_bundle", SerializationFormat.Mixed, Seq(dt))
-        val serializer = BundleSerializer(registry, file)
+        val serializer = BundleSerializer(file)
         serializer.write(bundle)
         val bundleRead = serializer.read()
 
@@ -69,7 +69,7 @@ class BundleSerializationSpec extends FunSpec {
       it("serializes/deserializes the same object") {
         val file = new File(TestUtil.baseDir, "pipeline_bundle")
         val bundle = Bundle.createBundle("my_bundle", SerializationFormat.Mixed, Seq(pipeline))
-        val serializer = BundleSerializer(registry, file)
+        val serializer = BundleSerializer(file)
         serializer.write(bundle)
         val bundleRead = serializer.read()
 

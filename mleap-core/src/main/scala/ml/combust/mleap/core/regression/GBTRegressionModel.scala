@@ -10,7 +10,7 @@ object GBTRegressionModel {
   def apply(trees: Seq[DecisionTreeRegressionModel],
             numFeatures: Int): GBTRegressionModel = {
     GBTRegressionModel(trees,
-      Array.fill[Double](trees.length)(1.0),
+      Seq.fill[Double](trees.length)(1.0),
       numFeatures)
   }
 }

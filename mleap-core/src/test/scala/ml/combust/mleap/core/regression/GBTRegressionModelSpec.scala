@@ -16,9 +16,11 @@ class GBTRegressionModelSpec extends FunSpec {
     val regression = GBTRegressionModel(Seq(tree1, tree2, tree3), Seq(0.5, 2.0, 1.0), 5)
     val features = Vectors.dense(Array(0.2, 0.8, 0.4))
 
-    assert(tree1.predict(features) == 0.5)
-    assert(tree2.predict(features) == 0.75)
-    assert(tree3.predict(features) == 0.1)
-    assert(regression.predict(features) == (0.5 * 0.5 + 0.75 * 2.0 + 0.1 * 1.0))
+    it("predicts the value based on the features") {
+      assert(tree1.predict(features) == 0.5)
+      assert(tree2.predict(features) == 0.75)
+      assert(tree3.predict(features) == 0.1)
+      assert(regression.predict(features) == (0.5 * 0.5 + 0.75 * 2.0 + 0.1 * 1.0))
+    }
   }
 }

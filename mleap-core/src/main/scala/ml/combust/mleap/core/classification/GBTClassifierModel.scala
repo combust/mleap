@@ -9,10 +9,14 @@ import org.apache.spark.ml.linalg.{Vector, Vectors}
   */
 object GBTClassifierModel {
   def apply(trees: Seq[DecisionTreeRegressionModel],
-            threshold: Option[Double] = Some(0.0),
+            weights: Seq[Double],
+            numFeatures: Int): GBTClassifierModel = apply(trees, weights, None, numFeatures)
+
+  def apply(trees: Seq[DecisionTreeRegressionModel],
+            threshold: Option[Double] = None,
             numFeatures: Int): GBTClassifierModel = {
-    GBTClassifierModel(trees,
-      Array.fill[Double](trees.length)(1.0),
+    apply(trees,
+      Seq.fill[Double](trees.length)(1.0),
       threshold,
       numFeatures)
   }

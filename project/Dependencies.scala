@@ -5,7 +5,7 @@ object Dependencies {
 
   lazy val baseDependencies = Seq("org.scalatest" %% "scalatest" % "3.0.0" % "test")
 
-  lazy val sparkLocalDependencies = Seq("org.apache.spark" %% "spark-mllib-local" % sparkVersion % "optional")
+  lazy val sparkLocalDependencies = Seq("org.apache.spark" %% "spark-mllib-local" % sparkVersion % "provided")
   lazy val sparkDependencies = Seq("org.apache.spark" %% "spark-core" % sparkVersion,
     "org.apache.spark" %% "spark-sql" % sparkVersion,
     "org.apache.spark" %% "spark-mllib" % sparkVersion,

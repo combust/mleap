@@ -15,7 +15,7 @@ releaseProcess := Seq[ReleaseStep](
   commitReleaseVersion,
   tagRelease,
   publishArtifacts,
-//  SonatypeCommand.sonatypeRelease,
+  releaseStepCommand(SonatypeCommand.sonatypeRelease),
   setNextVersion,
   commitNextVersion,
   pushChanges
@@ -24,6 +24,7 @@ releaseProcess := Seq[ReleaseStep](
 lazy val `root` = project.in(file(".")).
   settings(Common.settings).
   settings(Common.combustSettings).
+  settings(Common.sonatypeSettings).
   settings(publishArtifact := false).
   enablePlugins(ReleasePlugin).
   aggregate(`mleap-core`, `mleap-runtime`, `mleap-spark`, `bundle-ml`)

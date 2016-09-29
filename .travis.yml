@@ -12,10 +12,7 @@ before_install:
 language: scala
 scala:
   - 2.11.8
-
-script:
- - sbt "+ test"
-
+  - 2.10.6
 
 notifications:
   on_success: change

@@ -43,6 +43,7 @@ object SerializationFormat {
     case Format.MIXED => SerializationFormat.Mixed
     case Format.JSON => SerializationFormat.Json
     case Format.PROTOBUF => SerializationFormat.Protobuf
+    case _ => throw new Error("unknown format") // TODO: better error
   }
 
   object Json extends ConcreteSerializationFormat {

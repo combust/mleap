@@ -3,9 +3,8 @@ package ml.combust.mleap.runtime.serialization.bundle
 import java.io.File
 
 import ml.combust.mleap.runtime.transformer.{Pipeline, Transformer}
-import ml.bundle.BundleDef.BundleDef
-import ml.bundle.dsl._
-import ml.bundle.serializer._
+import ml.combust.bundle.dsl._
+import ml.combust.bundle.serializer._
 
 /**
   * Created by hollinwilkins on 8/23/16.

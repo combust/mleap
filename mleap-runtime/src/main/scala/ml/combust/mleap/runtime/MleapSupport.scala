@@ -5,8 +5,8 @@ import java.io.File
 import ml.combust.mleap.runtime.serialization.bundle.MleapBundle
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.bundle.BundleDef.BundleDef
-import ml.bundle.dsl.{AttributeList, Bundle}
-import ml.bundle.serializer._
+import ml.combust.bundle.dsl.{AttributeList, Bundle}
+import ml.combust.bundle.serializer._
 
 /** Object for support classes for easily working with Bundle.ML.
   */

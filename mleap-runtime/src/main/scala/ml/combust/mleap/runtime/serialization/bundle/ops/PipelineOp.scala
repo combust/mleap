@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime.serialization.bundle.ops
 
 import ml.combust.mleap.runtime.transformer.{Pipeline, Transformer}
-import ml.bundle.op.{OpModel, OpNode}
-import ml.bundle.serializer.{BundleContext, GraphSerializer}
-import ml.bundle.dsl._
+import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.serializer.{BundleContext, GraphSerializer}
+import ml.combust.bundle.dsl._
 
 /**
   * Created by hollinwilkins on 8/22/16.

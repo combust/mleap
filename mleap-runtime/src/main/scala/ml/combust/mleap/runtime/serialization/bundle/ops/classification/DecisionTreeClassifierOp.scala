@@ -4,10 +4,10 @@ import ml.combust.mleap.core.classification.DecisionTreeClassifierModel
 import ml.combust.mleap.core.tree.Node
 import ml.combust.mleap.runtime.serialization.bundle.tree.MleapNodeWrapper
 import ml.combust.mleap.runtime.transformer.classification.DecisionTreeClassifier
-import ml.bundle.op.{OpModel, OpNode}
-import ml.bundle.serializer.BundleContext
-import ml.bundle.tree.TreeSerializer
-import ml.bundle.dsl._
+import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.serializer.BundleContext
+import ml.combust.bundle.tree.TreeSerializer
+import ml.combust.bundle.dsl._
 
 /**
   * Created by hollinwilkins on 8/22/16.

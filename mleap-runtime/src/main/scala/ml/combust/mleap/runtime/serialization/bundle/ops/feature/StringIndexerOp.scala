@@ -2,9 +2,9 @@ package ml.combust.mleap.runtime.serialization.bundle.ops.feature
 
 import ml.combust.mleap.core.feature.StringIndexerModel
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
-import ml.bundle.op.{OpModel, OpNode}
-import ml.bundle.serializer.BundleContext
-import ml.bundle.dsl._
+import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.serializer.BundleContext
+import ml.combust.bundle.dsl._
 
 /**
   * Created by hollinwilkins on 8/22/16.

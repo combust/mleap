@@ -3,6 +3,7 @@ import Keys._
 import com.typesafe.sbt.SbtPgp.autoImportImpl._
 import com.typesafe.sbt.pgp.PgpKeys._
 import sbtrelease.ReleasePlugin.autoImport._
+import xerial.sbt.Sonatype.autoImport._
 
 object Common {
   val settings: Seq[Def.Setting[_]] = Seq(
@@ -20,9 +21,10 @@ object Common {
   )
 
   val combustSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")
-  val bundleSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.bundle")
+  val bundleSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.bundle")
 
   val sonatypeSettings: Seq[Def.Setting[_]] = Seq(
+    sonatypeProfileName := "ml.combust",
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     publishMavenStyle in publishSigned := true,
     publishTo in publishSigned := {

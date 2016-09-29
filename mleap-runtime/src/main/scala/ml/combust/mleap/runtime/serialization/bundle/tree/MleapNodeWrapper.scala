@@ -5,7 +5,7 @@ import ml.bundle.tree.Split.Split
 import ml.bundle.tree.Split.Split.{CategoricalSplit, ContinuousSplit}
 import ml.bundle.tree.Node.Node
 import ml.bundle.tree.Node.Node.{InternalNode, LeafNode}
-import ml.bundle.tree.NodeWrapper
+import ml.combust.bundle.tree.NodeWrapper
 import org.apache.spark.ml.linalg.Vectors
 
 /**

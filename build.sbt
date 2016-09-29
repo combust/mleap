@@ -1,7 +1,25 @@
+import ReleaseTransformations._
+import xerial.sbt.Sonatype.SonatypeCommand
+
 name := "mleap"
 
 releaseVersionBump := sbtrelease.Version.Bump.Minor
 releaseCrossBuild := true
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  publishArtifacts,
+//  SonatypeCommand.sonatypeRelease,
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
 
 lazy val `root` = project.in(file(".")).
   settings(Common.settings).

@@ -2,9 +2,9 @@ package ml.combust.mleap.runtime.serialization.bundle.ops.feature
 
 import ml.combust.mleap.core.feature.StandardScalerModel
 import ml.combust.mleap.runtime.transformer.feature.StandardScaler
-import ml.bundle.op.{OpModel, OpNode}
-import ml.bundle.serializer.BundleContext
-import ml.bundle.dsl._
+import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.serializer.BundleContext
+import ml.combust.bundle.dsl._
 import org.apache.spark.ml.linalg.Vectors
 
 /**

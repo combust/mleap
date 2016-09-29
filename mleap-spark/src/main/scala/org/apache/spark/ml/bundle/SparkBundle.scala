@@ -2,8 +2,8 @@ package org.apache.spark.ml.bundle
 
 import java.io.File
 
-import ml.bundle.dsl.{AttributeList, Bundle}
-import ml.bundle.serializer.{BundleSerializer, HasBundleRegistry, SerializationFormat}
+import ml.combust.bundle.dsl.{AttributeList, Bundle}
+import ml.combust.bundle.serializer.{BundleSerializer, HasBundleRegistry, SerializationFormat}
 import org.apache.spark.ml.{PipelineModel, Transformer}
 
 /**

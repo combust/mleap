@@ -1,8 +1,8 @@
 package org.apache.spark.ml.bundle.ops.classification
 
-import ml.bundle.op.{OpModel, OpNode}
-import ml.bundle.serializer.{BundleContext, ModelSerializer}
-import ml.bundle.dsl._
+import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
+import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.NominalAttribute
 import org.apache.spark.ml.classification.ClassificationModel
 import org.apache.spark.ml.mleap.classification.OneVsRestModel

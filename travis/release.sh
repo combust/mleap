@@ -2,6 +2,8 @@
 
 if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
   source travis/extract.sh
+  git config user.email "combust@combust.ml"
+  git config user.name "Combust, Inc."
   git checkout $TRAVIS_BRANCH
   if [ $# -eq 0 ]; then
     sbt "release with-defaults"

@@ -58,7 +58,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.2.0"
 MLeap is now a [Spark Package](http://spark-packages.org/package/combust-ml/mleap).
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark.10:0.2.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.2.0
 ```
 
 ## Modules
@@ -85,7 +85,7 @@ There are a few ways to contribute to MLeap.
 * Use MLeap at your company and tell us what you think.
 * Make a feature request or report a bug in github.
 * Make a pull request for an existing feature request or bug report.
-* Join the discussion of how to get MLeap into Spark as a dependency. Our gitter is here: (insert gitter link here)
+* Join the discussion of how to get MLeap into Spark as a dependency. Talk with us on Gitter (see link at top of README.md).
 
 ## Contact Information
 

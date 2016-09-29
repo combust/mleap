@@ -1,10 +1,7 @@
 name := "mleap"
 
-updateOptions := updateOptions.value.withCachedResolution(true)
-
 releaseVersionBump := sbtrelease.Version.Bump.Minor
 releaseCrossBuild := true
-releasePublishArtifactsAction := PgpKeys.publishSigned.value
 
 lazy val `root` = project.in(file(".")).
   settings(Common.settings).

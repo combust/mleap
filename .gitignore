@@ -5,3 +5,4 @@ tmp/
 derby.log
 metastore_db/
 *.iml
+unsafe.*

@@ -8,13 +8,18 @@ git:
 before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
   - git submodule update --init --recursive
+  - openssl aes-256-cbc -K $encrypted_21bd84d1dece_key -iv $encrypted_21bd84d1dece_iv -in travis/travis.tar -out travis/unsafe.travis.tar -d
+  - tar -xvf travis/unsafe.travis.tar -C travis/
+  - cp travis/unsafe.travis/unsafe.credentials.sbt ./unsafe.credentials.sbt
+  - eval "$(ssh-agent -s)"
+  - ssh-add travis/unsafe.travis/unsafe.combust.git
 
 language: scala
 scala:
   - 2.11.8
 
 script:
-  - sbt "+ test"
+  - travis/travis.sh
 
 notifications:
   on_success: change

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-if [[ $TRAVIS_BRANCH == 'master' ]] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
   source travis/extract.sh
-  git checkout master
+  git checkout $TRAVIS_BRANCH
   if [ $# -eq 0 ]; then
     sbt "release with-defaults"
   else

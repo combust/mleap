@@ -1,6 +1,9 @@
 import sbt._
 import Keys._
+import com.typesafe.sbt.SbtPgp.autoImportImpl._
 import com.typesafe.sbt.pgp.PgpKeys._
+import sbtrelease.ReleasePlugin.autoImport._
+import xerial.sbt.Sonatype.autoImport._
 
 object Common {
   val settings: Seq[Def.Setting[_]] = Seq(
@@ -14,14 +17,15 @@ object Common {
       } else {
         Seq()
       }
-    },
-    publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath + "/.m2/repository")))
+    }
   )
 
   val combustSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")
-  val bundleSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.bundle")
+  val bundleSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.bundle")
 
   val sonatypeSettings: Seq[Def.Setting[_]] = Seq(
+    sonatypeProfileName := "ml.combust",
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     publishMavenStyle in publishSigned := true,
     publishTo in publishSigned := {
       val nexus = "https://oss.sonatype.org/"
@@ -43,6 +47,10 @@ object Common {
       Developer("priannaahsan",
         "Prianna Ahsan",
         "prianna.ahsan@gmail.com",
-        url("http://prianna.me")))
+        url("http://prianna.me")),
+      Developer("seme0021",
+        "Mikhail Semeniuk",
+        "mikhail@combust.ml",
+        url("https://www.linkedin.com/in/semeniuk")))
   )
 }

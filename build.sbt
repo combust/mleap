@@ -1,14 +1,30 @@
-name := "mleap"
+import ReleaseTransformations._
+import xerial.sbt.Sonatype.SonatypeCommand
 
-updateOptions := updateOptions.value.withCachedResolution(true)
+name := "mleap"
 
 releaseVersionBump := sbtrelease.Version.Bump.Minor
 releaseCrossBuild := true
-releasePublishArtifactsAction := PgpKeys.publishSigned.value
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  publishArtifacts,
+  releaseStepCommand(SonatypeCommand.sonatypeRelease),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
 
 lazy val `root` = project.in(file(".")).
   settings(Common.settings).
   settings(Common.combustSettings).
+  settings(Common.sonatypeSettings).
   settings(publishArtifact := false).
   enablePlugins(ReleasePlugin).
   aggregate(`mleap-core`, `mleap-runtime`, `mleap-spark`, `bundle-ml`)

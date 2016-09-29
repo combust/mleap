@@ -14,7 +14,7 @@ scala:
   - 2.11.8
 
 script:
-  - sbt "+ test"
+  - travis/travis.sh
 
 notifications:
   on_success: change

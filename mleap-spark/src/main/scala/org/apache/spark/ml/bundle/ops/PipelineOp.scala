@@ -1,8 +1,8 @@
 package org.apache.spark.ml.bundle.ops
 
-import ml.bundle.op.{OpModel, OpNode}
-import ml.bundle.serializer.{BundleContext, GraphSerializer}
-import ml.bundle.dsl._
+import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.serializer.{BundleContext, GraphSerializer}
+import ml.combust.bundle.dsl._
 import org.apache.spark.ml.{PipelineModel, Transformer}
 
 /**

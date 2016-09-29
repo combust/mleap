@@ -2,9 +2,9 @@ package ml.combust.mleap.runtime.serialization.bundle.ops.classification
 
 import ml.combust.mleap.core.classification.LogisticRegressionModel
 import ml.combust.mleap.runtime.transformer.classification.LogisticRegression
-import ml.bundle.op.{OpModel, OpNode}
-import ml.bundle.serializer.BundleContext
-import ml.bundle.dsl._
+import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.serializer.BundleContext
+import ml.combust.bundle.dsl._
 import org.apache.spark.ml.linalg.Vectors
 
 /**

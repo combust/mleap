@@ -3,8 +3,8 @@ package org.apache.spark.ml.mleap
 import java.io.File
 
 import ml.bundle.BundleDef.BundleDef
-import ml.bundle.dsl._
-import ml.bundle.serializer._
+import ml.combust.bundle.dsl._
+import ml.combust.bundle.serializer._
 import org.apache.spark.ml.bundle.SparkBundle
 import org.apache.spark.ml.Transformer
 

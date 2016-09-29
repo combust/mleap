@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.serialization.bundle
 
-import ml.bundle.serializer.BundleRegistry
+import ml.combust.bundle.serializer.BundleRegistry
 
 /**
   * Created by hollinwilkins on 8/22/16.

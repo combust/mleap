@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.serialization.bundle.ops.regression
 
-import ml.bundle.dsl._
-import ml.bundle.op.{OpModel, OpNode}
-import ml.bundle.serializer.{BundleContext, ModelSerializer}
+import ml.combust.bundle.dsl._
+import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
 import ml.combust.mleap.core.regression.{DecisionTreeRegressionModel, GBTRegressionModel}
 import ml.combust.mleap.runtime.transformer.regression.GBTRegression
 

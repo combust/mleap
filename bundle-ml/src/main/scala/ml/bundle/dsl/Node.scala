@@ -50,7 +50,7 @@ trait WritableNode extends ReadableNode { }
   * @param name unique identifier for the node
   * @param shape shape of the node
   */
-case class Node(override val name:String,
+case class Node(override val name: String,
                 override val shape: Shape) extends WritableNode {
-  override def bundleNode: NodeDef = NodeDef(name = name, shape = shape.bundleShape)
+  override def bundleNode: NodeDef = NodeDef(name = name, shape = Some(shape.bundleShape))
 }

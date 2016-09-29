@@ -1,7 +1,6 @@
 import sbt._
 import Keys._
 import com.typesafe.sbt.pgp.PgpKeys._
-import com.trueaccord.scalapb.ScalaPbPlugin
 
 object Common {
   val settings: Seq[Def.Setting[_]] = Seq(
@@ -46,6 +45,4 @@ object Common {
         "prianna.ahsan@gmail.com",
         url("http://prianna.me")))
   )
-
-  val protobufSettings = ScalaPbPlugin.protobufSettings
 }

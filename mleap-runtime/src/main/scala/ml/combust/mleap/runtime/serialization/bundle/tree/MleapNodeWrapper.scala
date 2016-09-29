@@ -24,7 +24,7 @@ object MleapNodeWrapper extends NodeWrapper[ml.combust.mleap.core.tree.Node] {
           Split(Split.S.Continuous(ContinuousSplit(featureIndex = split.featureIndex,
             threshold = split.threshold)))
       }
-      Node(Node.N.Internal(Node.InternalNode(split)))
+      Node(Node.N.Internal(Node.InternalNode(Some(split))))
     case node: ml.combust.mleap.core.tree.LeafNode =>
       val impurities = if(withImpurities) {
         node.impurities.get.toArray.toSeq
@@ -48,14 +48,15 @@ object MleapNodeWrapper extends NodeWrapper[ml.combust.mleap.core.tree.Node] {
   override def internal(node: InternalNode,
                         left: ml.combust.mleap.core.tree.Node,
                         right: ml.combust.mleap.core.tree.Node): ml.combust.mleap.core.tree.Node = {
-    val split = if(node.split.s.isCategorical) {
-      val s = node.split.getCategorical
+    val bundleSplit = node.split.get
+    val split = if(bundleSplit.s.isCategorical) {
+      val s = bundleSplit.getCategorical
       tree.CategoricalSplit(featureIndex = s.featureIndex,
         isLeft = s.isLeft,
         numCategories = s.numCategories,
         categories = s.categories.toArray)
-    } else if(node.split.s.isContinuous) {
-      val s = node.split.getContinuous
+    } else if(bundleSplit.s.isContinuous) {
+      val s = bundleSplit.getContinuous
       tree.ContinuousSplit(featureIndex = s.featureIndex,
         threshold = s.threshold)
     } else { throw new Error("invalid split") }

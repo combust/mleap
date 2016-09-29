@@ -50,11 +50,12 @@ object Value {
     */
   def fromListValue(lt: ListType, list: ListValue)
                    (implicit context: SerializationContext): Any = {
-    val u = lt.base.underlying
+    val base = lt.base.get
+    val u = base.underlying
     if(u.isList) {
-      list.list.map(l => fromListValue(lt.base.getList, l))
+      list.list.map(l => fromListValue(base.getList, l))
     } else if(u.isBasic) {
-      lt.base.getBasic match {
+      base.getBasic match {
         case BasicType.STRING => list.s
         case BasicType.DOUBLE => list.f
         case BasicType.BOOLEAN => list.b
@@ -62,10 +63,10 @@ object Value {
         case _ => throw new Error("unsupported list type")
       }
     } else if(u.isTensor) {
-      val basic = lt.base.getTensor.base
+      val basic = base.getTensor.base
       list.tensor.map(t => fromTensorValue(basic, t))
     } else if(u.isCustom) {
-      val serializer = context.bundleRegistry.custom(lt.base.getCustom).formatSerializer
+      val serializer = context.bundleRegistry.custom(base.getCustom).formatSerializer
       list.custom.map(b => serializer.fromBytes(b.toByteArray))
     } else { throw new Error("unsupported list type") }
   }
@@ -125,26 +126,27 @@ object Value {
     */
   def listValue(lt: ListType, value: Seq[_])
                (implicit context: SerializationContext): ListValue = {
-    val base = lt.base.underlying
-    if(base.isBasic) {
-      lt.base.getBasic match {
+    val base = lt.base.get
+    val u = base.underlying
+    if(u.isBasic) {
+      base.getBasic match {
         case BasicType.STRING => ListValue(s = value.asInstanceOf[Seq[String]])
         case BasicType.LONG => ListValue(i = value.asInstanceOf[Seq[Long]])
         case BasicType.BOOLEAN => ListValue(b = value.asInstanceOf[Seq[Boolean]])
         case BasicType.DOUBLE => ListValue(f = value.asInstanceOf[Seq[Double]])
         case _ => throw new Error("unsupported basic type")
       }
-    } else if(base.isCustom) {
-      val ct = context.bundleRegistry.custom[Any](lt.base.getCustom)
+    } else if(u.isCustom) {
+      val ct = context.bundleRegistry.custom[Any](base.getCustom)
       val serializer = ct.formatSerializer
       val custom = value.map(a => ByteString.copyFrom(serializer.toBytes(a)))
       ListValue(custom = custom)
-    } else if(base.isTensor) {
-      val tb = lt.base.getTensor.base
+    } else if(u.isTensor) {
+      val tb = base.getTensor.base
       val tensor = value.map(a => tensorValue(tb, a))
       ListValue(tensor = tensor)
-    } else if(base.isList) {
-      val lb = lt.base.getList
+    } else if(u.isList) {
+      val lb = base.getList
       val list = value.map(a => listValue(lb, a.asInstanceOf[Seq[_]]))
       ListValue(list = list)
     } else { throw new Error("unsupported data type") }
@@ -196,7 +198,7 @@ object Value {
     * @param base type of values held within list
     * @return list data type for the base type
     */
-  def listDataType(base: DataType): DataType = DataType(DataType.Underlying.List(DataType.ListType(base)))
+  def listDataType(base: DataType): DataType = DataType(DataType.Underlying.List(DataType.ListType(Some(base))))
 
   /** Create a tensor data type.
     *
@@ -235,8 +237,8 @@ object Value {
     * @return data type for a nested list
     */
   def listDataTypeN(base: DataType, n: Int): DataType = n match {
-    case 1 => DataType(DataType.Underlying.List(DataType.ListType(base)))
-    case _ => DataType(DataType.Underlying.List(DataType.ListType(listDataTypeN(base, n - 1))))
+    case 1 => DataType(DataType.Underlying.List(DataType.ListType(Some(base))))
+    case _ => DataType(DataType.Underlying.List(DataType.ListType(Some(listDataTypeN(base, n - 1)))))
   }
 
   /** Create a custom data type.
@@ -349,7 +351,7 @@ object Value {
   def customList[T: ClassTag](value: Seq[T])
                              (implicit hr: HasBundleRegistry): Value = {
     val base = customDataType[T]
-    val lt = DataType(DataType.Underlying.List(DataType.ListType(base)))
+    val lt = DataType(DataType.Underlying.List(DataType.ListType(Some(base))))
     Value(lt, value)
   }
 
@@ -472,7 +474,7 @@ case class Value(private val _bundleDataType: DataType, value: Any) {
     */
   def isLarge(implicit hr: HasBundleRegistry): Boolean = {
     _bundleDataType.underlying.isTensor && getTensor[Any].length > 1024 ||
-    _bundleDataType.underlying.isList && !_bundleDataType.getList.base.underlying.isBasic ||
+    _bundleDataType.underlying.isList && !_bundleDataType.getList.base.get.underlying.isBasic ||
     _bundleDataType.underlying.isCustom && hr.bundleRegistry.custom[Any](_bundleDataType.getCustom).isLarge(value)
   }
 

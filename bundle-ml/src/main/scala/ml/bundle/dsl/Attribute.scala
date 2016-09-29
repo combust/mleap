@@ -14,7 +14,7 @@ object Attribute {
     */
   def apply(attr: bundle.Attribute.Attribute)
            (implicit context: SerializationContext): Attribute = {
-    Attribute(name = attr.name, value = Value.fromBundle(attr.`type`, attr.value))
+    Attribute(name = attr.name, value = Value.fromBundle(attr.`type`.get, attr.value.get))
   }
 }
 
@@ -31,7 +31,7 @@ case class Attribute(name: String, value: Value) {
     */
   def bundleAttribute(implicit context: SerializationContext): bundle.Attribute.Attribute = {
     bundle.Attribute.Attribute(name = name,
-      `type` = value.bundleDataType,
-      value = value.bundleValue)
+      `type` = Some(value.bundleDataType),
+      value = Some(value.bundleValue))
   }
 }

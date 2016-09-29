@@ -54,7 +54,7 @@ trait JsonLowPrioritySupport {
       case obj: JsObject =>
         obj.fields("type") match {
           case JsString("list") =>
-            DataType(DataType.Underlying.List(DataType.ListType(read(obj.fields("base")))))
+            DataType(DataType.Underlying.List(DataType.ListType(Some(read(obj.fields("base"))))))
           case JsString("tensor") =>
             DataType(DataType.Underlying.Tensor(bundleTensorTypeFormat.read(obj.fields("tensor"))))
           case JsString("custom") =>
@@ -68,7 +68,7 @@ trait JsonLowPrioritySupport {
       if(obj.underlying.isBasic) {
         bundleBasicTypeFormat.write(obj.getBasic)
       } else if(obj.underlying.isList) {
-        JsObject(("type", JsString("list")), ("base", write(obj.getList.base)))
+        JsObject(("type", JsString("list")), ("base", write(obj.getList.base.get)))
       } else if(obj.underlying.isTensor) {
         JsObject(("type", JsString("tensor")), ("tensor", bundleTensorTypeFormat.write(obj.getTensor)))
       } else if(obj.underlying.isCustom) {
@@ -101,7 +101,7 @@ trait JsonLowPrioritySupport {
   }
 
   protected def bundleListValueFormat(lt: ListType): JsonFormat[ListValue] = new JsonFormat[ListValue] {
-    val base = lt.base
+    val base = lt.base.get
     override def write(obj: ListValue): JsValue = {
       if(base.underlying.isCustom) {
         JsArray(obj.custom.map(b => new String(b.toByteArray).parseJson): _*)
@@ -114,11 +114,12 @@ trait JsonLowPrioritySupport {
           case BasicType.STRING => obj.s.toJson
           case BasicType.BOOLEAN => obj.b.toJson
           case BasicType.LONG => obj.i.toJson
+          case _ => throw new Error("invalid basic type") // TODO: better error
         }
       } else if(base.underlying.isList) {
         val format = bundleListValueFormat(base.getList)
         JsArray(obj.list.map(format.write): _*)
-      } else { throw new Error("invalid list") }
+      } else { throw new Error("invalid list") } // TODO: better error
     }
 
     override def read(json: JsValue): ListValue = {
@@ -133,11 +134,12 @@ trait JsonLowPrioritySupport {
           case BasicType.STRING => ListValue(s = json.convertTo[Seq[String]])
           case BasicType.BOOLEAN => ListValue(b = json.convertTo[Seq[Boolean]])
           case BasicType.LONG => ListValue(i = json.convertTo[Seq[Long]])
+          case _ => throw new Error("invalid basic type") // TODO: better error
         }
       } else if(base.underlying.isList) {
         implicit val format = bundleListValueFormat(base.getList)
         ListValue(list = json.convertTo[Seq[ListValue]])
-      } else { throw new Error("invalid list") }
+      } else { throw new Error("invalid list") } // TODO: better error
     }
   }
 
@@ -155,6 +157,7 @@ trait JsonLowPrioritySupport {
           case BasicType.STRING => StringJsonFormat.write(obj.getS)
           case BasicType.BOOLEAN => BooleanJsonFormat.write(obj.getB)
           case BasicType.LONG => LongJsonFormat.write(obj.getI)
+          case _ => throw new Error("invalid basic type") // TODO: better error
         }
       } else { throw new Error("unsupported data type") }
     }
@@ -172,8 +175,9 @@ trait JsonLowPrioritySupport {
           case BasicType.STRING => Value.V.S(StringJsonFormat.read(json))
           case BasicType.BOOLEAN => Value.V.B(BooleanJsonFormat.read(json))
           case BasicType.LONG => Value.V.I(LongJsonFormat.read(json))
+          case _ => throw new Error("invalid basic type") // TODO: better error
         }
-      } else { throw new Error("unsupported data type") }
+      } else { throw new Error("unsupported data type") } // TODO: better error
 
       Value(v)
     }
@@ -186,14 +190,14 @@ trait JsonLowPrioritySupport {
       val dt = bundleDataTypeFormat.read(obj.fields("type"))
       val value = bundleValueFormat(dt).read(obj.fields("value"))
 
-      Attribute(name = name, `type` = dt, value = value)
+      Attribute(name = name, `type` = Some(dt), value = Some(value))
     }
 
     override def write(obj: Attribute): JsValue = {
-      implicit val format = bundleValueFormat(obj.`type`)
+      implicit val format = bundleValueFormat(obj.`type`.get)
       JsObject(("name", JsString(obj.name)),
-        ("type", bundleDataTypeFormat.write(obj.`type`)),
-        ("value", format.write(obj.value)))
+        ("type", bundleDataTypeFormat.write(obj.`type`.get)),
+        ("value", format.write(obj.value.get)))
     }
   }
 
@@ -202,6 +206,7 @@ trait JsonLowPrioritySupport {
       case Format.MIXED => JsString("mixed")
       case Format.PROTOBUF => JsString("protobuf")
       case Format.JSON => JsString("json")
+      case _ => throw new Error("invalid format") // TODO: better error
     }
 
     override def read(json: JsValue): Format = json match {

@@ -39,7 +39,7 @@ object MyNodeWrapper extends NodeWrapper[Node] {
           val s = ml.bundle.tree.Split.Split.ContinuousSplit(split.featureIndex, split.threshold)
           ml.bundle.tree.Split.Split(ml.bundle.tree.Split.Split.S.Continuous(s))
       }
-      ml.bundle.tree.Node.Node(ml.bundle.tree.Node.Node.N.Internal(ml.bundle.tree.Node.Node.InternalNode(split)))
+      ml.bundle.tree.Node.Node(ml.bundle.tree.Node.Node.N.Internal(ml.bundle.tree.Node.Node.InternalNode(Some(split))))
     case node: LeafNode =>
       val impurities = if(withImpurities) {
         node.impurities.get
@@ -57,14 +57,14 @@ object MyNodeWrapper extends NodeWrapper[Node] {
   }
 
   override def internal(node: ml.bundle.tree.Node.Node.InternalNode, left: Node, right: Node): Node = {
-    val split = if(node.split.s.isCategorical) {
-      val s = node.split.getCategorical
+    val split = if(node.split.get.s.isCategorical) {
+      val s = node.split.get.getCategorical
       CategoricalSplit(s.featureIndex,
         s.isLeft,
         s.numCategories,
         s.categories)
-    } else if(node.split.s.isContinuous) {
-      val s = node.split.getContinuous
+    } else if(node.split.get.s.isContinuous) {
+      val s = node.split.get.getContinuous
       ContinuousSplit(s.featureIndex, s.threshold)
     } else { throw new Error("invalid split") }
     InternalNode(split, left, right)

@@ -99,7 +99,7 @@ case class NodeSerializer(context: BundleContext) {
     val nodeDef = (for(in <- managed(new FileInputStream(context.file(Bundle.nodeFile)))) yield {
       NodeDefSerializer.serializer.read(in)
     }).opt.get
-    val node = Node(nodeDef.name, Shape(nodeDef.shape))
+    val node = Node(nodeDef.name, Shape(nodeDef.shape.get))
 
     val (model, m) = ModelSerializer(context).readWithModel()
     val op = context.bundleRegistry[Any, Any](m.op)

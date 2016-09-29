@@ -31,7 +31,7 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
           Split(Split.S.Continuous(ContinuousSplit(featureIndex = split.featureIndex,
             threshold = split.threshold)))
       }
-      Node(Node.N.Internal(Node.InternalNode(split)))
+      Node(Node.N.Internal(Node.InternalNode(Some(split))))
     case node: tree.LeafNode =>
       val impurities = if(withImpurities) {
         node.impurityStats.stats
@@ -55,8 +55,9 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
   override def internal(node: InternalNode,
                         left: tree.Node,
                         right: tree.Node): tree.Node = {
-    val split = if(node.split.s.isCategorical) {
-      val s = node.split.getCategorical
+    val bundleSplit = node.split.get
+    val split = if(bundleSplit.s.isCategorical) {
+      val s = bundleSplit.getCategorical
       val c = if(s.isLeft) {
         s.categories.toArray
       } else {
@@ -65,8 +66,8 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
       new tree.CategoricalSplit(featureIndex = s.featureIndex,
         numCategories = s.numCategories,
         _leftCategories = c)
-    } else if(node.split.s.isContinuous) {
-      val s = node.split.getContinuous
+    } else if(bundleSplit.s.isContinuous) {
+      val s = bundleSplit.getContinuous
       new tree.ContinuousSplit(featureIndex = s.featureIndex,
         threshold = s.threshold)
     } else { throw new Error("invalid split") }

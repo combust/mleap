@@ -15,7 +15,8 @@ object Common {
       } else {
         Seq()
       }
-    }
+    },
+    publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath + "/.m2/repository")))
   )
 
   val combustSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")

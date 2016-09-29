@@ -97,7 +97,7 @@ There are a few ways to contribute to MLeap.
 
 See LICENSE and NOTICE file in this repository.
 
-Copyright 2016 Combust, inc.
+Copyright 2016 Combust, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

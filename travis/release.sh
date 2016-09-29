@@ -2,6 +2,7 @@
 
 if [[ $TRAVIS_BRANCH == 'master' ]] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
   source travis/extract.sh
+  git checkout master
   if [ $# -eq 0 ]; then
     sbt "release with-defaults"
   else

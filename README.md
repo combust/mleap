@@ -1,7 +1,6 @@
 # MLeap
 
 [![Join the chat at https://gitter.im/combust-ml/mleap](https://badges.gitter.im/combust-ml/mleap.svg)](https://gitter.im/combust-ml/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 [![Build Status](https://travis-ci.org/combust-ml/mleap.svg?branch=master)](https://travis-ci.org/combust-ml/mleap)
 
 Easily put your Spark ML Pipelines into action with MLeap. Train your feature and regression/classification pipeline with Spark then easily convert them to MLeap pipelines to deploy them anywhere. Take your pipelines to an API server, Hadoop, or even back to Spark to execute on a DataFrame.

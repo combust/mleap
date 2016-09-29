@@ -4,10 +4,15 @@ name := "mleap"
 
 updateOptions := updateOptions.value.withCachedResolution(true)
 
+releaseVersionBump := sbtrelease.Version.Bump.Minor
+releaseCrossBuild := true
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+
 lazy val `root` = project.in(file(".")).
   settings(Common.settings).
   settings(Common.combustSettings).
   settings(publishArtifact := false).
+  enablePlugins(ReleasePlugin).
   aggregate(`mleap-core`, `mleap-runtime`, `mleap-spark`, `bundle-ml`)
 
 lazy val `mleap-core` = project.in(file("mleap-core")).

@@ -13,21 +13,20 @@ object BucketizerOp extends OpNode[Bucketizer, BucketizerModel]{
   override val Model: OpModel[BucketizerModel] = new OpModel[BucketizerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.bucketizer
 
-    override def store(context: BundleContext, model: WritableModel, obj: BucketizerModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: BucketizerModel): Model = {
       model.withAttr(Attribute("splits", Value.doubleList(obj.splits)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): BucketizerModel = {
+    override def load(context: BundleContext, model: Model): BucketizerModel = {
       BucketizerModel(splits = model.value("splits").getDoubleList.toArray)
     }
-
   }
 
   override def name(node: Bucketizer): String = node.uid
 
   override def model(node: Bucketizer): BucketizerModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: BucketizerModel): Bucketizer = {
+  override def load(context: BundleContext, node: Node, model: BucketizerModel): Bucketizer = {
     Bucketizer(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)

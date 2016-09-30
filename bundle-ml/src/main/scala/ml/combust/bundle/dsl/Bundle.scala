@@ -107,5 +107,5 @@ case class Bundle(name: String,
   def bundleContext(bundleRegistry: BundleRegistry,
                     path: File): BundleContext = BundleContext(this.format, bundleRegistry, path)
 
-  override def replaceAttrList(list: AttributeList): Bundle = copy(attributes = Some(list))
+  override def replaceAttrList(list: Option[AttributeList]): Bundle = copy(attributes = list)
 }

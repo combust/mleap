@@ -29,19 +29,6 @@ class GBTClassifierSpec extends FunSpec {
       assert(prediction == (0.5 * 0.5 + 0.75 * 2.0 + 0.1 * 1.0))
     }
 
-    describe("with probability column") {
-      val gbt2 = gbt.copy(probabilityCol = Some("probability"),
-        model = gbt.model.copy(threshold = Some(0.0)))
-
-      it("uses the GBT to output prediction class and probability") {
-        val frame2 = gbt2.transform(frame).get
-        val row = frame2.dataset.toArray(0)
-
-        assert(row.getDouble(1) == 1.0)
-        assert(row.getDouble(2) == (0.5 * 0.5 + 0.75 * 2.0 + 0.1 * 1.0))
-      }
-    }
-
     describe("with invalid features column") {
       val gbt2 = gbt.copy(featuresCol = "bad_features")
 

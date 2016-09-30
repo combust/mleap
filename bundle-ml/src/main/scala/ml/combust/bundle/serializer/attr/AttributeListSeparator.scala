@@ -1,7 +1,7 @@
 package ml.combust.bundle.serializer.attr
 
 import ml.combust.bundle.serializer.HasBundleRegistry
-import ml.combust.bundle.dsl.{Attribute, AttributeList, ReadableAttributeList}
+import ml.combust.bundle.dsl.{Attribute, AttributeList}
 
 /** Class to separate an [[ml.combust.bundle.dsl.AttributeList]] into two
   * [[ml.combust.bundle.dsl.AttributeList]] objects, one with small attributes and one with large.
@@ -19,7 +19,7 @@ case class AttributeListSeparator() {
     * @param hr bundle registry for determining small or large for custom attributes
     * @return an optional small and large attribute list
     */
-  def separate(attributes: Option[ReadableAttributeList])
+  def separate(attributes: Option[AttributeList])
               (implicit hr: HasBundleRegistry): (Option[AttributeList], Option[AttributeList]) = attributes match {
     case None => (None, None)
     case Some(list) =>

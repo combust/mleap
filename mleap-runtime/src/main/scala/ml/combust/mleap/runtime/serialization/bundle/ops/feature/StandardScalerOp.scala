@@ -14,20 +14,12 @@ object StandardScalerOp extends OpNode[StandardScaler, StandardScalerModel] {
   override val Model: OpModel[StandardScalerModel] = new OpModel[StandardScalerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.standard_scaler
 
-    override def store(context: BundleContext, model: WritableModel, obj: StandardScalerModel): WritableModel = {
-      var model2 = model
-      model2 = obj.mean match {
-        case Some(mean) => model2.withAttr(Attribute("mean", Value.doubleVector(mean.toArray)))
-        case None => model2
-      }
-      model2 = obj.std match {
-        case Some(std) => model2.withAttr(Attribute("std", Value.doubleVector(std.toArray)))
-        case None => model2
-      }
-      model2
+    override def store(context: BundleContext, model: Model, obj: StandardScalerModel): Model = {
+      model.withAttr(obj.mean.map(m => Attribute("mean", Value.doubleVector(m.toArray)))).
+        withAttr(obj.std.map(s => Attribute("std", Value.doubleVector(s.toArray))))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): StandardScalerModel = {
+    override def load(context: BundleContext, model: Model): StandardScalerModel = {
       val mean = model.getValue("mean").map(_.getDoubleVector.toArray).map(Vectors.dense)
       val std = model.getValue("std").map(_.getDoubleVector.toArray).map(Vectors.dense)
       StandardScalerModel(mean = mean, std = std)
@@ -38,7 +30,7 @@ object StandardScalerOp extends OpNode[StandardScaler, StandardScalerModel] {
 
   override def model(node: StandardScaler): StandardScalerModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: StandardScalerModel): StandardScaler = {
+  override def load(context: BundleContext, node: Node, model: StandardScalerModel): StandardScaler = {
     StandardScaler(uid = node.name,
       inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,

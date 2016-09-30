@@ -3,7 +3,8 @@ package ml.combust.bundle.test_ops
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.tree.{NodeWrapper, TreeSerializer}
-import ml.combust.bundle.dsl.{Bundle, _}
+import ml.combust.bundle.dsl._
+import ml.combust.bundle.dsl
 
 /**
   * Created by hollinwilkins on 8/22/16.
@@ -85,12 +86,12 @@ object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegression, DecisionT
   override val Model: OpModel[DecisionTreeRegressionModel] = new OpModel[DecisionTreeRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.regression.decision_tree_regression
 
-    override def store(context: BundleContext, model: WritableModel, obj: DecisionTreeRegressionModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: DecisionTreeRegressionModel): Model = {
       TreeSerializer[Node](context.file("node"), withImpurities = true).write(obj.root)
       model
     }
 
-    override def load(context: BundleContext, model: ReadableModel): DecisionTreeRegressionModel = {
+    override def load(context: BundleContext, model: Model): DecisionTreeRegressionModel = {
       val root = TreeSerializer[Node](context.file("node"), withImpurities = true).read()
       DecisionTreeRegressionModel(root)
     }
@@ -100,7 +101,7 @@ object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegression, DecisionT
 
   override def model(node: DecisionTreeRegression): DecisionTreeRegressionModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: DecisionTreeRegressionModel): DecisionTreeRegression = {
+  override def load(context: BundleContext, node: dsl.Node, model: DecisionTreeRegressionModel): DecisionTreeRegression = {
     DecisionTreeRegression(uid = node.name,
       input = node.shape.standardInput.name,
       output = node.shape.standardOutput.name,

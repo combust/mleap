@@ -12,16 +12,16 @@ object TokenizerOp extends OpNode[Tokenizer, Tokenizer] {
   override val Model: OpModel[Tokenizer] = new OpModel[Tokenizer] {
     override def opName: String = Bundle.BuiltinOps.feature.tokenizer
 
-    override def store(context: BundleContext, model: WritableModel, obj: Tokenizer): WritableModel = { model }
+    override def store(context: BundleContext, model: Model, obj: Tokenizer): Model = { model }
 
-    override def load(context: BundleContext, model: ReadableModel): Tokenizer = new Tokenizer(uid = "")
+    override def load(context: BundleContext, model: Model): Tokenizer = new Tokenizer(uid = "")
   }
 
   override def name(node: Tokenizer): String = node.uid
 
   override def model(node: Tokenizer): Tokenizer = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: Tokenizer): Tokenizer = {
+  override def load(context: BundleContext, node: Node, model: Tokenizer): Tokenizer = {
     new Tokenizer(uid = node.name)
   }
 

@@ -12,12 +12,12 @@ object HashingTermFrequencyOp extends OpNode[HashingTF, HashingTF] {
   override val Model: OpModel[HashingTF] = new OpModel[HashingTF] {
     override def opName: String = Bundle.BuiltinOps.feature.hashing_term_frequency
 
-    override def store(context: BundleContext, model: WritableModel, obj: HashingTF): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: HashingTF): Model = {
       model.withAttr(Attribute("num_features", Value.long(obj.getNumFeatures))).
         withAttr(Attribute("binary", Value.boolean(obj.getBinary)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): HashingTF = {
+    override def load(context: BundleContext, model: Model): HashingTF = {
       new HashingTF(uid = "").setNumFeatures(model.value("num_features").getLong.toInt).
         setBinary(model.value("binary").getBoolean)
     }
@@ -27,7 +27,7 @@ object HashingTermFrequencyOp extends OpNode[HashingTF, HashingTF] {
 
   override def model(node: HashingTF): HashingTF = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: HashingTF): HashingTF = {
+  override def load(context: BundleContext, node: Node, model: HashingTF): HashingTF = {
     new HashingTF(uid = node.name).setNumFeatures(model.getNumFeatures).
       setBinary(model.getBinary).
       setInputCol(node.shape.standardInput.name).

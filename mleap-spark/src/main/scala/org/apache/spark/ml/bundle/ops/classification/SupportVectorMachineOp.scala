@@ -14,16 +14,14 @@ object SupportVectorMachineOp extends OpNode[SVMModel, SVMModel] {
   override val Model: OpModel[SVMModel] = new OpModel[SVMModel] {
     override def opName: String = Bundle.BuiltinOps.classification.support_vector_machine
 
-    override def store(context: BundleContext, model: WritableModel, obj: SVMModel): WritableModel = {
-      val m = model.withAttr(Attribute("coefficients", Value.doubleVector(obj.model.weights.toArray))).
+    override def store(context: BundleContext, model: Model, obj: SVMModel): Model = {
+      model.withAttr(Attribute("coefficients", Value.doubleVector(obj.model.weights.toArray))).
         withAttr(Attribute("intercept", Value.double(obj.model.intercept))).
-        withAttr(Attribute("num_classes", Value.long(2)))
-      obj.get(obj.threshold).
-        map(t => m.withAttr(Attribute("threshold", Value.double(t)))).
-        getOrElse(m)
+        withAttr(Attribute("num_classes", Value.long(2))).
+        withAttr(obj.get(obj.threshold).map(t => Attribute("threshold", Value.double(t))))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): SVMModel = {
+    override def load(context: BundleContext, model: Model): SVMModel = {
       // TODO: better error
       if(model.value("num_classes").getLong != 2) {
         throw new Error("Only binary logistic regression supported in Spark")
@@ -42,13 +40,15 @@ object SupportVectorMachineOp extends OpNode[SVMModel, SVMModel] {
 
   override def model(node: SVMModel): SVMModel = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: SVMModel): SVMModel = {
-    new SVMModel(uid = node.name,
+  override def load(context: BundleContext, node: Node, model: SVMModel): SVMModel = {
+    val svm = new SVMModel(uid = node.name,
       model = model.model).copy(model.extractParamMap()).
       setFeaturesCol(node.shape.input("features").name).
       setPredictionCol(node.shape.output("prediction").name)
+    node.shape.getOutput("probability").map(s => svm.setProbabilityCol(s.name)).getOrElse(svm)
   }
 
   override def shape(node: SVMModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+    withOutput(node.getPredictionCol, "prediction").
+    withOutput(node.getProbabilityCol, "probability")
 }

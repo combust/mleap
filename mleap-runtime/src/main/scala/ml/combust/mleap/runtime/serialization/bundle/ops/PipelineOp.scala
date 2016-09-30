@@ -12,12 +12,12 @@ object PipelineOp extends OpNode[Pipeline, Pipeline] {
   override val Model: OpModel[Pipeline] = new OpModel[Pipeline] {
     override def opName: String = Bundle.BuiltinOps.pipeline
 
-    override def store(context: BundleContext, model: WritableModel, obj: Pipeline): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: Pipeline): Model = {
       val nodes = GraphSerializer(context).write(obj.transformers)
       model.withAttr(Attribute("nodes", Value.stringList(nodes)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): Pipeline = {
+    override def load(context: BundleContext, model: Model): Pipeline = {
       val nodes = GraphSerializer(context).read(model.value("nodes").getStringList).map(_.asInstanceOf[Transformer])
       Pipeline(transformers = nodes)
     }
@@ -27,7 +27,7 @@ object PipelineOp extends OpNode[Pipeline, Pipeline] {
 
   override def model(node: Pipeline): Pipeline = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: Pipeline): Pipeline = {
+  override def load(context: BundleContext, node: Node, model: Pipeline): Pipeline = {
     model.copy(uid = node.name)
   }
 

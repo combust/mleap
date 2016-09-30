@@ -14,16 +14,14 @@ object LogisticRegressionOp extends OpNode[LogisticRegression, LogisticRegressio
   override val Model: OpModel[LogisticRegressionModel] = new OpModel[LogisticRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.classification.logistic_regression
 
-    override def store(context: BundleContext, model: WritableModel, obj: LogisticRegressionModel): WritableModel = {
-      val m = model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients.toArray))).
+    override def store(context: BundleContext, model: Model, obj: LogisticRegressionModel): Model = {
+      model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients.toArray))).
         withAttr(Attribute("intercept", Value.double(obj.intercept))).
-        withAttr(Attribute("num_classes", Value.long(2)))
-      obj.threshold.
-        map(t => m.withAttr(Attribute("threshold", Value.double(t)))).
-        getOrElse(m)
+        withAttr(Attribute("num_classes", Value.long(2))).
+        withAttr(obj.threshold.map(t => Attribute("threshold", Value.double(t))))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): LogisticRegressionModel = {
+    override def load(context: BundleContext, model: Model): LogisticRegressionModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new Error("MLeap only supports binary logistic regression")
       } // TODO: Better error
@@ -37,7 +35,7 @@ object LogisticRegressionOp extends OpNode[LogisticRegression, LogisticRegressio
 
   override def model(node: LogisticRegression): LogisticRegressionModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: LogisticRegressionModel): LogisticRegression = {
+  override def load(context: BundleContext, node: Node, model: LogisticRegressionModel): LogisticRegression = {
     LogisticRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,
@@ -45,10 +43,8 @@ object LogisticRegressionOp extends OpNode[LogisticRegression, LogisticRegressio
       model = model)
   }
 
-  override def shape(node: LogisticRegression): Shape = {
-    val s = Shape().withInput(node.featuresCol, "features").
-      withOutput(node.predictionCol, "prediction")
-    node.probabilityCol.map(p => s.withOutput(p, "probability")).
-      getOrElse(s)
-  }
+  override def shape(node: LogisticRegression): Shape = Shape().
+    withInput(node.featuresCol, "features").
+    withOutput(node.predictionCol, "prediction").
+    withOutput(node.probabilityCol, "probability")
 }

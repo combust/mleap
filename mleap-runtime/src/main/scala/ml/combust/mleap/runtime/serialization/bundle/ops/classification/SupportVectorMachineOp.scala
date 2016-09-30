@@ -14,16 +14,14 @@ object SupportVectorMachineOp extends OpNode[SupportVectorMachine, SupportVector
   override val Model: OpModel[SupportVectorMachineModel] = new OpModel[SupportVectorMachineModel] {
     override def opName: String = Bundle.BuiltinOps.classification.support_vector_machine
 
-    override def store(context: BundleContext, model: WritableModel, obj: SupportVectorMachineModel): WritableModel = {
-      val m = model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients.toArray))).
+    override def store(context: BundleContext, model: Model, obj: SupportVectorMachineModel): Model = {
+      model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients.toArray))).
         withAttr(Attribute("intercept", Value.double(obj.intercept))).
-        withAttr(Attribute("num_classes", Value.long(2)))
-      obj.threshold.
-        map(t => m.withAttr(Attribute("threshold", Value.double(t)))).
-        getOrElse(m)
+        withAttr(Attribute("num_classes", Value.long(2))).
+        withAttr(obj.threshold.map(t => Attribute("threshold", Value.double(t))))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): SupportVectorMachineModel = {
+    override def load(context: BundleContext, model: Model): SupportVectorMachineModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new Error("MLeap only supports binary SVM")
       } // TODO: Better error
@@ -37,7 +35,7 @@ object SupportVectorMachineOp extends OpNode[SupportVectorMachine, SupportVector
 
   override def model(node: SupportVectorMachine): SupportVectorMachineModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: SupportVectorMachineModel): SupportVectorMachine = {
+  override def load(context: BundleContext, node: Node, model: SupportVectorMachineModel): SupportVectorMachine = {
     SupportVectorMachine(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

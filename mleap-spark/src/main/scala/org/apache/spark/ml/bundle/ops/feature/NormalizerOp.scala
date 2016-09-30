@@ -12,11 +12,11 @@ object NormalizerOp extends OpNode[Normalizer, Normalizer] {
   override val Model: OpModel[Normalizer] = new OpModel[Normalizer] {
     override def opName: String = Bundle.BuiltinOps.feature.normalizer
 
-    override def store(context: BundleContext, model: WritableModel, obj: Normalizer): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: Normalizer): Model = {
       model.withAttr(Attribute("p_norm", Value.double(obj.getP)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): Normalizer = {
+    override def load(context: BundleContext, model: Model): Normalizer = {
       new Normalizer(uid = "").setP(model.value("p_norm").getDouble)
     }
   }
@@ -25,7 +25,7 @@ object NormalizerOp extends OpNode[Normalizer, Normalizer] {
 
   override def model(node: Normalizer): Normalizer = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: Normalizer): Normalizer = {
+  override def load(context: BundleContext, node: Node, model: Normalizer): Normalizer = {
     new Normalizer(uid = node.name).copy(model.extractParamMap()).
       setInputCol(node.shape.standardInput.name).
       setOutputCol(node.shape.standardOutput.name)

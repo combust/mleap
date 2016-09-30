@@ -5,7 +5,7 @@ import java.io.{FileInputStream, FileOutputStream, InputStream, OutputStream}
 import ml.bundle.ModelDef.ModelDef
 import ml.combust.bundle.json.JsonSupport._
 import ml.combust.bundle.serializer.attr.{AttributeListSeparator, AttributeListSerializer}
-import ml.combust.bundle.dsl.{AttributeList, Bundle, Model, WritableModel}
+import ml.combust.bundle.dsl.{AttributeList, Bundle, Model}
 import resource._
 import spray.json._
 
@@ -84,14 +84,14 @@ case class ModelSerializer(context: BundleContext) {
   def write(obj: Any): Unit = {
     context.path.mkdirs()
     val m = context.bundleRegistry.modelForObj[Any](obj)
-    var model: WritableModel = Model(op = m.opName)
+    var model: Model = Model(op = m.opName)
     model = m.store(context, model, obj)
 
     model = context.format match {
       case SerializationFormat.Mixed =>
         val (small, large) = AttributeListSeparator().separate(model.attributes)
         for(l <- large) { AttributeListSerializer(context.file("model.pb")).writeProto(l) }
-        small.map(model.replaceAttrList).getOrElse(model)
+        model.replaceAttrList(small)
       case _ => model
     }
 

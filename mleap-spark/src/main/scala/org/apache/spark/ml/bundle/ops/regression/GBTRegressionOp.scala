@@ -12,7 +12,7 @@ object GBTRegressionOp extends OpNode[GBTRegressionModel, GBTRegressionModel] {
   override val Model: OpModel[GBTRegressionModel] = new OpModel[GBTRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.regression.gbt_regression
 
-    override def store(context: BundleContext, model: WritableModel, obj: GBTRegressionModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: GBTRegressionModel): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -26,7 +26,7 @@ object GBTRegressionOp extends OpNode[GBTRegressionModel, GBTRegressionModel] {
         withAttr(Attribute("trees", Value.stringList(trees)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): GBTRegressionModel = {
+    override def load(context: BundleContext, model: Model): GBTRegressionModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList.toArray
 
@@ -45,7 +45,7 @@ object GBTRegressionOp extends OpNode[GBTRegressionModel, GBTRegressionModel] {
 
   override def model(node: GBTRegressionModel): GBTRegressionModel = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: GBTRegressionModel): GBTRegressionModel = {
+  override def load(context: BundleContext, node: Node, model: GBTRegressionModel): GBTRegressionModel = {
     new GBTRegressionModel(uid = node.name,
       _trees = model.trees,
       _treeWeights = model.treeWeights,

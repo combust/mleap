@@ -12,11 +12,11 @@ object ReverseStringIndexerOp extends OpNode[IndexToString, IndexToString] {
   override val Model: OpModel[IndexToString] = new OpModel[IndexToString] {
     override def opName: String = Bundle.BuiltinOps.feature.reverse_string_indexer
 
-    override def store(context: BundleContext, model: WritableModel, obj: IndexToString): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: IndexToString): Model = {
       model.withAttr(Attribute("labels", Value.stringList(obj.getLabels)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): IndexToString = {
+    override def load(context: BundleContext, model: Model): IndexToString = {
       new IndexToString(uid = "").setLabels(model.value("labels").getStringList.toArray)
     }
   }
@@ -25,7 +25,7 @@ object ReverseStringIndexerOp extends OpNode[IndexToString, IndexToString] {
 
   override def model(node: IndexToString): IndexToString = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: IndexToString): IndexToString = {
+  override def load(context: BundleContext, node: Node, model: IndexToString): IndexToString = {
     new IndexToString(uid = node.name).copy(model.extractParamMap())
   }
 

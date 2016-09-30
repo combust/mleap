@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.serialization.bundle.ops.regression
 
 import ml.combust.mleap.core.regression.DecisionTreeRegressionModel
-import ml.combust.mleap.core.tree.Node
+import ml.combust.mleap.core.tree
 import ml.combust.mleap.runtime.serialization.bundle.tree.MleapNodeWrapper
 import ml.combust.mleap.runtime.transformer.regression.DecisionTreeRegression
 import ml.combust.bundle.op.{OpModel, OpNode}
@@ -18,13 +18,13 @@ object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegression, DecisionT
   override val Model: OpModel[DecisionTreeRegressionModel] = new OpModel[DecisionTreeRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.regression.decision_tree_regression
 
-    override def store(context: BundleContext, model: WritableModel, obj: DecisionTreeRegressionModel): WritableModel = {
-      TreeSerializer[Node](context.file("nodes"), withImpurities = false).write(obj.rootNode)
+    override def store(context: BundleContext, model: Model, obj: DecisionTreeRegressionModel): Model = {
+      TreeSerializer[tree.Node](context.file("nodes"), withImpurities = false).write(obj.rootNode)
       model.withAttr(Attribute("num_features", Value.long(obj.numFeatures)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): DecisionTreeRegressionModel = {
-      val rootNode = TreeSerializer[Node](context.file("nodes"), withImpurities = false).read()
+    override def load(context: BundleContext, model: Model): DecisionTreeRegressionModel = {
+      val rootNode = TreeSerializer[tree.Node](context.file("nodes"), withImpurities = false).read()
       DecisionTreeRegressionModel(rootNode, numFeatures = model.value("num_features").getLong.toInt)
     }
   }
@@ -33,7 +33,7 @@ object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegression, DecisionT
 
   override def model(node: DecisionTreeRegression): DecisionTreeRegressionModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: DecisionTreeRegressionModel): DecisionTreeRegression = {
+  override def load(context: BundleContext, node: Node, model: DecisionTreeRegressionModel): DecisionTreeRegression = {
     DecisionTreeRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

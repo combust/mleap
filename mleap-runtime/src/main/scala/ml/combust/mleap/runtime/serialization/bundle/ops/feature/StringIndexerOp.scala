@@ -13,11 +13,11 @@ object StringIndexerOp extends OpNode[StringIndexer, StringIndexerModel] {
   override val Model: OpModel[StringIndexerModel] = new OpModel[StringIndexerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.string_indexer
 
-    override def store(context: BundleContext, model: WritableModel, obj: StringIndexerModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: StringIndexerModel): Model = {
       model.withAttr(Attribute("labels", Value.stringList(obj.labels)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): StringIndexerModel = {
+    override def load(context: BundleContext, model: Model): StringIndexerModel = {
       StringIndexerModel(labels = model.value("labels").getStringList)
     }
   }
@@ -26,7 +26,7 @@ object StringIndexerOp extends OpNode[StringIndexer, StringIndexerModel] {
 
   override def model(node: StringIndexer): StringIndexerModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: StringIndexerModel): StringIndexer = {
+  override def load(context: BundleContext, node: Node, model: StringIndexerModel): StringIndexer = {
     StringIndexer(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)

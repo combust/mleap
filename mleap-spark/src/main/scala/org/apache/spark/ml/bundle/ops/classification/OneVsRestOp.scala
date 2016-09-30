@@ -14,7 +14,7 @@ object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
   override val Model: OpModel[OneVsRestModel] = new OpModel[OneVsRestModel] {
     override def opName: String = Bundle.BuiltinOps.classification.one_vs_rest
 
-    override def store(context: BundleContext, model: WritableModel, obj: OneVsRestModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: OneVsRestModel): Model = {
       var i = 0
       for(cModel <- obj.models) {
         val name = s"model$i"
@@ -26,7 +26,7 @@ object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
       model.withAttr(Attribute("num_classes", Value.long(obj.models.length)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): OneVsRestModel = {
+    override def load(context: BundleContext, model: Model): OneVsRestModel = {
       val numClasses = model.value("num_classes").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
@@ -45,7 +45,7 @@ object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
 
   override def model(node: OneVsRestModel): OneVsRestModel = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: OneVsRestModel): OneVsRestModel = {
+  override def load(context: BundleContext, node: Node, model: OneVsRestModel): OneVsRestModel = {
     val labelMetadata = NominalAttribute.defaultAttr.
       withName(node.shape.output("prediction").name).
       withNumValues(model.models.length).
@@ -57,12 +57,7 @@ object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
     m
   }
 
-  override def shape(node: OneVsRestModel): Shape = {
-    val s = Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction")
-
-    if(node.isDefined(node.probabilityCol)) {
-      s.withOutput(node.getProbabilityCol, "probability")
-    } else { s }
-  }
+  override def shape(node: OneVsRestModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
+    withOutput(node.getPredictionCol, "prediction").
+    withOutput(node.getProbabilityCol, "probability")
 }

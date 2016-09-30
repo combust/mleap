@@ -49,8 +49,20 @@ trait HasAttributeList[T] {
     * @return a copy of T with the attribute added to the attribute list
     */
   def withAttr(attribute: Attribute): T = attributes match {
-    case Some(l) => replaceAttrList(l.withAttr(attribute))
-    case None => replaceAttrList(AttributeList(attribute))
+    case Some(l) => replaceAttrList(Some(l.withAttr(attribute)))
+    case None => replaceAttrList(Some(AttributeList(attribute)))
+  }
+
+  /** Add an optional attribute to the list.
+    *
+    * @param attribute optional attribute to add to the list
+    * @return a copy of T with the attribute optionally added
+    */
+  def withAttr(attribute: Option[Attribute]): T = (attributes, attribute) match {
+    case (Some(attrs), Some(attr)) => replaceAttrList(Some(attrs.withAttr(attr)))
+    case (Some(attrs), None) => replaceAttrList(Some(attrs))
+    case (None, Some(attr)) => replaceAttrList(Some(AttributeList(attr)))
+    case (None, None) => replaceAttrList(None)
   }
 
   /** Add a list of attributes to [[attributes]].
@@ -61,8 +73,8 @@ trait HasAttributeList[T] {
     * @return copy of T with all attributes added to [[attributes]]
     */
   def withAttrList(list: AttributeList): T = attributes match {
-    case Some(l) => replaceAttrList(l.withAttrList(list))
-    case None => replaceAttrList(list)
+    case Some(l) => replaceAttrList(Some(l.withAttrList(list)))
+    case None => replaceAttrList(Some(list))
   }
 
   /** Replace the [[attributes]] with another list.
@@ -70,74 +82,7 @@ trait HasAttributeList[T] {
     * @param list attributes to use to replace
     * @return copy of T with [[attributes]] replaced by list arg
     */
-  def replaceAttrList(list: AttributeList): T
-}
-
-/** Trait for read-only operations of an [[AttributeList]].
-  *
-  * Use this trait when you only want to grant read-access to an [[AttributeList]].
-  * This is used when deserializing [[Model]] or [[Bundle]] objects.
-  *
-  */
-trait ReadableAttributeList {
-  /** Get an attribute.
-    *
-    * Alias for [[attr]]
-    *
-    * @param name name of the attribute
-    * @return the attribute
-    */
-  def apply(name: String): Attribute = attr(name)
-
-  /** Convert to a protobuf attribute list
-    *
-    * @param context serialization context for encoding custom values
-    * @return protobuf attribute list
-    */
-  def bundleList(implicit context: SerializationContext): ml.bundle.AttributeList.AttributeList
-
-  /** Iteratable of all [[Attribute]] in the list.
-    *
-    * @return iterable of all [[Attribute]] in list
-    */
-  def attributes: Iterable[Attribute]
-
-  /** Get an [[Attribute]] from the list.
-    *
-    * Throws an error if the attribute doesn't exist.
-    *
-    * @param name name of the attribute
-    * @return the attribute
-    */
-  def attr(name: String): Attribute
-
-  /** Get an option of an [[Attribute]] from the list.
-    *
-    * @param name name of the attribute
-    * @return optional [[Attribute]] from list
-    */
-  def get(name: String): Option[Attribute]
-}
-
-/** Trait for write operations on an [[AttributeList]].
-  *
-  * Use this trait when you need to provide a writable interface to the [[AttributeList]].
-  * This is mainly used when serializing [[Model]] or [[Bundle]] objects.
-  */
-trait WritableAttributeList extends ReadableAttributeList {
-  /** Add an attribute to the list.
-    *
-    * @param attribute attribute to add
-    * @return copy of [[AttributeList]] with attribute added
-    */
-  def withAttr(attribute: Attribute): WritableAttributeList
-
-  /** Add a list of attributes to the list.
-    *
-    * @param list list of attributes to add
-    * @return copy of [[AttributeList]] with all attributes added
-    */
-  def withAttrList(list: ReadableAttributeList): WritableAttributeList
+  def replaceAttrList(list: Option[AttributeList]): T
 }
 
 /** Companion class for construction and conversion of [[AttributeList]] objects.
@@ -203,23 +148,65 @@ object AttributeList {
   *
   * @param lookup map of attribute name to [[Attribute]] object
   */
-case class AttributeList(lookup: Map[String, Attribute]) extends WritableAttributeList {
+case class AttributeList(lookup: Map[String, Attribute]) {
   /* make sure the list is not empty */
   if(lookup.isEmpty) { throw new Error("cannot have empty attribute list") } // TODO: better error
 
-  override def bundleList(implicit context: SerializationContext): ml.bundle.AttributeList.AttributeList = {
+  /** Get an attribute.
+    *
+    * Alias for [[attr]]
+    *
+    * @param name name of the attribute
+    * @return the attribute
+    */
+  def apply(name: String): Attribute = attr(name)
+
+  /** Convert to a protobuf attribute list
+    *
+    * @param context serialization context for encoding custom values
+    * @return protobuf attribute list
+    */
+  def bundleList(implicit context: SerializationContext): ml.bundle.AttributeList.AttributeList = {
     ml.bundle.AttributeList.AttributeList(lookup.values.map(a => a.bundleAttribute).toSeq)
   }
 
-  override def attributes: Iterable[Attribute] = lookup.values
-  override def attr(name: String): Attribute = lookup(name)
-  override def get(name: String): Option[Attribute] = lookup.get(name)
+  /** Iteratable of all [[Attribute]] in the list.
+    *
+    * @return iterable of all [[Attribute]] in list
+    */
+  def attributes: Iterable[Attribute] = lookup.values
 
-  override def withAttr(attribute: Attribute): AttributeList = {
+  /** Get an [[Attribute]] from the list.
+    *
+    * Throws an error if the attribute doesn't exist.
+    *
+    * @param name name of the attribute
+    * @return the attribute
+    */
+  def attr(name: String): Attribute = lookup(name)
+
+  /** Get an option of an [[Attribute]] from the list.
+    *
+    * @param name name of the attribute
+    * @return optional [[Attribute]] from list
+    */
+  def get(name: String): Option[Attribute] = lookup.get(name)
+
+  /** Add an attribute to the list.
+    *
+    * @param attribute attribute to add
+    * @return copy of [[AttributeList]] with attribute added
+    */
+  def withAttr(attribute: Attribute): AttributeList = {
     copy(lookup = lookup + (attribute.name -> attribute))
   }
 
-  override def withAttrList(list: ReadableAttributeList): AttributeList = {
+  /** Add a list of attributes to the list.
+    *
+    * @param list list of attributes to add
+    * @return copy of [[AttributeList]] with all attributes added
+    */
+  def withAttrList(list: AttributeList): AttributeList = {
     list.attributes.foldLeft(this) {
       case (l, attr) => l.withAttr(attr)
     }

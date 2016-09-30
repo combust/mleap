@@ -14,12 +14,12 @@ object LinearRegressionOp extends OpNode[LinearRegression, LinearRegressionModel
   override val Model: OpModel[LinearRegressionModel] = new OpModel[LinearRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.regression.linear_regression
 
-    override def store(context: BundleContext, model: WritableModel, obj: LinearRegressionModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: LinearRegressionModel): Model = {
       model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients.toArray))).
         withAttr(Attribute("intercept", Value.double(obj.intercept)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): LinearRegressionModel = {
+    override def load(context: BundleContext, model: Model): LinearRegressionModel = {
       LinearRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
         intercept = model.value("intercept").getDouble)
     }
@@ -29,7 +29,7 @@ object LinearRegressionOp extends OpNode[LinearRegression, LinearRegressionModel
 
   override def model(node: LinearRegression): LinearRegressionModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: LinearRegressionModel): LinearRegression = {
+  override def load(context: BundleContext, node: Node, model: LinearRegressionModel): LinearRegression = {
     LinearRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

@@ -1,25 +1,4 @@
-import ReleaseTransformations._
-import xerial.sbt.Sonatype.SonatypeCommand
-
 name := "mleap"
-
-releaseVersionBump := sbtrelease.Version.Bump.Minor
-releaseCrossBuild := true
-
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runClean,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  publishArtifacts,
-  releaseStepCommand(SonatypeCommand.sonatypeRelease),
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
-)
 
 lazy val `root` = project.in(file(".")).
   settings(Common.settings).
@@ -57,3 +36,24 @@ lazy val `bundle-ml` = project.in(file("bundle-ml")).
   settings(PB.includePaths in Compile := Seq(file("bundle-protobuf"))).
   settings(PB.protoSources in Compile := Seq(file("bundle-protobuf"))).
   settings(libraryDependencies ++= Dependencies.bundleMlDependencies)
+
+import ReleaseTransformations._
+import xerial.sbt.Sonatype.SonatypeCommand
+
+releaseVersionBump := sbtrelease.Version.Bump.Minor
+releaseCrossBuild := true
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  publishArtifacts,
+  releaseStepCommand(SonatypeCommand.sonatypeRelease),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)

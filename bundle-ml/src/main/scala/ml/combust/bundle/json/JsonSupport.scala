@@ -23,7 +23,7 @@ import spray.json.{JsObject, _}
   *
   * Includes many spray.json.JsonFormat format implicits as well as several
   * spray.json.RootJsonFormat format implicits for top-level JSON objects
-  * such as [[ml.combust.bundle.ModelDef.ModelDef]] and [[ml.combust.bundle.BundleDef.BundleDef]].
+  * such as [[ml.bundle.ModelDef.ModelDef]] and [[ml.bundle.BundleDef.BundleDef]].
   *
   * There are no members that need to be overriden if using this trait as a mixin.
  */

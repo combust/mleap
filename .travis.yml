@@ -9,6 +9,8 @@ script:
   - travis/travis.sh
 
 notifications:
+  on_success: change
+  on_failure: always
   urls:
     - https://webhooks.gitter.im/e/65cd239c75c243ce635e
   slack:

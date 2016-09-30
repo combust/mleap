@@ -1,6 +1,7 @@
 package ml.combust.bundle.serializer
 
 import java.io.{File, FileInputStream, FileOutputStream}
+import java.util.zip.ZipInputStream
 
 import ml.bundle.BundleDef.BundleDef
 import ml.combust.bundle.json.JsonSupport._
@@ -12,10 +13,71 @@ import scala.io.Source
 
 /** Class for serializing/deserializing Bundle.ML [[ml.combust.bundle.dsl.Bundle]] objects.
   *
-  * @param path path to the Bundle.ML folder to serialize/deserialize
+  * @param path path to the Bundle.ML folder/zip file to serialize/deserialize
   * @param hr bundle registry for custom types and ops
   */
 case class BundleSerializer(path: File)
+                           (implicit hr: HasBundleRegistry) {
+  val tmp: File = new File(s"/tmp/bundle.ml/${java.util.UUID.randomUUID().toString}")
+
+  /** Write a bundle to the path.
+    *
+    * @param bundle bundle to write
+    */
+  def write(bundle: Bundle): Unit = {
+    BundleDirectorySerializer(tmp).write(bundle)
+
+    if(path.getPath.endsWith(".zip")) {
+      FileUtil().zip(tmp, path)
+    } else {
+      tmp.renameTo(path)
+    }
+  }
+
+  /** Read a bundle from the path.
+    *
+    * @return deserialized bundle
+    */
+  def read(): Bundle = {
+    if(path.getPath.endsWith(".zip")) {
+      FileUtil().extract(path, tmp)
+      BundleDirectorySerializer(tmp).read()
+    } else {
+      BundleDirectorySerializer(path).read()
+    }
+  }
+
+  /** Read bundle definition from the path.
+    *
+    * @return bundle definition
+    */
+  def readBundleDef(): BundleDef = {
+    if(path.getPath.endsWith(".zip")) {
+      (for(in <- managed(new ZipInputStream(new FileInputStream(path)))) yield {
+        var bundleDef: Option[BundleDef] = None
+        var entry = in.getNextEntry
+        while(entry != null) {
+          if(entry.getName == Bundle.bundleJson) {
+            val json = Source.fromInputStream(in).getLines.mkString
+            bundleDef = Some(json.parseJson.convertTo[BundleDef])
+          }
+          entry = in.getNextEntry
+        }
+
+        bundleDef
+      }).opt.flatMap(identity).get
+    } else {
+      BundleDirectorySerializer(path).readBundleDef()
+    }
+  }
+}
+
+/** Class for serializing/deserializing Bundle.ML [[ml.combust.bundle.dsl.Bundle]] objects.
+  *
+  * @param path path to the Bundle.ML folder to serialize/deserialize
+  * @param hr bundle registry for custom types and ops
+  */
+case class BundleDirectorySerializer(path: File)
                            (implicit hr: HasBundleRegistry) {
   val registry = hr.bundleRegistry
 

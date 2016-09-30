@@ -16,12 +16,12 @@ object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegressionModel, Deci
   override val Model: OpModel[DecisionTreeRegressionModel] = new OpModel[DecisionTreeRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.regression.decision_tree_regression
 
-    override def store(context: BundleContext, model: WritableModel, obj: DecisionTreeRegressionModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: DecisionTreeRegressionModel): Model = {
       TreeSerializer[org.apache.spark.ml.tree.Node](context.file("nodes"), withImpurities = false).write(obj.rootNode)
       model.withAttr(Attribute("num_features", Value.long(obj.numFeatures)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): DecisionTreeRegressionModel = {
+    override def load(context: BundleContext, model: Model): DecisionTreeRegressionModel = {
       val rootNode = TreeSerializer[org.apache.spark.ml.tree.Node](context.file("nodes"), withImpurities = false).read()
       new DecisionTreeRegressionModel(uid = "",
         rootNode = rootNode,
@@ -33,7 +33,7 @@ object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegressionModel, Deci
 
   override def model(node: DecisionTreeRegressionModel): DecisionTreeRegressionModel = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: DecisionTreeRegressionModel): DecisionTreeRegressionModel = {
+  override def load(context: BundleContext, node: Node, model: DecisionTreeRegressionModel): DecisionTreeRegressionModel = {
     new DecisionTreeRegressionModel(uid = node.name,
       rootNode = model.rootNode,
       numFeatures = model.numFeatures).

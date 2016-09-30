@@ -14,22 +14,11 @@ import scala.util.Try
 case class GBTClassifier(override val uid: String = Transformer.uniqueName("gbt_classifier"),
                          featuresCol: String,
                          predictionCol: String,
-                         probabilityCol: Option[String] = None,
                          model: GBTClassifierModel) extends Transformer {
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(featuresCol, TensorType.doubleVector()).flatMap {
       case(b, featuresIndex) =>
-        probabilityCol match {
-          case Some(probability) =>
-            b.withOutputs(Seq(StructField(predictionCol, DoubleType),
-              StructField(probability, DoubleType))) {
-              row =>
-                val (prediction, probability) = model.predictWithProbability(row.getVector(featuresIndex))
-                Row(prediction, probability)
-            }
-          case None =>
-            b.withOutput(predictionCol, DoubleType)(row => model(row.getVector(featuresIndex)))
-        }
+        b.withOutput(predictionCol, DoubleType)(row => model(row.getVector(featuresIndex)))
     }
   }
 }

@@ -13,7 +13,7 @@ object GBTClassifierOp extends OpNode[GBTClassificationModel, GBTClassificationM
   override val Model: OpModel[GBTClassificationModel] = new OpModel[GBTClassificationModel] {
     override def opName: String = Bundle.BuiltinOps.classification.gbt_classifier
 
-    override def store(context: BundleContext, model: WritableModel, obj: GBTClassificationModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: GBTClassificationModel): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -28,7 +28,7 @@ object GBTClassifierOp extends OpNode[GBTClassificationModel, GBTClassificationM
         withAttr(Attribute("trees", Value.stringList(trees)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): GBTClassificationModel = {
+    override def load(context: BundleContext, model: Model): GBTClassificationModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new Error("MLeap only supports binary logistic regression")
       } // TODO: Better error
@@ -51,7 +51,7 @@ object GBTClassifierOp extends OpNode[GBTClassificationModel, GBTClassificationM
 
   override def model(node: GBTClassificationModel): GBTClassificationModel = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: GBTClassificationModel): GBTClassificationModel = {
+  override def load(context: BundleContext, node: Node, model: GBTClassificationModel): GBTClassificationModel = {
     new GBTClassificationModel(uid = node.name,
       _trees = model.trees,
       _treeWeights = model.treeWeights,

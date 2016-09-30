@@ -1,7 +1,7 @@
 package ml.combust.bundle.op
 
 import ml.combust.bundle.serializer.BundleContext
-import ml.combust.bundle.dsl.{Model, ReadableModel, WritableModel}
+import ml.combust.bundle.dsl.Model
 
 /** Type class for serializing/deserializing ML models to Bundle.ML.
   *
@@ -28,8 +28,8 @@ trait OpModel[M] {
     * @return writable model to be serialized
     */
   def store(context: BundleContext,
-            model: WritableModel,
-            obj: M): WritableModel
+            model: Model,
+            obj: M): Model
 
   /** Load the model.
     *
@@ -41,5 +41,5 @@ trait OpModel[M] {
     * @return reconstructed ML model from the model and context
     */
   def load(context: BundleContext,
-           model: ReadableModel): M
+           model: Model): M
 }

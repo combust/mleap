@@ -13,16 +13,16 @@ object VectorAssemblerOp extends OpNode[VectorAssembler, VectorAssemblerModel] {
   override val Model: OpModel[VectorAssemblerModel] = new OpModel[VectorAssemblerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.vector_assembler
 
-    override def store(context: BundleContext, model: WritableModel, obj: VectorAssemblerModel): WritableModel = { model }
+    override def store(context: BundleContext, model: Model, obj: VectorAssemblerModel): Model = { model }
 
-    override def load(context: BundleContext, model: ReadableModel): VectorAssemblerModel = VectorAssemblerModel.default
+    override def load(context: BundleContext, model: Model): VectorAssemblerModel = VectorAssemblerModel.default
   }
 
   override def name(node: VectorAssembler): String = node.uid
 
   override def model(node: VectorAssembler): VectorAssemblerModel = VectorAssemblerModel.default
 
-  override def load(context: BundleContext, node: ReadableNode, model: VectorAssemblerModel): VectorAssembler = {
+  override def load(context: BundleContext, node: Node, model: VectorAssemblerModel): VectorAssembler = {
     VectorAssembler(uid = node.name,
       inputCols = node.shape.inputs.map(_.name).toArray,
       outputCol = node.shape.standardOutput.name)

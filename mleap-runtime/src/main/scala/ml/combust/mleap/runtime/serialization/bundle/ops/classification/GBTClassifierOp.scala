@@ -14,7 +14,7 @@ object GBTClassifierOp extends OpNode[GBTClassifier, GBTClassifierModel] {
   override val Model: OpModel[GBTClassifierModel] = new OpModel[GBTClassifierModel] {
     override def opName: String = Bundle.BuiltinOps.classification.gbt_classifier
 
-    override def store(context: BundleContext, model: WritableModel, obj: GBTClassifierModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: GBTClassifierModel): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -32,7 +32,7 @@ object GBTClassifierOp extends OpNode[GBTClassifier, GBTClassifierModel] {
         getOrElse(m)
     }
 
-    override def load(context: BundleContext, model: ReadableModel): GBTClassifierModel = {
+    override def load(context: BundleContext, model: Model): GBTClassifierModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new Error("MLeap only supports binary logistic regression")
       } // TODO: Better error
@@ -56,18 +56,13 @@ object GBTClassifierOp extends OpNode[GBTClassifier, GBTClassifierModel] {
 
   override def model(node: GBTClassifier): GBTClassifierModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: GBTClassifierModel): GBTClassifier = {
+  override def load(context: BundleContext, node: Node, model: GBTClassifierModel): GBTClassifier = {
     GBTClassifier(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,
       model = model)
   }
 
-  override def shape(node: GBTClassifier): Shape = {
-    val shape = Shape().withInput(node.featuresCol, "features").
-      withOutput(node.predictionCol, "prediction")
-    node.probabilityCol.
-      map(p => shape.withOutput(p, "probability")).
-      getOrElse(shape)
-  }
+  override def shape(node: GBTClassifier): Shape = Shape().withInput(node.featuresCol, "features").
+    withOutput(node.predictionCol, "prediction")
 }

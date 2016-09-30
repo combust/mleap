@@ -16,7 +16,7 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassifier, RandomFor
   override val Model: OpModel[RandomForestClassifierModel] = new OpModel[RandomForestClassifierModel] {
     override def opName: String = Bundle.BuiltinOps.classification.random_forest_classifier
 
-    override def store(context: BundleContext, model: WritableModel, obj: RandomForestClassifierModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: RandomForestClassifierModel): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -31,7 +31,7 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassifier, RandomFor
         withAttr(Attribute("trees", Value.stringList(trees)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): RandomForestClassifierModel = {
+    override def load(context: BundleContext, model: Model): RandomForestClassifierModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val numClasses = model.value("num_classes").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList
@@ -51,7 +51,7 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassifier, RandomFor
 
   override def model(node: RandomForestClassifier): RandomForestClassifierModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: RandomForestClassifierModel): RandomForestClassifier = {
+  override def load(context: BundleContext, node: Node, model: RandomForestClassifierModel): RandomForestClassifier = {
     RandomForestClassifier(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.input("prediction").name,

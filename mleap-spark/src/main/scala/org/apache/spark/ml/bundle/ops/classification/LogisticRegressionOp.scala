@@ -13,16 +13,14 @@ object LogisticRegressionOp extends OpNode[LogisticRegressionModel, LogisticRegr
   override val Model: OpModel[LogisticRegressionModel] = new OpModel[LogisticRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.classification.logistic_regression
 
-    override def store(context: BundleContext, model: WritableModel, obj: LogisticRegressionModel): WritableModel = {
-      val m = model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients.toArray))).
+    override def store(context: BundleContext, model: Model, obj: LogisticRegressionModel): Model = {
+      model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients.toArray))).
         withAttr(Attribute("intercept", Value.double(obj.intercept))).
-        withAttr(Attribute("num_classes", Value.long(obj.numClasses)))
-
-      obj.get(obj.threshold).map(t => m.withAttr(Attribute("threshold", Value.double(t)))).
-        getOrElse(m)
+        withAttr(Attribute("num_classes", Value.long(obj.numClasses))).
+        withAttr(obj.get(obj.threshold).map(t => Attribute("threshold", Value.double(t))))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): LogisticRegressionModel = {
+    override def load(context: BundleContext, model: Model): LogisticRegressionModel = {
       // TODO: better error
       if(model.value("num_classes").getLong != 2) {
         throw new Error("Only binary logistic regression supported in Spark")
@@ -42,7 +40,7 @@ object LogisticRegressionOp extends OpNode[LogisticRegressionModel, LogisticRegr
 
   override def model(node: LogisticRegressionModel): LogisticRegressionModel = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: LogisticRegressionModel): LogisticRegressionModel = {
+  override def load(context: BundleContext, node: Node, model: LogisticRegressionModel): LogisticRegressionModel = {
     val lr = new LogisticRegressionModel(uid = node.name,
       coefficients = model.coefficients,
       intercept = model.intercept).copy(model.extractParamMap).

@@ -3,6 +3,7 @@ package org.apache.spark.ml.bundle.ops.classification
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.tree.TreeSerializer
+import org.apache.spark.ml.tree
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.tree.SparkNodeWrapper
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel
@@ -16,14 +17,14 @@ object DecisionTreeClassifierOp extends OpNode[DecisionTreeClassificationModel, 
   override val Model: OpModel[DecisionTreeClassificationModel] = new OpModel[DecisionTreeClassificationModel] {
     override def opName: String = Bundle.BuiltinOps.classification.decision_tree_classifier
 
-    override def store(context: BundleContext, model: WritableModel, obj: DecisionTreeClassificationModel): WritableModel = {
-      TreeSerializer[org.apache.spark.ml.tree.Node](context.file("nodes"), withImpurities = true).write(obj.rootNode)
+    override def store(context: BundleContext, model: Model, obj: DecisionTreeClassificationModel): Model = {
+      TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).write(obj.rootNode)
       model.withAttr(Attribute("num_features", Value.long(obj.numFeatures))).
         withAttr(Attribute("num_classes", Value.long(obj.numClasses)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): DecisionTreeClassificationModel = {
-      val rootNode = TreeSerializer[org.apache.spark.ml.tree.Node](context.file("nodes"), withImpurities = true).read()
+    override def load(context: BundleContext, model: Model): DecisionTreeClassificationModel = {
+      val rootNode = TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).read()
       new DecisionTreeClassificationModel(uid = "",
         rootNode = rootNode,
         numClasses = model.value("num_classes").getLong.toInt,
@@ -35,7 +36,7 @@ object DecisionTreeClassifierOp extends OpNode[DecisionTreeClassificationModel, 
 
   override def model(node: DecisionTreeClassificationModel): DecisionTreeClassificationModel = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: DecisionTreeClassificationModel): DecisionTreeClassificationModel = {
+  override def load(context: BundleContext, node: Node, model: DecisionTreeClassificationModel): DecisionTreeClassificationModel = {
     new DecisionTreeClassificationModel(uid = node.name,
       rootNode = model.rootNode,
       numClasses = model.numClasses,

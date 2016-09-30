@@ -9,125 +9,6 @@ object Shape {
   val standardOutputPort: String = "output"
 }
 
-/** Trait for read-only interface to [[Shape]] objects.
-  *
-  * Use this trait when desierializing [[Shape]] objects,
-  * such as when reading a [[Node]] from a Bundle.ML file.
-  */
-trait ReadableShape {
-  /** Create a protobuf shape.
-    *
-    * @return protobuf shape
-    */
-  def bundleShape: ml.bundle.Shape.Shape
-
-  /** Get list of all inputs.
-    *
-    * @return list of inputs
-    */
-  def inputs: Seq[Socket]
-
-  /** Get list of all outputs.
-    *
-    * @return list of all outputs
-    */
-  def outputs: Seq[Socket]
-
-  /** Get an input by the port name.
-    *
-    * @param port name of port
-    * @return socket for named port
-    */
-  def input(port: String): Socket
-
-  /** Get an output by the port name.
-    *
-    * @param port name of port
-    * @return socket for named port
-    */
-  def output(port: String): Socket
-
-  /** Get an optional input by the port name.
-    *
-    * @param port name of the port
-    * @return optional socket for the named port
-    */
-  def getInput(port: String): Option[Socket]
-
-  /** Get an optional input by the port name.
-    *
-    * @param port name of the port
-    * @return optional socket for the named port
-    */
-  def getOutput(port: String): Option[Socket]
-
-  /** Get the standard input socket.
-    *
-    * The standard input socket is on port "input".
-    *
-    * @return standard input socket
-    */
-  def standardInput: Socket = input(Shape.standardInputPort)
-
-  /** Get the standard output socket.
-    *
-    * The standard output socket is on port "output".
-    *
-    * @return standard output socket
-    */
-  def standardOutput: Socket = output(Shape.standardOutputPort)
-}
-
-/** Trait for writable interface to a [[Shape]].
-  *
-  * Use this trait when serializing a [[Shape]] object,
-  * such as when writing a [[Node]] to a Bundle.ML file.
-  */
-trait WritableShape extends ReadableShape {
-  /** Add standard input/output sockets to the shape.
-    *
-    * This is the same as calling [[WritableShape#withStandardInput]] and
-    * [[WritableShape#withStandardOutput]].
-    *
-    * @param nameInput name of the input socket
-    * @param nameOutput name of the output socket
-    * @return copy of the shape with standard input/output sockets added
-    */
-  def withStandardIO(nameInput: String, nameOutput: String): this.type = {
-    withStandardInput(nameInput).withStandardOutput(nameOutput)
-  }
-
-  /** Add standard input socket to the shape.
-    *
-    * @param name name of standard input socket
-    * @return copy of the shape with standard input socket added
-    */
-  def withStandardInput(name: String): this.type = withInput(name, Shape.standardInputPort)
-
-  /** Add standard output socket to the shape.
-    *
-    * @param name name of standard output socket
-    * @return copy of the shape with standard output socket added
-    */
-  def withStandardOutput(name: String): this.type = withOutput(name, Shape.standardOutputPort)
-
-  /** Add an input socket to the shape.
-    *
-    * @param name name of input socket
-    * @param port port of input socket
-    * @return copy of the shape with input socket added
-    */
-  def withInput(name: String, port: String): this.type
-
-  /** Add an output socket to the shape.
-    *
-    * @param name name of output socket
-    * @param port port of output socket
-    * @return copy of the shape with output socket added
-    */
-  def withOutput(name: String, port: String): this.type
-}
-
 /** Class for holding the input fields and output fields of a [[Node]].
   * The shape also holds information for connecting the input/output fields
   * to the underlying ML model.
@@ -149,35 +30,144 @@ trait WritableShape extends ReadableShape {
   * scala> Shape().withStandardIO("label", "label_name") // shorthand for the above code
   * }}}
   *
-  * @param _shape protobuf shape object containing the shape information
+  * @param shape protobuf shape object containing the shape information
   */
-case class Shape(private var _shape: ml.bundle.Shape.Shape = ml.bundle.Shape.Shape(inputs = Seq(), outputs = Seq())) extends WritableShape {
-  private var inputLookup: Map[String, Socket] = _shape.inputs.map(s => (s.port, s)).toMap
-  private var outputLookup: Map[String, Socket] = _shape.outputs.map(s => (s.port, s)).toMap
+case class Shape(private val shape: ml.bundle.Shape.Shape = ml.bundle.Shape.Shape(inputs = Seq(), outputs = Seq())) {
+  private var inputLookup: Map[String, Socket] = shape.inputs.map(s => (s.port, s)).toMap
+  private var outputLookup: Map[String, Socket] = shape.outputs.map(s => (s.port, s)).toMap
 
-  override def bundleShape: ml.bundle.Shape.Shape = _shape
+  /** Get the standard input socket.
+    *
+    * The standard input socket is on port "input".
+    *
+    * @return standard input socket
+    */
+  def standardInput: Socket = input(Shape.standardInputPort)
 
-  override def inputs: Seq[Socket] = _shape.inputs
-  override def outputs: Seq[Socket] = _shape.outputs
+  /** Get the standard output socket.
+    *
+    * The standard output socket is on port "output".
+    *
+    * @return standard output socket
+    */
+  def standardOutput: Socket = output(Shape.standardOutputPort)
 
-  override def input(port: String): Socket = inputLookup(port)
-  override def output(port: String): Socket = outputLookup(port)
+  /** Add standard input/output sockets to the shape.
+    *
+    * This is the same as calling [[Shape#withStandardInput]] and
+    * [[Shape#withStandardOutput]].
+    *
+    * @param nameInput name of the input socket
+    * @param nameOutput name of the output socket
+    * @return copy of the shape with standard input/output sockets added
+    */
+  def withStandardIO(nameInput: String, nameOutput: String): Shape = {
+    withStandardInput(nameInput).withStandardOutput(nameOutput)
+  }
 
-  override def getInput(port: String): Option[Socket] = inputLookup.get(port)
-  override def getOutput(port: String): Option[Socket] = outputLookup.get(port)
+  /** Add standard input socket to the shape.
+    *
+    * @param name name of standard input socket
+    * @return copy of the shape with standard input socket added
+    */
+  def withStandardInput(name: String): Shape = withInput(name, Shape.standardInputPort)
 
-  override def withInput(name: String, port: String): Shape.this.type = {
+  /** Add standard output socket to the shape.
+    *
+    * @param name name of standard output socket
+    * @return copy of the shape with standard output socket added
+    */
+  def withStandardOutput(name: String): Shape = withOutput(name, Shape.standardOutputPort)
+
+  /** Add an optional input socket to the shape.
+    *
+    * @param name optional name of input socket
+    * @param port port of input socket
+    * @return copy of the shape with input socket optionally added
+    */
+  def withInput(name: Option[String], port: String): Shape = {
+    name.map(n => withInput(n, port)).getOrElse(this)
+  }
+
+  /** Add an optional output socket to the shape.
+    *
+    * @param name name of optional output socket
+    * @param port port of output socket
+    * @return copy of the shape with output socket optionally added
+    */
+  def withOutput(name: Option[String], port: String): Shape = {
+    name.map(n => withOutput(n, port)).getOrElse(this)
+  }
+
+  /** Get the bundle protobuf shape.
+    *
+    * @return bundle protobuf shape
+    */
+  def bundleShape: ml.bundle.Shape.Shape = shape
+
+  /** Get all inputs.
+    *
+    * @return all inputs
+    */
+  def inputs: Seq[Socket] = shape.inputs
+
+  /** Get all outputs.
+    *
+    * @return all outputs
+    */
+  def outputs: Seq[Socket] = shape.outputs
+
+  /** Get an input by the port name. 
+    *
+    * @param port name of port 
+    * @return socket for named port 
+    */
+  def input(port: String): Socket = inputLookup(port)
+
+  /** Get an output by the port name. 
+    *
+    * @param port name of port 
+    * @return socket for named port 
+    */
+  def output(port: String): Socket = outputLookup(port)
+
+  /** Get an optional input by the port name. 
+    *
+    * @param port name of the port 
+    * @return optional socket for the named port 
+    */
+  def getInput(port: String): Option[Socket] = inputLookup.get(port)
+
+  /** Get an optional input by the port name. 
+    *
+    * @param port name of the port 
+    * @return optional socket for the named port 
+    */
+  def getOutput(port: String): Option[Socket] = outputLookup.get(port)
+
+  /** Add an input socket to the shape. 
+    *
+    * @param name name of input socket 
+    * @param port port of input socket 
+    * @return copy of the shape with input socket added 
+    */
+  def withInput(name: String, port: String): Shape = {
     if(inputLookup.contains(port)) { throw new Error("only one input allowed per port") } // TODO: better error
     val socket = Socket(name, port)
     inputLookup = inputLookup + (port -> socket)
-    _shape = _shape.copy(inputs = _shape.inputs :+ socket)
-    this
+    copy(shape = shape.copy(inputs = shape.inputs :+ socket))
   }
-  override def withOutput(name: String, port: String): Shape.this.type = {
+
+  /** Add an output socket to the shape. 
+    *
+    * @param name name of output socket 
+    * @param port port of output socket 
+    * @return copy of the shape with output socket added 
+    */
+  def withOutput(name: String, port: String): Shape = {
     if(outputLookup.contains(port)) { throw new Error("only one output allowed per port") } // TODO: better error
     val socket = Socket(name, port)
     outputLookup = outputLookup + (port -> socket)
-    _shape = _shape.copy(outputs = _shape.outputs :+ socket)
-    this
+    copy(shape = shape.copy(outputs = shape.outputs :+ socket))
   }
 }

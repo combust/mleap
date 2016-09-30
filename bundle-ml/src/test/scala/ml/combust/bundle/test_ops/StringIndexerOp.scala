@@ -2,7 +2,8 @@ package ml.combust.bundle.test_ops
 
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
-import ml.combust.bundle.dsl.{Bundle, _}
+import ml.combust.bundle.dsl._
+import ml.combust.bundle.dsl
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -17,11 +18,11 @@ object StringIndexerOp extends OpNode[StringIndexer, StringIndexerModel] {
   override val Model: OpModel[StringIndexerModel] = new OpModel[StringIndexerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.string_indexer
 
-    override def store(context: BundleContext, model: WritableModel, obj: StringIndexerModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: StringIndexerModel): Model = {
       model.withAttr(Attribute("labels", Value.stringList(obj.strings)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): StringIndexerModel = {
+    override def load(context: BundleContext, model: Model): StringIndexerModel = {
       StringIndexerModel(strings = model.value("labels").getStringList)
     }
   }
@@ -30,7 +31,7 @@ object StringIndexerOp extends OpNode[StringIndexer, StringIndexerModel] {
 
   override def model(node: StringIndexer): StringIndexerModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: StringIndexerModel): StringIndexer = {
+  override def load(context: BundleContext, node: dsl.Node, model: StringIndexerModel): StringIndexer = {
     StringIndexer(uid = node.name,
       input = node.shape.standardInput.name,
       output = node.shape.standardOutput.name,

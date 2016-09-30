@@ -12,11 +12,11 @@ object OneHotEncoderOp extends OpNode[OneHotEncoderModel, OneHotEncoderModel] {
   override val Model: OpModel[OneHotEncoderModel] = new OpModel[OneHotEncoderModel] {
     override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder
 
-    override def store(context: BundleContext, model: WritableModel, obj: OneHotEncoderModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: OneHotEncoderModel): Model = {
       model.withAttr(Attribute("size", Value.long(obj.size)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): OneHotEncoderModel = {
+    override def load(context: BundleContext, model: Model): OneHotEncoderModel = {
       new OneHotEncoderModel(uid = "", size = model.value("size").getLong.toInt)
     }
   }
@@ -25,7 +25,7 @@ object OneHotEncoderOp extends OpNode[OneHotEncoderModel, OneHotEncoderModel] {
 
   override def model(node: OneHotEncoderModel): OneHotEncoderModel = node
 
-  override def load(context: BundleContext, node: ReadableNode, model: OneHotEncoderModel): OneHotEncoderModel = {
+  override def load(context: BundleContext, node: Node, model: OneHotEncoderModel): OneHotEncoderModel = {
     new OneHotEncoderModel(uid = node.name, size = model.size)
   }
 

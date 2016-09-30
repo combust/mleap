@@ -14,12 +14,12 @@ object MinMaxScalerOp extends OpNode[MinMaxScaler, MinMaxScalerModel]{
   override val Model: OpModel[MinMaxScalerModel] = new OpModel[MinMaxScalerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.min_max_scaler
 
-    override def store(context: BundleContext, model: WritableModel, obj: MinMaxScalerModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: MinMaxScalerModel): Model = {
       model.withAttr(Attribute("min", Value.doubleVector(obj.originalMin.toArray))).
         withAttr(Attribute("max", Value.doubleVector(obj.originalMax.toArray)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): MinMaxScalerModel = {
+    override def load(context: BundleContext, model: Model): MinMaxScalerModel = {
       MinMaxScalerModel(originalMin = Vectors.dense(model.value("min").getDoubleVector.toArray),
         originalMax = Vectors.dense(model.value("max").getDoubleVector.toArray))
     }
@@ -29,7 +29,7 @@ object MinMaxScalerOp extends OpNode[MinMaxScaler, MinMaxScalerModel]{
 
   override def model(node: MinMaxScaler): MinMaxScalerModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: MinMaxScalerModel): MinMaxScaler = {
+  override def load(context: BundleContext, node: Node, model: MinMaxScalerModel): MinMaxScaler = {
     MinMaxScaler(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)

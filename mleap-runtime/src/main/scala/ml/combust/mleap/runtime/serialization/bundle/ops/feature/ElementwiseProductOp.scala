@@ -14,21 +14,20 @@ object ElementwiseProductOp extends OpNode[ElementwiseProduct, ElementwiseProduc
   override val Model: OpModel[ElementwiseProductModel] = new OpModel[ElementwiseProductModel] {
     override def opName: String = Bundle.BuiltinOps.feature.elementwise_product
 
-    override def store(context: BundleContext, model: WritableModel, obj: ElementwiseProductModel): WritableModel = {
+    override def store(context: BundleContext, model: Model, obj: ElementwiseProductModel): Model = {
       model.withAttr(Attribute("scalingVec", Value.doubleVector(obj.scalingVec.toArray)))
     }
 
-    override def load(context: BundleContext, model: ReadableModel): ElementwiseProductModel = {
+    override def load(context: BundleContext, model: Model): ElementwiseProductModel = {
       ElementwiseProductModel(scalingVec = Vectors.dense(model.value("scalingVec").getDoubleVector.toArray))
     }
-
   }
 
   override def name(node: ElementwiseProduct): String = node.uid
 
   override def model(node: ElementwiseProduct): ElementwiseProductModel = node.model
 
-  override def load(context: BundleContext, node: ReadableNode, model: ElementwiseProductModel): ElementwiseProduct = {
+  override def load(context: BundleContext, node: Node, model: ElementwiseProductModel): ElementwiseProduct = {
     ElementwiseProduct(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model

@@ -12,3 +12,10 @@ object Vector {
   def fromBreeze(breezeVector: breeze.linalg.Vector[Double]): linalg.Vector = linalg.Vectors.fromBreeze(breezeVector)
 
 }
+
+object VectorWithNorm {
+  def apply(vector: linalg.Vector): VectorWithNorm = {
+    VectorWithNorm(vector, linalg.Vectors.norm(vector, 2.0))
+  }
+}
+case class VectorWithNorm(vector: linalg.Vector, norm: Double)

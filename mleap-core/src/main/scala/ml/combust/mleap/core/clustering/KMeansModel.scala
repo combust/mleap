@@ -8,10 +8,11 @@ import org.apache.spark.ml.linalg.Vector
   * Created by hollinwilkins on 9/30/16.
   */
 object KMeansModel {
-  def apply(clusterCenters: Array[Vector]): KMeansModel = {
-    KMeansModel(clusterCenters.map(VectorWithNorm.apply))
+  def apply(clusterCenters: Seq[Vector]): KMeansModel = {
+    KMeansModel(clusterCenters.map(VectorWithNorm.apply).toArray)
   }
 }
+
 case class KMeansModel(clusterCenters: Array[VectorWithNorm]) {
   def clusterCount: Int = clusterCenters.length
 

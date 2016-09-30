@@ -35,6 +35,9 @@ object MleapRegistry {
     register(ops.regression.RandomForestRegressionOp).
     register(ops.regression.GBTRegressionOp).
 
+    // clustering
+    register(ops.clustering.KMeansOp).
+
     // other
     register(ops.PipelineOp)
 }

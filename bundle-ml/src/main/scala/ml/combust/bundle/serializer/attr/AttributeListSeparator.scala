@@ -4,9 +4,9 @@ import ml.combust.bundle.serializer.HasBundleRegistry
 import ml.combust.bundle.dsl.{Attribute, AttributeList, ReadableAttributeList}
 
 /** Class to separate an [[ml.combust.bundle.dsl.AttributeList]] into two
-  * [[AttributeList]] objects, one with small attributes and one with large.
+  * [[ml.combust.bundle.dsl.AttributeList]] objects, one with small attributes and one with large.
   *
-  * An [[Attribute]] is large or small according to the [[ml.combust.bundle.dsl.Value#isLarge]] and
+  * An [[ml.combust.bundle.dsl.Attribute]] is large or small according to the [[ml.combust.bundle.dsl.Value#isLarge]] and
   * [[ml.combust.bundle.dsl.Value#isSmall]] methods, respectively. This class is only used when
   * the [[ml.combust.bundle.serializer.SerializationFormat.Mixed]] mode of serialization is
   * being used, and large attributes are intended to go into a protobuf file, while

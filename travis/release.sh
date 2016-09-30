@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
 if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+  sed -i 's/https:\/\/github.com\//git@github.com:/' .git/config
+
   source travis/extract.sh
   git config user.email "combust@combust.ml"
   git config user.name "Combust, Inc."
   git checkout $TRAVIS_BRANCH
+
   if [ $# -eq 0 ]; then
     sbt "release with-defaults"
   else

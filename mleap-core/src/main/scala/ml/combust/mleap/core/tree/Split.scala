@@ -1,11 +1,13 @@
 package ml.combust.mleap.core.tree
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.Vector
 
 /** Trait for a split logic.
   *
   * Normally used for splits in a decision tree.
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/tree/Split.scala")
 sealed trait Split extends Serializable {
   /** Index of the feature to split on.
     *
@@ -38,6 +40,7 @@ sealed trait Split extends Serializable {
   * @param categories array of categories
   * @param isLeft if this split goes left
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/tree/Split.scala")
 final case class CategoricalSplit(featureIndex: Int,
                                   numCategories: Int,
                                   categories: Array[Double],
@@ -64,6 +67,7 @@ final case class CategoricalSplit(featureIndex: Int,
   * @param featureIndex index of the features
   * @param threshold threshold for going left or right
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/tree/Split.scala")
 final case class ContinuousSplit(featureIndex: Int,
                                  threshold: Double) extends Split {
   override def shouldGoLeft(features: Vector): Boolean = features(featureIndex) <= threshold

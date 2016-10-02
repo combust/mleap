@@ -57,6 +57,10 @@ object Bundle {
       val one_vs_rest = "one_vs_rest"
     }
 
+    object clustering {
+      val k_means = "k_means"
+    }
+
     val pipeline = "pipeline"
   }
 

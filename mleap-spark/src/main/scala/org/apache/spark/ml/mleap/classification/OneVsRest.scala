@@ -20,6 +20,8 @@ package org.apache.spark.ml.mleap.classification
 import java.util.{List => JList}
 import java.util.UUID
 
+import ml.combust.mleap.core.annotation.SparkCode
+
 import scala.collection.JavaConverters._
 import scala.language.existentials
 import org.apache.hadoop.fs.Path
@@ -40,6 +42,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.storage.StorageLevel
 
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/OneVsRest.scala")
 private[ml] trait ClassifierTypeTrait {
   // scalastyle:off structural.type
   type ClassifierType = Classifier[F, E, M] forSome {
@@ -53,6 +56,7 @@ private[ml] trait ClassifierTypeTrait {
 /**
   * Params for [[OneVsRest]].
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/OneVsRest.scala")
 private[ml] trait OneVsRestParams extends PredictorParams with ClassifierTypeTrait with HasProbabilityCol {
   /**
     * param for the base binary classifier that we reduce multiclass classification into.
@@ -66,6 +70,7 @@ private[ml] trait OneVsRestParams extends PredictorParams with ClassifierTypeTra
   def getClassifier: ClassifierType = $(classifier)
 }
 
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/OneVsRest.scala")
 private[ml] object OneVsRestParams extends ClassifierTypeTrait {
 
   def validateParams(instance: OneVsRestParams): Unit = {
@@ -127,6 +132,7 @@ private[ml] object OneVsRestParams extends ClassifierTypeTrait {
   *               The i-th model is produced by testing the i-th class (taking label 1) vs the rest
   *               (taking label 0).
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/OneVsRest.scala")
 @Since("1.4.0")
 final class OneVsRestModel private[ml] (
                                          @Since("1.4.0") override val uid: String,
@@ -231,6 +237,7 @@ final class OneVsRestModel private[ml] (
   override def write: MLWriter = new OneVsRestModel.OneVsRestModelWriter(this)
 }
 
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/OneVsRest.scala")
 @Since("2.0.0")
 object OneVsRestModel extends MLReadable[OneVsRestModel] {
 
@@ -285,6 +292,7 @@ object OneVsRestModel extends MLReadable[OneVsRestModel] {
   * Each example is scored against all k models and the model with highest score
   * is picked to label the example.
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/OneVsRest.scala")
 @Since("1.4.0")
 final class OneVsRest @Since("1.4.0") (
                                         @Since("1.4.0") override val uid: String)
@@ -389,6 +397,7 @@ final class OneVsRest @Since("1.4.0") (
   override def write: MLWriter = new OneVsRest.OneVsRestWriter(this)
 }
 
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/OneVsRest.scala")
 @Since("2.0.0")
 object OneVsRest extends MLReadable[OneVsRest] {
 

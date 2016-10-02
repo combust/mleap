@@ -1,5 +1,6 @@
 package org.apache.spark.ml.mleap.feature
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.ml.attribute._
 import org.apache.spark.ml.mleap.param.HasDropLast
@@ -30,6 +31,7 @@ import org.apache.spark.sql.types.{DoubleType, NumericType, StructType}
 
 trait OneHotEncoderBase extends HasInputCol with HasOutputCol with HasDropLast
 
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/OneHotEncoder.scala")
 class OneHotEncoderModel(override val uid: String, val size: Int) extends Model[OneHotEncoderModel]
   with OneHotEncoderBase {
   def this(size: Int) = this(Identifiable.randomUID("oneHotEncoderModel"), size)
@@ -129,6 +131,7 @@ class OneHotEncoderModel(override val uid: String, val size: Int) extends Model[
   }
 }
 
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/OneHotEncoder.scala")
 class OneHotEncoder(override val uid: String) extends Estimator[OneHotEncoderModel]
   with OneHotEncoderBase {
 

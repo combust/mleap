@@ -1,14 +1,17 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.mleap.{Vector => MleapVectors}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
+
 import scala.math.{max, min}
 
 /** Class for MaxAbs Scaler model.
   *
   * @param maxAbs max absolute value
   */
-case class MaxAbsScalerModel(maxAbs: Vector)  extends Serializable{
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/MaxAbsScaler.scala")
+case class MaxAbsScalerModel(maxAbs: Vector)  extends Serializable {
   def apply(vector: Vector): Vector = {
     val maxAbsUnzero = Vectors.dense(maxAbs.toArray.map(x => if (x == 0) 1 else x))
 

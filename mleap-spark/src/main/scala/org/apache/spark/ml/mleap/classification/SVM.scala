@@ -1,5 +1,6 @@
 package org.apache.spark.ml.mleap.classification
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.classification.{ProbabilisticClassificationModel, ProbabilisticClassifier}
 import org.apache.spark.ml.linalg
 import org.apache.spark.ml.param._
@@ -117,6 +118,7 @@ class SVMModel(override val uid: String,
   }
 }
 
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/classification/SVM.scala")
 class SVMWithSGD(private var stepSize: Double,
                  private var numIterations: Int,
                  private var regParam: Double,

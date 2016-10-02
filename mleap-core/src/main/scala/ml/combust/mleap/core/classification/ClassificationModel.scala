@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.classification
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.Vector
 
 /** Trait for all classification models.
@@ -25,6 +26,7 @@ trait ClassificationModel {
   * This trait handles multinomial classification models as well as
   * binary classification models.
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/ProbabilisticClassifier.scala")
 trait MultinomialClassificationModel extends ClassificationModel {
   /** Number of classes this model predicts.
     *

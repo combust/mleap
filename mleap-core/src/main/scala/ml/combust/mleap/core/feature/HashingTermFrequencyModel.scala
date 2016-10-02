@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 import scala.collection.mutable
@@ -10,6 +11,7 @@ import scala.collection.mutable
   *
   * @param numFeatures size of feature vector to hash into
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/HashingTF.scala")
 case class HashingTermFrequencyModel(numFeatures: Int = 1 << 18) {
   def indexOf(term: Any): Int = nonNegativeMod(term.##, numFeatures)
 
@@ -26,6 +28,7 @@ case class HashingTermFrequencyModel(numFeatures: Int = 1 << 18) {
  * i.e. if 'x' is negative, than 'x' % 'mod' is negative too
  * so function return (x % mod) + mod in that case.
  */
+  @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/core/src/main/scala/org/apache/spark/util/Utils.scala")
   def nonNegativeMod(x: Int, mod: Int): Int = {
     val rawMod = x % mod
     rawMod + (if (rawMod < 0) mod else 0)

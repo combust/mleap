@@ -3,9 +3,6 @@ package org.apache.spark.ml.mleap.param
 import org.apache.spark.ml.param.{BooleanParam, Params}
 
 /**
-  * Created by hollinwilkins on 5/10/16.
-  */
-/**
   * Trait for shared param dropLast.
   */
 private[ml] trait HasDropLast extends Params {

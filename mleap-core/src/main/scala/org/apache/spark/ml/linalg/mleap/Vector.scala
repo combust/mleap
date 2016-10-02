@@ -1,10 +1,11 @@
 package org.apache.spark.ml.linalg.mleap
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg
 
-/**
-  * Created by mikhail on 9/18/16.
+/** Expose private methods from mllib local.
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib-local/src/main/scala/org/apache/spark/ml/linalg/Vector.scala")
 object Vector {
   implicit class VectorOps(vector: linalg.Vector) {
     def toBreeze: breeze.linalg.Vector[Double] = vector.asBreeze

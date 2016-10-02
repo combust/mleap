@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 import scala.math._
@@ -8,7 +9,8 @@ import scala.math._
   *
   * @param scalingVec vector for scaling feature vectors
   */
-case class ElementwiseProductModel(scalingVec: Vector) extends Serializable{
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/ElementwiseProduct.scala")
+case class ElementwiseProductModel(scalingVec: Vector) extends Serializable {
   def apply(vector: Vector): Vector = {
     vector match {
       case DenseVector(values) =>

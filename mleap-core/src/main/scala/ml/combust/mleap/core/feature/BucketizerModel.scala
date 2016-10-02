@@ -1,11 +1,14 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.annotation.SparkCode
+
 /** Class for a bucketizer model.
   *
   * Bucketizer will place incoming feature into a bucket.
   *
   * @param splits splits used to determine bucket
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/Bucketizer.scala")
 case class BucketizerModel(splits: Array[Double]) extends Serializable {
   def apply(feature: Double): Double = {
     binarySearchForBuckets(splits, feature)

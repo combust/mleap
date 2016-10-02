@@ -1,11 +1,13 @@
 package ml.combust.mleap.core.linalg
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.{SparseVector, Vector, Vectors}
 import org.apache.spark.ml.linalg.mleap.{BLAS, VectorWithNorm}
 
 /**
   * Created by hollinwilkins on 9/30/16.
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/util/MLUtils.scala")
 object LinalgUtils {
   lazy val EPSILON = {
     var eps = 1.0

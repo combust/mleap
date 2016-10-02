@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.clustering
 
+import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.linalg.LinalgUtils
 import org.apache.spark.ml.linalg.mleap.VectorWithNorm
 import org.apache.spark.ml.linalg.Vector
@@ -22,6 +23,7 @@ case class KMeansModel(clusterCenters: Array[VectorWithNorm]) {
     findClosest(VectorWithNorm(features))._1
   }
 
+  @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/clustering/KMeans.scala")
   private def findClosest(point: VectorWithNorm): (Int, Double) = {
     var bestDistance = Double.PositiveInfinity
     var bestIndex = 0

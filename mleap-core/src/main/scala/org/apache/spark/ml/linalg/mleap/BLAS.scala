@@ -1,9 +1,11 @@
 package org.apache.spark.ml.linalg.mleap
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg
 
 /** BLAS public interface to the private mllib-local BLAS.
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib-local/src/main/scala/org/apache/spark/ml/linalg/BLAS.scala")
 object BLAS {
   /** Calculate dot product of two vectors.
     *

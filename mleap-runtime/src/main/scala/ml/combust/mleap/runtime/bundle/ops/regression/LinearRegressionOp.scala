@@ -15,8 +15,8 @@ object LinearRegressionOp extends OpNode[LinearRegression, LinearRegressionModel
     override def opName: String = Bundle.BuiltinOps.regression.linear_regression
 
     override def store(context: BundleContext, model: Model, obj: LinearRegressionModel): Model = {
-      model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients.toArray))).
-        withAttr(Attribute("intercept", Value.double(obj.intercept)))
+      model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
+        withAttr("intercept", Value.double(obj.intercept))
     }
 
     override def load(context: BundleContext, model: Model): LinearRegressionModel = {

@@ -16,9 +16,9 @@ object KMeansOp extends OpNode[KMeansModel, KMeansModel] {
     override def opName: String = Bundle.BuiltinOps.clustering.k_means
 
     override def store(context: BundleContext, model: Model, obj: KMeansModel): Model = {
-      model.withAttr(Attribute("cluster_centers", Value.tensorList(
+      model.withAttr("cluster_centers", Value.tensorList(
         value = obj.clusterCenters.map(_.toArray.toSeq),
-        dims = Seq(-1))))
+        dims = Seq(-1)))
     }
 
     override def load(context: BundleContext, model: Model): KMeansModel = {

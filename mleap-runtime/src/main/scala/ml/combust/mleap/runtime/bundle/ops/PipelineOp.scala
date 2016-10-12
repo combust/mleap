@@ -14,7 +14,7 @@ object PipelineOp extends OpNode[Pipeline, Pipeline] {
 
     override def store(context: BundleContext, model: Model, obj: Pipeline): Model = {
       val nodes = GraphSerializer(context).write(obj.transformers)
-      model.withAttr(Attribute("nodes", Value.stringList(nodes)))
+      model.withAttr("nodes", Value.stringList(nodes))
     }
 
     override def load(context: BundleContext, model: Model): Pipeline = {

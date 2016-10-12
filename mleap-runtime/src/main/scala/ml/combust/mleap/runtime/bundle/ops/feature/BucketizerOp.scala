@@ -14,7 +14,7 @@ object BucketizerOp extends OpNode[Bucketizer, BucketizerModel]{
     override def opName: String = Bundle.BuiltinOps.feature.bucketizer
 
     override def store(context: BundleContext, model: Model, obj: BucketizerModel): Model = {
-      model.withAttr(Attribute("splits", Value.doubleList(obj.splits)))
+      model.withAttr("splits", Value.doubleList(obj.splits))
     }
 
     override def load(context: BundleContext, model: Model): BucketizerModel = {

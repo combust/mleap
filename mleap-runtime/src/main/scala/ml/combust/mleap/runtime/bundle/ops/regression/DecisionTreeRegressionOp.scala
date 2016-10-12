@@ -20,7 +20,7 @@ object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegression, DecisionT
 
     override def store(context: BundleContext, model: Model, obj: DecisionTreeRegressionModel): Model = {
       TreeSerializer[tree.Node](context.file("nodes"), withImpurities = false).write(obj.rootNode)
-      model.withAttr(Attribute("num_features", Value.long(obj.numFeatures)))
+      model.withAttr("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(context: BundleContext, model: Model): DecisionTreeRegressionModel = {

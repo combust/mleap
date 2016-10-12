@@ -13,7 +13,7 @@ object OneHotEncoderOp extends OpNode[OneHotEncoderModel, OneHotEncoderModel] {
     override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder
 
     override def store(context: BundleContext, model: Model, obj: OneHotEncoderModel): Model = {
-      model.withAttr(Attribute("size", Value.long(obj.size)))
+      model.withAttr("size", Value.long(obj.size))
     }
 
     override def load(context: BundleContext, model: Model): OneHotEncoderModel = {

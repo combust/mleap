@@ -20,8 +20,8 @@ object DecisionTreeClassifierOp extends OpNode[DecisionTreeClassifier, DecisionT
 
     override def store(context: BundleContext, model: Model, obj: DecisionTreeClassifierModel): Model = {
       TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).write(obj.rootNode)
-      model.withAttr(Attribute("num_features", Value.long(obj.numFeatures))).
-        withAttr(Attribute("num_classes", Value.long(obj.numClasses)))
+      model.withAttr("num_features", Value.long(obj.numFeatures)).
+        withAttr("num_classes", Value.long(obj.numClasses))
     }
 
     override def load(context: BundleContext, model: Model): DecisionTreeClassifierModel = {

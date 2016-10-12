@@ -14,7 +14,7 @@ object ReverseStringIndexerOp extends OpNode[ReverseStringIndexer, ReverseString
     override def opName: String = Bundle.BuiltinOps.feature.reverse_string_indexer
 
     override def store(context: BundleContext, model: Model, obj: ReverseStringIndexerModel): Model = {
-      model.withAttr(Attribute("labels", Value.stringList(obj.labels)))
+      model.withAttr("labels", Value.stringList(obj.labels))
     }
 
     override def load(context: BundleContext, model: Model): ReverseStringIndexerModel = {

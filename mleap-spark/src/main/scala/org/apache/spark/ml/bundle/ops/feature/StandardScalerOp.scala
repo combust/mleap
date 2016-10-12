@@ -14,11 +14,11 @@ object StandardScalerOp extends OpNode[StandardScalerModel, StandardScalerModel]
     override def opName: String = Bundle.BuiltinOps.feature.standard_scaler
 
     override def store(context: BundleContext, model: Model, obj: StandardScalerModel): Model = {
-      val mean = if(obj.getWithMean) Some(obj.mean) else None
-      val std = if(obj.getWithStd) Some(obj.std) else None
+      val mean = if(obj.getWithMean) Some(obj.mean.toArray.toSeq) else None
+      val std = if(obj.getWithStd) Some(obj.std.toArray.toSeq) else None
 
-      model.withAttr(mean.map(m => Attribute("mean", Value.doubleVector(m.toArray)))).
-        withAttr(std.map(s => Attribute("std", Value.doubleVector(s.toArray))))
+      model.withAttr("mean", mean.map(Value.doubleVector)).
+        withAttr("std", std.map(Value.doubleVector))
     }
 
     override def load(context: BundleContext, model: Model): StandardScalerModel = {

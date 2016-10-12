@@ -15,10 +15,10 @@ object SupportVectorMachineOp extends OpNode[SupportVectorMachine, SupportVector
     override def opName: String = Bundle.BuiltinOps.classification.support_vector_machine
 
     override def store(context: BundleContext, model: Model, obj: SupportVectorMachineModel): Model = {
-      model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients.toArray))).
-        withAttr(Attribute("intercept", Value.double(obj.intercept))).
-        withAttr(Attribute("num_classes", Value.long(2))).
-        withAttr(obj.threshold.map(t => Attribute("threshold", Value.double(t))))
+      model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
+        withAttr("intercept", Value.double(obj.intercept)).
+        withAttr("num_classes", Value.long(2)).
+        withAttr("threshold", obj.threshold.map(Value.double))
     }
 
     override def load(context: BundleContext, model: Model): SupportVectorMachineModel = {

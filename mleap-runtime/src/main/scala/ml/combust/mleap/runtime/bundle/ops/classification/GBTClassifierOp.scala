@@ -23,13 +23,11 @@ object GBTClassifierOp extends OpNode[GBTClassifier, GBTClassifierModel] {
           i = i + 1
           name
       }
-      val m = model.withAttr(Attribute("num_features", Value.long(obj.numFeatures))).
-        withAttr(Attribute("num_classes", Value.long(2))).
-        withAttr(Attribute("tree_weights", Value.doubleList(obj.treeWeights))).
-        withAttr(Attribute("trees", Value.stringList(trees)))
-      obj.threshold.
-        map(t => m.withAttr(Attribute("threshold", Value.double(t)))).
-        getOrElse(m)
+      model.withAttr(Attribute("num_features", Value.long(obj.numFeatures))).
+        withAttr("num_classes", Value.long(2)).
+        withAttr("tree_weights", Value.doubleList(obj.treeWeights)).
+        withAttr("trees", Value.stringList(trees)).
+        withAttr("threshold", obj.threshold.map(Value.double))
     }
 
     override def load(context: BundleContext, model: Model): GBTClassifierModel = {

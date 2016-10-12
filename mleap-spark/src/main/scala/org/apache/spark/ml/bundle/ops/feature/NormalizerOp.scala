@@ -13,7 +13,7 @@ object NormalizerOp extends OpNode[Normalizer, Normalizer] {
     override def opName: String = Bundle.BuiltinOps.feature.normalizer
 
     override def store(context: BundleContext, model: Model, obj: Normalizer): Model = {
-      model.withAttr(Attribute("p_norm", Value.double(obj.getP)))
+      model.withAttr("p_norm", Value.double(obj.getP))
     }
 
     override def load(context: BundleContext, model: Model): Normalizer = {

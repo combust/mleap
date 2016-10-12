@@ -15,8 +15,8 @@ object MinMaxScalerOp extends OpNode[MinMaxScaler, MinMaxScalerModel]{
     override def opName: String = Bundle.BuiltinOps.feature.min_max_scaler
 
     override def store(context: BundleContext, model: Model, obj: MinMaxScalerModel): Model = {
-      model.withAttr(Attribute("min", Value.doubleVector(obj.originalMin.toArray))).
-        withAttr(Attribute("max", Value.doubleVector(obj.originalMax.toArray)))
+      model.withAttr("min", Value.doubleVector(obj.originalMin.toArray)).
+        withAttr("max", Value.doubleVector(obj.originalMax.toArray))
     }
 
     override def load(context: BundleContext, model: Model): MinMaxScalerModel = {

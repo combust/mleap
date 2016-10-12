@@ -13,8 +13,8 @@ object HashingTermFrequencyOp extends OpNode[HashingTF, HashingTF] {
     override def opName: String = Bundle.BuiltinOps.feature.hashing_term_frequency
 
     override def store(context: BundleContext, model: Model, obj: HashingTF): Model = {
-      model.withAttr(Attribute("num_features", Value.long(obj.getNumFeatures))).
-        withAttr(Attribute("binary", Value.boolean(obj.getBinary)))
+      model.withAttr("num_features", Value.long(obj.getNumFeatures)).
+        withAttr("binary", Value.boolean(obj.getBinary))
     }
 
     override def load(context: BundleContext, model: Model): HashingTF = {

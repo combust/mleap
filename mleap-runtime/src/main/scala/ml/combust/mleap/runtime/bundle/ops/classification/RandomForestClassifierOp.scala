@@ -1,7 +1,7 @@
-package ml.combust.mleap.runtime.serialization.bundle.ops.classification
+package ml.combust.mleap.runtime.bundle.ops.classification
 
 import ml.combust.mleap.core.classification.{DecisionTreeClassifierModel, RandomForestClassifierModel}
-import ml.combust.mleap.runtime.serialization.bundle.tree.MleapNodeWrapper
+import ml.combust.mleap.runtime.bundle.tree.MleapNodeWrapper
 import ml.combust.mleap.runtime.transformer.classification.RandomForestClassifier
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}

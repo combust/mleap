@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.serialization.bundle.ops
+package ml.combust.mleap.runtime.bundle.ops
 
 import ml.combust.mleap.runtime.transformer.{Pipeline, Transformer}
 import ml.combust.bundle.op.{OpModel, OpNode}

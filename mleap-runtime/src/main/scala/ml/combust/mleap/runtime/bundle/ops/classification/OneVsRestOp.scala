@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.serialization.bundle.ops.classification
+package ml.combust.mleap.runtime.bundle.ops.classification
 
 import ml.combust.mleap.core.classification.{BinaryClassificationModel, OneVsRestModel}
 import ml.combust.mleap.runtime.transformer.classification.OneVsRest

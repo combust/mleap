@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.serialization.bundle.ops.regression
+package ml.combust.mleap.runtime.bundle.ops.regression
 
 import ml.combust.mleap.core.regression.LinearRegressionModel
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression

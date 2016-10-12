@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.serialization.bundle.ops.feature
+package ml.combust.mleap.runtime.bundle.ops.feature
 
 import ml.combust.mleap.core.feature.StandardScalerModel
 import ml.combust.mleap.runtime.transformer.feature.StandardScaler

@@ -32,4 +32,6 @@ object PipelineOp extends OpNode[PipelineModel, PipelineModel] {
   }
 
   override def shape(node: PipelineModel): Shape = Shape()
+
+  override def children(node: PipelineModel): Option[Array[Any]] = Some(node.stages.toArray)
 }

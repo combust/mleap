@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.serialization.bundle
+package ml.combust.mleap.runtime.bundle
 
 import java.io.File
 

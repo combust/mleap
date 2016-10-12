@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.serialization.bundle.tree
+package ml.combust.mleap.runtime.bundle.tree
 
 import ml.combust.mleap.core.tree
 import ml.bundle.tree.Split.Split

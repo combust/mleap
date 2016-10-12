@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.serialization.bundle.ops.classification
+package ml.combust.mleap.runtime.bundle.ops.classification
 
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}

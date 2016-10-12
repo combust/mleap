@@ -28,6 +28,7 @@ object MleapRegistry {
     register(ops.feature.BucketizerOp).
     register(ops.feature.ElementwiseProductOp).
     register(ops.feature.NormalizerOp).
+    register(ops.feature.PcaOp).
 
     // regression
     register(ops.regression.LinearRegressionOp).

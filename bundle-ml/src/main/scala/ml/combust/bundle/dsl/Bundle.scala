@@ -46,6 +46,7 @@ object Bundle {
       val bucketizer = "bucketizer"
       val elementwise_product = "elementwise_product"
       val normalizer = "normalizer"
+      val pca = "pca"
     }
 
     object classification {

@@ -13,7 +13,7 @@ object StringIndexerOp extends OpNode[StringIndexerModel, StringIndexerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.string_indexer
 
     override def store(context: BundleContext, model: Model, obj: StringIndexerModel): Model = {
-      model.withAttr(Attribute("labels", Value.stringList(obj.labels)))
+      model.withAttr("labels", Value.stringList(obj.labels))
     }
 
     override def load(context: BundleContext, model: Model): StringIndexerModel = {

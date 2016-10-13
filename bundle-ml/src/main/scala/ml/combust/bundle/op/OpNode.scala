@@ -35,6 +35,13 @@ trait OpNode[N, M] {
     */
   def shape(node: N): Shape
 
+  /** Get the children of the node.
+    *
+    * @param node node object
+    * @return children of the node
+    */
+  def children(node: N): Option[Array[Any]] = None
+
   /** Load a node from Bundle.ML data.
     *
     * @param context bundle context for decoding custom values and getting non-standard params

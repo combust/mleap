@@ -14,7 +14,7 @@ object MaxAbsScalerOp extends OpNode[MaxAbsScalerModel, MaxAbsScalerModel]{
     override def opName: String = Bundle.BuiltinOps.feature.max_abs_scaler
 
     override def store(context: BundleContext, model: Model, obj: MaxAbsScalerModel): Model = {
-      model.withAttr(Attribute("maxAbs", Value.doubleVector(obj.maxAbs.toArray)))
+      model.withAttr("maxAbs", Value.doubleVector(obj.maxAbs.toArray))
   }
 
     override def load(context: BundleContext, model: Model): MaxAbsScalerModel = {

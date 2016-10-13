@@ -65,6 +65,22 @@ trait HasAttributeList[T] {
     case (None, None) => replaceAttrList(None)
   }
 
+  /** Add an attribute to the list.
+    *
+    * @param name name of the attribute
+    * @param value value of the attribute
+    * @return a copy of T with the attribute added
+    */
+  def withAttr(name: String, value: Value): T = withAttr(Attribute(name, value))
+
+  /** Add an optional attribute to the list.
+    *
+    * @param name name of the attribute
+    * @param value optional value
+    * @return a copy of T with the attribute optionally added
+    */
+  def withAttr(name: String, value: Option[Value]): T = withAttr(value.map(Attribute(name, _)))
+
   /** Add a list of attributes to [[attributes]].
     *
     * Adds all attributes in the list argument to [[attributes]].

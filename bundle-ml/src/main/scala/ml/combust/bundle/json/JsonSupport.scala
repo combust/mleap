@@ -1,33 +1,40 @@
 package ml.combust.bundle.json
 
-import com.google.protobuf.ByteString
-import ml.bundle.Attribute.Attribute
-import ml.bundle.AttributeList.AttributeList
 import ml.bundle.BasicType.BasicType
-import ml.bundle.BundleDef.BundleDef
-import ml.bundle.BundleDef.BundleDef.Format
+import ml.combust.bundle.dsl._
+import ml.combust.bundle.serializer.{HasBundleRegistry, SerializationFormat}
 import ml.bundle.DataType.DataType
 import ml.bundle.DataType.DataType.ListType
-import ml.bundle.ModelDef.ModelDef
-import ml.bundle.NodeDef.NodeDef
-import ml.bundle.Shape.Shape
-import ml.bundle.Socket.Socket
-import ml.bundle.Tensor.Tensor
 import ml.bundle.TensorType.TensorType
-import ml.bundle.Value.Value.ListValue
-import ml.bundle.Value.Value
+import ml.bundle.Socket.Socket
 import spray.json.DefaultJsonProtocol._
-import spray.json.{JsObject, _}
+import spray.json._
 
 /** Low priority implicit spray.json.JsonFormat formats for protobuf objects in Bundle.ML.
   *
   * Includes many spray.json.JsonFormat format implicits as well as several
-  * spray.json.RootJsonFormat format implicits for top-level JSON objects
-  * such as [[ml.bundle.ModelDef.ModelDef]] and [[ml.bundle.BundleDef.BundleDef]].
+  * spray.json.RootJsonFormat format implicits for top-level JSON objects.
   *
   * There are no members that need to be overriden if using this trait as a mixin.
- */
-trait JsonLowPrioritySupport {
+  */
+trait JsonSupportLowPriority {
+  implicit val bundleSocketFormat: JsonFormat[Socket] = jsonFormat2(Socket.apply)
+
+  implicit val bundleShapeFormat: JsonFormat[Shape] = new JsonFormat[Shape] {
+    override def write(obj: Shape): JsValue = {
+      JsObject("inputs" -> obj.inputs.toJson,
+        "outputs" -> obj.outputs.toJson)
+    }
+
+    override def read(json: JsValue): Shape = json match {
+      case json: JsObject =>
+        val inputs = json.fields("inputs").convertTo[Seq[Socket]]
+        val outputs = json.fields("outputs").convertTo[Seq[Socket]]
+        Shape(inputs, outputs)
+      case _ => throw new Error("Invalid shape") // TODO: better error
+    }
+  }
+
   protected implicit val bundleBasicTypeFormat: JsonFormat[BasicType] = new JsonFormat[BasicType] {
     override def read(json: JsValue): BasicType = json match {
       case JsString("double") => BasicType.DOUBLE
@@ -74,172 +81,186 @@ trait JsonLowPrioritySupport {
       } else if(obj.underlying.isCustom) {
         JsObject(("type", JsString("custom")), ("name", JsString(obj.getCustom)))
       } else {
-        throw new Error("invalid data type")
+        throw new Error("invalid data type") // TODO: better error
       }
     }
   }
 
-  protected implicit val bundleSocketFormat: JsonFormat[Socket] = jsonFormat2(Socket.apply)
-  protected implicit val bundleShapeFormat: JsonFormat[Shape] = jsonFormat2(Shape.apply)
-
-  protected def bundleTensorFormat(tt: TensorType): JsonFormat[Tensor] = new JsonFormat[Tensor] {
-    override def read(json: JsValue): Tensor = {
+  protected def bundleTensorFormat(tt: TensorType): JsonFormat[Any] = new JsonFormat[Any] {
+    override def read(json: JsValue): Any = {
       tt.base match {
-        case BasicType.DOUBLE => Tensor(doubleVal = json.convertTo[Seq[Double]])
-        case BasicType.STRING => Tensor(stringVal = json.convertTo[Seq[String]])
-        case _ => throw new Error("unsupported tensor")
+        case BasicType.DOUBLE => json.convertTo[Seq[Double]]
+        case BasicType.STRING => json.convertTo[Seq[String]]
+        case _ => throw new Error("unsupported tensor") // TODO: better error
       }
     }
 
-    override def write(obj: Tensor): JsValue = {
+    override def write(obj: Any): JsValue = {
       tt.base match {
-        case BasicType.DOUBLE => obj.doubleVal.toJson
-        case BasicType.STRING => obj.stringVal.toJson
-        case _ => throw new Error("unsupported tensor")
+        case BasicType.DOUBLE => obj.asInstanceOf[Seq[Double]].toJson
+        case BasicType.STRING => obj.asInstanceOf[Seq[String]].toJson
+        case _ => throw new Error("unsupported tensor") // TODO: better error
       }
     }
   }
 
-  protected def bundleListValueFormat(lt: ListType): JsonFormat[ListValue] = new JsonFormat[ListValue] {
+  protected def bundleListValueFormat(lt: ListType)
+                                     (implicit hr: HasBundleRegistry): JsonFormat[Seq[Any]] = new JsonFormat[Seq[Any]] {
     val base = lt.base.get
-    override def write(obj: ListValue): JsValue = {
+    override def write(obj: Seq[Any]): JsValue = {
       if(base.underlying.isCustom) {
-        JsArray(obj.custom.map(b => new String(b.toByteArray).parseJson): _*)
+        val ct = hr.bundleRegistry.custom[Any](base.getCustom)
+        val values = obj.map(ct.format.write)
+        JsArray(values: _*)
       } else if(base.underlying.isTensor) {
         val format = bundleTensorFormat(base.getTensor)
-        JsArray(obj.tensor.map(format.write): _*)
+        JsArray(obj.map(format.write): _*)
       } else if(base.underlying.isBasic) {
         base.getBasic match {
-          case BasicType.DOUBLE => obj.f.toJson
-          case BasicType.STRING => obj.s.toJson
-          case BasicType.BOOLEAN => obj.b.toJson
-          case BasicType.LONG => obj.i.toJson
+          case BasicType.DOUBLE => obj.asInstanceOf[Seq[Double]].toJson
+          case BasicType.STRING => obj.asInstanceOf[Seq[String]].toJson
+          case BasicType.BOOLEAN => obj.asInstanceOf[Seq[Boolean]].toJson
+          case BasicType.LONG => obj.asInstanceOf[Seq[Long]].toJson
           case _ => throw new Error("invalid basic type") // TODO: better error
         }
       } else if(base.underlying.isList) {
         val format = bundleListValueFormat(base.getList)
-        JsArray(obj.list.map(format.write): _*)
+        JsArray(obj.asInstanceOf[Seq[Seq[Any]]].map(format.write): _*)
       } else { throw new Error("invalid list") } // TODO: better error
     }
 
-    override def read(json: JsValue): ListValue = {
+    override def read(json: JsValue): Seq[Any] = {
       if(base.underlying.isCustom) {
-        ListValue(custom = json.convertTo[Seq[JsValue]].map(_.compactPrint.getBytes).map(ByteString.copyFrom))
+        val format = hr.bundleRegistry.custom[Any](base.getCustom).format
+        json.convertTo[Seq[JsValue]].map(format.read)
       } else if(base.underlying.isTensor) {
-        implicit val format = bundleTensorFormat(base.getTensor)
-        ListValue(tensor = json.convertTo[Seq[Tensor]])
+        val format = bundleTensorFormat(base.getTensor)
+        json.convertTo[Seq[JsValue]].map(format.read)
       } else if(base.underlying.isBasic) {
         base.getBasic match {
-          case BasicType.DOUBLE => ListValue(f = json.convertTo[Seq[Double]])
-          case BasicType.STRING => ListValue(s = json.convertTo[Seq[String]])
-          case BasicType.BOOLEAN => ListValue(b = json.convertTo[Seq[Boolean]])
-          case BasicType.LONG => ListValue(i = json.convertTo[Seq[Long]])
+          case BasicType.DOUBLE => json.convertTo[Seq[Double]]
+          case BasicType.STRING => json.convertTo[Seq[String]]
+          case BasicType.BOOLEAN => json.convertTo[Seq[Boolean]]
+          case BasicType.LONG => json.convertTo[Seq[Long]]
           case _ => throw new Error("invalid basic type") // TODO: better error
         }
       } else if(base.underlying.isList) {
-        implicit val format = bundleListValueFormat(base.getList)
-        ListValue(list = json.convertTo[Seq[ListValue]])
+        val format = bundleListValueFormat(base.getList)
+        json.convertTo[Seq[JsValue]].map(format.read)
       } else { throw new Error("invalid list") } // TODO: better error
     }
   }
 
-  protected def bundleValueFormat(dt: DataType): JsonFormat[Value] = new JsonFormat[Value] {
-    override def write(obj: Value): JsValue = {
+  protected def bundleValueFormat(dt: DataType)
+                                 (implicit hr: HasBundleRegistry): JsonFormat[Any] = new JsonFormat[Any] {
+    override def write(obj: Any): JsValue = {
       if(dt.underlying.isCustom) {
-        new String(obj.getCustom.toByteArray).parseJson
+        val format = hr.bundleRegistry.custom[Any](dt.getCustom).format
+        format.write(obj)
       } else if(dt.underlying.isList) {
-        bundleListValueFormat(dt.getList).write(obj.getList)
+        bundleListValueFormat(dt.getList).write(obj.asInstanceOf[Seq[Any]])
       } else if(dt.underlying.isTensor) {
-        bundleTensorFormat(dt.getTensor).write(obj.getTensor)
+        bundleTensorFormat(dt.getTensor).write(obj)
       } else if(dt.underlying.isBasic) {
         dt.getBasic match {
-          case BasicType.DOUBLE => DoubleJsonFormat.write(obj.getF)
-          case BasicType.STRING => StringJsonFormat.write(obj.getS)
-          case BasicType.BOOLEAN => BooleanJsonFormat.write(obj.getB)
-          case BasicType.LONG => LongJsonFormat.write(obj.getI)
+          case BasicType.DOUBLE => DoubleJsonFormat.write(obj.asInstanceOf[Double])
+          case BasicType.STRING => StringJsonFormat.write(obj.asInstanceOf[String])
+          case BasicType.BOOLEAN => BooleanJsonFormat.write(obj.asInstanceOf[Boolean])
+          case BasicType.LONG => LongJsonFormat.write(obj.asInstanceOf[Long])
           case _ => throw new Error("invalid basic type") // TODO: better error
         }
-      } else { throw new Error("unsupported data type") }
+      } else { throw new Error("unsupported data type") } // TODO: better error
     }
 
-    override def read(json: JsValue): Value = {
+    override def read(json: JsValue): Any = {
       val v = if(dt.underlying.isCustom) {
-        Value.V.Custom(ByteString.copyFrom(json.compactPrint.getBytes))
+        val format = hr.bundleRegistry.custom[Any](dt.getCustom).format
+        format.read(json)
       } else if(dt.underlying.isList) {
-        Value.V.List(bundleListValueFormat(dt.getList).read(json))
+        bundleListValueFormat(dt.getList).read(json)
       } else if(dt.underlying.isTensor) {
-        Value.V.Tensor(bundleTensorFormat(dt.getTensor).read(json))
+        bundleTensorFormat(dt.getTensor).read(json)
       } else if(dt.underlying.isBasic) {
         dt.getBasic match {
-          case BasicType.DOUBLE => Value.V.F(DoubleJsonFormat.read(json))
-          case BasicType.STRING => Value.V.S(StringJsonFormat.read(json))
-          case BasicType.BOOLEAN => Value.V.B(BooleanJsonFormat.read(json))
-          case BasicType.LONG => Value.V.I(LongJsonFormat.read(json))
+          case BasicType.DOUBLE => DoubleJsonFormat.read(json)
+          case BasicType.STRING => StringJsonFormat.read(json)
+          case BasicType.BOOLEAN => BooleanJsonFormat.read(json)
+          case BasicType.LONG => LongJsonFormat.read(json)
           case _ => throw new Error("invalid basic type") // TODO: better error
         }
       } else { throw new Error("unsupported data type") } // TODO: better error
 
-      Value(v)
+      v
     }
   }
 
-  protected implicit val bundleAttributeFormat: JsonFormat[Attribute] = new JsonFormat[Attribute] {
-    override def read(json: JsValue): Attribute = {
-      val obj = json.asJsObject("invalid attribute") // TODO: better error
-      val name = StringJsonFormat.read(obj.fields("name"))
-      val dt = bundleDataTypeFormat.read(obj.fields("type"))
-      val value = bundleValueFormat(dt).read(obj.fields("value"))
+  protected implicit def bundleAttributeFormat(implicit hr: HasBundleRegistry): JsonFormat[Attribute] = new JsonFormat[Attribute] {
+    override def read(json: JsValue): Attribute = json match {
+      case json: JsObject =>
+        val name = StringJsonFormat.read(json.fields("name"))
+        val dt = bundleDataTypeFormat.read(json.fields("type"))
+        val value = bundleValueFormat(dt).read(json.fields("value"))
 
-      Attribute(name = name, `type` = Some(dt), value = Some(value))
+        Attribute(name = name, value = Value(dt, value))
+      case _ => throw new Error("invalid basic type") // TODO: better error
     }
 
     override def write(obj: Attribute): JsValue = {
-      implicit val format = bundleValueFormat(obj.`type`.get)
+      implicit val format = bundleValueFormat(obj.value.bundleDataType)
       JsObject(("name", JsString(obj.name)),
-        ("type", bundleDataTypeFormat.write(obj.`type`.get)),
-        ("value", format.write(obj.value.get)))
+        ("type", obj.value.bundleDataType.toJson),
+        ("value", format.write(obj.value.value)))
     }
   }
 
-  implicit val bundleFormatFormat: JsonFormat[Format] = new JsonFormat[Format] {
-    override def write(obj: Format): JsValue = obj match {
-      case Format.MIXED => JsString("mixed")
-      case Format.PROTOBUF => JsString("protobuf")
-      case Format.JSON => JsString("json")
-      case _ => throw new Error("invalid format") // TODO: better error
-    }
-
-    override def read(json: JsValue): Format = json match {
-      case JsString("mixed") => Format.MIXED
-      case JsString("json") => Format.JSON
-      case JsString("protobuf") => Format.PROTOBUF
-      case _ => throw new Error("invalid format") // TODO: better error
-    }
-  }
-
-  protected implicit val bundleEmbeddedAttributeListFormat: JsonFormat[AttributeList] = new JsonFormat[AttributeList] {
+  protected implicit def bundleEmbeddedAttributeListFormat(implicit hr: HasBundleRegistry): JsonFormat[AttributeList] = new JsonFormat[AttributeList] {
     override def write(obj: AttributeList): JsValue = obj.attributes.toJson
     override def read(json: JsValue): AttributeList = AttributeList(json.convertTo[Seq[Attribute]])
   }
 
-  implicit val bundleModelDefFormat: RootJsonFormat[ModelDef] = jsonFormat2(ModelDef.apply)
-  implicit val bundleNodeDefFormat: RootJsonFormat[NodeDef] = jsonFormat2(NodeDef.apply)
-  implicit val bundleBundleDefFormat: RootJsonFormat[BundleDef] = jsonFormat5(BundleDef.apply)
+  implicit val bundleFormatFormat: JsonFormat[SerializationFormat] = new JsonFormat[SerializationFormat] {
+    override def write(obj: SerializationFormat): JsValue = obj match {
+      case SerializationFormat.Mixed => JsString("mixed")
+      case SerializationFormat.Protobuf => JsString("protobuf")
+      case SerializationFormat.Json => JsString("json")
+      case _ => throw new Error("invalid format") // TODO: better error
+    }
+
+    override def read(json: JsValue): SerializationFormat = json match {
+      case JsString("mixed") => SerializationFormat.Mixed
+      case JsString("json") => SerializationFormat.Json
+      case JsString("protobuf") => SerializationFormat.Protobuf
+      case _ => throw new Error("invalid format") // TODO: better error
+    }
+  }
+
+  implicit def bundleModelFormat(implicit hr: HasBundleRegistry): RootJsonFormat[Model] = jsonFormat2(Model.apply)
+  implicit val bundleNodeFormat: RootJsonFormat[Node] = jsonFormat2(Node.apply)
+  implicit def bundleBundleMetaFormat(implicit hr: HasBundleRegistry): RootJsonFormat[BundleMeta] = jsonFormat5(BundleMeta)
 }
 
 /** All spray.json.RootJsonFormat formats needed for Bundle.ML JSON serialization.
   *
   * The 4 spray.json.RootJsonFormat formats provided are:
   * <ul>
-  *   <li>[[JsonSupport.bundleBundleDefFormat]]</li>
-  *   <li>[[JsonSupport.bundleNodeDefFormat]]</li>
-  *   <li>[[JsonSupport.bundleModelDefFormat]]</li>
+  *   <li>[[JsonSupport.bundleBundleMetaFormat]]</li>
+  *   <li>[[JsonSupport.bundleNodeFormat]]</li>
+  *   <li>[[JsonSupport.bundleModelFormat]]</li>
   *   <li>[[JsonSupport.bundleAttributeListFormat]]</li>
   * </ul>
   *
   * These are the only 4 implicit formats needed to serialize Bundle.ML models.
   */
-trait JsonSupport extends JsonLowPrioritySupport {
-  implicit val bundleAttributeListFormat: RootJsonFormat[AttributeList] = jsonFormat1(AttributeList.apply)
+trait JsonSupport extends JsonSupportLowPriority {
+  implicit def bundleAttributeListFormat(implicit hr: HasBundleRegistry): RootJsonFormat[AttributeList] = new RootJsonFormat[AttributeList] {
+    override def read(json: JsValue): AttributeList = json match {
+      case json: JsObject =>
+        AttributeList(json.fields("attributes").convertTo[Seq[Attribute]])
+      case _ => throw new Error("invalid attribute list") // TODO: better error
+    }
+
+    override def write(obj: AttributeList): JsValue = JsObject("attributes" -> obj.attributes.toJson)
+  }
 }
+
 object JsonSupport extends JsonSupport

@@ -7,6 +7,40 @@ import ml.bundle.Socket.Socket
 object Shape {
   val standardInputPort: String = "input"
   val standardOutputPort: String = "output"
+
+  /** Default constructor.
+    *
+    * @return empty shape
+    */
+  def apply(): Shape = new Shape(inputs = Seq(),
+    outputs = Seq(),
+    inputLookup = Map(),
+    outputLookup = Map())
+
+  /** Construct a shape with inputs and outputs.
+    *
+    * @param inputs input sockets
+    * @param outputs output sockets
+    * @return shape with inputs/outputs
+    */
+  def apply(inputs: Seq[Socket],
+            outputs: Seq[Socket]): Shape = {
+    val inputLookup = inputs.map(s => (s.port, s)).toMap
+    val outputLookup = outputs.map(s => (s.port, s)).toMap
+
+    new Shape(inputs = inputs,
+      outputs = outputs,
+      inputLookup = inputLookup,
+      outputLookup = outputLookup)
+  }
+
+  /** Create a shape from a bundle shape.
+    *
+    * @param shape bundle shape
+    * @return dsl shape
+    */
+  def fromBundle(shape: ml.bundle.Shape.Shape): Shape = Shape(inputs = shape.inputs,
+    outputs = shape.outputs)
 }
 
 /** Class for holding the input fields and output fields of a [[Node]].
@@ -30,11 +64,21 @@ object Shape {
   * scala> Shape().withStandardIO("label", "label_name") // shorthand for the above code
   * }}}
   *
-  * @param shape protobuf shape object containing the shape information
+  * @param inputs input sockets
+  * @param outputs output sockets
+  * @param inputLookup input sockets lookup by port
+  * @param outputLookup output sockets lookup by port
   */
-case class Shape(private val shape: ml.bundle.Shape.Shape = ml.bundle.Shape.Shape(inputs = Seq(), outputs = Seq())) {
-  private var inputLookup: Map[String, Socket] = shape.inputs.map(s => (s.port, s)).toMap
-  private var outputLookup: Map[String, Socket] = shape.outputs.map(s => (s.port, s)).toMap
+case class Shape private (inputs: Seq[Socket],
+                          outputs: Seq[Socket],
+                          inputLookup: Map[String, Socket],
+                          outputLookup: Map[String, Socket]) {
+  /** Convert to bundle shape.
+    *
+    * @return bundle shape
+    */
+  def asBundle: ml.bundle.Shape.Shape = ml.bundle.Shape.Shape(inputs = inputs,
+    outputs = outputs)
 
   /** Get the standard input socket.
     *
@@ -103,19 +147,8 @@ case class Shape(private val shape: ml.bundle.Shape.Shape = ml.bundle.Shape.Shap
     *
     * @return bundle protobuf shape
     */
-  def bundleShape: ml.bundle.Shape.Shape = shape
-
-  /** Get all inputs.
-    *
-    * @return all inputs
-    */
-  def inputs: Seq[Socket] = shape.inputs
-
-  /** Get all outputs.
-    *
-    * @return all outputs
-    */
-  def outputs: Seq[Socket] = shape.outputs
+  def bundleShape: ml.bundle.Shape.Shape = ml.bundle.Shape.Shape(inputs = inputs,
+    outputs = outputs)
 
   /** Get an input by the port name. 
     *
@@ -154,8 +187,8 @@ case class Shape(private val shape: ml.bundle.Shape.Shape = ml.bundle.Shape.Shap
   def withInput(name: String, port: String): Shape = {
     if(inputLookup.contains(port)) { throw new Error("only one input allowed per port") } // TODO: better error
     val socket = Socket(name, port)
-    inputLookup = inputLookup + (port -> socket)
-    copy(shape = shape.copy(inputs = shape.inputs :+ socket))
+    val inputLookup2 = inputLookup + (port -> socket)
+    copy(inputs = inputs :+ socket, inputLookup = inputLookup2)
   }
 
   /** Add an output socket to the shape. 
@@ -167,7 +200,7 @@ case class Shape(private val shape: ml.bundle.Shape.Shape = ml.bundle.Shape.Shap
   def withOutput(name: String, port: String): Shape = {
     if(outputLookup.contains(port)) { throw new Error("only one output allowed per port") } // TODO: better error
     val socket = Socket(name, port)
-    outputLookup = outputLookup + (port -> socket)
-    copy(shape = shape.copy(outputs = shape.outputs :+ socket))
+    val outputLookup2 = outputLookup + (port -> socket)
+    copy(outputs = outputs :+ socket, outputLookup = outputLookup2)
   }
 }

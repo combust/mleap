@@ -1,7 +1,21 @@
 package ml.combust.bundle.dsl
 
 import ml.bundle.ModelDef.ModelDef
-import ml.combust.bundle.serializer.SerializationContext
+import ml.combust.bundle.serializer.HasBundleRegistry
+
+/** Companion object for model.
+  */
+object Model {
+  /** Create a dsl model from a bunle model.
+    *
+    * @param modelDef bundle model definition
+    * @param hr bundle registry for custom types
+    * @return dsl model
+    */
+  def fromBundle(modelDef: ModelDef)
+                (implicit hr: HasBundleRegistry): Model = Model(op = modelDef.op,
+    attributes = modelDef.attributes.map(AttributeList.fromBundle))
+}
 
 /** Class that encodes all information need to serialize or deserialize
   * a machine learning model.
@@ -16,15 +30,13 @@ import ml.combust.bundle.serializer.SerializationContext
   */
 case class Model(op: String,
                  attributes: Option[AttributeList] = None) extends HasAttributeList[Model] {
-  /** Convert the [[Model]] to a protobuf serializable object.
+  /** Convert to bundle model.
     *
-    * @param context serialization context for encoding custom values
-    * @return protobuf model definition
+    * @param hr bundle registry from custom types
+    * @return bundle model definition
     */
-  def bundleModel(implicit context: SerializationContext): ModelDef = {
-    ModelDef(op = op,
-      attributes = attributes.map(_.bundleList))
-  }
+  def asBundle(implicit hr: HasBundleRegistry): ModelDef = ModelDef(op = op,
+    attributes = attributes.map(_.asBundle))
 
   override def replaceAttrList(list: Option[AttributeList]): Model = {
     copy(attributes = list)

@@ -71,26 +71,4 @@ trait CustomType[T] {
     * @return deserialized custom object
     */
   def fromBytes(bytes: Array[Byte]): T
-
-  /** Get custom object serializer specific to implicit [[ml.combust.bundle.serializer.ConcreteSerializationFormat]].
-    *
-    * @param format concrete serialization format determines which serializer to return
-    * @return custom object serializer for given concrete format
-    */
-  def formatSerializer(implicit format: HasConcreteSerializationFormat): CustomSerializer[T] = format.concrete match {
-    case SerializationFormat.Json => jsonSerializer
-    case SerializationFormat.Protobuf => bytesSerializer
-  }
-
-  /** Get compact byte serializer.
-    *
-    * @return compact byte serializer for custom object
-    */
-  def bytesSerializer: CustomBytesSerializer[T] = CustomBytesSerializer[T](this)
-
-  /** Get JSON serializer.
-    *
-    * @return JSON serialize for custom object
-    */
-  def jsonSerializer: CustomJsonSerializer[T] = CustomJsonSerializer[T](this)
 }

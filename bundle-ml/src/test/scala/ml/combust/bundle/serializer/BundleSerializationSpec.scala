@@ -19,10 +19,28 @@ class BundleSerializationSpec extends FunSpec {
     register(PipelineOp).
     register(DecisionTreeRegressionOp)
 
-  it should behave like bundleSerializer("Serializing/Deserializing a bundle as a dir", "")
-  it should behave like bundleSerializer("Serializing/Deserializing a bundle as a zip", ".zip")
+  it should behave like bundleSerializer("Serializing/Deserializing mixed a bundle as a dir",
+    SerializationFormat.Mixed,
+    "")
+  it should behave like bundleSerializer("Serializing/Deserializing mixed a bundle as a zip",
+    SerializationFormat.Mixed,
+    ".zip")
 
-  def bundleSerializer(description: String, suffix: String) = {
+  it should behave like bundleSerializer("Serializing/Deserializing json a bundle as a dir",
+    SerializationFormat.Json,
+    "")
+  it should behave like bundleSerializer("Serializing/Deserializing json a bundle as a zip",
+    SerializationFormat.Json,
+    ".zip")
+
+  it should behave like bundleSerializer("Serializing/Deserializing proto a bundle as a dir",
+    SerializationFormat.Protobuf,
+    "")
+  it should behave like bundleSerializer("Serializing/Deserializing proto a bundle as a zip",
+    SerializationFormat.Protobuf,
+    ".zip")
+
+  def bundleSerializer(description: String, format: SerializationFormat, suffix: String) = {
     describe(description) {
       val randomCoefficients = (0 to 100000).map(v => Random.nextDouble())
       val lr = LinearRegression(uid = "linear_regression_example",
@@ -38,8 +56,8 @@ class BundleSerializationSpec extends FunSpec {
 
       describe("with a simple linear regression") {
         it("serializes/deserializes the same object") {
-          val file = new File(TestUtil.baseDir, s"lr_bundle$suffix")
-          val bundle = Bundle.createBundle("my_bundle", SerializationFormat.Mixed, Seq(lr))
+          val file = new File(TestUtil.baseDir, s"lr_bundle.$format$suffix")
+          val bundle = Bundle.createBundle("my_bundle", format, Seq(lr))
           val serializer = BundleSerializer(file)
           serializer.write(bundle)
           val bundleRead = serializer.read()
@@ -58,8 +76,8 @@ class BundleSerializationSpec extends FunSpec {
             output = "my_output",
             model = DecisionTreeRegressionModel(node))
 
-          val file = new File(TestUtil.baseDir, s"decision_tree_bundle$suffix")
-          val bundle = Bundle.createBundle("my_bundle", SerializationFormat.Mixed, Seq(dt))
+          val file = new File(TestUtil.baseDir, s"decision_tree_bundle.$format$suffix")
+          val bundle = Bundle.createBundle("my_bundle", format, Seq(dt))
           val serializer = BundleSerializer(file)
           serializer.write(bundle)
           val bundleRead = serializer.read()
@@ -70,8 +88,8 @@ class BundleSerializationSpec extends FunSpec {
 
       describe("with a pipeline") {
         it("serializes/deserializes the same object") {
-          val file = new File(TestUtil.baseDir, s"pipeline_bundle$suffix")
-          val bundle = Bundle.createBundle("my_bundle", SerializationFormat.Mixed, Seq(pipeline))
+          val file = new File(TestUtil.baseDir, s"pipeline_bundle.$format$suffix")
+          val bundle = Bundle.createBundle("my_bundle", format, Seq(pipeline))
           val serializer = BundleSerializer(file)
           serializer.write(bundle)
           val bundleRead = serializer.read()

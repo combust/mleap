@@ -2,8 +2,7 @@ package ml.combust.bundle.dsl
 
 import java.io.File
 
-import ml.combust.bundle.serializer.{BundleContext, BundleRegistry, SerializationContext, SerializationFormat}
-import ml.bundle.BundleDef.BundleDef
+import ml.combust.bundle.serializer._
 
 /** Companion class for constants and constructors of [[Bundle]] objects.
   *
@@ -65,6 +64,14 @@ object Bundle {
     val pipeline = "pipeline"
   }
 
+  /** Create a bundle.
+    *
+    * @param name name of bundle
+    * @param format format of bundle
+    * @param nodes nodes in bundle
+    * @param attributes attributes of bundle
+    * @return bundle
+    */
   def createBundle(name: String,
                    format: SerializationFormat,
                    nodes: Seq[Any],
@@ -75,6 +82,20 @@ object Bundle {
       attributes = attributes, nodes)
   }
 }
+
+/** Meta data for a bundle.
+  *
+  * @param name name of the bundle
+  * @param format serialization format of the [[Bundle]]
+  * @param version Bundle.ML version used for serializing
+  * @param attributes optional [[AttributeList]] to serialize with the bundle
+  * @param nodes list of root nodes in the bundle
+  */
+case class BundleMeta(name: String,
+                  format: SerializationFormat,
+                  version: String,
+                  attributes: Option[AttributeList],
+                  nodes: Seq[String])
 
 /** Root object for serializing Bundle.ML pipelines and graphs.
   *
@@ -87,20 +108,20 @@ object Bundle {
 case class Bundle(name: String,
                   format: SerializationFormat,
                   version: String,
-                  attributes: Option[AttributeList],
+                  override val attributes: Option[AttributeList],
                   nodes: Seq[Any]) extends HasAttributeList[Bundle] {
-  /** Convert to protobuf bundle definition.
+  /** Create meta data for this bundle.
     *
-    * @param context bundle context for serialization format
-    * @param sc serialization context for decoding custom values
-    * @return protobuf bundle definition
+    * @param hr bundle registry for custom types
+    * @return bundle meta data
     */
-  def bundleDef(context: BundleContext)
-               (implicit sc: SerializationContext): BundleDef = {
-    BundleDef(name = name,
-      format = format.bundleFormat,
+  def meta(implicit hr: HasBundleRegistry): BundleMeta = {
+    val nodeNames = nodes.map(node => hr.bundleRegistry.opForObj[Any, Any](node).name(node))
+    BundleMeta(name = name,
+      format = format,
       version = version,
-      attributes = attributes.map(_.bundleList.attributes).map(ml.bundle.AttributeList.AttributeList.apply))
+      attributes = attributes,
+      nodes = nodeNames)
   }
 
   /** Create a [[ml.combust.bundle.serializer.BundleContext]] for serializing to Bundle.ML
@@ -110,7 +131,7 @@ case class Bundle(name: String,
     * @return context for serializing Bundle.ML
     */
   def bundleContext(bundleRegistry: BundleRegistry,
-                    path: File): BundleContext = BundleContext(this.format, bundleRegistry, path)
+                    path: File): BundleContext = BundleContext(format, bundleRegistry, path)
 
   override def replaceAttrList(list: Option[AttributeList]): Bundle = copy(attributes = list)
 }

@@ -1,19 +1,19 @@
 package ml.combust.bundle.dsl
 
-import ml.combust.bundle.serializer.SerializationContext
+import ml.combust.bundle.serializer.HasBundleRegistry
 
-/** Companion object for Attribute class.
+/** Companion object for attribute.
   */
 object Attribute {
-  /** Construct an Attribute from a protobuf Attribute.
+  /** Create DSL attribute from bundle attribute.
     *
-    * @param attr protobuf attribute
-    * @param context serialization context for decoding custom values
-    * @return wrapped attribute
+    * @param attr bundle attribute
+    * @param hr bundle registry for custom types
+    * @return dsl attribute
     */
-  def apply(attr: ml.bundle.Attribute.Attribute)
-           (implicit context: SerializationContext): Attribute = {
-    Attribute(name = attr.name, value = Value.fromBundle(attr.`type`.get, attr.value.get))
+  def fromBundle(attr: ml.bundle.Attribute.Attribute)
+                (implicit hr: HasBundleRegistry): Attribute = {
+    Attribute(attr.name, Value.fromBundle(attr.`type`.get, attr.value.get))
   }
 }
 
@@ -23,14 +23,14 @@ object Attribute {
   * @param value stored value of the attribute
   */
 case class Attribute(name: String, value: Value) {
-  /** Create the protobut attribute used for serialization.
+  /** Convert to bundle attribute.
     *
-    * @param context serialization context for encoding custom values
-    * @return protobuf attribute
+    * @param hr bundle registry for custom types
+    * @return bundle attribute
     */
-  def bundleAttribute(implicit context: SerializationContext): ml.bundle.Attribute.Attribute = {
+  def asBundle(implicit hr: HasBundleRegistry): ml.bundle.Attribute.Attribute = {
     ml.bundle.Attribute.Attribute(name = name,
       `type` = Some(value.bundleDataType),
-      value = Some(value.bundleValue))
+      value = Some(value.asBundle))
   }
 }

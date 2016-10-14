@@ -4,8 +4,7 @@ import java.io.File
 
 import ml.combust.mleap.runtime.bundle.MleapBundle
 import ml.combust.mleap.runtime.transformer.Transformer
-import ml.bundle.BundleDef.BundleDef
-import ml.combust.bundle.dsl.{AttributeList, Bundle}
+import ml.combust.bundle.dsl.{AttributeList, Bundle, BundleMeta}
 import ml.combust.bundle.serializer._
 
 /** Object for support classes for easily working with Bundle.ML.
@@ -43,10 +42,10 @@ object MleapSupport {
     /** Deserialize the bundle definition.
       *
       * @param hr bundle registry
-      * @return bundle definition
+      * @return bundle meta data
       */
-    def deserializeBundleDef()
-                            (implicit hr: HasBundleRegistry): BundleDef = BundleSerializer(path).readBundleDef()
+    def deserializeBundleMeta()
+                             (implicit hr: HasBundleRegistry): BundleMeta = BundleSerializer(path).readMeta()
 
     /** Deserialize the Bundle.ML to MLeap.
       *

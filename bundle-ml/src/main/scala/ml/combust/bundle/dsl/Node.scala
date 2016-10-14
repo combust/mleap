@@ -2,6 +2,20 @@ package ml.combust.bundle.dsl
 
 import ml.bundle.NodeDef.NodeDef
 
+/** Companion object for node.
+  */
+object Node {
+  /** Create a node from a bundle node.
+    *
+    * @param nodeDef bundle node definition
+    * @return dsl node
+    */
+  def fromBundle(nodeDef: NodeDef): Node = {
+    Node(name = nodeDef.name,
+      shape = Shape.fromBundle(nodeDef.shape.get))
+  }
+}
+
 /** Class for storing a node in the Bundle.ML graph.
   *
   * Bundle.ML is composed of a set of [[Node]] objects,
@@ -16,9 +30,10 @@ import ml.bundle.NodeDef.NodeDef
   */
 case class Node(name: String,
                 shape: Shape) {
-  /** Create a protobuf node definition.
+  /** Convert to a bundle node.
     *
-    * @return protobuf node definition
+    * @return bundle node definition
     */
-  def bundleNode: NodeDef = NodeDef(name = name, shape = Some(shape.bundleShape))
+  def asBundle: NodeDef = NodeDef(name = name,
+    shape = Some(shape.asBundle))
 }

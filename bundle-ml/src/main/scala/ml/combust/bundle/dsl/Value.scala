@@ -7,8 +7,8 @@ import ml.bundle.DataType.DataType.ListType
 import ml.bundle.Tensor.Tensor
 import ml.bundle.TensorType.TensorType
 import ml.bundle.Value.Value.ListValue
-import ml.combust.bundle.serializer.{HasBundleRegistry, SerializationContext}
 import ml.bundle.Value.{Value => BValue}
+import ml.combust.bundle.serializer.HasBundleRegistry
 
 import scala.reflect.{ClassTag, classTag}
 
@@ -45,11 +45,11 @@ object Value {
     *
     * @param lt list type to extract to a Scala value
     * @param list protobuf list to extract to Scala value
-    * @param context serialization context for decoding custom values
+    * @param hr bundle registry for custom types
     * @return Scala value of protobuf object
     */
   def fromListValue(lt: ListType, list: ListValue)
-                   (implicit context: SerializationContext): Any = {
+                   (implicit hr: HasBundleRegistry): Any = {
     val base = lt.base.get
     val u = base.underlying
     if(u.isList) {
@@ -66,8 +66,8 @@ object Value {
       val basic = base.getTensor.base
       list.tensor.map(t => fromTensorValue(basic, t))
     } else if(u.isCustom) {
-      val serializer = context.bundleRegistry.custom(base.getCustom).formatSerializer
-      list.custom.map(b => serializer.fromBytes(b.toByteArray))
+      val ct = hr.bundleRegistry.custom(base.getCustom)
+      list.custom.map(b => ct.fromBytes(b.toByteArray))
     } else { throw new Error("unsupported list type") }
   }
 
@@ -75,13 +75,13 @@ object Value {
     *
     * @param dataType data type of the protobuf value
     * @param value protobuf value to convert
-    * @param context serialization context for decoding custom values
+    * @param hr bundle registry for custom types
     * @return wrapped Scala value of protobuf object
     */
   def fromBundle(dataType: DataType, value: ml.bundle.Value.Value)
-           (implicit context: SerializationContext): Value = {
+                (implicit hr: HasBundleRegistry): Value = {
     val v = if(dataType.underlying.isCustom) {
-      context.bundleRegistry.custom(dataType.getCustom).formatSerializer.fromBytes(value.getCustom.toByteArray)
+      hr.bundleRegistry.custom(dataType.getCustom).fromBytes(value.getCustom.toByteArray)
     } else if(dataType.underlying.isTensor) {
       fromTensorValue(dataType.getTensor.base, value.getTensor)
     } else if(dataType.underlying.isBasic) {
@@ -121,11 +121,11 @@ object Value {
     *
     * @param lt list type
     * @param value Scala list
-    * @param context serialization context for encoding custom values
+    * @param hr bundle registry for custom types
     * @return list protobuf object of the Scala list
     */
   def listValue(lt: ListType, value: Seq[_])
-               (implicit context: SerializationContext): ListValue = {
+               (implicit hr: HasBundleRegistry): ListValue = {
     val base = lt.base.get
     val u = base.underlying
     if(u.isBasic) {
@@ -137,9 +137,8 @@ object Value {
         case _ => throw new Error("unsupported basic type")
       }
     } else if(u.isCustom) {
-      val ct = context.bundleRegistry.custom[Any](base.getCustom)
-      val serializer = ct.formatSerializer
-      val custom = value.map(a => ByteString.copyFrom(serializer.toBytes(a)))
+      val ct = hr.bundleRegistry.custom[Any](base.getCustom)
+      val custom = value.map(a => ByteString.copyFrom(ct.toBytes(a)))
       ListValue(custom = custom)
     } else if(u.isTensor) {
       val tb = base.getTensor.base
@@ -156,11 +155,11 @@ object Value {
     *
     * @param dataType type of Scala value
     * @param value Scala value to convert
-    * @param context serialization context for encoding custom values
+    * @param hr bundle registry for custom types
     * @return protobuf value of the Scala value
     */
   def bundleValue(dataType: DataType, value: Any)
-                 (implicit context: SerializationContext): BValue = {
+                 (implicit hr: HasBundleRegistry): BValue = {
     val u = dataType.underlying
     val v = if(u.isTensor) {
       BValue.V.Tensor(tensorValue(dataType.getTensor.base, value))
@@ -175,8 +174,8 @@ object Value {
     } else if(u.isList) {
       BValue.V.List(listValue(dataType.getList, value.asInstanceOf[Seq[_]]))
     } else if(u.isCustom) {
-      val ct = context.bundleRegistry.customForObj[Any](value)
-      BValue.V.Custom(ByteString.copyFrom(ct.formatSerializer.toBytes(value)))
+      val ct = hr.bundleRegistry.customForObj[Any](value)
+      BValue.V.Custom(ByteString.copyFrom(ct.toBytes(value)))
     } else { throw new Error("unsupported data type") }
 
     BValue(v)
@@ -409,7 +408,7 @@ object Value {
     * @return wrapped nested list of custom values
     */
   def customListN[T: ClassTag](n: Int, value: Seq[_])
-                    (implicit hr: HasBundleRegistry): Value = {
+                              (implicit hr: HasBundleRegistry): Value = {
     val base = customDataType[T]
     listN(base, n, value)
   }
@@ -435,24 +434,13 @@ object Value {
 
 /** This class is used to wrap Scala objects for later serialization into Bundle.ML
   *
-  * @param _bundleDataType data type of the value being stored
+  * @param bundleDataType data type of the value being stored
   * @param value Scala object that will be serialized later
   */
-case class Value(private val _bundleDataType: DataType, value: Any) {
-  /** Create the protobuf value used for serialization.
-    *
-    * @param context serialization context needed for encoding custom values
-    * @return protobuf value
-    */
-  def bundleValue(implicit context: SerializationContext): BValue = {
-    Value.bundleValue(_bundleDataType, value)
+case class Value(bundleDataType: DataType, value: Any) {
+  def asBundle(implicit hr: HasBundleRegistry): ml.bundle.Value.Value = {
+    Value.bundleValue(bundleDataType, value)
   }
-
-  /** Get the protobuf data type of the value.
-    *
-    * @return protobuf data type
-    */
-  def bundleDataType: DataType = _bundleDataType
 
   /** Whether or not this value has a small serialization size.
     *
@@ -473,9 +461,9 @@ case class Value(private val _bundleDataType: DataType, value: Any) {
     * @return true if the value has a large serialization size, false otherwise
     */
   def isLarge(implicit hr: HasBundleRegistry): Boolean = {
-    _bundleDataType.underlying.isTensor && getTensor[Any].length > 1024 ||
-    _bundleDataType.underlying.isList && !_bundleDataType.getList.base.get.underlying.isBasic ||
-    _bundleDataType.underlying.isCustom && hr.bundleRegistry.custom[Any](_bundleDataType.getCustom).isLarge(value)
+    bundleDataType.underlying.isTensor && getTensor[Any].length > 1024 ||
+      bundleDataType.underlying.isList && !bundleDataType.getList.base.get.underlying.isBasic ||
+      bundleDataType.underlying.isCustom && hr.bundleRegistry.custom[Any](bundleDataType.getCustom).isLarge(value)
   }
 
   /** Get value as a string.

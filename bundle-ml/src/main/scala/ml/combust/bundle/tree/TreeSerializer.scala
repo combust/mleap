@@ -50,6 +50,6 @@ case class TreeSerializer[N: NodeWrapper](path: File, withImpurities: Boolean) {
         read(in))
     } else if(node.n.isLeaf) {
       ntc.leaf(node.getLeaf, withImpurities)
-    } else { throw new Error("invalid tree") } // TODO: better error
+    } else { throw new IllegalArgumentException("invalid tree") }
   }
 }

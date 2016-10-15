@@ -59,7 +59,7 @@ object MleapNodeWrapper extends NodeWrapper[ml.combust.mleap.core.tree.Node] {
       val s = bundleSplit.getContinuous
       tree.ContinuousSplit(featureIndex = s.featureIndex,
         threshold = s.threshold)
-    } else { throw new Error("invalid split") }
+    } else { throw new IllegalArgumentException("invalid split") }
 
     tree.InternalNode(split = split,
       left = left,
@@ -68,11 +68,11 @@ object MleapNodeWrapper extends NodeWrapper[ml.combust.mleap.core.tree.Node] {
 
   override def left(node: ml.combust.mleap.core.tree.Node): ml.combust.mleap.core.tree.Node = node match {
     case node: ml.combust.mleap.core.tree.InternalNode => node.left
-    case _ => throw new Error("not an internal node") // TODO: better error
+    case _ => throw new IllegalArgumentException("not an internal node")
   }
 
   override def right(node: ml.combust.mleap.core.tree.Node): ml.combust.mleap.core.tree.Node = node match {
     case node: ml.combust.mleap.core.tree.InternalNode => node.right
-    case _ => throw new Error("not an internal node") // TODO: better error
+    case _ => throw new IllegalArgumentException("not an internal node")
   }
 }

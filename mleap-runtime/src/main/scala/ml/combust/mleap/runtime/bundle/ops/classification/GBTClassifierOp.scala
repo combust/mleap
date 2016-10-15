@@ -32,8 +32,8 @@ object GBTClassifierOp extends OpNode[GBTClassifier, GBTClassifierModel] {
 
     override def load(context: BundleContext, model: Model): GBTClassifierModel = {
       if(model.value("num_classes").getLong != 2) {
-        throw new Error("MLeap only supports binary logistic regression")
-      } // TODO: Better error
+        throw new IllegalArgumentException("MLeap only supports binary logistic regression")
+      }
 
       val numFeatures = model.value("num_features").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList

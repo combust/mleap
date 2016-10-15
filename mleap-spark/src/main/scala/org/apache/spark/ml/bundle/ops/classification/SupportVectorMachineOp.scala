@@ -22,9 +22,8 @@ object SupportVectorMachineOp extends OpNode[SVMModel, SVMModel] {
     }
 
     override def load(context: BundleContext, model: Model): SVMModel = {
-      // TODO: better error
       if(model.value("num_classes").getLong != 2) {
-        throw new Error("Only binary logistic regression supported in Spark")
+        throw new IllegalArgumentException("Only binary logistic regression supported in Spark")
       }
 
       val svm = new classification.SVMModel(weights = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),

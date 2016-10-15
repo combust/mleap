@@ -35,7 +35,10 @@ case class TreeSerializer[N: NodeWrapper](path: File, withImpurities: Boolean) {
   def read(): N = {
     (for(in <- managed(new DataInputStream(new FileInputStream(s"$path.pb")))) yield {
       read(in)
-    }).opt.get
+    }).either.either match {
+      case Left(errors) => throw errors.head
+      case Right(n) => n
+    }
   }
 
   def read(in: DataInputStream): N = {

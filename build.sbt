@@ -4,8 +4,10 @@ lazy val `root` = project.in(file(".")).
   settings(Common.settings).
   settings(Common.combustSettings).
   settings(Common.sonatypeSettings).
-  settings(publishArtifact := false).
-  enablePlugins(ReleasePlugin).
+  enablePlugins(ReleasePlugin, BuildInfoPlugin, GitPlugin).
+  settings(buildInfoKeys := Seq[BuildInfoKey](version, scalaVersion, git.gitHeadCommit),
+    buildInfoPackage := "ml.combust.mleap",
+    buildInfoObject := "BuildInfoKeys").
   aggregate(`mleap-core`, `mleap-runtime`, `mleap-spark`, `bundle-ml`)
 
 lazy val `mleap-core` = project.in(file("mleap-core")).
@@ -38,6 +40,8 @@ lazy val `bundle-ml` = project.in(file("bundle-ml")).
   settings(libraryDependencies ++= Dependencies.bundleMlDependencies)
 
 import ReleaseTransformations._
+import com.typesafe.sbt.GitPlugin
+import com.typesafe.sbt.GitPlugin.autoImport._
 import xerial.sbt.Sonatype.SonatypeCommand
 
 releaseVersionBump := sbtrelease.Version.Bump.Minor

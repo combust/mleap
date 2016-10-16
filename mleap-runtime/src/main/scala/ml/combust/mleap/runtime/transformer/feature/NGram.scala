@@ -13,8 +13,7 @@ import scala.util.Try
 case class NGram(uid: String = Transformer.uniqueName("ngram"),
                  inputCol: String,
                  outputCol: String,
-                 model: NGramModel
-                ) extends Transformer{
+                 model: NGramModel) extends Transformer{
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(inputCol, ListType(StringType)).flatMap {
       case (b, inputIndex) =>

@@ -38,6 +38,7 @@ object SparkRegistry {
       register(ops.feature.ElementwiseProductOp).
       register(ops.feature.PcaOp).
       register(ops.feature.NGramOp).
+      register(ops.feature.StopWordsRemoverOp).
 
       // other
       register(ops.PipelineOp)

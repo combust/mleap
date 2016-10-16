@@ -30,6 +30,7 @@ object MleapRegistry {
     register(ops.feature.NormalizerOp).
     register(ops.feature.PcaOp).
     register(ops.feature.NGramOp).
+    register(ops.feature.StopWordsRemoverOp).
 
     // regression
     register(ops.regression.LinearRegressionOp).

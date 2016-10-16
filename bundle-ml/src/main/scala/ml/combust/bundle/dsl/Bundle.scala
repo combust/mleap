@@ -47,6 +47,7 @@ object Bundle {
       val normalizer = "normalizer"
       val pca = "pca"
       val ngram = "ngram"
+      val stopwords_remover = "stopwords_remover"
     }
 
     object classification {

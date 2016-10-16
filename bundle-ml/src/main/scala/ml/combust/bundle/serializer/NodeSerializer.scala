@@ -12,57 +12,57 @@ import scala.io.Source
 
 /** Trait for serializing node definitions.
   */
-trait NodeDefSerializer {
+trait FormatNodeSerializer {
   /** Write a node definition to an output stream.
     *
     * @param out stream to write to
     * @param obj node definition to write
     */
-  def write(out: OutputStream, obj: NodeDef): Unit
+  def write(out: OutputStream, obj: Node): Unit
 
   /** Read a node definition from an input stream.
     *
     * @param in stream to read from
     * @return node definition
     */
-  def read(in: InputStream): NodeDef
+  def read(in: InputStream): Node
 }
 
 /** Companion class for utility serializer methods for node definitions.
   */
-object NodeDefSerializer {
+object FormatNodeSerializer {
   /** Get the serializer for a given serialization context.
     *
     * @param context serialization context for desired format
     * @return serializer for given concrete serialization format
     */
-  def serializer(implicit context: SerializationContext): NodeDefSerializer = context.concrete match {
-    case SerializationFormat.Json => JsonNodeDefSerializer
-    case SerializationFormat.Protobuf => ProtoNodeDefSerializer
+  def serializer(implicit context: SerializationContext): FormatNodeSerializer = context.concrete match {
+    case SerializationFormat.Json => JsonFormatNodeSerializer
+    case SerializationFormat.Protobuf => ProtoFormatNodeSerializer
   }
 }
 
 /** Object for serializing/deserializing node definitions with JSON.
   */
-object JsonNodeDefSerializer extends NodeDefSerializer {
-  override def write(out: OutputStream, obj: NodeDef): Unit = {
-    out.write(obj.toJson.prettyPrint.getBytes)
+object JsonFormatNodeSerializer extends FormatNodeSerializer {
+  override def write(out: OutputStream, node: Node): Unit = {
+    out.write(node.toJson.prettyPrint.getBytes)
   }
 
-  override def read(in: InputStream): NodeDef = {
-    Source.fromInputStream(in).getLines.mkString.parseJson.convertTo[NodeDef]
+  override def read(in: InputStream): Node = {
+    Source.fromInputStream(in).getLines.mkString.parseJson.convertTo[Node]
   }
 }
 
 /** Object for serializing/deserializing node definitions with Protobuf.
   */
-object ProtoNodeDefSerializer extends NodeDefSerializer {
-  override def write(out: OutputStream, obj: NodeDef): Unit = {
-    obj.writeTo(out)
+object ProtoFormatNodeSerializer extends FormatNodeSerializer {
+  override def write(out: OutputStream, node: Node): Unit = {
+    node.asBundle.writeTo(out)
   }
 
-  override def read(in: InputStream): NodeDef = {
-    NodeDef.parseFrom(in)
+  override def read(in: InputStream): Node = {
+    Node.fromBundle(NodeDef.parseFrom(in))
   }
 }
 
@@ -87,7 +87,7 @@ case class NodeSerializer(context: BundleContext) {
     val shape = op.shape(obj)
     val node = Node(name = name, shape = shape)
     for(out <- managed(new FileOutputStream(context.file(Bundle.nodeFile)))) {
-      NodeDefSerializer.serializer.write(out, node.bundleNode)
+      FormatNodeSerializer.serializer.write(out, node)
     }
   }
 
@@ -96,10 +96,9 @@ case class NodeSerializer(context: BundleContext) {
     * @return deserialized node
     */
   def read(): Any = {
-    val nodeDef = (for(in <- managed(new FileInputStream(context.file(Bundle.nodeFile)))) yield {
-      NodeDefSerializer.serializer.read(in)
+    val node = (for(in <- managed(new FileInputStream(context.file(Bundle.nodeFile)))) yield {
+      FormatNodeSerializer.serializer.read(in)
     }).opt.get
-    val node = Node(nodeDef.name, Shape(nodeDef.shape.get))
 
     val (model, m) = ModelSerializer(context).readWithModel()
     val op = context.bundleRegistry[Any, Any](m.op)

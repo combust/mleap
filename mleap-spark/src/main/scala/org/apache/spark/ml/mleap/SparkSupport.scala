@@ -2,7 +2,6 @@ package org.apache.spark.ml.mleap
 
 import java.io.File
 
-import ml.bundle.BundleDef.BundleDef
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.serializer._
 import org.apache.spark.ml.bundle.SparkBundle
@@ -22,8 +21,8 @@ object SparkSupport {
   }
 
   implicit class FileOps(path: File) {
-    def deserializeBundleDef()
-                            (implicit hr: HasBundleRegistry): BundleDef = BundleSerializer(path).readBundleDef()
+    def deserializeBundleMeta()
+                             (implicit hr: HasBundleRegistry): BundleMeta = BundleSerializer(path).readMeta()
 
     def deserializeBundle()
                          (implicit hr: HasBundleRegistry): (Bundle, Transformer) = SparkBundle.readTransformer(path)

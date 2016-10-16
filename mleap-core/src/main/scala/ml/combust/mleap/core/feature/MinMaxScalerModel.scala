@@ -1,7 +1,9 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.mleap.Vector._
-import org.apache.spark.ml.linalg.{Vector, Vectors, SparseVector, DenseVector}
+import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
+
 import scala.math.{max, min}
 
 /** Class for MinMax Scaler Transformer
@@ -11,6 +13,7 @@ import scala.math.{max, min}
   * @param originalMin minimum values from training features
   * @param originalMax maximum values from training features
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/MinMaxScaler.scala")
 case class MinMaxScalerModel(originalMin: Vector,
                              originalMax: Vector) extends Serializable {
   val originalRange = (originalMax.toBreeze - originalMin.toBreeze).toArray

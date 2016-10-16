@@ -18,7 +18,7 @@ object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegressionModel, Deci
 
     override def store(context: BundleContext, model: Model, obj: DecisionTreeRegressionModel): Model = {
       TreeSerializer[org.apache.spark.ml.tree.Node](context.file("nodes"), withImpurities = false).write(obj.rootNode)
-      model.withAttr(Attribute("num_features", Value.long(obj.numFeatures)))
+      model.withAttr("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(context: BundleContext, model: Model): DecisionTreeRegressionModel = {

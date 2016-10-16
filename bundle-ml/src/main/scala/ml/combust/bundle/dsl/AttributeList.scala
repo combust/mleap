@@ -1,6 +1,6 @@
 package ml.combust.bundle.dsl
 
-import ml.combust.bundle.serializer.SerializationContext
+import ml.combust.bundle.serializer.HasBundleRegistry
 
 /** This trait provides easy access to reading/writing attributes
   * to objects that contain an [[AttributeList]].
@@ -65,6 +65,22 @@ trait HasAttributeList[T] {
     case (None, None) => replaceAttrList(None)
   }
 
+  /** Add an attribute to the list.
+    *
+    * @param name name of the attribute
+    * @param value value of the attribute
+    * @return a copy of T with the attribute added
+    */
+  def withAttr(name: String, value: Value): T = withAttr(Attribute(name, value))
+
+  /** Add an optional attribute to the list.
+    *
+    * @param name name of the attribute
+    * @param value optional value
+    * @return a copy of T with the attribute optionally added
+    */
+  def withAttr(name: String, value: Option[Value]): T = withAttr(value.map(Attribute(name, _)))
+
   /** Add a list of attributes to [[attributes]].
     *
     * Adds all attributes in the list argument to [[attributes]].
@@ -88,29 +104,6 @@ trait HasAttributeList[T] {
 /** Companion class for construction and conversion of [[AttributeList]] objects.
   */
 object AttributeList {
-  /** Construct an [[AttributeList]] from a protobuf attribute list.
-    *
-    * @param list protobuf attribute list
-    * @param context serialization context for decoding custom values
-    * @return [[AttributeList]] of all attributes in the list param
-    */
-  def apply(list: ml.bundle.AttributeList.AttributeList)
-           (implicit context: SerializationContext): AttributeList = {
-    apply(list.attributes)
-  }
-
-  /** Construct an [[AttributeList]] from a list of protobuf attributes.
-    *
-    * @param attrs list of protobuf attributes
-    * @param context serialization context for decoding custom values
-    * @return [[AttributeList]] of all attributes in the list
-    */
-  def apply(attrs: Seq[ml.bundle.Attribute.Attribute])
-           (implicit context: SerializationContext): AttributeList = {
-    val lookup = attrs.map(a => (a.name, Attribute(a))).toMap
-    AttributeList(lookup)
-  }
-
   /** Construct an [[AttributeList]] from a list of [[Attribute]].
     *
     * @param attrs list of [[Attribute]]
@@ -128,6 +121,18 @@ object AttributeList {
     */
   def apply(attr1: Attribute, attrs: Attribute *): AttributeList = {
     AttributeList(Seq(attr1) ++ attrs)
+  }
+
+  /** Create an attribute list from a bundle attribute list.
+    *
+    * @param list bundle attribute list
+    * @param hr bundle registry for custom types
+    * @return dsl attribute list
+    */
+  def fromBundle(list: ml.bundle.AttributeList.AttributeList)
+                (implicit hr: HasBundleRegistry): AttributeList = {
+    val attrs = list.attributes.map(Attribute.fromBundle)
+    AttributeList(attrs)
   }
 
   /** Construct an optional [[AttributeList]].
@@ -152,6 +157,16 @@ case class AttributeList(lookup: Map[String, Attribute]) {
   /* make sure the list is not empty */
   if(lookup.isEmpty) { throw new Error("cannot have empty attribute list") } // TODO: better error
 
+  /** Convert to bundle attribute list.
+    *
+    * @param hr bundle registry for custom types
+    * @return bundle attribute list
+    */
+  def asBundle(implicit hr: HasBundleRegistry): ml.bundle.AttributeList.AttributeList = {
+    val attrs = lookup.values.map(_.asBundle).toSeq
+    ml.bundle.AttributeList.AttributeList(attrs)
+  }
+
   /** Get an attribute.
     *
     * Alias for [[attr]]
@@ -160,15 +175,6 @@ case class AttributeList(lookup: Map[String, Attribute]) {
     * @return the attribute
     */
   def apply(name: String): Attribute = attr(name)
-
-  /** Convert to a protobuf attribute list
-    *
-    * @param context serialization context for encoding custom values
-    * @return protobuf attribute list
-    */
-  def bundleList(implicit context: SerializationContext): ml.bundle.AttributeList.AttributeList = {
-    ml.bundle.AttributeList.AttributeList(lookup.values.map(a => a.bundleAttribute).toSeq)
-  }
 
   /** Iteratable of all [[Attribute]] in the list.
     *

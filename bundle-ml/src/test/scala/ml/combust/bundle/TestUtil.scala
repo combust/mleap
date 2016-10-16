@@ -9,7 +9,7 @@ import java.io.File
   * Created by hollinwilkins on 8/23/16.
   */
 object TestUtil {
-  val baseDir = new File("/tmp/bundle-scala-test")
+  val baseDir = new File("/tmp/bundle-ml")
   TestUtil.delete(baseDir)
   baseDir.mkdirs()
 

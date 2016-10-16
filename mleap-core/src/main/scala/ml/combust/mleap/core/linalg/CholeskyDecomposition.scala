@@ -18,11 +18,13 @@
 package ml.combust.mleap.core.linalg
 
 import com.github.fommil.netlib.LAPACK.{getInstance => lapack}
+import ml.combust.mleap.core.annotation.SparkCode
 import org.netlib.util.intW
 
 /**
   * Compute Cholesky decomposition.
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/linalg/CholeskyDecomposition.scala")
 object CholeskyDecomposition {
 
   /**

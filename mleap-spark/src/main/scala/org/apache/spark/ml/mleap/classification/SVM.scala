@@ -1,5 +1,6 @@
 package org.apache.spark.ml.mleap.classification
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.classification.{ProbabilisticClassificationModel, ProbabilisticClassifier}
 import org.apache.spark.ml.linalg
 import org.apache.spark.ml.param._
@@ -77,18 +78,22 @@ class SVMModel(override val uid: String,
   with SVMBase {
   def this(model: classification.SVMModel) = this(Identifiable.randomUID("svmModel"), model)
 
+  for(t <- model.getThreshold) { setThreshold(t) }
   def setThreshold(value: Double): this.type = {
     model.setThreshold(value)
     set(threshold, value)
   }
-  setDefault(threshold, 0.5)
+  def clearThreshold(): this.type = clear(threshold)
 
   def margin(features: linalg.Vector): Double = {
     BLAS.dot(model.weights, Vectors.dense(features.toArray)) + model.intercept
   }
 
   protected override def predict(features: linalg.Vector): Double = {
-    if(margin(features)> getThreshold) 1.0 else 0.0
+    get(threshold) match {
+      case Some(t) => if(margin(features)> t) 1.0 else 0.0
+      case None => margin(features)
+    }
   }
 
   override protected def predictRaw(features: linalg.Vector): linalg.Vector = {
@@ -100,23 +105,10 @@ class SVMModel(override val uid: String,
 
   override def copy(extra: ParamMap): SVMModel = defaultCopy(extra)
 
-  override protected def raw2probabilityInPlace(rawPrediction: linalg.Vector): linalg.Vector = {
-    rawPrediction match {
-      case dv: linalg.DenseVector =>
-        var i = 0
-        val size = dv.size
-        while (i < size) {
-          dv.values(i) = 1.0 / (1.0 + math.exp(-dv.values(i)))
-          i += 1
-        }
-        dv
-      case sv: linalg.SparseVector =>
-        throw new RuntimeException("Unexpected error in LogisticRegressionModel:" +
-          " raw2probabilitiesInPlace encountered SparseVector")
-    }
-  }
+  override protected def raw2probabilityInPlace(rawPrediction: linalg.Vector): linalg.Vector = rawPrediction
 }
 
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/classification/SVM.scala")
 class SVMWithSGD(private var stepSize: Double,
                  private var numIterations: Int,
                  private var regParam: Double,
@@ -170,7 +162,7 @@ class SVM(override val uid: String)
 
   /** @group setParam */
   def setThreshold(value: Double): this.type = set(threshold, value)
-  setDefault(threshold, 0.5)
+  def clearThreshold(): this.type = clear(threshold)
 
   override def copy(extra: ParamMap): SVM = defaultCopy(extra)
 
@@ -186,9 +178,13 @@ class SVM(override val uid: String)
       getRegParam,
       getMiniBatchFraction).
       setIntercept(getFitIntercept).
-      run(labeledPoints).
-      setThreshold(getThreshold)
+      run(labeledPoints)
 
+    // Optionally set threshold
+    get(threshold) match {
+      case Some(t) => mllibModel.setThreshold(t)
+      case None => mllibModel.clearThreshold()
+    }
 
     new SVMModel(mllibModel)
   }

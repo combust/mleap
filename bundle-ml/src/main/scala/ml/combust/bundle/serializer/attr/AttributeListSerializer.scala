@@ -32,11 +32,11 @@ case class AttributeListSerializer(path: File) {
   /** Write attribute list as a JSON file.
     *
     * @param list attribute list to write
-    * @param context serialization context for encoding custom values
+    * @param hr bundle registry for custom types
     */
   def writeJson(list: AttributeList)
-               (implicit context: SerializationContext): Unit = {
-    val json = list.bundleList.toJson.prettyPrint.getBytes
+               (implicit hr: HasBundleRegistry): Unit = {
+    val json = list.toJson.prettyPrint.getBytes
     for(out <- managed(new FileOutputStream(path))) {
       out.write(json)
     }
@@ -45,12 +45,12 @@ case class AttributeListSerializer(path: File) {
   /** Write attribute list as a Protobuf file.
     *
     * @param list attribute list to write
-    * @param context serialization context for encoding custom values
+    * @param hr bundle registry for custom types
     */
   def writeProto(list: AttributeList)
-                (implicit context: SerializationContext): Unit = {
+                (implicit hr: HasBundleRegistry): Unit = {
     for(out <- managed(new FileOutputStream(path))) {
-      list.bundleList.writeTo(out)
+      list.asBundle.writeTo(out)
     }
   }
 
@@ -75,8 +75,7 @@ case class AttributeListSerializer(path: File) {
   def readJson()
               (implicit context: SerializationContext): AttributeList = {
     (for(in <- managed(new FileInputStream(path))) yield {
-      val json = Source.fromInputStream(in).getLines().mkString
-      AttributeList(json.parseJson.convertTo[ml.bundle.AttributeList.AttributeList])
+      Source.fromInputStream(in).getLines().mkString.parseJson.convertTo[AttributeList]
     }).opt.get
   }
 
@@ -88,7 +87,7 @@ case class AttributeListSerializer(path: File) {
   def readProto()
                (implicit context: SerializationContext): AttributeList = {
     (for(in <- managed(new FileInputStream(path))) yield {
-      AttributeList(ml.bundle.AttributeList.AttributeList.parseFrom(in))
+      AttributeList.fromBundle(ml.bundle.AttributeList.AttributeList.parseFrom(in))
     }).opt.get
   }
 }

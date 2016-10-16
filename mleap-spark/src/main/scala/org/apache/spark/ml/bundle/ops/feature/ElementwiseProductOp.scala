@@ -14,7 +14,7 @@ object ElementwiseProductOp extends OpNode[ElementwiseProduct, ElementwiseProduc
     override def opName: String = Bundle.BuiltinOps.feature.elementwise_product
 
     override def store(context: BundleContext, model: Model, obj: ElementwiseProduct): Model = {
-      model.withAttr(Attribute("scaling_vec", Value.doubleVector(obj.getScalingVec.toArray)))
+      model.withAttr("scaling_vec", Value.doubleVector(obj.getScalingVec.toArray))
     }
 
     override def load(context: BundleContext, model: Model): ElementwiseProduct = {

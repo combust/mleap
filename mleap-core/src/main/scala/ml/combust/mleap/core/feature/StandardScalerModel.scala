@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.feature
 
-import org.apache.spark.ml.linalg.{Vector, Vectors, SparseVector, DenseVector}
+import ml.combust.mleap.core.annotation.SparkCode
+import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 /** Class for standard scaler models.
   *
@@ -10,6 +11,7 @@ import org.apache.spark.ml.linalg.{Vector, Vectors, SparseVector, DenseVector}
   * @param std optional standard deviations of features
   * @param mean optional means of features
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/StandardScaler.scala")
 case class StandardScalerModel(std: Option[Vector],
                                mean: Option[Vector]) extends Serializable {
   /** Scale a feature vector using stddev, mean, or both.

@@ -23,7 +23,7 @@ object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
         name
       }
 
-      model.withAttr(Attribute("num_classes", Value.long(obj.models.length)))
+      model.withAttr("num_classes", Value.long(obj.models.length))
     }
 
     override def load(context: BundleContext, model: Model): OneVsRestModel = {

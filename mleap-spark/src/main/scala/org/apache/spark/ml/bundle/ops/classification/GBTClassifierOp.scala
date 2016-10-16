@@ -22,10 +22,10 @@ object GBTClassifierOp extends OpNode[GBTClassificationModel, GBTClassificationM
           i = i + 1
           name
       }
-      model.withAttr(Attribute("num_features", Value.long(obj.numFeatures))).
-        withAttr(Attribute("num_classes", Value.long(2))).
-        withAttr(Attribute("tree_weights", Value.doubleList(obj.treeWeights))).
-        withAttr(Attribute("trees", Value.stringList(trees)))
+      model.withAttr("num_features", Value.long(obj.numFeatures)).
+        withAttr("num_classes", Value.long(2)).
+        withAttr("tree_weights", Value.doubleList(obj.treeWeights)).
+        withAttr("trees", Value.stringList(trees))
     }
 
     override def load(context: BundleContext, model: Model): GBTClassificationModel = {

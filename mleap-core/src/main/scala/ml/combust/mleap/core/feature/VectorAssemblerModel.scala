@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 import scala.collection.mutable
@@ -17,6 +18,7 @@ object VectorAssemblerModel {
   * to get all desired features into one vector before training
   * a model.
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/VectorAssembler.scala")
 case class VectorAssemblerModel() extends Serializable {
   /** Assemble a feature vector from a set of input features.
     *

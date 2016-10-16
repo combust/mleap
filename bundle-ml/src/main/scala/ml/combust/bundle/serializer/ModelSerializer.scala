@@ -13,58 +13,58 @@ import scala.io.Source
 
 /** Trait for serializing a protobuf model definition.
   */
-trait ModelDefSerializer {
+trait FormatModelSerializer {
   /** Write a protobuf model definition.
     *
     * @param out stream to write to
-    * @param m model definition to write
+    * @param model model to write
     */
-  def write(out: OutputStream, m: ModelDef): Unit
+  def write(out: OutputStream, model: Model): Unit
 
   /** Read a protobuf model definition.
     *
     * @param in stream to read from
-    * @return model definition that was read
+    * @return model that was read
     */
-  def read(in: InputStream): ModelDef
+  def read(in: InputStream): Model
 }
 
 /** Companion object for utility methods related to model definition serialization.
   */
-object ModelDefSerializer {
+object FormatModelSerializer {
   /** Get the appropriate JSON or Protobuf serializer based on the serialization context.
     *
     * @param context serialization context for determining which serializer to return
     * @return JSON or Protobuf model definition serializer depending on serialization context
     */
-  def serializer(implicit context: SerializationContext): ModelDefSerializer = context.concrete match {
-    case SerializationFormat.Json => JsonModelDefSerializer
-    case SerializationFormat.Protobuf => ProtoModelDefSerializer
+  def serializer(implicit context: SerializationContext): FormatModelSerializer = context.concrete match {
+    case SerializationFormat.Json => JsonFormatModelSerializer()
+    case SerializationFormat.Protobuf => ProtoFormatModelSerializer()
   }
 }
 
 /** Object for serializing/deserializing model definitions with JSON.
   */
-object JsonModelDefSerializer extends ModelDefSerializer {
-  override def write(out: OutputStream, m: ModelDef): Unit = {
-    out.write(m.toJson.prettyPrint.getBytes)
+case class JsonFormatModelSerializer(implicit hr: HasBundleRegistry) extends FormatModelSerializer {
+  override def write(out: OutputStream, model: Model): Unit = {
+    out.write(model.toJson.prettyPrint.getBytes)
   }
 
-  override def read(in: InputStream): ModelDef = {
+  override def read(in: InputStream): Model = {
     val json = Source.fromInputStream(in).getLines.mkString
-    json.parseJson.convertTo[ModelDef]
+    json.parseJson.convertTo[Model]
   }
 }
 
 /** Object for serializing/deserializing model definitions with Protobuf.
   */
-object ProtoModelDefSerializer extends ModelDefSerializer {
-  override def write(out: OutputStream, m: ModelDef): Unit = {
-    m.writeTo(out)
+case class ProtoFormatModelSerializer(implicit hr: HasBundleRegistry) extends FormatModelSerializer {
+  override def write(out: OutputStream, model: Model): Unit = {
+    model.asBundle.writeTo(out)
   }
 
-  override def read(in: InputStream): ModelDef = {
-    ModelDef.parseFrom(in)
+  override def read(in: InputStream): Model = {
+    Model.fromBundle(ModelDef.parseFrom(in))
   }
 }
 
@@ -96,7 +96,7 @@ case class ModelSerializer(context: BundleContext) {
     }
 
     for(out <- managed(new FileOutputStream(context.file(Bundle.modelFile)))) {
-      ModelDefSerializer.serializer.write(out, model.bundleModel)
+      FormatModelSerializer.serializer.write(out, model)
     }
   }
 
@@ -111,12 +111,10 @@ case class ModelSerializer(context: BundleContext) {
     * @return (deserialized model, model type class)
     */
   def readWithModel(): (Any, Model) = {
-    val modelDef = (for(in <- managed(new FileInputStream(context.file(Bundle.modelFile)))) yield {
-      ModelDefSerializer.serializer.read(in)
+    var model = (for(in <- managed(new FileInputStream(context.file(Bundle.modelFile)))) yield {
+      FormatModelSerializer.serializer.read(in)
     }).opt.get
-    val m = context.bundleRegistry.model(modelDef.op)
-    var model = Model(op = modelDef.op,
-      attributes = modelDef.attributes.map(AttributeList.apply))
+    val m = context.bundleRegistry.model(model.op)
 
     model = context.format match {
       case SerializationFormat.Mixed =>

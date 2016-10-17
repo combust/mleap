@@ -37,6 +37,7 @@ object SparkRegistry {
       register(ops.feature.BucketizerOp).
       register(ops.feature.ElementwiseProductOp).
       register(ops.feature.PcaOp).
+      register(ops.feature.NGramOp).
 
       // other
       register(ops.PipelineOp)

@@ -5,7 +5,7 @@ import org.scalatest.FunSpec
 /**
   * Created by mikhail on 10/16/16.
   */
-class StopWordsRemoverModelSpec extends FunSpec{
+class StopWordsRemoverModelSpec extends FunSpec {
   describe("#apply"){
     it("filters the array of strings of stop words") {
       val remover = StopWordsRemoverModel(Array("I", "and", "you"), true)

@@ -5,7 +5,7 @@ package ml.combust.mleap.core.feature
   */
 case class StopWordsRemoverModel(stopWords: Array[String],
                              caseSensitive: Boolean
-                           ) extends Serializable{
+                           ) extends Serializable {
   def apply(value: Array[String]): Array[String] = {
     val t = if (caseSensitive) {
       val stopWordsSet = (stopWords).toSet

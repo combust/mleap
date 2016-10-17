@@ -8,7 +8,7 @@ import org.apache.spark.ml.feature.StopWordsRemover
 /**
   * Created by mikhail on 10/16/16.
   */
-object StopWordsRemoverOp extends OpNode[StopWordsRemover, StopWordsRemover]{
+object StopWordsRemoverOp extends OpNode[StopWordsRemover, StopWordsRemover] {
   override val Model: OpModel[StopWordsRemover] = new OpModel[StopWordsRemover] {
     override def opName: String = Bundle.BuiltinOps.feature.stopwords_remover
 

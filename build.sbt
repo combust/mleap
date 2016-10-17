@@ -42,6 +42,7 @@ import xerial.sbt.Sonatype.SonatypeCommand
 
 releaseVersionBump := sbtrelease.Version.Bump.Minor
 releaseCrossBuild := true
+fork := true
 
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,

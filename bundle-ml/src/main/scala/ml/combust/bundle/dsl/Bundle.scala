@@ -47,6 +47,7 @@ object Bundle {
       val normalizer = "normalizer"
       val pca = "pca"
       val ngram = "ngram"
+      val polynomial_expansion = "polynomial_expansion"
     }
 
     object classification {

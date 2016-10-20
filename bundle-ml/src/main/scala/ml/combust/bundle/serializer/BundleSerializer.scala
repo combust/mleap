@@ -63,8 +63,11 @@ case class BundleSerializer(path: File)
           entry = in.getNextEntry
         }
 
-        meta
-      }).opt.flatMap(identity).get
+        meta.getOrElse(throw new IllegalArgumentException("bundle zip does not contain bundle.json file"))
+      }).either.either match {
+        case Left(errors) => throw errors.head
+        case Right(meta) => meta
+      }
     } else {
       BundleDirectorySerializer(path).readMeta()
     }
@@ -127,6 +130,9 @@ case class BundleDirectorySerializer(path: File)
     (for(in <- managed(new FileInputStream(bundleJson))) yield {
       val json = Source.fromInputStream(in).getLines.mkString
       json.parseJson.convertTo[BundleMeta]
-    }).opt.get
+    }).either.either match {
+      case Left(errors) => throw errors.head
+      case Right(meta) => meta
+    }
   }
 }

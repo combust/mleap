@@ -21,9 +21,8 @@ object LogisticRegressionOp extends OpNode[LogisticRegressionModel, LogisticRegr
     }
 
     override def load(context: BundleContext, model: Model): LogisticRegressionModel = {
-      // TODO: better error
       if(model.value("num_classes").getLong != 2) {
-        throw new Error("Only binary logistic regression supported in Spark")
+        throw new IllegalArgumentException("Only binary logistic regression supported in Spark")
       }
 
       val lr = new LogisticRegressionModel(uid = "",

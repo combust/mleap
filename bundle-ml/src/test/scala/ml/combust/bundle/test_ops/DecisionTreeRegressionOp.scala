@@ -67,17 +67,17 @@ object MyNodeWrapper extends NodeWrapper[Node] {
     } else if(node.split.get.s.isContinuous) {
       val s = node.split.get.getContinuous
       ContinuousSplit(s.featureIndex, s.threshold)
-    } else { throw new Error("invalid split") }
+    } else { throw new IllegalArgumentException("invalid split") }
     InternalNode(split, left, right)
   }
 
   override def left(node: Node): Node = node match {
     case node: InternalNode => node.left
-    case _ => throw new Error("not an internal node")
+    case _ => throw new IllegalArgumentException("not an internal node")
   }
   override def right(node: Node): Node = node match {
     case node: InternalNode => node.right
-    case _ => throw new Error("not an internal node")
+    case _ => throw new IllegalArgumentException("not an internal node")
   }
 }
 

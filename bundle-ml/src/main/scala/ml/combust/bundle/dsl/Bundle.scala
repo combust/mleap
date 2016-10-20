@@ -46,6 +46,7 @@ object Bundle {
       val elementwise_product = "elementwise_product"
       val normalizer = "normalizer"
       val pca = "pca"
+      val ngram = "ngram"
     }
 
     object classification {

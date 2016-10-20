@@ -155,7 +155,7 @@ object AttributeList {
   */
 case class AttributeList(lookup: Map[String, Attribute]) {
   /* make sure the list is not empty */
-  if(lookup.isEmpty) { throw new Error("cannot have empty attribute list") } // TODO: better error
+  require(lookup.nonEmpty, "attribute list cannot be empty")
 
   /** Convert to bundle attribute list.
     *

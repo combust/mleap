@@ -23,8 +23,8 @@ object SupportVectorMachineOp extends OpNode[SupportVectorMachine, SupportVector
 
     override def load(context: BundleContext, model: Model): SupportVectorMachineModel = {
       if(model.value("num_classes").getLong != 2) {
-        throw new Error("MLeap only supports binary SVM")
-      } // TODO: Better error
+        throw new IllegalArgumentException("MLeap only supports binary SVM")
+      }
       SupportVectorMachineModel(coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
         intercept = model.value("intercept").getDouble,
         threshold = model.getValue("threshold").map(_.getDouble))

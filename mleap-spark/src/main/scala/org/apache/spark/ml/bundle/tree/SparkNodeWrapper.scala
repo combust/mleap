@@ -70,7 +70,7 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
       val s = bundleSplit.getContinuous
       new tree.ContinuousSplit(featureIndex = s.featureIndex,
         threshold = s.threshold)
-    } else { throw new Error("invalid split") }
+    } else { throw new IllegalArgumentException("invalid split") }
 
     new tree.InternalNode(split = split,
       leftChild = left,
@@ -83,11 +83,11 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
 
   override def left(node: tree.Node): tree.Node = node match {
     case node: tree.InternalNode => node.leftChild
-    case _ => throw new Error("not an internal node") // TODO: better error
+    case _ => throw new IllegalArgumentException("not an internal node")
   }
 
   override def right(node: tree.Node): tree.Node = node match {
     case node: tree.InternalNode => node.rightChild
-    case _ => throw new Error("not an internal node") // TODO: better error
+    case _ => throw new IllegalArgumentException("not an internal node")
   }
 }

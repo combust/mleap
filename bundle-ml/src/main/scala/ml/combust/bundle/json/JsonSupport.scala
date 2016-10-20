@@ -31,7 +31,7 @@ trait JsonSupportLowPriority {
         val inputs = json.fields("inputs").convertTo[Seq[Socket]]
         val outputs = json.fields("outputs").convertTo[Seq[Socket]]
         Shape(inputs, outputs)
-      case _ => throw new Error("Invalid shape") // TODO: better error
+      case _ => deserializationError("invalid shape")
     }
   }
 
@@ -41,7 +41,7 @@ trait JsonSupportLowPriority {
       case JsString("string") => BasicType.STRING
       case JsString("boolean") => BasicType.BOOLEAN
       case JsString("long") => BasicType.LONG
-      case _ => throw new Error("invalid basic type") // TODO: better error
+      case _ => deserializationError("invalid basic type")
     }
 
     override def write(obj: BasicType): JsValue = obj match {
@@ -49,7 +49,7 @@ trait JsonSupportLowPriority {
       case BasicType.STRING => JsString("string")
       case BasicType.BOOLEAN => JsString("boolean")
       case BasicType.LONG => JsString("long")
-      case _ => throw new Error("invalid basic type") // TODO: better error
+      case _ => serializationError("invalid basic type")
     }
   }
 
@@ -66,9 +66,9 @@ trait JsonSupportLowPriority {
             DataType(DataType.Underlying.Tensor(bundleTensorTypeFormat.read(obj.fields("tensor"))))
           case JsString("custom") =>
             DataType(DataType.Underlying.Custom(StringJsonFormat.read(obj.fields("name"))))
-          case _ => throw new Error("invalid data type")
+          case _ => deserializationError("invalid data type")
         }
-      case _ => throw new Error("invalid data type") // TODO: better error
+      case _ => deserializationError("invalid data type")
     }
 
     override def write(obj: DataType): JsValue = {
@@ -81,7 +81,7 @@ trait JsonSupportLowPriority {
       } else if(obj.underlying.isCustom) {
         JsObject(("type", JsString("custom")), ("name", JsString(obj.getCustom)))
       } else {
-        throw new Error("invalid data type") // TODO: better error
+        serializationError("invalid data type")
       }
     }
   }
@@ -91,7 +91,7 @@ trait JsonSupportLowPriority {
       tt.base match {
         case BasicType.DOUBLE => json.convertTo[Seq[Double]]
         case BasicType.STRING => json.convertTo[Seq[String]]
-        case _ => throw new Error("unsupported tensor") // TODO: better error
+        case _ => deserializationError("unsupported tensor")
       }
     }
 
@@ -99,7 +99,7 @@ trait JsonSupportLowPriority {
       tt.base match {
         case BasicType.DOUBLE => obj.asInstanceOf[Seq[Double]].toJson
         case BasicType.STRING => obj.asInstanceOf[Seq[String]].toJson
-        case _ => throw new Error("unsupported tensor") // TODO: better error
+        case _ => serializationError("unsupported tensor")
       }
     }
   }
@@ -121,12 +121,12 @@ trait JsonSupportLowPriority {
           case BasicType.STRING => obj.asInstanceOf[Seq[String]].toJson
           case BasicType.BOOLEAN => obj.asInstanceOf[Seq[Boolean]].toJson
           case BasicType.LONG => obj.asInstanceOf[Seq[Long]].toJson
-          case _ => throw new Error("invalid basic type") // TODO: better error
+          case _ => serializationError("invalid basic type")
         }
       } else if(base.underlying.isList) {
         val format = bundleListValueFormat(base.getList)
         JsArray(obj.asInstanceOf[Seq[Seq[Any]]].map(format.write): _*)
-      } else { throw new Error("invalid list") } // TODO: better error
+      } else { serializationError("invalid list") }
     }
 
     override def read(json: JsValue): Seq[Any] = {
@@ -142,12 +142,12 @@ trait JsonSupportLowPriority {
           case BasicType.STRING => json.convertTo[Seq[String]]
           case BasicType.BOOLEAN => json.convertTo[Seq[Boolean]]
           case BasicType.LONG => json.convertTo[Seq[Long]]
-          case _ => throw new Error("invalid basic type") // TODO: better error
+          case _ => deserializationError("invalid basic type")
         }
       } else if(base.underlying.isList) {
         val format = bundleListValueFormat(base.getList)
         json.convertTo[Seq[JsValue]].map(format.read)
-      } else { throw new Error("invalid list") } // TODO: better error
+      } else { deserializationError("invalid list") }
     }
   }
 
@@ -167,9 +167,9 @@ trait JsonSupportLowPriority {
           case BasicType.STRING => StringJsonFormat.write(obj.asInstanceOf[String])
           case BasicType.BOOLEAN => BooleanJsonFormat.write(obj.asInstanceOf[Boolean])
           case BasicType.LONG => LongJsonFormat.write(obj.asInstanceOf[Long])
-          case _ => throw new Error("invalid basic type") // TODO: better error
+          case _ => serializationError("invalid basic type")
         }
-      } else { throw new Error("unsupported data type") } // TODO: better error
+      } else { serializationError("unsupported data type") }
     }
 
     override def read(json: JsValue): Any = {
@@ -186,9 +186,9 @@ trait JsonSupportLowPriority {
           case BasicType.STRING => StringJsonFormat.read(json)
           case BasicType.BOOLEAN => BooleanJsonFormat.read(json)
           case BasicType.LONG => LongJsonFormat.read(json)
-          case _ => throw new Error("invalid basic type") // TODO: better error
+          case _ => deserializationError("invalid basic type")
         }
-      } else { throw new Error("unsupported data type") } // TODO: better error
+      } else { deserializationError("unsupported data type") }
 
       v
     }
@@ -202,7 +202,7 @@ trait JsonSupportLowPriority {
         val value = bundleValueFormat(dt).read(json.fields("value"))
 
         Attribute(name = name, value = Value(dt, value))
-      case _ => throw new Error("invalid basic type") // TODO: better error
+      case _ => deserializationError("invalid basic type")
     }
 
     override def write(obj: Attribute): JsValue = {
@@ -223,14 +223,14 @@ trait JsonSupportLowPriority {
       case SerializationFormat.Mixed => JsString("mixed")
       case SerializationFormat.Protobuf => JsString("protobuf")
       case SerializationFormat.Json => JsString("json")
-      case _ => throw new Error("invalid format") // TODO: better error
+      case _ => serializationError("invalid format")
     }
 
     override def read(json: JsValue): SerializationFormat = json match {
       case JsString("mixed") => SerializationFormat.Mixed
       case JsString("json") => SerializationFormat.Json
       case JsString("protobuf") => SerializationFormat.Protobuf
-      case _ => throw new Error("invalid format") // TODO: better error
+      case _ => deserializationError("invalid format")
     }
   }
 
@@ -256,7 +256,7 @@ trait JsonSupport extends JsonSupportLowPriority {
     override def read(json: JsValue): AttributeList = json match {
       case json: JsObject =>
         AttributeList(json.fields("attributes").convertTo[Seq[Attribute]])
-      case _ => throw new Error("invalid attribute list") // TODO: better error
+      case _ => deserializationError("invalid attribute list")
     }
 
     override def write(obj: AttributeList): JsValue = JsObject("attributes" -> obj.attributes.toJson)

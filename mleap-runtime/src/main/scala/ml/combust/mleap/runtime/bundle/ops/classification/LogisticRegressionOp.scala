@@ -23,8 +23,8 @@ object LogisticRegressionOp extends OpNode[LogisticRegression, LogisticRegressio
 
     override def load(context: BundleContext, model: Model): LogisticRegressionModel = {
       if(model.value("num_classes").getLong != 2) {
-        throw new Error("MLeap only supports binary logistic regression")
-      } // TODO: Better error
+        throw new IllegalArgumentException("MLeap only supports binary logistic regression")
+      }
       LogisticRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
         intercept = model.value("intercept").getDouble,
         threshold = model.getValue("threshold").map(_.getDouble))

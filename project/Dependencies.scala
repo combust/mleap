@@ -13,7 +13,11 @@ object Dependencies {
 
   lazy val mleapCoreDependencies = baseDependencies.union(sparkLocalDependencies)
 
-  lazy val mleapRuntimeDependencies = baseDependencies.union(sparkLocalDependencies)
+  def mleapRuntimeDependencies(scalaVersion: String) = {
+    baseDependencies.
+      union(sparkLocalDependencies).
+      union(Seq("org.scala-lang" % "scala-reflect" % scalaVersion))
+  }
 
   lazy val mleapSparkDependencies = baseDependencies
     .union(sparkDependencies)

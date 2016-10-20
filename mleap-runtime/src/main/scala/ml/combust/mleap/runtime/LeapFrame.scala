@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.runtime.types.{DataType, StructField, StructType}
 
@@ -136,17 +137,51 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     */
   protected def withSchemaAndDataset(schema: StructType, dataset: Dataset): LF
 
-  override def withInput(name: String): Try[(LF, Int)] = {
-    schema.indexOf(name).map((this.lf, _))
-  }
-
   override def withInput(name: String, dataType: DataType): Try[(LF, Int)] = {
     schema.indexedField(name).flatMap {
       case (index, field) =>
-        if(field.dataType.fits(dataType)) {
+        if(dataType.fits(field.dataType)) {
           Success(this.lf, index)
         } else {
-          Failure(new IllegalArgumentException(s"field $name expected data type ${field.dataType} but found $dataType"))
+          Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
+        }
+    }
+  }
+
+  override def withInputs(fields: Seq[(String, DataType)]): Try[(LF, Seq[Int])] = {
+    fields.foldLeft(Try((lf, Seq[Int]()))) {
+      case (lfs, (name, dataType)) =>
+        schema.indexedField(name).flatMap {
+          case (index, field) =>
+            if(dataType.fits(field.dataType)) {
+              lfs.map {
+                case (l, indices) => (lf, indices :+ index)
+              }
+            } else {
+              Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
+            }
+        }
+    }
+  }
+
+  override def withOutput(name: String,
+                          names: String *)
+                         (udf: UserDefinedFunction): Try[LF] = {
+    withInputs(names.zip(udf.inputs)).flatMap {
+      case (b, indices) =>
+        udf.inputs.length match {
+          case 0 =>
+            val f = udf.f.asInstanceOf[() => Any]
+            withField(name, udf.returnType)(r => f())
+          case 1 =>
+            val f = udf.f.asInstanceOf[(Any) => Any]
+            withField(name, udf.returnType)(r => f(r.get(indices.head)))
+          case 2 =>
+            val f = udf.f.asInstanceOf[(Any, Any) => Any]
+            withField(name, udf.returnType)(r => f(r.get(indices.head), r.get(indices(1))))
+          case 3 =>
+            val f = udf.f.asInstanceOf[(Any, Any, Any) => Any]
+            withField(name, udf.returnType)(r => f(r.get(indices.head), r.get(indices(1)), r.get(indices(2))))
         }
     }
   }

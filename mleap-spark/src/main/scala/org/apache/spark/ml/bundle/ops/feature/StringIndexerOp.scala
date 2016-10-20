@@ -26,7 +26,9 @@ object StringIndexerOp extends OpNode[StringIndexerModel, StringIndexerModel] {
   override def model(node: StringIndexerModel): StringIndexerModel = node
 
   override def load(context: BundleContext, node: Node, model: StringIndexerModel): StringIndexerModel = {
-    new StringIndexerModel(uid = node.name, labels = model.labels)
+    new StringIndexerModel(uid = node.name, labels = model.labels).
+      setInputCol(node.shape.standardInput.name).
+      setOutputCol(node.shape.standardOutput.name)
   }
 
   override def shape(node: StringIndexerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

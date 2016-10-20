@@ -23,9 +23,6 @@ class NGramSpec extends FunSpec{
       val frame2 = ngram.transform(frame).get
       val data = frame2.dataset.toArray
 
-      println(data(0).getArray(1)(0))
-      println(data(0).getArray(1)(1))
-
       assert(data(0).getArray[String](1)(0) == "a b")
       assert(data(0).getArray[String](1)(1) == "b c")
     }

@@ -10,6 +10,7 @@ object Common {
     scalaVersion := "2.11.8",
     crossScalaVersions := Seq("2.10.6", "2.11.8"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
+    fork := true,
     resolvers ++= {
       // Only add Sonatype Snapshots if this version itself is a snapshot version
       if(isSnapshot.value) {

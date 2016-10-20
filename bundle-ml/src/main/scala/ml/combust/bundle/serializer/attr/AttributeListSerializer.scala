@@ -76,18 +76,24 @@ case class AttributeListSerializer(path: File) {
               (implicit context: SerializationContext): AttributeList = {
     (for(in <- managed(new FileInputStream(path))) yield {
       Source.fromInputStream(in).getLines().mkString.parseJson.convertTo[AttributeList]
-    }).opt.get
+    }).either.either match {
+      case Left(errors) => throw errors.head
+      case Right(list) => list
+    }
   }
 
   /** Read an attribute list from a Protobuf file.
     *
     * @param context serialization context for decoding custom values
-    * @return attribut elist from the protobuf file
+    * @return attribute list from the protobuf file
     */
   def readProto()
                (implicit context: SerializationContext): AttributeList = {
     (for(in <- managed(new FileInputStream(path))) yield {
       AttributeList.fromBundle(ml.bundle.AttributeList.AttributeList.parseFrom(in))
-    }).opt.get
+    }).either.either match {
+      case Left(errors) => throw errors.head
+      case Right(list) => list
+    }
   }
 }

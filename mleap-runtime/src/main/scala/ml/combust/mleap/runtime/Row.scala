@@ -55,6 +55,13 @@ trait Row {
     */
   def getInt(index: Int): Int = get(index).asInstanceOf[Int]
 
+  /** Get value at index as a long.
+    *
+    * @param index index of value
+    * @return long value
+    */
+  def getLong(index: Int): Long = get(index).asInstanceOf[Long]
+
   /** Get value at index as a string.
     *
     * @param index index of value
@@ -95,26 +102,26 @@ trait Row {
     * @param udf user defined function to call
     * @return row with calculated value added
     */
-  def withValue(indices: Array[Int])(udf: UserDefinedFunction): Row = {
+  def withValue(indices: Int *)(udf: UserDefinedFunction): Row = {
     udf.inputs.length match {
       case 0 =>
         val f = udf.f.asInstanceOf[() => Any]
-        withValue(f())
+        withLiteral(f())
       case 1 =>
         val f = udf.f.asInstanceOf[(Any) => Any]
-        withValue(f(get(indices.head)))
+        withLiteral(f(get(indices.head)))
       case 2 =>
         val f = udf.f.asInstanceOf[(Any, Any) => Any]
-        withValue(f(get(indices.head), get(indices(1))))
+        withLiteral(f(get(indices.head), get(indices(1))))
       case 3 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any) => Any]
-        withValue(f(get(indices.head), get(indices(1)), get(indices(2))))
+        withLiteral(f(get(indices.head), get(indices(1)), get(indices(2))))
       case 4 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any, Any) => Any]
-        withValue(f(get(indices.head), get(indices(1)), get(indices(2)), get(indices(3))))
+        withLiteral(f(get(indices.head), get(indices(1)), get(indices(2)), get(indices(3))))
       case 5 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any, Any, Any) => Any]
-        withValue(f(get(indices.head), get(indices(1)), get(indices(2)), get(indices(3)), get(indices(4))))
+        withLiteral(f(get(indices.head), get(indices(1)), get(indices(2)), get(indices(3)), get(indices(4))))
     }
   }
 
@@ -123,14 +130,7 @@ trait Row {
     * @param f function for calculating new value
     * @return row with new value
     */
-  def withValue(f: (Row) => Any): Row = withValue(f(this))
-
-  /** Add a value to the row.
-    *
-    * @param value value to add
-    * @return row with the new value
-    */
-  def withValue(value: Any): Row
+  def withValue(f: (Row) => Any): Row = withLiteral(f(this))
 
   /** Add multiple values to the row.
     *
@@ -145,6 +145,13 @@ trait Row {
     * @return row with new values
     */
   def withValues(values: Row): Row
+
+  /** Add a value to the row.
+    *
+    * @param value value to add
+    * @return row with the new value
+    */
+  def withLiteral(value: Any): Row
 
   /** Create a new row from specified indices.
     *
@@ -177,7 +184,7 @@ case class ArrayRow(values: Array[Any]) extends Row {
   override def toSeq: Seq[Any] = values.toSeq
   override def toArray: Array[Any] = values
 
-  override def withValue(value: Any): Row = ArrayRow(values :+ value)
+  override def withLiteral(value: Any): Row = ArrayRow(values :+ value)
   override def withValues(vs: Row): Row = ArrayRow(values ++ vs.toArray)
 
   override def selectIndices(indices: Int*): Row = ArrayRow(indices.toArray.map(values))
@@ -202,7 +209,7 @@ class SeqRow private(values: Seq[Any]) extends Row {
 
   override def selectIndices(indices: Int *): SeqRow = SeqRow(indices.map(index => values(realIndex(index))))
 
-  override def withValue(value: Any): Row = new SeqRow(value +: values)
+  override def withLiteral(value: Any): Row = new SeqRow(value +: values)
   override def withValues(vs: Row): Row = new SeqRow(vs.toSeq.reverse ++ values)
 
   override def dropIndex(index: Int): Row = {

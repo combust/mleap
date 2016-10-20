@@ -46,6 +46,30 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
       }
 
       describe("#withField") {
+        describe("with a user defined function") {
+          it("creates a new LeapFrame with field added") {
+            val frame2 = frame.withField("test_double_2", "test_double") {
+              (r: Double) => r + 10
+            }.get
+            val data = frame2.dataset.toArray
+
+            assert(frame2.schema.fields.length == 3)
+            assert(frame2.schema.indexOf("test_double_2").get == 2)
+            assert(data(0).getDouble(2) == 52.13)
+            assert(data(1).getDouble(2) == 23.42)
+          }
+
+          describe("with non-matching data types") {
+            it("returns a failure") {
+              val frame2 = frame.withField("test_double_2", "test_double") {
+                (r: Int) => r + 10
+              }
+
+              assert(frame2.isFailure)
+            }
+          }
+        }
+
         it("creates a new LeapFrame with field added") {
           val frame2 = frame.withField("test_double_2", DoubleType)(r => r.getDouble(1) + 10).get
           val data = frame2.dataset.toArray

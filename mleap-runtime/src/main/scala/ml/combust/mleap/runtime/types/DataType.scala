@@ -9,6 +9,7 @@ object AnyType extends BasicType {
   override def fits(other: DataType): Boolean = true
 }
 
+object IntegerType extends BasicType
 object LongType extends BasicType
 object BooleanType extends BasicType
 object DoubleType extends BasicType

@@ -18,7 +18,7 @@ trait Dataset extends Serializable {
     * @param udf user defined function
     * @return dataset with value calculated for all rows
     */
-  def withValue(indices: Array[Int])(udf: UserDefinedFunction): Dataset = update(_.withValue(indices)(udf))
+  def withValue(indices: Int *)(udf: UserDefinedFunction): Dataset = update(_.withValue(indices: _*)(udf))
 
   /** Add a value to every row.
     *

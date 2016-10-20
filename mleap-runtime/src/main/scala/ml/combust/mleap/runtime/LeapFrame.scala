@@ -60,13 +60,13 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     * @param udf user defined function for calculating field value
     * @return try new LeapFrame with new field
     */
-  def withField(name: String, fields: Seq[String])
+  def withField(name: String, fields: String *)
                (udf: UserDefinedFunction): Try[LF] = {
     schema.withField(name, udf.returnType).flatMap {
       schema2 =>
         withInputs(fields.zip(udf.inputs)).map {
           case (frame, indices) =>
-            val dataset2 = dataset.withValue(indices)(udf)
+            val dataset2 = dataset.withValue(indices: _*)(udf)
             withSchemaAndDataset(schema2, dataset2)
         }
     }
@@ -169,8 +169,8 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     }
   }
 
-  override def withInputs(fields: Seq[(String, DataType)]): Try[(LF, Array[Int])] = {
-    fields.foldLeft(Try((lf, Array[Int]()))) {
+  override def withInputs(fields: Seq[(String, DataType)]): Try[(LF, Seq[Int])] = {
+    fields.foldLeft(Try((lf, Seq[Int]()))) {
       case (lfs, (name, dataType)) =>
         schema.indexedField(name).flatMap {
           case (index, field) =>
@@ -188,7 +188,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
   override def withOutput(name: String,
                           fields: String *)
                          (udf: UserDefinedFunction): Try[LF] = {
-    withField(name, fields)(udf)
+    withField(name, fields: _*)(udf)
   }
 
   override def withOutput(name: String, dataType: DataType)(o: (Row) => Any): Try[LF] = {

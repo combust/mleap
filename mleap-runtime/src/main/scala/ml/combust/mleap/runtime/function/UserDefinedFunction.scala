@@ -33,6 +33,7 @@ object UserDefinedFunction {
     tpe match {
       case t if t <:< mirrorType[Boolean] => BooleanType
       case t if t <:< mirrorType[String] => StringType
+      case t if t <:< mirrorType[Int] => IntegerType
       case t if t <:< mirrorType[Long] => LongType
       case t if t <:< mirrorType[Double] => DoubleType
       case t if t <:< mirrorType[Array[_]] =>

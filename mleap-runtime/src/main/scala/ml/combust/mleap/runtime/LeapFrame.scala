@@ -56,6 +56,27 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     * Returns a Failure if trying to add a field that already exists.
     *
     * @param name name of field
+    * @param fields input field names
+    * @param udf user defined function for calculating field value
+    * @return try new LeapFrame with new field
+    */
+  def withField(name: String, fields: Seq[String])
+               (udf: UserDefinedFunction): Try[LF] = {
+    schema.withField(name, udf.returnType).flatMap {
+      schema2 =>
+        withInputs(fields.zip(udf.inputs)).map {
+          case (frame, indices) =>
+            val dataset2 = dataset.withValue(indices)(udf)
+            withSchemaAndDataset(schema2, dataset2)
+        }
+    }
+  }
+
+  /** Try to add a field to the LeapFrame.
+    *
+    * Returns a Failure if trying to add a field that already exists.
+    *
+    * @param name name of field
     * @param dataType data type of field
     * @param f function for calculating field value
     * @return try new LeapFrame with new field
@@ -148,8 +169,8 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     }
   }
 
-  override def withInputs(fields: Seq[(String, DataType)]): Try[(LF, Seq[Int])] = {
-    fields.foldLeft(Try((lf, Seq[Int]()))) {
+  override def withInputs(fields: Seq[(String, DataType)]): Try[(LF, Array[Int])] = {
+    fields.foldLeft(Try((lf, Array[Int]()))) {
       case (lfs, (name, dataType)) =>
         schema.indexedField(name).flatMap {
           case (index, field) =>
@@ -165,25 +186,9 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
   }
 
   override def withOutput(name: String,
-                          names: String *)
+                          fields: String *)
                          (udf: UserDefinedFunction): Try[LF] = {
-    withInputs(names.zip(udf.inputs)).flatMap {
-      case (b, indices) =>
-        udf.inputs.length match {
-          case 0 =>
-            val f = udf.f.asInstanceOf[() => Any]
-            withField(name, udf.returnType)(r => f())
-          case 1 =>
-            val f = udf.f.asInstanceOf[(Any) => Any]
-            withField(name, udf.returnType)(r => f(r.get(indices.head)))
-          case 2 =>
-            val f = udf.f.asInstanceOf[(Any, Any) => Any]
-            withField(name, udf.returnType)(r => f(r.get(indices.head), r.get(indices(1))))
-          case 3 =>
-            val f = udf.f.asInstanceOf[(Any, Any, Any) => Any]
-            withField(name, udf.returnType)(r => f(r.get(indices.head), r.get(indices(1)), r.get(indices(2))))
-        }
-    }
+    withField(name, fields)(udf)
   }
 
   override def withOutput(name: String, dataType: DataType)(o: (Row) => Any): Try[LF] = {

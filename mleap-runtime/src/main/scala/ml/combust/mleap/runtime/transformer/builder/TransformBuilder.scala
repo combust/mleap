@@ -12,7 +12,7 @@ import scala.util.{Failure, Try}
 trait TransformBuilder[B <: TransformBuilder[B]] extends Serializable {
   def withInput(name: String): Try[(B, Int)] = withInput(name, AnyType)
   def withInput(name: String, dataType: DataType): Try[(B, Int)]
-  def withInputs(fields: Seq[(String, DataType)]): Try[(B, Seq[Int])]
+  def withInputs(fields: Seq[(String, DataType)]): Try[(B, Array[Int])]
 
   def withOutput(name: String, fields: String *)
                 (f: UserDefinedFunction): Try[B]

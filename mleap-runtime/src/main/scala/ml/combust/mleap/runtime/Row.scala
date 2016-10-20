@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.linalg.Vector
 
 /** Companion object for creating default rows.
@@ -87,6 +88,35 @@ trait Row {
     * @return seq of values from row
     */
   def toSeq: Seq[Any]
+
+  /** Add value to row with a user defined function.
+    *
+    * @param indices input indices to the udf
+    * @param udf user defined function to call
+    * @return row with calculated value added
+    */
+  def withValue(indices: Array[Int])(udf: UserDefinedFunction): Row = {
+    udf.inputs.length match {
+      case 0 =>
+        val f = udf.f.asInstanceOf[() => Any]
+        withValue(f())
+      case 1 =>
+        val f = udf.f.asInstanceOf[(Any) => Any]
+        withValue(f(get(indices.head)))
+      case 2 =>
+        val f = udf.f.asInstanceOf[(Any, Any) => Any]
+        withValue(f(get(indices.head), get(indices(1))))
+      case 3 =>
+        val f = udf.f.asInstanceOf[(Any, Any, Any) => Any]
+        withValue(f(get(indices.head), get(indices(1)), get(indices(2))))
+      case 4 =>
+        val f = udf.f.asInstanceOf[(Any, Any, Any, Any) => Any]
+        withValue(f(get(indices.head), get(indices(1)), get(indices(2)), get(indices(3))))
+      case 5 =>
+        val f = udf.f.asInstanceOf[(Any, Any, Any, Any, Any) => Any]
+        withValue(f(get(indices.head), get(indices(1)), get(indices(2)), get(indices(3)), get(indices(4))))
+    }
+  }
 
   /** Add a value to the row.
     *

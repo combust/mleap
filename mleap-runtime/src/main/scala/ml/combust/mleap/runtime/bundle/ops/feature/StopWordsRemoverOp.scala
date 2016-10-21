@@ -14,12 +14,12 @@ object StopWordsRemoverOp extends OpNode[StopWordsRemover, StopWordsRemoverModel
     override def opName: String = Bundle.BuiltinOps.feature.stopwords_remover
 
     override def store(context: BundleContext, model: Model, obj: StopWordsRemoverModel): Model = {
-      model.withAttr("stop_words", Value.stringVector(obj.stopWords)).
+      model.withAttr("stop_words", Value.stringList(obj.stopWords)).
         withAttr("case_sensitive", Value.boolean(obj.caseSensitive))
     }
 
     override def load(context: BundleContext, model: Model): StopWordsRemoverModel = {
-      StopWordsRemoverModel(stopWords = model.value("stop_words").getStringVector.toArray,
+      StopWordsRemoverModel(stopWords = model.value("stop_words").getStringList.toArray,
         caseSensitive = model.value("case_sensitive").getBoolean)
     }
 

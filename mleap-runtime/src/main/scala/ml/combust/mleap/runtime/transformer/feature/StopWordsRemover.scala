@@ -13,7 +13,7 @@ import scala.util.Try
 case class StopWordsRemover(uid:String = Transformer.uniqueName("stopwords_remover"),
                             inputCol: String,
                             outputCol: String,
-                            model: StopWordsRemoverModel) extends Transformer{
+                            model: StopWordsRemoverModel) extends Transformer {
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withInput(inputCol, ListType(StringType)).flatMap {
       case (b, inputIndex) =>

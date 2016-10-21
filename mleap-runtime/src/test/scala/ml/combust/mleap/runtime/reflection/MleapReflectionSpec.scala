@@ -4,8 +4,6 @@ import ml.combust.mleap.runtime.types._
 import org.apache.spark.ml.linalg.Vector
 import org.scalatest.FunSpec
 
-import scala.util.Try
-
 /**
   * Created by hollinwilkins on 10/21/16.
   */

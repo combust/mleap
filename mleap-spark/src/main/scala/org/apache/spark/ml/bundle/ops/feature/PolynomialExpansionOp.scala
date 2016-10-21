@@ -1,6 +1,6 @@
 package org.apache.spark.ml.bundle.ops.feature
 
-import ml.combust.bundle.dsl.{Bundle, Model, Node, Shape}
+import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
 import org.apache.spark.ml.feature.PolynomialExpansion
@@ -12,9 +12,13 @@ object PolynomialExpansionOp extends OpNode[PolynomialExpansion, PolynomialExpan
   override val Model: OpModel[PolynomialExpansion] = new OpModel[PolynomialExpansion] {
     override def opName: String = Bundle.BuiltinOps.feature.polynomial_expansion
 
-    override def store(context: BundleContext, model: Model, obj: PolynomialExpansion): Model = {model}
+    override def store(context: BundleContext, model: Model, obj: PolynomialExpansion): Model = {
+      model.withAttr("degree", Value.long(obj.getDegree))
+    }
 
-    override def load(context: BundleContext, model: Model): PolynomialExpansion = { new PolynomialExpansion(uid = "")}
+    override def load(context: BundleContext, model: Model): PolynomialExpansion = {
+      new PolynomialExpansion(uid = "").setDegree(model.value("degree").getLong.toInt)
+    }
 
   }
   override def name(node: PolynomialExpansion): String = node.uid

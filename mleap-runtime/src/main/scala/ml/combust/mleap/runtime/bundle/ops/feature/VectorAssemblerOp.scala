@@ -29,12 +29,12 @@ object VectorAssemblerOp extends OpNode[VectorAssembler, VectorAssemblerModel] {
   }
 
   override def shape(node: VectorAssembler): Shape = {
-    val s = Shape()
     var i = 0
-    for(input <- node.inputCols) {
-      s.withInput(input, s"input$i")
-       i = i + 1
-    }
-    s.withStandardOutput(node.outputCol)
+    node.inputCols.foldLeft(Shape()) {
+      case (shape, inputCol) =>
+        val shape2 = shape.withInput(inputCol, s"input$i")
+        i += 1
+        shape2
+    }.withStandardOutput(node.outputCol)
   }
 }

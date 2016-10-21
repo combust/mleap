@@ -113,7 +113,10 @@ case class ModelSerializer(context: BundleContext) {
   def readWithModel(): (Any, Model) = {
     var model = (for(in <- managed(new FileInputStream(context.file(Bundle.modelFile)))) yield {
       FormatModelSerializer.serializer.read(in)
-    }).opt.get
+    }).either.either match {
+      case Left(errors) => throw errors.head
+      case Right(m) => m
+    }
     val m = context.bundleRegistry.model(model.op)
 
     model = context.format match {

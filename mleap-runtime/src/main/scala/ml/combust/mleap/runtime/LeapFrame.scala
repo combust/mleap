@@ -146,7 +146,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
         if(field.dataType.fits(dataType)) {
           Success(this.lf, index)
         } else {
-          Failure(new Error(s"Field $name expected data type ${field.dataType} but found $dataType"))
+          Failure(new IllegalArgumentException(s"field $name expected data type ${field.dataType} but found $dataType"))
         }
     }
   }

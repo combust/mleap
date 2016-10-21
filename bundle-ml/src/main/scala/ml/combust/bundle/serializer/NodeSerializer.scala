@@ -98,7 +98,10 @@ case class NodeSerializer(context: BundleContext) {
   def read(): Any = {
     val node = (for(in <- managed(new FileInputStream(context.file(Bundle.nodeFile)))) yield {
       FormatNodeSerializer.serializer.read(in)
-    }).opt.get
+    }).either.either match {
+      case Left(errors) => throw errors.head
+      case Right(n) => n
+    }
 
     val (model, m) = ModelSerializer(context).readWithModel()
     val op = context.bundleRegistry[Any, Any](m.op)

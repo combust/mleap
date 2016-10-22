@@ -109,52 +109,31 @@ trait Row {
     udf.inputs.length match {
       case 0 =>
         val f = udf.f.asInstanceOf[() => Any]
-        withLiteral(f())
+        withValue(f())
       case 1 =>
         val f = udf.f.asInstanceOf[(Any) => Any]
-        withLiteral(f(selectors.head(this)))
+        withValue(f(selectors.head(this)))
       case 2 =>
         val f = udf.f.asInstanceOf[(Any, Any) => Any]
-        withLiteral(f(selectors.head(this), selectors(1)(this)))
+        withValue(f(selectors.head(this), selectors(1)(this)))
       case 3 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any) => Any]
-        withLiteral(f(selectors.head(this), selectors(1)(this), selectors(2)(this)))
+        withValue(f(selectors.head(this), selectors(1)(this), selectors(2)(this)))
       case 4 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any, Any) => Any]
-        withLiteral(f(selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this)))
+        withValue(f(selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this)))
       case 5 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any, Any, Any) => Any]
-        withLiteral(f(selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this), selectors(4)(this)))
+        withValue(f(selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this), selectors(4)(this)))
     }
   }
-
-  /** Add a value to the row.
-    *
-    * @param f function for calculating new value
-    * @return row with new value
-    */
-  def withValue(f: (Row) => Any): Row = withLiteral(f(this))
-
-  /** Add multiple values to the row.
-    *
-    * @param f function for calculating new row values
-    * @return row with new values
-    */
-  def withValues(f: (Row) => Row): Row = withValues(f(this))
-
-  /** Add multiple values to the row.
-    *
-    * @param values row with values to add
-    * @return row with new values
-    */
-  def withValues(values: Row): Row
 
   /** Add a value to the row.
     *
     * @param value value to add
     * @return row with the new value
     */
-  def withLiteral(value: Any): Row
+  def withValue(value: Any): Row
 
   /** Create a new row from specified indices.
     *
@@ -187,8 +166,7 @@ case class ArrayRow(values: Array[Any]) extends Row {
   override def toSeq: Seq[Any] = values.toSeq
   override def toArray: Array[Any] = values
 
-  override def withLiteral(value: Any): Row = ArrayRow(values :+ value)
-  override def withValues(vs: Row): Row = ArrayRow(values ++ vs.toArray)
+  override def withValue(value: Any): Row = ArrayRow(values :+ value)
 
   override def selectIndices(indices: Int*): Row = ArrayRow(indices.toArray.map(values))
   override def dropIndex(index: Int): Row = ArrayRow(values.take(index) ++ values.drop(index + 1))
@@ -212,8 +190,7 @@ class SeqRow private(values: Seq[Any]) extends Row {
 
   override def selectIndices(indices: Int *): SeqRow = SeqRow(indices.map(index => values(realIndex(index))))
 
-  override def withLiteral(value: Any): Row = new SeqRow(value +: values)
-  override def withValues(vs: Row): Row = new SeqRow(vs.toSeq.reverse ++ values)
+  override def withValue(value: Any): Row = new SeqRow(value +: values)
 
   override def dropIndex(index: Int): Row = {
     val i = realIndex(index)

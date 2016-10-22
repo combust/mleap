@@ -1,6 +1,5 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 
@@ -105,49 +104,11 @@ trait RowSpec[R <: Row] extends FunSpec {
         }
       }
 
-      describe("function arg") {
-        it("adds a value using a function") {
-          val adder = (r: Row) => r.getInt(1) + r.getArray[Int](2)(0)
-          val r2 = row.withValue(adder)
-
-          assert(r2.getInt(6) == 98)
-        }
-      }
-
       describe("value arg") {
         it("adds the value to the row") {
-          val r = row.withLiteral(789)
+          val r = row.withValue(789)
 
           assert(r.getInt(6) == 789)
-        }
-      }
-    }
-
-    describe("#withValues") {
-      describe("function arg") {
-        it("adds the row result to this row") {
-          val multiAdder = {
-            (r: Row) =>
-              val a = r.getInt(1)
-              val ar = r.getArray[Int](2)
-              Row(ar.map(_ + a): _*)
-          }
-          val r = row.withValues(multiAdder)
-
-          assert(r.getInt(6) == 98)
-          assert(r.getInt(7) == 120)
-          assert(r.getInt(8) == 65)
-        }
-      }
-
-      describe("row arg") {
-        it("adds the row to this row") {
-          val r = Row(44, 55, 66)
-          val r2 = row.withValues(r)
-
-          assert(r2.getInt(6) == 44)
-          assert(r2.getInt(7) == 55)
-          assert(r2.getInt(8) == 66)
         }
       }
     }

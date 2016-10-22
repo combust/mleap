@@ -22,13 +22,6 @@ trait Dataset extends Serializable {
   def withValue(selectors: RowSelector *)
                (udf: UserDefinedFunction): Dataset = update(_.withValue(selectors: _*)(udf))
 
-  /** Add values to every row.
-    *
-    * @param f function used to calculate additional values for every row
-    * @return dataset with new values
-    */
-  def withValues(f: (Row) => Row): Dataset = update(_.withValues(f))
-
   /** Select given indices of every row.
     *
     * @param indices indices to select

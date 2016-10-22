@@ -38,15 +38,6 @@ trait DatasetSpec[D <: Dataset] extends FunSpec {
         }
       }
 
-      describe("#withValues") {
-        it("creates a new dataset with additional values in every row") {
-          val dataset2 = dataset.withValues(r => Row(s"${r.getString(1)}:${r.getInt(0)}", 78 + r.getInt(0)))
-          val data = dataset2.toArray.map(r => (r.getString(2), r.getInt(3)))
-
-          assert(data sameElements Array(("hey:42", 120), ("there:13", 91)))
-        }
-      }
-
       describe("#selectIndices") {
         it("creates a new dataset with the selected indices") {
           val dataset2 = dataset.selectIndices(0)

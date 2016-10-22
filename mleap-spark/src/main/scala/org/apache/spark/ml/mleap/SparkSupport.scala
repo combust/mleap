@@ -6,17 +6,26 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.serializer._
 import org.apache.spark.ml.bundle.SparkBundle
 import org.apache.spark.ml.Transformer
+import ml.combust.mleap.runtime.transformer.{Transformer => MleapTransformer}
+import ml.combust.mleap.spark.SparkTransformBuilder
+import org.apache.spark.sql.DataFrame
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object SparkSupport {
+trait SparkSupport {
   implicit class TransformerOps(transformer: Transformer) {
     def serializeToBundle(path: File,
                           list: Option[AttributeList] = None,
                           format: SerializationFormat = SerializationFormat.Mixed)
                          (implicit hr: HasBundleRegistry): Unit = {
       SparkBundle.writeTransformer(transformer, path, list, format)(hr)
+    }
+  }
+
+  implicit class MleapTransformerOps(transformer: MleapTransformer) {
+    def transform(dataset: DataFrame): DataFrame = {
+      transformer.transform(SparkTransformBuilder(dataset)).map(_.dataset).get
     }
   }
 
@@ -28,3 +37,4 @@ object SparkSupport {
                          (implicit hr: HasBundleRegistry): (Bundle, Transformer) = SparkBundle.readTransformer(path)
   }
 }
+object SparkSupport extends SparkSupport

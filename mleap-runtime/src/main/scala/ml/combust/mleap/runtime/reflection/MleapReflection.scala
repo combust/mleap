@@ -14,6 +14,8 @@ trait MleapReflection {
 
   import universe._
 
+  def scalaType(t: DataType): `Type` = ???
+
   def dataType[T: TypeTag]: DataType = dataTypeFor(mirrorType[T])
   private def dataTypeFor(tpe: `Type`): DataType = MleapReflectionLock.synchronized {
     tpe match {

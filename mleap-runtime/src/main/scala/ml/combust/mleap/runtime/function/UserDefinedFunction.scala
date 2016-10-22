@@ -5,8 +5,7 @@ import ml.combust.mleap.runtime.types._
 import scala.language.implicitConversions
 import scala.reflect.runtime.universe.TypeTag
 
-/**
-  * Created by hollinwilkins on 10/19/16.
+/** Companion object for creating user defined functions.
   */
 object UserDefinedFunction {
   import ml.combust.mleap.runtime.reflection.MleapReflection.dataType

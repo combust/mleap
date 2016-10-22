@@ -51,6 +51,22 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     }
   }
 
+  def withInputs(fields: Seq[(String, DataType)]): Try[(LF, Seq[Int])] = {
+    fields.foldLeft(Try((lf, Seq[Int]()))) {
+      case (lfs, (name, dataType)) =>
+        schema.indexedField(name).flatMap {
+          case (index, field) =>
+            if(dataType.fits(field.dataType)) {
+              lfs.map {
+                case (l, indices) => (lf, indices :+ index)
+              }
+            } else {
+              Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
+            }
+        }
+    }
+  }
+
   /** Try to add a field to the LeapFrame.
     *
     * Returns a Failure if trying to add a field that already exists.
@@ -158,44 +174,9 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     */
   protected def withSchemaAndDataset(schema: StructType, dataset: Dataset): LF
 
-  override def withInput(name: String, dataType: DataType): Try[(LF, Int)] = {
-    schema.indexedField(name).flatMap {
-      case (index, field) =>
-        if(dataType.fits(field.dataType)) {
-          Success(this.lf, index)
-        } else {
-          Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
-        }
-    }
-  }
-
-  override def withInputs(fields: Seq[(String, DataType)]): Try[(LF, Seq[Int])] = {
-    fields.foldLeft(Try((lf, Seq[Int]()))) {
-      case (lfs, (name, dataType)) =>
-        schema.indexedField(name).flatMap {
-          case (index, field) =>
-            if(dataType.fits(field.dataType)) {
-              lfs.map {
-                case (l, indices) => (lf, indices :+ index)
-              }
-            } else {
-              Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
-            }
-        }
-    }
-  }
-
   override def withOutput(name: String,
                           fields: String *)
                          (udf: UserDefinedFunction): Try[LF] = {
     withField(name, fields: _*)(udf)
-  }
-
-  override def withOutput(name: String, dataType: DataType)(o: (Row) => Any): Try[LF] = {
-    withField(name, dataType)(o)
-  }
-
-  override def withOutputs(fields: Seq[StructField])(o: (Row) => Row): Try[LF] = {
-    withFields(fields)(o)
   }
 }

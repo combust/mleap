@@ -1,11 +1,14 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.linalg.Vector
 
 /** Companion object for creating default rows.
   */
 object Row {
+  type RowSelector = (Row) => Any
+
   /** Create a row using the default implementation [[ArrayRow]].
     *
     * @param values values in the row
@@ -98,30 +101,30 @@ trait Row {
 
   /** Add value to row with a user defined function.
     *
-    * @param indices input indices to the udf
+    * @param selectors row selectors to generate inputs to function
     * @param udf user defined function to call
     * @return row with calculated value added
     */
-  def withValue(indices: Int *)(udf: UserDefinedFunction): Row = {
+  def withValue(selectors: RowSelector *)(udf: UserDefinedFunction): Row = {
     udf.inputs.length match {
       case 0 =>
         val f = udf.f.asInstanceOf[() => Any]
         withLiteral(f())
       case 1 =>
         val f = udf.f.asInstanceOf[(Any) => Any]
-        withLiteral(f(get(indices.head)))
+        withLiteral(f(selectors.head(this)))
       case 2 =>
         val f = udf.f.asInstanceOf[(Any, Any) => Any]
-        withLiteral(f(get(indices.head), get(indices(1))))
+        withLiteral(f(selectors.head(this), selectors(1)(this)))
       case 3 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any) => Any]
-        withLiteral(f(get(indices.head), get(indices(1)), get(indices(2))))
+        withLiteral(f(selectors.head(this), selectors(1)(this), selectors(2)(this)))
       case 4 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any, Any) => Any]
-        withLiteral(f(get(indices.head), get(indices(1)), get(indices(2)), get(indices(3))))
+        withLiteral(f(selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this)))
       case 5 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any, Any, Any) => Any]
-        withLiteral(f(get(indices.head), get(indices(1)), get(indices(2)), get(indices(3)), get(indices(4))))
+        withLiteral(f(selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this), selectors(4)(this)))
     }
   }
 

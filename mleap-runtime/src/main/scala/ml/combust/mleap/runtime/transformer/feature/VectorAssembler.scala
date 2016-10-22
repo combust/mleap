@@ -12,10 +12,10 @@ import scala.util.Try
 case class VectorAssembler(override val uid: String = Transformer.uniqueName("vector_assembler"),
                            inputCols: Array[String],
                            outputCol: String) extends Transformer {
-  private val assembler: VectorAssemblerModel = VectorAssemblerModel.default
-
+  val exec = (values: Array[Any]) => VectorAssemblerModel.default(values)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+    builder.withOutput(outputCol, inputCols)(exec)
 //    inputCols.foldLeft(Try((builder, Seq[Int]()))) {
 //      (result, col) => result.flatMap {
 //        case (b, indices) =>
@@ -28,6 +28,5 @@ case class VectorAssembler(override val uid: String = Transformer.uniqueName("ve
 //      case (b, indices) =>
 //        b.withOutput(outputCol, TensorType.doubleVector())(row => assembler(indices.map(row.get): _*))
 //    }
-    Try(builder)
   }
 }

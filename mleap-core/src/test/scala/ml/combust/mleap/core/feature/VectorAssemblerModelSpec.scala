@@ -12,10 +12,10 @@ class VectorAssemblerModelSpec extends FunSpec {
       val assembler = VectorAssemblerModel.default
       val expectedArray = Array(45.0, 76.8, 23.0, 45.6, 0.0, 22.3, 45.6, 0.0, 99.3)
 
-      assert(assembler(45.0,
+      assert(assembler(Array(45.0,
         76.8,
         Vectors.dense(Array(23.0, 45.6)),
-        Vectors.sparse(5, Array(1, 2, 4), Array(22.3, 45.6, 99.3))).toArray.sameElements(expectedArray))
+        Vectors.sparse(5, Array(1, 2, 4), Array(22.3, 45.6, 99.3)))).toArray.sameElements(expectedArray))
     }
   }
 }

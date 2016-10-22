@@ -97,7 +97,7 @@ trait RowSpec[R <: Row] extends FunSpec {
     describe("#withValue") {
       describe("user defined function") {
         it("adds a value using a user defined function") {
-          val r2 = row.withValue(1, 2) {
+          val r2 = row.withValue(r => r.get(1), r => r.get(2)) {
             (v1: Int, v2: Array[Int]) => v1 + v2(0)
           }
 

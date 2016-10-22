@@ -28,20 +28,13 @@ trait DatasetSpec[D <: Dataset] extends FunSpec {
       describe("#withValue") {
         describe("with a user defined function") {
           it("created a new dataset with the calculated value from the user defined function") {
-            val dataset2 = dataset.withValue(1, 0) {
+            val dataset2 = dataset.withValue(r => r.get(1), r => r.get(0)) {
               (v1: String, v2: Int) => s"$v1:$v2"
             }
             val data = dataset2.toArray.map(r => r.getString(2))
 
             assert(data sameElements Array("hey:42", "there:13"))
           }
-        }
-
-        it("creates a new dataset with a calculated value in every row") {
-          val dataset2 = dataset.withValue(r => s"${r.getString(1)}:${r.getInt(0)}")
-          val data = dataset2.toArray.map(r => r.getString(2))
-
-          assert(data sameElements Array("hey:42", "there:13"))
         }
       }
 

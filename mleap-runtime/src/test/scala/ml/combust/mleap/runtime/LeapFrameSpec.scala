@@ -67,6 +67,14 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
             assert(frame2.isFailure)
           }
         }
+
+        describe("with MultipleFieldSelector and non Array[Any] data type") {
+          val frame2 = frame.withField("test_double_2", Array("test_double")) {
+            (r: Array[Double]) => r.head
+          }
+
+          assert(frame2.isFailure)
+        }
       }
 
       describe("#dropField") {

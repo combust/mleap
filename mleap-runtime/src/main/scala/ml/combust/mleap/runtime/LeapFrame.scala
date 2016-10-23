@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime
 
 import ml.combust.mleap.runtime.Row.RowSelector
-import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector, UserDefinedFunction}
+import ml.combust.mleap.runtime.function.{FieldSelector, MultipleFieldSelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.{DataType, ListType, StructField, StructType}
+import ml.combust.mleap.runtime.types._
 
 import scala.util.{Failure, Try}
 
@@ -67,26 +67,16 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
             Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
           }
       }
-    case ArraySelector(fields @ _*) =>
-      (for(base <- Try(dataType.asInstanceOf[ListType].base)) yield {
-        var i = 0
-        fields.foldLeft(Try(new Array[Int](fields.length))) {
-          case (indices, name) =>
-            schema.indexedField(name).flatMap {
-              case (index, field) =>
-                if (base.fits(field.dataType)) {
-                  indices.map {
-                    ids =>
-                      ids(i) = index
-                      i = i + 1
-                      ids
-                  }
-                } else {
-                  Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $base"))
-                }
-            }
-        }.map(indices => (r: Row) => indices.map(i => r.get(i)))
-      }).flatMap(identity)
+    case MultipleFieldSelector(fields @ _*) =>
+      if(dataType == ListType(AnyType)) {
+        schema.indicesOf(fields: _*).map {
+          indices =>
+            val indicesArr = indices.toArray
+            r => indicesArr.map(r.get)
+        }
+      } else {
+        Failure(new IllegalArgumentException(s"multiple field selector must be an Array[Any], found $dataType"))
+      }
   }
 
   /** Try to add a field to the LeapFrame.

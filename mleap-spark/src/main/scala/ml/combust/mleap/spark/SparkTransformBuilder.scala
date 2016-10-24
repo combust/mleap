@@ -4,7 +4,7 @@ import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import org.apache.spark.sql.{Column, DataFrame, expressions}
 import org.apache.spark.sql.mleap.UserDefinedFunctionConverters._
-import org.apache.spark.sql.functions
+import org.apache.spark.sql.mleap.MleapArrayExpression
 
 import scala.util.Try
 
@@ -21,6 +21,6 @@ case class SparkTransformBuilder(dataset: DataFrame) extends TransformBuilder[Sp
 
   private def sparkSelector(selector: Selector): Column = selector match {
     case FieldSelector(name) => dataset.col(name)
-    case ArraySelector(names @ _*) => functions.array(names.map(dataset.col): _*)
+    case ArraySelector(names @ _*) => MleapArrayExpression.col(names.map(dataset.col))
   }
 }

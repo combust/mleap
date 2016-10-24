@@ -1,13 +1,12 @@
-package org.apache.spark.ml.mleap
+package ml.combust.mleap.spark
 
 import java.io.File
 
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.serializer._
-import org.apache.spark.ml.bundle.SparkBundle
-import org.apache.spark.ml.Transformer
 import ml.combust.mleap.runtime.transformer.{Transformer => MleapTransformer}
-import ml.combust.mleap.spark.SparkTransformBuilder
+import org.apache.spark.ml.Transformer
+import org.apache.spark.ml.bundle.SparkBundle
 import org.apache.spark.sql.DataFrame
 
 /**

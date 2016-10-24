@@ -1,6 +1,7 @@
-package org.apache.spark.ml.bundle
+package ml.combust.mleap.spark
 
 import ml.combust.bundle.serializer.BundleRegistry
+import org.apache.spark.ml.bundle.ops
 
 /**
   * Created by hollinwilkins on 8/21/16.

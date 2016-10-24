@@ -5,7 +5,7 @@ sealed trait DataType extends Serializable {
 }
 sealed trait BasicType extends DataType with Serializable
 
-object AnyType extends BasicType {
+object AnyType extends DataType {
   override def fits(other: DataType): Boolean = true
 }
 

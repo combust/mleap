@@ -20,6 +20,7 @@ object MleapRegistry {
 
     // feature
     register(ops.feature.StandardScalerOp).
+    register(ops.feature.OneHotEncoderOp).
     register(ops.feature.StringIndexerOp).
     register(ops.feature.ReverseStringIndexerOp).
     register(ops.feature.VectorAssemblerOp).

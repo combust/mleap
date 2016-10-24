@@ -13,7 +13,7 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassificationModel, 
   implicit val nodeWrapper = SparkNodeWrapper
 
   override val Model: OpModel[RandomForestClassificationModel] = new OpModel[RandomForestClassificationModel] {
-    override def opName: String = Bundle.BuiltinOps.regression.random_forest_regression
+    override def opName: String = Bundle.BuiltinOps.classification.random_forest_classifier
 
     override def store(context: BundleContext, model: Model, obj: RandomForestClassificationModel): Model = {
       var i = 0
@@ -26,12 +26,17 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassificationModel, 
       }
       model.withAttr("num_features", Value.long(obj.numFeatures)).
         withAttr("num_classes", Value.long(obj.numClasses)).
+        withAttr("tree_weights", Value.doubleList(obj.treeWeights)).
         withAttr("trees", Value.stringList(trees))
     }
 
     override def load(context: BundleContext, model: Model): RandomForestClassificationModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val numClasses = model.value("num_classes").getLong.toInt
+      val treeWeights = model.value("tree_weights").getDoubleList
+
+      // TODO: get rid of this when Spark supports setting tree weights
+      for(weight <- treeWeights) { require(weight == 1.0, "tree weights must be 1.0 for Spark") }
 
       val models = model.value("trees").getStringList.map {
         tree => ModelSerializer(context.bundleContext(tree)).read().asInstanceOf[DecisionTreeClassificationModel]

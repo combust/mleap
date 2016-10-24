@@ -51,7 +51,7 @@ object RandomForestRegressionOp extends OpNode[RandomForestRegression, RandomFor
   override def load(context: BundleContext, node: Node, model: RandomForestRegressionModel): RandomForestRegression = {
     RandomForestRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.input("prediction").name,
+      predictionCol = node.shape.output("prediction").name,
       model = model)
   }
 

@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime
 
 import ml.combust.mleap.runtime.Row.RowSelector
-import ml.combust.mleap.runtime.function.{FieldSelector, MultipleFieldSelector, Selector, UserDefinedFunction}
+import ml.combust.mleap.runtime.function.{FieldSelector, ArraySelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.runtime.types._
 
@@ -67,7 +67,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
             Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
           }
       }
-    case MultipleFieldSelector(fields @ _*) =>
+    case ArraySelector(fields @ _*) =>
       if(dataType == ListType(AnyType)) {
         schema.indicesOf(fields: _*).map {
           indices =>

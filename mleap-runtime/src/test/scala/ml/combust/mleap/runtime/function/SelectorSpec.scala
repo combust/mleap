@@ -12,7 +12,7 @@ class SelectorSpec extends FunSpec {
       val arraySelector: Selector = Array("hey", "there")
 
       assert(fieldSelector == FieldSelector("hey"))
-      assert(arraySelector == MultipleFieldSelector("hey", "there"))
+      assert(arraySelector == ArraySelector("hey", "there"))
     }
   }
 }

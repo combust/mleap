@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.reflection
 
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
 import org.apache.spark.ml.linalg.Vector
 import org.scalatest.FunSpec
@@ -10,6 +11,7 @@ import org.scalatest.FunSpec
 class MleapReflectionSpec extends FunSpec {
   describe("#dataType") {
     import MleapReflection.dataType
+    implicit val context = MleapContext()
 
     it("returns the Mleap runtime data type from the Scala type") {
       assert(dataType[Boolean] == BooleanType)

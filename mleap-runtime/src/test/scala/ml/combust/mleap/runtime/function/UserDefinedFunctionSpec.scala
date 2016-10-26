@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.function
 
+import ml.combust.mleap.runtime.test.{MyCustomObject, MyCustomType}
 import ml.combust.mleap.runtime.types._
 import org.apache.spark.ml.linalg.Vector
 import org.scalatest.FunSpec
@@ -16,6 +17,7 @@ class UserDefinedFunctionSpec extends FunSpec {
       val udf3: UserDefinedFunction = (v1: Boolean, v2: Vector) => "hello": Any
       val udf4: UserDefinedFunction = (v1: Array[Boolean], v2: Array[String], v3: Array[Double]) => "hello"
       val udf5: UserDefinedFunction = (v1: Double, v2: Double, v3: Double, v4: Double, v5: String) => 55d
+      val udf0custom: UserDefinedFunction = () => MyCustomObject()
 
       assertUdfForm(udf0, StringType)
       assertUdfForm(udf1, ListType(StringType), DoubleType)
@@ -23,6 +25,7 @@ class UserDefinedFunctionSpec extends FunSpec {
       assertUdfForm(udf3, AnyType, BooleanType, TensorType.doubleVector())
       assertUdfForm(udf4, StringType, ListType(BooleanType), ListType(StringType), ListType(DoubleType))
       assertUdfForm(udf5, DoubleType, DoubleType, DoubleType, DoubleType, DoubleType, StringType)
+      assertUdfForm(udf0custom, new MyCustomType)
     }
   }
 

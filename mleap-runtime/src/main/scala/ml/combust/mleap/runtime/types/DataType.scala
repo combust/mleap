@@ -54,4 +54,10 @@ trait CustomType[T] extends DataType {
 
   def toBytes(t: T): Array[Byte] = format.write(t).compactPrint.getBytes("UTF-8")
   def fromBytes(bytes: Array[Byte]): T = format.read(new String(bytes, "UTF-8").parseJson)
+
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case obj: CustomType[_] =>
+      getClass.getCanonicalName == obj.getClass.getCanonicalName && klazz == obj.klazz
+    case _ => false
+  }
 }

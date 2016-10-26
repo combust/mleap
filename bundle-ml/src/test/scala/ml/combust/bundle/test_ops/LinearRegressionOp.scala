@@ -15,8 +15,10 @@ case class LinearRegression(uid: String,
                             output: String,
                             model: LinearModel) extends Transformer
 
-object LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
+class LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
   override val Model: OpModel[Any, LinearModel] = new OpModel[Any, LinearModel] {
+    override val klazz: Class[LinearModel] = classOf[LinearModel]
+
     override def opName: String = Bundle.BuiltinOps.regression.linear_regression
 
     override def store(context: BundleContext[Any], model: Model, obj: LinearModel): Model = {
@@ -29,6 +31,8 @@ object LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
         intercept = model.value("intercept").getDouble)
     }
   }
+
+  override val klazz: Class[LinearRegression] = classOf[LinearRegression]
 
   override def name(node: LinearRegression): String = node.uid
 

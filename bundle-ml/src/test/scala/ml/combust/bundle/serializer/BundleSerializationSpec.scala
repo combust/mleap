@@ -13,11 +13,7 @@ import scala.util.Random
   * Created by hollinwilkins on 8/21/16.
   */
 class BundleSerializationSpec extends FunSpec {
-  implicit val registry = new BundleRegistry().
-    register(LinearRegressionOp).
-    register(StringIndexerOp).
-    register(PipelineOp).
-    register(DecisionTreeRegressionOp)
+  implicit val registry = BundleRegistry("test")
 
   it should behave like bundleSerializer("Serializing/Deserializing mixed a bundle as a dir",
     SerializationFormat.Mixed,

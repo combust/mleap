@@ -9,8 +9,10 @@ import org.apache.spark.ml.feature.HashingTF
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object HashingTermFrequencyOp extends OpNode[SparkBundleContext, HashingTF, HashingTF] {
+class HashingTermFrequencyOp extends OpNode[SparkBundleContext, HashingTF, HashingTF] {
   override val Model: OpModel[SparkBundleContext, HashingTF] = new OpModel[SparkBundleContext, HashingTF] {
+    override val klazz: Class[HashingTF] = classOf[HashingTF]
+
     override def opName: String = Bundle.BuiltinOps.feature.hashing_term_frequency
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: HashingTF): Model = {
@@ -23,6 +25,8 @@ object HashingTermFrequencyOp extends OpNode[SparkBundleContext, HashingTF, Hash
         setBinary(model.value("binary").getBoolean)
     }
   }
+
+  override val klazz: Class[HashingTF] = classOf[HashingTF]
 
   override def name(node: HashingTF): String = node.uid
 

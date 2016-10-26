@@ -10,8 +10,10 @@ import org.apache.spark.ml.linalg.Vectors
 /**
   * Created by mikhail on 9/23/16.
   */
-object ElementwiseProductOp extends OpNode[SparkBundleContext, ElementwiseProduct, ElementwiseProduct] {
+class ElementwiseProductOp extends OpNode[SparkBundleContext, ElementwiseProduct, ElementwiseProduct] {
   override val Model: OpModel[SparkBundleContext, ElementwiseProduct] = new OpModel[SparkBundleContext, ElementwiseProduct] {
+    override val klazz: Class[ElementwiseProduct] = classOf[ElementwiseProduct]
+
     override def opName: String = Bundle.BuiltinOps.feature.elementwise_product
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: ElementwiseProduct): Model = {
@@ -22,6 +24,8 @@ object ElementwiseProductOp extends OpNode[SparkBundleContext, ElementwiseProduc
       new ElementwiseProduct(uid = "").setScalingVec(Vectors.dense(model.value("scaling_vec").getDoubleVector.toArray))
     }
   }
+
+  override val klazz: Class[ElementwiseProduct] = classOf[ElementwiseProduct]
 
   override def name(node: ElementwiseProduct): String = node.uid
 

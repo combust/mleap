@@ -10,8 +10,10 @@ import org.apache.spark.ml.regression.LinearRegressionModel
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object LinearRegressionOp extends OpNode[SparkBundleContext, LinearRegressionModel, LinearRegressionModel] {
+class LinearRegressionOp extends OpNode[SparkBundleContext, LinearRegressionModel, LinearRegressionModel] {
   override val Model: OpModel[SparkBundleContext, LinearRegressionModel] = new OpModel[SparkBundleContext, LinearRegressionModel] {
+    override val klazz: Class[LinearRegressionModel] = classOf[LinearRegressionModel]
+
     override def opName: String = Bundle.BuiltinOps.regression.linear_regression
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: LinearRegressionModel): Model = {
@@ -25,6 +27,8 @@ object LinearRegressionOp extends OpNode[SparkBundleContext, LinearRegressionMod
         intercept = model.value("intercept").getDouble)
     }
   }
+
+  override val klazz: Class[LinearRegressionModel] = classOf[LinearRegressionModel]
 
   override def name(node: LinearRegressionModel): String = node.uid
 

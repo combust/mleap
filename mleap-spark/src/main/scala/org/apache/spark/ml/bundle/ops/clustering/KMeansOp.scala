@@ -12,8 +12,10 @@ import org.apache.spark.mllib.linalg.Vectors
 /**
   * Created by hollinwilkins on 9/30/16.
   */
-object KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
+class KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
   override val Model: OpModel[SparkBundleContext, KMeansModel] = new OpModel[SparkBundleContext, KMeansModel] {
+    override val klazz: Class[KMeansModel] = classOf[KMeansModel]
+
     override def opName: String = Bundle.BuiltinOps.clustering.k_means
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: KMeansModel): Model = {
@@ -31,6 +33,8 @@ object KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
       new KMeansModel(uid = "", parentModel = mllibModel)
     }
   }
+
+  override val klazz: Class[KMeansModel] = classOf[KMeansModel]
 
   override def name(node: KMeansModel): String = node.uid
 

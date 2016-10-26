@@ -13,6 +13,10 @@ import spray.json._
   * @tparam T Scala class of custom type
   */
 trait CustomType[T] {
+  /** Class of the custom type.
+    */
+  val klazz: Class[T]
+
   /** Get name of the custom type.
     *
     * This can be anything as long as it is unique among custom types

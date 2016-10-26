@@ -10,8 +10,10 @@ import org.apache.spark.ml.linalg.Vectors
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
+class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
   override val Model: OpModel[SparkBundleContext, LogisticRegressionModel] = new OpModel[SparkBundleContext, LogisticRegressionModel] {
+    override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
+
     override def opName: String = Bundle.BuiltinOps.classification.logistic_regression
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: LogisticRegressionModel): Model = {
@@ -35,6 +37,8 @@ object LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegressio
         getOrElse(lr)
     }
   }
+
+  override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 
   override def name(node: LogisticRegressionModel): String = node.uid
 

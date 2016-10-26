@@ -14,8 +14,10 @@ case class StringIndexer(uid: String,
                          output: String,
                          model: StringIndexerModel) extends Transformer
 
-object StringIndexerOp extends OpNode[Any, StringIndexer, StringIndexerModel] {
+class StringIndexerOp extends OpNode[Any, StringIndexer, StringIndexerModel] {
   override val Model: OpModel[Any, StringIndexerModel] = new OpModel[Any, StringIndexerModel] {
+    override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
+
     override def opName: String = Bundle.BuiltinOps.feature.string_indexer
 
     override def store(context: BundleContext[Any], model: Model, obj: StringIndexerModel): Model = {
@@ -26,6 +28,8 @@ object StringIndexerOp extends OpNode[Any, StringIndexer, StringIndexerModel] {
       StringIndexerModel(strings = model.value("labels").getStringList)
     }
   }
+
+  override val klazz: Class[StringIndexer] = classOf[StringIndexer]
 
   override def name(node: StringIndexer): String = node.uid
 

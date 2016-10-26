@@ -10,8 +10,10 @@ import org.apache.spark.ml.linalg.Vectors
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, StandardScalerModel] {
+class StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, StandardScalerModel] {
   override val Model: OpModel[SparkBundleContext, StandardScalerModel] = new OpModel[SparkBundleContext, StandardScalerModel] {
+    override val klazz: Class[StandardScalerModel] = classOf[StandardScalerModel]
+
     override def opName: String = Bundle.BuiltinOps.feature.standard_scaler
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: StandardScalerModel): Model = {
@@ -28,6 +30,8 @@ object StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, 
       new StandardScalerModel(uid = "", std = std, mean = mean)
     }
   }
+
+  override val klazz: Class[StandardScalerModel] = classOf[StandardScalerModel]
 
   override def name(node: StandardScalerModel): String = node.uid
 

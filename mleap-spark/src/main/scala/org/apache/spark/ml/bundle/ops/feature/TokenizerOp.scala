@@ -9,14 +9,18 @@ import org.apache.spark.ml.feature.Tokenizer
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object TokenizerOp extends OpNode[SparkBundleContext, Tokenizer, Tokenizer] {
+class TokenizerOp extends OpNode[SparkBundleContext, Tokenizer, Tokenizer] {
   override val Model: OpModel[SparkBundleContext, Tokenizer] = new OpModel[SparkBundleContext, Tokenizer] {
+    override val klazz: Class[Tokenizer] = classOf[Tokenizer]
+
     override def opName: String = Bundle.BuiltinOps.feature.tokenizer
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: Tokenizer): Model = { model }
 
     override def load(context: BundleContext[SparkBundleContext], model: Model): Tokenizer = new Tokenizer(uid = "")
   }
+
+  override val klazz: Class[Tokenizer] = classOf[Tokenizer]
 
   override def name(node: Tokenizer): String = node.uid
 

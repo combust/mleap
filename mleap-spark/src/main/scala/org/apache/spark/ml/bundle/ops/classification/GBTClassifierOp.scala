@@ -10,8 +10,10 @@ import org.apache.spark.ml.regression.DecisionTreeRegressionModel
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-object GBTClassifierOp extends OpNode[SparkBundleContext, GBTClassificationModel, GBTClassificationModel] {
+class GBTClassifierOp extends OpNode[SparkBundleContext, GBTClassificationModel, GBTClassificationModel] {
   override val Model: OpModel[SparkBundleContext, GBTClassificationModel] = new OpModel[SparkBundleContext, GBTClassificationModel] {
+    override val klazz: Class[GBTClassificationModel] = classOf[GBTClassificationModel]
+
     override def opName: String = Bundle.BuiltinOps.classification.gbt_classifier
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: GBTClassificationModel): Model = {
@@ -47,6 +49,8 @@ object GBTClassifierOp extends OpNode[SparkBundleContext, GBTClassificationModel
         numFeatures = numFeatures)
     }
   }
+
+  override val klazz: Class[GBTClassificationModel] = classOf[GBTClassificationModel]
 
   override def name(node: GBTClassificationModel): String = node.uid
 

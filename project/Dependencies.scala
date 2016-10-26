@@ -16,8 +16,7 @@ object Dependencies {
   def mleapRuntimeDependencies(scalaVersion: String) = {
     baseDependencies.
       union(sparkLocalDependencies).
-      union(Seq("org.scala-lang" % "scala-reflect" % scalaVersion,
-        "com.typesafe" % "config" % "1.3.0"))
+      union(Seq("org.scala-lang" % "scala-reflect" % scalaVersion))
   }
 
   lazy val mleapSparkDependencies = baseDependencies.
@@ -25,5 +24,6 @@ object Dependencies {
 
   lazy val bundleMlDependencies = baseDependencies.
     union(Seq("io.spray" %% "spray-json" % "1.3.2",
-      "com.jsuereth" %% "scala-arm" % "2.0-RC1"))
+      "com.jsuereth" %% "scala-arm" % "2.0-RC1",
+      "com.typesafe" % "config" % "1.3.0"))
 }

@@ -11,10 +11,12 @@ import org.apache.spark.ml.regression.DecisionTreeRegressionModel
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object DecisionTreeRegressionOp extends OpNode[SparkBundleContext, DecisionTreeRegressionModel, DecisionTreeRegressionModel] {
+class DecisionTreeRegressionOp extends OpNode[SparkBundleContext, DecisionTreeRegressionModel, DecisionTreeRegressionModel] {
   implicit val nodeWrapper = SparkNodeWrapper
 
   override val Model: OpModel[SparkBundleContext, DecisionTreeRegressionModel] = new OpModel[SparkBundleContext, DecisionTreeRegressionModel] {
+    override val klazz: Class[DecisionTreeRegressionModel] = classOf[DecisionTreeRegressionModel]
+
     override def opName: String = Bundle.BuiltinOps.regression.decision_tree_regression
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: DecisionTreeRegressionModel): Model = {
@@ -29,6 +31,8 @@ object DecisionTreeRegressionOp extends OpNode[SparkBundleContext, DecisionTreeR
         numFeatures = model.value("num_features").getLong.toInt)
     }
   }
+
+  override val klazz: Class[DecisionTreeRegressionModel] = classOf[DecisionTreeRegressionModel]
 
   override def name(node: DecisionTreeRegressionModel): String = node.uid
 

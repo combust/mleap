@@ -9,6 +9,10 @@ import ml.combust.bundle.dsl.Model
   * @tparam M Scala class of the ML model
   */
 trait OpModel[Context, M] {
+  /** Class of the model.
+    */
+  val klazz: Class[M]
+
   /** Get the name of the model.
     *
     * @return name of the model

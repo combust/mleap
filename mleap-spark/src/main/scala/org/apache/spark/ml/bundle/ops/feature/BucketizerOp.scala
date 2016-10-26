@@ -9,8 +9,10 @@ import org.apache.spark.ml.feature.Bucketizer
 /**
   * Created by mikhail on 9/22/16.
   */
-object BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
+class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
   override val Model: OpModel[SparkBundleContext, Bucketizer] = new OpModel[SparkBundleContext, Bucketizer] {
+    override val klazz: Class[Bucketizer] = classOf[Bucketizer]
+
     override def opName: String = Bundle.BuiltinOps.feature.bucketizer
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: Bucketizer): Model = {
@@ -21,6 +23,8 @@ object BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
       new Bucketizer(uid = "").setSplits(model.value("splits").getDoubleList.toArray)
     }
   }
+
+  override val klazz: Class[Bucketizer] = classOf[Bucketizer]
 
   override def name(node: Bucketizer): String = node.uid
 

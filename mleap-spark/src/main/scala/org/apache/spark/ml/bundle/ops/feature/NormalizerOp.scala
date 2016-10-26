@@ -9,8 +9,10 @@ import org.apache.spark.ml.feature.Normalizer
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-object NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
+class NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
   override val Model: OpModel[SparkBundleContext, Normalizer] = new OpModel[SparkBundleContext, Normalizer] {
+    override val klazz: Class[Normalizer] = classOf[Normalizer]
+
     override def opName: String = Bundle.BuiltinOps.feature.normalizer
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: Normalizer): Model = {
@@ -21,6 +23,8 @@ object NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
       new Normalizer(uid = "").setP(model.value("p_norm").getDouble)
     }
   }
+
+  override val klazz: Class[Normalizer] = classOf[Normalizer]
 
   override def name(node: Normalizer): String = node.uid
 

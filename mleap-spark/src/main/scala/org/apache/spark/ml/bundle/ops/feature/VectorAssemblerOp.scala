@@ -9,14 +9,18 @@ import org.apache.spark.ml.feature.VectorAssembler
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, VectorAssembler] {
+class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, VectorAssembler] {
   override val Model: OpModel[SparkBundleContext, VectorAssembler] = new OpModel[SparkBundleContext, VectorAssembler] {
+    override val klazz: Class[VectorAssembler] = classOf[VectorAssembler]
+
     override def opName: String = Bundle.BuiltinOps.feature.vector_assembler
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: VectorAssembler): Model = { model }
 
     override def load(context: BundleContext[SparkBundleContext], model: Model): VectorAssembler = { new VectorAssembler(uid = "") }
   }
+
+  override val klazz: Class[VectorAssembler] = classOf[VectorAssembler]
 
   override def name(node: VectorAssembler): String = node.uid
 

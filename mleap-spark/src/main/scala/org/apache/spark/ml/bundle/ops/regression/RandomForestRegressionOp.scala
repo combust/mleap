@@ -10,10 +10,12 @@ import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, RandomForest
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object RandomForestRegressionOp extends OpNode[SparkBundleContext, RandomForestRegressionModel, RandomForestRegressionModel] {
+class RandomForestRegressionOp extends OpNode[SparkBundleContext, RandomForestRegressionModel, RandomForestRegressionModel] {
   implicit val nodeWrapper = SparkNodeWrapper
 
   override val Model: OpModel[SparkBundleContext, RandomForestRegressionModel] = new OpModel[SparkBundleContext, RandomForestRegressionModel] {
+    override val klazz: Class[RandomForestRegressionModel] = classOf[RandomForestRegressionModel]
+
     override def opName: String = Bundle.BuiltinOps.regression.random_forest_regression
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: RandomForestRegressionModel): Model = {
@@ -46,6 +48,8 @@ object RandomForestRegressionOp extends OpNode[SparkBundleContext, RandomForestR
         _trees = models)
     }
   }
+
+  override val klazz: Class[RandomForestRegressionModel] = classOf[RandomForestRegressionModel]
 
   override def name(node: RandomForestRegressionModel): String = node.uid
 

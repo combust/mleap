@@ -10,8 +10,10 @@ import org.apache.spark.ml.linalg.Vectors
 /**
   * Created by mikhail on 9/19/16.
   */
-object MaxAbsScalerOp extends OpNode[SparkBundleContext, MaxAbsScalerModel, MaxAbsScalerModel]{
+class MaxAbsScalerOp extends OpNode[SparkBundleContext, MaxAbsScalerModel, MaxAbsScalerModel]{
   override val Model: OpModel[SparkBundleContext, MaxAbsScalerModel] = new OpModel[SparkBundleContext, MaxAbsScalerModel] {
+    override val klazz: Class[MaxAbsScalerModel] = classOf[MaxAbsScalerModel]
+
     override def opName: String = Bundle.BuiltinOps.feature.max_abs_scaler
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: MaxAbsScalerModel): Model = {
@@ -24,6 +26,8 @@ object MaxAbsScalerOp extends OpNode[SparkBundleContext, MaxAbsScalerModel, MaxA
     }
 
   }
+
+  override val klazz: Class[MaxAbsScalerModel] = classOf[MaxAbsScalerModel]
 
   override def name(node: MaxAbsScalerModel): String = node.uid
 

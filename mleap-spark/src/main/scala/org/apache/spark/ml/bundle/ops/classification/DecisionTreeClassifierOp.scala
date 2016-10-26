@@ -12,10 +12,12 @@ import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeClassificationModel, DecisionTreeClassificationModel] {
+class DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeClassificationModel, DecisionTreeClassificationModel] {
   implicit val nodeWrapper = SparkNodeWrapper
 
   override val Model: OpModel[SparkBundleContext, DecisionTreeClassificationModel] = new OpModel[SparkBundleContext, DecisionTreeClassificationModel] {
+    override val klazz: Class[DecisionTreeClassificationModel] = classOf[DecisionTreeClassificationModel]
+
     override def opName: String = Bundle.BuiltinOps.classification.decision_tree_classifier
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: DecisionTreeClassificationModel): Model = {
@@ -32,6 +34,8 @@ object DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeC
         numFeatures = model.value("num_features").getLong.toInt)
     }
   }
+
+  override val klazz: Class[DecisionTreeClassificationModel] = classOf[DecisionTreeClassificationModel]
 
   override def name(node: DecisionTreeClassificationModel): String = node.uid
 

@@ -9,8 +9,10 @@ import org.apache.spark.ml.feature.NGram
 /**
   * Created by mikhail on 10/16/16.
   */
-object NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
+class NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
   override val Model: OpModel[SparkBundleContext, NGram] = new OpModel[SparkBundleContext, NGram] {
+    override val klazz: Class[NGram] = classOf[NGram]
+
     override def opName: String = Bundle.BuiltinOps.feature.ngram
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: NGram): Model = {
@@ -22,6 +24,8 @@ object NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
     }
 
   }
+
+  override val klazz: Class[NGram] = classOf[NGram]
 
   override def name(node: NGram): String = node.uid
 

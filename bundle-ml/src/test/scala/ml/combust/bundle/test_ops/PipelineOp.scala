@@ -11,8 +11,10 @@ import ml.combust.bundle.dsl
 case class PipelineModel(stages: Seq[Transformer])
 case class Pipeline(uid: String, model: PipelineModel) extends Transformer
 
-object PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
+class PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
   override val Model: OpModel[Any, PipelineModel] = new OpModel[Any, PipelineModel] {
+    override val klazz: Class[PipelineModel] = classOf[PipelineModel]
+
     override def opName: String = Bundle.BuiltinOps.pipeline
 
     override def store(context: BundleContext[Any], model: Model, obj: PipelineModel): Model = {
@@ -24,6 +26,8 @@ object PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
         map(_.asInstanceOf[Transformer]))
     }
   }
+
+  override val klazz: Class[Pipeline] = classOf[Pipeline]
 
   override def name(node: Pipeline): String = node.uid
 

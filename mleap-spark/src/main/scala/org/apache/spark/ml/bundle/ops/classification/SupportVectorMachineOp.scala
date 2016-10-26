@@ -11,8 +11,10 @@ import org.apache.spark.mllib.linalg.Vectors
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMModel] {
+class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMModel] {
   override val Model: OpModel[SparkBundleContext, SVMModel] = new OpModel[SparkBundleContext, SVMModel] {
+    override val klazz: Class[SVMModel] = classOf[SVMModel]
+
     override def opName: String = Bundle.BuiltinOps.classification.support_vector_machine
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: SVMModel): Model = {
@@ -35,6 +37,8 @@ object SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMo
         getOrElse(svmModel)
     }
   }
+
+  override val klazz: Class[SVMModel] = classOf[SVMModel]
 
   override def name(node: SVMModel): String = node.uid
 

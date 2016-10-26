@@ -9,8 +9,10 @@ import org.apache.spark.ml.feature.StringIndexerModel
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, StringIndexerModel] {
+class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, StringIndexerModel] {
   override val Model: OpModel[SparkBundleContext, StringIndexerModel] = new OpModel[SparkBundleContext, StringIndexerModel] {
+    override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
+
     override def opName: String = Bundle.BuiltinOps.feature.string_indexer
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: StringIndexerModel): Model = {
@@ -21,6 +23,8 @@ object StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, St
       new StringIndexerModel(uid = "", labels = model.value("labels").getStringList.toArray)
     }
   }
+
+  override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
 
   override def name(node: StringIndexerModel): String = node.uid
 

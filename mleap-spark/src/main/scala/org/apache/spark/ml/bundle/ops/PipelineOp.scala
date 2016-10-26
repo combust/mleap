@@ -9,8 +9,10 @@ import org.apache.spark.ml.{PipelineModel, Transformer}
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object PipelineOp extends OpNode[SparkBundleContext, PipelineModel, PipelineModel] {
+class PipelineOp extends OpNode[SparkBundleContext, PipelineModel, PipelineModel] {
   override val Model: OpModel[SparkBundleContext, PipelineModel] = new OpModel[SparkBundleContext, PipelineModel] {
+    override val klazz: Class[PipelineModel] = classOf[PipelineModel]
+
     override def opName: String = Bundle.BuiltinOps.pipeline
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: PipelineModel): Model = {
@@ -23,6 +25,8 @@ object PipelineOp extends OpNode[SparkBundleContext, PipelineModel, PipelineMode
       new PipelineModel(uid = "", stages = nodes)
     }
   }
+
+  override val klazz: Class[PipelineModel] = classOf[PipelineModel]
 
   override def name(node: PipelineModel): String = node.uid
 

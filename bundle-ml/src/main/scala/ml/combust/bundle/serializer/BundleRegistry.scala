@@ -1,8 +1,10 @@
 package ml.combust.bundle.serializer
 
+import com.typesafe.config.{Config, ConfigFactory}
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.custom.CustomType
 
+import scala.collection.JavaConverters._
 import scala.reflect.{ClassTag, classTag}
 
 /** Trait for classes that contain a bundle registry.
@@ -17,6 +19,21 @@ trait HasBundleRegistry {
   def bundleRegistry: BundleRegistry
 }
 
+object BundleRegistry {
+  def apply(registry: String): BundleRegistry = apply(registry, Thread.currentThread().getContextClassLoader)
+
+  def apply(registry: String, cl: ClassLoader): BundleRegistry = apply(registry, ConfigFactory.load(cl), cl)
+
+  def apply(registry: String, config: Config, cl: ClassLoader): BundleRegistry = {
+    val br = config.getStringList(s"ml.combust.bundle.registry.$registry.ops").asScala.foldLeft(BundleRegistry()) {
+      (br, opClass) => br.register(cl.loadClass(opClass).newInstance().asInstanceOf[OpNode[_, _, _]])
+    }
+    config.getStringList("ml.combust.bundle.customTypes").asScala.foldLeft(br) {
+      (br2, customClass) => br.register(cl.loadClass(customClass).newInstance().asInstanceOf[CustomType[_]])
+    }
+  }
+}
+
 /** Class for storing all supported [[ml.combust.bundle.op.OpNode]] and [[ml.combust.bundle.serializer.custom.CustomType]] objects.
   *
   * This is the primary registry for Bundle.ML. It contains all objects
@@ -25,7 +42,7 @@ trait HasBundleRegistry {
   * Many serialization calls in Bundle.ML require access to the registry for information
   * on how to serialize custom types or models or nodes.
   */
-case class BundleRegistry() extends HasBundleRegistry {
+case class BundleRegistry private () extends HasBundleRegistry {
   var ops: Map[String, OpNode[_, _, _]] = Map()
   var opAlias: Map[String, String] = Map()
 
@@ -108,11 +125,11 @@ case class BundleRegistry() extends HasBundleRegistry {
     * @tparam M type of the underlying model
     * @return this
     */
-  def register[Context, N: ClassTag, M: ClassTag](op: OpNode[Context, N, M]): this.type = {
+  def register[Context, N, M](op: OpNode[Context, N, M]): this.type = {
     ops = ops + (op.Model.opName -> op)
-    opAlias = opAlias + (classTag[N].runtimeClass.getCanonicalName -> op.Model.opName)
+    opAlias = opAlias + (op.klazz.getCanonicalName -> op.Model.opName)
     models = models + (op.Model.opName -> op.Model)
-    modelAlias = modelAlias + (classTag[M].runtimeClass.getCanonicalName -> op.Model.opName)
+    modelAlias = modelAlias + (op.Model.klazz.getCanonicalName -> op.Model.opName)
     this
   }
 
@@ -122,9 +139,9 @@ case class BundleRegistry() extends HasBundleRegistry {
     * @tparam T type of the custom type
     * @return this
     */
-  def register[T: ClassTag](c: CustomType[T]): this.type = {
+  def register[T](c: CustomType[T]): this.type = {
     customTypes = customTypes + (c.name -> c)
-    customTypeAlias = customTypeAlias + (classTag[T].runtimeClass.getCanonicalName -> c.name)
+    customTypeAlias = customTypeAlias + (c.klazz.getCanonicalName -> c.name)
     this
   }
 }

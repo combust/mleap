@@ -11,8 +11,10 @@ import org.apache.spark.ml.mleap.classification.OneVsRestModel
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestModel] {
+class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestModel] {
   override val Model: OpModel[SparkBundleContext, OneVsRestModel] = new OpModel[SparkBundleContext, OneVsRestModel] {
+    override val klazz: Class[OneVsRestModel] = classOf[OneVsRestModel]
+
     override def opName: String = Bundle.BuiltinOps.classification.one_vs_rest
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: OneVsRestModel): Model = {
@@ -41,6 +43,8 @@ object OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestM
       new OneVsRestModel(uid = "", models = models, labelMetadata = labelMetadata)
     }
   }
+
+  override val klazz: Class[OneVsRestModel] = classOf[OneVsRestModel]
 
   override def name(node: OneVsRestModel): String = node.uid
 

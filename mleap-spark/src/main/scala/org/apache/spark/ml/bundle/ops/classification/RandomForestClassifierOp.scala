@@ -10,10 +10,12 @@ import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, Rand
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object RandomForestClassifierOp extends OpNode[SparkBundleContext, RandomForestClassificationModel, RandomForestClassificationModel] {
+class RandomForestClassifierOp extends OpNode[SparkBundleContext, RandomForestClassificationModel, RandomForestClassificationModel] {
   implicit val nodeWrapper = SparkNodeWrapper
 
   override val Model: OpModel[SparkBundleContext, RandomForestClassificationModel] = new OpModel[SparkBundleContext, RandomForestClassificationModel] {
+    override val klazz: Class[RandomForestClassificationModel] = classOf[RandomForestClassificationModel]
+
     override def opName: String = Bundle.BuiltinOps.classification.random_forest_classifier
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: RandomForestClassificationModel): Model = {
@@ -49,6 +51,8 @@ object RandomForestClassifierOp extends OpNode[SparkBundleContext, RandomForestC
         _trees = models)
     }
   }
+
+  override val klazz: Class[RandomForestClassificationModel] = classOf[RandomForestClassificationModel]
 
   override def name(node: RandomForestClassificationModel): String = node.uid
 

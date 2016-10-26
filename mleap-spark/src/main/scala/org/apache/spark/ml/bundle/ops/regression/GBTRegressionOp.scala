@@ -9,8 +9,10 @@ import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, GBTRegressio
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-object GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBTRegressionModel] {
+class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBTRegressionModel] {
   override val Model: OpModel[SparkBundleContext, GBTRegressionModel] = new OpModel[SparkBundleContext, GBTRegressionModel] {
+    override val klazz: Class[GBTRegressionModel] = classOf[GBTRegressionModel]
+
     override def opName: String = Bundle.BuiltinOps.regression.gbt_regression
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: GBTRegressionModel): Model = {
@@ -41,6 +43,8 @@ object GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GB
         numFeatures = numFeatures)
     }
   }
+
+  override val klazz: Class[GBTRegressionModel] = classOf[GBTRegressionModel]
 
   override def name(node: GBTRegressionModel): String = node.uid
 

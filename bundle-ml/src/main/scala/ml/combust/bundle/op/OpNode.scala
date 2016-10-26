@@ -14,6 +14,10 @@ trait OpNode[Context, N, M] {
     */
   val Model: OpModel[Context, M]
 
+  /** Class of the node.
+    */
+  val klazz: Class[N]
+
   /** Get the unique name for this node.
     *
     * @param node node object

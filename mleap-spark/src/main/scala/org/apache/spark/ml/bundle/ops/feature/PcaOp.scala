@@ -10,8 +10,10 @@ import org.apache.spark.ml.linalg.{DenseMatrix, DenseVector}
 /**
   * Created by hollinwilkins on 10/12/16.
   */
-object PcaOp extends OpNode[SparkBundleContext, PCAModel, PCAModel] {
+class PcaOp extends OpNode[SparkBundleContext, PCAModel, PCAModel] {
   override val Model: OpModel[SparkBundleContext, PCAModel] = new OpModel[SparkBundleContext, PCAModel] {
+    override val klazz: Class[PCAModel] = classOf[PCAModel]
+
     override def opName: String = Bundle.BuiltinOps.feature.pca
 
     override def store(context: BundleContext[SparkBundleContext], model: Model, obj: PCAModel): Model = {
@@ -27,6 +29,8 @@ object PcaOp extends OpNode[SparkBundleContext, PCAModel, PCAModel] {
         explainedVariance = new DenseVector(Array()))
     }
   }
+
+  override val klazz: Class[PCAModel] = classOf[PCAModel]
 
   override def name(node: PCAModel): String = node.uid
 

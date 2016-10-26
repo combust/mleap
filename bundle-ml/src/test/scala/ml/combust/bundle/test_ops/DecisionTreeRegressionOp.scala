@@ -81,9 +81,11 @@ object MyNodeWrapper extends NodeWrapper[Node] {
   }
 }
 
-object DecisionTreeRegressionOp extends OpNode[Any, DecisionTreeRegression, DecisionTreeRegressionModel] {
+class DecisionTreeRegressionOp extends OpNode[Any, DecisionTreeRegression, DecisionTreeRegressionModel] {
   implicit val wrapper = MyNodeWrapper
   override val Model: OpModel[Any, DecisionTreeRegressionModel] = new OpModel[Any, DecisionTreeRegressionModel] {
+    override val klazz: Class[DecisionTreeRegressionModel] = classOf[DecisionTreeRegressionModel]
+
     override def opName: String = Bundle.BuiltinOps.regression.decision_tree_regression
 
     override def store(context: BundleContext[Any], model: Model, obj: DecisionTreeRegressionModel): Model = {
@@ -96,6 +98,8 @@ object DecisionTreeRegressionOp extends OpNode[Any, DecisionTreeRegression, Deci
       DecisionTreeRegressionModel(root)
     }
   }
+
+  override val klazz: Class[DecisionTreeRegression] = classOf[DecisionTreeRegression]
 
   override def name(node: DecisionTreeRegression): String = node.uid
 

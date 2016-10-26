@@ -2,6 +2,7 @@ package ml.combust.bundle.dsl
 
 import java.io.File
 
+import ml.combust.bundle.{BundleContext, BundleRegistry, HasBundleRegistry}
 import ml.combust.bundle.serializer._
 
 /** Companion class for constants and constructors of [[Bundle]] objects.
@@ -125,7 +126,7 @@ case class Bundle(name: String,
       nodes = nodeNames)
   }
 
-  /** Create a [[ml.combust.bundle.serializer.BundleContext]] for serializing to Bundle.ML
+  /** Create a [[BundleContext]] for serializing to Bundle.ML
     *
     * @param bundleRegistry bundle registry for serializing ops, nodes, and custom types
     * @param path path to the Bundle.ML directory

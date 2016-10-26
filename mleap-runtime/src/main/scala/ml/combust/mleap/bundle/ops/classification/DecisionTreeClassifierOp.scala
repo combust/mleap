@@ -1,11 +1,11 @@
 package ml.combust.mleap.bundle.ops.classification
 
+import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.classification.DecisionTreeClassifierModel
 import ml.combust.mleap.core.tree
 import ml.combust.mleap.bundle.tree.MleapNodeWrapper
 import ml.combust.mleap.runtime.transformer.classification.DecisionTreeClassifier
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.tree.TreeSerializer
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.runtime.MleapContext

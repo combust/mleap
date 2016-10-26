@@ -2,6 +2,7 @@ package ml.combust.mleap.runtime
 
 import java.io.File
 
+import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.mleap.bundle.MleapBundle
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.bundle.dsl.{AttributeList, Bundle, BundleMeta}

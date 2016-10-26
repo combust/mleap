@@ -2,6 +2,7 @@ package ml.combust.mleap.bundle
 
 import java.io.File
 
+import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.mleap.runtime.transformer.{Pipeline, Transformer}
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.serializer._

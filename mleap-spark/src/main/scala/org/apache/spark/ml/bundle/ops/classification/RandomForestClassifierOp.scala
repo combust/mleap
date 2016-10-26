@@ -1,7 +1,8 @@
 package org.apache.spark.ml.bundle.ops.classification
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
+import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.bundle.tree.SparkNodeWrapper

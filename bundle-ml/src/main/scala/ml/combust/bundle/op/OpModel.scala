@@ -1,6 +1,6 @@
 package ml.combust.bundle.op
 
-import ml.combust.bundle.serializer.BundleContext
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.Model
 
 /** Type class for serializing/deserializing ML models to Bundle.ML.

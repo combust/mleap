@@ -2,8 +2,9 @@ package ml.combust.bundle.serializer.attr
 
 import java.io.{File, FileInputStream, FileOutputStream}
 
+import ml.combust.bundle.HasBundleRegistry
 import ml.combust.bundle.json.JsonSupport._
-import ml.combust.bundle.serializer.{HasBundleRegistry, SerializationContext, SerializationFormat}
+import ml.combust.bundle.serializer.{SerializationContext, SerializationFormat}
 import ml.combust.bundle.dsl.AttributeList
 import spray.json._
 import resource._

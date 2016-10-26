@@ -3,6 +3,7 @@ package ml.combust.bundle.serializer
 import java.io.{File, FileInputStream, FileOutputStream}
 import java.util.zip.ZipInputStream
 
+import ml.combust.bundle.{BundleContext, HasBundleRegistry}
 import ml.combust.bundle.json.JsonSupport._
 import ml.combust.bundle.dsl.{AttributeList, Bundle, BundleMeta}
 import spray.json._

@@ -1,8 +1,9 @@
 package org.apache.spark.ml.bundle.ops.regression
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
+import ml.combust.bundle.serializer.ModelSerializer
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, GBTRegressionModel}
 

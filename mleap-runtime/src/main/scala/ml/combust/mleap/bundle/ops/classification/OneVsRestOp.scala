@@ -1,9 +1,10 @@
 package ml.combust.mleap.bundle.ops.classification
 
+import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.classification.{BinaryClassificationModel, OneVsRestModel}
 import ml.combust.mleap.runtime.transformer.classification.OneVsRest
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
+import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.runtime.MleapContext
 

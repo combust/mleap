@@ -8,7 +8,7 @@ import ml.bundle.Tensor.Tensor
 import ml.bundle.TensorType.TensorType
 import ml.bundle.Value.Value.ListValue
 import ml.bundle.Value.{Value => BValue}
-import ml.combust.bundle.serializer.HasBundleRegistry
+import ml.combust.bundle.HasBundleRegistry
 
 import scala.reflect.{ClassTag, classTag}
 

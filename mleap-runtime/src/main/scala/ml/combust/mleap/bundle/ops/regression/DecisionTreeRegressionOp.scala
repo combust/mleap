@@ -1,11 +1,11 @@
 package ml.combust.mleap.bundle.ops.regression
 
+import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.regression.DecisionTreeRegressionModel
 import ml.combust.mleap.core.tree
 import ml.combust.mleap.bundle.tree.MleapNodeWrapper
 import ml.combust.mleap.runtime.transformer.regression.DecisionTreeRegression
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.tree.TreeSerializer
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.runtime.MleapContext

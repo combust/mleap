@@ -1,6 +1,8 @@
-package ml.combust.bundle.serializer
+package ml.combust.bundle
 
 import java.io.File
+
+import ml.combust.bundle.serializer.{ConcreteSerializationFormat, SerializationContext, SerializationFormat}
 
 /** Class for holding serialization information for a [[ml.combust.bundle.dsl.Bundle]].
   *

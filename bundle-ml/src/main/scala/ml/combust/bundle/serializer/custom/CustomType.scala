@@ -1,7 +1,7 @@
 package ml.combust.bundle.serializer.custom
 
 import com.trueaccord.scalapb.{GeneratedMessage, GeneratedMessageCompanion}
-import ml.combust.bundle.serializer.{BundleContext, ConcreteSerializationFormat, HasConcreteSerializationFormat, SerializationFormat}
+import ml.combust.bundle.serializer.{ConcreteSerializationFormat, HasConcreteSerializationFormat, SerializationFormat}
 import spray.json._
 
 /** Type class for a custom object.

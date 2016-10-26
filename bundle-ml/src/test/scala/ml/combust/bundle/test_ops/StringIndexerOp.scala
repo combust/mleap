@@ -1,9 +1,8 @@
 package ml.combust.bundle.test_ops
 
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.dsl
+import ml.combust.bundle.{BundleContext, dsl}
 
 /**
   * Created by hollinwilkins on 8/21/16.

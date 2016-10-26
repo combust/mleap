@@ -2,7 +2,7 @@ package ml.combust.bundle.serializer
 
 import java.io.File
 
-import ml.combust.bundle.TestUtil
+import ml.combust.bundle.{BundleRegistry, TestUtil}
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.test_ops._
 import org.scalatest.FunSpec

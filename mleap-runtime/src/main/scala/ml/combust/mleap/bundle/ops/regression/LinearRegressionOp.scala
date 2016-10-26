@@ -1,9 +1,9 @@
 package ml.combust.mleap.bundle.ops.regression
 
+import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.regression.LinearRegressionModel
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.runtime.MleapContext
 import org.apache.spark.ml.linalg.Vectors

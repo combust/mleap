@@ -1,5 +1,6 @@
 package ml.combust.bundle.serializer
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.Bundle
 
 /** Class for serializing a list of graph nodes.

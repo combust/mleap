@@ -1,6 +1,6 @@
 package ml.combust.bundle.op
 
-import ml.combust.bundle.serializer.BundleContext
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.{Node, Shape}
 
 /** Type class for serializing/deserializing Bundle.ML graph nodes.

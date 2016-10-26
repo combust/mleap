@@ -1,8 +1,9 @@
 package ml.combust.mleap.bundle.ops
 
+import ml.combust.bundle.BundleContext
 import ml.combust.mleap.runtime.transformer.{Pipeline, Transformer}
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.{BundleContext, GraphSerializer}
+import ml.combust.bundle.serializer.GraphSerializer
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.runtime.MleapContext
 

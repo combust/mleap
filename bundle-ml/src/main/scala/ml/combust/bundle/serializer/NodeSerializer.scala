@@ -3,6 +3,7 @@ package ml.combust.bundle.serializer
 import java.io.{FileInputStream, FileOutputStream, InputStream, OutputStream}
 
 import ml.bundle.NodeDef.NodeDef
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.{Bundle, Node, Shape}
 import ml.combust.bundle.json.JsonSupport._
 import spray.json._

@@ -1,4 +1,4 @@
-package ml.combust.bundle.serializer
+package ml.combust.bundle
 
 import com.typesafe.config.{Config, ConfigFactory}
 import ml.combust.bundle.op.{OpModel, OpNode}

@@ -3,6 +3,7 @@ package ml.combust.bundle.serializer
 import java.io.{FileInputStream, FileOutputStream, InputStream, OutputStream}
 
 import ml.bundle.ModelDef.ModelDef
+import ml.combust.bundle.{BundleContext, HasBundleRegistry}
 import ml.combust.bundle.json.JsonSupport._
 import ml.combust.bundle.serializer.attr.{AttributeListSeparator, AttributeListSerializer}
 import ml.combust.bundle.dsl.{AttributeList, Bundle, Model}

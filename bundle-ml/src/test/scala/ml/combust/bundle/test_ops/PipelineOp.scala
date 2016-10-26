@@ -11,15 +11,15 @@ import ml.combust.bundle.dsl
 case class PipelineModel(stages: Seq[Transformer])
 case class Pipeline(uid: String, model: PipelineModel) extends Transformer
 
-object PipelineOp extends OpNode[Pipeline, PipelineModel] {
-  override val Model: OpModel[PipelineModel] = new OpModel[PipelineModel] {
+object PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
+  override val Model: OpModel[Any, PipelineModel] = new OpModel[Any, PipelineModel] {
     override def opName: String = Bundle.BuiltinOps.pipeline
 
-    override def store(context: BundleContext, model: Model, obj: PipelineModel): Model = {
+    override def store(context: BundleContext[Any], model: Model, obj: PipelineModel): Model = {
       model.withAttr(Attribute("nodes", Value.stringList(GraphSerializer(context).write(obj.stages))))
     }
 
-    override def load(context: BundleContext, model: Model): PipelineModel = {
+    override def load(context: BundleContext[Any], model: Model): PipelineModel = {
       PipelineModel(GraphSerializer(context).read(model.value("nodes").getStringList).
         map(_.asInstanceOf[Transformer]))
     }
@@ -29,7 +29,7 @@ object PipelineOp extends OpNode[Pipeline, PipelineModel] {
 
   override def model(node: Pipeline): PipelineModel = node.model
 
-  override def load(context: BundleContext, node: dsl.Node, model: PipelineModel): Pipeline = {
+  override def load(context: BundleContext[Any], node: dsl.Node, model: PipelineModel): Pipeline = {
     Pipeline(node.name, model)
   }
 

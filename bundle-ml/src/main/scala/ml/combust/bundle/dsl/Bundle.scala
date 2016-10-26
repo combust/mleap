@@ -93,10 +93,10 @@ object Bundle {
   * @param nodes list of root nodes in the bundle
   */
 case class BundleMeta(name: String,
-                  format: SerializationFormat,
-                  version: String,
-                  attributes: Option[AttributeList],
-                  nodes: Seq[String])
+                      format: SerializationFormat,
+                      version: String,
+                      attributes: Option[AttributeList],
+                      nodes: Seq[String])
 
 /** Root object for serializing Bundle.ML pipelines and graphs.
   *
@@ -117,7 +117,7 @@ case class Bundle(name: String,
     * @return bundle meta data
     */
   def meta(implicit hr: HasBundleRegistry): BundleMeta = {
-    val nodeNames = nodes.map(node => hr.bundleRegistry.opForObj[Any, Any](node).name(node))
+    val nodeNames = nodes.map(node => hr.bundleRegistry.opForObj[Any, Any, Any](node).name(node))
     BundleMeta(name = name,
       format = format,
       version = version,
@@ -129,10 +129,14 @@ case class Bundle(name: String,
     *
     * @param bundleRegistry bundle registry for serializing ops, nodes, and custom types
     * @param path path to the Bundle.ML directory
+    * @tparam Context context for implementation
     * @return context for serializing Bundle.ML
     */
-  def bundleContext(bundleRegistry: BundleRegistry,
-                    path: File): BundleContext = BundleContext(format, bundleRegistry, path)
+  def bundleContext[Context](context: Context,
+                             bundleRegistry: BundleRegistry,
+                             path: File): BundleContext[Context] = {
+    BundleContext[Context](context, format, bundleRegistry, path)
+  }
 
   override def replaceAttrList(list: Option[AttributeList]): Bundle = copy(attributes = list)
 }

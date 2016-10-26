@@ -9,16 +9,18 @@ import java.io.File
   * @param format desired serialization format (Json, Protobuf, or Mixed)
   * @param bundleRegistry bundle registry of all supported operations
   * @param path path to the Bundle.ML model
+  * @tparam Context extra contextual information specific to implementation
   */
-case class BundleContext(format: SerializationFormat,
-                         bundleRegistry: BundleRegistry,
-                         path: File) extends HasBundleRegistry {
+case class BundleContext[Context](context: Context,
+                                  format: SerializationFormat,
+                                  bundleRegistry: BundleRegistry,
+                                  path: File) extends HasBundleRegistry {
   /** Create a new bundle context for a subfolder.
     *
     * @param file name of subfolder
     * @return bundle context for the subfolder
     */
-  def bundleContext(file: String): BundleContext = copy(path = new File(path, file))
+  def bundleContext(file: String): BundleContext[Context] = copy(path = new File(path, file))
 
   /** Get a file in the current bundle folder.
     *

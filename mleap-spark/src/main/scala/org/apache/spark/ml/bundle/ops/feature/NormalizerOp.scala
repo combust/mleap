@@ -3,20 +3,21 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.Normalizer
 
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-object NormalizerOp extends OpNode[Normalizer, Normalizer] {
-  override val Model: OpModel[Normalizer] = new OpModel[Normalizer] {
+object NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
+  override val Model: OpModel[SparkBundleContext, Normalizer] = new OpModel[SparkBundleContext, Normalizer] {
     override def opName: String = Bundle.BuiltinOps.feature.normalizer
 
-    override def store(context: BundleContext, model: Model, obj: Normalizer): Model = {
+    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: Normalizer): Model = {
       model.withAttr("p_norm", Value.double(obj.getP))
     }
 
-    override def load(context: BundleContext, model: Model): Normalizer = {
+    override def load(context: BundleContext[SparkBundleContext], model: Model): Normalizer = {
       new Normalizer(uid = "").setP(model.value("p_norm").getDouble)
     }
   }
@@ -25,7 +26,7 @@ object NormalizerOp extends OpNode[Normalizer, Normalizer] {
 
   override def model(node: Normalizer): Normalizer = node
 
-  override def load(context: BundleContext, node: Node, model: Normalizer): Normalizer = {
+  override def load(context: BundleContext[SparkBundleContext], node: Node, model: Normalizer): Normalizer = {
     new Normalizer(uid = node.name).copy(model.extractParamMap()).
       setInputCol(node.shape.standardInput.name).
       setOutputCol(node.shape.standardOutput.name)

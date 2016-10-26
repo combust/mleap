@@ -19,6 +19,8 @@ trait TypeConverters {
     case types.DoubleType => Some(DoubleType)
     case lt: types.ListType => sparkType(lt.base).map(t => ArrayType(t, containsNull = false))
     case tt: types.TensorType if tt.dimensions.length == 1 => Some(new VectorUDT())
+    case ct: types.CustomType[_] => UDTRegistration.getUDTFor(ct.klazz.getCanonicalName).
+      map(_.newInstance().asInstanceOf[UserDefinedType[_]])
     case types.AnyType => None
   }
 }

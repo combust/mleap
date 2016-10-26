@@ -5,24 +5,25 @@ import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object VectorAssemblerOp extends OpNode[VectorAssembler, VectorAssemblerModel] {
-  override val Model: OpModel[VectorAssemblerModel] = new OpModel[VectorAssemblerModel] {
+object VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAssemblerModel] {
+  override val Model: OpModel[MleapContext, VectorAssemblerModel] = new OpModel[MleapContext, VectorAssemblerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.vector_assembler
 
-    override def store(context: BundleContext, model: Model, obj: VectorAssemblerModel): Model = { model }
+    override def store(context: BundleContext[MleapContext], model: Model, obj: VectorAssemblerModel): Model = { model }
 
-    override def load(context: BundleContext, model: Model): VectorAssemblerModel = VectorAssemblerModel.default
+    override def load(context: BundleContext[MleapContext], model: Model): VectorAssemblerModel = VectorAssemblerModel.default
   }
 
   override def name(node: VectorAssembler): String = node.uid
 
   override def model(node: VectorAssembler): VectorAssemblerModel = VectorAssemblerModel.default
 
-  override def load(context: BundleContext, node: Node, model: VectorAssemblerModel): VectorAssembler = {
+  override def load(context: BundleContext[MleapContext], node: Node, model: VectorAssemblerModel): VectorAssembler = {
     VectorAssembler(uid = node.name,
       inputCols = node.shape.inputs.map(_.name).toArray,
       outputCol = node.shape.standardOutput.name)

@@ -5,16 +5,17 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
 import ml.combust.mleap.core.classification.GBTClassifierModel
 import ml.combust.mleap.core.regression.DecisionTreeRegressionModel
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.classification.GBTClassifier
 
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-object GBTClassifierOp extends OpNode[GBTClassifier, GBTClassifierModel] {
-  override val Model: OpModel[GBTClassifierModel] = new OpModel[GBTClassifierModel] {
+object GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierModel] {
+  override val Model: OpModel[MleapContext, GBTClassifierModel] = new OpModel[MleapContext, GBTClassifierModel] {
     override def opName: String = Bundle.BuiltinOps.classification.gbt_classifier
 
-    override def store(context: BundleContext, model: Model, obj: GBTClassifierModel): Model = {
+    override def store(context: BundleContext[MleapContext], model: Model, obj: GBTClassifierModel): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -30,7 +31,7 @@ object GBTClassifierOp extends OpNode[GBTClassifier, GBTClassifierModel] {
         withAttr("threshold", obj.threshold.map(Value.double))
     }
 
-    override def load(context: BundleContext, model: Model): GBTClassifierModel = {
+    override def load(context: BundleContext[MleapContext], model: Model): GBTClassifierModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("MLeap only supports binary logistic regression")
       }
@@ -54,7 +55,7 @@ object GBTClassifierOp extends OpNode[GBTClassifier, GBTClassifierModel] {
 
   override def model(node: GBTClassifier): GBTClassifierModel = node.model
 
-  override def load(context: BundleContext, node: Node, model: GBTClassifierModel): GBTClassifier = {
+  override def load(context: BundleContext[MleapContext], node: Node, model: GBTClassifierModel): GBTClassifier = {
     GBTClassifier(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

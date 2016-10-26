@@ -45,7 +45,7 @@ object MleapSupport {
       * @return bundle meta data
       */
     def deserializeBundleMeta()
-                             (implicit hr: HasBundleRegistry): BundleMeta = BundleSerializer(path).readMeta()
+                             (implicit hr: HasBundleRegistry): BundleMeta = BundleSerializer(MleapContext(), path).readMeta()
 
     /** Deserialize the Bundle.ML to MLeap.
       *

@@ -5,9 +5,10 @@ import ml.combust.bundle.dsl.Model
 
 /** Type class for serializing/deserializing ML models to Bundle.ML.
   *
+  * @tparam Context context for implementation
   * @tparam M Scala class of the ML model
   */
-trait OpModel[M] {
+trait OpModel[Context, M] {
   /** Get the name of the model.
     *
     * @return name of the model
@@ -27,7 +28,7 @@ trait OpModel[M] {
     * @param obj object to be stored in Bundle.ML
     * @return writable model to be serialized
     */
-  def store(context: BundleContext,
+  def store(context: BundleContext[Context],
             model: Model,
             obj: M): Model
 
@@ -40,6 +41,6 @@ trait OpModel[M] {
     * @param model model and attributes read from Bundle.ML
     * @return reconstructed ML model from the model and context
     */
-  def load(context: BundleContext,
+  def load(context: BundleContext[Context],
            model: Model): M
 }

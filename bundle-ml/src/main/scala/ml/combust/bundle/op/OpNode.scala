@@ -9,10 +9,10 @@ import ml.combust.bundle.dsl.{Node, Shape}
   * Nodes connect data fields being processed to the underlying ML models that
   * know how to transform the data.
   */
-trait OpNode[N, M] {
+trait OpNode[Context, N, M] {
   /** Type class for the underlying model.
     */
-  val Model: OpModel[M]
+  val Model: OpModel[Context, M]
 
   /** Get the unique name for this node.
     *
@@ -49,7 +49,7 @@ trait OpNode[N, M] {
     * @param model deserialized model for the node
     * @return deserialized node object
     */
-  def load(context: BundleContext,
+  def load(context: BundleContext[Context],
            node: Node,
            model: M): N
 }

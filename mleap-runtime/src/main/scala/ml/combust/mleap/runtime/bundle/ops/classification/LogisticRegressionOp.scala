@@ -5,23 +5,24 @@ import ml.combust.mleap.runtime.transformer.classification.LogisticRegression
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.runtime.MleapContext
 import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hollinwilkins on 8/24/16.
   */
-object LogisticRegressionOp extends OpNode[LogisticRegression, LogisticRegressionModel] {
-  override val Model: OpModel[LogisticRegressionModel] = new OpModel[LogisticRegressionModel] {
+object LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, LogisticRegressionModel] {
+  override val Model: OpModel[MleapContext, LogisticRegressionModel] = new OpModel[MleapContext, LogisticRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.classification.logistic_regression
 
-    override def store(context: BundleContext, model: Model, obj: LogisticRegressionModel): Model = {
+    override def store(context: BundleContext[MleapContext], model: Model, obj: LogisticRegressionModel): Model = {
       model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept)).
         withAttr("num_classes", Value.long(2)).
         withAttr("threshold", obj.threshold.map(Value.double))
     }
 
-    override def load(context: BundleContext, model: Model): LogisticRegressionModel = {
+    override def load(context: BundleContext[MleapContext], model: Model): LogisticRegressionModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("MLeap only supports binary logistic regression")
       }
@@ -35,7 +36,7 @@ object LogisticRegressionOp extends OpNode[LogisticRegression, LogisticRegressio
 
   override def model(node: LogisticRegression): LogisticRegressionModel = node.model
 
-  override def load(context: BundleContext, node: Node, model: LogisticRegressionModel): LogisticRegression = {
+  override def load(context: BundleContext[MleapContext], node: Node, model: LogisticRegressionModel): LogisticRegression = {
     LogisticRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

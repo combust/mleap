@@ -4,16 +4,17 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
 import ml.combust.mleap.core.regression.{DecisionTreeRegressionModel, GBTRegressionModel}
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.regression.GBTRegression
 
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-object GBTRegressionOp extends OpNode[GBTRegression, GBTRegressionModel] {
-  override val Model: OpModel[GBTRegressionModel] = new OpModel[GBTRegressionModel] {
+object GBTRegressionOp extends OpNode[MleapContext, GBTRegression, GBTRegressionModel] {
+  override val Model: OpModel[MleapContext, GBTRegressionModel] = new OpModel[MleapContext, GBTRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.regression.gbt_regression
 
-    override def store(context: BundleContext, model: Model, obj: GBTRegressionModel): Model = {
+    override def store(context: BundleContext[MleapContext], model: Model, obj: GBTRegressionModel): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -27,7 +28,7 @@ object GBTRegressionOp extends OpNode[GBTRegression, GBTRegressionModel] {
         withAttr("trees", Value.stringList(trees))
     }
 
-    override def load(context: BundleContext, model: Model): GBTRegressionModel = {
+    override def load(context: BundleContext[MleapContext], model: Model): GBTRegressionModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList
 
@@ -45,7 +46,7 @@ object GBTRegressionOp extends OpNode[GBTRegression, GBTRegressionModel] {
 
   override def model(node: GBTRegression): GBTRegressionModel = node.model
 
-  override def load(context: BundleContext, node: Node, model: GBTRegressionModel): GBTRegression = {
+  override def load(context: BundleContext[MleapContext], node: Node, model: GBTRegressionModel): GBTRegression = {
     GBTRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

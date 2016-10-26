@@ -15,16 +15,16 @@ case class LinearRegression(uid: String,
                             output: String,
                             model: LinearModel) extends Transformer
 
-object LinearRegressionOp extends OpNode[LinearRegression, LinearModel] {
-  override val Model: OpModel[LinearModel] = new OpModel[LinearModel] {
+object LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
+  override val Model: OpModel[Any, LinearModel] = new OpModel[Any, LinearModel] {
     override def opName: String = Bundle.BuiltinOps.regression.linear_regression
 
-    override def store(context: BundleContext, model: Model, obj: LinearModel): Model = {
+    override def store(context: BundleContext[Any], model: Model, obj: LinearModel): Model = {
       model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients))).
         withAttr(Attribute("intercept", Value.double(obj.intercept)))
     }
 
-    override def load(context: BundleContext, model: Model): LinearModel = {
+    override def load(context: BundleContext[Any], model: Model): LinearModel = {
       LinearModel(coefficients = model.value("coefficients").getDoubleVector,
         intercept = model.value("intercept").getDouble)
     }
@@ -34,7 +34,7 @@ object LinearRegressionOp extends OpNode[LinearRegression, LinearModel] {
 
   override def model(node: LinearRegression): LinearModel = node.model
 
-  override def load(context: BundleContext, node: dsl.Node, model: LinearModel): LinearRegression = {
+  override def load(context: BundleContext[Any], node: dsl.Node, model: LinearModel): LinearRegression = {
     LinearRegression(uid = node.name,
       input = node.shape.standardInput.name,
       output = node.shape.standardOutput.name,

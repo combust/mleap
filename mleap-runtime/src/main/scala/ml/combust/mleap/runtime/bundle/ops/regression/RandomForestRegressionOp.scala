@@ -6,17 +6,18 @@ import ml.combust.mleap.runtime.transformer.regression.RandomForestRegression
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object RandomForestRegressionOp extends OpNode[RandomForestRegression, RandomForestRegressionModel] {
+object RandomForestRegressionOp extends OpNode[MleapContext, RandomForestRegression, RandomForestRegressionModel] {
   implicit val nodeWrapper = MleapNodeWrapper
 
-  override val Model: OpModel[RandomForestRegressionModel] = new OpModel[RandomForestRegressionModel] {
+  override val Model: OpModel[MleapContext, RandomForestRegressionModel] = new OpModel[MleapContext, RandomForestRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.regression.random_forest_regression
 
-    override def store(context: BundleContext, model: Model, obj: RandomForestRegressionModel): Model = {
+    override def store(context: BundleContext[MleapContext], model: Model, obj: RandomForestRegressionModel): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -30,7 +31,7 @@ object RandomForestRegressionOp extends OpNode[RandomForestRegression, RandomFor
         withAttr("trees", Value.stringList(trees))
     }
 
-    override def load(context: BundleContext, model: Model): RandomForestRegressionModel = {
+    override def load(context: BundleContext[MleapContext], model: Model): RandomForestRegressionModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList
 
@@ -48,7 +49,7 @@ object RandomForestRegressionOp extends OpNode[RandomForestRegression, RandomFor
 
   override def model(node: RandomForestRegression): RandomForestRegressionModel = node.model
 
-  override def load(context: BundleContext, node: Node, model: RandomForestRegressionModel): RandomForestRegression = {
+  override def load(context: BundleContext[MleapContext], node: Node, model: RandomForestRegressionModel): RandomForestRegression = {
     RandomForestRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

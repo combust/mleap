@@ -4,17 +4,18 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.NominalAttribute
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.classification.ClassificationModel
 import org.apache.spark.ml.mleap.classification.OneVsRestModel
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
-  override val Model: OpModel[OneVsRestModel] = new OpModel[OneVsRestModel] {
+object OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestModel] {
+  override val Model: OpModel[SparkBundleContext, OneVsRestModel] = new OpModel[SparkBundleContext, OneVsRestModel] {
     override def opName: String = Bundle.BuiltinOps.classification.one_vs_rest
 
-    override def store(context: BundleContext, model: Model, obj: OneVsRestModel): Model = {
+    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: OneVsRestModel): Model = {
       var i = 0
       for(cModel <- obj.models) {
         val name = s"model$i"
@@ -26,7 +27,7 @@ object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
       model.withAttr("num_classes", Value.long(obj.models.length))
     }
 
-    override def load(context: BundleContext, model: Model): OneVsRestModel = {
+    override def load(context: BundleContext[SparkBundleContext], model: Model): OneVsRestModel = {
       val numClasses = model.value("num_classes").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
@@ -45,7 +46,7 @@ object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
 
   override def model(node: OneVsRestModel): OneVsRestModel = node
 
-  override def load(context: BundleContext, node: Node, model: OneVsRestModel): OneVsRestModel = {
+  override def load(context: BundleContext[SparkBundleContext], node: Node, model: OneVsRestModel): OneVsRestModel = {
     val labelMetadata = NominalAttribute.defaultAttr.
       withName(node.shape.output("prediction").name).
       withNumValues(model.models.length).

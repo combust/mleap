@@ -12,13 +12,13 @@ import org.apache.spark.ml.{PipelineModel, Transformer}
 object SparkBundle {
   def readTransformerGraph(path: File)
                           (implicit hr: HasBundleRegistry): PipelineModel = {
-    val bundle = BundleSerializer(path).read()
+    val bundle = BundleSerializer(SparkBundleContext(), path).read()
     new PipelineModel(uid = bundle.name, stages = bundle.nodes.map(_.asInstanceOf[Transformer]).toArray)
   }
 
   def readTransformer(path: File)
                      (implicit hr: HasBundleRegistry): (Bundle, Transformer) = {
-    val bundle = BundleSerializer(path).read()
+    val bundle = BundleSerializer(SparkBundleContext(), path).read()
     val transformer = if(bundle.nodes.length == 1) {
       bundle.nodes.head.asInstanceOf[Transformer]
     } else {
@@ -34,7 +34,7 @@ object SparkBundle {
                             format: SerializationFormat = SerializationFormat.Mixed)
                            (implicit hr: HasBundleRegistry): Unit = {
     val bundle = Bundle.createBundle(graph.uid, format, graph.stages, list)
-    BundleSerializer(path).write(bundle)
+    BundleSerializer(SparkBundleContext(), path).write(bundle)
   }
 
   def writeTransformer(transformer: Transformer,
@@ -46,7 +46,7 @@ object SparkBundle {
       case transformer: PipelineModel => writeTransformerGraph(transformer, path, list, format)(hr)
       case _ =>
         val bundle = Bundle.createBundle(transformer.uid, format, Seq(transformer), list)
-        BundleSerializer(path).write(bundle)
+        BundleSerializer(SparkBundleContext(), path).write(bundle)
     }
   }
 }

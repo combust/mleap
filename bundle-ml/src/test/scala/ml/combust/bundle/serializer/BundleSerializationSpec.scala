@@ -58,7 +58,7 @@ class BundleSerializationSpec extends FunSpec {
         it("serializes/deserializes the same object") {
           val file = new File(TestUtil.baseDir, s"lr_bundle.$format$suffix")
           val bundle = Bundle.createBundle("my_bundle", format, Seq(lr))
-          val serializer = BundleSerializer(file)
+          val serializer = BundleSerializer(Unit, file)
           serializer.write(bundle)
           val bundleRead = serializer.read()
 
@@ -78,7 +78,7 @@ class BundleSerializationSpec extends FunSpec {
 
           val file = new File(TestUtil.baseDir, s"decision_tree_bundle.$format$suffix")
           val bundle = Bundle.createBundle("my_bundle", format, Seq(dt))
-          val serializer = BundleSerializer(file)
+          val serializer = BundleSerializer(Unit, file)
           serializer.write(bundle)
           val bundleRead = serializer.read()
 
@@ -90,7 +90,7 @@ class BundleSerializationSpec extends FunSpec {
         it("serializes/deserializes the same object") {
           val file = new File(TestUtil.baseDir, s"pipeline_bundle.$format$suffix")
           val bundle = Bundle.createBundle("my_bundle", format, Seq(pipeline))
-          val serializer = BundleSerializer(file)
+          val serializer = BundleSerializer(Unit, file)
           serializer.write(bundle)
           val bundleRead = serializer.read()
 

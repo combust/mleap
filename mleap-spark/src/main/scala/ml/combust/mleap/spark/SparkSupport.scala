@@ -6,7 +6,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.serializer._
 import ml.combust.mleap.runtime.transformer.{Transformer => MleapTransformer}
 import org.apache.spark.ml.Transformer
-import org.apache.spark.ml.bundle.SparkBundle
+import org.apache.spark.ml.bundle.{SparkBundle, SparkBundleContext}
 import org.apache.spark.sql.DataFrame
 
 /**
@@ -30,7 +30,7 @@ trait SparkSupport {
 
   implicit class FileOps(path: File) {
     def deserializeBundleMeta()
-                             (implicit hr: HasBundleRegistry): BundleMeta = BundleSerializer(path).readMeta()
+                             (implicit hr: HasBundleRegistry): BundleMeta = BundleSerializer(SparkBundleContext(), path).readMeta()
 
     def deserializeBundle()
                          (implicit hr: HasBundleRegistry): (Bundle, Transformer) = SparkBundle.readTransformer(path)

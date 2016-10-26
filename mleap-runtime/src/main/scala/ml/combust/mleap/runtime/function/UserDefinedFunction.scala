@@ -7,7 +7,7 @@ import scala.reflect.runtime.universe.TypeTag
 
 /** Companion object for creating user defined functions.
   */
-object UserDefinedFunction {
+trait UserDefinedFunctionBase {
   import ml.combust.mleap.runtime.reflection.MleapReflection.dataType
 
   implicit def apply[RT: TypeTag](f: () => RT): UserDefinedFunction =
@@ -23,6 +23,12 @@ object UserDefinedFunction {
   implicit def apply[RT: TypeTag, T1: TypeTag, T2: TypeTag, T3: TypeTag, T4: TypeTag, T5: TypeTag](f: (T1, T2, T3, T4, T5) => RT): UserDefinedFunction =
     UserDefinedFunction(f, dataType[RT], Seq(dataType[T1], dataType[T2], dataType[T3], dataType[T4], dataType[T5]))
 }
+
+case class UserDefinedFunctionBuilder(custom: Map[String, CustomType[_]] = Map()) extends UserDefinedFunctionBase {
+
+}
+
+object UserDefinedFunction extends UserDefinedFunctionBase
 
 case class UserDefinedFunction(f: AnyRef,
                                returnType: DataType,

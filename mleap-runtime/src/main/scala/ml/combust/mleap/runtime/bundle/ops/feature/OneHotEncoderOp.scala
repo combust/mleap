@@ -4,20 +4,21 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
 import ml.combust.mleap.core.feature.OneHotEncoderModel
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.OneHotEncoder
 
 /**
   * Created by hollinwilkins on 10/24/16.
   */
-object OneHotEncoderOp extends OpNode[OneHotEncoder, OneHotEncoderModel] {
-  override val Model: OpModel[OneHotEncoderModel] = new OpModel[OneHotEncoderModel] {
+object OneHotEncoderOp extends OpNode[MleapContext, OneHotEncoder, OneHotEncoderModel] {
+  override val Model: OpModel[MleapContext, OneHotEncoderModel] = new OpModel[MleapContext, OneHotEncoderModel] {
     override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder
 
-    override def store(context: BundleContext, model: Model, obj: OneHotEncoderModel): Model = {
+    override def store(context: BundleContext[MleapContext], model: Model, obj: OneHotEncoderModel): Model = {
       model.withAttr("size", Value.long(obj.size))
     }
 
-    override def load(context: BundleContext, model: Model): OneHotEncoderModel = {
+    override def load(context: BundleContext[MleapContext], model: Model): OneHotEncoderModel = {
       OneHotEncoderModel(size = model.value("size").getLong.toInt)
     }
   }
@@ -26,7 +27,7 @@ object OneHotEncoderOp extends OpNode[OneHotEncoder, OneHotEncoderModel] {
 
   override def model(node: OneHotEncoder): OneHotEncoderModel = node.model
 
-  override def load(context: BundleContext, node: Node, model: OneHotEncoderModel): OneHotEncoder = {
+  override def load(context: BundleContext[MleapContext], node: Node, model: OneHotEncoderModel): OneHotEncoder = {
     OneHotEncoder(uid = node.name,
       inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,

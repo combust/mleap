@@ -5,21 +5,22 @@ import ml.combust.mleap.runtime.transformer.regression.LinearRegression
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.runtime.MleapContext
 import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object LinearRegressionOp extends OpNode[LinearRegression, LinearRegressionModel] {
-  override val Model: OpModel[LinearRegressionModel] = new OpModel[LinearRegressionModel] {
+object LinearRegressionOp extends OpNode[MleapContext, LinearRegression, LinearRegressionModel] {
+  override val Model: OpModel[MleapContext, LinearRegressionModel] = new OpModel[MleapContext, LinearRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.regression.linear_regression
 
-    override def store(context: BundleContext, model: Model, obj: LinearRegressionModel): Model = {
+    override def store(context: BundleContext[MleapContext], model: Model, obj: LinearRegressionModel): Model = {
       model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept))
     }
 
-    override def load(context: BundleContext, model: Model): LinearRegressionModel = {
+    override def load(context: BundleContext[MleapContext], model: Model): LinearRegressionModel = {
       LinearRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
         intercept = model.value("intercept").getDouble)
     }
@@ -29,7 +30,7 @@ object LinearRegressionOp extends OpNode[LinearRegression, LinearRegressionModel
 
   override def model(node: LinearRegression): LinearRegressionModel = node.model
 
-  override def load(context: BundleContext, node: Node, model: LinearRegressionModel): LinearRegression = {
+  override def load(context: BundleContext[MleapContext], node: Node, model: LinearRegressionModel): LinearRegression = {
     LinearRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

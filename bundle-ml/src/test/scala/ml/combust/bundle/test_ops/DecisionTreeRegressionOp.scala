@@ -81,17 +81,17 @@ object MyNodeWrapper extends NodeWrapper[Node] {
   }
 }
 
-object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegression, DecisionTreeRegressionModel] {
+object DecisionTreeRegressionOp extends OpNode[Any, DecisionTreeRegression, DecisionTreeRegressionModel] {
   implicit val wrapper = MyNodeWrapper
-  override val Model: OpModel[DecisionTreeRegressionModel] = new OpModel[DecisionTreeRegressionModel] {
+  override val Model: OpModel[Any, DecisionTreeRegressionModel] = new OpModel[Any, DecisionTreeRegressionModel] {
     override def opName: String = Bundle.BuiltinOps.regression.decision_tree_regression
 
-    override def store(context: BundleContext, model: Model, obj: DecisionTreeRegressionModel): Model = {
+    override def store(context: BundleContext[Any], model: Model, obj: DecisionTreeRegressionModel): Model = {
       TreeSerializer[Node](context.file("nodes"), withImpurities = true).write(obj.root)
       model
     }
 
-    override def load(context: BundleContext, model: Model): DecisionTreeRegressionModel = {
+    override def load(context: BundleContext[Any], model: Model): DecisionTreeRegressionModel = {
       val root = TreeSerializer[Node](context.file("nodes"), withImpurities = true).read()
       DecisionTreeRegressionModel(root)
     }
@@ -101,7 +101,7 @@ object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegression, DecisionT
 
   override def model(node: DecisionTreeRegression): DecisionTreeRegressionModel = node.model
 
-  override def load(context: BundleContext, node: dsl.Node, model: DecisionTreeRegressionModel): DecisionTreeRegression = {
+  override def load(context: BundleContext[Any], node: dsl.Node, model: DecisionTreeRegressionModel): DecisionTreeRegression = {
     DecisionTreeRegression(uid = node.name,
       input = node.shape.standardInput.name,
       output = node.shape.standardOutput.name,

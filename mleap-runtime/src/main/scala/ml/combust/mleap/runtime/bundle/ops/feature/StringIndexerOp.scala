@@ -5,19 +5,20 @@ import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object StringIndexerOp extends OpNode[StringIndexer, StringIndexerModel] {
-  override val Model: OpModel[StringIndexerModel] = new OpModel[StringIndexerModel] {
+object StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerModel] {
+  override val Model: OpModel[MleapContext, StringIndexerModel] = new OpModel[MleapContext, StringIndexerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.string_indexer
 
-    override def store(context: BundleContext, model: Model, obj: StringIndexerModel): Model = {
+    override def store(context: BundleContext[MleapContext], model: Model, obj: StringIndexerModel): Model = {
       model.withAttr("labels", Value.stringList(obj.labels))
     }
 
-    override def load(context: BundleContext, model: Model): StringIndexerModel = {
+    override def load(context: BundleContext[MleapContext], model: Model): StringIndexerModel = {
       StringIndexerModel(labels = model.value("labels").getStringList)
     }
   }
@@ -26,7 +27,7 @@ object StringIndexerOp extends OpNode[StringIndexer, StringIndexerModel] {
 
   override def model(node: StringIndexer): StringIndexerModel = node.model
 
-  override def load(context: BundleContext, node: Node, model: StringIndexerModel): StringIndexer = {
+  override def load(context: BundleContext[MleapContext], node: Node, model: StringIndexerModel): StringIndexer = {
     StringIndexer(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)

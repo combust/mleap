@@ -26,10 +26,10 @@ trait HasBundleRegistry {
   * on how to serialize custom types or models or nodes.
   */
 case class BundleRegistry() extends HasBundleRegistry {
-  var ops: Map[String, OpNode[_, _]] = Map()
+  var ops: Map[String, OpNode[_, _, _]] = Map()
   var opAlias: Map[String, String] = Map()
 
-  var models: Map[String, OpModel[_]] = Map()
+  var models: Map[String, OpModel[_, _]] = Map()
   var modelAlias: Map[String, String] = Map()
 
   var customTypes: Map[String, CustomType[_]] = Map()
@@ -40,36 +40,40 @@ case class BundleRegistry() extends HasBundleRegistry {
   /** Get an op node by name.
     *
     * @param op name of op
+    * @tparam Context context for implementation
     * @tparam N class of op
     * @tparam M model class of op
     * @return op node type class for given name
     */
-  def apply[N, M](op: String): OpNode[N, M] = ops(op).asInstanceOf[OpNode[N, M]]
+  def apply[Context, N, M](op: String): OpNode[Context, N, M] = ops(op).asInstanceOf[OpNode[Context, N, M]]
 
   /** Get an op node for an object.
     *
     * @param obj node object
+    * @tparam Context context for implementation
     * @tparam N class of op
     * @tparam M model class of op
     * @return op node type class for given object
     */
-  def opForObj[N, M](obj: N): OpNode[N, M] = ops(opAlias(obj.getClass.getCanonicalName)).asInstanceOf[OpNode[N, M]]
+  def opForObj[Context, N, M](obj: N): OpNode[Context, N, M] = ops(opAlias(obj.getClass.getCanonicalName)).asInstanceOf[OpNode[Context, N, M]]
 
   /** Get a model for a name.
     *
     * @param op name of op
+    * @tparam Context context for implementation
     * @tparam M model class of op
     * @return model type class for given name
     */
-  def model[M](op: String): OpModel[M] = models(op).asInstanceOf[OpModel[M]]
+  def model[Context, M](op: String): OpModel[Context, M] = models(op).asInstanceOf[OpModel[Context, M]]
 
   /** Get a model for an object.
     *
     * @param obj model object
+    * @tparam Context context for implementation
     * @tparam M model class
     * @return model type class for given object
     */
-  def modelForObj[M](obj: Any): OpModel[M] = model(modelAlias(obj.getClass.getCanonicalName))
+  def modelForObj[Context, M](obj: Any): OpModel[Context, M] = model(modelAlias(obj.getClass.getCanonicalName))
 
   /** Get custom type by name.
     *
@@ -99,11 +103,12 @@ case class BundleRegistry() extends HasBundleRegistry {
     * This will register the underlying model type class as well.
     *
     * @param op op node type class
+    * @tparam Context context for implementation
     * @tparam N type of the op node
     * @tparam M type of the underlying model
     * @return this
     */
-  def register[N: ClassTag, M: ClassTag](op: OpNode[N, M]): this.type = {
+  def register[Context, N: ClassTag, M: ClassTag](op: OpNode[Context, N, M]): this.type = {
     ops = ops + (op.Model.opName -> op)
     opAlias = opAlias + (classTag[N].runtimeClass.getCanonicalName -> op.Model.opName)
     models = models + (op.Model.opName -> op.Model)

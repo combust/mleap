@@ -6,17 +6,18 @@ import ml.combust.mleap.runtime.transformer.classification.RandomForestClassifie
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object RandomForestClassifierOp extends OpNode[RandomForestClassifier, RandomForestClassifierModel] {
+object RandomForestClassifierOp extends OpNode[MleapContext, RandomForestClassifier, RandomForestClassifierModel] {
   implicit val nodeWrapper = MleapNodeWrapper
 
-  override val Model: OpModel[RandomForestClassifierModel] = new OpModel[RandomForestClassifierModel] {
+  override val Model: OpModel[MleapContext, RandomForestClassifierModel] = new OpModel[MleapContext, RandomForestClassifierModel] {
     override def opName: String = Bundle.BuiltinOps.classification.random_forest_classifier
 
-    override def store(context: BundleContext, model: Model, obj: RandomForestClassifierModel): Model = {
+    override def store(context: BundleContext[MleapContext], model: Model, obj: RandomForestClassifierModel): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -31,7 +32,7 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassifier, RandomFor
         withAttr("trees", Value.stringList(trees))
     }
 
-    override def load(context: BundleContext, model: Model): RandomForestClassifierModel = {
+    override def load(context: BundleContext[MleapContext], model: Model): RandomForestClassifierModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val numClasses = model.value("num_classes").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList
@@ -51,7 +52,7 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassifier, RandomFor
 
   override def model(node: RandomForestClassifier): RandomForestClassifierModel = node.model
 
-  override def load(context: BundleContext, node: Node, model: RandomForestClassifierModel): RandomForestClassifier = {
+  override def load(context: BundleContext[MleapContext], node: Node, model: RandomForestClassifierModel): RandomForestClassifier = {
     RandomForestClassifier(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.input("prediction").name,

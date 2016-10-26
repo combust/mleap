@@ -1,5 +1,7 @@
 package ml.combust.mleap.runtime.types
 
+import spray.json.{JsValue, JsonFormat}
+
 sealed trait DataType extends Serializable {
   def fits(other: DataType): Boolean = this == other
 }
@@ -38,4 +40,18 @@ case class ListType(base: DataType) extends DataType
 
 object TensorType {
   def doubleVector(dim: Int = -1): TensorType = TensorType(DoubleType, Seq(dim))
+}
+
+trait CustomType[T] extends DataType {
+  import spray.json._
+
+  val klazz: Class[T]
+  val name: String
+  val format: JsonFormat[T]
+
+  def toJson(t: T): JsValue = format.write(t)
+  def fromJson(json: JsValue): T = format.read(json)
+
+  def toBytes(t: T): Array[Byte] = format.write(t).compactPrint.getBytes("UTF-8")
+  def fromBytes(bytes: Array[Byte]): T = format.read(new String(bytes, "UTF-8").parseJson)
 }

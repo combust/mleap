@@ -3,19 +3,20 @@ package org.apache.spark.ml.bundle.ops.classification
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
 import ml.combust.bundle.dsl._
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.bundle.tree.SparkNodeWrapper
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, RandomForestClassificationModel}
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object RandomForestClassifierOp extends OpNode[RandomForestClassificationModel, RandomForestClassificationModel] {
+object RandomForestClassifierOp extends OpNode[SparkBundleContext, RandomForestClassificationModel, RandomForestClassificationModel] {
   implicit val nodeWrapper = SparkNodeWrapper
 
-  override val Model: OpModel[RandomForestClassificationModel] = new OpModel[RandomForestClassificationModel] {
+  override val Model: OpModel[SparkBundleContext, RandomForestClassificationModel] = new OpModel[SparkBundleContext, RandomForestClassificationModel] {
     override def opName: String = Bundle.BuiltinOps.classification.random_forest_classifier
 
-    override def store(context: BundleContext, model: Model, obj: RandomForestClassificationModel): Model = {
+    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: RandomForestClassificationModel): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -30,7 +31,7 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassificationModel, 
         withAttr("trees", Value.stringList(trees))
     }
 
-    override def load(context: BundleContext, model: Model): RandomForestClassificationModel = {
+    override def load(context: BundleContext[SparkBundleContext], model: Model): RandomForestClassificationModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val numClasses = model.value("num_classes").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList
@@ -53,7 +54,7 @@ object RandomForestClassifierOp extends OpNode[RandomForestClassificationModel, 
 
   override def model(node: RandomForestClassificationModel): RandomForestClassificationModel = node
 
-  override def load(context: BundleContext, node: Node, model: RandomForestClassificationModel): RandomForestClassificationModel = {
+  override def load(context: BundleContext[SparkBundleContext], node: Node, model: RandomForestClassificationModel): RandomForestClassificationModel = {
     new RandomForestClassificationModel(uid = node.name,
       numClasses = model.numClasses,
       numFeatures = model.numFeatures,

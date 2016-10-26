@@ -4,20 +4,21 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.BundleContext
 import ml.combust.mleap.core.feature.NormalizerModel
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Normalizer
 
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-object NormalizerOp extends OpNode[Normalizer, NormalizerModel] {
-  override val Model: OpModel[NormalizerModel] = new OpModel[NormalizerModel] {
+object NormalizerOp extends OpNode[MleapContext, Normalizer, NormalizerModel] {
+  override val Model: OpModel[MleapContext, NormalizerModel] = new OpModel[MleapContext, NormalizerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.normalizer
 
-    override def store(context: BundleContext, model: Model, obj: NormalizerModel): Model = {
+    override def store(context: BundleContext[MleapContext], model: Model, obj: NormalizerModel): Model = {
       model.withAttr("p_norm", Value.double(obj.pNorm))
     }
 
-    override def load(context: BundleContext, model: Model): NormalizerModel = {
+    override def load(context: BundleContext[MleapContext], model: Model): NormalizerModel = {
       NormalizerModel(pNorm = model.value("p_norm").getDouble)
     }
   }
@@ -26,7 +27,7 @@ object NormalizerOp extends OpNode[Normalizer, NormalizerModel] {
 
   override def model(node: Normalizer): NormalizerModel = node.model
 
-  override def load(context: BundleContext, node: Node, model: NormalizerModel): Normalizer = {
+  override def load(context: BundleContext[MleapContext], node: Node, model: NormalizerModel): Normalizer = {
     Normalizer(uid = node.name,
       inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,

@@ -12,16 +12,18 @@ import ml.combust.mleap.runtime.MleapContext
   */
 object MleapBundle {
   def readTransformerGraph(path: File)
-                          (implicit hr: HasBundleRegistry): (Bundle, Pipeline) = {
-    val bundle = BundleSerializer(MleapContext(), path).read()
+                          (implicit hr: HasBundleRegistry = BundleRegistry("mleap"),
+                           context: MleapContext = MleapContext()): (Bundle, Pipeline) = {
+    val bundle = BundleSerializer(context, path).read()
     val pipeline = Pipeline(uid = bundle.name, transformers = bundle.nodes.map(_.asInstanceOf[Transformer]))
 
     (bundle, pipeline)
   }
 
   def readTransformer(path: File)
-                     (implicit hr: HasBundleRegistry): (Bundle, Transformer) = {
-    val bundle = BundleSerializer(MleapContext(), path).read()
+                     (implicit hr: HasBundleRegistry = BundleRegistry("mleap"),
+                      context: MleapContext = MleapContext()): (Bundle, Transformer) = {
+    val bundle = BundleSerializer(context, path).read()
     val model = if(bundle.nodes.length == 1) {
       bundle.nodes.head.asInstanceOf[Transformer]
     } else {
@@ -35,16 +37,18 @@ object MleapBundle {
                             path: File,
                             list: Option[AttributeList] = None,
                             format: SerializationFormat = SerializationFormat.Mixed)
-                           (implicit hr: HasBundleRegistry): Unit = {
+                           (implicit hr: HasBundleRegistry = BundleRegistry("mleap"),
+                            context: MleapContext = MleapContext()): Unit = {
     val bundle = Bundle.createBundle(graph.uid, format, graph.transformers, list)
-    BundleSerializer(MleapContext(), path).write(bundle)
+    BundleSerializer(context, path).write(bundle)
   }
 
   def writeTransformer(transformer: Transformer,
                        path: File,
                        list: Option[AttributeList] = None,
                        format: SerializationFormat = SerializationFormat.Mixed)
-                      (implicit hr: HasBundleRegistry): Unit = {
+                      (implicit hr: HasBundleRegistry,
+                       context: MleapContext = MleapContext()): Unit = {
     transformer match {
       case transformer: Pipeline => writeTransformerGraph(transformer, path, list, format)
       case _ =>
@@ -52,7 +56,7 @@ object MleapBundle {
           format,
           Seq(transformer),
           list)
-        BundleSerializer(MleapContext(), path).write(bundle)
+        BundleSerializer(context, path).write(bundle)
     }
   }
 }

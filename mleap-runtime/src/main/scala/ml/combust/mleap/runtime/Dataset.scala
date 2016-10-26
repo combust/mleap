@@ -1,5 +1,8 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.runtime.Row.RowSelector
+import ml.combust.mleap.runtime.function.UserDefinedFunction
+
 /** Trait for storing data in a [[ml.combust.mleap.runtime.LeapFrame]].
   */
 trait Dataset extends Serializable {
@@ -10,19 +13,14 @@ trait Dataset extends Serializable {
     */
   def update(f: (Row) => Row): Dataset
 
-  /** Add a value to every row.
+  /** Add a value to every row using a user defined function.
     *
-    * @param f function used to calculate value for a row
-    * @return dataset with new value
+    * @param selectors row selectors to generate inputs to UDF
+    * @param udf user defined function
+    * @return dataset with value calculated for all rows
     */
-  def withValue(f: (Row) => Any): Dataset = update(_.withValue(f))
-
-  /** Add values to every row.
-    *
-    * @param f function used to calculate additional values for every row
-    * @return dataset with new values
-    */
-  def withValues(f: (Row) => Row): Dataset = update(_.withValues(f))
+  def withValue(selectors: RowSelector *)
+               (udf: UserDefinedFunction): Dataset = update(_.withValue(selectors: _*)(udf))
 
   /** Select given indices of every row.
     *

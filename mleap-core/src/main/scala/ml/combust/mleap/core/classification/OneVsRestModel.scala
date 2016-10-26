@@ -27,6 +27,10 @@ case class OneVsRestModel(classifiers: Array[BinaryClassificationModel]) {
     predictWithProbability(features)._1
   }
 
+  def predictProbability(features: Vector): Double = {
+    predictWithProbability(features)._2
+  }
+
   /** Predict the class and probability for a feature vector.
     *
     * @param features feature vector

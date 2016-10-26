@@ -18,7 +18,7 @@ lazy val `mleap-runtime` = project.in(file("mleap-runtime")).
   settings(Common.settings).
   settings(Common.combustSettings).
   settings(Common.sonatypeSettings).
-  settings(libraryDependencies ++= Dependencies.mleapRuntimeDependencies).
+  settings(libraryDependencies ++= Dependencies.mleapRuntimeDependencies(scalaVersion.value)).
   dependsOn(`mleap-core`, `bundle-ml`)
 
 lazy val `mleap-spark` = project.in(file("mleap-spark")).

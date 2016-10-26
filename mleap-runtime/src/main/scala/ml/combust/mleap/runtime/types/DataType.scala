@@ -1,17 +1,20 @@
 package ml.combust.mleap.runtime.types
 
-/**
- * Created by hwilkins on 10/23/15.
- */
 sealed trait DataType extends Serializable {
   def fits(other: DataType): Boolean = this == other
 }
 sealed trait BasicType extends DataType with Serializable
 
+object AnyType extends BasicType {
+  override def fits(other: DataType): Boolean = true
+}
+
+object IntegerType extends BasicType
 object LongType extends BasicType
 object BooleanType extends BasicType
 object DoubleType extends BasicType
 object StringType extends BasicType
+
 case class TensorType(base: BasicType, dimensions: Seq[Int]) extends DataType {
   override def fits(other: DataType): Boolean = {
     if(super.fits(other)) { return true }

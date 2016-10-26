@@ -1,23 +1,19 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MaxAbsScalerModel
-import ml.combust.mleap.runtime.transformer.Transformer
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.TensorType
+import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
+import org.apache.spark.ml.linalg.Vector
 
 import scala.util.Try
 
 /**
   * Created by mikhail on 9/18/16.
   */
-case class MaxAbsScaler(uid: String = Transformer.uniqueName("max_abs_scaler"),
-                       inputCol: String,
-                       outputCol: String,
-                       model: MaxAbsScalerModel) extends Transformer {
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withInput(inputCol, TensorType.doubleVector()).flatMap {
-      case (b, inputIndex) =>
-        b.withOutput(outputCol, TensorType.doubleVector())(row => model(row.getVector(inputIndex)))
-    }
-  }
+case class MaxAbsScaler(override val uid: String = Transformer.uniqueName("max_abs_scaler"),
+                        override val inputCol: String,
+                        override val outputCol: String,
+                       model: MaxAbsScalerModel) extends FeatureTransformer {
+
+  override val exec: UserDefinedFunction = (value: Vector) => model(value)
 }

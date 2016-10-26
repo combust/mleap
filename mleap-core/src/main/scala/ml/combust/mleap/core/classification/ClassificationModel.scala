@@ -94,7 +94,7 @@ trait BinaryClassificationModel extends ClassificationModel {
     (probabilityToPrediction(probability), probability)
   }
 
-  private def probabilityToPrediction(probability: Double): Double = threshold match {
+  def probabilityToPrediction(probability: Double): Double = threshold match {
     case Some(t) => if (probability > t) 1.0 else 0.0
     case None => probability
   }

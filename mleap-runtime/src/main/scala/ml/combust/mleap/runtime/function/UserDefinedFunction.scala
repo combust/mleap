@@ -39,7 +39,6 @@ object UserDefinedFunction {
                                                                                                   (implicit context: MleapContext = MleapContext.defaultContext): UserDefinedFunction = {
     UserDefinedFunction(f, dataType[RT], Seq(dataType[T1], dataType[T2], dataType[T3], dataType[T4], dataType[T5]))
   }
-
 }
 
 case class UserDefinedFunction(f: AnyRef,

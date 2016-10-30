@@ -36,7 +36,7 @@ class PolynomialExpansionOp extends OpNode[SparkBundleContext, PolynomialExpansi
 
   override def load(node: Node, model: PolynomialExpansion)
                    (implicit context: BundleContext[SparkBundleContext]): PolynomialExpansion = {
-    new PolynomialExpansion().
+    new PolynomialExpansion(uid = node.name).
       setDegree(model.getDegree).
       setInputCol(node.shape.standardInput.name).
       setOutputCol(node.shape.standardOutput.name)

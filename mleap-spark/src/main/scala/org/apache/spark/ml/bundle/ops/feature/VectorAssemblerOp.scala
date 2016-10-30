@@ -30,7 +30,7 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
 
   override def load(node: Node, model: VectorAssembler)
                    (implicit context: BundleContext[SparkBundleContext]): VectorAssembler = {
-    new VectorAssembler().
+    new VectorAssembler(uid = node.name).
       setInputCols(node.shape.inputs.map(_.name).toArray).
       setOutputCol(node.shape.standardOutput.name)
   }

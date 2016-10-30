@@ -35,7 +35,8 @@ class NGramOp extends OpNode[MleapContext, NGram, NGramModel]{
 
   override def load(node: Node, model: NGramModel)
                    (implicit context: BundleContext[MleapContext]): NGram = {
-    NGram(inputCol = node.shape.standardInput.name,
+    NGram(uid = node.name,
+      inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

@@ -36,7 +36,8 @@ class MaxAbsScalerOp extends OpNode[MleapContext, MaxAbsScaler, MaxAbsScalerMode
 
   override def load(node: Node, model: MaxAbsScalerModel)
                    (implicit context: BundleContext[MleapContext]): MaxAbsScaler = {
-    MaxAbsScaler(inputCol = node.shape.standardInput.name,
+    MaxAbsScaler(uid = node.name,
+      inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

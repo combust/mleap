@@ -35,7 +35,8 @@ class PolynomialExpansionOp extends OpNode[MleapContext, PolynomialExpansion, Po
 
   override def load(node: Node, model: PolynomialExpansionModel)
                    (implicit context: BundleContext[MleapContext]): PolynomialExpansion = {
-    PolynomialExpansion(inputCol = node.shape.standardInput.name,
+    PolynomialExpansion(uid = node.name,
+      inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

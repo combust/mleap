@@ -35,7 +35,8 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
 
   override def load(node: Node, model: StringIndexerModel)
                    (implicit context: BundleContext[MleapContext]): StringIndexer = {
-    StringIndexer(inputCol = node.shape.standardInput.name,
+    StringIndexer(uid = node.name,
+      inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

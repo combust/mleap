@@ -38,7 +38,8 @@ class StopWordsRemoverOp extends OpNode[MleapContext, StopWordsRemover, StopWord
 
   override def load(node: Node, model: StopWordsRemoverModel)
                    (implicit context: BundleContext[MleapContext]): StopWordsRemover = {
-    StopWordsRemover(inputCol = node.shape.standardInput.name,
+    StopWordsRemover(uid = node.name,
+      inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model
     )

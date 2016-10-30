@@ -36,7 +36,8 @@ class ElementwiseProductOp extends OpNode[MleapContext, ElementwiseProduct, Elem
 
   override def load(node: Node, model: ElementwiseProductModel)
                    (implicit context: BundleContext[MleapContext]): ElementwiseProduct = {
-    ElementwiseProduct(inputCol = node.shape.standardInput.name,
+    ElementwiseProduct(uid = node.name,
+      inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model
     )

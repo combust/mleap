@@ -35,7 +35,8 @@ class BucketizerOp extends OpNode[MleapContext, Bucketizer, BucketizerModel]{
 
   override def load(node: Node, model: BucketizerModel)
                    (implicit context: BundleContext[MleapContext]): Bucketizer = {
-    Bucketizer(inputCol = node.shape.standardInput.name,
+    Bucketizer(uid = node.name,
+      inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

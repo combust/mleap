@@ -48,6 +48,7 @@ object Bundle {
       val normalizer = "normalizer"
       val pca = "pca"
       val ngram = "ngram"
+      val polynomial_expansion = "polynomial_expansion"
       val stopwords_remover = "stopwords_remover"
     }
 

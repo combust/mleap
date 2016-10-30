@@ -38,7 +38,8 @@ class MinMaxScalerOp extends OpNode[MleapContext, MinMaxScaler, MinMaxScalerMode
 
   override def load(node: Node, model: MinMaxScalerModel)
                    (implicit context: BundleContext[MleapContext]): MinMaxScaler = {
-    MinMaxScaler(inputCol = node.shape.standardInput.name,
+    MinMaxScaler(uid = node.name,
+      inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

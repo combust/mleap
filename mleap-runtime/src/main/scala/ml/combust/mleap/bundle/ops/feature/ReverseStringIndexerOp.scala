@@ -35,7 +35,8 @@ class ReverseStringIndexerOp extends OpNode[MleapContext, ReverseStringIndexer, 
 
   override def load(node: Node, model: ReverseStringIndexerModel)
                    (implicit context: BundleContext[MleapContext]): ReverseStringIndexer = {
-    ReverseStringIndexer(inputCol = node.shape.standardInput.name,
+    ReverseStringIndexer(uid = node.name,
+      inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

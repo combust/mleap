@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.reflection
 
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
 import org.apache.spark.ml.linalg.Vector
 
@@ -14,8 +15,9 @@ trait MleapReflection {
 
   import universe._
 
-  def dataType[T: TypeTag]: DataType = dataTypeFor(mirrorType[T])
-  private def dataTypeFor(tpe: `Type`): DataType = MleapReflectionLock.synchronized {
+  def dataType[T: TypeTag](implicit context: MleapContext): DataType = dataTypeFor(mirrorType[T])
+  private def dataTypeFor(tpe: `Type`)
+                         (implicit context: MleapContext): DataType = MleapReflectionLock.synchronized {
     tpe match {
       case t if t <:< mirrorType[Boolean] => BooleanType
       case t if t <:< mirrorType[String] => StringType
@@ -28,6 +30,8 @@ trait MleapReflection {
         ListType(baseType)
       case t if t <:< mirrorType[Vector] => TensorType.doubleVector()
       case t if t =:= mirrorType[Any] => AnyType
+      case t if context.hasCustomType(t.erasure.typeSymbol.asClass.fullName) =>
+        context.customTypeForClass[Any](t.erasure.typeSymbol.asClass.fullName)
       case t => throw new IllegalArgumentException(s"unknown type $t")
     }
   }

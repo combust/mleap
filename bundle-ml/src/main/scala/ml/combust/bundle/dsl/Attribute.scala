@@ -1,6 +1,6 @@
 package ml.combust.bundle.dsl
 
-import ml.combust.bundle.serializer.HasBundleRegistry
+import ml.combust.bundle.HasBundleRegistry
 
 /** Companion object for attribute.
   */

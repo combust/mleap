@@ -1,20 +1,25 @@
 package org.apache.spark.ml.bundle.ops.classification
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.{BundleContext, ModelSerializer}
+import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.NominalAttribute
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.classification.ClassificationModel
 import org.apache.spark.ml.mleap.classification.OneVsRestModel
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
-  override val Model: OpModel[OneVsRestModel] = new OpModel[OneVsRestModel] {
+class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestModel] {
+  override val Model: OpModel[SparkBundleContext, OneVsRestModel] = new OpModel[SparkBundleContext, OneVsRestModel] {
+    override val klazz: Class[OneVsRestModel] = classOf[OneVsRestModel]
+
     override def opName: String = Bundle.BuiltinOps.classification.one_vs_rest
 
-    override def store(context: BundleContext, model: Model, obj: OneVsRestModel): Model = {
+    override def store(model: Model, obj: OneVsRestModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       var i = 0
       for(cModel <- obj.models) {
         val name = s"model$i"
@@ -26,7 +31,8 @@ object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
       model.withAttr("num_classes", Value.long(obj.models.length))
     }
 
-    override def load(context: BundleContext, model: Model): OneVsRestModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): OneVsRestModel = {
       val numClasses = model.value("num_classes").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
@@ -41,11 +47,14 @@ object OneVsRestOp extends OpNode[OneVsRestModel, OneVsRestModel] {
     }
   }
 
+  override val klazz: Class[OneVsRestModel] = classOf[OneVsRestModel]
+
   override def name(node: OneVsRestModel): String = node.uid
 
   override def model(node: OneVsRestModel): OneVsRestModel = node
 
-  override def load(context: BundleContext, node: Node, model: OneVsRestModel): OneVsRestModel = {
+  override def load(node: Node, model: OneVsRestModel)
+                   (implicit context: BundleContext[SparkBundleContext]): OneVsRestModel = {
     val labelMetadata = NominalAttribute.defaultAttr.
       withName(node.shape.output("prediction").name).
       withNumValues(model.models.length).

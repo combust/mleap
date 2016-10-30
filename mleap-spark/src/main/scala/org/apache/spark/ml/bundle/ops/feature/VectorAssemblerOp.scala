@@ -1,27 +1,35 @@
 package org.apache.spark.ml.bundle.ops.feature
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.VectorAssembler
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object VectorAssemblerOp extends OpNode[VectorAssembler, VectorAssembler] {
-  override val Model: OpModel[VectorAssembler] = new OpModel[VectorAssembler] {
+class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, VectorAssembler] {
+  override val Model: OpModel[SparkBundleContext, VectorAssembler] = new OpModel[SparkBundleContext, VectorAssembler] {
+    override val klazz: Class[VectorAssembler] = classOf[VectorAssembler]
+
     override def opName: String = Bundle.BuiltinOps.feature.vector_assembler
 
-    override def store(context: BundleContext, model: Model, obj: VectorAssembler): Model = { model }
+    override def store(model: Model, obj: VectorAssembler)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = { model }
 
-    override def load(context: BundleContext, model: Model): VectorAssembler = { new VectorAssembler(uid = "") }
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): VectorAssembler = { new VectorAssembler(uid = "") }
   }
+
+  override val klazz: Class[VectorAssembler] = classOf[VectorAssembler]
 
   override def name(node: VectorAssembler): String = node.uid
 
   override def model(node: VectorAssembler): VectorAssembler = node
 
-  override def load(context: BundleContext, node: Node, model: VectorAssembler): VectorAssembler = {
+  override def load(node: Node, model: VectorAssembler)
+                   (implicit context: BundleContext[SparkBundleContext]): VectorAssembler = {
     new VectorAssembler().
       setInputCols(node.shape.inputs.map(_.name).toArray).
       setOutputCol(node.shape.standardOutput.name)

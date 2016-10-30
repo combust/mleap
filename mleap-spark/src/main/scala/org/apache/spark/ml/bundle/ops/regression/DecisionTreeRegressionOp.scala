@@ -1,27 +1,32 @@
 package org.apache.spark.ml.bundle.ops.regression
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.tree.TreeSerializer
 import ml.combust.bundle.dsl._
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.bundle.tree.SparkNodeWrapper
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegressionModel, DecisionTreeRegressionModel] {
+class DecisionTreeRegressionOp extends OpNode[SparkBundleContext, DecisionTreeRegressionModel, DecisionTreeRegressionModel] {
   implicit val nodeWrapper = SparkNodeWrapper
 
-  override val Model: OpModel[DecisionTreeRegressionModel] = new OpModel[DecisionTreeRegressionModel] {
+  override val Model: OpModel[SparkBundleContext, DecisionTreeRegressionModel] = new OpModel[SparkBundleContext, DecisionTreeRegressionModel] {
+    override val klazz: Class[DecisionTreeRegressionModel] = classOf[DecisionTreeRegressionModel]
+
     override def opName: String = Bundle.BuiltinOps.regression.decision_tree_regression
 
-    override def store(context: BundleContext, model: Model, obj: DecisionTreeRegressionModel): Model = {
+    override def store(model: Model, obj: DecisionTreeRegressionModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       TreeSerializer[org.apache.spark.ml.tree.Node](context.file("nodes"), withImpurities = false).write(obj.rootNode)
       model.withAttr("num_features", Value.long(obj.numFeatures))
     }
 
-    override def load(context: BundleContext, model: Model): DecisionTreeRegressionModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): DecisionTreeRegressionModel = {
       val rootNode = TreeSerializer[org.apache.spark.ml.tree.Node](context.file("nodes"), withImpurities = false).read()
       new DecisionTreeRegressionModel(uid = "",
         rootNode = rootNode,
@@ -29,11 +34,14 @@ object DecisionTreeRegressionOp extends OpNode[DecisionTreeRegressionModel, Deci
     }
   }
 
+  override val klazz: Class[DecisionTreeRegressionModel] = classOf[DecisionTreeRegressionModel]
+
   override def name(node: DecisionTreeRegressionModel): String = node.uid
 
   override def model(node: DecisionTreeRegressionModel): DecisionTreeRegressionModel = node
 
-  override def load(context: BundleContext, node: Node, model: DecisionTreeRegressionModel): DecisionTreeRegressionModel = {
+  override def load(node: Node, model: DecisionTreeRegressionModel)
+                   (implicit context: BundleContext[SparkBundleContext]): DecisionTreeRegressionModel = {
     new DecisionTreeRegressionModel(uid = node.name,
       rootNode = model.rootNode,
       numFeatures = model.numFeatures).

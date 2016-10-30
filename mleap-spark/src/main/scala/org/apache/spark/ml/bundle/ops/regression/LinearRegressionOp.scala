@@ -1,35 +1,43 @@
 package org.apache.spark.ml.bundle.ops.regression
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.regression.LinearRegressionModel
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object LinearRegressionOp extends OpNode[LinearRegressionModel, LinearRegressionModel] {
-  override val Model: OpModel[LinearRegressionModel] = new OpModel[LinearRegressionModel] {
+class LinearRegressionOp extends OpNode[SparkBundleContext, LinearRegressionModel, LinearRegressionModel] {
+  override val Model: OpModel[SparkBundleContext, LinearRegressionModel] = new OpModel[SparkBundleContext, LinearRegressionModel] {
+    override val klazz: Class[LinearRegressionModel] = classOf[LinearRegressionModel]
+
     override def opName: String = Bundle.BuiltinOps.regression.linear_regression
 
-    override def store(context: BundleContext, model: Model, obj: LinearRegressionModel): Model = {
+    override def store(model: Model, obj: LinearRegressionModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept))
     }
 
-    override def load(context: BundleContext, model: Model): LinearRegressionModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): LinearRegressionModel = {
       new LinearRegressionModel(uid = "",
         coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
         intercept = model.value("intercept").getDouble)
     }
   }
 
+  override val klazz: Class[LinearRegressionModel] = classOf[LinearRegressionModel]
+
   override def name(node: LinearRegressionModel): String = node.uid
 
   override def model(node: LinearRegressionModel): LinearRegressionModel = node
 
-  override def load(context: BundleContext, node: Node, model: LinearRegressionModel): LinearRegressionModel = {
+  override def load(node: Node, model: LinearRegressionModel)
+                   (implicit context: BundleContext[SparkBundleContext]): LinearRegressionModel = {
     new LinearRegressionModel(uid = node.name,
       coefficients = model.coefficients,
       intercept = model.intercept).

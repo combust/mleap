@@ -1,12 +1,14 @@
 package ml.combust.bundle.serializer
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.Bundle
 
 /** Class for serializing a list of graph nodes.
   *
-  * @param context bundle context for encoding/decoding custom types, op nodes and op models
+  * @param bundleContext bundle context for encoding/decoding custom types, op nodes and op models
+  * @tparam Context context class for implementation
   */
-case class GraphSerializer(context: BundleContext) {
+case class GraphSerializer[Context](bundleContext: BundleContext[Context]) {
   /** Write a list of nodes to the path in the context.
     *
     * @param nodes list of nodes to write
@@ -22,9 +24,9 @@ case class GraphSerializer(context: BundleContext) {
     * @return name of node written
     */
   def writeNode(node: Any): String = {
-    val op = context.bundleRegistry.opForObj[Any, Any](node)
+    val op = bundleContext.bundleRegistry.opForObj[Context, Any, Any](node)
     val name = op.name(node)
-    val nodeContext = context.bundleContext(Bundle.node(name))
+    val nodeContext = bundleContext.bundleContext(Bundle.node(name))
     NodeSerializer(nodeContext).write(node)
     name
   }
@@ -44,7 +46,7 @@ case class GraphSerializer(context: BundleContext) {
     * @return deserialized node
     */
   def readNode(name: String): Any = {
-    val nodeContext = context.bundleContext(Bundle.node(name))
+    val nodeContext = bundleContext.bundleContext(Bundle.node(name))
     NodeSerializer(nodeContext).read()
   }
 }

@@ -1,19 +1,23 @@
 package org.apache.spark.ml.bundle.ops.feature
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.StandardScalerModel
 import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object StandardScalerOp extends OpNode[StandardScalerModel, StandardScalerModel] {
-  override val Model: OpModel[StandardScalerModel] = new OpModel[StandardScalerModel] {
+class StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, StandardScalerModel] {
+  override val Model: OpModel[SparkBundleContext, StandardScalerModel] = new OpModel[SparkBundleContext, StandardScalerModel] {
+    override val klazz: Class[StandardScalerModel] = classOf[StandardScalerModel]
+
     override def opName: String = Bundle.BuiltinOps.feature.standard_scaler
 
-    override def store(context: BundleContext, model: Model, obj: StandardScalerModel): Model = {
+    override def store(model: Model, obj: StandardScalerModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       val mean = if(obj.getWithMean) Some(obj.mean.toArray.toSeq) else None
       val std = if(obj.getWithStd) Some(obj.std.toArray.toSeq) else None
 
@@ -21,18 +25,22 @@ object StandardScalerOp extends OpNode[StandardScalerModel, StandardScalerModel]
         withAttr("std", std.map(Value.doubleVector))
     }
 
-    override def load(context: BundleContext, model: Model): StandardScalerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): StandardScalerModel = {
       val std = model.getValue("std").map(_.getDoubleVector.toArray).map(Vectors.dense).orNull
       val mean = model.getValue("mean").map(_.getDoubleVector.toArray).map(Vectors.dense).orNull
       new StandardScalerModel(uid = "", std = std, mean = mean)
     }
   }
 
+  override val klazz: Class[StandardScalerModel] = classOf[StandardScalerModel]
+
   override def name(node: StandardScalerModel): String = node.uid
 
   override def model(node: StandardScalerModel): StandardScalerModel = node
 
-  override def load(context: BundleContext, node: Node, model: StandardScalerModel): StandardScalerModel = {
+  override def load(node: Node, model: StandardScalerModel)
+                   (implicit context: BundleContext[SparkBundleContext]): StandardScalerModel = {
     new StandardScalerModel(uid = node.name, std = model.std, mean = model.mean)
   }
 

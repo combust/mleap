@@ -20,7 +20,8 @@ object Dependencies {
   }
 
   lazy val mleapSparkDependencies = baseDependencies.
-    union(sparkDependencies)
+    union(sparkDependencies).
+    union(Seq("com.databricks" %% "spark-avro" % "3.0.1" % "test"))
 
   lazy val bundleMlDependencies = baseDependencies.
     union(Seq("io.spray" %% "spray-json" % "1.3.2",

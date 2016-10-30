@@ -24,8 +24,8 @@ trait SparkSupport {
     }
   }
 
-  implicit class MleapTransformerOps(transformer: MleapTransformer) {
-    def transform(dataset: DataFrame): DataFrame = {
+  implicit class MleapTransformerOps[T <: MleapTransformer](transformer: T) {
+    def sparkTransform(dataset: DataFrame): DataFrame = {
       transformer.transform(SparkTransformBuilder(dataset)).map(_.dataset).get
     }
   }

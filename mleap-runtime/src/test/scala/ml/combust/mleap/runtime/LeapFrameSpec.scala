@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime
 
 import ml.combust.mleap.runtime.test.{MyCustomObject, MyCustomType}
-import ml.combust.mleap.runtime.types.{DoubleType, StringType, StructField, StructType}
+import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /** Base trait for testing LeapFrame implementations.
@@ -65,7 +65,7 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
           }.flatMap(_.select("test_custom")).get
           val data = frame2.dataset.toArray
 
-          assert(frame2.schema.getField("test_custom").get.dataType == new MyCustomType)
+          assert(frame2.schema.getField("test_custom").get.dataType == CustomType(new MyCustomType))
           assert(data(0).getAs[MyCustomObject](0) == MyCustomObject("hello"))
           assert(data(1).getAs[MyCustomObject](0) == MyCustomObject("there"))
         }

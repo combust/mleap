@@ -1,7 +1,7 @@
-package ml.combust.bundle.test_ops
+package ml.combust.bundle.test.ops
 
-import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
+import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.{BundleContext, dsl}
 
 /**

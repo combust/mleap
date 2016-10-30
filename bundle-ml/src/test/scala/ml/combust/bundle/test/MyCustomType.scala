@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.test
+package ml.combust.bundle.test
 
 import ml.combust.bundle.custom.CustomType
 import spray.json.RootJsonFormat
@@ -14,5 +14,5 @@ class MyCustomType extends CustomType[MyCustomObject] {
 
   override def name: String = "my_custom_object"
 
-  override def format: RootJsonFormat[MyCustomObject] = jsonFormat1(MyCustomObject)
+  override def format: RootJsonFormat[MyCustomObject] = ???
 }

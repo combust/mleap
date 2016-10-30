@@ -1,6 +1,14 @@
 package ml.combust.mleap.runtime.types
 
-import spray.json.{JsValue, JsonFormat}
+import ml.combust.bundle
+import spray.json.RootJsonFormat
+import scala.language.implicitConversions
+
+object DataType {
+  implicit def apply[T](ct: bundle.custom.CustomType[T]): CustomType = {
+    CustomType(ct.asInstanceOf[bundle.custom.CustomType[Any]])
+  }
+}
 
 sealed trait DataType extends Serializable {
   def fits(other: DataType): Boolean = this == other
@@ -42,22 +50,21 @@ object TensorType {
   def doubleVector(dim: Int = -1): TensorType = TensorType(DoubleType, Seq(dim))
 }
 
-trait CustomType[T] extends DataType {
-  import spray.json._
-
-  val klazz: Class[T]
-  val name: String
-  val format: JsonFormat[T]
-
-  def toJson(t: T): JsValue = format.write(t)
-  def fromJson(json: JsValue): T = format.read(json)
-
-  def toBytes(t: T): Array[Byte] = format.write(t).compactPrint.getBytes("UTF-8")
-  def fromBytes(bytes: Array[Byte]): T = format.read(new String(bytes, "UTF-8").parseJson)
-
-  override def equals(obj: scala.Any): Boolean = obj match {
-    case obj: CustomType[_] =>
-      getClass.getCanonicalName == obj.getClass.getCanonicalName && klazz == obj.klazz
-    case _ => false
+object CustomType {
+  implicit def apply[T](ct: bundle.custom.CustomType[T]): CustomType = {
+    new CustomType(ct.asInstanceOf[bundle.custom.CustomType[Any]])
   }
+}
+
+class CustomType private (ct: bundle.custom.CustomType[Any]) extends DataType with bundle.custom.CustomType[Any] {
+  override val klazz: Class[Any] = ct.klazz
+  override def name: String = ct.name
+  override def format: RootJsonFormat[Any] = ct.format
+
+  override def isSmall(obj: Any): Boolean = ct.isSmall(obj)
+  override def isLarge(obj: Any): Boolean = ct.isLarge(obj)
+  override def toJsonBytes(obj: Any): Array[Byte] = ct.toJsonBytes(obj)
+  override def fromJsonBytes(bytes: Array[Byte]): Any = ct.fromJsonBytes(bytes)
+  override def toBytes(obj: Any): Array[Byte] = ct.toBytes(obj)
+  override def fromBytes(bytes: Array[Byte]): Any = ct.fromBytes(bytes)
 }

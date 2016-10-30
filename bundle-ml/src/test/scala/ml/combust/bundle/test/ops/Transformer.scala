@@ -1,4 +1,4 @@
-package ml.combust.bundle.test_ops
+package ml.combust.bundle.test.ops
 
 /**
   * Created by hollinwilkins on 8/21/16.

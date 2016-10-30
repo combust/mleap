@@ -2,7 +2,7 @@ package ml.combust.bundle
 
 import com.typesafe.config.{Config, ConfigFactory}
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.custom.CustomType
+import ml.combust.bundle.custom.CustomType
 
 import scala.collection.JavaConverters._
 import scala.reflect.{ClassTag, classTag}
@@ -34,7 +34,7 @@ object BundleRegistry {
   }
 }
 
-/** Class for storing all supported [[ml.combust.bundle.op.OpNode]] and [[ml.combust.bundle.serializer.custom.CustomType]] objects.
+/** Class for storing all supported [[ml.combust.bundle.op.OpNode]] and [[ml.combust.bundle.custom.CustomType]] objects.
   *
   * This is the primary registry for Bundle.ML. It contains all objects
   * required for serializing ML models, graph nodes and custom types.

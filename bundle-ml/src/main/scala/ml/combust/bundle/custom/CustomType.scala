@@ -1,4 +1,4 @@
-package ml.combust.bundle.serializer.custom
+package ml.combust.bundle.custom
 
 import com.trueaccord.scalapb.{GeneratedMessage, GeneratedMessageCompanion}
 import ml.combust.bundle.serializer.{ConcreteSerializationFormat, HasConcreteSerializationFormat, SerializationFormat}
@@ -67,12 +67,18 @@ trait CustomType[T] {
     * @param obj custom object
     * @return compact byte array serialization of obj
     */
-  def toBytes(obj: T): Array[Byte]
+  def toBytes(obj: T): Array[Byte] = format.write(obj).compactPrint.getBytes("UTF-8")
 
   /** Convert compact bytes to custom object.
     *
     * @param bytes compact byte array
     * @return deserialized custom object
     */
-  def fromBytes(bytes: Array[Byte]): T
+  def fromBytes(bytes: Array[Byte]): T = format.read(new String(bytes, "UTF-8").parseJson)
+
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case obj: CustomType[_] =>
+      getClass.getCanonicalName == obj.getClass.getCanonicalName && klazz == obj.klazz
+    case _ => false
+  }
 }

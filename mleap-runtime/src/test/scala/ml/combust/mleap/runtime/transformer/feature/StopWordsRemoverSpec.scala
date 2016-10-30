@@ -15,7 +15,7 @@ class StopWordsRemoverSpec extends FunSpec{
 
   val stopwordsTransformer = StopWordsRemover(inputCol = "test_string_seq",
     outputCol = "output_seq",
-    model = StopWordsRemoverModel(Array("I", "You", "the"), true)
+    model = StopWordsRemoverModel(Array("I", "You", "the"), caseSensitive = true)
   )
 
   describe("#transform") {

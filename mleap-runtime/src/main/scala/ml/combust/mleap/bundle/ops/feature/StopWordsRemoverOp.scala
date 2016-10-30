@@ -1,35 +1,43 @@
-package ml.combust.mleap.runtime.bundle.ops.feature
+package ml.combust.mleap.bundle.ops.feature
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.mleap.core.feature.StopWordsRemoverModel
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.StopWordsRemover
 
 /**
   * Created by mikhail on 10/16/16.
   */
-object StopWordsRemoverOp extends OpNode[StopWordsRemover, StopWordsRemoverModel] {
-  override val Model: OpModel[StopWordsRemoverModel] = new OpModel[StopWordsRemoverModel] {
+class StopWordsRemoverOp extends OpNode[MleapContext, StopWordsRemover, StopWordsRemoverModel] {
+  override val Model: OpModel[MleapContext, StopWordsRemoverModel] = new OpModel[MleapContext, StopWordsRemoverModel] {
+    override val klazz: Class[StopWordsRemoverModel] = classOf[StopWordsRemoverModel]
+
     override def opName: String = Bundle.BuiltinOps.feature.stopwords_remover
 
-    override def store(context: BundleContext, model: Model, obj: StopWordsRemoverModel): Model = {
+    override def store(model: Model, obj: StopWordsRemoverModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("stop_words", Value.stringList(obj.stopWords)).
         withAttr("case_sensitive", Value.boolean(obj.caseSensitive))
     }
 
-    override def load(context: BundleContext, model: Model): StopWordsRemoverModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): StopWordsRemoverModel = {
       StopWordsRemoverModel(stopWords = model.value("stop_words").getStringList.toArray,
         caseSensitive = model.value("case_sensitive").getBoolean)
     }
 
   }
 
+  override val klazz: Class[StopWordsRemover] = classOf[StopWordsRemover]
+
   override def name(node: StopWordsRemover): String = node.uid
 
   override def model(node: StopWordsRemover): StopWordsRemoverModel = node.model
 
-  override def load(context: BundleContext, node: Node, model: StopWordsRemoverModel): StopWordsRemover = {
+  override def load(node: Node, model: StopWordsRemoverModel)
+                   (implicit context: BundleContext[MleapContext]): StopWordsRemover = {
     StopWordsRemover(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model

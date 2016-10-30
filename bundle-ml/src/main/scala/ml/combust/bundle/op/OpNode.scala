@@ -48,12 +48,11 @@ trait OpNode[Context, N, M] {
 
   /** Load a node from Bundle.ML data.
     *
-    * @param context bundle context for decoding custom values and getting non-standard params
     * @param node read-only node for attributes
     * @param model deserialized model for the node
+    * @param context bundle context for custom types
     * @return deserialized node object
     */
-  def load(context: BundleContext[Context],
-           node: Node,
-           model: M): N
+  def load(node: Node, model: M)
+          (implicit context: BundleContext[Context]): N
 }

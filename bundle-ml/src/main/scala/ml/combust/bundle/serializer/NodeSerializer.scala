@@ -107,6 +107,6 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
 
     val (model, m) = ModelSerializer(bundleContext).readWithModel()
     val op = bundleContext.bundleRegistry[Context, Any, Any](m.op)
-    op.load(bundleContext, node, model)
+    op.load(node, model)(bundleContext)
   }
 }

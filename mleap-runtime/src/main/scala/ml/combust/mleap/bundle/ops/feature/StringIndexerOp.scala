@@ -16,11 +16,13 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
 
     override def opName: String = Bundle.BuiltinOps.feature.string_indexer
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: StringIndexerModel): Model = {
+    override def store(model: Model, obj: StringIndexerModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("labels", Value.stringList(obj.labels))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): StringIndexerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): StringIndexerModel = {
       StringIndexerModel(labels = model.value("labels").getStringList)
     }
   }
@@ -31,7 +33,8 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
 
   override def model(node: StringIndexer): StringIndexerModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: StringIndexerModel): StringIndexer = {
+  override def load(node: Node, model: StringIndexerModel)
+                   (implicit context: BundleContext[MleapContext]): StringIndexer = {
     StringIndexer(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)

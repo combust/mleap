@@ -17,13 +17,15 @@ class KMeansOp extends OpNode[MleapContext, KMeans, KMeansModel] {
 
     override def opName: String = Bundle.BuiltinOps.clustering.k_means
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: KMeansModel): Model = {
+    override def store(model: Model, obj: KMeansModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("cluster_centers",
         Value.tensorList(value = obj.clusterCenters.map(_.vector.toArray.toSeq),
         dims = Seq(-1)))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): KMeansModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): KMeansModel = {
       KMeansModel(model.value("cluster_centers").getTensorList[Double].map(t => Vectors.dense(t.toArray)))
     }
   }
@@ -34,7 +36,8 @@ class KMeansOp extends OpNode[MleapContext, KMeans, KMeansModel] {
 
   override def model(node: KMeans): KMeansModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: KMeansModel): KMeans = {
+  override def load(node: Node, model: KMeansModel)
+                   (implicit context: BundleContext[MleapContext]): KMeans = {
     KMeans(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

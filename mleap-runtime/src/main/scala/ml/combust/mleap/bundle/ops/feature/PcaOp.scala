@@ -17,12 +17,14 @@ class PcaOp extends OpNode[MleapContext, Pca, PcaModel] {
 
     override def opName: String = Bundle.BuiltinOps.feature.pca
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: PcaModel): Model = {
+    override def store(model: Model, obj: PcaModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("principal_components", Value.tensor[Double](obj.principalComponents.values.toSeq,
         Seq(obj.principalComponents.numRows, obj.principalComponents.numCols)))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): PcaModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): PcaModel = {
       val tt = model.value("principal_components").bundleDataType.getTensor
       val values = model.value("principal_components").getTensor[Double].toArray
       PcaModel(new DenseMatrix(tt.dimensions.head, tt.dimensions(1), values))
@@ -35,7 +37,8 @@ class PcaOp extends OpNode[MleapContext, Pca, PcaModel] {
 
   override def model(node: Pca): PcaModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: PcaModel): Pca = {
+  override def load(node: Node, model: PcaModel)
+                   (implicit context: BundleContext[MleapContext]): Pca = {
     Pca(uid = node.name,
       inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,

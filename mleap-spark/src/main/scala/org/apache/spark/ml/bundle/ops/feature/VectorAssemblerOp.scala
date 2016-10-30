@@ -15,9 +15,11 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
 
     override def opName: String = Bundle.BuiltinOps.feature.vector_assembler
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: VectorAssembler): Model = { model }
+    override def store(model: Model, obj: VectorAssembler)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = { model }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): VectorAssembler = { new VectorAssembler(uid = "") }
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): VectorAssembler = { new VectorAssembler(uid = "") }
   }
 
   override val klazz: Class[VectorAssembler] = classOf[VectorAssembler]
@@ -26,7 +28,8 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
 
   override def model(node: VectorAssembler): VectorAssembler = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: VectorAssembler): VectorAssembler = {
+  override def load(node: Node, model: VectorAssembler)
+                   (implicit context: BundleContext[SparkBundleContext]): VectorAssembler = {
     new VectorAssembler().
       setInputCols(node.shape.inputs.map(_.name).toArray).
       setOutputCol(node.shape.standardOutput.name)

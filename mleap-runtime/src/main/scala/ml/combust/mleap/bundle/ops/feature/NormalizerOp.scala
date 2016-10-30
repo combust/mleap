@@ -16,11 +16,13 @@ class NormalizerOp extends OpNode[MleapContext, Normalizer, NormalizerModel] {
 
     override def opName: String = Bundle.BuiltinOps.feature.normalizer
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: NormalizerModel): Model = {
+    override def store(model: Model, obj: NormalizerModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("p_norm", Value.double(obj.pNorm))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): NormalizerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): NormalizerModel = {
       NormalizerModel(pNorm = model.value("p_norm").getDouble)
     }
   }
@@ -31,7 +33,8 @@ class NormalizerOp extends OpNode[MleapContext, Normalizer, NormalizerModel] {
 
   override def model(node: Normalizer): NormalizerModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: NormalizerModel): Normalizer = {
+  override def load(node: Node, model: NormalizerModel)
+                   (implicit context: BundleContext[MleapContext]): Normalizer = {
     Normalizer(uid = node.name,
       inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,

@@ -15,11 +15,13 @@ class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
 
     override def opName: String = Bundle.BuiltinOps.feature.bucketizer
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: Bucketizer): Model = {
+    override def store(model: Model, obj: Bucketizer)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("splits", Value.doubleList(obj.getSplits))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): Bucketizer = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): Bucketizer = {
       new Bucketizer(uid = "").setSplits(model.value("splits").getDoubleList.toArray)
     }
   }
@@ -30,7 +32,8 @@ class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
 
   override def model(node: Bucketizer): Bucketizer = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: Bucketizer): Bucketizer = {
+  override def load(node: Node, model: Bucketizer)
+                   (implicit context: BundleContext[SparkBundleContext]): Bucketizer = {
     new Bucketizer(uid = node.name).copy(model.extractParamMap()).
       setInputCol(node.shape.standardInput.name).
       setOutputCol(node.shape.standardOutput.name)

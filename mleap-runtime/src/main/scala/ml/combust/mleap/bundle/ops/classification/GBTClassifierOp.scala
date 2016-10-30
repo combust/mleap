@@ -18,7 +18,8 @@ class GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierM
 
     override def opName: String = Bundle.BuiltinOps.classification.gbt_classifier
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: GBTClassifierModel): Model = {
+    override def store(model: Model, obj: GBTClassifierModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -34,7 +35,8 @@ class GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierM
         withAttr("threshold", obj.threshold.map(Value.double))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): GBTClassifierModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): GBTClassifierModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("MLeap only supports binary logistic regression")
       }
@@ -60,7 +62,8 @@ class GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierM
 
   override def model(node: GBTClassifier): GBTClassifierModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: GBTClassifierModel): GBTClassifier = {
+  override def load(node: Node, model: GBTClassifierModel)
+                   (implicit context: BundleContext[MleapContext]): GBTClassifier = {
     GBTClassifier(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

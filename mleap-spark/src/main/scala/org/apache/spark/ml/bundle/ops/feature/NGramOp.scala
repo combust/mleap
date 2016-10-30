@@ -15,11 +15,13 @@ class NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
 
     override def opName: String = Bundle.BuiltinOps.feature.ngram
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: NGram): Model = {
+    override def store(model: Model, obj: NGram)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("n", Value.long(obj.getN))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): NGram = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): NGram = {
       new NGram(uid = "").setN(model.value("n").getLong.toInt)
     }
 
@@ -31,7 +33,8 @@ class NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
 
   override def model(node: NGram): NGram = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: NGram): NGram = {
+  override def load(node: Node, model: NGram)
+                   (implicit context: BundleContext[SparkBundleContext]): NGram = {
     new NGram(uid = node.name).
       setN(model.getN).
       setInputCol(node.shape.standardInput.name).

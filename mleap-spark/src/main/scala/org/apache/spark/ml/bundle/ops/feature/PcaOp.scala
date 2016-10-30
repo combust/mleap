@@ -16,12 +16,14 @@ class PcaOp extends OpNode[SparkBundleContext, PCAModel, PCAModel] {
 
     override def opName: String = Bundle.BuiltinOps.feature.pca
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: PCAModel): Model = {
+    override def store(model: Model, obj: PCAModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("principal_components", Value.tensor[Double](obj.pc.values.toSeq,
         Seq(obj.pc.numRows, obj.pc.numCols)))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): PCAModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): PCAModel = {
       val tt = model.value("principal_components").bundleDataType.getTensor
       val values = model.value("principal_components").getTensor[Double].toArray
       new PCAModel(uid = "",
@@ -36,7 +38,8 @@ class PcaOp extends OpNode[SparkBundleContext, PCAModel, PCAModel] {
 
   override def model(node: PCAModel): PCAModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: PCAModel): PCAModel = {
+  override def load(node: Node, model: PCAModel)
+                   (implicit context: BundleContext[SparkBundleContext]): PCAModel = {
     new PCAModel(uid = node.name,
       pc = model.pc,
       explainedVariance = model.explainedVariance)

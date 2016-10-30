@@ -15,11 +15,13 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
 
     override def opName: String = Bundle.BuiltinOps.feature.string_indexer
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: StringIndexerModel): Model = {
+    override def store(model: Model, obj: StringIndexerModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("labels", Value.stringList(obj.labels))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): StringIndexerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): StringIndexerModel = {
       new StringIndexerModel(uid = "", labels = model.value("labels").getStringList.toArray)
     }
   }
@@ -30,7 +32,8 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
 
   override def model(node: StringIndexerModel): StringIndexerModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: StringIndexerModel): StringIndexerModel = {
+  override def load(node: Node, model: StringIndexerModel)
+                   (implicit context: BundleContext[SparkBundleContext]): StringIndexerModel = {
     new StringIndexerModel(uid = node.name, labels = model.labels).
       setInputCol(node.shape.standardInput.name).
       setOutputCol(node.shape.standardOutput.name)

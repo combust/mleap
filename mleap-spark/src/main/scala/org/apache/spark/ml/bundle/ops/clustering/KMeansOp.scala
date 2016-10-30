@@ -18,13 +18,15 @@ class KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
 
     override def opName: String = Bundle.BuiltinOps.clustering.k_means
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: KMeansModel): Model = {
+    override def store(model: Model, obj: KMeansModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("cluster_centers", Value.tensorList(
         value = obj.clusterCenters.map(_.toArray.toSeq),
         dims = Seq(-1)))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): KMeansModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): KMeansModel = {
       val clusterCenters = model.value("cluster_centers").
         getTensorList[Double].toArray.
         map(t => Vectors.dense(t.toArray))
@@ -40,7 +42,8 @@ class KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
 
   override def model(node: KMeansModel): KMeansModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: KMeansModel): KMeansModel = {
+  override def load(node: Node, model: KMeansModel)
+                   (implicit context: BundleContext[SparkBundleContext]): KMeansModel = {
     val clusterCenters = model.clusterCenters.map {
       case DenseVector(values) => Vectors.dense(values)
       case SparseVector(size, indices, values) => Vectors.sparse(size, indices, values)

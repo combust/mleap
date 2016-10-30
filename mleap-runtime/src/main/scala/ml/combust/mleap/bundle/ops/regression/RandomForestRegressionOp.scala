@@ -20,7 +20,8 @@ class RandomForestRegressionOp extends OpNode[MleapContext, RandomForestRegressi
 
     override def opName: String = Bundle.BuiltinOps.regression.random_forest_regression
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: RandomForestRegressionModel): Model = {
+    override def store(model: Model, obj: RandomForestRegressionModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -34,7 +35,8 @@ class RandomForestRegressionOp extends OpNode[MleapContext, RandomForestRegressi
         withAttr("trees", Value.stringList(trees))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): RandomForestRegressionModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): RandomForestRegressionModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList
 
@@ -54,7 +56,8 @@ class RandomForestRegressionOp extends OpNode[MleapContext, RandomForestRegressi
 
   override def model(node: RandomForestRegression): RandomForestRegressionModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: RandomForestRegressionModel): RandomForestRegression = {
+  override def load(node: Node, model: RandomForestRegressionModel)
+                   (implicit context: BundleContext[MleapContext]): RandomForestRegression = {
     RandomForestRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

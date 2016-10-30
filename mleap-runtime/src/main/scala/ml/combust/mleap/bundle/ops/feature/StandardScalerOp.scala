@@ -17,12 +17,14 @@ class StandardScalerOp extends OpNode[MleapContext, StandardScaler, StandardScal
 
     override def opName: String = Bundle.BuiltinOps.feature.standard_scaler
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: StandardScalerModel): Model = {
+    override def store(model: Model, obj: StandardScalerModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("mean", obj.mean.map(_.toArray.toSeq).map(Value.doubleVector)).
         withAttr("std", obj.mean.map(_.toArray.toSeq).map(Value.doubleVector))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): StandardScalerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): StandardScalerModel = {
       val mean = model.getValue("mean").map(_.getDoubleVector.toArray).map(Vectors.dense)
       val std = model.getValue("std").map(_.getDoubleVector.toArray).map(Vectors.dense)
       StandardScalerModel(mean = mean, std = std)
@@ -35,7 +37,8 @@ class StandardScalerOp extends OpNode[MleapContext, StandardScaler, StandardScal
 
   override def model(node: StandardScaler): StandardScalerModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: StandardScalerModel): StandardScaler = {
+  override def load(node: Node, model: StandardScalerModel)
+                   (implicit context: BundleContext[MleapContext]): StandardScaler = {
     StandardScaler(uid = node.name,
       inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,

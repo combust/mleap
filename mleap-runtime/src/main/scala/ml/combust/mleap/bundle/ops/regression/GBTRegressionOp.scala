@@ -17,7 +17,8 @@ class GBTRegressionOp extends OpNode[MleapContext, GBTRegression, GBTRegressionM
 
     override def opName: String = Bundle.BuiltinOps.regression.gbt_regression
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: GBTRegressionModel): Model = {
+    override def store(model: Model, obj: GBTRegressionModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -31,7 +32,8 @@ class GBTRegressionOp extends OpNode[MleapContext, GBTRegression, GBTRegressionM
         withAttr("trees", Value.stringList(trees))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): GBTRegressionModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): GBTRegressionModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList
 
@@ -51,7 +53,8 @@ class GBTRegressionOp extends OpNode[MleapContext, GBTRegression, GBTRegressionM
 
   override def model(node: GBTRegression): GBTRegressionModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: GBTRegressionModel): GBTRegression = {
+  override def load(node: Node, model: GBTRegressionModel)
+                   (implicit context: BundleContext[MleapContext]): GBTRegression = {
     GBTRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

@@ -15,11 +15,13 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
 
     override def opName: String = Bundle.BuiltinOps.feature.reverse_string_indexer
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: IndexToString): Model = {
+    override def store(model: Model, obj: IndexToString)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("labels", Value.stringList(obj.getLabels))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): IndexToString = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): IndexToString = {
       new IndexToString(uid = "").setLabels(model.value("labels").getStringList.toArray)
     }
   }
@@ -30,7 +32,8 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
 
   override def model(node: IndexToString): IndexToString = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: IndexToString): IndexToString = {
+  override def load(node: Node, model: IndexToString)
+                   (implicit context: BundleContext[SparkBundleContext]): IndexToString = {
     new IndexToString(uid = node.name).copy(model.extractParamMap())
   }
 

@@ -17,14 +17,16 @@ class SupportVectorMachineOp extends OpNode[MleapContext, SupportVectorMachine, 
 
     override def opName: String = Bundle.BuiltinOps.classification.support_vector_machine
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: SupportVectorMachineModel): Model = {
+    override def store(model: Model, obj: SupportVectorMachineModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept)).
         withAttr("num_classes", Value.long(2)).
         withAttr("threshold", obj.threshold.map(Value.double))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): SupportVectorMachineModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): SupportVectorMachineModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("MLeap only supports binary SVM")
       }
@@ -40,7 +42,8 @@ class SupportVectorMachineOp extends OpNode[MleapContext, SupportVectorMachine, 
 
   override def model(node: SupportVectorMachine): SupportVectorMachineModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: SupportVectorMachineModel): SupportVectorMachine = {
+  override def load(node: Node, model: SupportVectorMachineModel)
+                   (implicit context: BundleContext[MleapContext]): SupportVectorMachine = {
     SupportVectorMachine(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

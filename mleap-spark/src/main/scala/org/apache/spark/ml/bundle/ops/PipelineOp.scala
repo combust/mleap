@@ -16,12 +16,14 @@ class PipelineOp extends OpNode[SparkBundleContext, PipelineModel, PipelineModel
 
     override def opName: String = Bundle.BuiltinOps.pipeline
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: PipelineModel): Model = {
+    override def store(model: Model, obj: PipelineModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       val nodes = GraphSerializer(context).write(obj.stages)
       model.withAttr("nodes", Value.stringList(nodes))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): PipelineModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): PipelineModel = {
       val nodes = GraphSerializer(context).read(model.value("nodes").getStringList).map(_.asInstanceOf[Transformer]).toArray
       new PipelineModel(uid = "", stages = nodes)
     }
@@ -33,7 +35,8 @@ class PipelineOp extends OpNode[SparkBundleContext, PipelineModel, PipelineModel
 
   override def model(node: PipelineModel): PipelineModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: PipelineModel): PipelineModel = {
+  override def load(node: Node, model: PipelineModel)
+                   (implicit context: BundleContext[SparkBundleContext]): PipelineModel = {
     new PipelineModel(uid = node.name, stages = model.stages)
   }
 

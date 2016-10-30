@@ -17,11 +17,15 @@ class PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
 
     override def opName: String = Bundle.BuiltinOps.pipeline
 
-    override def store(context: BundleContext[Any], model: Model, obj: PipelineModel): Model = {
+
+    override def store(model: Model, obj: PipelineModel)
+                      (implicit context: BundleContext[Any]): Model = {
       model.withAttr(Attribute("nodes", Value.stringList(GraphSerializer(context).write(obj.stages))))
     }
 
-    override def load(context: BundleContext[Any], model: Model): PipelineModel = {
+
+    override def load(model: Model)
+                     (implicit context: BundleContext[Any]): PipelineModel = {
       PipelineModel(GraphSerializer(context).read(model.value("nodes").getStringList).
         map(_.asInstanceOf[Transformer]))
     }
@@ -33,7 +37,9 @@ class PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
 
   override def model(node: Pipeline): PipelineModel = node.model
 
-  override def load(context: BundleContext[Any], node: dsl.Node, model: PipelineModel): Pipeline = {
+
+  override def load(node: dsl.Node, model: PipelineModel)
+                   (implicit context: BundleContext[Any]): Pipeline = {
     Pipeline(node.name, model)
   }
 

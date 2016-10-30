@@ -17,14 +17,16 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
 
     override def opName: String = Bundle.BuiltinOps.classification.logistic_regression
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: LogisticRegressionModel): Model = {
+    override def store(model: Model, obj: LogisticRegressionModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept)).
         withAttr("num_classes", Value.long(2)).
         withAttr("threshold", obj.threshold.map(Value.double))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): LogisticRegressionModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): LogisticRegressionModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("MLeap only supports binary logistic regression")
       }
@@ -40,7 +42,8 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
 
   override def model(node: LogisticRegression): LogisticRegressionModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: LogisticRegressionModel): LogisticRegression = {
+  override def load(node: Node, model: LogisticRegressionModel)
+                   (implicit context: BundleContext[MleapContext]): LogisticRegression = {
     LogisticRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

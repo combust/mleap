@@ -16,11 +16,13 @@ class ReverseStringIndexerOp extends OpNode[MleapContext, ReverseStringIndexer, 
 
     override def opName: String = Bundle.BuiltinOps.feature.reverse_string_indexer
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: ReverseStringIndexerModel): Model = {
+    override def store(model: Model, obj: ReverseStringIndexerModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("labels", Value.stringList(obj.labels))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): ReverseStringIndexerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): ReverseStringIndexerModel = {
       ReverseStringIndexerModel(labels = model.value("labels").getStringList)
     }
   }
@@ -31,7 +33,8 @@ class ReverseStringIndexerOp extends OpNode[MleapContext, ReverseStringIndexer, 
 
   override def model(node: ReverseStringIndexer): ReverseStringIndexerModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: ReverseStringIndexerModel): ReverseStringIndexer = {
+  override def load(node: Node, model: ReverseStringIndexerModel)
+                   (implicit context: BundleContext[MleapContext]): ReverseStringIndexer = {
     ReverseStringIndexer(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)

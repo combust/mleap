@@ -20,12 +20,15 @@ class LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
 
     override def opName: String = Bundle.BuiltinOps.regression.linear_regression
 
-    override def store(context: BundleContext[Any], model: Model, obj: LinearModel): Model = {
+    override def store(model: Model, obj: LinearModel)
+                      (implicit context: BundleContext[Any]): Model = {
       model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients))).
         withAttr(Attribute("intercept", Value.double(obj.intercept)))
     }
 
-    override def load(context: BundleContext[Any], model: Model): LinearModel = {
+
+    override def load(model: Model)
+                     (implicit context: BundleContext[Any]): LinearModel = {
       LinearModel(coefficients = model.value("coefficients").getDoubleVector,
         intercept = model.value("intercept").getDouble)
     }
@@ -37,7 +40,9 @@ class LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
 
   override def model(node: LinearRegression): LinearModel = node.model
 
-  override def load(context: BundleContext[Any], node: dsl.Node, model: LinearModel): LinearRegression = {
+
+  override def load(node: dsl.Node, model: LinearModel)
+                   (implicit context: BundleContext[Any]): LinearRegression = {
     LinearRegression(uid = node.name,
       input = node.shape.standardInput.name,
       output = node.shape.standardOutput.name,

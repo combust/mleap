@@ -16,12 +16,14 @@ class PipelineOp extends OpNode[MleapContext, Pipeline, Pipeline] {
 
     override def opName: String = Bundle.BuiltinOps.pipeline
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: Pipeline): Model = {
+    override def store(model: Model, obj: Pipeline)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       val nodes = GraphSerializer(context).write(obj.transformers)
       model.withAttr("nodes", Value.stringList(nodes))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): Pipeline = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): Pipeline = {
       val nodes = GraphSerializer(context).read(model.value("nodes").getStringList).map(_.asInstanceOf[Transformer])
       Pipeline(transformers = nodes)
     }
@@ -33,7 +35,8 @@ class PipelineOp extends OpNode[MleapContext, Pipeline, Pipeline] {
 
   override def model(node: Pipeline): Pipeline = node
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: Pipeline): Pipeline = {
+  override def load(node: Node, model: Pipeline)
+                   (implicit context: BundleContext[MleapContext]): Pipeline = {
     model.copy(uid = node.name)
   }
 

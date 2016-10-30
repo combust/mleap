@@ -87,12 +87,16 @@ class DecisionTreeRegressionOp extends OpNode[Any, DecisionTreeRegression, Decis
 
     override def opName: String = Bundle.BuiltinOps.regression.decision_tree_regression
 
-    override def store(context: BundleContext[Any], model: Model, obj: DecisionTreeRegressionModel): Model = {
+
+    override def store(model: Model, obj: DecisionTreeRegressionModel)
+                      (implicit context: BundleContext[Any]): Model = {
       TreeSerializer[Node](context.file("nodes"), withImpurities = true).write(obj.root)
       model
     }
 
-    override def load(context: BundleContext[Any], model: Model): DecisionTreeRegressionModel = {
+
+    override def load(model: Model)
+                     (implicit context: BundleContext[Any]): DecisionTreeRegressionModel = {
       val root = TreeSerializer[Node](context.file("nodes"), withImpurities = true).read()
       DecisionTreeRegressionModel(root)
     }
@@ -104,7 +108,9 @@ class DecisionTreeRegressionOp extends OpNode[Any, DecisionTreeRegression, Decis
 
   override def model(node: DecisionTreeRegression): DecisionTreeRegressionModel = node.model
 
-  override def load(context: BundleContext[Any], node: dsl.Node, model: DecisionTreeRegressionModel): DecisionTreeRegression = {
+
+  override def load(node: dsl.Node, model: DecisionTreeRegressionModel)
+                   (implicit context: BundleContext[Any]): DecisionTreeRegression = {
     DecisionTreeRegression(uid = node.name,
       input = node.shape.standardInput.name,
       output = node.shape.standardOutput.name,

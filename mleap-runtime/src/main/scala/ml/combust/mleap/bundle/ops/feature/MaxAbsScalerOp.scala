@@ -17,11 +17,13 @@ class MaxAbsScalerOp extends OpNode[MleapContext, MaxAbsScaler, MaxAbsScalerMode
 
     override def opName: String = Bundle.BuiltinOps.feature.max_abs_scaler
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: MaxAbsScalerModel): Model = {
+    override def store(model: Model, obj: MaxAbsScalerModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("maxAbs", Value.doubleVector(obj.maxAbs.toArray))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): MaxAbsScalerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): MaxAbsScalerModel = {
       MaxAbsScalerModel(maxAbs = Vectors.dense(model.value("maxAbs").getDoubleVector.toArray))
     }
   }
@@ -32,7 +34,8 @@ class MaxAbsScalerOp extends OpNode[MleapContext, MaxAbsScaler, MaxAbsScalerMode
 
   override def model(node: MaxAbsScaler): MaxAbsScalerModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: MaxAbsScalerModel): MaxAbsScaler = {
+  override def load(node: Node, model: MaxAbsScalerModel)
+                   (implicit context: BundleContext[MleapContext]): MaxAbsScaler = {
     MaxAbsScaler(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)

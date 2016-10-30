@@ -16,11 +16,13 @@ class NGramOp extends OpNode[MleapContext, NGram, NGramModel]{
 
     override def opName: String = Bundle.BuiltinOps.feature.ngram
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: NGramModel): Model = {
+    override def store(model: Model, obj: NGramModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr(Attribute("n", Value.long(obj.n)))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): NGramModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): NGramModel = {
       NGramModel(n = model.value("n").getLong.toInt)
     }
   }
@@ -31,7 +33,8 @@ class NGramOp extends OpNode[MleapContext, NGram, NGramModel]{
 
   override def model(node: NGram): NGramModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: NGramModel): NGram = {
+  override def load(node: Node, model: NGramModel)
+                   (implicit context: BundleContext[MleapContext]): NGram = {
     NGram(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)

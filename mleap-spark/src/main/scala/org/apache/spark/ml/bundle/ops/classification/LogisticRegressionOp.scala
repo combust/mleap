@@ -16,14 +16,16 @@ class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegression
 
     override def opName: String = Bundle.BuiltinOps.classification.logistic_regression
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: LogisticRegressionModel): Model = {
+    override def store(model: Model, obj: LogisticRegressionModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept)).
         withAttr("num_classes", Value.long(obj.numClasses)).
         withAttr("threshold", obj.get(obj.threshold).map(Value.double))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): LogisticRegressionModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("Only binary logistic regression supported in Spark")
       }
@@ -44,7 +46,8 @@ class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegression
 
   override def model(node: LogisticRegressionModel): LogisticRegressionModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: LogisticRegressionModel): LogisticRegressionModel = {
+  override def load(node: Node, model: LogisticRegressionModel)
+                   (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
     val lr = new LogisticRegressionModel(uid = node.name,
       coefficients = model.coefficients,
       intercept = model.intercept).copy(model.extractParamMap).

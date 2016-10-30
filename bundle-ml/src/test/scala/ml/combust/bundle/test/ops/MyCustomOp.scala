@@ -19,13 +19,15 @@ class MyCustomOp extends OpNode[Any, MyCustomTransformer, MyCustomTransformer] {
 
     override def opName: String = "my_custom_transformer"
 
-    override def store(context: BundleContext[Any], model: Model, obj: MyCustomTransformer): Model = {
-      implicit val c = context
+
+    override def store(model: Model, obj: MyCustomTransformer)
+                      (implicit context: BundleContext[Any]): Model = {
       model.withAttr("my_custom_attr", Value.custom(obj.custom))
     }
 
-    override def load(context: BundleContext[Any], model: Model): MyCustomTransformer = {
-      implicit val c = context
+
+    override def load(model: Model)
+                     (implicit context: BundleContext[Any]): MyCustomTransformer = {
       MyCustomTransformer(model.value("my_custom_attr").getCustom[MyCustomObject])
     }
   }
@@ -36,7 +38,8 @@ class MyCustomOp extends OpNode[Any, MyCustomTransformer, MyCustomTransformer] {
 
   override def model(node: MyCustomTransformer): MyCustomTransformer = node
 
-  override def load(context: BundleContext[Any], node: dsl.Node, model: MyCustomTransformer): MyCustomTransformer = {
+  override def load(node: dsl.Node, model: MyCustomTransformer)
+                   (implicit context: BundleContext[Any]): MyCustomTransformer = {
     MyCustomTransformer(model.custom)
   }
 

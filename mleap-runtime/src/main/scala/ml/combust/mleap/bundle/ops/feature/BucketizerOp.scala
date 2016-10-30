@@ -16,11 +16,13 @@ class BucketizerOp extends OpNode[MleapContext, Bucketizer, BucketizerModel]{
 
     override def opName: String = Bundle.BuiltinOps.feature.bucketizer
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: BucketizerModel): Model = {
+    override def store(model: Model, obj: BucketizerModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("splits", Value.doubleList(obj.splits))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): BucketizerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): BucketizerModel = {
       BucketizerModel(splits = model.value("splits").getDoubleList.toArray)
     }
   }
@@ -31,7 +33,8 @@ class BucketizerOp extends OpNode[MleapContext, Bucketizer, BucketizerModel]{
 
   override def model(node: Bucketizer): BucketizerModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: BucketizerModel): Bucketizer = {
+  override def load(node: Node, model: BucketizerModel)
+                   (implicit context: BundleContext[MleapContext]): Bucketizer = {
     Bucketizer(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)

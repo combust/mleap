@@ -15,11 +15,13 @@ class NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
 
     override def opName: String = Bundle.BuiltinOps.feature.normalizer
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: Normalizer): Model = {
+    override def store(model: Model, obj: Normalizer)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("p_norm", Value.double(obj.getP))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): Normalizer = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): Normalizer = {
       new Normalizer(uid = "").setP(model.value("p_norm").getDouble)
     }
   }
@@ -30,7 +32,8 @@ class NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
 
   override def model(node: Normalizer): Normalizer = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: Normalizer): Normalizer = {
+  override def load(node: Node, model: Normalizer)
+                   (implicit context: BundleContext[SparkBundleContext]): Normalizer = {
     new Normalizer(uid = node.name).copy(model.extractParamMap()).
       setInputCol(node.shape.standardInput.name).
       setOutputCol(node.shape.standardOutput.name)

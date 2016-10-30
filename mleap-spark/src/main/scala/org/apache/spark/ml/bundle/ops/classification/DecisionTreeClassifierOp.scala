@@ -20,13 +20,15 @@ class DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeCl
 
     override def opName: String = Bundle.BuiltinOps.classification.decision_tree_classifier
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: DecisionTreeClassificationModel): Model = {
+    override def store(model: Model, obj: DecisionTreeClassificationModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).write(obj.rootNode)
       model.withAttr("num_features", Value.long(obj.numFeatures)).
         withAttr("num_classes", Value.long(obj.numClasses))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): DecisionTreeClassificationModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): DecisionTreeClassificationModel = {
       val rootNode = TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).read()
       new DecisionTreeClassificationModel(uid = "",
         rootNode = rootNode,
@@ -41,7 +43,8 @@ class DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeCl
 
   override def model(node: DecisionTreeClassificationModel): DecisionTreeClassificationModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: DecisionTreeClassificationModel): DecisionTreeClassificationModel = {
+  override def load(node: Node, model: DecisionTreeClassificationModel)
+                   (implicit context: BundleContext[SparkBundleContext]): DecisionTreeClassificationModel = {
     new DecisionTreeClassificationModel(uid = node.name,
       rootNode = model.rootNode,
       numClasses = model.numClasses,

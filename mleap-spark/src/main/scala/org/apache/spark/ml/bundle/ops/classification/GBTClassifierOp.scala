@@ -17,7 +17,8 @@ class GBTClassifierOp extends OpNode[SparkBundleContext, GBTClassificationModel,
 
     override def opName: String = Bundle.BuiltinOps.classification.gbt_classifier
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: GBTClassificationModel): Model = {
+    override def store(model: Model, obj: GBTClassificationModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -32,7 +33,8 @@ class GBTClassifierOp extends OpNode[SparkBundleContext, GBTClassificationModel,
         withAttr("trees", Value.stringList(trees))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): GBTClassificationModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): GBTClassificationModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("MLeap only supports binary logistic regression")
       }
@@ -57,7 +59,8 @@ class GBTClassifierOp extends OpNode[SparkBundleContext, GBTClassificationModel,
 
   override def model(node: GBTClassificationModel): GBTClassificationModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: GBTClassificationModel): GBTClassificationModel = {
+  override def load(node: Node, model: GBTClassificationModel)
+                   (implicit context: BundleContext[SparkBundleContext]): GBTClassificationModel = {
     new GBTClassificationModel(uid = node.name,
       _trees = model.trees,
       _treeWeights = model.treeWeights,

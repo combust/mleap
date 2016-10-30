@@ -16,11 +16,13 @@ class MaxAbsScalerOp extends OpNode[SparkBundleContext, MaxAbsScalerModel, MaxAb
 
     override def opName: String = Bundle.BuiltinOps.feature.max_abs_scaler
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: MaxAbsScalerModel): Model = {
+    override def store(model: Model, obj: MaxAbsScalerModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("maxAbs", Value.doubleVector(obj.maxAbs.toArray))
   }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): MaxAbsScalerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): MaxAbsScalerModel = {
       new MaxAbsScalerModel(uid = "",
         maxAbs = Vectors.dense(model.value("maxAbs").getDoubleVector.toArray))
     }
@@ -34,7 +36,8 @@ class MaxAbsScalerOp extends OpNode[SparkBundleContext, MaxAbsScalerModel, MaxAb
   override def model(node: MaxAbsScalerModel): MaxAbsScalerModel = node
 
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: MaxAbsScalerModel): MaxAbsScalerModel = {
+  override def load(node: Node, model: MaxAbsScalerModel)
+                   (implicit context: BundleContext[SparkBundleContext]): MaxAbsScalerModel = {
     new MaxAbsScalerModel(uid = node.name, maxAbs = model.maxAbs)
   }
 

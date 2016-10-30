@@ -16,11 +16,13 @@ class OneHotEncoderOp extends OpNode[MleapContext, OneHotEncoder, OneHotEncoderM
 
     override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: OneHotEncoderModel): Model = {
+    override def store(model: Model, obj: OneHotEncoderModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("size", Value.long(obj.size))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): OneHotEncoderModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): OneHotEncoderModel = {
       OneHotEncoderModel(size = model.value("size").getLong.toInt)
     }
   }
@@ -31,7 +33,8 @@ class OneHotEncoderOp extends OpNode[MleapContext, OneHotEncoder, OneHotEncoderM
 
   override def model(node: OneHotEncoder): OneHotEncoderModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: OneHotEncoderModel): OneHotEncoder = {
+  override def load(node: Node, model: OneHotEncoderModel)
+                   (implicit context: BundleContext[MleapContext]): OneHotEncoder = {
     OneHotEncoder(uid = node.name,
       inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,

@@ -17,12 +17,14 @@ class MinMaxScalerOp extends OpNode[MleapContext, MinMaxScaler, MinMaxScalerMode
 
     override def opName: String = Bundle.BuiltinOps.feature.min_max_scaler
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: MinMaxScalerModel): Model = {
+    override def store(model: Model, obj: MinMaxScalerModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("min", Value.doubleVector(obj.originalMin.toArray)).
         withAttr("max", Value.doubleVector(obj.originalMax.toArray))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): MinMaxScalerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): MinMaxScalerModel = {
       MinMaxScalerModel(originalMin = Vectors.dense(model.value("min").getDoubleVector.toArray),
         originalMax = Vectors.dense(model.value("max").getDoubleVector.toArray))
     }
@@ -34,7 +36,8 @@ class MinMaxScalerOp extends OpNode[MleapContext, MinMaxScaler, MinMaxScalerMode
 
   override def model(node: MinMaxScaler): MinMaxScalerModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: MinMaxScalerModel): MinMaxScaler = {
+  override def load(node: Node, model: MinMaxScalerModel)
+                   (implicit context: BundleContext[MleapContext]): MinMaxScaler = {
     MinMaxScaler(inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
       model = model)

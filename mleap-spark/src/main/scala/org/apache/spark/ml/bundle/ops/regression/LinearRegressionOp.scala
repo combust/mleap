@@ -16,12 +16,14 @@ class LinearRegressionOp extends OpNode[SparkBundleContext, LinearRegressionMode
 
     override def opName: String = Bundle.BuiltinOps.regression.linear_regression
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: LinearRegressionModel): Model = {
+    override def store(model: Model, obj: LinearRegressionModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): LinearRegressionModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): LinearRegressionModel = {
       new LinearRegressionModel(uid = "",
         coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
         intercept = model.value("intercept").getDouble)
@@ -34,7 +36,8 @@ class LinearRegressionOp extends OpNode[SparkBundleContext, LinearRegressionMode
 
   override def model(node: LinearRegressionModel): LinearRegressionModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: LinearRegressionModel): LinearRegressionModel = {
+  override def load(node: Node, model: LinearRegressionModel)
+                   (implicit context: BundleContext[SparkBundleContext]): LinearRegressionModel = {
     new LinearRegressionModel(uid = node.name,
       coefficients = model.coefficients,
       intercept = model.intercept).

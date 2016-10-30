@@ -15,11 +15,13 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoderModel, One
 
     override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: OneHotEncoderModel): Model = {
+    override def store(model: Model, obj: OneHotEncoderModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("size", Value.long(obj.size))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): OneHotEncoderModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): OneHotEncoderModel = {
       new OneHotEncoderModel(uid = "", size = model.value("size").getLong.toInt)
     }
   }
@@ -30,7 +32,8 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoderModel, One
 
   override def model(node: OneHotEncoderModel): OneHotEncoderModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: OneHotEncoderModel): OneHotEncoderModel = {
+  override def load(node: Node, model: OneHotEncoderModel)
+                   (implicit context: BundleContext[SparkBundleContext]): OneHotEncoderModel = {
     new OneHotEncoderModel(uid = node.name, size = model.size)
   }
 

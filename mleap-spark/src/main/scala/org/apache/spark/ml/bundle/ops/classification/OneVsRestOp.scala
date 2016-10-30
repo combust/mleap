@@ -18,7 +18,8 @@ class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestMo
 
     override def opName: String = Bundle.BuiltinOps.classification.one_vs_rest
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: OneVsRestModel): Model = {
+    override def store(model: Model, obj: OneVsRestModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       var i = 0
       for(cModel <- obj.models) {
         val name = s"model$i"
@@ -30,7 +31,8 @@ class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestMo
       model.withAttr("num_classes", Value.long(obj.models.length))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): OneVsRestModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): OneVsRestModel = {
       val numClasses = model.value("num_classes").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
@@ -51,7 +53,8 @@ class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestMo
 
   override def model(node: OneVsRestModel): OneVsRestModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: OneVsRestModel): OneVsRestModel = {
+  override def load(node: Node, model: OneVsRestModel)
+                   (implicit context: BundleContext[SparkBundleContext]): OneVsRestModel = {
     val labelMetadata = NominalAttribute.defaultAttr.
       withName(node.shape.output("prediction").name).
       withNumValues(model.models.length).

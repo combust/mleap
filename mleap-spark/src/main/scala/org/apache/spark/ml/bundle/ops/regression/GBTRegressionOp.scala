@@ -16,7 +16,8 @@ class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBT
 
     override def opName: String = Bundle.BuiltinOps.regression.gbt_regression
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: GBTRegressionModel): Model = {
+    override def store(model: Model, obj: GBTRegressionModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       var i = 0
       val trees = obj.trees.map {
         tree =>
@@ -30,7 +31,8 @@ class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBT
         withAttr("trees", Value.stringList(trees))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): GBTRegressionModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): GBTRegressionModel = {
       val numFeatures = model.value("num_features").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList.toArray
 
@@ -51,7 +53,8 @@ class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBT
 
   override def model(node: GBTRegressionModel): GBTRegressionModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: GBTRegressionModel): GBTRegressionModel = {
+  override def load(node: Node, model: GBTRegressionModel)
+                   (implicit context: BundleContext[SparkBundleContext]): GBTRegressionModel = {
     new GBTRegressionModel(uid = node.name,
       _trees = model.trees,
       _treeWeights = model.treeWeights,

@@ -15,12 +15,14 @@ class HashingTermFrequencyOp extends OpNode[SparkBundleContext, HashingTF, Hashi
 
     override def opName: String = Bundle.BuiltinOps.feature.hashing_term_frequency
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: HashingTF): Model = {
+    override def store(model: Model, obj: HashingTF)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("num_features", Value.long(obj.getNumFeatures)).
         withAttr("binary", Value.boolean(obj.getBinary))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): HashingTF = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): HashingTF = {
       new HashingTF(uid = "").setNumFeatures(model.value("num_features").getLong.toInt).
         setBinary(model.value("binary").getBoolean)
     }
@@ -32,7 +34,8 @@ class HashingTermFrequencyOp extends OpNode[SparkBundleContext, HashingTF, Hashi
 
   override def model(node: HashingTF): HashingTF = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: HashingTF): HashingTF = {
+  override def load(node: Node, model: HashingTF)
+                   (implicit context: BundleContext[SparkBundleContext]): HashingTF = {
     new HashingTF(uid = node.name).setNumFeatures(model.getNumFeatures).
       setBinary(model.getBinary).
       setInputCol(node.shape.standardInput.name).

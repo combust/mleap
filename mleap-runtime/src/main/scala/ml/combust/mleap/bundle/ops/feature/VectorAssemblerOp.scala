@@ -16,9 +16,11 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
 
     override def opName: String = Bundle.BuiltinOps.feature.vector_assembler
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: VectorAssemblerModel): Model = { model }
+    override def store(model: Model, obj: VectorAssemblerModel)
+                      (implicit context: BundleContext[MleapContext]): Model = { model }
 
-    override def load(context: BundleContext[MleapContext], model: Model): VectorAssemblerModel = VectorAssemblerModel.default
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): VectorAssemblerModel = VectorAssemblerModel.default
   }
 
   override val klazz: Class[VectorAssembler] = classOf[VectorAssembler]
@@ -27,7 +29,8 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
 
   override def model(node: VectorAssembler): VectorAssemblerModel = VectorAssemblerModel.default
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: VectorAssemblerModel): VectorAssembler = {
+  override def load(node: Node, model: VectorAssemblerModel)
+                   (implicit context: BundleContext[MleapContext]): VectorAssembler = {
     VectorAssembler(uid = node.name,
       inputCols = node.shape.inputs.map(_.name).toArray,
       outputCol = node.shape.standardOutput.name)

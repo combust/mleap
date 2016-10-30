@@ -16,12 +16,14 @@ class MinMaxScalerOp extends OpNode[SparkBundleContext, MinMaxScalerModel, MinMa
 
     override def opName: String = Bundle.BuiltinOps.feature.min_max_scaler
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: MinMaxScalerModel): Model = {
+    override def store(model: Model, obj: MinMaxScalerModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("min", Value.doubleVector(obj.originalMin.toArray)).
         withAttr("max", Value.doubleVector(obj.originalMax.toArray))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): MinMaxScalerModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): MinMaxScalerModel = {
       new MinMaxScalerModel(uid = "",
         originalMin = Vectors.dense(model.value("min").getDoubleVector.toArray),
         originalMax = Vectors.dense(model.value("max").getDoubleVector.toArray))
@@ -35,7 +37,8 @@ class MinMaxScalerOp extends OpNode[SparkBundleContext, MinMaxScalerModel, MinMa
 
   override def model(node: MinMaxScalerModel): MinMaxScalerModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: MinMaxScalerModel): MinMaxScalerModel = {
+  override def load(node: Node, model: MinMaxScalerModel)
+                   (implicit context: BundleContext[SparkBundleContext]): MinMaxScalerModel = {
     new MinMaxScalerModel(uid = node.name, originalMin = model.originalMin, originalMax = model.originalMax)
   }
 

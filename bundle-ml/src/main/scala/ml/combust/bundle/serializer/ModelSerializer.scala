@@ -86,8 +86,8 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
   def write(obj: Any): Unit = {
     bundleContext.path.mkdirs()
     val m = bundleContext.bundleRegistry.modelForObj[Context, Any](obj)
-    var model: Model = Model(op = m.opName)
-    model = m.store(bundleContext, model, obj)
+    var model = Model(op = m.opName)
+    model = m.store(model, obj)(bundleContext)
 
     model = bundleContext.format match {
       case SerializationFormat.Mixed =>
@@ -130,6 +130,6 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
       case _ => bundleModel
     }
 
-    (m.load(bundleContext, bundleModel), bundleModel)
+    (m.load(bundleModel)(bundleContext), bundleModel)
   }
 }

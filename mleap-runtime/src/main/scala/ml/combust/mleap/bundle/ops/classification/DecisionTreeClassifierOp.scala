@@ -21,13 +21,15 @@ class DecisionTreeClassifierOp extends OpNode[MleapContext, DecisionTreeClassifi
 
     override def opName: String = Bundle.BuiltinOps.classification.decision_tree_classifier
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: DecisionTreeClassifierModel): Model = {
+    override def store(model: Model, obj: DecisionTreeClassifierModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).write(obj.rootNode)
       model.withAttr("num_features", Value.long(obj.numFeatures)).
         withAttr("num_classes", Value.long(obj.numClasses))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): DecisionTreeClassifierModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): DecisionTreeClassifierModel = {
       val rootNode = TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).read()
       DecisionTreeClassifierModel(rootNode,
         numClasses = model.value("num_classes").getLong.toInt,
@@ -41,7 +43,8 @@ class DecisionTreeClassifierOp extends OpNode[MleapContext, DecisionTreeClassifi
 
   override def model(node: DecisionTreeClassifier): DecisionTreeClassifierModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: DecisionTreeClassifierModel): DecisionTreeClassifier = {
+  override def load(node: Node, model: DecisionTreeClassifierModel)
+                   (implicit context: BundleContext[MleapContext]): DecisionTreeClassifier = {
     DecisionTreeClassifier(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

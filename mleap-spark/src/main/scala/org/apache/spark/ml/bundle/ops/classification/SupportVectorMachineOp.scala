@@ -17,14 +17,16 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
 
     override def opName: String = Bundle.BuiltinOps.classification.support_vector_machine
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: SVMModel): Model = {
+    override def store(model: Model, obj: SVMModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("coefficients", Value.doubleVector(obj.model.weights.toArray)).
         withAttr("intercept", Value.double(obj.model.intercept)).
         withAttr("num_classes", Value.long(2)).
         withAttr("threshold", obj.get(obj.threshold).map(Value.double))
     }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): SVMModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): SVMModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("Only binary logistic regression supported in Spark")
       }
@@ -44,7 +46,8 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
 
   override def model(node: SVMModel): SVMModel = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: SVMModel): SVMModel = {
+  override def load(node: Node, model: SVMModel)
+                   (implicit context: BundleContext[SparkBundleContext]): SVMModel = {
     val svm = new SVMModel(uid = node.name,
       model = model.model).copy(model.extractParamMap()).
       setFeaturesCol(node.shape.input("features").name).

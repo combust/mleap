@@ -15,9 +15,11 @@ class TokenizerOp extends OpNode[SparkBundleContext, Tokenizer, Tokenizer] {
 
     override def opName: String = Bundle.BuiltinOps.feature.tokenizer
 
-    override def store(context: BundleContext[SparkBundleContext], model: Model, obj: Tokenizer): Model = { model }
+    override def store(model: Model, obj: Tokenizer)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = { model }
 
-    override def load(context: BundleContext[SparkBundleContext], model: Model): Tokenizer = new Tokenizer(uid = "")
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): Tokenizer = new Tokenizer(uid = "")
   }
 
   override val klazz: Class[Tokenizer] = classOf[Tokenizer]
@@ -26,7 +28,8 @@ class TokenizerOp extends OpNode[SparkBundleContext, Tokenizer, Tokenizer] {
 
   override def model(node: Tokenizer): Tokenizer = node
 
-  override def load(context: BundleContext[SparkBundleContext], node: Node, model: Tokenizer): Tokenizer = {
+  override def load(node: Node, model: Tokenizer)
+                   (implicit context: BundleContext[SparkBundleContext]): Tokenizer = {
     new Tokenizer(uid = node.name)
   }
 

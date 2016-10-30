@@ -17,7 +17,8 @@ class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
 
     override def opName: String = Bundle.BuiltinOps.classification.one_vs_rest
 
-    override def store(context: BundleContext[MleapContext], model: Model, obj: OneVsRestModel): Model = {
+    override def store(model: Model, obj: OneVsRestModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       var i = 0
       for(cModel <- obj.classifiers) {
         val name = s"model$i"
@@ -29,7 +30,8 @@ class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
       model.withAttr("num_classes", Value.long(obj.classifiers.length))
     }
 
-    override def load(context: BundleContext[MleapContext], model: Model): OneVsRestModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): OneVsRestModel = {
       val numClasses = model.value("num_classes").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
@@ -46,7 +48,8 @@ class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
 
   override def model(node: OneVsRest): OneVsRestModel = node.model
 
-  override def load(context: BundleContext[MleapContext], node: Node, model: OneVsRestModel): OneVsRest = {
+  override def load(node: Node, model: OneVsRestModel)
+                   (implicit context: BundleContext[MleapContext]): OneVsRest = {
     OneVsRest(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,

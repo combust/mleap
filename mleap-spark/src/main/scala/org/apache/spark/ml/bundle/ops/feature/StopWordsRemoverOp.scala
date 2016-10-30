@@ -23,7 +23,7 @@ class StopWordsRemoverOp extends OpNode[SparkBundleContext, StopWordsRemover, St
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): StopWordsRemover = {
-      new StopWordsRemover(uid = "").setStopWords(model.value("stop_words").getStringVector.toArray).
+      new StopWordsRemover(uid = "").setStopWords(model.value("stop_words").getStringList.toArray).
         setCaseSensitive(model.value("case_sensitive").getBoolean)
     }
 

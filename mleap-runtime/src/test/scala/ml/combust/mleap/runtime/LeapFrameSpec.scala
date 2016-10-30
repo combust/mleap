@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.runtime.test.{MyCustomObject, MyCustomType}
 import ml.combust.mleap.runtime.types.{DoubleType, StringType, StructField, StructType}
 import org.scalatest.FunSpec
 
@@ -58,6 +59,17 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
           assert(data(1).getDouble(2) == 23.42)
         }
 
+        describe("with a custom data type") {
+          val frame2 = frame.withField("test_custom", "test_string") {
+            (v: String) => MyCustomObject(v)
+          }.flatMap(_.select("test_custom")).get
+          val data = frame2.dataset.toArray
+
+          assert(frame2.schema.getField("test_custom").get.dataType == new MyCustomType)
+          assert(data(0).getAs[MyCustomObject](0) == MyCustomObject("hello"))
+          assert(data(1).getAs[MyCustomObject](0) == MyCustomObject("there"))
+        }
+
         describe("with non-matching data types") {
           it("returns a failure") {
             val frame2 = frame.withField("test_double_2", "test_double") {
@@ -68,7 +80,7 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
           }
         }
 
-        describe("with MultipleFieldSelector and non Array[Any] data type") {
+        describe("with ArraySelector and non Array[Any] data type") {
           val frame2 = frame.withField("test_double_2", Array("test_double")) {
             (r: Array[Double]) => r.head
           }

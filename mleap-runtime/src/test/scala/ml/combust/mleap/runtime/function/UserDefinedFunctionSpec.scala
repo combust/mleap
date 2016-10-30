@@ -17,7 +17,7 @@ class UserDefinedFunctionSpec extends FunSpec {
       val udf3: UserDefinedFunction = (v1: Boolean, v2: Vector) => "hello": Any
       val udf4: UserDefinedFunction = (v1: Array[Boolean], v2: Array[String], v3: Array[Double]) => "hello"
       val udf5: UserDefinedFunction = (v1: Double, v2: Double, v3: Double, v4: Double, v5: String) => 55d
-      val udf0custom: UserDefinedFunction = () => MyCustomObject()
+      val udf0custom: UserDefinedFunction = () => MyCustomObject("hello")
 
       assertUdfForm(udf0, StringType)
       assertUdfForm(udf1, ListType(StringType), DoubleType)

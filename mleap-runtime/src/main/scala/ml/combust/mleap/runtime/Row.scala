@@ -1,10 +1,14 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.runtime.Row.RowSelector
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.linalg.Vector
 
 /** Companion object for creating default rows.
   */
 object Row {
+  type RowSelector = (Row) => Any
+
   /** Create a row using the default implementation [[ArrayRow]].
     *
     * @param values values in the row
@@ -54,6 +58,13 @@ trait Row {
     */
   def getInt(index: Int): Int = get(index).asInstanceOf[Int]
 
+  /** Get value at index as a long.
+    *
+    * @param index index of value
+    * @return long value
+    */
+  def getLong(index: Int): Long = get(index).asInstanceOf[Long]
+
   /** Get value at index as a string.
     *
     * @param index index of value
@@ -88,12 +99,34 @@ trait Row {
     */
   def toSeq: Seq[Any]
 
-  /** Add a value to the row.
+  /** Add value to row with a user defined function.
     *
-    * @param f function for calculating new value
-    * @return row with new value
+    * @param selectors row selectors to generate inputs to function
+    * @param udf user defined function to call
+    * @return row with calculated value added
     */
-  def withValue(f: (Row) => Any): Row = withValue(f(this))
+  def withValue(selectors: RowSelector *)(udf: UserDefinedFunction): Row = {
+    udf.inputs.length match {
+      case 0 =>
+        val f = udf.f.asInstanceOf[() => Any]
+        withValue(f())
+      case 1 =>
+        val f = udf.f.asInstanceOf[(Any) => Any]
+        withValue(f(selectors.head(this)))
+      case 2 =>
+        val f = udf.f.asInstanceOf[(Any, Any) => Any]
+        withValue(f(selectors.head(this), selectors(1)(this)))
+      case 3 =>
+        val f = udf.f.asInstanceOf[(Any, Any, Any) => Any]
+        withValue(f(selectors.head(this), selectors(1)(this), selectors(2)(this)))
+      case 4 =>
+        val f = udf.f.asInstanceOf[(Any, Any, Any, Any) => Any]
+        withValue(f(selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this)))
+      case 5 =>
+        val f = udf.f.asInstanceOf[(Any, Any, Any, Any, Any) => Any]
+        withValue(f(selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this), selectors(4)(this)))
+    }
+  }
 
   /** Add a value to the row.
     *
@@ -101,20 +134,6 @@ trait Row {
     * @return row with the new value
     */
   def withValue(value: Any): Row
-
-  /** Add multiple values to the row.
-    *
-    * @param f function for calculating new row values
-    * @return row with new values
-    */
-  def withValues(f: (Row) => Row): Row = withValues(f(this))
-
-  /** Add multiple values to the row.
-    *
-    * @param values row with values to add
-    * @return row with new values
-    */
-  def withValues(values: Row): Row
 
   /** Create a new row from specified indices.
     *
@@ -148,7 +167,6 @@ case class ArrayRow(values: Array[Any]) extends Row {
   override def toArray: Array[Any] = values
 
   override def withValue(value: Any): Row = ArrayRow(values :+ value)
-  override def withValues(vs: Row): Row = ArrayRow(values ++ vs.toArray)
 
   override def selectIndices(indices: Int*): Row = ArrayRow(indices.toArray.map(values))
   override def dropIndex(index: Int): Row = ArrayRow(values.take(index) ++ values.drop(index + 1))
@@ -173,7 +191,6 @@ class SeqRow private(values: Seq[Any]) extends Row {
   override def selectIndices(indices: Int *): SeqRow = SeqRow(indices.map(index => values(realIndex(index))))
 
   override def withValue(value: Any): Row = new SeqRow(value +: values)
-  override def withValues(vs: Row): Row = new SeqRow(vs.toSeq.reverse ++ values)
 
   override def dropIndex(index: Int): Row = {
     val i = realIndex(index)

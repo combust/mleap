@@ -1,25 +1,17 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.StringIndexerModel
-import ml.combust.mleap.runtime.transformer.Transformer
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.DoubleType
-
-import scala.util.Try
+import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 
 /**
   * Created by hwilkins on 10/22/15.
   */
-case class StringIndexer(uid: String = Transformer.uniqueName("string_indexer"),
-                         inputCol: String,
-                         outputCol: String,
-                         model: StringIndexerModel) extends Transformer {
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withInput(inputCol).flatMap {
-      case (b, inputIndex) =>
-        b.withOutput(outputCol, DoubleType)(row => model(row.get(inputIndex).toString))
-    }
-  }
+case class StringIndexer(override val uid: String = Transformer.uniqueName("string_indexer"),
+                         override val inputCol: String,
+                         override val outputCol: String,
+                         model: StringIndexerModel) extends FeatureTransformer {
+  val exec: UserDefinedFunction = (value: Any) => model(value.toString)
 
   def toReverse: ReverseStringIndexer = ReverseStringIndexer(inputCol = inputCol,
     outputCol = outputCol,

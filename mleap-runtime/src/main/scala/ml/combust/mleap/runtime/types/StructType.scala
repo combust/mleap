@@ -64,7 +64,7 @@ case class StructType private(fields: Seq[StructField],
     */
   def withField(field: StructField): Try[StructType] = {
     if(hasField(field.name)) {
-      Failure(new Error(s"Already has field: ${field.name}"))
+      Failure(new IllegalArgumentException(s"struct already has field: ${field.name}"))
     } else {
       val key = field.name
 
@@ -113,7 +113,7 @@ case class StructType private(fields: Seq[StructField],
     val invalid = indices.filter(_ >= fields.length)
 
     if(invalid.nonEmpty) {
-      Failure(new Error(s"Invalid indices: ${invalid.mkString(",")}"))
+      Failure(new IllegalArgumentException(s"invalid indices: ${invalid.mkString(",")}"))
     } else {
       val selection = indices.map(fields)
       StructType(selection)
@@ -129,7 +129,7 @@ case class StructType private(fields: Seq[StructField],
     val invalid = fieldNames.filterNot(nameToIndex.contains)
 
     if(invalid.nonEmpty) {
-      Failure(new Error(s"Invalid fields: ${invalid.mkString(",")}"))
+      Failure(new IllegalArgumentException(s"invalid fields: ${invalid.mkString(",")}"))
     } else {
       Success(fieldNames.map(nameToIndex))
     }
@@ -151,7 +151,7 @@ case class StructType private(fields: Seq[StructField],
     */
   def dropIndex(index: Int): Try[StructType] = {
     if(index >= fields.length) {
-      Failure(new Error(s"Invalid index: $index"))
+      Failure(new IllegalArgumentException(s"invalid index: $index"))
     } else {
       StructType(fields.take(index) ++ fields.drop(index + 1))
     }
@@ -166,7 +166,7 @@ case class StructType private(fields: Seq[StructField],
     if(nameToIndex.contains(name)) {
       Success(nameToIndex(name))
     } else {
-      Failure(new Error(s"Invalid field: $name"))
+      Failure(new IllegalArgumentException(s"invalid field: $name"))
     }
   }
 

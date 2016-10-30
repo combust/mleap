@@ -1,29 +1,33 @@
 package org.apache.spark.ml.bundle.ops.classification
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.classification.LogisticRegressionModel
 import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object LogisticRegressionOp extends OpNode[LogisticRegressionModel, LogisticRegressionModel] {
-  override val Model: OpModel[LogisticRegressionModel] = new OpModel[LogisticRegressionModel] {
+class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
+  override val Model: OpModel[SparkBundleContext, LogisticRegressionModel] = new OpModel[SparkBundleContext, LogisticRegressionModel] {
+    override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
+
     override def opName: String = Bundle.BuiltinOps.classification.logistic_regression
 
-    override def store(context: BundleContext, model: Model, obj: LogisticRegressionModel): Model = {
+    override def store(model: Model, obj: LogisticRegressionModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept)).
         withAttr("num_classes", Value.long(obj.numClasses)).
         withAttr("threshold", obj.get(obj.threshold).map(Value.double))
     }
 
-    override def load(context: BundleContext, model: Model): LogisticRegressionModel = {
-      // TODO: better error
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
       if(model.value("num_classes").getLong != 2) {
-        throw new Error("Only binary logistic regression supported in Spark")
+        throw new IllegalArgumentException("Only binary logistic regression supported in Spark")
       }
 
       val lr = new LogisticRegressionModel(uid = "",
@@ -36,11 +40,14 @@ object LogisticRegressionOp extends OpNode[LogisticRegressionModel, LogisticRegr
     }
   }
 
+  override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
+
   override def name(node: LogisticRegressionModel): String = node.uid
 
   override def model(node: LogisticRegressionModel): LogisticRegressionModel = node
 
-  override def load(context: BundleContext, node: Node, model: LogisticRegressionModel): LogisticRegressionModel = {
+  override def load(node: Node, model: LogisticRegressionModel)
+                   (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
     val lr = new LogisticRegressionModel(uid = node.name,
       coefficients = model.coefficients,
       intercept = model.intercept).copy(model.extractParamMap).

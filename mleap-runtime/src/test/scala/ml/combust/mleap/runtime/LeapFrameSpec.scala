@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.mleap.runtime.types.{DoubleType, StringType, StructField, StructType}
+import ml.combust.mleap.runtime.test.{MyCustomObject, MyCustomType}
+import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /** Base trait for testing LeapFrame implementations.
@@ -47,7 +48,9 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
 
       describe("#withField") {
         it("creates a new LeapFrame with field added") {
-          val frame2 = frame.withField("test_double_2", DoubleType)(r => r.getDouble(1) + 10).get
+          val frame2 = frame.withField("test_double_2", "test_double") {
+            (r: Double) => r + 10
+          }.get
           val data = frame2.dataset.toArray
 
           assert(frame2.schema.fields.length == 3)
@@ -56,38 +59,33 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
           assert(data(1).getDouble(2) == 23.42)
         }
 
-        describe("with already existing field") {
-          it("returns a Failure") { assert(frame.withField("test_double", DoubleType)(r => 56.3).isFailure) }
-        }
-      }
-
-      describe("#withFields") {
-        it("creates a new LeapFrame with multiple fields added") {
-          val newFields = Seq(StructField("test_string_2", StringType),
-            StructField("test_double_2", DoubleType))
-          val frame2 = frame.withFields(newFields) {
-            r => Row(s"${r.getString(0)}:77", r.getDouble(1) + 20)
-          }.get
-
+        describe("with a custom data type") {
+          val frame2 = frame.withField("test_custom", "test_string") {
+            (v: String) => MyCustomObject(v)
+          }.flatMap(_.select("test_custom")).get
           val data = frame2.dataset.toArray
 
-          assert(frame2.schema.fields.length == 4)
-          assert(frame2.schema.indexOf("test_string_2").get == 2)
-          assert(frame2.schema.indexOf("test_double_2").get == 3)
-          assert(data(0).toArray sameElements Array("hello", 42.13, "hello:77", 62.13))
-          assert(data(1).toArray sameElements Array("there", 13.42, "there:77", 33.42))
+          assert(frame2.schema.getField("test_custom").get.dataType == CustomType(new MyCustomType))
+          assert(data(0).getAs[MyCustomObject](0) == MyCustomObject("hello"))
+          assert(data(1).getAs[MyCustomObject](0) == MyCustomObject("there"))
         }
 
-        describe("with already existing fields") {
+        describe("with non-matching data types") {
           it("returns a failure") {
-            val newFields = Seq(StructField("test_string", StringType),
-              StructField("test_double", DoubleType))
-            val frame2 = frame.withFields(newFields) {
-              r => Row(s"${r.getString(0)}:77", r.getDouble(1) + 20)
+            val frame2 = frame.withField("test_double_2", "test_double") {
+              (r: Int) => r + 10
             }
 
             assert(frame2.isFailure)
           }
+        }
+
+        describe("with ArraySelector and non Array[Any] data type") {
+          val frame2 = frame.withField("test_double_2", Array("test_double")) {
+            (r: Array[Double]) => r.head
+          }
+
+          assert(frame2.isFailure)
         }
       }
 

@@ -185,7 +185,7 @@ case class Shape private (inputs: Seq[Socket],
     * @return copy of the shape with input socket added 
     */
   def withInput(name: String, port: String): Shape = {
-    if(inputLookup.contains(port)) { throw new Error("only one input allowed per port") } // TODO: better error
+    require(!inputLookup.contains(port), s"input already exists for port: $port")
     val socket = Socket(name, port)
     val inputLookup2 = inputLookup + (port -> socket)
     copy(inputs = inputs :+ socket, inputLookup = inputLookup2)
@@ -198,7 +198,7 @@ case class Shape private (inputs: Seq[Socket],
     * @return copy of the shape with output socket added 
     */
   def withOutput(name: String, port: String): Shape = {
-    if(outputLookup.contains(port)) { throw new Error("only one output allowed per port") } // TODO: better error
+    require(!outputLookup.contains(port), s"output already exists for port: $port")
     val socket = Socket(name, port)
     val outputLookup2 = outputLookup + (port -> socket)
     copy(outputs = outputs :+ socket, outputLookup = outputLookup2)

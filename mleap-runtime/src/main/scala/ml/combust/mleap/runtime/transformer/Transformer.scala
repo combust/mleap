@@ -2,6 +2,7 @@ package ml.combust.mleap.runtime.transformer
 
 import java.util.UUID
 
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 
 import scala.util.Try
@@ -31,4 +32,14 @@ trait Transformer {
     * @return try new builder with transformation applied
     */
   def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB]
+}
+
+trait FeatureTransformer extends Transformer {
+  val inputCol: String
+  val outputCol: String
+  val exec: UserDefinedFunction
+
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+    builder.withOutput(outputCol, inputCol)(exec)
+  }
 }

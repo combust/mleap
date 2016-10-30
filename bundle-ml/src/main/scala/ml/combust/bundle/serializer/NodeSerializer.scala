@@ -3,6 +3,7 @@ package ml.combust.bundle.serializer
 import java.io.{FileInputStream, FileOutputStream, InputStream, OutputStream}
 
 import ml.bundle.NodeDef.NodeDef
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.{Bundle, Node, Shape}
 import ml.combust.bundle.json.JsonSupport._
 import spray.json._
@@ -68,25 +69,26 @@ object ProtoFormatNodeSerializer extends FormatNodeSerializer {
 
 /** Class for serializing a Bundle.ML node.
   *
-  * @param context bundle context for custom types and serialization formats
+  * @param bundleContext bundle context for custom types and serialization formats
+  * @tparam Context context class for implementation
   */
-case class NodeSerializer(context: BundleContext) {
-  implicit val sc = context.preferredSerializationContext(SerializationFormat.Json)
+case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
+  implicit val sc = bundleContext.preferredSerializationContext(SerializationFormat.Json)
 
   /** Write a node to the current context path.
     *
     * @param obj node to write
     */
   def write(obj: Any): Unit = {
-    context.path.mkdirs()
-    val op = context.bundleRegistry.opForObj[Any, Any](obj)
-    val modelSerializer = ModelSerializer(context)
+    bundleContext.path.mkdirs()
+    val op = bundleContext.bundleRegistry.opForObj[Context, Any, Any](obj)
+    val modelSerializer = ModelSerializer(bundleContext)
     modelSerializer.write(op.model(obj))
 
     val name = op.name(obj)
     val shape = op.shape(obj)
     val node = Node(name = name, shape = shape)
-    for(out <- managed(new FileOutputStream(context.file(Bundle.nodeFile)))) {
+    for(out <- managed(new FileOutputStream(bundleContext.file(Bundle.nodeFile)))) {
       FormatNodeSerializer.serializer.write(out, node)
     }
   }
@@ -96,12 +98,15 @@ case class NodeSerializer(context: BundleContext) {
     * @return deserialized node
     */
   def read(): Any = {
-    val node = (for(in <- managed(new FileInputStream(context.file(Bundle.nodeFile)))) yield {
+    val node = (for(in <- managed(new FileInputStream(bundleContext.file(Bundle.nodeFile)))) yield {
       FormatNodeSerializer.serializer.read(in)
-    }).opt.get
+    }).either.either match {
+      case Left(errors) => throw errors.head
+      case Right(n) => n
+    }
 
-    val (model, m) = ModelSerializer(context).readWithModel()
-    val op = context.bundleRegistry[Any, Any](m.op)
-    op.load(context, node, model)
+    val (model, m) = ModelSerializer(bundleContext).readWithModel()
+    val op = bundleContext.bundleRegistry[Context, Any, Any](m.op)
+    op.load(node, model)(bundleContext)
   }
 }

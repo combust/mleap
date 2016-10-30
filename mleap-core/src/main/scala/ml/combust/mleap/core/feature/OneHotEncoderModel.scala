@@ -25,7 +25,7 @@ case class OneHotEncoderModel(size: Int) extends Serializable {
     val labelInt = label.toInt
 
     if(label != labelInt) {
-      throw new Error("invalid label, must be integer")
+      throw new IllegalArgumentException(s"invalid label: $label, must be integer")
     }
 
     if(label < size) {

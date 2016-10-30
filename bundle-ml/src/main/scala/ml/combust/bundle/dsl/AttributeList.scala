@@ -1,6 +1,6 @@
 package ml.combust.bundle.dsl
 
-import ml.combust.bundle.serializer.HasBundleRegistry
+import ml.combust.bundle.HasBundleRegistry
 
 /** This trait provides easy access to reading/writing attributes
   * to objects that contain an [[AttributeList]].
@@ -155,7 +155,7 @@ object AttributeList {
   */
 case class AttributeList(lookup: Map[String, Attribute]) {
   /* make sure the list is not empty */
-  if(lookup.isEmpty) { throw new Error("cannot have empty attribute list") } // TODO: better error
+  require(lookup.nonEmpty, "attribute list cannot be empty")
 
   /** Convert to bundle attribute list.
     *

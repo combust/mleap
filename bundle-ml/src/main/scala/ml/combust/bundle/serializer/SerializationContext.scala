@@ -1,5 +1,7 @@
 package ml.combust.bundle.serializer
 
+import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
+
 /** Class for holding concrete serialization format and bundle registry.
   *
   * This class is used by methods that need to know the exact serialization

@@ -8,7 +8,7 @@ import ml.bundle.Tensor.Tensor
 import ml.bundle.TensorType.TensorType
 import ml.bundle.Value.Value.ListValue
 import ml.bundle.Value.{Value => BValue}
-import ml.combust.bundle.serializer.HasBundleRegistry
+import ml.combust.bundle.HasBundleRegistry
 
 import scala.reflect.{ClassTag, classTag}
 
@@ -35,7 +35,7 @@ object Value {
   def fromTensorValue(base: BasicType, tensor: Tensor): Any = base match {
     case BasicType.DOUBLE => tensor.doubleVal
     case BasicType.STRING => tensor.stringVal
-    case _ => throw new Error("unsupported tensor type")
+    case _ => throw new IllegalArgumentException(s"unsupported tensor type: $base")
   }
 
   /** Convert a [[ml.bundle.Value.Value.ListValue]] into a Scala Seq.
@@ -60,7 +60,7 @@ object Value {
         case BasicType.DOUBLE => list.f
         case BasicType.BOOLEAN => list.b
         case BasicType.LONG => list.i
-        case _ => throw new Error("unsupported list type")
+        case _ => throw new IllegalArgumentException("unsupported list type")
       }
     } else if(u.isTensor) {
       val basic = base.getTensor.base
@@ -68,7 +68,7 @@ object Value {
     } else if(u.isCustom) {
       val ct = hr.bundleRegistry.custom(base.getCustom)
       list.custom.map(b => ct.fromBytes(b.toByteArray))
-    } else { throw new Error("unsupported list type") }
+    } else { throw new IllegalArgumentException("unsupported list type") }
   }
 
   /** Convert a [[ml.bundle.Value.Value]] into a [[ml.combust.bundle.dsl.Value]].
@@ -90,11 +90,11 @@ object Value {
         case BasicType.DOUBLE => value.getF
         case BasicType.BOOLEAN => value.getB
         case BasicType.LONG => value.getI
-        case _ => throw new Error("unsupported basic type")
+        case _ => throw new IllegalArgumentException("unsupported basic type")
       }
     } else if(dataType.underlying.isList) {
       fromListValue(dataType.getList, value.getList)
-    } else { throw new Error("unsupported value type") }
+    } else { throw new IllegalArgumentException("unsupported value type") }
 
     Value(dataType, v)
   }
@@ -110,7 +110,7 @@ object Value {
   def tensorValue(base: BasicType, value: Any): Tensor = base match {
     case BasicType.DOUBLE => Tensor(doubleVal = value.asInstanceOf[Seq[Double]])
     case BasicType.STRING => Tensor(stringVal = value.asInstanceOf[Seq[String]])
-    case _ => throw new Error("unsupported vector base type")
+    case _ => throw new IllegalArgumentException("unsupported vector base type")
   }
 
   /** Create a list value.
@@ -134,7 +134,7 @@ object Value {
         case BasicType.LONG => ListValue(i = value.asInstanceOf[Seq[Long]])
         case BasicType.BOOLEAN => ListValue(b = value.asInstanceOf[Seq[Boolean]])
         case BasicType.DOUBLE => ListValue(f = value.asInstanceOf[Seq[Double]])
-        case _ => throw new Error("unsupported basic type")
+        case _ => throw new IllegalArgumentException("unsupported basic type")
       }
     } else if(u.isCustom) {
       val ct = hr.bundleRegistry.custom[Any](base.getCustom)
@@ -148,7 +148,7 @@ object Value {
       val lb = base.getList
       val list = value.map(a => listValue(lb, a.asInstanceOf[Seq[_]]))
       ListValue(list = list)
-    } else { throw new Error("unsupported data type") }
+    } else { throw new IllegalArgumentException("unsupported data type") }
   }
 
   /** Converts a Scala value to a protobuf value.
@@ -169,14 +169,14 @@ object Value {
         case BasicType.LONG => BValue.V.I(value.asInstanceOf[Long])
         case BasicType.BOOLEAN => BValue.V.B(value.asInstanceOf[Boolean])
         case BasicType.DOUBLE => BValue.V.F(value.asInstanceOf[Double])
-        case _ => throw new Error("unsupported basic type")
+        case _ => throw new IllegalArgumentException("unsupported basic type")
       }
     } else if(u.isList) {
       BValue.V.List(listValue(dataType.getList, value.asInstanceOf[Seq[_]]))
     } else if(u.isCustom) {
       val ct = hr.bundleRegistry.customForObj[Any](value)
       BValue.V.Custom(ByteString.copyFrom(ct.toBytes(value)))
-    } else { throw new Error("unsupported data type") }
+    } else { throw new IllegalArgumentException("unsupported data type") }
 
     BValue(v)
   }
@@ -307,7 +307,7 @@ object Value {
     val (basic, tensor) = classTag[T].runtimeClass.getName match {
       case "Double" => (BasicType.DOUBLE, Tensor(doubleVal = value.asInstanceOf[Seq[Double]]))
       case "String" => (BasicType.STRING, Tensor(stringVal = value.asInstanceOf[Seq[String]]))
-      case _ => throw new Error("unsupported vector type")
+      case _ => throw new IllegalArgumentException("unsupported vector type")
     }
     Value(tensorDataType(basic, dims), tensor)
   }
@@ -369,7 +369,7 @@ object Value {
     val basic = classTag[T].runtimeClass.getName match {
       case "Double" => BasicType.DOUBLE
       case "String" => BasicType.STRING
-      case _ => throw new Error("unsupported vector type")
+      case _ => throw new IllegalArgumentException("unsupported vector type")
     }
     Value(listDataType(tensorDataType(basic, dims)), value)
   }

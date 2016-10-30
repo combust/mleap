@@ -22,7 +22,7 @@ MLeap is cross-compiled for Scala 2.10 and 2.11, so just replace 2.10 with 2.11 
 #### SBT
 
 ```
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.2.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.3.0"
 ```
 
 #### Maven
@@ -31,7 +31,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.2.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.10</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
@@ -40,7 +40,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.2.0"
 #### SBT
 
 ```
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.2.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.3.0"
 ```
 
 #### Maven
@@ -49,7 +49,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.2.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.10</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
@@ -58,7 +58,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.2.0"
 MLeap is now a [Spark Package](http://spark-packages.org/package/combust-ml/mleap).
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.2.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.3.0
 ```
 
 ## Modules

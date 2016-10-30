@@ -45,11 +45,12 @@ class BundleSerializationSpec extends FunSpec {
         output = "output_field",
         model = LinearModel(coefficients = randomCoefficients,
           intercept = 44.5))
+      val custom = MyCustomTransformer(MyCustomObject("some_custom"))
       val si = StringIndexer(uid = "string_indexer_example",
         input = "input_string",
         output = "output_index",
         model = StringIndexerModel(strings = Seq("hey", "there", "man")))
-      val pipeline = Pipeline(uid = "my_pipeline", PipelineModel(Seq(si, lr)))
+      val pipeline = Pipeline(uid = "my_pipeline", PipelineModel(Seq(si, custom, lr)))
 
       describe("with a simple linear regression") {
         it("serializes/deserializes the same object") {

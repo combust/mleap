@@ -14,5 +14,5 @@ class MyCustomType extends CustomType[MyCustomObject] {
 
   override def name: String = "my_custom_object"
 
-  override def format: RootJsonFormat[MyCustomObject] = ???
+  override def format: RootJsonFormat[MyCustomObject] = jsonFormat1(MyCustomObject)
 }

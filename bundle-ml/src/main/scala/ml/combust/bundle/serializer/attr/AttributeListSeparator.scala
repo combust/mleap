@@ -1,6 +1,6 @@
 package ml.combust.bundle.serializer.attr
 
-import ml.combust.bundle.serializer.HasBundleRegistry
+import ml.combust.bundle.HasBundleRegistry
 import ml.combust.bundle.dsl.{Attribute, AttributeList}
 
 /** Class to separate an [[ml.combust.bundle.dsl.AttributeList]] into two

@@ -2,8 +2,9 @@ package org.apache.spark.ml.bundle
 
 import java.io.File
 
+import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.bundle.dsl.{AttributeList, Bundle}
-import ml.combust.bundle.serializer.{BundleSerializer, HasBundleRegistry, SerializationFormat}
+import ml.combust.bundle.serializer.{BundleSerializer, SerializationFormat}
 import org.apache.spark.ml.{PipelineModel, Transformer}
 
 /**
@@ -11,14 +12,16 @@ import org.apache.spark.ml.{PipelineModel, Transformer}
   */
 object SparkBundle {
   def readTransformerGraph(path: File)
-                          (implicit hr: HasBundleRegistry): PipelineModel = {
-    val bundle = BundleSerializer(path).read()
+                          (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
+                           context: SparkBundleContext = SparkBundleContext()): PipelineModel = {
+    val bundle = BundleSerializer(context, path).read()
     new PipelineModel(uid = bundle.name, stages = bundle.nodes.map(_.asInstanceOf[Transformer]).toArray)
   }
 
   def readTransformer(path: File)
-                     (implicit hr: HasBundleRegistry): (Bundle, Transformer) = {
-    val bundle = BundleSerializer(path).read()
+                     (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
+                      context: SparkBundleContext = SparkBundleContext()): (Bundle, Transformer) = {
+    val bundle = BundleSerializer(context, path).read()
     val transformer = if(bundle.nodes.length == 1) {
       bundle.nodes.head.asInstanceOf[Transformer]
     } else {
@@ -32,21 +35,23 @@ object SparkBundle {
                             path: File,
                             list: Option[AttributeList] = None,
                             format: SerializationFormat = SerializationFormat.Mixed)
-                           (implicit hr: HasBundleRegistry): Unit = {
+                           (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
+                            context: SparkBundleContext = SparkBundleContext()): Unit = {
     val bundle = Bundle.createBundle(graph.uid, format, graph.stages, list)
-    BundleSerializer(path).write(bundle)
+    BundleSerializer(context, path).write(bundle)
   }
 
   def writeTransformer(transformer: Transformer,
                        path: File,
                        list: Option[AttributeList] = None,
                        format: SerializationFormat = SerializationFormat.Mixed)
-                      (implicit hr: HasBundleRegistry): Unit = {
+                      (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
+                       context: SparkBundleContext = SparkBundleContext()): Unit = {
     transformer match {
       case transformer: PipelineModel => writeTransformerGraph(transformer, path, list, format)(hr)
       case _ =>
         val bundle = Bundle.createBundle(transformer.uid, format, Seq(transformer), list)
-        BundleSerializer(path).write(bundle)
+        BundleSerializer(context, path).write(bundle)
     }
   }
 }

@@ -33,8 +33,8 @@ class LogisticRegressionSpec extends FunSpec {
 
         it("executes the logistic regression model and outputs the prediction/probability") {
           val frame2 = logisticRegression2.transform(frame).get
-          val prediction = frame2.dataset.toArray(0).getDouble(1)
-          val probability = frame2.dataset.toArray(0).getDouble(2)
+          val probability = frame2.dataset.toArray(0).getDouble(1)
+          val prediction = frame2.dataset.toArray(0).getDouble(2)
 
           assert(prediction == 1.0)
           assert(probability > 0.84)

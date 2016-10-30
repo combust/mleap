@@ -2,7 +2,8 @@ package ml.combust.mleap.runtime
 
 import java.io.File
 
-import ml.combust.mleap.runtime.bundle.MleapBundle
+import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
+import ml.combust.mleap.bundle.MleapBundle
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.bundle.dsl.{AttributeList, Bundle, BundleMeta}
 import ml.combust.bundle.serializer._
@@ -27,7 +28,8 @@ object MleapSupport {
     def serializeToBundle(path: File,
                           list: Option[AttributeList] = None,
                           format: SerializationFormat = SerializationFormat.Mixed)
-                         (implicit hr: HasBundleRegistry): Unit = {
+                         (implicit hr: HasBundleRegistry = BundleRegistry("mleap"),
+                          context: MleapContext = MleapContext()): Unit = {
       MleapBundle.writeTransformer(transformer, path, list)
     }
   }
@@ -45,7 +47,8 @@ object MleapSupport {
       * @return bundle meta data
       */
     def deserializeBundleMeta()
-                             (implicit hr: HasBundleRegistry): BundleMeta = BundleSerializer(path).readMeta()
+                             (implicit hr: HasBundleRegistry = BundleRegistry("mleap"),
+                              context: MleapContext = MleapContext()): BundleMeta = BundleSerializer(context, path).readMeta()
 
     /** Deserialize the Bundle.ML to MLeap.
       *
@@ -53,6 +56,7 @@ object MleapSupport {
       * @return (bundle, MLeap transformer)
       */
     def deserializeBundle()
-                         (implicit hr: HasBundleRegistry): (Bundle, Transformer) = MleapBundle.readTransformer(path)
+                         (implicit hr: HasBundleRegistry = BundleRegistry("mleap"),
+                          context: MleapContext = MleapContext()): (Bundle, Transformer) = MleapBundle.readTransformer(path)
   }
 }

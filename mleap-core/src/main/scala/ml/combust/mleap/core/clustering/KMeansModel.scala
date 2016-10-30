@@ -17,9 +17,9 @@ object KMeansModel {
 case class KMeansModel(clusterCenters: Array[VectorWithNorm]) {
   def clusterCount: Int = clusterCenters.length
 
-  def apply(features: Vector): Int = predict(features)
+  def apply(features: Vector): Double = predict(features)
 
-  def predict(features: Vector): Int = {
+  def predict(features: Vector): Double = {
     findClosest(VectorWithNorm(features))._1
   }
 

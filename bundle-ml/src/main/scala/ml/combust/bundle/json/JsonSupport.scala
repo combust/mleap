@@ -2,11 +2,12 @@ package ml.combust.bundle.json
 
 import ml.bundle.BasicType.BasicType
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.serializer.{HasBundleRegistry, SerializationFormat}
+import ml.combust.bundle.serializer.SerializationFormat
 import ml.bundle.DataType.DataType
 import ml.bundle.DataType.DataType.ListType
 import ml.bundle.TensorType.TensorType
 import ml.bundle.Socket.Socket
+import ml.combust.bundle.HasBundleRegistry
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 

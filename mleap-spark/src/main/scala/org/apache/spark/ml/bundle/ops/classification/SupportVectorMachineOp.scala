@@ -1,8 +1,9 @@
 package org.apache.spark.ml.bundle.ops.classification
 
+import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.serializer.BundleContext
 import ml.combust.bundle.dsl._
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.classification.SVMModel
 import org.apache.spark.mllib.classification
 import org.apache.spark.mllib.linalg.Vectors
@@ -10,18 +11,22 @@ import org.apache.spark.mllib.linalg.Vectors
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-object SupportVectorMachineOp extends OpNode[SVMModel, SVMModel] {
-  override val Model: OpModel[SVMModel] = new OpModel[SVMModel] {
+class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMModel] {
+  override val Model: OpModel[SparkBundleContext, SVMModel] = new OpModel[SparkBundleContext, SVMModel] {
+    override val klazz: Class[SVMModel] = classOf[SVMModel]
+
     override def opName: String = Bundle.BuiltinOps.classification.support_vector_machine
 
-    override def store(context: BundleContext, model: Model, obj: SVMModel): Model = {
+    override def store(model: Model, obj: SVMModel)
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("coefficients", Value.doubleVector(obj.model.weights.toArray)).
         withAttr("intercept", Value.double(obj.model.intercept)).
         withAttr("num_classes", Value.long(2)).
         withAttr("threshold", obj.get(obj.threshold).map(Value.double))
     }
 
-    override def load(context: BundleContext, model: Model): SVMModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[SparkBundleContext]): SVMModel = {
       if(model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("Only binary logistic regression supported in Spark")
       }
@@ -35,11 +40,14 @@ object SupportVectorMachineOp extends OpNode[SVMModel, SVMModel] {
     }
   }
 
+  override val klazz: Class[SVMModel] = classOf[SVMModel]
+
   override def name(node: SVMModel): String = node.uid
 
   override def model(node: SVMModel): SVMModel = node
 
-  override def load(context: BundleContext, node: Node, model: SVMModel): SVMModel = {
+  override def load(node: Node, model: SVMModel)
+                   (implicit context: BundleContext[SparkBundleContext]): SVMModel = {
     val svm = new SVMModel(uid = node.name,
       model = model.model).copy(model.extractParamMap()).
       setFeaturesCol(node.shape.input("features").name).

@@ -1,6 +1,6 @@
 package ml.combust.bundle.dsl
 
-import ml.combust.bundle.serializer.HasBundleRegistry
+import ml.combust.bundle.HasBundleRegistry
 
 /** This trait provides easy access to reading/writing attributes
   * to objects that contain an [[AttributeList]].

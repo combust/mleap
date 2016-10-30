@@ -25,7 +25,7 @@ case class VectorAssemblerModel() extends Serializable {
     * @param vv all input feature values
     * @return assembled vector
     */
-  def apply(vv: Any *): Vector = {
+  def apply(vv: Array[Any]): Vector = {
     val indices = mutable.ArrayBuilder.make[Int]
     val values = mutable.ArrayBuilder.make[Double]
     var cur = 0

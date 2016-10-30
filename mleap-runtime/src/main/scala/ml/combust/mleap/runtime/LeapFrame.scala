@@ -1,9 +1,11 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.runtime.Row.RowSelector
+import ml.combust.mleap.runtime.function.{FieldSelector, ArraySelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.{DataType, StructField, StructType}
+import ml.combust.mleap.runtime.types._
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Try}
 
 object LeapFrame {
   def apply(schema: StructType, dataset: Dataset): DefaultLeapFrame = DefaultLeapFrame(schema, dataset)
@@ -50,63 +52,59 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     }
   }
 
+  /** Create a row selector from a frame selector.
+    *
+    * @param selector frame selector
+    * @return row selector
+    */
+  def createRowSelector(selector: Selector, dataType: DataType): Try[RowSelector] = selector match {
+    case FieldSelector(name) =>
+      schema.indexedField(name).flatMap {
+        case (index, field) =>
+          if(dataType.fits(field.dataType)) {
+            Try(r => r.get(index))
+          } else {
+            Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
+          }
+      }
+    case ArraySelector(fields @ _*) =>
+      if(dataType == ListType(AnyType)) {
+        schema.indicesOf(fields: _*).map {
+          indices =>
+            val indicesArr = indices.toArray
+            r => indicesArr.map(r.get)
+        }
+      } else {
+        Failure(new IllegalArgumentException(s"multiple field selector must be an Array[Any], found $dataType"))
+      }
+  }
+
   /** Try to add a field to the LeapFrame.
     *
     * Returns a Failure if trying to add a field that already exists.
     *
     * @param name name of field
-    * @param dataType data type of field
-    * @param f function for calculating field value
+    * @param selectors row selectors used to generate inputs to udf
+    * @param udf user defined function for calculating field value
     * @return try new LeapFrame with new field
     */
-  def withField(name: String, dataType: DataType)
-               (f: (Row) => Any): Try[LF] = withField(StructField(name, dataType))(f)
-
-  /** Try to add a field to the LeapFrame.
-    *
-    * Returns a Failure if trying to add a field that already exists.
-    *
-    * @param field field to add
-    * @param f function for calculating field value
-    * @return try new LeapFrame with new field
-    */
-  def withField(field: StructField)
-               (f: (Row) => Any): Try[LF] = {
-    schema.withField(field).map {
-      schema2 =>
-        val dataset2 = dataset.withValue(f)
-        withSchemaAndDataset(schema2, dataset2)
-    }
-  }
-
-  /** Try to add multiple fields to the LeapFrame.
-    *
-    * Returns a Failure if trying to add any existing fields.
-    *
-    * @param field first field to add
-    * @param fields fields to add
-    * @param f function for calculating new field values
-    * @return try new LeapFrame with new fields
-    */
-  def withFields(field: StructField, fields: StructField *)
-                (f: (Row) => Row): Try[LF] = {
-    withFields(field +: fields)(f)
-  }
-
-  /** Try to add multiple fields to the LeapFrame.
-    *
-    * Returns a Failure if trying to add any existing fields.
-    *
-    * @param fields fields to add
-    * @param f function for calculating new field values
-    * @return try new LeapFrame with new fields
-    */
-  def withFields(fields: Seq[StructField])
-                (f: (Row) => Row): Try[LF] = {
-    schema.withFields(fields).map {
-      schema2 =>
-        val dataset2 = dataset.withValues(f)
-        withSchemaAndDataset(schema2, dataset2)
+  def withField(name: String, selectors: Selector *)
+               (udf: UserDefinedFunction): Try[LF] = {
+    var i = 0
+    selectors.foldLeft(Try(Seq[RowSelector]())) {
+      case (trss, s) =>
+        val rs = createRowSelector(s, udf.inputs(i)).flatMap {
+          rs => trss.map(trs => rs +: trs)
+        }
+        i = i + 1
+        rs
+    }.flatMap {
+      rowSelectors =>
+        schema.withField(name, udf.returnType).map {
+          schema2 =>
+            val dataset2 = dataset.withValue(rowSelectors: _*)(udf)
+            withSchemaAndDataset(schema2, dataset2)
+        }
     }
   }
 
@@ -136,26 +134,8 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     */
   protected def withSchemaAndDataset(schema: StructType, dataset: Dataset): LF
 
-  override def withInput(name: String): Try[(LF, Int)] = {
-    schema.indexOf(name).map((this.lf, _))
-  }
-
-  override def withInput(name: String, dataType: DataType): Try[(LF, Int)] = {
-    schema.indexedField(name).flatMap {
-      case (index, field) =>
-        if(field.dataType.fits(dataType)) {
-          Success(this.lf, index)
-        } else {
-          Failure(new IllegalArgumentException(s"field $name expected data type ${field.dataType} but found $dataType"))
-        }
-    }
-  }
-
-  override def withOutput(name: String, dataType: DataType)(o: (Row) => Any): Try[LF] = {
-    withField(name, dataType)(o)
-  }
-
-  override def withOutputs(fields: Seq[StructField])(o: (Row) => Row): Try[LF] = {
-    withFields(fields)(o)
+  override def withOutput(name: String, selectors: Selector *)
+                         (udf: UserDefinedFunction): Try[LF] = {
+    withField(name, selectors: _*)(udf)
   }
 }

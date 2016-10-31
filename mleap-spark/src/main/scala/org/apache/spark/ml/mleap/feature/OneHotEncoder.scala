@@ -135,6 +135,8 @@ class OneHotEncoderModel(override val uid: String, val size: Int) extends Model[
 class OneHotEncoder(override val uid: String) extends Estimator[OneHotEncoderModel]
   with OneHotEncoderBase {
 
+  def this() = this(uid = Identifiable.randomUID("oneHot"))
+
   /** @group setParam */
   def setDropLast(value: Boolean): this.type = set(dropLast, value)
   setDefault(dropLast -> true)

@@ -42,7 +42,9 @@ class PcaOp extends OpNode[SparkBundleContext, PCAModel, PCAModel] {
                    (implicit context: BundleContext[SparkBundleContext]): PCAModel = {
     new PCAModel(uid = node.name,
       pc = model.pc,
-      explainedVariance = model.explainedVariance)
+      explainedVariance = model.explainedVariance).
+      setInputCol(node.shape.standardInput.name).
+      setOutputCol(node.shape.standardOutput.name)
   }
 
   override def shape(node: PCAModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

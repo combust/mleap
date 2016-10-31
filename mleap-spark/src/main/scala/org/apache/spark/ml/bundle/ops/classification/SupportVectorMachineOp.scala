@@ -28,7 +28,7 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): SVMModel = {
       if(model.value("num_classes").getLong != 2) {
-        throw new IllegalArgumentException("Only binary logistic regression supported in Spark")
+        throw new IllegalArgumentException("only binary logistic regression supported in Spark")
       }
 
       val svm = new classification.SVMModel(weights = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
@@ -55,7 +55,13 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
     node.shape.getOutput("probability").map(s => svm.setProbabilityCol(s.name)).getOrElse(svm)
   }
 
-  override def shape(node: SVMModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction").
-    withOutput(node.getProbabilityCol, "probability")
+  override def shape(node: SVMModel): Shape = {
+    val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
+    val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+
+    Shape().withInput(node.getFeaturesCol, "features").
+      withOutput(node.getPredictionCol, "prediction").
+      withOutput(rawPrediction, "raw_prediction").
+      withOutput(probability, "probability")
+  }
 }

@@ -63,10 +63,14 @@ class RandomForestClassifierOp extends OpNode[MleapContext, RandomForestClassifi
                    (implicit context: BundleContext[MleapContext]): RandomForestClassifier = {
     RandomForestClassifier(uid = node.name,
       featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.input("prediction").name,
+      predictionCol = node.shape.output("prediction").name,
+      rawPredictionCol = node.shape.getOutput("raw_prediction").map(_.name),
+      probabilityCol = node.shape.getOutput("probability").map(_.name),
       model = model)
   }
 
   override def shape(node: RandomForestClassifier): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction")
+    withOutput(node.predictionCol, "prediction").
+    withOutput(node.rawPredictionCol, "raw_prediction").
+    withOutput(node.probabilityCol, "probability")
 }

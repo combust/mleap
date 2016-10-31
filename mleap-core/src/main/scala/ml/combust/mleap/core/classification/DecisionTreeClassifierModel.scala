@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.classification
 
 import ml.combust.mleap.core.tree.{DecisionTree, Node}
-import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 
 /** Class for decision tree classification models.
   *
@@ -17,5 +17,14 @@ case class DecisionTreeClassifierModel(override val rootNode: Node,
     rootNode.predictImpl(features).impurities.get
   }
 
-  override def rawToProbabilityInPlace(raw: Vector): Vector = raw
+  override def rawToProbabilityInPlace(raw: Vector): Vector = {
+    raw match {
+      case dv: DenseVector =>
+        MultinomialClassificationModel.normalizeToProbabilitiesInPlace(dv)
+        dv
+      case sv: SparseVector =>
+        throw new RuntimeException("Unexpected error in RandomForestClassificationModel:" +
+          " raw2probabilityInPlace encountered SparseVector")
+    }
+  }
 }

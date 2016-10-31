@@ -48,18 +48,22 @@ class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegression
 
   override def load(node: Node, model: LogisticRegressionModel)
                    (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
-    val lr = new LogisticRegressionModel(uid = node.name,
+    var lr = new LogisticRegressionModel(uid = node.name,
       coefficients = model.coefficients,
       intercept = model.intercept).copy(model.extractParamMap).
       setFeaturesCol(node.shape.input("features").name).
       setPredictionCol(node.shape.output("prediction").name)
-    node.shape.getOutput("probability").map(p => lr.setProbabilityCol(p.name)).getOrElse(lr)
+    lr = node.shape.getOutput("probability").map(p => lr.setProbabilityCol(p.name)).getOrElse(lr)
+    node.shape.getOutput("raw_prediction").map(rp => lr.setRawPredictionCol(rp.name)).getOrElse(lr)
   }
 
   override def shape(node: LogisticRegressionModel): Shape = {
-    val s = Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction")
-    node.get(node.probabilityCol).map(p => s.withOutput(p, "probability")).
-      getOrElse(s)
+    val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
+    val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+
+    Shape().withInput(node.getFeaturesCol, "features").
+      withOutput(node.getPredictionCol, "prediction").
+      withOutput(rawPrediction, "raw_prediction").
+      withOutput(probability, "probability")
   }
 }

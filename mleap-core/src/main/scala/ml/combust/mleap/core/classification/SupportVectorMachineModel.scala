@@ -23,5 +23,12 @@ case class SupportVectorMachineModel(coefficients: Vector,
 
   // TODO: this is not right, need to support multiple kernels
   // and actually do the SVM stuff properly
-  override def predictProbability(features: Vector): Double = margin(features)
+  override def predictBinaryProbability(features: Vector): Double = margin(features)
+
+  override def rawToProbabilityInPlace(raw: Vector): Vector = raw
+
+  override def predictRaw(features: Vector): Vector = {
+    val m = margin(features)
+    Vectors.dense(-m, m)
+  }
 }

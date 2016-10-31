@@ -4,6 +4,8 @@ import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
 import org.apache.spark.ml.linalg.Vector
 
+import scala.collection.mutable
+
 /**
   * Created by hollinwilkins on 10/21/16.
   */
@@ -24,7 +26,8 @@ trait MleapReflection {
       case t if t <:< mirrorType[Int] => IntegerType
       case t if t <:< mirrorType[Long] => LongType
       case t if t <:< mirrorType[Double] => DoubleType
-      case t if t <:< mirrorType[Array[_]] =>
+      case t if t <:< mirrorType[Array[_]] ||
+        t <:< mirrorType[mutable.WrappedArray[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t
         val baseType = dataTypeFor(elementType)
         ListType(baseType)

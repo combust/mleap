@@ -45,14 +45,23 @@ class DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeCl
 
   override def load(node: Node, model: DecisionTreeClassificationModel)
                    (implicit context: BundleContext[SparkBundleContext]): DecisionTreeClassificationModel = {
-    new DecisionTreeClassificationModel(uid = node.name,
+    var dt = new DecisionTreeClassificationModel(uid = node.name,
       rootNode = model.rootNode,
       numClasses = model.numClasses,
       numFeatures = model.numFeatures).
       setFeaturesCol(node.shape.input("features").name).
       setPredictionCol(node.shape.output("prediction").name)
+    dt = node.shape.getOutput("probability").map(p => dt.setProbabilityCol(p.name)).getOrElse(dt)
+    node.shape.getOutput("raw_prediction").map(rp => dt.setRawPredictionCol(rp.name)).getOrElse(dt)
   }
 
-  override def shape(node: DecisionTreeClassificationModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: DecisionTreeClassificationModel): Shape = {
+    val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
+    val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+
+    Shape().withInput(node.getFeaturesCol, "features").
+      withOutput(node.getPredictionCol, "prediction").
+      withOutput(rawPrediction, "raw_prediction").
+      withOutput(probability, "probability")
+  }
 }

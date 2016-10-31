@@ -16,17 +16,5 @@ case class VectorAssembler(override val uid: String = Transformer.uniqueName("ve
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(outputCol, inputCols)(exec)
-//    inputCols.foldLeft(Try((builder, Seq[Int]()))) {
-//      (result, col) => result.flatMap {
-//        case (b, indices) =>
-//          b.withInput(col)
-//            .map {
-//              case (b3, index) => (b3, indices :+ index)
-//            }
-//      }
-//    }.flatMap {
-//      case (b, indices) =>
-//        b.withOutput(outputCol, TensorType.doubleVector())(row => assembler(indices.map(row.get): _*))
-//    }
   }
 }

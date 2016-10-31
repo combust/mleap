@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.classification
 
 import ml.combust.mleap.core.annotation.SparkCode
-import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 /** Trait for all classification models.
   */
@@ -35,6 +35,8 @@ trait MultinomialClassificationModel extends ClassificationModel {
     */
   val numClasses: Int
 
+  def thresholds: Option[Array[Double]] = None
+
   def predict(features: Vector): Double = predictProbabilities(features).argmax.toDouble
   def predictWithProbability(features: Vector): (Double, Double) = {
     val probabilities = predictProbabilities(features)
@@ -48,6 +50,30 @@ trait MultinomialClassificationModel extends ClassificationModel {
     raw
   }
 
+  def rawToProbability(raw: Vector): Vector = {
+    val probabilities = raw.copy
+    rawToProbabilityInPlace(probabilities)
+  }
+
+  def rawToPrediction(raw: Vector): Double = {
+    thresholds match {
+      case Some(t) => probabilityToPrediction(rawToProbability(raw))
+      case None => raw.argmax
+    }
+  }
+
+  def probabilityToPrediction(probability: Vector): Double = {
+    thresholds match {
+      case Some(ts) =>
+        val scaledProbability: Array[Double] =
+          probability.toArray.zip(ts).map { case (p, t) =>
+            if (t == 0.0) Double.PositiveInfinity else p / t
+          }
+        Vectors.dense(scaledProbability).argmax
+      case None => probability.argmax
+    }
+  }
+
   def rawToProbabilityInPlace(raw: Vector): Vector
 
   def predictRaw(features: Vector): Vector
@@ -58,7 +84,9 @@ trait MultinomialClassificationModel extends ClassificationModel {
   * This is only used for binary classifiers.
   * See [[MultinomialClassificationModel]] for multinomial classifiers.
   */
-trait BinaryClassificationModel extends ClassificationModel {
+trait BinaryClassificationModel extends MultinomialClassificationModel {
+  override val numClasses: Int = 2
+
   /** Threshold for binary classifiers.
     *
     * If the prediction probability is over this value, then
@@ -67,13 +95,15 @@ trait BinaryClassificationModel extends ClassificationModel {
     */
   val threshold: Option[Double] = None
 
+  override val thresholds: Option[Array[Double]] = threshold.map(t => Array[Double](1 - t, t))
+
   /** Predict the class taking into account threshold.
     *
     * @param features features for prediction
     * @return prediction with threshold
     */
-  def predict(features: Vector): Double = {
-    probabilityToPrediction(predictProbability(features))
+  override def predict(features: Vector): Double = {
+    binaryProbabilityToPrediction(predictBinaryProbability(features))
   }
 
   /** Predict the class without taking into account threshold.
@@ -81,20 +111,20 @@ trait BinaryClassificationModel extends ClassificationModel {
     * @param features features for prediction
     * @return probability that prediction is the predictable class
     */
-  def predictProbability(features: Vector): Double
+  def predictBinaryProbability(features: Vector): Double
 
   /** Predict class and probability.
     *
     * @param features features to predict
     * @return (prediction, probability)
     */
-  def predictWithProbability(features: Vector): (Double, Double) = {
-    val probability = predictProbability(features)
+  def predictBinaryWithProbability(features: Vector): (Double, Double) = {
+    val probability = predictBinaryProbability(features)
 
-    (probabilityToPrediction(probability), probability)
+    (binaryProbabilityToPrediction(probability), probability)
   }
 
-  def probabilityToPrediction(probability: Double): Double = threshold match {
+  def binaryProbabilityToPrediction(probability: Double): Double = threshold match {
     case Some(t) => if (probability > t) 1.0 else 0.0
     case None => probability
   }

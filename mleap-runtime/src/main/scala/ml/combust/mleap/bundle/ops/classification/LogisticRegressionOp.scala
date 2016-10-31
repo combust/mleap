@@ -47,6 +47,7 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
     LogisticRegression(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,
+      rawPredictionCol = node.shape.getOutput("raw_prediction").map(_.name),
       probabilityCol = node.shape.getOutput("probability").map(_.name),
       model = model)
   }
@@ -54,5 +55,6 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
   override def shape(node: LogisticRegression): Shape = Shape().
     withInput(node.featuresCol, "features").
     withOutput(node.predictionCol, "prediction").
+    withOutput(node.rawPredictionCol, "raw_prediction").
     withOutput(node.probabilityCol, "probability")
 }

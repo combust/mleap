@@ -16,8 +16,8 @@ case class SupportVectorMachine(override val uid: String = Transformer.uniqueNam
                                 predictionCol: String,
                                 probabilityCol: Option[String] = None,
                                 model: SupportVectorMachineModel) extends Transformer {
-  val predictProbability: UserDefinedFunction = (features: Vector) => model.predictProbability(features)
-  val probabilityToPrediction: UserDefinedFunction = (probability: Double) => model.probabilityToPrediction(probability)
+  val predictProbability: UserDefinedFunction = (features: Vector) => model.predictBinaryProbability(features)
+  val probabilityToPrediction: UserDefinedFunction = (probability: Double) => model.binaryProbabilityToPrediction(probability)
   val exec: UserDefinedFunction = (features: Vector) => model(features)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {

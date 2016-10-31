@@ -1,6 +1,6 @@
 package ml.combust.mleap.core.classification
 
-import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 import org.apache.spark.ml.linalg.mleap.BLAS
 
 
@@ -20,7 +20,28 @@ case class LogisticRegressionModel(coefficients: Vector,
     BLAS.dot(features, coefficients) + intercept
   }
 
-  override def predictProbability(features: Vector): Double = {
+  override def predictBinaryProbability(features: Vector): Double = {
     1.0 / (1.0 + math.exp(-margin(features)))
+  }
+
+  override def predictRaw(features: Vector): Vector = {
+    val m = margin(features)
+    Vectors.dense(-m, m)
+  }
+
+  override def rawToProbabilityInPlace(raw: Vector): Vector = {
+    raw match {
+      case dv: DenseVector =>
+        var i = 0
+        val size = dv.size
+        while (i < size) {
+          dv.values(i) = 1.0 / (1.0 + math.exp(-dv.values(i)))
+          i += 1
+        }
+        dv
+      case sv: SparseVector =>
+        throw new RuntimeException("Unexpected error in LogisticRegressionModel:" +
+          " raw2probabilitiesInPlace encountered SparseVector")
+    }
   }
 }

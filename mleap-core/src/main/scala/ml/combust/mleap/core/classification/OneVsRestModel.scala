@@ -39,7 +39,7 @@ case class OneVsRestModel(classifiers: Array[BinaryClassificationModel]) {
   def predictWithProbability(features: Vector): (Double, Double) = {
     val (prediction, probability) = classifiers.zipWithIndex.map {
       case (c, i) =>
-        val raw = c.predictProbability(features)
+        val raw = c.predictBinaryProbability(features)
         (i.toDouble, raw)
     }.maxBy(_._2)
 

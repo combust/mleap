@@ -1,6 +1,6 @@
-package ml.combust.mleap.spark.parity.regression
+package org.apache.spark.ml.parity.regression
 
-import ml.combust.mleap.spark.parity.SparkParityBase
+import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.regression.GBTRegressor
 import org.apache.spark.ml.{Pipeline, Transformer}

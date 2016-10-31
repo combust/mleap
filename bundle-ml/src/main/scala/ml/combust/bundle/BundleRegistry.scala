@@ -3,6 +3,7 @@ package ml.combust.bundle
 import com.typesafe.config.{Config, ConfigFactory}
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.custom.CustomType
+import ml.combust.bundle.util.ClassLoaderUtil
 
 import scala.collection.JavaConverters._
 import scala.reflect.{ClassTag, classTag}
@@ -20,12 +21,12 @@ trait HasBundleRegistry {
 }
 
 object BundleRegistry {
-  def apply(registry: String): BundleRegistry = apply(registry, Thread.currentThread().getContextClassLoader)
+  def apply(registry: String): BundleRegistry = apply(registry, ClassLoaderUtil.resolveClassLoader())
 
   def apply(registry: String, cl: ClassLoader): BundleRegistry = apply(registry, ConfigFactory.load(cl), cl)
 
   def apply(registry: String, config: Config, cl: ClassLoader): BundleRegistry = {
-    val br = config.getStringList(s"ml.combust.bundle.registry.$registry.ops").asScala.foldLeft(BundleRegistry()) {
+    val br = config.getStringList(s"ml.combust.bundle.registry.$registry.ops").asScala.foldLeft(BundleRegistry(cl)) {
       (br, opClass) => br.register(cl.loadClass(opClass).newInstance().asInstanceOf[OpNode[_, _, _]])
     }
     config.getStringList("ml.combust.bundle.customTypes").asScala.foldLeft(br) {
@@ -41,8 +42,10 @@ object BundleRegistry {
   *
   * Many serialization calls in Bundle.ML require access to the registry for information
   * on how to serialize custom types or models or nodes.
+  *
+  * @param classLoader class loader used to create this registry
   */
-case class BundleRegistry private () extends HasBundleRegistry {
+case class BundleRegistry private (classLoader: ClassLoader) extends HasBundleRegistry {
   var ops: Map[String, OpNode[_, _, _]] = Map()
   var opAlias: Map[String, String] = Map()
 

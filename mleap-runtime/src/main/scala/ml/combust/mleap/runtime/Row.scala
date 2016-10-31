@@ -173,25 +173,36 @@ case class ArrayRow(values: Array[Any]) extends Row {
     values(index) = value
     this
   }
+
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case obj: ArrayRow => values.sameElements(obj.values)
+    case obj: Row => values.sameElements(obj.toArray)
+  }
+
+  override def hashCode(): Int = {
+    values.foldLeft(0) {
+      (hash, value) => hash * 13 + value.hashCode()
+    }
+  }
 }
 
 /** Companion object for creating a SeqRow.
   */
 object SeqRow {
-  def apply(values: Seq[Any]): SeqRow = new SeqRow(values.reverse)
+  def create(values: Seq[Any]): SeqRow = new SeqRow(values.reverse)
 }
 
 /** Class for holding Row values in a Seq.
   *
   * @param values seq values in the row
   */
-class SeqRow private(values: Seq[Any]) extends Row {
+case class SeqRow private (values: Seq[Any]) extends Row {
   override def toArray: Array[Any] = values.reverse.toArray
   override def toSeq: Seq[Any] = values.reverse
 
   override def get(index: Int): Any = values(realIndex(index))
 
-  override def selectIndices(indices: Int *): SeqRow = SeqRow(indices.map(index => values(realIndex(index))))
+  override def selectIndices(indices: Int *): SeqRow = SeqRow.create(indices.map(index => values(realIndex(index))))
 
   override def withValue(value: Any): Row = new SeqRow(value +: values)
 

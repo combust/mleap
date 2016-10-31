@@ -24,7 +24,7 @@ case class FrameSerializerContext(format: String,
 
   def rowSerializer(schema: StructType): RowSerializer = frameSerializer.rowSerializer(schema)
 
-  def frameSerializer: FrameSerializer = resolveClassLoader().loadClass(format).
+  def frameSerializer: FrameSerializer = resolveClassLoader().loadClass(s"$format.DefaultFrameSerializer").
     getConstructor(classOf[FrameSerializerContext]).
     newInstance(this).
     asInstanceOf[FrameSerializer]

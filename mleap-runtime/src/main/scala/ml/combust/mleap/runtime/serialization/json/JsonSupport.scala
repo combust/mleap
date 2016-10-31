@@ -89,7 +89,8 @@ trait JsonSupport {
         obj.fields.get("type") match {
           case Some(JsString("list")) => mleapListTypeFormat.read(obj)
           case Some(JsString("tensor")) => mleapTensorTypeFormat.read(obj)
-          case _ => throw new Error("invalid data type") // TODO: better error
+          case Some(JsString("custom")) => mleapCustomTypeFormat.read(obj)
+          case _ => deserializationError(s"invalid data type: ${obj.fields.get("type")}")
         }
       case _ => throw new Error("Invalid data type") // TODO: better error
     }
@@ -117,13 +118,13 @@ trait JsonSupport {
     override def write(obj: Vector): JsValue = obj match {
       case obj: DenseVector => mleapDenseVectorFormat.write(obj)
       case obj: SparseVector => mleapSparseVectorFormat.write(obj)
-      case _ => throw new Error("Unsupported Vector type") // TODO: better error
+      case _ => serializationError("invalid vector")
     }
 
     override def read(json: JsValue): Vector = json match {
       case json: JsArray => mleapDenseVectorFormat.read(json)
       case json: JsObject => mleapSparseVectorFormat.read(json)
-      case _ => throw new Error("Unsupported vector type") // TODO: better error
+      case _ => deserializationError(s"invalid vector: $json")
     }
   }
 

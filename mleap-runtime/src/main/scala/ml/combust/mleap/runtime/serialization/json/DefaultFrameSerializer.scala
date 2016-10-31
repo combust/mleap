@@ -11,19 +11,19 @@ import spray.json._
 /**
   * Created by hollinwilkins on 10/31/16.
   */
-object JsonFrameSerializer {
+object DefaultFrameSerializer {
   val charset = Charset.forName("UTF-8")
 }
 
-class JsonFrameSerializer(override val serializerContext: FrameSerializerContext) extends FrameSerializer {
+class DefaultFrameSerializer(override val serializerContext: FrameSerializerContext) extends FrameSerializer {
   implicit val context: MleapContext = serializerContext.context
 
   override def toBytes[LF <: LeapFrame[LF]](frame: LF): Array[Byte] = {
-    frame.toJson.prettyPrint.getBytes(JsonFrameSerializer.charset)
+    frame.toJson.prettyPrint.getBytes(DefaultFrameSerializer.charset)
   }
 
   override def fromBytes(bytes: Array[Byte]): DefaultLeapFrame = {
-    new String(bytes, JsonFrameSerializer.charset).parseJson.convertTo[DefaultLeapFrame]
+    new String(bytes, DefaultFrameSerializer.charset).parseJson.convertTo[DefaultLeapFrame]
   }
 
   override def rowSerializer(schema: StructType): RowSerializer = JsonRowSerializer(schema)

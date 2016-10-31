@@ -4,7 +4,7 @@ import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.mleap.runtime.types.CustomType
 import ml.combust.bundle
 import ml.combust.mleap.runtime.serialization.FrameSerializerContext
-import ml.combust.mleap.runtime.serialization.json.JsonFrameSerializer
+import ml.combust.mleap.runtime.serialization.json.DefaultFrameSerializer
 
 /**
   * Created by hollinwilkins on 10/25/16.
@@ -37,7 +37,7 @@ case class MleapContext private (registry: BundleRegistry,
   def hasCustomTypeAlias(alias: String): Boolean = customTypeAliases.contains(alias)
   def customTypeForAlias(alias: String): CustomType = customTypeAliases(alias)
 
-  def serializer(format: String = classOf[JsonFrameSerializer].getCanonicalName): FrameSerializerContext = {
+  def serializer(format: String = "ml.combust.mleap.runtime.serialization.json"): FrameSerializerContext = {
     FrameSerializerContext(format)(this)
   }
 }

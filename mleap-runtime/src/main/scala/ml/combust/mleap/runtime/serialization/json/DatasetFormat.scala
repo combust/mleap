@@ -41,16 +41,12 @@ case class DatasetFormat(schema: StructType) extends RootJsonFormat[Dataset] {
     JsArray(values: _*)
   }
 
-  override def read(json: JsValue): Dataset = json match {
-    case json: JsArray =>
-      val rows = json.elements.map {
-        case jsValues: JsArray =>
-          val values = jsValues.elements.map(rowFormat.read)
-          Row(values: _*)
-        case _ => deserializationError("invalid dataset row")
-      }
-
-      LocalDataset(data = rows.toArray)
-    case _ => deserializationError("invalid dataset")
+  override def read(json: JsValue): Dataset = {
+    json match {
+      case json: JsArray =>
+        val rows = json.elements.map(rowFormat.read)
+        LocalDataset(data = rows.toArray)
+      case _ => deserializationError("invalid dataset")
+    }
   }
 }

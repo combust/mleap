@@ -11,6 +11,6 @@ import spray.json._
 case class JsonRowSerializer(schema: StructType) extends RowSerializer {
   val rowFormat: RowFormat = RowFormat(schema)
 
-  override def toBytes(row: Row): Array[Byte] = rowFormat.write(row).compactPrint.getBytes(JsonFrameSerializer.charset)
-  override def fromBytes(bytes: Array[Byte]): Row = rowFormat.read(new String(bytes, JsonFrameSerializer.charset).parseJson)
+  override def toBytes(row: Row): Array[Byte] = rowFormat.write(row).compactPrint.getBytes(DefaultFrameSerializer.charset)
+  override def fromBytes(bytes: Array[Byte]): Row = rowFormat.read(new String(bytes, DefaultFrameSerializer.charset).parseJson)
 }

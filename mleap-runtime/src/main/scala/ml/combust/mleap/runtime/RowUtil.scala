@@ -10,6 +10,13 @@ import scala.util.{Failure, Try}
   * Created by hollinwilkins on 10/30/16.
   */
 object RowUtil {
+  /** Create row selectors for a given schema and inputs.
+    *
+    * @param schema schema for inputs
+    * @param inputs data type of desired outputs of selectors
+    * @param selectors selectors for row
+    * @return row selectors
+    */
   def createRowSelectors(schema: StructType,
                          inputs: Seq[DataType],
                          selectors: Selector *): Try[Seq[RowSelector]] = {

@@ -21,21 +21,22 @@ case class RandomForestClassifier(override val uid: String = Transformer.uniqueN
   val rawToProbability: UserDefinedFunction = (raw: Vector) => model.rawToProbability(raw)
   val rawToPrediction: UserDefinedFunction = (raw: Vector) => model.rawToPrediction(raw)
   val probabilityToPrediction: UserDefinedFunction = (raw: Vector) => model.probabilityToPrediction(raw)
+  val predictProbabilities: UserDefinedFunction = (features: Vector) => model.predictProbabilities(features)
   val predict: UserDefinedFunction = (features: Vector) => model(features)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    rawPredictionCol match {
-      case Some(rp) =>
-        probabilityCol match {
-          case Some(p) =>
-            for(b <- builder.withOutput(rp, featuresCol)(predictRaw);
-                b2 <- b.withOutput(p, rp)(rawToProbability);
-                b3 <- b2.withOutput(predictionCol, p)(probabilityToPrediction)) yield b3
-          case None =>
-            for(b <- builder.withOutput(rp, featuresCol)(predictRaw);
-                b2 <- b.withOutput(predictionCol, rp)(rawToPrediction)) yield b2
-        }
-      case None =>
+    (rawPredictionCol, probabilityCol) match {
+      case ((Some(rp), Some(p))) =>
+        for(b <- builder.withOutput(rp, featuresCol)(predictRaw);
+            b2 <- b.withOutput(p, rp)(rawToProbability);
+            b3 <- b2.withOutput(predictionCol, p)(probabilityToPrediction)) yield b3
+      case ((Some(rp), None)) =>
+        for(b <- builder.withOutput(rp, featuresCol)(predictRaw);
+            b2 <- b.withOutput(predictionCol, rp)(rawToPrediction)) yield b2
+      case (None, Some(p)) =>
+        for(b <- builder.withOutput(p, featuresCol)(predictProbabilities);
+            b2 <- b.withOutput(predictionCol, p)(probabilityToPrediction)) yield b2
+      case (None, None) =>
         builder.withOutput(predictionCol, featuresCol)(predict)
     }
   }

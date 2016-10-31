@@ -48,9 +48,13 @@ class DecisionTreeClassifierOp extends OpNode[MleapContext, DecisionTreeClassifi
     DecisionTreeClassifier(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,
+      rawPredictionCol = node.shape.getOutput("raw_prediction").map(_.name),
+      probabilityCol = node.shape.getOutput("probability").map(_.name),
       model = model)
   }
 
   override def shape(node: DecisionTreeClassifier): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction")
+    withOutput(node.predictionCol, "prediction").
+    withOutput(node.rawPredictionCol, "raw_prediction").
+    withOutput(node.probabilityCol, "probability")
 }

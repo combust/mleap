@@ -26,7 +26,7 @@ class GBTClassifierSpec extends FunSpec {
       val frame2 = gbt.transform(frame).get
       val prediction = frame2.dataset.toArray(0).getDouble(1)
 
-      assert(prediction == (0.5 * 0.5 + 0.75 * 2.0 + 0.1 * 1.0))
+      assert(prediction == 1.0)
     }
 
     describe("with invalid features column") {

@@ -173,7 +173,6 @@ case class ArrayRow(values: Array[Any]) extends Row {
     values(index) = value
     this
   }
-
   override def equals(obj: scala.Any): Boolean = obj match {
     case obj: ArrayRow => values.sameElements(obj.values)
     case obj: Row => values.sameElements(obj.toArray)

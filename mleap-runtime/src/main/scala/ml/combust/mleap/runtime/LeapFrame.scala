@@ -1,11 +1,10 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.mleap.runtime.Row.RowSelector
-import ml.combust.mleap.runtime.function.{FieldSelector, ArraySelector, Selector, UserDefinedFunction}
+import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.runtime.types._
 
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 object LeapFrame {
   def apply(schema: StructType, dataset: Dataset): DefaultLeapFrame = DefaultLeapFrame(schema, dataset)
@@ -52,33 +51,6 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     }
   }
 
-  /** Create a row selector from a frame selector.
-    *
-    * @param selector frame selector
-    * @return row selector
-    */
-  def createRowSelector(selector: Selector, dataType: DataType): Try[RowSelector] = selector match {
-    case FieldSelector(name) =>
-      schema.indexedField(name).flatMap {
-        case (index, field) =>
-          if(dataType.fits(field.dataType)) {
-            Try(r => r.get(index))
-          } else {
-            Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
-          }
-      }
-    case ArraySelector(fields @ _*) =>
-      if(dataType == ListType(AnyType)) {
-        schema.indicesOf(fields: _*).map {
-          indices =>
-            val indicesArr = indices.toArray
-            r => indicesArr.map(r.get)
-        }
-      } else {
-        Failure(new IllegalArgumentException(s"multiple field selector must be an Array[Any], found $dataType"))
-      }
-  }
-
   /** Try to add a field to the LeapFrame.
     *
     * Returns a Failure if trying to add a field that already exists.
@@ -90,15 +62,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     */
   def withField(name: String, selectors: Selector *)
                (udf: UserDefinedFunction): Try[LF] = {
-    var i = 0
-    selectors.foldLeft(Try(Seq[RowSelector]())) {
-      case (trss, s) =>
-        val rs = createRowSelector(s, udf.inputs(i)).flatMap {
-          rs => trss.map(trs => rs +: trs)
-        }
-        i = i + 1
-        rs
-    }.flatMap {
+    RowUtil.createRowSelectors(schema, udf.inputs, selectors: _*).flatMap {
       rowSelectors =>
         schema.withField(name, udf.returnType).map {
           schema2 =>

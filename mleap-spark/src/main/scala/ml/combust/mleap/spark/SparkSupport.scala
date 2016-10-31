@@ -14,7 +14,7 @@ import org.apache.spark.sql.DataFrame
   * Created by hollinwilkins on 8/22/16.
   */
 trait SparkSupport {
-  implicit class TransformerOps(transformer: Transformer) {
+  implicit class SparkTransformerOps(transformer: Transformer) {
     def serializeToBundle(path: File,
                           list: Option[AttributeList] = None,
                           format: SerializationFormat = SerializationFormat.Mixed)

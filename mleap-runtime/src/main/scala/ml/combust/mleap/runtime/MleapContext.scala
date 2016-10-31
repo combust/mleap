@@ -20,7 +20,9 @@ object MleapContext {
 
 case class MleapContext private (hr: HasBundleRegistry,
                                  customTypes: Map[String, CustomType],
-                                 customTypeAliases: Map[String, CustomType]) {
+                                 customTypeAliases: Map[String, CustomType]) extends HasBundleRegistry {
+  override def bundleRegistry: BundleRegistry = hr.bundleRegistry
+
   def withCustomType[T](customType: CustomType): MleapContext = {
     copy(customTypes = customTypes + (customType.klazz.getCanonicalName -> customType),
       customTypeAliases = customTypeAliases + (customType.name -> customType))

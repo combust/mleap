@@ -106,25 +106,23 @@ trait Row {
     * @return row with calculated value added
     */
   def withValue(selectors: RowSelector *)(udf: UserDefinedFunction): Row = {
+    withValue(udfValue(selectors: _*)(udf))
+  }
+
+  def udfValue(selectors: RowSelector *)(udf: UserDefinedFunction): Any = {
     udf.inputs.length match {
       case 0 =>
-        val f = udf.f.asInstanceOf[() => Any]
-        withValue(f())
+        udf.f.asInstanceOf[() => Any]()
       case 1 =>
-        val f = udf.f.asInstanceOf[(Any) => Any]
-        withValue(f(selectors.head(this)))
+        udf.f.asInstanceOf[(Any) => Any](selectors.head(this))
       case 2 =>
-        val f = udf.f.asInstanceOf[(Any, Any) => Any]
-        withValue(f(selectors.head(this), selectors(1)(this)))
+        udf.f.asInstanceOf[(Any, Any) => Any](selectors.head(this), selectors(1)(this))
       case 3 =>
-        val f = udf.f.asInstanceOf[(Any, Any, Any) => Any]
-        withValue(f(selectors.head(this), selectors(1)(this), selectors(2)(this)))
+        udf.f.asInstanceOf[(Any, Any, Any) => Any](selectors.head(this), selectors(1)(this), selectors(2)(this))
       case 4 =>
-        val f = udf.f.asInstanceOf[(Any, Any, Any, Any) => Any]
-        withValue(f(selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this)))
+        udf.f.asInstanceOf[(Any, Any, Any, Any) => Any](selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this))
       case 5 =>
-        val f = udf.f.asInstanceOf[(Any, Any, Any, Any, Any) => Any]
-        withValue(f(selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this), selectors(4)(this)))
+        udf.f.asInstanceOf[(Any, Any, Any, Any, Any) => Any](selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this), selectors(4)(this))
     }
   }
 
@@ -170,6 +168,11 @@ case class ArrayRow(values: Array[Any]) extends Row {
 
   override def selectIndices(indices: Int*): Row = ArrayRow(indices.toArray.map(values))
   override def dropIndex(index: Int): Row = ArrayRow(values.take(index) ++ values.drop(index + 1))
+
+  def set(index: Int, value: Any): ArrayRow = {
+    values(index) = value
+    this
+  }
 }
 
 /** Companion object for creating a SeqRow.

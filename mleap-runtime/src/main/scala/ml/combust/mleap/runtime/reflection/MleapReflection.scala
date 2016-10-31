@@ -34,7 +34,7 @@ trait MleapReflection {
       case t if t <:< mirrorType[Vector] => TensorType.doubleVector()
       case t if t =:= mirrorType[Any] => AnyType
       case t if context.hasCustomType(t.erasure.typeSymbol.asClass.fullName) =>
-        context.customTypeForClass[Any](t.erasure.typeSymbol.asClass.fullName)
+        context.customTypeForClass(t.erasure.typeSymbol.asClass.fullName)
       case t => throw new IllegalArgumentException(s"unknown type $t")
     }
   }

@@ -139,7 +139,7 @@ class ArrayRowSpec extends RowSpec[ArrayRow] {
 }
 
 class SeqRowSpec extends RowSpec[SeqRow] {
-  override def create(values: Any*): SeqRow = SeqRow(values)
+  override def create(values: Any *): SeqRow = SeqRow.create(values)
 
   it should behave like row()
 }

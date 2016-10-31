@@ -14,19 +14,29 @@ import scala.util.Try
 case class SupportVectorMachine(override val uid: String = Transformer.uniqueName("support_vector_machine"),
                                 featuresCol: String,
                                 predictionCol: String,
+                                rawPredictionCol: Option[String] = None,
                                 probabilityCol: Option[String] = None,
                                 model: SupportVectorMachineModel) extends Transformer {
-  val predictProbability: UserDefinedFunction = (features: Vector) => model.predictBinaryProbability(features)
-  val probabilityToPrediction: UserDefinedFunction = (probability: Double) => model.binaryProbabilityToPrediction(probability)
-  val exec: UserDefinedFunction = (features: Vector) => model(features)
+  val predictRaw: UserDefinedFunction = (features: Vector) => model.predictRaw(features)
+  val rawToProbability: UserDefinedFunction = (raw: Vector) => model.rawToProbability(raw)
+  val rawToPrediction: UserDefinedFunction = (raw: Vector) => model.rawToPrediction(raw)
+  val probabilityToPrediction: UserDefinedFunction = (raw: Vector) => model.probabilityToPrediction(raw)
+  val predict: UserDefinedFunction = (features: Vector) => model(features)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    probabilityCol match {
-      case Some(p) =>
-        for(b <- builder.withOutput(p, featuresCol)(predictProbability);
-            b2 <- b.withOutput(predictionCol, p)(probabilityToPrediction)) yield b2
+    rawPredictionCol match {
+      case Some(rp) =>
+        probabilityCol match {
+          case Some(p) =>
+            for(b <- builder.withOutput(rp, featuresCol)(predictRaw);
+                b2 <- b.withOutput(p, rp)(rawToProbability);
+                b3 <- b2.withOutput(predictionCol, p)(probabilityToPrediction)) yield b3
+          case None =>
+            for(b <- builder.withOutput(rp, featuresCol)(predictRaw);
+                b2 <- b.withOutput(predictionCol, rp)(rawToPrediction)) yield b2
+        }
       case None =>
-        builder.withOutput(predictionCol, featuresCol)(exec)
+        builder.withOutput(predictionCol, featuresCol)(predict)
     }
   }
 }

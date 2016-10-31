@@ -31,8 +31,7 @@ class GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierM
       model.withAttr(Attribute("num_features", Value.long(obj.numFeatures))).
         withAttr("num_classes", Value.long(2)).
         withAttr("tree_weights", Value.doubleList(obj.treeWeights)).
-        withAttr("trees", Value.stringList(trees)).
-        withAttr("threshold", obj.threshold.map(Value.double))
+        withAttr("trees", Value.stringList(trees))
     }
 
     override def load(model: Model)
@@ -43,14 +42,12 @@ class GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierM
 
       val numFeatures = model.value("num_features").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList
-      val threshold = model.getValue("threshold").map(_.getDouble)
 
       val models = model.value("trees").getStringList.map {
         tree => ModelSerializer(context.bundleContext(tree)).read().asInstanceOf[DecisionTreeRegressionModel]
       }
 
       GBTClassifierModel(numFeatures = numFeatures,
-        threshold = threshold,
         trees = models,
         treeWeights = treeWeights)
     }

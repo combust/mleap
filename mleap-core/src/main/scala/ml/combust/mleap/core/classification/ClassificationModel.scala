@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.classification
 
 import ml.combust.mleap.core.annotation.SparkCode
-import org.apache.spark.ml.linalg.{Vector, Vectors}
+import org.apache.spark.ml.linalg.{DenseVector, Vector, Vectors}
 
 /** Trait for all classification models.
   */
@@ -19,6 +19,21 @@ trait ClassificationModel {
     * @return predicted class or probability
     */
   def predict(features: Vector): Double
+}
+
+@SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/classification/ProbabilisticClassifier.scala")
+object MultinomialClassificationModel {
+  def normalizeToProbabilitiesInPlace(v: DenseVector): Unit = {
+    val sum = v.values.sum
+    if (sum != 0) {
+      var i = 0
+      val size = v.size
+      while (i < size) {
+        v.values(i) /= sum
+        i += 1
+      }
+    }
+  }
 }
 
 /** Trait for classification models.
@@ -95,7 +110,7 @@ trait BinaryClassificationModel extends MultinomialClassificationModel {
     */
   val threshold: Option[Double] = None
 
-  override val thresholds: Option[Array[Double]] = threshold.map(t => Array[Double](1 - t, t))
+  override lazy val thresholds: Option[Array[Double]] = threshold.map(t => Array[Double](1 - t, t))
 
   /** Predict the class taking into account threshold.
     *

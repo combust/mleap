@@ -40,7 +40,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   override protected def afterAll(): Unit = spark.stop()
 
   def parityTransformer(): Unit = {
-    it("has parity parity between Spark/MLeap") {
+    it("has parity between Spark/MLeap") {
       val mTransformer = SparkParityBase.mleapTransformer(sparkTransformer)
       val sparkDataset = sparkTransformer.transform(dataset).collect()
       val mleapDataset = mTransformer.sparkTransform(dataset).collect()

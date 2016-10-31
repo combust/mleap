@@ -307,7 +307,7 @@ object Value {
     val name = classTag[T].runtimeClass.getName
     val (basic, tensor) = name match {
       case "double" => (BasicType.DOUBLE, value.asInstanceOf[Seq[Double]])
-      case "string" => (BasicType.STRING, value.asInstanceOf[Seq[String]])
+      case "java.lang.String" => (BasicType.STRING, value.asInstanceOf[Seq[String]])
       case _ => throw new IllegalArgumentException(s"unsupported vector type: $name")
     }
     Value(tensorDataType(basic, dims), tensor)
@@ -368,8 +368,8 @@ object Value {
     */
   def tensorList[T: ClassTag](value: Seq[Seq[T]], dims: Seq[Int]): Value = {
     val basic = classTag[T].runtimeClass.getName match {
-      case "Double" => BasicType.DOUBLE
-      case "String" => BasicType.STRING
+      case "double" => BasicType.DOUBLE
+      case "java.lang.String" => BasicType.STRING
       case _ => throw new IllegalArgumentException("unsupported vector type")
     }
     Value(listDataType(tensorDataType(basic, dims)), value)

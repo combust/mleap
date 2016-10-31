@@ -26,9 +26,8 @@ trait MleapReflection {
       case t if t <:< mirrorType[Int] => IntegerType
       case t if t <:< mirrorType[Long] => LongType
       case t if t <:< mirrorType[Double] => DoubleType
-      case t if t <:< mirrorType[Array[_]] =>
-//        ||
-//        t <:< mirrorType[mutable.WrappedArray[_]]
+      case t if t <:< mirrorType[Array[_]] ||
+        t <:< mirrorType[mutable.WrappedArray[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t
         val baseType = dataTypeFor(elementType)
         ListType(baseType)

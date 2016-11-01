@@ -30,7 +30,7 @@ trait MleapReflection {
         t <:< mirrorType[mutable.WrappedArray[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t
         val baseType = dataTypeFor(elementType)
-        ListType(baseType)
+        ArrayType(baseType)
       case t if t <:< mirrorType[Vector] => TensorType.doubleVector()
       case t if t =:= mirrorType[Any] => AnyType
       case t if context.hasCustomType(t.erasure.typeSymbol.asClass.fullName) =>

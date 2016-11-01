@@ -10,7 +10,7 @@ import org.scalatest.FunSpec
   */
 class StringIndexerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_string", StringType))).get
-  val dataset = LocalDataset(Array(Row("index1"), Row("index2"), Row("index3")))
+  val dataset = LocalDataset(Seq(Row("index1"), Row("index2"), Row("index3")))
   val frame = LeapFrame(schema, dataset)
 
   val stringIndexer = StringIndexer(inputCol = "test_string",

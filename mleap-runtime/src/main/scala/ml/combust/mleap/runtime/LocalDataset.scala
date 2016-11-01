@@ -4,13 +4,8 @@ package ml.combust.mleap.runtime
   *
   * @param data array of row data
   */
-case class LocalDataset(data: Array[Row]) extends Dataset {
-  /** Get a row at a given index.
-    *
-    * @param index index of row
-    * @return row at index
-    */
-  def apply(index: Int): Row = data(index)
+case class LocalDataset(data: Seq[Row]) extends Dataset {
+  override def apply(index: Int): Row = data(index)
 
   override def update(f: (Row) => Row): LocalDataset = {
     LocalDataset(data = data.map(f))
@@ -18,5 +13,7 @@ case class LocalDataset(data: Array[Row]) extends Dataset {
 
   override def toLocal: LocalDataset = this
 
-  override def toArray: Array[Row] = data
+  override def toSeq: Seq[Row] = data
+
+  override def iterator: Iterator[Row] = data.iterator
 }

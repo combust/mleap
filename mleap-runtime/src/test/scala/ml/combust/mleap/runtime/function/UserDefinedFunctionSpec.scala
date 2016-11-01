@@ -20,10 +20,10 @@ class UserDefinedFunctionSpec extends FunSpec {
       val udf0custom: UserDefinedFunction = () => MyCustomObject("hello")
 
       assertUdfForm(udf0, StringType)
-      assertUdfForm(udf1, ListType(StringType), DoubleType)
+      assertUdfForm(udf1, ArrayType(StringType), DoubleType)
       assertUdfForm(udf2, LongType, LongType, IntegerType)
       assertUdfForm(udf3, AnyType, BooleanType, TensorType.doubleVector())
-      assertUdfForm(udf4, StringType, ListType(BooleanType), ListType(StringType), ListType(DoubleType))
+      assertUdfForm(udf4, StringType, ArrayType(BooleanType), ArrayType(StringType), ArrayType(DoubleType))
       assertUdfForm(udf5, DoubleType, DoubleType, DoubleType, DoubleType, DoubleType, StringType)
       assertUdfForm(udf0custom, new MyCustomType)
     }

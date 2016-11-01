@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.serialization.json
+package ml.combust.mleap.json
 
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, MleapContext}
 import ml.combust.mleap.runtime.types._
@@ -13,20 +13,20 @@ import scala.language.implicitConversions
   * Created by hollinwilkins on 8/23/16.
   */
 trait JsonSupport {
-  implicit def mleapListTypeFormat(implicit context: MleapContext): JsonFormat[ListType] = lazyFormat(new JsonFormat[ListType] {
-    override def write(obj: ListType): JsValue = {
+  implicit def mleapListTypeFormat(implicit context: MleapContext): JsonFormat[ArrayType] = lazyFormat(new JsonFormat[ArrayType] {
+    override def write(obj: ArrayType): JsValue = {
       JsObject("type" -> JsString("list"),
         "base" -> obj.base.toJson)
     }
 
-    override def read(json: JsValue): ListType = {
+    override def read(json: JsValue): ArrayType = {
       val obj = json.asJsObject("invalid list type")
 
-      ListType(obj.fields("base").convertTo[DataType])
+      ArrayType(obj.fields("base").convertTo[DataType])
     }
   })
 
-  val mleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
+  implicit val mleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
     override def write(obj: TensorType): JsValue = {
       JsObject("type" -> JsString("tensor"),
         "base" -> mleapBasicTypeFormat.write(obj.base),
@@ -77,7 +77,7 @@ trait JsonSupport {
   implicit def mleapDataTypeFormat(implicit context: MleapContext): JsonFormat[DataType] = lazyFormat(new JsonFormat[DataType] {
     override def write(obj: DataType): JsValue = obj match {
       case bt: BasicType => mleapBasicTypeFormat.write(bt)
-      case lt: ListType => mleapListTypeFormat.write(lt)
+      case lt: ArrayType => mleapListTypeFormat.write(lt)
       case tt: TensorType => mleapTensorTypeFormat.write(tt)
       case ct: CustomType => mleapCustomTypeFormat.write(ct)
       case AnyType => serializationError("AnyType not supported for JSON serialization")

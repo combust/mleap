@@ -3,7 +3,7 @@ package org.apache.spark.sql.mleap
 import ml.combust.mleap.runtime.function.{UserDefinedFunction => MleapUDF}
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import ml.combust.mleap.runtime.types
-import ml.combust.mleap.runtime.types.{AnyType, ListType}
+import ml.combust.mleap.runtime.types.{AnyType, ArrayType}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.DataType
 
@@ -46,8 +46,8 @@ trait UserDefinedFunctionConverters {
   }
 
   private def converter(dataType: types.DataType): (Any) => Any = dataType match {
-    case lt: ListType if lt.base == AnyType => (row: Any) => row.asInstanceOf[Row].toSeq.toArray
-    case lt: ListType =>
+    case lt: ArrayType if lt.base == AnyType => (row: Any) => row.asInstanceOf[Row].toSeq.toArray
+    case lt: ArrayType =>
       lt.base match {
         case types.DoubleType => (arr: Any) => arr.asInstanceOf[mutable.WrappedArray[Double]].toArray
         case types.StringType => (arr: Any) => arr.asInstanceOf[mutable.WrappedArray[String]].toArray

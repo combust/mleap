@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime
 
 import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector}
-import ml.combust.mleap.runtime.types.{AnyType, DataType, ListType, StructType}
+import ml.combust.mleap.runtime.types.{AnyType, DataType, ArrayType, StructType}
 
 import scala.util.{Failure, Try}
 
@@ -51,7 +51,7 @@ object RowUtil {
           }
       }
     case ArraySelector(fields@_*) =>
-      if (dataType == ListType(AnyType)) {
+      if (dataType == ArrayType(AnyType)) {
         schema.indicesOf(fields: _*).map {
           indices =>
             val indicesArr = indices.toArray

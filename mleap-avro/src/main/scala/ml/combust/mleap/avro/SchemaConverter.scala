@@ -5,7 +5,7 @@ import java.nio.charset.Charset
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
 import org.apache.avro.Schema
-import ml.combust.mleap.runtime.serialization.json.JsonSupport._
+import ml.combust.mleap.json.JsonSupport._
 import spray.json._
 
 import scala.language.implicitConversions

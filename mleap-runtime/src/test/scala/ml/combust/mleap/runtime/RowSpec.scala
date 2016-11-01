@@ -132,8 +132,8 @@ trait RowSpec[R <: Row] extends FunSpec {
   }
 }
 
-class SeqRowSpec extends RowSpec[SeqRow] {
-  override def create(values: Any *): SeqRow = SeqRow(values)
+class SeqRowSpec extends RowSpec[ArrayRow] {
+  override def create(values: Any *): ArrayRow = ArrayRow(values)
 
   it should behave like row()
 }

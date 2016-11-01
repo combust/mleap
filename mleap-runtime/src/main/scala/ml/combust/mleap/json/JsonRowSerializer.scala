@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.serialization.json
+package ml.combust.mleap.json
 
 import ml.combust.mleap.runtime.Row
 import ml.combust.mleap.runtime.serialization.RowSerializer

@@ -2,6 +2,7 @@ package ml.combust.mleap.avro
 
 import ml.combust.mleap.runtime.types._
 import org.apache.avro.generic.GenericData
+import org.apache.avro.util.Utf8
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vectors}
 
 import scala.collection.JavaConverters._
@@ -43,10 +44,11 @@ case class ValueConverter() {
   }
 
   def avroToMleap(dataType: DataType): (Any) => Any = dataType match {
+    case StringType => (value) => value.asInstanceOf[Utf8].toString
     case _: BasicType => identity
     case at: ArrayType => at.base match {
       case DoubleType => (value) => value.asInstanceOf[GenericData.Array[Double]].asScala.toArray
-      case StringType => (value) => value.asInstanceOf[GenericData.Array[String]].asScala.toArray
+      case StringType => (value) => value.asInstanceOf[GenericData.Array[Utf8]].asScala.map(_.toString).toArray
       case LongType => (value) => value.asInstanceOf[GenericData.Array[Long]].asScala.toArray
       case IntegerType => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.toArray
       case BooleanType => (value) => value.asInstanceOf[GenericData.Array[Boolean]].asScala.toArray

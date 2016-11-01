@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.builder
 
-import ml.combust.mleap.runtime.{Row, RowUtil, SeqRow}
+import ml.combust.mleap.runtime.{Row, RowUtil, ArrayRow}
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.types.StructType
 
@@ -15,7 +15,7 @@ object RowTransformBuilder {
 
 case class RowTransformBuilder private (inputSchema: StructType,
                                         outputSchema: StructType,
-                                        transforms: Array[(SeqRow) => SeqRow]) extends TransformBuilder[RowTransformBuilder] {
+                                        transforms: Array[(ArrayRow) => ArrayRow]) extends TransformBuilder[RowTransformBuilder] {
   def arraySize: Int = outputSchema.fields.length
 
   override def withOutput(name: String, selectors: Selector *)
@@ -26,7 +26,7 @@ case class RowTransformBuilder private (inputSchema: StructType,
       rowSelectors =>
         outputSchema.withField(name, udf.returnType).map {
           schema2 =>
-            val transform = (row: SeqRow) => row.set(index, row.udfValue(rowSelectors: _*)(udf))
+            val transform = (row: ArrayRow) => row.set(index, row.udfValue(rowSelectors: _*)(udf))
             copy(outputSchema = schema2, transforms = transforms :+ transform)
         }
     }
@@ -37,10 +37,10 @@ case class RowTransformBuilder private (inputSchema: StructType,
     * @param row row to transform
     * @return transformed row
     */
-  def transform(row: Row): SeqRow = {
+  def transform(row: Row): ArrayRow = {
     val arr = new Array[Any](arraySize)
     row.toArray.copyToArray(arr)
-    val arrRow = SeqRow(arr)
+    val arrRow = ArrayRow(arr)
 
     transforms.foldLeft(arrRow) {
       (r, transform) => transform(r)

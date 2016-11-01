@@ -11,12 +11,12 @@ import scala.collection.mutable
 object Row {
   type RowSelector = (Row) => Any
 
-  /** Create a row using the default implementation [[SeqRow]].
+  /** Create a row using the default implementation [[ArrayRow]].
     *
     * @param values values in the row
     * @return default row implementation with values
     */
-  def apply(values: Any *): Row = SeqRow(values.toArray)
+  def apply(values: Any *): Row = ArrayRow(values.toArray)
 }
 
 /** Base trait for row data.
@@ -151,25 +151,25 @@ trait Row extends Iterable[Any] {
   override def toString: String  = s"Row(${mkString(",")})"
 }
 
-object SeqRow {
-  def apply(values: Seq[Any]): SeqRow = SeqRow(values.toArray)
+object ArrayRow {
+  def apply(values: Seq[Any]): ArrayRow = ArrayRow(values.toArray)
 }
 
 /** Class for holding Row values in an array.
   *
   * @param values array of values in row
   */
-case class SeqRow(values: mutable.WrappedArray[Any]) extends Row {
+case class ArrayRow(values: mutable.WrappedArray[Any]) extends Row {
   override def get(index: Int): Any = values(index)
 
   override def iterator: Iterator[Any] = values.iterator
 
-  override def withValue(value: Any): Row = SeqRow(values :+ value)
+  override def withValue(value: Any): Row = ArrayRow(values :+ value)
 
-  override def selectIndices(indices: Int*): Row = SeqRow(indices.toArray.map(values))
-  override def dropIndex(index: Int): Row = SeqRow(values.take(index) ++ values.drop(index + 1))
+  override def selectIndices(indices: Int*): Row = ArrayRow(indices.toArray.map(values))
+  override def dropIndex(index: Int): Row = ArrayRow(values.take(index) ++ values.drop(index + 1))
 
-  def set(index: Int, value: Any): SeqRow = {
+  def set(index: Int, value: Any): ArrayRow = {
     values(index) = value
     this
   }

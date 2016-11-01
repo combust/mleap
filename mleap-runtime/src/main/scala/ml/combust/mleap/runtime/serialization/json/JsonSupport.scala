@@ -26,7 +26,7 @@ trait JsonSupport {
     }
   })
 
-  val mleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
+  implicit val mleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
     override def write(obj: TensorType): JsValue = {
       JsObject("type" -> JsString("tensor"),
         "base" -> mleapBasicTypeFormat.write(obj.base),

@@ -15,10 +15,10 @@ class MleapContextSpec extends FunSpec {
   val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(20.0, 10.0, 5.0)), "hello")))
   val frame = LeapFrame(schema, dataset).withOutput("custom_object", "name")((name: String) => MyCustomObject(name)).get
 
-  describe("with format ml.combust.mleap.runtime.serialization.json") {
+  describe("with format ml.combust.mleap.json") {
     it("serializes the leap frame as JSON") {
-      val bytes = context.serializer("ml.combust.mleap.runtime.serialization.json").toBytes(frame)
-      val dFrame = context.serializer("ml.combust.mleap.runtime.serialization.json").fromBytes(bytes)
+      val bytes = context.serializer("ml.combust.mleap.json").toBytes(frame)
+      val dFrame = context.serializer("ml.combust.mleap.json").fromBytes(bytes)
 
       assert(dFrame.schema == frame.schema)
       assert(dFrame.dataset == frame.dataset)
@@ -26,7 +26,28 @@ class MleapContextSpec extends FunSpec {
 
     describe("row serializer") {
       it("serializes rows as JSON") {
-        val serializer = context.serializer("ml.combust.mleap.runtime.serialization.json").rowSerializer(frame.schema)
+        val serializer = context.serializer("ml.combust.mleap.json").rowSerializer(frame.schema)
+        val row = frame.dataset(0)
+        val bytes = serializer.toBytes(row)
+        val dRow = serializer.fromBytes(bytes)
+
+        assert(row == dRow)
+      }
+    }
+  }
+
+  describe("with format format ml.combust.mleap.binary") {
+    it("serializes the leap frame as JSON") {
+      val bytes = context.serializer("ml.combust.mleap.binary").toBytes(frame)
+      val dFrame = context.serializer("ml.combust.mleap.binary").fromBytes(bytes)
+
+      assert(dFrame.schema == frame.schema)
+      assert(dFrame.dataset == frame.dataset)
+    }
+
+    describe("row serializer") {
+      it("serializes rows as JSON") {
+        val serializer = context.serializer("ml.combust.mleap.binary").rowSerializer(frame.schema)
         val row = frame.dataset(0)
         val bytes = serializer.toBytes(row)
         val dRow = serializer.fromBytes(bytes)

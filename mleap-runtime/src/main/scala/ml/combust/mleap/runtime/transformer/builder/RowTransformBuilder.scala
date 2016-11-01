@@ -3,7 +3,7 @@ package ml.combust.mleap.runtime.transformer.builder
 import ml.combust.mleap.runtime.{ArrayRow, Row, RowUtil}
 import ml.combust.mleap.runtime.Row._
 import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector, UserDefinedFunction}
-import ml.combust.mleap.runtime.types.{AnyType, DataType, ListType, StructType}
+import ml.combust.mleap.runtime.types.{AnyType, DataType, ArrayType, StructType}
 
 import scala.util.{Failure, Try}
 

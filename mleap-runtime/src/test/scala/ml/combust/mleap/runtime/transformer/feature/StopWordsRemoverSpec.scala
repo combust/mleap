@@ -2,14 +2,14 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.StopWordsRemoverModel
 import ml.combust.mleap.runtime.{LeapFrame, Row, LocalDataset}
-import ml.combust.mleap.runtime.types.{StringType, ListType, StructField, StructType}
+import ml.combust.mleap.runtime.types.{StringType, ArrayType, StructField, StructType}
 import org.scalatest.FunSpec
 
 /**
   * Created by mikhail on 10/16/16.
   */
 class StopWordsRemoverSpec extends FunSpec{
-  val schema = StructType(Seq(StructField("test_string_seq", ListType(StringType)))).get
+  val schema = StructType(Seq(StructField("test_string_seq", ArrayType(StringType)))).get
   val dataset = LocalDataset(Array(Row("I used MLeap transformer".split(" ")), Row("You use Mleap transformer".split(" "))))
   val frame = LeapFrame(schema,dataset)
 

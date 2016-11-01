@@ -44,7 +44,7 @@ case class TensorType(base: BasicType, dimensions: Seq[Int]) extends DataType {
     } else { false }
   }
 }
-case class ListType(base: DataType) extends DataType
+case class ArrayType(base: DataType) extends DataType
 
 object TensorType {
   def doubleVector(dim: Int = -1): TensorType = TensorType(DoubleType, Seq(dim))

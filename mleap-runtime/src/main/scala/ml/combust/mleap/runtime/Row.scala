@@ -4,22 +4,24 @@ import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.linalg.Vector
 
+import scala.collection.mutable
+
 /** Companion object for creating default rows.
   */
 object Row {
   type RowSelector = (Row) => Any
 
-  /** Create a row using the default implementation [[ArrayRow]].
+  /** Create a row using the default implementation [[SeqRow]].
     *
     * @param values values in the row
     * @return default row implementation with values
     */
-  def apply(values: Any *): Row = ArrayRow(values.toArray)
+  def apply(values: Any *): Row = SeqRow(values.toArray)
 }
 
 /** Base trait for row data.
   */
-trait Row {
+trait Row extends Iterable[Any] {
   /** Get value at index.
     *
     * Alias for [[Row#get]]
@@ -87,12 +89,6 @@ trait Row {
     */
   def getArray[T](index: Int): Array[T] = get(index).asInstanceOf[Array[T]]
 
-  /** Convert row to an array of values.
-    *
-    * @return array of values from row
-    */
-  def toArray: Array[Any]
-
   /** Convert row to a seq of values.
     *
     * @return seq of values from row
@@ -147,35 +143,35 @@ trait Row {
     */
   def dropIndex(index: Int): Row
 
-  override def toString: String  = s"Row(${mkString(",")})"
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case obj: Row => iterator sameElements obj.iterator
+    case _ => false
+  }
 
-  def mkString: String = toArray.mkString
-  def mkString(sep: String): String = toArray.mkString(sep)
-  def mkString(start: String, sep: String, end: String): String = toArray.mkString(start, sep, end)
+  override def toString: String  = s"Row(${mkString(",")})"
+}
+
+object SeqRow {
+  def apply(values: Seq[Any]): SeqRow = SeqRow(values.toArray)
 }
 
 /** Class for holding Row values in an array.
   *
   * @param values array of values in row
   */
-case class ArrayRow(values: Array[Any]) extends Row {
+case class SeqRow(values: mutable.WrappedArray[Any]) extends Row {
   override def get(index: Int): Any = values(index)
 
-  override def toSeq: Seq[Any] = values.toSeq
-  override def toArray: Array[Any] = values
+  override def iterator: Iterator[Any] = values.iterator
 
-  override def withValue(value: Any): Row = ArrayRow(values :+ value)
+  override def withValue(value: Any): Row = SeqRow(values :+ value)
 
-  override def selectIndices(indices: Int*): Row = ArrayRow(indices.toArray.map(values))
-  override def dropIndex(index: Int): Row = ArrayRow(values.take(index) ++ values.drop(index + 1))
+  override def selectIndices(indices: Int*): Row = SeqRow(indices.toArray.map(values))
+  override def dropIndex(index: Int): Row = SeqRow(values.take(index) ++ values.drop(index + 1))
 
-  def set(index: Int, value: Any): ArrayRow = {
+  def set(index: Int, value: Any): SeqRow = {
     values(index) = value
     this
-  }
-  override def equals(obj: scala.Any): Boolean = obj match {
-    case obj: ArrayRow => values.sameElements(obj.values)
-    case obj: Row => values.sameElements(obj.toArray)
   }
 
   override def hashCode(): Int = {
@@ -183,32 +179,4 @@ case class ArrayRow(values: Array[Any]) extends Row {
       (hash, value) => hash * 13 + value.hashCode()
     }
   }
-}
-
-/** Companion object for creating a SeqRow.
-  */
-object SeqRow {
-  def create(values: Seq[Any]): SeqRow = new SeqRow(values.reverse)
-}
-
-/** Class for holding Row values in a Seq.
-  *
-  * @param values seq values in the row
-  */
-case class SeqRow private (values: Seq[Any]) extends Row {
-  override def toArray: Array[Any] = values.reverse.toArray
-  override def toSeq: Seq[Any] = values.reverse
-
-  override def get(index: Int): Any = values(realIndex(index))
-
-  override def selectIndices(indices: Int *): SeqRow = SeqRow.create(indices.map(index => values(realIndex(index))))
-
-  override def withValue(value: Any): Row = new SeqRow(value +: values)
-
-  override def dropIndex(index: Int): Row = {
-    val i = realIndex(index)
-    new SeqRow(values.take(i) ++ values.drop(i + 1))
-  }
-
-  private def realIndex(index: Int): Int = values.length - index - 1
 }

@@ -11,7 +11,7 @@ import org.scalatest.FunSpec
   */
 class PolynomialExpansionSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType.doubleVector()))).get
-  val dataset = LocalDataset(Array(Row(Vectors.dense(Array(2.0, 3.0)))))
+  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(2.0, 3.0)))))
   val frame = LeapFrame(schema, dataset)
 
   val transformer = PolynomialExpansion(inputCol = "test_vec",

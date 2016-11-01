@@ -45,7 +45,7 @@ case class DatasetFormat(schema: StructType) extends RootJsonFormat[Dataset] {
     json match {
       case json: JsArray =>
         val rows = json.elements.map(rowFormat.read)
-        LocalDataset(data = rows.toArray)
+        LocalDataset(data = rows)
       case _ => deserializationError("invalid dataset")
     }
   }

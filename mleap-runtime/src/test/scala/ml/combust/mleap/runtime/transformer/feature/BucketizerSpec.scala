@@ -10,7 +10,7 @@ import org.scalatest.FunSpec
   */
 class BucketizerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_double", DoubleType))).get
-  val dataset = LocalDataset(Array(Row(11.0), Row(0.0), Row(55.0)))
+  val dataset = LocalDataset(Seq(Row(11.0), Row(0.0), Row(55.0)))
   val frame = LeapFrame(schema, dataset)
 
   val bucketizer = Bucketizer(inputCol = "test_double",

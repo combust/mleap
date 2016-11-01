@@ -1,11 +1,10 @@
 package ml.combust.mleap.runtime.transformer.builder
 
-import ml.combust.mleap.runtime.{ArrayRow, Row, RowUtil}
-import ml.combust.mleap.runtime.Row._
-import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector, UserDefinedFunction}
-import ml.combust.mleap.runtime.types.{AnyType, DataType, ArrayType, StructType}
+import ml.combust.mleap.runtime.{Row, RowUtil, SeqRow}
+import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
+import ml.combust.mleap.runtime.types.StructType
 
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 10/30/16.
@@ -16,7 +15,7 @@ object RowTransformBuilder {
 
 case class RowTransformBuilder private (inputSchema: StructType,
                                         outputSchema: StructType,
-                                        transforms: Array[(ArrayRow) => ArrayRow]) extends TransformBuilder[RowTransformBuilder] {
+                                        transforms: Array[(SeqRow) => SeqRow]) extends TransformBuilder[RowTransformBuilder] {
   def arraySize: Int = outputSchema.fields.length
 
   override def withOutput(name: String, selectors: Selector *)
@@ -27,7 +26,7 @@ case class RowTransformBuilder private (inputSchema: StructType,
       rowSelectors =>
         outputSchema.withField(name, udf.returnType).map {
           schema2 =>
-            val transform = (row: ArrayRow) => row.set(index, row.udfValue(rowSelectors: _*)(udf))
+            val transform = (row: SeqRow) => row.set(index, row.udfValue(rowSelectors: _*)(udf))
             copy(outputSchema = schema2, transforms = transforms :+ transform)
         }
     }
@@ -38,10 +37,10 @@ case class RowTransformBuilder private (inputSchema: StructType,
     * @param row row to transform
     * @return transformed row
     */
-  def transform(row: Row): ArrayRow = {
+  def transform(row: Row): SeqRow = {
     val arr = new Array[Any](arraySize)
     row.toArray.copyToArray(arr)
-    val arrRow = ArrayRow(arr)
+    val arrRow = SeqRow(arr)
 
     transforms.foldLeft(arrRow) {
       (r, transform) => transform(r)

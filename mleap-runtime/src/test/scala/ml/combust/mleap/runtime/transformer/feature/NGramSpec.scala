@@ -10,7 +10,7 @@ import org.scalatest.FunSpec
   */
 class NGramSpec extends FunSpec{
   val schema = StructType(Seq(StructField("test_string_seq", ArrayType(StringType)))).get
-  val dataset = LocalDataset(Array(Row("a b c".split(" ")), Row("d e f".split(" ")), Row("g h i".split(" "))))
+  val dataset = LocalDataset(Seq(Row("a b c".split(" ")), Row("d e f".split(" ")), Row("g h i".split(" "))))
   val frame = LeapFrame(schema,dataset)
 
   val ngram = NGram(inputCol = "test_string_seq",

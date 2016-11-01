@@ -66,14 +66,14 @@ case class DefaultFrameSerializer(override val serializerContext: FrameSerialize
 
       val rows = (0 until size).map {
         _ =>
-          val row = ArrayRow(new Array[Any](schema.fields.length))
+          val row = SeqRow(new Array[Any](schema.fields.length))
           dataReader.read(record, decoder)
           for(i <- schema.fields.indices) {
             row.set(i, readers(i)(record.get(i)))
           }
           row
       }
-      DefaultLeapFrame(schema, LocalDataset(rows.toArray))
+      DefaultLeapFrame(schema, LocalDataset(rows))
     }).either.either match {
       case Left(errors) => throw errors.head
       case Right(frame) => frame

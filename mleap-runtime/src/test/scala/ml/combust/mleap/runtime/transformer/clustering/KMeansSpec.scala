@@ -16,7 +16,7 @@ class KMeansSpec extends FunSpec {
   val v3 = Vectors.dense(Array(100.0, 22.0, 55.0))
 
   val schema = StructType(Seq(StructField("features", TensorType.doubleVector()))).get
-  val dataset = LocalDataset(Array(Row(Vectors.dense(Array(2.0, 5.0, 34.0))),
+  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(2.0, 5.0, 34.0))),
     Row(Vectors.dense(Array(20.0, 230.0, 34.0))),
     Row(Vectors.dense(Array(111.0, 20.0, 56.0)))))
   val frame = LeapFrame(schema, dataset)

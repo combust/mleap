@@ -12,7 +12,7 @@ import org.scalatest.FunSpec
   */
 class GBTClassifierSpec extends FunSpec {
   val schema = StructType(Seq(StructField("features", TensorType.doubleVector()))).get
-  val dataset = LocalDataset(Array(Row(Vectors.dense(Array(0.2, 0.7, 0.4)))))
+  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(0.2, 0.7, 0.4)))))
   val frame = LeapFrame(schema, dataset)
   val tree1 = TestUtil.buildDecisionTreeRegression(0.5, 0, goLeft = true)
   val tree2 = TestUtil.buildDecisionTreeRegression(0.75, 1, goLeft = false)
@@ -24,7 +24,7 @@ class GBTClassifierSpec extends FunSpec {
   describe("#transform") {
     it("uses the GBT to make predictions on the features column") {
       val frame2 = gbt.transform(frame).get
-      val prediction = frame2.dataset.toArray(0).getDouble(1)
+      val prediction = frame2.dataset(0).getDouble(1)
 
       assert(prediction == 1.0)
     }

@@ -18,10 +18,9 @@ trait DatasetSpec[D <: Dataset] extends FunSpec {
       describe("#update") {
         it("creates a new dataset with updated rows") {
           val dataset2 = dataset.update(r => Row(55, r.get(1)))
-          val rowData = dataset2.toArray
 
-          assert(rowData(0).toSeq == Seq(55, "hey"))
-          assert(rowData(1).toSeq == Seq(55, "there"))
+          assert(dataset2(0) == Row(55, "hey"))
+          assert(dataset2(1) == Row(55, "there"))
         }
       }
 
@@ -31,9 +30,9 @@ trait DatasetSpec[D <: Dataset] extends FunSpec {
             val dataset2 = dataset.withValue(r => r.get(1), r => r.get(0)) {
               (v1: String, v2: Int) => s"$v1:$v2"
             }
-            val data = dataset2.toArray.map(r => r.getString(2))
+            val data = dataset2.toSeq.map(r => r.getString(2))
 
-            assert(data sameElements Array("hey:42", "there:13"))
+            assert(data == Seq("hey:42", "there:13"))
           }
         }
       }
@@ -41,12 +40,12 @@ trait DatasetSpec[D <: Dataset] extends FunSpec {
       describe("#selectIndices") {
         it("creates a new dataset with the selected indices") {
           val dataset2 = dataset.selectIndices(0)
-          for(r <- dataset2.toArray) {
-            assert(r.toArray.length == 1)
+          for(r <- dataset2) {
+            assert(r.size == 1)
           }
-          val data = dataset2.toArray.map(r => r.getInt(0))
+          val data = dataset2.toSeq.map(r => r.getInt(0))
 
-          assert(data sameElements Array(42, 13))
+          assert(data == Seq(42, 13))
         }
       }
 
@@ -65,20 +64,20 @@ trait DatasetSpec[D <: Dataset] extends FunSpec {
       describe("#toLocal") {
         it("converts to a LocalDataset") {
           val local = dataset.toLocal
-          val localData = local.toArray.clone().flatMap(_.toArray)
-          val datasetData = dataset.toArray.flatMap(_.toArray)
+          val localData = local.flatMap(_.toSeq)
+          val datasetData = dataset.flatMap(_.toSeq)
 
           assert(local.isInstanceOf[LocalDataset])
-          assert(localData sameElements datasetData)
+          assert(localData == datasetData)
         }
       }
 
       describe("#toArray") {
         it("converts the dataset to an Array[Row]") {
-          val arr = dataset.toArray.flatMap(_.toArray)
-          val expected = Array(42, "hey", 13, "there")
+          val arr = dataset.flatMap(_.toSeq)
+          val expected = Seq(42, "hey", 13, "there")
 
-          assert(arr sameElements expected)
+          assert(arr == expected)
         }
       }
     }
@@ -86,7 +85,7 @@ trait DatasetSpec[D <: Dataset] extends FunSpec {
 }
 
 class LocalDatasetSpec extends DatasetSpec[LocalDataset] {
-  override def create(rows: Row *): LocalDataset = LocalDataset(rows.toArray)
+  override def create(rows: Row *): LocalDataset = LocalDataset(rows)
 
   it should behave like dataset("LocalDataset")
 }

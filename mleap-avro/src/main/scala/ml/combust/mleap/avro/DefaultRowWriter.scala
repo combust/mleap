@@ -1,9 +1,10 @@
 package ml.combust.mleap.avro
 
 import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
 
 import ml.combust.mleap.runtime.Row
-import ml.combust.mleap.runtime.serialization.RowWriter
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowWriter}
 import ml.combust.mleap.runtime.types.StructType
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericDatumReader, GenericDatumWriter}
@@ -22,7 +23,7 @@ class DefaultRowWriter(override val schema: StructType) extends RowWriter {
   var encoder: BinaryEncoder = null
   var record = new GenericData.Record(avroSchema)
 
-  override def toBytes(row: Row): Array[Byte] = {
+  override def toBytes(row: Row, charset: Charset = BuiltinFormats.charset): Array[Byte] = {
     (for(out <- managed(new ByteArrayOutputStream(1024))) yield {
       encoder = EncoderFactory.get().binaryEncoder(out, encoder)
 

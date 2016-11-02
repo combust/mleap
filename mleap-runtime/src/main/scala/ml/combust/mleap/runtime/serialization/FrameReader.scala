@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime.serialization
 
 import java.io.{DataInputStream, File, FileInputStream}
+import java.nio.charset.Charset
 
 import ml.combust.bundle.util.ClassLoaderUtil
 import ml.combust.mleap.runtime.{DefaultLeapFrame, MleapContext}
@@ -20,10 +21,10 @@ object FrameReader {
 }
 
 trait FrameReader {
-  def fromBytes(bytes: Array[Byte])
+  def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset)
                (implicit context: MleapContext): DefaultLeapFrame
 
-  def read(file: File)
+  def read(file: File, charset: Charset = BuiltinFormats.charset)
           (implicit context: MleapContext): DefaultLeapFrame = {
     (for(in <- managed(new DataInputStream(new FileInputStream(file)))) yield {
       val bytes = new Array[Byte](file.length().toInt)

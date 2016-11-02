@@ -1,6 +1,7 @@
 package ml.combust.mleap.binary
 
 import java.io.{ByteArrayInputStream, DataInputStream}
+import java.nio.charset.Charset
 
 import ml.combust.mleap.runtime._
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
@@ -15,7 +16,7 @@ import scala.collection.mutable
   * Created by hollinwilkins on 11/2/16.
   */
 class DefaultFrameReader extends FrameReader {
-  override def fromBytes(bytes: Array[Byte])
+  override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset)
                         (implicit context: MleapContext): DefaultLeapFrame = {
     (for(in <- managed(new ByteArrayInputStream(bytes))) yield {
       val din = new DataInputStream(in)

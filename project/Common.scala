@@ -11,8 +11,6 @@ object Common {
     crossScalaVersions := Seq("2.10.6", "2.11.8"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork := true,
-    parallelExecution := false,
-    javaOptions in test += "-Xmx2G",
     resolvers ++= {
       // Only add Sonatype Snapshots if this version itself is a snapshot version
       if(isSnapshot.value) {

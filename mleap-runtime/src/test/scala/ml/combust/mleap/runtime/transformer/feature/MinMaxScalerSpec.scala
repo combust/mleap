@@ -11,7 +11,7 @@ import org.scalatest.FunSpec
   */
 class MinMaxScalerSpec extends FunSpec{
   val schema = StructType(Seq(StructField("test_vec", TensorType.doubleVector()))).get
-  val dataset = LocalDataset(Array(Row(Vectors.dense(Array(0.0, 20.0, 20.0)))))
+  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(0.0, 20.0, 20.0)))))
   val frame = LeapFrame(schema, dataset)
 
   val minMaxScaler = MinMaxScaler(inputCol = "test_vec",

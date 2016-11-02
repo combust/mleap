@@ -11,7 +11,7 @@ import org.scalatest.FunSpec
   */
 class LogisticRegressionSpec extends FunSpec {
   val schema = StructType(Seq(StructField("features", TensorType.doubleVector()))).get
-  val dataset = LocalDataset(Array(Row(Vectors.dense(Array(0.5, -0.5, 1.0)))))
+  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(0.5, -0.5, 1.0)))))
   val frame = LeapFrame(schema, dataset)
   val logisticRegression = LogisticRegression(featuresCol = "features",
     predictionCol = "prediction",
@@ -23,7 +23,7 @@ class LogisticRegressionSpec extends FunSpec {
     describe("#transform") {
       it("executes the logistic regression model and outputs the prediction") {
         val frame2 = logisticRegression.transform(frame).get
-        val prediction = frame2.dataset.toArray(0).getDouble(1)
+        val prediction = frame2.dataset(0).getDouble(1)
 
         assert(prediction == 1.0)
       }

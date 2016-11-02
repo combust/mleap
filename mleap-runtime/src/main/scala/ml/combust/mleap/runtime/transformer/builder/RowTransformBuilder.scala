@@ -1,11 +1,10 @@
 package ml.combust.mleap.runtime.transformer.builder
 
-import ml.combust.mleap.runtime.{ArrayRow, Row, RowUtil}
-import ml.combust.mleap.runtime.Row._
-import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector, UserDefinedFunction}
-import ml.combust.mleap.runtime.types.{AnyType, DataType, ListType, StructType}
+import ml.combust.mleap.runtime.{Row, RowUtil, ArrayRow}
+import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
+import ml.combust.mleap.runtime.types.StructType
 
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 10/30/16.

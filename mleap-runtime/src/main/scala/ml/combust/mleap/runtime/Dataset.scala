@@ -3,9 +3,18 @@ package ml.combust.mleap.runtime
 import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 
+import scala.collection.mutable
+
 /** Trait for storing data in a [[ml.combust.mleap.runtime.LeapFrame]].
   */
-trait Dataset extends Serializable {
+trait Dataset extends Serializable with Iterable[Row] {
+  /** Get row at given index.
+    *
+    * @param index index of row
+    * @return row at index
+    */
+  def apply(index: Int): Row
+
   /** Update all rows in the dataset.
     *
     * @param f update function
@@ -41,10 +50,4 @@ trait Dataset extends Serializable {
     * @return local dataset
     */
   def toLocal: LocalDataset
-
-  /** Convert dataset to an array of rows.
-    *
-    * @return array of rows
-    */
-  def toArray: Array[Row] = toLocal.data
 }

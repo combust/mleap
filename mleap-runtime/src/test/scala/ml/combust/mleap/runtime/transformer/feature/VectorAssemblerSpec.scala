@@ -12,7 +12,7 @@ class VectorAssemblerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("feature1", TensorType.doubleVector()),
     StructField("feature2", DoubleType),
     StructField("feature3", DoubleType))).get
-  val dataset = LocalDataset(Array(Row(Vectors.dense(Array(0.5, -0.5, 1.0)), 42.0, 13.0)))
+  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(0.5, -0.5, 1.0)), 42.0, 13.0)))
   val frame = LeapFrame(schema, dataset)
   val vectorAssembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
     outputCol = "features")

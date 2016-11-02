@@ -9,7 +9,7 @@ import ml.combust.mleap.runtime.types.StructType
   */
 object RowWriter {
   def apply(schema: StructType,
-            format: String = Defaults.format,
+            format: String = BuiltinFormats.json,
             classLoader: Option[ClassLoader] = None): RowWriter = {
     ClassLoaderUtil.resolveClassLoader(classLoader).
       loadClass(s"$format.DefaultRowWriter").

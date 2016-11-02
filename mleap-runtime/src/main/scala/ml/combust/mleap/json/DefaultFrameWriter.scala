@@ -1,7 +1,7 @@
 package ml.combust.mleap.json
 
 import ml.combust.mleap.runtime.LeapFrame
-import ml.combust.mleap.runtime.serialization.{Defaults, FrameWriter}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import JsonSupport._
 import spray.json._
 
@@ -10,6 +10,6 @@ import spray.json._
   */
 class DefaultFrameWriter() extends FrameWriter {
   override def toBytes[LF <: LeapFrame[LF]](frame: LF): Array[Byte] = {
-    frame.toJson.prettyPrint.getBytes(Defaults.charset)
+    frame.toJson.prettyPrint.getBytes(BuiltinFormats.charset)
   }
 }

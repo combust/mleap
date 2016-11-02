@@ -3,7 +3,7 @@ package ml.combust.mleap.binary
 import java.io.{ByteArrayInputStream, DataInputStream}
 
 import ml.combust.mleap.runtime._
-import ml.combust.mleap.runtime.serialization.{Defaults, FrameReader}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
 import ml.combust.mleap.runtime.types.StructType
 import ml.combust.mleap.json.JsonSupport._
 import spray.json._
@@ -14,14 +14,15 @@ import scala.collection.mutable
 /**
   * Created by hollinwilkins on 11/2/16.
   */
-class DefaultFrameReader(implicit override val context: MleapContext) extends FrameReader {
-  override def fromBytes(bytes: Array[Byte]): DefaultLeapFrame = {
+class DefaultFrameReader extends FrameReader {
+  override def fromBytes(bytes: Array[Byte])
+                        (implicit context: MleapContext): DefaultLeapFrame = {
     (for(in <- managed(new ByteArrayInputStream(bytes))) yield {
       val din = new DataInputStream(in)
       val length = din.readInt()
       val schemaBytes = new Array[Byte](length)
       din.readFully(schemaBytes)
-      val schema = new String(schemaBytes, Defaults.charset).parseJson.convertTo[StructType]
+      val schema = new String(schemaBytes, BuiltinFormats.charset).parseJson.convertTo[StructType]
       val serializers = schema.fields.map(_.dataType).map(ValueSerializer.serializerForDataType)
       val rowCount = din.readInt()
       val rows = mutable.WrappedArray.make[Row](new Array[Row](rowCount))

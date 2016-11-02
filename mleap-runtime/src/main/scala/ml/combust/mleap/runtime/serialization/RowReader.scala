@@ -9,7 +9,7 @@ import ml.combust.mleap.runtime.Row
   */
 object RowReader {
   def apply(schema: StructType,
-            format: String = Defaults.format,
+            format: String = BuiltinFormats.json,
             classLoader: Option[ClassLoader] = None): RowReader = {
     ClassLoaderUtil.resolveClassLoader(classLoader).
       loadClass(s"$format.DefaultRowReader").

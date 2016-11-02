@@ -10,7 +10,7 @@ import resource._
   * Created by hollinwilkins on 11/1/16.
   */
 object FrameWriter {
-  def apply(format: String = Defaults.format,
+  def apply(format: String = BuiltinFormats.json,
             classLoader: Option[ClassLoader] = None): FrameWriter = {
     ClassLoaderUtil.resolveClassLoader(classLoader).
       loadClass(s"$format.DefaultFrameWriter").

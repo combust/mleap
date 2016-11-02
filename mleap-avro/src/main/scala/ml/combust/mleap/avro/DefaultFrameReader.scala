@@ -12,10 +12,11 @@ import scala.collection.mutable
 /**
   * Created by hollinwilkins on 11/2/16.
   */
-class DefaultFrameReader(implicit override val context: MleapContext) extends FrameReader {
+class DefaultFrameReader extends FrameReader {
   val valueConverter = ValueConverter()
 
-  override def fromBytes(bytes: Array[Byte]): DefaultLeapFrame = {
+  override def fromBytes(bytes: Array[Byte])
+                        (implicit context: MleapContext): DefaultLeapFrame = {
     val datumReader = new GenericDatumReader[GenericData.Record]()
     val reader = new DataFileReader[GenericData.Record](new SeekableByteArrayInput(bytes), datumReader)
     val avroSchema = reader.getSchema

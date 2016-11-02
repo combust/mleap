@@ -3,13 +3,12 @@ package ml.combust.mleap.runtime
 import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.mleap.runtime.types.CustomType
 import ml.combust.bundle
-import ml.combust.mleap.runtime.serialization.FrameSerializerContext
 
 /**
   * Created by hollinwilkins on 10/25/16.
   */
 object MleapContext {
-  lazy val defaultContext: MleapContext = MleapContext()
+  lazy implicit val defaultContext: MleapContext = MleapContext()
 
   def apply(registry: BundleRegistry = BundleRegistry("mleap")): MleapContext = {
     val context = new MleapContext(registry, Map(), Map())
@@ -35,8 +34,4 @@ case class MleapContext private (registry: BundleRegistry,
 
   def hasCustomTypeAlias(alias: String): Boolean = customTypeAliases.contains(alias)
   def customTypeForAlias(alias: String): CustomType = customTypeAliases(alias)
-
-  def serializer(format: String = "ml.combust.mleap.json"): FrameSerializerContext = {
-    FrameSerializerContext(format)(this)
-  }
 }

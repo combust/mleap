@@ -1,0 +1,31 @@
+package ml.combust.mleap.binary
+
+import java.io.{ByteArrayOutputStream, DataOutputStream}
+
+import ml.combust.mleap.runtime.Row
+import ml.combust.mleap.runtime.serialization.RowWriter
+import ml.combust.mleap.runtime.types.StructType
+import resource._
+
+/**
+  * Created by hollinwilkins on 11/2/16.
+  */
+class DefaultRowWriter(override val schema: StructType) extends RowWriter {
+  val serializers = schema.fields.map(_.dataType).map(ValueSerializer.serializerForDataType)
+
+  override def toBytes(row: Row): Array[Byte] = {
+    (for(out <- managed(new ByteArrayOutputStream())) yield {
+      val dout = new DataOutputStream(out)
+      var i = 0
+      for(s <- serializers) {
+        s.write(row(i), dout)
+        i = i + 1
+      }
+      dout.flush()
+      out.toByteArray
+    }).either.either match {
+      case Left(errors) => throw errors.head
+      case Right(bytes) => bytes
+    }
+  }
+}

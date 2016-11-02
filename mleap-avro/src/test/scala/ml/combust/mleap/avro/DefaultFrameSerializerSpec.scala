@@ -1,7 +1,7 @@
 package ml.combust.mleap.avro
 
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, MleapContext, Row}
-import ml.combust.mleap.runtime.serialization.FrameSerializerContext
+import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.runtime.serialization._
 import ml.combust.mleap.runtime.types._
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
@@ -16,34 +16,28 @@ class DefaultFrameSerializerSpec extends FunSpec {
   val row = Row(2.0, "hello", Vectors.dense(Array(0.1, 2.33, 4.5)))
   val dataset = LocalDataset(Seq(row))
   val frame = LeapFrame(schema, dataset)
-  val serializer = DefaultFrameSerializer(FrameSerializerContext("ml.combust.mleap.avro")(MleapContext()))
 
-  it("serializes/deserializes avro properly") {
-    val bytes = serializer.toBytes(frame)
-    val dFrame = serializer.fromBytes(bytes)
+  import ml.combust.mleap.runtime.MleapContext.defaultContext
 
-    assert(frame.schema == dFrame.schema)
-  }
+  describe("with format ml.combust.mleap.avro") {
+    it("serializes the leap frame as avro") {
+      val bytes = FrameWriter("ml.combust.mleap.avro").toBytes(frame)
+      val dFrame = FrameReader("ml.combust.mleap.avro").fromBytes(bytes)
 
-  describe("row serializer") {
-    val rowSerializer = serializer.rowSerializer(schema)
-
-    it("serializes/deserializes avro rows properly") {
-      val row = Row(2.0, "hello", Vectors.dense(Array(0.1, 2.33, 4.5)))
-      val bytes = rowSerializer.toBytes(row)
-      val dRow = rowSerializer.fromBytes(bytes)
-
-      assert(row.toSeq == dRow.toSeq)
+      assert(dFrame.schema == frame.schema)
+      assert(dFrame.dataset == frame.dataset)
     }
-  }
 
-  describe("with an MleapContext") {
-    it("serializes/deserializes avro properly") {
-      val serializer = MleapContext.defaultContext.serializer("ml.combust.mleap.avro")
-      val bytes = serializer.toBytes(frame)
-      val dFrame = serializer.fromBytes(bytes)
+    describe("row serializer") {
+      it("serializes rows as avro") {
+        val writer = RowWriter(frame.schema, "ml.combust.mleap.avro")
+        val reader = RowReader(frame.schema, "ml.combust.mleap.avro")
+        val row = frame.dataset(0)
+        val bytes = writer.toBytes(row)
+        val dRow = reader.fromBytes(bytes)
 
-      assert(frame == dFrame)
+        assert(row == dRow)
+      }
     }
   }
 }

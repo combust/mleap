@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime
 
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
+import ml.combust.mleap.runtime.serialization.{Defaults, FrameWriter, RowReader, RowWriter}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.runtime.types._
 
@@ -89,6 +90,10 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
         }
     }
   }
+
+  def writer(format: String = Defaults.format): FrameWriter = FrameWriter(format)
+  def rowWriter(format: String = Defaults.format): RowWriter = RowWriter(schema, format)
+  def rowReader(format: String = Defaults.format): RowReader = RowReader(schema, format)
 
   /** Creates a new instance of this LeapFrame with new schema and dataset.
     *

@@ -2,6 +2,7 @@ package ml.combust.bundle.dsl
 
 import java.io.File
 
+import ml.combust.BuildValues
 import ml.combust.bundle.{BundleContext, BundleRegistry, HasBundleRegistry}
 import ml.combust.bundle.serializer._
 
@@ -10,7 +11,7 @@ import ml.combust.bundle.serializer._
   * Contains file names for bundle JSON files and model JSON files.
   */
 object Bundle {
-  val version = "0.2.0"
+  val version = BuildValues.version
   val bundleJson = "bundle.json"
   val root = "root"
 

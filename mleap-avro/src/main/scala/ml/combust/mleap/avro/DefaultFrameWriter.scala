@@ -1,9 +1,10 @@
 package ml.combust.mleap.avro
 
 import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
 
 import ml.combust.mleap.runtime.LeapFrame
-import ml.combust.mleap.runtime.serialization.FrameWriter
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import org.apache.avro.Schema
 import org.apache.avro.file.DataFileWriter
 import org.apache.avro.generic.{GenericData, GenericDatumWriter}
@@ -16,7 +17,7 @@ import resource._
 class DefaultFrameWriter extends FrameWriter {
   val valueConverter = ValueConverter()
 
-  override def toBytes[LF <: LeapFrame[LF]](frame: LF): Array[Byte] = {
+  override def toBytes[LF <: LeapFrame[LF]](frame: LF, charset: Charset = BuiltinFormats.charset): Array[Byte] = {
     (for(out <- managed(new ByteArrayOutputStream())) yield {
       val writers = frame.schema.fields.map(_.dataType).map(valueConverter.mleapToAvro)
       val avroSchema = frame.schema: Schema

@@ -1,9 +1,10 @@
 package ml.combust.mleap.binary
 
 import java.io.{ByteArrayOutputStream, DataOutputStream}
+import java.nio.charset.Charset
 
 import ml.combust.mleap.runtime.LeapFrame
-import ml.combust.mleap.runtime.serialization.{Defaults, FrameWriter}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import ml.combust.mleap.json.JsonSupport._
 import spray.json._
 import resource._
@@ -12,11 +13,11 @@ import resource._
   * Created by hollinwilkins on 11/2/16.
   */
 class DefaultFrameWriter extends FrameWriter {
-  override def toBytes[LF <: LeapFrame[LF]](frame: LF): Array[Byte] = {
+  override def toBytes[LF <: LeapFrame[LF]](frame: LF, charset: Charset = BuiltinFormats.charset): Array[Byte] = {
     (for(out <- managed(new ByteArrayOutputStream())) yield {
       val serializers = frame.schema.fields.map(_.dataType).map(ValueSerializer.serializerForDataType)
       val dout = new DataOutputStream(out)
-      val schemaBytes = frame.schema.toJson.prettyPrint.getBytes(Defaults.charset)
+      val schemaBytes = frame.schema.toJson.prettyPrint.getBytes(BuiltinFormats.charset)
       dout.writeInt(schemaBytes.length)
       dout.write(schemaBytes)
       dout.writeInt(frame.dataset.size)

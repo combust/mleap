@@ -1,7 +1,9 @@
 package ml.combust.mleap.avro
 
+import java.nio.charset.Charset
+
 import ml.combust.mleap.runtime.{ArrayRow, Row}
-import ml.combust.mleap.runtime.serialization.RowReader
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader}
 import ml.combust.mleap.runtime.types.StructType
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericDatumReader}
@@ -19,7 +21,7 @@ class DefaultRowReader(override val schema: StructType) extends RowReader {
   var decoder: BinaryDecoder = null
   var record = new GenericData.Record(avroSchema)
 
-  override def fromBytes(bytes: Array[Byte]): Row = {
+  override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Row = {
     decoder = DecoderFactory.get().binaryDecoder(bytes, decoder)
     record = datumReader.read(record, decoder)
     val row = ArrayRow(new Array[Any](schema.fields.length))

@@ -1,5 +1,7 @@
 package ml.combust.mleap.runtime.serialization
 
+import java.nio.charset.Charset
+
 import ml.combust.bundle.util.ClassLoaderUtil
 import ml.combust.mleap.runtime.Row
 import ml.combust.mleap.runtime.types.StructType
@@ -9,7 +11,7 @@ import ml.combust.mleap.runtime.types.StructType
   */
 object RowWriter {
   def apply(schema: StructType,
-            format: String = Defaults.format,
+            format: String = BuiltinFormats.json,
             classLoader: Option[ClassLoader] = None): RowWriter = {
     ClassLoaderUtil.resolveClassLoader(classLoader).
       loadClass(s"$format.DefaultRowWriter").
@@ -22,5 +24,5 @@ object RowWriter {
 trait RowWriter {
   val schema: StructType
 
-  def toBytes(row: Row): Array[Byte]
+  def toBytes(row: Row, charset: Charset = BuiltinFormats.charset): Array[Byte]
 }

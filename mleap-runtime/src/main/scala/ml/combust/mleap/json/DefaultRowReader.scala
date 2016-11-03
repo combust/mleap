@@ -1,7 +1,9 @@
 package ml.combust.mleap.json
 
+import java.nio.charset.Charset
+
 import ml.combust.mleap.runtime.Row
-import ml.combust.mleap.runtime.serialization.{Defaults, RowReader}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader}
 import ml.combust.mleap.runtime.types.StructType
 import spray.json._
 
@@ -11,5 +13,7 @@ import spray.json._
 class DefaultRowReader(override val schema: StructType) extends RowReader {
   val rowFormat: RowFormat = RowFormat(schema)
 
-  override def fromBytes(bytes: Array[Byte]): Row = rowFormat.read(new String(bytes, Defaults.charset).parseJson)
+  override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Row = {
+    rowFormat.read(new String(bytes, charset).parseJson)
+  }
 }

@@ -8,17 +8,16 @@ import java.io.File
 /**
   * Created by mikhail on 11/5/16.
   *
-  *
   */
-class PythonSerializer() {
-  implicit val  hr: HasBundleRegistry = BundleRegistry("spark")
+class SimpleSparkSerializer() {
+  implicit val hr: HasBundleRegistry = BundleRegistry("spark")
 
-  def serializeToBundle(transformer : Transformer, path : String): Unit = {
+  def serializeToBundle(transformer: Transformer, path : String): Unit = {
     transformer.serializeToBundle(new File(path))
   }
 
-  def deserializeFromBundle(path : String): Transformer = {
-    val (bundle, tf) = new File(path).deserializeBundle()
+  def deserializeFromBundle(path: String): Transformer = {
+    val (_, tf) = new File(path).deserializeBundle()
     tf
   }
 

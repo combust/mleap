@@ -16,33 +16,24 @@
 #
 
 from pyspark.ml.base import Transformer
-from pyspark.ml.wrapper import JavaTransformer
-
+from pyspark.ml.util import _jvm
 
 def serializeToBundle(self, path):
-    python_serializer = PythonSerializer()
-    python_serializer.serializeToBundle(self, path)
-
+    serializer = SimpleSparkSerializer()
+    serializer.serializeToBundle(self, path)
 
 def deserializeFromBundle(self, path):
-    python_serializer = PythonSerializer()
-    tf = python_serializer.deserializeFromBundle(path)
+    serializer = SimpleSparkSerializer()
+    tf = serializer.deserializeFromBundle(path)
     return JavaTransformer._from_java(tf)
-
 
 setattr(Transformer, 'serializeToBundle', serializeToBundle)
 setattr(Transformer.__class__, 'deserializeFromBundle', deserializeFromBundle)
 
-from pyspark.ml.wrapper import JavaTransformer
-
-
-class PythonSerializer(JavaTransformer):
-
+class SimpleSparkSerializer(object):
     def __init__(self):
-        """
-        """
-        super(PythonSerializer, self).__init__()
-        self._java_obj = self._new_java_obj("ml.combust.mleap.spark.PythonSerializer")
+        super(SimpleSparkSerializer, self).__init__()
+        self._java_obj = _jvm().ml.combust.mleap.spark.SimpleSparkSerializer()
 
     def serializeToBundle(self, transformer, path):
         self._java_obj.serializeToBundle(transformer._to_java(), path)

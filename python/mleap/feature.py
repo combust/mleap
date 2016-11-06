@@ -19,7 +19,6 @@ from pyspark.ml.util import JavaMLReadable, JavaMLWritable
 from pyspark.ml.wrapper import JavaModel, JavaEstimator
 from pyspark.ml.param.shared import *
 
-
 class OneHotEncoder(JavaEstimator, HasInputCol, HasOutputCol, HasHandleInvalid, JavaMLReadable,
                     JavaMLWritable):
 

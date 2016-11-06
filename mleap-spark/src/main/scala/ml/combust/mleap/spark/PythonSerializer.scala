@@ -19,7 +19,6 @@ class PythonSerializer() {
 
   def deserializeFromBundle(path : String): Transformer = {
     val (bundle, tf) = new File(path).deserializeBundle()
-    println(tf.uid)
     tf
   }
 

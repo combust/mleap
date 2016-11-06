@@ -44,6 +44,13 @@ case class VectorAssemblerModel() extends Serializable {
           }
         }
         cur += vec.size
+      case v: java.math.BigDecimal =>
+        val d = v.doubleValue()
+        if (d != 0.0) {
+          indices += cur
+          values += d
+        }
+        cur += 1
     }
     Vectors.sparse(cur, indices.result(), values.result()).compressed
   }

@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+from pyspark.ml.wrapper import JavaTransformer
 from pyspark.ml.base import Transformer
 from pyspark.ml.util import _jvm
 
@@ -24,8 +25,7 @@ def serializeToBundle(self, path):
 
 def deserializeFromBundle(self, path):
     serializer = SimpleSparkSerializer()
-    tf = serializer.deserializeFromBundle(path)
-    return JavaTransformer._from_java(tf)
+    return serializer.deserializeFromBundle(path)
 
 setattr(Transformer, 'serializeToBundle', serializeToBundle)
 setattr(Transformer.__class__, 'deserializeFromBundle', deserializeFromBundle)
@@ -39,4 +39,4 @@ class SimpleSparkSerializer(object):
         self._java_obj.serializeToBundle(transformer._to_java(), path)
 
     def deserializeFromBundle(self, path):
-        return self._java_obj.deserializeFromBundle(path)
+        return JavaTransformer._from_java( self._java_obj.deserializeFromBundle(path))

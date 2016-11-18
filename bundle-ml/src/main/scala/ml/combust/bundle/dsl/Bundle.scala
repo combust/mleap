@@ -63,6 +63,7 @@ object Bundle {
     }
 
     object clustering {
+      val gaussian_mixture = "gaussian_mixture"
       val k_means = "k_means"
     }
 

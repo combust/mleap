@@ -29,9 +29,9 @@ class KMeansSpec extends FunSpec {
       val frame2 = km.transform(frame).get
       val data = frame2.dataset.toArray
 
-      assert(data(0).getDouble(1) == 0.0)
-      assert(data(1).getDouble(1) == 1.0)
-      assert(data(2).getDouble(1) == 2.0)
+      assert(data(0).getInt(1) == 0)
+      assert(data(1).getInt(1) == 1)
+      assert(data(2).getInt(1) == 2)
     }
 
     describe("with invalid features column") {

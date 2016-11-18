@@ -11,6 +11,7 @@ import ml.combust.mleap.spark.SparkSupport.{MleapTransformerOps, SparkTransforme
 import ml.combust.mleap.runtime.MleapSupport.FileOps
 import com.databricks.spark.avro._
 import ml.combust.bundle.serializer.FileUtil
+import org.apache.spark.sql.functions.col
 
 /**
   * Created by hollinwilkins on 10/30/16.
@@ -44,8 +45,10 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   def parityTransformer(): Unit = {
     it("has parity between Spark/MLeap") {
       val mTransformer = mleapTransformer(sparkTransformer)
-      val sparkDataset = sparkTransformer.transform(dataset).collect()
-      val mleapDataset = mTransformer.sparkTransform(dataset).collect()
+      val sparkTransformed = sparkTransformer.transform(dataset)
+      val fields = sparkTransformed.schema.fields.map(_.name).map(col)
+      val sparkDataset = sparkTransformed.select(fields: _*).collect()
+      val mleapDataset = mTransformer.sparkTransform(dataset).select(fields: _*).collect()
 
       assert(sparkDataset sameElements mleapDataset)
     }

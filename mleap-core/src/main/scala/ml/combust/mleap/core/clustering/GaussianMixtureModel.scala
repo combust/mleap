@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.clustering
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.mleap.Utils._
 import org.apache.spark.ml.linalg.{DenseVector, Vector, Vectors}
 import org.apache.spark.ml.stat.distribution.MultivariateGaussian
@@ -8,6 +9,7 @@ import org.apache.spark.ml.stat.distribution.MultivariateGaussian
   * Created by hollinwilkins on 11/17/16.
   */
 object GaussianMixtureModel {
+  @SparkCode(uri = "https://github.com/apache/spark/blob/branch-2.0/mllib/src/main/scala/org/apache/spark/ml/clustering/GaussianMixture.scala")
   def computeProbabilities(features: DenseVector,
                            dists: Array[MultivariateGaussian],
                            weights: Array[Double]): Array[Double] = {

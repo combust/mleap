@@ -13,7 +13,6 @@ import org.apache.spark.mllib.util.DataValidators
 import org.apache.spark.sql.{Dataset, Row}
 import org.apache.spark.sql.functions.col
 
-
 /**
   * Created by hollinwilkins on 4/14/16.
   */
@@ -167,11 +166,9 @@ class SVM(override val uid: String)
   override def copy(extra: ParamMap): SVM = defaultCopy(extra)
 
   override protected def train(dataset: Dataset[_]): SVMModel = {
-    val labeledPoints = dataset.select(col($(featuresCol)), col($(labelCol)))
-      .rdd
-      .map {
-        case Row(label: Double, features: linalg.Vector) => LabeledPoint(label, Vectors.dense(features.toArray))
-      }
+    val labeledPoints = dataset.select(col($(labelCol)), col($(featuresCol))).rdd.map {
+      case Row(label: Double, features: linalg.Vector) => LabeledPoint(label, Vectors.dense(features.toArray))
+    }
 
     val mllibModel = new SVMWithSGD(getStepSize,
       getNumIterations,

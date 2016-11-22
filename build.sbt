@@ -15,7 +15,7 @@ lazy val `mleap-base` = project.in(file("mleap-base")).
   settings(Common.sonatypeSettings).
   enablePlugins(BuildInfoPlugin, GitVersioning).
   settings(buildInfoKeys := Seq[BuildInfoKey](name, version, git.gitHeadCommit),
-    buildInfoPackage := "ml.combust",
+    buildInfoPackage := "ml.combust.mleap",
     buildInfoObject := "BuildValues",
     buildInfoOptions += BuildInfoOption.ToJson)
 

@@ -1,4 +1,4 @@
-package ml.combust
+package ml.combust.mleap
 
 /**
   * Created by hollinwilkins on 11/2/16.

@@ -7,7 +7,7 @@ lazy val `root` = project.in(file(".")).
   settings(publishArtifact := false).
   enablePlugins(ReleasePlugin).
   aggregate(`mleap-base`, `mleap-core`, `mleap-runtime`,
-    `mleap-spark`, `bundle-ml`)
+    `mleap-spark`, `mleap-avro`, `bundle-ml`)
 
 lazy val `mleap-base` = project.in(file("mleap-base")).
   settings(Common.settings).

@@ -21,11 +21,16 @@ trait HasBundleRegistry {
 }
 
 object BundleRegistry {
-  def apply(registry: String): BundleRegistry = apply(registry, ClassLoaderUtil.resolveClassLoader())
+  def apply(registry: String): BundleRegistry = apply(registry, None)
 
-  def apply(registry: String, cl: ClassLoader): BundleRegistry = apply(registry, ConfigFactory.load(cl), cl)
+  def apply(registry: String, cl: Option[ClassLoader]): BundleRegistry = {
+    apply(registry, None, cl)
+  }
 
-  def apply(registry: String, config: Config, cl: ClassLoader): BundleRegistry = {
+  def apply(registry: String, configOption: Option[Config], clOption: Option[ClassLoader]): BundleRegistry = {
+    val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[BundleRegistry].getCanonicalName))
+    val config = configOption.getOrElse(ConfigFactory.load(cl))
+
     val br = config.getStringList(s"ml.combust.bundle.registry.$registry.ops").asScala.foldLeft(BundleRegistry(cl)) {
       (br, opClass) => br.register(cl.loadClass(opClass).newInstance().asInstanceOf[OpNode[_, _, _]])
     }

@@ -35,6 +35,7 @@ setattr(FeatureUnion, 'serialize_to_bundle', serialize_to_bundle)
 setattr(FeatureUnion, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(FeatureUnion, 'op', 'feature_union')
 setattr(FeatureUnion, 'name', "{}_{}".format('feature_union', uuid.uuid1()))
+setattr(FeatureUnion, 'serializable', True)
 
 
 class SimpleSparkSerializer(object):
@@ -75,7 +76,7 @@ class SimpleSparkSerializer(object):
           "name": transformer.name,
           "format": "json",
           "version": "0.4.0-SNAPSHOT",
-          "nodes": [x[1].name for x in transformer.steps]
+          "nodes": [x[1].name for x in transformer.steps if hasattr(x[1], 'serialize_to_bundle')]
         }
         return js
 

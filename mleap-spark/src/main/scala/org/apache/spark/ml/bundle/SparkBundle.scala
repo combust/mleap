@@ -12,8 +12,7 @@ import org.apache.spark.ml.{PipelineModel, Transformer}
   */
 object SparkBundle {
   def readTransformerGraph(path: File)
-                          (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
-                           context: SparkBundleContext = SparkBundleContext()): PipelineModel = {
+                          (implicit context: SparkBundleContext = SparkBundleContext()): PipelineModel = {
     val bundle = BundleSerializer(context, path).read()
     new PipelineModel(uid = bundle.name, stages = bundle.nodes.map(_.asInstanceOf[Transformer]).toArray)
   }

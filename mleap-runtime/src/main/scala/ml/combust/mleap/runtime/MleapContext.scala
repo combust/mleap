@@ -3,14 +3,22 @@ package ml.combust.mleap.runtime
 import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.mleap.runtime.types.CustomType
 import ml.combust.bundle
+import ml.combust.bundle.util.ClassLoaderUtil
 
 /**
   * Created by hollinwilkins on 10/25/16.
   */
 object MleapContext {
-  lazy implicit val defaultContext: MleapContext = MleapContext()
+  implicit lazy val defaultContext: MleapContext = MleapContext(Some(classOf[MleapContext].getClassLoader))
 
-  def apply(registry: BundleRegistry = BundleRegistry("mleap")): MleapContext = {
+  def apply(): MleapContext = apply(None)
+
+  def apply(clOption: Option[ClassLoader]): MleapContext = {
+    val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[MleapContext].getCanonicalName))
+    apply(BundleRegistry("mleap", Some(cl)))
+  }
+
+  def apply(registry: BundleRegistry): MleapContext = {
     val context = new MleapContext(registry, Map(), Map())
     registry.customTypes.values.foldLeft(context) {
       (ctx, ct) => ctx.withCustomType(ct.asInstanceOf[bundle.custom.CustomType[Any]])

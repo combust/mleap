@@ -7,7 +7,7 @@ lazy val `root` = project.in(file(".")).
   settings(publishArtifact := false).
   enablePlugins(ReleasePlugin).
   aggregate(`mleap-base`, `mleap-core`, `mleap-runtime`,
-    `mleap-spark`, `bundle-ml`)
+    `mleap-spark`, `mleap-avro`, `bundle-ml`)
 
 lazy val `mleap-base` = project.in(file("mleap-base")).
   settings(Common.settings).
@@ -15,7 +15,7 @@ lazy val `mleap-base` = project.in(file("mleap-base")).
   settings(Common.sonatypeSettings).
   enablePlugins(BuildInfoPlugin, GitVersioning).
   settings(buildInfoKeys := Seq[BuildInfoKey](name, version, git.gitHeadCommit),
-    buildInfoPackage := "ml.combust",
+    buildInfoPackage := "ml.combust.mleap",
     buildInfoObject := "BuildValues",
     buildInfoOptions += BuildInfoOption.ToJson)
 

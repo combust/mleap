@@ -12,9 +12,9 @@ import resource._
   */
 object FrameReader {
   def apply(format: String = BuiltinFormats.json,
-            classLoader: Option[ClassLoader] = None): FrameReader = {
-    ClassLoaderUtil.resolveClassLoader(classLoader).
-      loadClass(s"$format.DefaultFrameReader").
+            clOption: Option[ClassLoader] = None): FrameReader = {
+    val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[FrameReader].getCanonicalName))
+    cl.loadClass(s"$format.DefaultFrameReader").
       newInstance().
       asInstanceOf[FrameReader]
   }

@@ -12,9 +12,9 @@ import ml.combust.mleap.runtime.Row
 object RowReader {
   def apply(schema: StructType,
             format: String = BuiltinFormats.json,
-            classLoader: Option[ClassLoader] = None): RowReader = {
-    ClassLoaderUtil.resolveClassLoader(classLoader).
-      loadClass(s"$format.DefaultRowReader").
+            clOption: Option[ClassLoader] = None): RowReader = {
+    val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[RowReader].getCanonicalName))
+    cl.loadClass(s"$format.DefaultRowReader").
       getConstructor(classOf[StructType]).
       newInstance(schema).
       asInstanceOf[RowReader]

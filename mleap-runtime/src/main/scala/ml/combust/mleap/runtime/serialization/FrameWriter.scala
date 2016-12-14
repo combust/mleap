@@ -4,7 +4,7 @@ import java.io.{File, FileOutputStream}
 import java.nio.charset.Charset
 
 import ml.combust.bundle.util.ClassLoaderUtil
-import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame}
+import ml.combust.mleap.runtime.LeapFrame
 import resource._
 
 /**
@@ -12,9 +12,9 @@ import resource._
   */
 object FrameWriter {
   def apply(format: String = BuiltinFormats.json,
-            classLoader: Option[ClassLoader] = None): FrameWriter = {
-    ClassLoaderUtil.resolveClassLoader(classLoader).
-      loadClass(s"$format.DefaultFrameWriter").
+            clOption: Option[ClassLoader] = None): FrameWriter = {
+    val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[FrameWriter].getCanonicalName))
+    cl.loadClass(s"$format.DefaultFrameWriter").
       newInstance().
       asInstanceOf[FrameWriter]
   }

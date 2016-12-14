@@ -12,9 +12,9 @@ import ml.combust.mleap.runtime.types.StructType
 object RowWriter {
   def apply(schema: StructType,
             format: String = BuiltinFormats.json,
-            classLoader: Option[ClassLoader] = None): RowWriter = {
-    ClassLoaderUtil.resolveClassLoader(classLoader).
-      loadClass(s"$format.DefaultRowWriter").
+            clOption: Option[ClassLoader] = None): RowWriter = {
+    val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[RowWriter].getCanonicalName))
+    cl.loadClass(s"$format.DefaultRowWriter").
       getConstructor(classOf[StructType]).
       newInstance(schema).
       asInstanceOf[RowWriter]

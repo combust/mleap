@@ -2,7 +2,6 @@ package org.apache.spark.ml.parity
 
 import java.io.File
 
-import ml.combust.bundle.BundleRegistry
 import ml.combust.mleap.runtime
 import org.apache.spark.ml.Transformer
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -11,15 +10,20 @@ import ml.combust.mleap.spark.SparkSupport.{MleapTransformerOps, SparkTransforme
 import ml.combust.mleap.runtime.MleapSupport.FileOps
 import com.databricks.spark.avro._
 import ml.combust.bundle.serializer.FileUtil
+import ml.combust.mleap.runtime.MleapContext
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.sql.functions.col
 
 /**
   * Created by hollinwilkins on 10/30/16.
   */
 object SparkParityBase extends FunSpec {
-  val sparkRegistry = BundleRegistry("spark")
-  val mleapRegistry = BundleRegistry("mleap")
-  def dataset(spark: SparkSession) = spark.sqlContext.read.avro(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").toString)
+  val sparkRegistry = SparkBundleContext.defaultContext
+  val mleapRegistry = MleapContext.defaultContext
+
+  def dataset(spark: SparkSession) = {
+    spark.sqlContext.read.avro(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").toString)
+  }
 }
 
 abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {

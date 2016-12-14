@@ -2,7 +2,7 @@ package ml.combust.bundle.dsl
 
 import java.io.File
 
-import ml.combust.BuildValues
+import ml.combust.mleap.BuildValues
 import ml.combust.bundle.{BundleContext, BundleRegistry, HasBundleRegistry}
 import ml.combust.bundle.serializer._
 
@@ -35,6 +35,7 @@ object Bundle {
     }
 
     object feature {
+      val binarizer = "binarizer"
       val string_indexer = "string_indexer"
       val reverse_string_indexer = "reverse_string_indexer"
       val hashing_term_frequency = "hashing_term_frequency"

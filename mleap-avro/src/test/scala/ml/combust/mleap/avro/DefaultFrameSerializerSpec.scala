@@ -1,7 +1,7 @@
 package ml.combust.mleap.avro
 
 import ml.combust.mleap.runtime.serialization._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, MleapContext, Row}
+import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types._
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec

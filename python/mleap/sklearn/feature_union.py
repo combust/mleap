@@ -17,7 +17,6 @@
 
 from sklearn.pipeline import FeatureUnion
 import os
-import json
 import shutil
 import uuid
 
@@ -46,37 +45,19 @@ class SimpleSparkSerializer(object):
 
         for transformer in [x[1] for x in transformer.transformer_list]:
             name = transformer.name
-            print(name)
 
             if os.path.exists("{}/{}.node".format(path, transformer.name)):
                 shutil.rmtree("{}/{}.node".format(path, transformer.name))
 
             model_dir = "{}/{}.node".format(path, transformer.name)
-            print model_dir
             os.mkdir(model_dir)
 
             if transformer.op == 'pipeline':
                 # Write bundle file
                 transformer.serialize_to_bundle(model_dir, transformer.name)
 #
-            #elif step.op == 'feature_union':
-            #    for name, tf in step.transformer_list:
-            #        tf.setialize_to_bundel(tf, bundle_dir, name)
-            #else:
-            #    step.serialize_to_bundle(model_dir)
-#
             if isinstance(transformer, list):
                 pass
 
     def deserialize_from_bundle(self, path):
         return NotImplementedError
-
-    def get_bundle(self, transformer):
-        js = {
-          "name": transformer.name,
-          "format": "json",
-          "version": "0.4.0-SNAPSHOT",
-          "nodes": [x[1].name for x in transformer.steps if hasattr(x[1], 'serialize_to_bundle')]
-        }
-        return js
-

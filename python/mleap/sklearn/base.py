@@ -16,9 +16,11 @@
 #
 
 from sklearn.linear_model import LinearRegression
+from mleap.bundle.serialize import MLeapSerializer
 import uuid
 import json
 import os
+import shutil
 
 
 def get_mleap_model(self, path):
@@ -28,6 +30,10 @@ def get_mleap_model(self, path):
 def get_mleap_node(self, path):
     serializer = SimpleSparkSerializer()
     return serializer.get_mleap_node(self)
+
+def serialize_to_bundle(self, path, model_name):
+    serializer = SimpleSparkSerializer()
+    return serializer.serialize_to_bundle(self, path, model_name)
 
 def set_prediction_column(self, prediction_column):
     serializer = SimpleSparkSerializer()
@@ -40,69 +46,41 @@ def set_input_features(self, input_features):
 
 setattr(LinearRegression, 'get_mleap_model', get_mleap_model)
 setattr(LinearRegression, 'get_mleap_node', get_mleap_node)
+setattr(LinearRegression, 'serialize_to_bundle', serialize_to_bundle)
 setattr(LinearRegression, 'op', 'linear_regression')
 setattr(LinearRegression, 'name', "{}_{}".format('linear_regression', uuid.uuid1()))
 setattr(LinearRegression, 'set_prediction_column', set_prediction_column)
 setattr(LinearRegression, 'set_input_features', set_input_features)
+setattr(LinearRegression, 'serializable', True)
 
 
-class SimpleSparkSerializer(object):
+class SimpleSparkSerializer(MLeapSerializer):
     def __init__(self):
         super(SimpleSparkSerializer, self).__init__()
         self.prediction_column = None
-
-    def serialize_to_bundle(self, transformer, path):
-        """
-        :param path:
-        :return:
-        """
-        step_dir = "{}/{}.node".format(path, transformer.name)
-        os.mkdir(step_dir)
-        # Write Model and Node .json files
-        with open("{}/{}".format(step_dir, 'model.json'), 'w') as outfile:
-            json.dump(transformer.get_mleap_model(), outfile, indent=3)
-        with open("{}/{}".format(step_dir, 'node.json'), 'w') as f:
-            json.dump(transformer.get_mleap_node(), f, indent=3)
-
-    def get_mleap_model(self, transformer):
-        js = {
-            'op': transformer.op,
-            "attributes": [{
-            "name": "coefficients",
-            "type": {
-              "type": "tensor",
-              "tensor": {
-                "base": "double",
-                "dimensions": [-1]
-              }
-            },
-            "value": transformer.coef_.tolist()
-          }, {
-            "name": "intercept",
-            "type": "double",
-            "value": transformer.intercept_.tolist()
-          }]
-        }
-        return js
-
-    def get_mleap_node(self, transformer):
-        js = {
-          "name": transformer.op,
-          "shape": {
-            "inputs": [{
-              "name": transformer.input_features,
-              "port": "features"
-            }],
-            "outputs": [{
-              "name": transformer.prediction_column,
-              "port": "prediction"
-            }]
-          }
-        }
-        return js
 
     def set_prediction_column(self, transformer, prediction_column):
         transformer.prediction_column = prediction_column
 
     def set_input_features(self, transformer, input_features):
         transformer.input_features = input_features
+
+    def serialize_to_bundle(self, transformer, path, model_name):
+
+        # compile tuples of model attributes to serialize
+        attributes = []
+        attributes.append(('intercept', transformer.intercept_.tolist()[0]))
+        attributes.append(('coefficients', transformer.coef_.tolist()[0]))
+
+        # define node inputs and outputs
+        inputs = [{
+                  "name": transformer.input_features,
+                  "port": "features"
+                }]
+
+        outputs = [{
+                  "name": transformer.prediction_column,
+                  "port": "prediction"
+                }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs)

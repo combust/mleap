@@ -18,6 +18,7 @@ from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer
 from sklearn.preprocessing.data import OneHotEncoder
 from sklearn.preprocessing.label import LabelEncoder
+from mleap.bundle.serialize import MLeapSerializer
 import numpy as np
 import pandas as pd
 import uuid
@@ -38,69 +39,89 @@ class ops(object):
 
 ops = ops()
 
-def get_mleap_model(self, path):
-    serializer = SimpleSparkSerializer()
-    return serializer.get_mleap_model(self)
-
-def get_mleap_node(self, path):
-    serializer = SimpleSparkSerializer()
-    return serializer.get_mleap_node(self)
 
 def set_input_features(self, input_features):
     serializer = SimpleSparkSerializer()
     return serializer.set_input_features(self, input_features)
 
+
 def set_output_features(self, output_features):
     serializer = SimpleSparkSerializer()
     return serializer.set_output_features(self, output_features)
+
 
 def serialize_to_bundle(self, path, model_name):
     serializer = SimpleSparkSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
 
 
-setattr(StandardScaler, 'get_mleap_model', get_mleap_model)
-setattr(StandardScaler, 'get_mleap_node', get_mleap_node)
 setattr(StandardScaler, 'op', ops.STANDARD_SCALER)
 setattr(StandardScaler, 'name', "{}_{}".format(ops.STANDARD_SCALER, uuid.uuid1()))
 setattr(StandardScaler, 'set_input_features', set_input_features)
 setattr(StandardScaler, 'set_output_features', set_output_features)
 setattr(StandardScaler, 'serialize_to_bundle', serialize_to_bundle)
+setattr(StandardScaler, 'serializable', True)
 
-setattr(MinMaxScaler, 'get_mleap_model', get_mleap_model)
-setattr(MinMaxScaler, 'get_mleap_node', get_mleap_node)
 setattr(MinMaxScaler, 'op', ops.MIN_MAX_SCALER)
 setattr(MinMaxScaler, 'name', "{}_{}".format(ops.MIN_MAX_SCALER, uuid.uuid1()))
 setattr(MinMaxScaler, 'set_input_features', set_input_features)
 setattr(MinMaxScaler, 'set_output_features', set_output_features)
 setattr(MinMaxScaler, 'serialize_to_bundle', serialize_to_bundle)
+setattr(MinMaxScaler, 'serializable', True)
 
-setattr(Imputer, 'get_mleap_model', get_mleap_model)
-setattr(Imputer, 'get_mleap_node', get_mleap_node)
 setattr(Imputer, 'op', ops.IMPUTER)
 setattr(Imputer, 'name', "{}_{}".format(ops.IMPUTER, uuid.uuid1()))
 setattr(Imputer, 'set_input_features', set_input_features)
 setattr(Imputer, 'set_output_features', set_output_features)
 setattr(Imputer, 'serialize_to_bundle', serialize_to_bundle)
+setattr(Imputer, 'serializable', True)
 
-setattr(LabelEncoder, 'get_mleap_model', get_mleap_model)
-setattr(LabelEncoder, 'get_mleap_node', get_mleap_node)
 setattr(LabelEncoder, 'op', ops.LABEL_ENCODER)
 setattr(LabelEncoder, 'name', "{}_{}".format(ops.LABEL_ENCODER, uuid.uuid1()))
 setattr(LabelEncoder, 'set_input_features', set_input_features)
 setattr(LabelEncoder, 'set_output_features', set_output_features)
 setattr(LabelEncoder, 'serialize_to_bundle', serialize_to_bundle)
+setattr(LabelEncoder, 'serializable', True)
 
-setattr(OneHotEncoder, 'get_mleap_model', get_mleap_model)
-setattr(OneHotEncoder, 'get_mleap_node', get_mleap_node)
 setattr(OneHotEncoder, 'op', ops.ONE_HOT_ENCODER)
 setattr(OneHotEncoder, 'name', "{}_{}".format(ops.ONE_HOT_ENCODER, uuid.uuid1()))
 setattr(OneHotEncoder, 'set_input_features', set_input_features)
 setattr(OneHotEncoder, 'set_output_features', set_output_features)
 setattr(OneHotEncoder, 'serialize_to_bundle', serialize_to_bundle)
+setattr(OneHotEncoder, 'serializable', True)
 
 
-class FeatureExtractor(BaseEstimator, TransformerMixin):
+class SimpleSparkSerializer(object):
+    def __init__(self):
+        super(SimpleSparkSerializer, self).__init__()
+
+    @staticmethod
+    def _choose_serializer(transformer):
+        serializer = None
+        if transformer.op == ops.STANDARD_SCALER:
+            serializer = StandardScalerSerializer()
+        elif transformer.op == ops.MIN_MAX_SCALER:
+            serializer = MinMaxScalerSerializer()
+        elif transformer.op == ops.ONE_HOT_ENCODER:
+            serializer = OneHotEncoderSerializer()
+        elif transformer.op == ops.LABEL_ENCODER:
+            serializer = LabelEncoderSerializer()
+        elif transformer.op == ops.IMPUTER:
+            serializer = ImputerSerializer()
+        return serializer
+
+    def set_input_features(self, transformer, input_features):
+        transformer.input_features = input_features
+
+    def set_output_features(self, transformer, output_features):
+        transformer.output_features = output_features
+
+    def serialize_to_bundle(self, transformer, path, model_name):
+        serializer = self._choose_serializer(transformer)
+        serializer.serialize_to_bundle(transformer, path, model_name)
+
+
+class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
     """
     Selects a subset of features from a pandas dataframe that are then passed into a subsequent transformer.
     MLeap treats this transformer like a VectorAssembler equivalent in spark.
@@ -111,75 +132,166 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
         self.output_vector = output_vector
         self.op = 'vector_assembler'
         self.name = "{}_{}".format(self.op, uuid.uuid1())
+        self.dtypes = None
+        self.serializable = True
+        self.skip_fit_transform = False
 
     def transform(self, df, **params):
-        return df[self.input_features]
+        if not self.skip_fit_transform:
+            return df[self.input_features]
+        return df
 
     def fit(self, df, y=None, **fit_params):
+        if not self.skip_fit_transform:
+            self.dtypes = df[self.input_features].dtypes.to_dict()
+            if len([x for x in self.dtypes.values() if x.type == np.object_]) != 0:
+                self.serializable = False
         return self
 
     def fit_transform(self, X, y=None, **fit_params):
-
-        self.fit(X)
+        if not self.skip_fit_transform:
+            self.fit(X)
 
         df_subset = self.transform(X)
         return df_subset
 
     def serialize_to_bundle(self, path, model_name):
-        # If bundle path already exists, delte it and create a clean directory
-        if os.path.exists("{}/{}".format(path, model_name)):
-            shutil.rmtree("{}/{}".format(path, model_name))
 
-        model_dir = "{}/{}".format(path, model_name)
-        os.mkdir(model_dir)
+        # compile tuples of model attributes to serialize
+        attributes = None
 
-        # Write bundle file
-        with open("{}/{}".format(model_dir, 'bundle.json'), 'w') as outfile:
-            json.dump(self.get_mleap_model(), outfile, indent=3)
+        # define node inputs and outputs
+        inputs = [{'name': x, 'port': 'input{}'.format(self.input_features.index(x))} for x in self.input_features]
 
-        # Write node file
-        with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
-            json.dump(self.get_mleap_node(), outfile, indent=3)
+        outputs = [{
+                  "name": self.output_vector,
+                  "port": "output"
+                }]
 
-    def get_mleap_model(self):
-        js = {
-          "op": self.op
-        }
-        return js
-
-    def get_mleap_node(self):
-        js = {
-          "name": self.name,
-          "shape": {
-            "inputs": [{'name': x, 'port': 'input{}'.format(self.input_features.index(x))} for x in self.input_features],
-            "outputs": [{
-              "name": self.output_vector,
-              "port": "output"
-            }]
-          }
-        }
-        return js
+        self.serialize(self, path, model_name, attributes, inputs, outputs)
 
 
-class SerializeToBundle(object):
+class StandardScalerSerializer(MLeapSerializer):
     def __init__(self):
-        super(SerializeToBundle, self).__init__()
+        super(StandardScalerSerializer, self).__init__()
 
     def serialize_to_bundle(self, transformer, path, model_name):
-        # If bundle path already exists, delete it and create a clean directory
-        if os.path.exists("{}/{}.node".format(path, model_name)):
-            shutil.rmtree("{}/{}.node".format(path, model_name))
 
-        model_dir = "{}/{}.node".format(path, model_name)
-        os.mkdir(model_dir)
+        # compile tuples of model attributes to serialize
+        attributes = list()
+        attributes.append(('mean', transformer.mean_.tolist()))
+        attributes.append(('std', [np.sqrt(x) for x in transformer.var_]))
 
-        # Write bundle file
-        with open("{}/{}".format(model_dir, 'bundle.json'), 'w') as outfile:
-            json.dump(self.get_mleap_model(transformer), outfile, indent=3)
+        # define node inputs and outputs
+        inputs = [{
+                  "name": transformer.input_features,
+                  "port": "input"
+                }]
 
-        # Write node file
-        with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
-            json.dump(self.get_mleap_node(transformer), outfile, indent=3)
+        outputs = [{
+                  "name": transformer.output_features,
+                  "port": "output"
+                }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+
+class MinMaxScalerSerializer(MLeapSerializer):
+    def __init__(self):
+        super(MinMaxScalerSerializer, self).__init__()
+
+    def serialize_to_bundle(self, transformer, path, model_name):
+
+        # compile tuples of model attributes to serialize
+        attributes = list()
+        attributes.append(('mean', transformer.mean_.tolist()))
+        attributes.append(('std', [np.sqrt(x) for x in transformer.var_]))
+
+        # define node inputs and outputs
+        inputs = [{
+                  "name": transformer.input_features,
+                  "port": "input"
+                }]
+
+        outputs = [{
+                  "name": transformer.output_features,
+                  "port": "output"
+                }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+
+class ImputerSerializer(MLeapSerializer):
+    def __init__(self):
+        super(ImputerSerializer, self).__init__()
+        self.serializable = False
+
+    def serialize_to_bundle(self, transformer, path, model_name):
+
+        # compile tuples of model attributes to serialize
+        attributes = list()
+        attributes.append((transformer.strategy, transformer.statistics_.tolist()))
+
+        # define node inputs and outputs
+        inputs = [{
+                  "name": transformer.input_features,
+                  "port": "input"
+                }]
+
+        outputs = [{
+                  "name": transformer.output_features,
+                  "port": "output"
+                }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+
+class OneHotEncoderSerializer(MLeapSerializer):
+    def __init__(self):
+        super(OneHotEncoderSerializer, self).__init__()
+
+    def serialize_to_bundle(self, transformer, path, model_name):
+
+        # compile tuples of model attributes to serialize
+        attributes = list()
+        attributes.append(('size', transformer.n_values_.tolist()[0]))
+
+        # define node inputs and outputs
+        inputs = [{
+                  "name": transformer.input_features,
+                  "port": "input"
+                }]
+
+        outputs = [{
+                  "name": transformer.output_features,
+                  "port": "output"
+                }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+
+class LabelEncoderSerializer(MLeapSerializer):
+    def __init__(self):
+        super(LabelEncoderSerializer, self).__init__()
+
+    def serialize_to_bundle(self, transformer, path, model_name):
+
+        # compile tuples of model attributes to serialize
+        attributes = list()
+        attributes.append(('labels', transformer.classes_.tolist()))
+
+        # define node inputs and outputs
+        inputs = [{
+                  "name": transformer.input_features,
+                  "port": "input"
+                }]
+
+        outputs = [{
+                  "name": transformer.output_features,
+                  "port": "output"
+                }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
 
 class NDArrayToDataFrame(BaseEstimator, TransformerMixin):
@@ -229,7 +341,7 @@ class NDArrayToDataFrame(BaseEstimator, TransformerMixin):
         os.mkdir(model_dir)
 
         # Write bundle file
-        with open("{}/{}".format(model_dir, 'bundle.json'), 'w') as outfile:
+        with open("{}/{}".format(model_dir, 'model.json'), 'w') as outfile:
             json.dump(self.get_mleap_model(), outfile, indent=3)
 
         # Write node file
@@ -281,275 +393,9 @@ class ToDense(BaseEstimator, TransformerMixin):
         os.mkdir(model_dir)
 
         # Write bundle file
-        with open("{}/{}".format(model_dir, 'bundle.json'), 'w') as outfile:
+        with open("{}/{}".format(model_dir, 'model.json'), 'w') as outfile:
             json.dump(self.get_mleap_model(), outfile, indent=3)
 
         # Write node file
         with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
             json.dump(self.get_mleap_node(), outfile, indent=3)
-
-
-class SimpleSparkSerializer(object):
-    def __init__(self):
-        super(SimpleSparkSerializer, self).__init__()
-
-    @staticmethod
-    def _choose_serializer(transformer):
-        serializer = None
-        if transformer.op == ops.STANDARD_SCALER:
-            serializer = StandardScalerSerializer()
-        elif transformer.op == ops.MIN_MAX_SCALER:
-            serializer = MinMaxScalerSerializer()
-        elif transformer.op == ops.ONE_HOT_ENCODER:
-            serializer = OneHotEncoderSerializer()
-        elif transformer.op == ops.LABEL_ENCODER:
-            serializer = LabelEncoderSerializer()
-        elif transformer.op == ops.IMPUTER:
-            serializer = ImputerSerializer()
-        return serializer
-
-    def get_mleap_model(self, transformer):
-        serializer = self._choose_serializer(transformer)
-        js = serializer.get_mleap_model(transformer)
-        return js
-
-    def get_mleap_node(self, transformer):
-        serializer = self._choose_serializer(transformer)
-        js = serializer.get_mleap_node(transformer)
-        return js
-
-    def set_input_features(self, transformer, input_features):
-        transformer.input_features = input_features
-
-    def set_output_features(self, transformer, output_features):
-        transformer.output_features = output_features
-
-    def serialize_to_bundle(self, transformer, path, model_name):
-        serializer = self._choose_serializer(transformer)
-        serializer.serialize_to_bundle(transformer, path, model_name)
-
-
-class StandardScalerSerializer(SerializeToBundle):
-    def __init__(self):
-        super(StandardScalerSerializer, self).__init__()
-
-    def get_mleap_model(self, transformer):
-
-        attributes = []
-        if transformer.with_mean is True:
-            attributes.append({
-                'name': 'mean',
-                'type': {
-                    'type': 'tensor',
-                    'tensor': {
-                        'base': 'double',
-                        'dimensions': [-1]
-                    }
-                },
-                'value': transformer.mean_.tolist()
-            })
-
-        if transformer.with_std is True:
-            attributes.append({
-                'name': 'std',
-                'type': {
-                    'type': 'tensor',
-                    'tensor': {
-                        'base': 'double',
-                        'dimensions': [-1]
-                    }
-                },
-                'value': [np.sqrt(x) for x in transformer.var_]
-            })
-
-        js = {
-          "op": transformer.op,
-          "attributes": attributes
-        }
-        return js
-
-    def get_mleap_node(self, transformer):
-
-        js = {
-          "name": transformer.name,
-          "shape": {
-            "inputs": [{
-              "name": transformer.input_features,
-              "port": "input"
-            }],
-            "outputs": [{
-              "name": transformer.output_features,
-              "port": "output"
-            }]
-          }
-        }
-        return js
-
-
-class MinMaxScalerSerializer(SerializeToBundle):
-    def __init__(self):
-        super(MinMaxScalerSerializer, self).__init__()
-
-    def get_mleap_model(self, transformer):
-
-        attributes = []
-
-        attributes.append({
-            'name': 'min',
-            'type': {
-                'type': 'tensor',
-                'tensor': {
-                    'base': 'double',
-                    'dimensions': [-1]
-                }
-            },
-            'value': transformer.data_min_.tolist()
-        })
-
-        attributes.append({
-            'name': 'max',
-            'type': {
-                'type': 'tensor',
-                'tensor': {
-                    'base': 'double',
-                    'dimensions': [-1]
-                }
-            },
-            'value': transformer.data_max_.tolist()
-        })
-
-        js = {
-          "op": transformer.op,
-          "attributes": attributes
-        }
-        return js
-
-    def get_mleap_node(self, transformer):
-
-        js = {
-          "name": transformer.name,
-          "shape": {
-            "inputs": [{
-              "name": transformer.input_features,
-              "port": "input"
-            }],
-            "outputs": [{
-              "name": transformer.output_features,
-              "port": "output"
-            }]
-          }
-        }
-        return js
-
-
-
-class ImputerSerializer(SerializeToBundle):
-    def __init__(self):
-        super(ImputerSerializer, self).__init__()
-        self.serializable = False
-
-    def get_mleap_model(self, transformer):
-
-        attributes = []
-
-        attributes.append({
-            'name': transformer.strategy,
-            'type': {
-                'type': 'tensor',
-                'tensor': {
-                    'base': 'double',
-                    'dimensions': [-1]
-                }
-            },
-            'value': transformer.statistics_.tolist()
-        })
-
-        js = {
-          "op": transformer.op,
-          "attributes": attributes
-        }
-        return js
-
-    def get_mleap_node(self, transformer):
-
-        js = {
-          "name": transformer.name,
-          "shape": {
-            "inputs": [{
-              "name": transformer.input_features,
-              "port": "input"
-            }],
-            "outputs": [{
-              "name": transformer.output_features,
-              "port": "output"
-            }]
-          }
-        }
-        return js
-
-
-class OneHotEncoderSerializer(SerializeToBundle):
-    def __init__(self):
-        super(OneHotEncoderSerializer, self).__init__()
-
-    def get_mleap_model(self, transformer):
-        js = {
-            'op': transformer.op,
-            'attributes': [{
-                    'name': "size",
-                    'type': "long",
-                    'value': transformer.n_values
-                }]
-        }
-        return js
-
-    def get_mleap_node(self, transformer):
-        js = {
-          "name": transformer.name,
-          "shape": {
-            "inputs": [{
-              "name": transformer.input_features,
-              "port": "input"
-            }],
-            "outputs": [{
-              "name": transformer.output_features,
-              "port": "output"
-            }]
-          }
-        }
-        return js
-
-
-class LabelEncoderSerializer(SerializeToBundle):
-    def __init__(self):
-        super(LabelEncoderSerializer, self).__init__()
-
-    def get_mleap_model(self, transformer):
-        js = {
-              "op": transformer.op,
-              "attributes": [{
-                "name": "labels",
-                "type": {
-                  "type": "list",
-                  "base": "string"
-                },
-                "value": transformer.classes_.tolist()
-              }]
-            }
-        return js
-
-    def get_mleap_node(self, transformer):
-        js = {
-          "name": transformer.name,
-          "shape": {
-            "inputs": [{
-              "name": transformer.input_features,
-              "port": "input"
-            }],
-            "outputs": [{
-              "name": transformer.output_features,
-              "port": "output"
-            }]
-          }
-        }
-        return js

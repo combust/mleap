@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer, Binarizer, PolynomialFeatures
 from sklearn.preprocessing.data import OneHotEncoder
 from sklearn.preprocessing.label import LabelEncoder
 from mleap.bundle.serialize import MLeapSerializer
@@ -36,6 +36,8 @@ class ops(object):
         self.IMPUTER = 'imputer'
         self.NDARRAYTODATAFRAME = 'one_dim_array_to_dataframe'
         self.TODENSE = 'dense_transformer'
+        self.BINARIZER = 'binarizer'
+        self.POLYNOMIALEXPANSION = 'polynomial_expansion'
 
 ops = ops()
 
@@ -90,6 +92,20 @@ setattr(OneHotEncoder, 'set_output_features', set_output_features)
 setattr(OneHotEncoder, 'serialize_to_bundle', serialize_to_bundle)
 setattr(OneHotEncoder, 'serializable', True)
 
+setattr(Binarizer, 'op', ops.BINARIZER)
+setattr(Binarizer, 'name', "{}_{}".format(ops.BINARIZER, uuid.uuid1()))
+setattr(Binarizer, 'set_input_features', set_input_features)
+setattr(Binarizer, 'set_output_features', set_output_features)
+setattr(Binarizer, 'serialize_to_bundle', serialize_to_bundle)
+setattr(Binarizer, 'serializable', True)
+
+setattr(PolynomialFeatures, 'op', ops.POLYNOMIALEXPANSION)
+setattr(PolynomialFeatures, 'name', "{}_{}".format(ops.POLYNOMIALEXPANSION, uuid.uuid1()))
+setattr(PolynomialFeatures, 'set_input_features', set_input_features)
+setattr(PolynomialFeatures, 'set_output_features', set_output_features)
+setattr(PolynomialFeatures, 'serialize_to_bundle', serialize_to_bundle)
+setattr(PolynomialFeatures, 'serializable', True)
+
 
 class SimpleSparkSerializer(object):
     def __init__(self):
@@ -108,12 +124,18 @@ class SimpleSparkSerializer(object):
             serializer = LabelEncoderSerializer()
         elif transformer.op == ops.IMPUTER:
             serializer = ImputerSerializer()
+        elif transformer.op == ops.BINARIZER:
+            serializer = BinarizerSerializer()
+        elif transformer.op == ops.POLYNOMIALEXPANSION:
+            serializer = PolynomialExpansionSerializer()
         return serializer
 
-    def set_input_features(self, transformer, input_features):
+    @staticmethod
+    def set_input_features(transformer, input_features):
         transformer.input_features = input_features
 
-    def set_output_features(self, transformer, output_features):
+    @staticmethod
+    def set_output_features(transformer, output_features):
         transformer.output_features = output_features
 
     def serialize_to_bundle(self, transformer, path, model_name):
@@ -279,6 +301,54 @@ class LabelEncoderSerializer(MLeapSerializer):
         # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('labels', transformer.classes_.tolist()))
+
+        # define node inputs and outputs
+        inputs = [{
+                  "name": transformer.input_features,
+                  "port": "input"
+                }]
+
+        outputs = [{
+                  "name": transformer.output_features,
+                  "port": "output"
+                }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+
+class BinarizerSerializer(MLeapSerializer):
+    def __init__(self):
+        super(BinarizerSerializer, self).__init__()
+
+    def serialize_to_bundle(self, transformer, path, model_name):
+
+        # compile tuples of model attributes to serialize
+        attributes = list()
+        attributes.append(('threshold', transformer.threshold))
+
+        # define node inputs and outputs
+        inputs = [{
+                  "name": transformer.input_features,
+                  "port": "input"
+                }]
+
+        outputs = [{
+                  "name": transformer.output_features,
+                  "port": "output"
+                }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+
+class PolynomialExpansionSerializer(MLeapSerializer):
+    def __init__(self):
+        super(PolynomialExpansionSerializer, self).__init__()
+
+    def serialize_to_bundle(self, transformer, path, model_name):
+
+        # compile tuples of model attributes to serialize
+        attributes = list()
+        attributes.append(('degree', transformer.degree))
 
         # define node inputs and outputs
         inputs = [{

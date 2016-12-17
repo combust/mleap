@@ -18,9 +18,6 @@
 from sklearn.linear_model import LinearRegression
 from mleap.bundle.serialize import MLeapSerializer
 import uuid
-import json
-import os
-import shutil
 
 
 def get_mleap_model(self, path):
@@ -59,18 +56,19 @@ setattr(LinearRegression, 'serializable', True)
 class SimpleSparkSerializer(MLeapSerializer):
     def __init__(self):
         super(SimpleSparkSerializer, self).__init__()
-        self.prediction_column = None
 
-    def set_prediction_column(self, transformer, prediction_column):
+    @staticmethod
+    def set_prediction_column(transformer, prediction_column):
         transformer.prediction_column = prediction_column
 
-    def set_input_features(self, transformer, input_features):
+    @staticmethod
+    def set_input_features(transformer, input_features):
         transformer.input_features = input_features
 
     def serialize_to_bundle(self, transformer, path, model_name):
 
         # compile tuples of model attributes to serialize
-        attributes = []
+        attributes = list()
         attributes.append(('intercept', transformer.intercept_.tolist()[0]))
         attributes.append(('coefficients', transformer.coef_.tolist()[0]))
 
@@ -78,11 +76,11 @@ class SimpleSparkSerializer(MLeapSerializer):
         inputs = [{
                   "name": transformer.input_features,
                   "port": "features"
-                }]
+                  }]
 
         outputs = [{
                   "name": transformer.prediction_column,
                   "port": "prediction"
-                }]
+                   }]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)

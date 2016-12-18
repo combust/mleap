@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer, Binarizer, PolynomialFeatures
 from sklearn.preprocessing.data import OneHotEncoder
@@ -143,6 +144,12 @@ class SimpleSparkSerializer(object):
         serializer.serialize_to_bundle(transformer, path, model_name)
 
 
+def _to_list(x):
+    if isinstance(x, list):
+        return x
+    return list(x)
+
+
 class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
     """
     Selects a subset of features from a pandas dataframe that are then passed into a subsequent transformer.
@@ -194,6 +201,9 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
 
 
 class StandardScalerSerializer(MLeapSerializer):
+    """
+    Only serializing the degree of the polynomial to match Spark's implementation (2.0.1)
+    """
     def __init__(self):
         super(StandardScalerSerializer, self).__init__()
 
@@ -226,8 +236,8 @@ class MinMaxScalerSerializer(MLeapSerializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('mean', transformer.mean_.tolist()))
-        attributes.append(('std', [np.sqrt(x) for x in transformer.var_]))
+        attributes.append(('min', _to_list(transformer.data_min_)))
+        attributes.append(('max', _to_list(transformer.data_max_)))
 
         # define node inputs and outputs
         inputs = [{

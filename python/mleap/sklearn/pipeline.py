@@ -16,12 +16,11 @@
 #
 
 from sklearn.pipeline import Pipeline
+from mleap.version import __version__
 import os
 import json
 import shutil
 import uuid
-
-__VERSION__ = "0.5.0-SNAPSHOT"
 
 
 def serialize_to_bundle(self, path, model_name, init=False):
@@ -102,7 +101,7 @@ class SimpleSparkSerializer(object):
         js = {
           "name": transformer.name,
           "format": "json",
-          "version": __VERSION__,
+          "version": __version__,
           "nodes": self._extract_nodes(transformer.steps)
         }
         return js

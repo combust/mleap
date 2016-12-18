@@ -83,7 +83,7 @@ class MLeapSerializer(object):
 
     def get_mleap_node(self, transformer, inputs, outputs):
         js = {
-              "name": transformer.op,
+              "name": transformer.name,
               "shape": {
                 "inputs": inputs,
                 "outputs": outputs

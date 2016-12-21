@@ -34,9 +34,10 @@ class NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
 
   override def load(node: Node, model: Normalizer)
                    (implicit context: BundleContext[SparkBundleContext]): Normalizer = {
-    new Normalizer(uid = node.name).copy(model.extractParamMap()).
+    new Normalizer(uid = node.name).
       setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+      setOutputCol(node.shape.standardOutput.name).
+      setP(model.getP)
   }
 
   override def shape(node: Normalizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

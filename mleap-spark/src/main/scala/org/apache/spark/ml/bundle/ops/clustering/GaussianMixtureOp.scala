@@ -58,11 +58,17 @@ class GaussianMixtureOp extends OpNode[MleapContext, GaussianMixtureModel, Gauss
       weights = model.weights)
     gmm.set(gmm.featuresCol, node.shape.input("features").name)
     gmm.set(gmm.predictionCol, node.shape.output("prediction").name)
-    for(p <- node.shape.getOutput("probability")) { gmm.set(gmm.probabilityCol, p.name) }
+    for(p <- node.shape.getOutput("probability")) {
+      gmm.set(gmm.probabilityCol, p.name)
+    }
     gmm
   }
 
-  override def shape(node: GaussianMixtureModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction").
-    withOutput(node.getProbabilityCol, "probability")
+  override def shape(node: GaussianMixtureModel): Shape = {
+    val probability = if(node.isSet(node.probabilityCol)) Some(node.getProbabilityCol) else None
+
+    Shape().withInput(node.getFeaturesCol, "features").
+      withOutput(node.getPredictionCol, "prediction").
+      withOutput(probability, "probability")
+  }
 }

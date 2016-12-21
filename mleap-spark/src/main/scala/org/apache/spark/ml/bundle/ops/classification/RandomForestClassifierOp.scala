@@ -68,7 +68,7 @@ class RandomForestClassifierOp extends OpNode[SparkBundleContext, RandomForestCl
       numFeatures = model.numFeatures,
       _trees = model.trees).
       setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.input("prediction").name)
+      setPredictionCol(node.shape.output("prediction").name)
     rf = node.shape.getOutput("probability").map(p => rf.setProbabilityCol(p.name)).getOrElse(rf)
     node.shape.getOutput("raw_prediction").map(rp => rf.setRawPredictionCol(rp.name)).getOrElse(rf)
   }

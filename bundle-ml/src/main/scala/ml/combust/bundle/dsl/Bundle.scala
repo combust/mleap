@@ -39,6 +39,7 @@ object Bundle {
       val string_indexer = "string_indexer"
       val reverse_string_indexer = "reverse_string_indexer"
       val hashing_term_frequency = "hashing_term_frequency"
+      val imputer = "imputer"
       val standard_scaler = "standard_scaler"
       val tokenizer = "tokenizer"
       val vector_assembler = "vector_assembler"

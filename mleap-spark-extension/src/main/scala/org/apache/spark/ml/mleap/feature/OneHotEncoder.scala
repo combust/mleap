@@ -37,6 +37,10 @@ class OneHotEncoderModel(override val uid: String, val size: Int) extends Model[
   def this(size: Int) = this(Identifiable.randomUID("oneHotEncoderModel"), size)
 
   /** @group setParam */
+  def setDropLast(value: Boolean): this.type = set(dropLast, value)
+  setDefault(dropLast, true)
+
+  /** @group setParam */
   def setInputCol(value: String): this.type = set(inputCol, value)
 
   /** @group setParam */
@@ -45,6 +49,7 @@ class OneHotEncoderModel(override val uid: String, val size: Int) extends Model[
   override def copy(extra: ParamMap): OneHotEncoderModel = defaultCopy(extra)
 
   override def transform(dataset: Dataset[_]): DataFrame = {
+    val indexMax = size
     val inputColName = $(inputCol)
     val outputColName = $(outputCol)
     val shouldDropLast = $(dropLast)
@@ -52,7 +57,7 @@ class OneHotEncoderModel(override val uid: String, val size: Int) extends Model[
     val emptyValues = Array[Double]()
     val emptyIndices = Array[Int]()
     val encode = functions.udf { label: Double =>
-      if (label < size) {
+      if (label < indexMax) {
         Vectors.sparse(size, Array(label.toInt), oneValue)
       } else {
         Vectors.sparse(size, emptyIndices, emptyValues)

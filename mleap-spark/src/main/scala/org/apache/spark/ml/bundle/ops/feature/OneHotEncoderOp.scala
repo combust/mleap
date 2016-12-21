@@ -49,8 +49,9 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoder, OneHotEn
       val df = context.context.dataset.get
       val size = OneHotEncoderOp.sizeForField(df.schema(obj.getInputCol))
       val dropLast = obj.getDropLast
+      val arrSize = if(dropLast) { size - 1 } else { size }
 
-      model.withAttr("size", Value.long(size)).
+      model.withAttr("size", Value.long(arrSize)).
         withAttr("drop_last", Value.boolean(dropLast))
     }
 

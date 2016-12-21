@@ -13,7 +13,6 @@ import org.apache.spark.ml.linalg.{Vector, Vectors}
   */
 case class OneHotEncoderModel(size: Int,
                               dropLast: Boolean = true) extends Serializable {
-  private val arrSize = if(dropLast) { size - 1 } else { size }
   private val oneValue = Array(1.0)
   private val emptyIndices = Array[Int]()
   private val emptyValues = Array[Double]()
@@ -30,10 +29,10 @@ case class OneHotEncoderModel(size: Int,
       throw new IllegalArgumentException(s"invalid label: $label, must be integer")
     }
 
-    if(label < arrSize) {
-      Vectors.sparse(arrSize, Array(labelInt), oneValue)
+    if(label < size) {
+      Vectors.sparse(size, Array(labelInt), oneValue)
     } else {
-      Vectors.sparse(arrSize, emptyIndices, emptyValues)
+      Vectors.sparse(size, emptyIndices, emptyValues)
     }
   }
 }

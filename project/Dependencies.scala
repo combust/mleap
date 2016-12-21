@@ -29,7 +29,8 @@ object Dependencies {
   lazy val mleapSparkDependencies = baseDependencies.
     union(sparkDependencies)
 
-  lazy val mleapSparkExtensionDependencies = sparkDependencies
+  lazy val mleapSparkExtensionDependencies = sparkDependencies.
+    union(baseDependencies)
 
   lazy val mleapAvroDependencies = Seq("org.apache.avro" % "avro" % "1.8.1")
 

@@ -18,9 +18,8 @@ trait SparkSupport {
     def serializeToBundle(path: File,
                           list: Option[AttributeList] = None,
                           format: SerializationFormat = SerializationFormat.Mixed)
-                         (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
-                          context: SparkBundleContext = SparkBundleContext()): Unit = {
-      SparkBundle.writeTransformer(transformer, path, list, format)(hr)
+                         (implicit context: SparkBundleContext = SparkBundleContext()): Unit = {
+      SparkBundle.writeTransformer(transformer, path, list, format)(context)
     }
   }
 
@@ -32,12 +31,14 @@ trait SparkSupport {
 
   implicit class FileOps(path: File) {
     def deserializeBundleMeta()
-                             (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
-                              context: SparkBundleContext = SparkBundleContext()): BundleMeta = BundleSerializer(context, path).readMeta()
+                             (implicit context: SparkBundleContext = SparkBundleContext()): BundleMeta = {
+      BundleSerializer(context, path).readMeta()
+    }
 
     def deserializeBundle()
-                         (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
-                          context: SparkBundleContext = SparkBundleContext()): (Bundle, Transformer) = SparkBundle.readTransformer(path)
+                         (implicit context: SparkBundleContext = SparkBundleContext()): (Bundle, Transformer) = {
+      SparkBundle.readTransformer(path)
+    }
   }
 }
 object SparkSupport extends SparkSupport

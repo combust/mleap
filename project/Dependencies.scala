@@ -24,6 +24,8 @@ object Dependencies {
     union(sparkDependencies).
     union(Seq("com.databricks" %% "spark-avro" % "3.0.1" % "test"))
 
+  lazy val mleapSparkExtensionDependencies = sparkDependencies
+
   lazy val mleapAvroDependencies = Seq("org.apache.avro" % "avro" % "1.8.1")
 
   lazy val bundleMlDependencies = baseDependencies.

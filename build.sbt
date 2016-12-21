@@ -7,7 +7,8 @@ lazy val `root` = project.in(file(".")).
   settings(publishArtifact := false).
   enablePlugins(ReleasePlugin).
   aggregate(`mleap-base`, `mleap-core`, `mleap-runtime`,
-    `mleap-spark`, `mleap-avro`, `bundle-ml`)
+    `mleap-spark`, `mleap-spark-extension`,
+    `mleap-avro`, `bundle-ml`)
 
 lazy val `mleap-base` = project.in(file("mleap-base")).
   settings(Common.settings).
@@ -39,6 +40,13 @@ lazy val `mleap-spark` = project.in(file("mleap-spark")).
   settings(Common.sonatypeSettings).
   settings(libraryDependencies ++= Dependencies.mleapSparkDependencies).
   dependsOn(`mleap-runtime`)
+
+lazy val `mleap-spark-extension` = project.in(file("mleap-spark-extension")).
+  settings(Common.settings).
+  settings(Common.combustSettings).
+  settings(Common.sonatypeSettings).
+  settings(libraryDependencies ++= Dependencies.mleapSparkExtensionDependencies).
+  dependsOn(`mleap-spark`)
 
 lazy val `mleap-avro` = project.in(file("mleap-avro")).
   settings(Common.settings).

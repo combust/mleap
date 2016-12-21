@@ -1,12 +1,11 @@
-package org.apache.spark.ml.bundle.ops.classification
+package org.apache.spark.ml.bundle.extension.ops.classification
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
-import org.apache.spark.ml.bundle.SparkBundleContext
+import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.util.ParamUtil
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.classification.SVMModel
-import org.apache.spark.mllib.classification
 import org.apache.spark.mllib.linalg.Vectors
 
 /**
@@ -32,7 +31,7 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
         throw new IllegalArgumentException("only binary logistic regression supported in Spark")
       }
 
-      val svm = new classification.SVMModel(weights = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
+      val svm = new org.apache.spark.mllib.classification.SVMModel(weights = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
         intercept = model.value("intercept").getDouble)
       val svmModel = new SVMModel(uid = "", model = svm)
       model.getValue("threshold").

@@ -18,8 +18,7 @@ object SparkBundle {
   }
 
   def readTransformer(path: File)
-                     (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
-                      context: SparkBundleContext = SparkBundleContext()): (Bundle, Transformer) = {
+                     (implicit context: SparkBundleContext = SparkBundleContext()): (Bundle, Transformer) = {
     val bundle = BundleSerializer(context, path).read()
     val transformer = if(bundle.nodes.length == 1) {
       bundle.nodes.head.asInstanceOf[Transformer]
@@ -34,8 +33,7 @@ object SparkBundle {
                             path: File,
                             list: Option[AttributeList] = None,
                             format: SerializationFormat = SerializationFormat.Mixed)
-                           (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
-                            context: SparkBundleContext = SparkBundleContext()): Unit = {
+                           (implicit context: SparkBundleContext = SparkBundleContext()): Unit = {
     val bundle = Bundle.createBundle(graph.uid, format, graph.stages, list)
     BundleSerializer(context, path).write(bundle)
   }
@@ -44,10 +42,9 @@ object SparkBundle {
                        path: File,
                        list: Option[AttributeList] = None,
                        format: SerializationFormat = SerializationFormat.Mixed)
-                      (implicit hr: HasBundleRegistry = BundleRegistry("spark"),
-                       context: SparkBundleContext = SparkBundleContext()): Unit = {
+                      (implicit context: SparkBundleContext = SparkBundleContext()): Unit = {
     transformer match {
-      case transformer: PipelineModel => writeTransformerGraph(transformer, path, list, format)(hr)
+      case transformer: PipelineModel => writeTransformerGraph(transformer, path, list, format)(context)
       case _ =>
         val bundle = Bundle.createBundle(transformer.uid, format, Seq(transformer), list)
         BundleSerializer(context, path).write(bundle)

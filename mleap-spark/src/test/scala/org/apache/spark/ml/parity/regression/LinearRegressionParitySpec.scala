@@ -1,8 +1,7 @@
 package org.apache.spark.ml.parity.regression
 
 import org.apache.spark.ml.parity.SparkParityBase
-import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
-import org.apache.spark.ml.mleap.feature.OneHotEncoder
+import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer, VectorAssembler}
 import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.sql.DataFrame

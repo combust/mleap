@@ -41,18 +41,20 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
   var bundleCache: Option[File] = None
 
-  def serializedModel(transformer: Transformer): File = {
+  def serializedModel(transformer: Transformer)
+                     (implicit context: SparkBundleContext): File = {
     bundleCache.getOrElse {
       new File("/tmp/mleap/spark-parity").mkdirs()
       val file = new File(s"/tmp/mleap/spark-parity/${getClass.getName}")
       FileUtil().rmRF(file)
-      transformer.serializeToBundle(file)(SparkParityBase.sparkRegistry)
+      transformer.serializeToBundle(file)
       bundleCache = Some(file)
       file
     }
   }
 
-  def mleapTransformer(transformer: Transformer): runtime.transformer.Transformer = {
+  def mleapTransformer(transformer: Transformer)
+                      (implicit context: SparkBundleContext): runtime.transformer.Transformer = {
     serializedModel(transformer).deserializeBundle()(SparkParityBase.mleapRegistry)._2
   }
 
@@ -62,8 +64,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
   def parityTransformer(): Unit = {
     it("has parity between Spark/MLeap") {
-      val mTransformer = mleapTransformer(sparkTransformer)
       val sparkTransformed = sparkTransformer.transform(dataset)
+      implicit val sbc = SparkBundleContext(Some(sparkTransformed))
+      val mTransformer = mleapTransformer(sparkTransformer)
       val fields = sparkTransformed.schema.fields.map(_.name).map(col)
       val sparkDataset = sparkTransformed.select(fields: _*).collect()
       val mleapDataset = mTransformer.sparkTransform(dataset).select(fields: _*).collect()

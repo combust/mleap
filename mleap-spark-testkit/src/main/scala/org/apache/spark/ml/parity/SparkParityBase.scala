@@ -66,7 +66,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   def parityTransformer(): Unit = {
     it("has parity between Spark/MLeap") {
       val sparkTransformed = sparkTransformer.transform(dataset)
-      implicit val sbc = SparkBundleContext(Some(sparkTransformed))
+      implicit val sbc = SparkBundleContext().withDataset(sparkTransformed)
       val mTransformer = mleapTransformer(sparkTransformer)
       val fields = sparkTransformed.schema.fields.map(_.name).map(col)
       val sparkDataset = sparkTransformed.select(fields: _*).collect()

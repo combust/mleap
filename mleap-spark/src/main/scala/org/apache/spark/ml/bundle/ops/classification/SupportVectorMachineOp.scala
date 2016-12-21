@@ -4,6 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.util.ParamUtil
 import org.apache.spark.ml.mleap.classification.SVMModel
 import org.apache.spark.mllib.classification
 import org.apache.spark.mllib.linalg.Vectors
@@ -49,9 +50,10 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
   override def load(node: Node, model: SVMModel)
                    (implicit context: BundleContext[SparkBundleContext]): SVMModel = {
     val svm = new SVMModel(uid = node.name,
-      model = model.model).copy(model.extractParamMap()).
+      model = model.model).
       setFeaturesCol(node.shape.input("features").name).
       setPredictionCol(node.shape.output("prediction").name)
+    ParamUtil.setOptional(svm, model, svm.threshold, model.threshold)
     node.shape.getOutput("probability").map(s => svm.setProbabilityCol(s.name)).getOrElse(svm)
   }
 

@@ -61,7 +61,7 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
       val c = if(s.isLeft) {
         s.categories.toArray
       } else {
-        ((0 to s.numCategories).map(_.toDouble).toSet -- s.categories).toArray
+        ((0 until s.numCategories).map(_.toDouble).toSet -- s.categories).toArray
       }
       new tree.CategoricalSplit(featureIndex = s.featureIndex,
         numCategories = s.numCategories,

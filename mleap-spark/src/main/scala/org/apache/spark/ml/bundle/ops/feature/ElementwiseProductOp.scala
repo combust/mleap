@@ -36,9 +36,10 @@ class ElementwiseProductOp extends OpNode[SparkBundleContext, ElementwiseProduct
 
   override def load(node: Node, model: ElementwiseProduct)
                    (implicit context: BundleContext[SparkBundleContext]): ElementwiseProduct = {
-    new ElementwiseProduct(uid = node.name).copy(model.extractParamMap()).
+    new ElementwiseProduct(uid = node.name).
       setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+      setOutputCol(node.shape.standardOutput.name).
+      setScalingVec(model.getScalingVec)
   }
 
   override def shape(node: ElementwiseProduct): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

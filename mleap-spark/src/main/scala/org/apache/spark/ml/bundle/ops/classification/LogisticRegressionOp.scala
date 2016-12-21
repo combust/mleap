@@ -6,6 +6,7 @@ import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.classification.LogisticRegressionModel
 import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.ml.bundle.util.ParamUtil
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -50,9 +51,10 @@ class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegression
                    (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
     var lr = new LogisticRegressionModel(uid = node.name,
       coefficients = model.coefficients,
-      intercept = model.intercept).copy(model.extractParamMap).
+      intercept = model.intercept).
       setFeaturesCol(node.shape.input("features").name).
       setPredictionCol(node.shape.output("prediction").name)
+    ParamUtil.setOptional(lr, model, lr.threshold, model.threshold)
     lr = node.shape.getOutput("probability").map(p => lr.setProbabilityCol(p.name)).getOrElse(lr)
     node.shape.getOutput("raw_prediction").map(rp => lr.setRawPredictionCol(rp.name)).getOrElse(lr)
   }

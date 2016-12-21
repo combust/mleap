@@ -4,6 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.util.ParamUtil
 import org.apache.spark.ml.feature.Binarizer
 
 /**
@@ -35,9 +36,10 @@ class BinarizerOp extends OpNode[SparkBundleContext, Binarizer, Binarizer] {
 
   override def load(node: Node, model: Binarizer)
                    (implicit context: BundleContext[SparkBundleContext]): Binarizer = {
-    new Binarizer(uid = node.name).copy(model.extractParamMap()).
+    new Binarizer(uid = node.name).
       setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+      setOutputCol(node.shape.standardOutput.name).
+      setThreshold(model.getThreshold)
   }
 
   override def shape(node: Binarizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

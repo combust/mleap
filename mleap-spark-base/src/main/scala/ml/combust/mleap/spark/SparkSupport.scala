@@ -2,7 +2,6 @@ package ml.combust.mleap.spark
 
 import java.io.File
 
-import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.serializer._
 import ml.combust.mleap.runtime.transformer.{Transformer => MleapTransformer}

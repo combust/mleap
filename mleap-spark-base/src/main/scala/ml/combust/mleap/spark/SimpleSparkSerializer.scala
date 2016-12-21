@@ -1,9 +1,10 @@
 package ml.combust.mleap.spark
 
-import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
-import org.apache.spark.ml.Transformer
-import SparkSupport._
 import java.io.File
+
+import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
+import ml.combust.mleap.spark.SparkSupport._
+import org.apache.spark.ml.Transformer
 
 /**
   * Created by mikhail on 11/5/16.

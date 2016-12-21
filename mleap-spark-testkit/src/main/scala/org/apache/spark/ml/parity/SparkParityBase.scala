@@ -15,6 +15,7 @@ import ml.combust.mleap.runtime.MleapContext
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.sql.functions.col
 
+
 /**
   * Created by hollinwilkins on 10/30/16.
   */
@@ -22,7 +23,7 @@ object SparkParityBase extends FunSpec {
   val sparkRegistry = SparkBundleContext.defaultContext
   val mleapRegistry = MleapContext.defaultContext
 
-  def dataset(spark: SparkSession) = {
+  def dataset(spark: SparkSession): DataFrame = {
     spark.sqlContext.read.avro(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").toString)
   }
 }

@@ -34,19 +34,33 @@ lazy val `mleap-runtime` = project.in(file("mleap-runtime")).
   settings(libraryDependencies ++= Dependencies.mleapRuntimeDependencies(scalaVersion.value)).
   dependsOn(`mleap-core`, `bundle-ml`)
 
+lazy val `mleap-spark-base` = project.in(file("mleap-spark-base")).
+  settings(Common.settings).
+  settings(Common.combustSettings).
+  settings(Common.sonatypeSettings).
+  settings(libraryDependencies ++= Dependencies.mleapSparkBaseDependencies).
+  dependsOn(`mleap-runtime`)
+
+lazy val `mleap-spark-testkit` = project.in(file("mleap-spark-testkit")).
+  settings(Common.settings).
+  settings(Common.combustSettings).
+  settings(Common.sonatypeSettings).
+  settings(libraryDependencies ++= Dependencies.mleapSparkTestKitDependencies).
+  dependsOn(`mleap-spark-base`, `mleap-runtime`)
+
 lazy val `mleap-spark` = project.in(file("mleap-spark")).
   settings(Common.settings).
   settings(Common.combustSettings).
   settings(Common.sonatypeSettings).
   settings(libraryDependencies ++= Dependencies.mleapSparkDependencies).
-  dependsOn(`mleap-runtime`)
+  dependsOn(`mleap-runtime`, `mleap-spark-base`, `mleap-spark-testkit` % "test")
 
 lazy val `mleap-spark-extension` = project.in(file("mleap-spark-extension")).
   settings(Common.settings).
   settings(Common.combustSettings).
   settings(Common.sonatypeSettings).
   settings(libraryDependencies ++= Dependencies.mleapSparkExtensionDependencies).
-  dependsOn(`mleap-spark`)
+  dependsOn(`mleap-spark`, `mleap-spark-testkit` % "test")
 
 lazy val `mleap-avro` = project.in(file("mleap-avro")).
   settings(Common.settings).

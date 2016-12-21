@@ -2,9 +2,9 @@ package ml.combust.mleap.spark
 
 import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame, expressions}
 import org.apache.spark.sql.mleap.UserDefinedFunctionConverters._
-import org.apache.spark.sql.functions._
 
 import scala.util.Try
 

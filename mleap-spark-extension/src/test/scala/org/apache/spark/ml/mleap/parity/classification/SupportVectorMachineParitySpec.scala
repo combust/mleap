@@ -1,11 +1,11 @@
-package org.apache.spark.ml.parity.classification
+package org.apache.spark.ml.mleap.parity.classification
 
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
-import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.ml.mleap.classification.SVMModel
-import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.parity.SparkParityBase
-import org.apache.spark.mllib.classification
+import org.apache.spark.ml.{Pipeline, Transformer}
+import org.apache.spark.mllib
+import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.sql._
 
 /**
@@ -20,5 +20,5 @@ class SupportVectorMachineParitySpec extends SparkParityBase {
       setInputCols(Array("fico_index", "dti")).
       setOutputCol("features"),
     new SVMModel(uid = "svm",
-      model = new classification.SVMModel(weights = Vectors.dense(0.53, 0.67), intercept = 0.77)))).fit(dataset)
+      model = new mllib.classification.SVMModel(weights = Vectors.dense(0.53, 0.67), intercept = 0.77)))).fit(dataset)
 }

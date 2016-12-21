@@ -20,9 +20,17 @@ object Dependencies {
       union(Seq("org.scala-lang" % "scala-reflect" % scalaVersion))
   }
 
+  lazy val mleapSparkBaseDependencies = sparkDependencies
+
+  lazy val mleapSparkTestKitDependencies = sparkDependencies.
+    union(Seq("com.databricks" %% "spark-avro" % "3.0.1",
+      "org.scalatest" %% "scalatest" % "3.0.0"))
+
   lazy val mleapSparkDependencies = baseDependencies.
-    union(sparkDependencies).
-    union(Seq("com.databricks" %% "spark-avro" % "3.0.1" % "test"))
+    union(sparkDependencies)
+
+  lazy val mleapSparkExtensionDependencies = sparkDependencies.
+    union(baseDependencies)
 
   lazy val mleapAvroDependencies = Seq("org.apache.avro" % "avro" % "1.8.1")
 

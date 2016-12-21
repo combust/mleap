@@ -10,7 +10,7 @@ import org.apache.spark.sql.DataFrame
 object SparkBundleContext {
   implicit lazy val defaultContext: SparkBundleContext = SparkBundleContext(None, Some(classOf[SparkBundleContext].getClassLoader))
 
-  def apply(dataset: Option[DataFrame] = None): SparkBundleContext = apply(None, None)
+  def apply(dataset: Option[DataFrame] = None): SparkBundleContext = apply(dataset, None)
 
   def apply(dataset: Option[DataFrame], clOption: Option[ClassLoader]): SparkBundleContext = {
     val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[SparkBundleContext].getCanonicalName))
@@ -19,4 +19,6 @@ object SparkBundleContext {
 }
 
 case class SparkBundleContext(dataset: Option[DataFrame],
-                              override val bundleRegistry: BundleRegistry) extends HasBundleRegistry
+                              override val bundleRegistry: BundleRegistry) extends HasBundleRegistry {
+  def withDataset(dataset: DataFrame): SparkBundleContext = copy(dataset = Some(dataset))
+}

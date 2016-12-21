@@ -1,12 +1,13 @@
-package org.apache.spark.ml.bundle.ops.classification
+package org.apache.spark.ml.bundle.extension.ops.classification
 
 import ml.combust.bundle.BundleContext
+import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.ModelSerializer
-import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.NominalAttribute
 import org.apache.spark.ml.bundle.SparkBundleContext
-import org.apache.spark.ml.classification.{ClassificationModel, OneVsRestModel}
+import org.apache.spark.ml.classification.ClassificationModel
+import org.apache.spark.ml.mleap.classification.OneVsRestModel
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -60,12 +61,14 @@ class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestMo
       withName(node.shape.output("prediction").name).
       withNumValues(model.models.length).
       toMetadata
-    val m = new OneVsRestModel(uid = node.name, models = model.models, labelMetadata = labelMetadata)
-    m.set(m.featuresCol, node.shape.input("features").name)
-    m.set(m.predictionCol, node.shape.output("prediction").name)
-    m
+    val ovr = new OneVsRestModel(uid = node.name, models = model.models, labelMetadata = labelMetadata).
+      setFeaturesCol(node.shape.input("features").name).
+      setPredictionCol(node.shape.output("prediction").name)
+    ovr.get(ovr.probabilityCol).foreach(ovr.setProbabilityCol)
+    ovr
   }
 
   override def shape(node: OneVsRestModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+    withOutput(node.getPredictionCol, "prediction").
+    withOutput(node.get(node.probabilityCol), "probability")
 }

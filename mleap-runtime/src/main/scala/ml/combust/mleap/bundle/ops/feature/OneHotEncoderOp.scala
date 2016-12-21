@@ -18,12 +18,14 @@ class OneHotEncoderOp extends OpNode[MleapContext, OneHotEncoder, OneHotEncoderM
 
     override def store(model: Model, obj: OneHotEncoderModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("size", Value.long(obj.size))
+      model.withAttr("size", Value.long(obj.size)).
+        withAttr("drop_last", Value.boolean(obj.dropLast))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): OneHotEncoderModel = {
-      OneHotEncoderModel(size = model.value("size").getLong.toInt)
+      OneHotEncoderModel(size = model.value("size").getLong.toInt,
+        dropLast = model.value("drop_last").getBoolean)
     }
   }
 

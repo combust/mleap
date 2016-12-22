@@ -1,5 +1,7 @@
 package ml.combust.bundle.json
 
+import java.util.UUID
+
 import ml.bundle.BasicType.BasicType
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.serializer.SerializationFormat
@@ -19,6 +21,15 @@ import spray.json._
   * There are no members that need to be overriden if using this trait as a mixin.
   */
 trait JsonSupportLowPriority {
+  implicit object UUIDFormat extends JsonFormat[UUID] {
+    override def read(json: JsValue): UUID = json match {
+      case JsString(value) => UUID.fromString(value)
+      case _ => throw new IllegalArgumentException("invalid UUID")
+    }
+
+    override def write(obj: UUID): JsValue = JsString(obj.toString)
+  }
+
   implicit val bundleSocketFormat: JsonFormat[Socket] = jsonFormat2(Socket.apply)
 
   implicit val bundleShapeFormat: JsonFormat[Shape] = new JsonFormat[Shape] {
@@ -237,7 +248,7 @@ trait JsonSupportLowPriority {
 
   implicit def bundleModelFormat(implicit hr: HasBundleRegistry): RootJsonFormat[Model] = jsonFormat2(Model.apply)
   implicit val bundleNodeFormat: RootJsonFormat[Node] = jsonFormat2(Node.apply)
-  implicit def bundleBundleMetaFormat(implicit hr: HasBundleRegistry): RootJsonFormat[BundleMeta] = jsonFormat5(BundleMeta)
+  implicit def bundleBundleMetaFormat(implicit hr: HasBundleRegistry): RootJsonFormat[BundleMeta] = jsonFormat4(BundleMeta)
 }
 
 /** All spray.json.RootJsonFormat formats needed for Bundle.ML JSON serialization.

@@ -1,6 +1,7 @@
 package ml.combust.bundle
 
 import java.io.File
+import java.nio.file.{FileSystem, Path}
 
 import ml.combust.bundle.serializer.{ConcreteSerializationFormat, SerializationContext, SerializationFormat}
 
@@ -10,26 +11,28 @@ import ml.combust.bundle.serializer.{ConcreteSerializationFormat, SerializationC
   *
   * @param format desired serialization format (Json, Protobuf, or Mixed)
   * @param bundleRegistry bundle registry of all supported operations
+  * @param fs file system for bundle
   * @param path path to the Bundle.ML model
   * @tparam Context extra contextual information specific to implementation
   */
 case class BundleContext[Context](context: Context,
                                   format: SerializationFormat,
                                   bundleRegistry: BundleRegistry,
-                                  path: File) extends HasBundleRegistry {
+                                  fs: FileSystem,
+                                  path: Path) extends HasBundleRegistry {
   /** Create a new bundle context for a subfolder.
     *
     * @param file name of subfolder
     * @return bundle context for the subfolder
     */
-  def bundleContext(file: String): BundleContext[Context] = copy(path = new File(path, file))
+  def bundleContext(file: String): BundleContext[Context] = copy(path = fs.getPath(path.toString, file))
 
   /** Get a file in the current bundle folder.
     *
     * @param name name of the file
     * @return file in the bundle
     */
-  def file(name: String): File = new File(path, name)
+  def file(name: String): Path = fs.getPath(path.toString, name)
 
   /** Create a serialization context.
     *

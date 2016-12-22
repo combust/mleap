@@ -1,110 +1,79 @@
 package ml.combust.bundle.serializer
 
-import java.io.{File, FileInputStream, FileOutputStream}
-import java.util.zip.ZipInputStream
+import java.io.File
+import java.net.URI
+import java.nio.file.{FileSystem, FileSystems, Files, Path}
 
 import ml.combust.bundle.{BundleContext, HasBundleRegistry}
 import ml.combust.bundle.json.JsonSupport._
-import ml.combust.bundle.dsl.{AttributeList, Bundle, BundleMeta}
+import ml.combust.bundle.dsl.{Bundle, BundleMeta}
 import spray.json._
 import resource._
 
+import scala.collection.JavaConverters._
 import scala.io.Source
 
-/** Class for serializing/deserializing Bundle.ML [[ml.combust.bundle.dsl.Bundle]] objects.
-  *
-  * @param context context for implementation
-  * @param path path to the Bundle.ML folder/zip file to serialize/deserialize
-  * @param hr bundle registry for custom types and ops
-  * @tparam Context context type for implementation
-  */
-case class BundleSerializer[Context](context: Context,
-                                     path: File)
-                                    (implicit hr: HasBundleRegistry) {
-  val tmp: File = new File(s"/tmp/bundle.ml/${java.util.UUID.randomUUID().toString}")
-
-  /** Write a bundle to the path.
-    *
-    * @param bundle bundle to write
-    */
-  def write(bundle: Bundle): Unit = {
-    BundleDirectorySerializer(context, tmp).write(bundle)
-
-    if(path.getPath.endsWith(".zip")) {
-      FileUtil().zip(tmp, path)
-    } else {
-      tmp.renameTo(path)
-    }
+object BundleSerializer {
+  def apply[Context](context: Context,
+                     uri: String)
+                    (implicit hr: HasBundleRegistry): BundleSerializer[Context] = {
+    apply(context, new URI(uri))
   }
 
-  /** Read a bundle from the path.
-    *
-    * @return deserialized bundle
-    */
-  def read(): Bundle = {
-    if(path.getPath.endsWith(".zip")) {
-      FileUtil().extract(path, tmp)
-      BundleDirectorySerializer(context, tmp).read()
+  def apply[Context](context: Context,
+                     file: File)
+                    (implicit hr: HasBundleRegistry): BundleSerializer[Context] = {
+    val uri = if(file.getPath.endsWith(".zip")) {
+      new URI(s"jar:file:${file.getPath}")
     } else {
-      BundleDirectorySerializer(context, path).read()
+      new URI(s"file:$file")
     }
+
+    apply(context, uri)
   }
 
-  /** Read bundle definition from the path.
-    *
-    * @return bundle definition
-    */
-  def readMeta(): BundleMeta = {
-    if(path.getPath.endsWith(".zip")) {
-      (for(in <- managed(new ZipInputStream(new FileInputStream(path)))) yield {
-        var meta: Option[BundleMeta] = None
-        var entry = in.getNextEntry
-        while(entry != null) {
-          if(entry.getName == Bundle.bundleJson) {
-            val json = Source.fromInputStream(in).getLines.mkString
-            meta = Some(json.parseJson.convertTo[BundleMeta])
-          }
-          entry = in.getNextEntry
-        }
+  def apply[Context](context: Context,
+                     uri: URI)
+                    (implicit hr: HasBundleRegistry): BundleSerializer[Context] = {
+    val env = Map("create" -> "true").asJava
 
-        meta.getOrElse(throw new IllegalArgumentException("bundle zip does not contain bundle.json file"))
-      }).either.either match {
-        case Left(errors) => throw errors.head
-        case Right(meta) => meta
-      }
-    } else {
-      BundleDirectorySerializer(context, path).readMeta()
+    val (fs, path) = uri.getScheme match {
+      case "file" =>
+        (FileSystems.getDefault, FileSystems.getDefault.getPath(uri.getPath))
+      case "jar" =>
+        val zfs = FileSystems.newFileSystem(uri, env)
+        (zfs, zfs.getPath("/"))
     }
+
+    apply(context, fs, path)
   }
 }
 
 /** Class for serializing/deserializing Bundle.ML [[ml.combust.bundle.dsl.Bundle]] objects.
   *
-  * @param context for implementation
-  * @param path path to the Bundle.ML folder to serialize/deserialize
+  * @param context context for implementation
+  * @param fs file system used for writing/reading
+  * @param path path to the Bundle.ML folder/zip file to serialize/deserialize
   * @param hr bundle registry for custom types and ops
-  * @tparam Context context class for implementation
+  * @tparam Context context type for implementation
   */
-case class BundleDirectorySerializer[Context](context: Context,
-                                              path: File)
-                                             (implicit hr: HasBundleRegistry) {
-  val registry = hr.bundleRegistry
-
+case class BundleSerializer[Context](context: Context,
+                                     fs: FileSystem,
+                                     path: Path)
+                                    (implicit hr: HasBundleRegistry) {
   /** Write a bundle to the path.
     *
     * @param bundle bundle to write
     */
-  def write(bundle: Bundle): Unit = {
-    val bundleContext = bundle.bundleContext(context, registry, path)
+  def write[Transformer <: AnyRef](bundle: Bundle[Transformer]): Unit = {
+    val bundleContext = bundle.bundleContext(context, hr.bundleRegistry, fs, path)
     implicit val sc = bundleContext.serializationContext(SerializationFormat.Json)
 
-    bundleContext.path.mkdirs()
-    GraphSerializer(bundleContext).write(bundle.nodes)
-    val meta = bundle.meta
+    Files.createDirectories(path)
+    NodeSerializer(bundleContext.bundleContext("root")).write(bundle.root)
 
-    new FileOutputStream(bundleContext.file(Bundle.bundleJson))
-    for(out <- managed(new FileOutputStream(bundleContext.file(Bundle.bundleJson)))) {
-      val json = meta.toJson.prettyPrint.getBytes
+    for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.bundleJson)))) {
+      val json = bundle.meta.toJson.prettyPrint.getBytes
       out.write(json)
     }
   }
@@ -113,29 +82,26 @@ case class BundleDirectorySerializer[Context](context: Context,
     *
     * @return deserialized bundle
     */
-  def read(): Bundle = {
+  def read[Transformer <: AnyRef](): Bundle[Transformer] = {
     val meta = readMeta()
     val bundleContext = BundleContext(context,
       meta.format,
-      registry,
+      hr.bundleRegistry,
+      fs,
       path)
     implicit val sc = bundleContext.serializationContext(SerializationFormat.Json)
 
-    val nodes = GraphSerializer(bundleContext).read(meta.nodes)
-    Bundle(name = meta.name,
-      format = meta.format,
-      version = meta.version,
-      attributes = meta.attributes,
-      nodes = nodes)
+    val root = NodeSerializer(bundleContext.bundleContext("root")).read()
+    Bundle(meta, root.asInstanceOf[Transformer])
   }
 
-  /** Read bundle meta data from the path.
+  /** Read bundle definition from the path.
     *
-    * @return bundle meta
+    * @return bundle definition
     */
   def readMeta(): BundleMeta = {
-    val bundleJson = new File(path, Bundle.bundleJson)
-    (for(in <- managed(new FileInputStream(bundleJson))) yield {
+    val bundleJson = fs.getPath(path.toString, Bundle.bundleJson)
+    (for(in <- managed(Files.newInputStream(bundleJson))) yield {
       val json = Source.fromInputStream(in).getLines.mkString
       json.parseJson.convertTo[BundleMeta]
     }).either.either match {

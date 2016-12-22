@@ -1,10 +1,11 @@
 package ml.combust.bundle.serializer
 
-import java.io.{FileInputStream, FileOutputStream, InputStream, OutputStream}
+import java.io.{InputStream, OutputStream}
+import java.nio.file.Files
 
 import ml.bundle.NodeDef.NodeDef
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.dsl.{Bundle, Node, Shape}
+import ml.combust.bundle.dsl.{Bundle, Node}
 import ml.combust.bundle.json.JsonSupport._
 import spray.json._
 import resource._
@@ -80,7 +81,7 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
     * @param obj node to write
     */
   def write(obj: Any): Unit = {
-    bundleContext.path.mkdirs()
+    Files.createDirectories(bundleContext.path)
     val op = bundleContext.bundleRegistry.opForObj[Context, Any, Any](obj)
     val modelSerializer = ModelSerializer(bundleContext)
     modelSerializer.write(op.model(obj))
@@ -88,7 +89,7 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
     val name = op.name(obj)
     val shape = op.shape(obj)
     val node = Node(name = name, shape = shape)
-    for(out <- managed(new FileOutputStream(bundleContext.file(Bundle.nodeFile)))) {
+    for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.nodeFile)))) {
       FormatNodeSerializer.serializer.write(out, node)
     }
   }
@@ -98,7 +99,7 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
     * @return deserialized node
     */
   def read(): Any = {
-    val node = (for(in <- managed(new FileInputStream(bundleContext.file(Bundle.nodeFile)))) yield {
+    val node = (for(in <- managed(Files.newInputStream(bundleContext.file(Bundle.nodeFile)))) yield {
       FormatNodeSerializer.serializer.read(in)
     }).either.either match {
       case Left(errors) => throw errors.head

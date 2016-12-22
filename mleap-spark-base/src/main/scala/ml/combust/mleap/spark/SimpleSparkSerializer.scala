@@ -18,8 +18,7 @@ class SimpleSparkSerializer() {
   }
 
   def deserializeFromBundle(path: String): Transformer = {
-    val (_, tf) = new File(path).deserializeBundle()
-    tf
+    new File(path).deserializeBundle().root
   }
 
 }

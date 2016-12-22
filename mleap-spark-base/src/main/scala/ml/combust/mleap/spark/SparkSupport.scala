@@ -15,10 +15,9 @@ import org.apache.spark.sql.DataFrame
 trait SparkSupport {
   implicit class SparkTransformerOps(transformer: Transformer) {
     def serializeToBundle(path: File,
-                          list: Option[AttributeList] = None,
                           format: SerializationFormat = SerializationFormat.Mixed)
                          (implicit context: SparkBundleContext = SparkBundleContext()): Unit = {
-      SparkBundle.writeTransformer(transformer, path, list, format)(context)
+      SparkBundle.writeTransformer(transformer, path, format)(context)
     }
   }
 
@@ -35,7 +34,7 @@ trait SparkSupport {
     }
 
     def deserializeBundle()
-                         (implicit context: SparkBundleContext = SparkBundleContext()): (Bundle, Transformer) = {
+                         (implicit context: SparkBundleContext = SparkBundleContext()): Bundle[Transformer] = {
       SparkBundle.readTransformer(path)
     }
   }

@@ -5,7 +5,7 @@ import java.io.File
 import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.mleap.bundle.MleapBundle
 import ml.combust.mleap.runtime.transformer.Transformer
-import ml.combust.bundle.dsl.{AttributeList, Bundle, BundleMeta}
+import ml.combust.bundle.dsl.{Bundle, BundleMeta}
 import ml.combust.bundle.serializer._
 
 /** Object for support classes for easily working with Bundle.ML.
@@ -21,16 +21,14 @@ object MleapSupport {
     /** Serialize the transformer to a Bundle.ML directory.
       *
       * @param path path to Bundle.ML
-      * @param list optional custom Bundle Attributes
       * @param format serialization format
       * @param hr bundle registry
       */
     def serializeToBundle(path: File,
-                          list: Option[AttributeList] = None,
                           format: SerializationFormat = SerializationFormat.Mixed)
                          (implicit hr: HasBundleRegistry = BundleRegistry("mleap"),
                           context: MleapContext = MleapContext()): Unit = {
-      MleapBundle.writeTransformer(transformer, path, list)
+      MleapBundle.writeTransformer(transformer, path, format)
     }
   }
 
@@ -43,20 +41,16 @@ object MleapSupport {
   implicit class FileOps(path: File) {
     /** Deserialize the bundle definition.
       *
-      * @param hr bundle registry
       * @return bundle meta data
       */
     def deserializeBundleMeta()
-                             (implicit hr: HasBundleRegistry = BundleRegistry("mleap"),
-                              context: MleapContext = MleapContext()): BundleMeta = BundleSerializer(context, path).readMeta()
+                             (implicit context: MleapContext = MleapContext()): BundleMeta = BundleSerializer(context, path).readMeta()
 
     /** Deserialize the Bundle.ML to MLeap.
       *
-      * @param hr bundle registry
       * @return (bundle, MLeap transformer)
       */
     def deserializeBundle()
-                         (implicit hr: HasBundleRegistry = BundleRegistry("mleap"),
-                          context: MleapContext = MleapContext()): (Bundle, Transformer) = MleapBundle.readTransformer(path)
+                         (implicit context: MleapContext = MleapContext()): Bundle[Transformer] = MleapBundle.readTransformer(path)
   }
 }

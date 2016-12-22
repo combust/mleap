@@ -65,12 +65,12 @@ class BundleSerializationSpec extends FunSpec {
       describe("with a simple linear regression") {
         it("serializes/deserializes the same object") {
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/lr_bundle.$format$suffix")
-          val bundle = Bundle.createBundle("my_bundle", format, Seq(lr))
+          val bundle = Bundle[Transformer]("my_bundle", format, lr)
           val serializer = BundleSerializer(Unit, uri)
           serializer.write(bundle)
-          val bundleRead = serializer.read()
+          val bundleRead = serializer.read[Transformer]()
 
-          assert(lr == bundleRead.nodes.head)
+          assert(lr == bundleRead.root)
         }
       }
 
@@ -84,25 +84,25 @@ class BundleSerializationSpec extends FunSpec {
             output = "my_output",
             model = DecisionTreeRegressionModel(node))
 
-          val uri = new URI(s"$prefix:${TestUtil.baseDir}/lr_bundle.$format$suffix")
-          val bundle = Bundle.createBundle("my_bundle", format, Seq(dt))
+          val uri = new URI(s"$prefix:${TestUtil.baseDir}/dt_bundle.$format$suffix")
+          val bundle = Bundle[Transformer]("my_bundle", format, dt)
           val serializer = BundleSerializer(Unit, uri)
           serializer.write(bundle)
-          val bundleRead = serializer.read()
+          val bundleRead = serializer.read[Transformer]()
 
-          assert(dt == bundleRead.nodes.head)
+          assert(dt == bundleRead.root)
         }
       }
 
       describe("with a pipeline") {
         it("serializes/deserializes the same object") {
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/pipeline_bundle.$format$suffix")
-          val bundle = Bundle.createBundle("my_bundle", format, Seq(pipeline))
+          val bundle = Bundle[Transformer]("my_bundle", format, pipeline)
           val serializer = BundleSerializer(Unit, uri)
           serializer.write(bundle)
-          val bundleRead = serializer.read()
+          val bundleRead = serializer.read[Transformer]()
 
-          assert(pipeline == bundleRead.nodes.head)
+          assert(pipeline == bundleRead.root)
         }
       }
     }

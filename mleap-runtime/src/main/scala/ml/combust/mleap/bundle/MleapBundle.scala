@@ -12,48 +12,17 @@ import ml.combust.mleap.runtime.MleapContext
   * Created by hollinwilkins on 8/23/16.
   */
 object MleapBundle {
-  def readTransformerGraph(path: File)
-                          (implicit context: MleapContext): (Bundle, Pipeline) = {
-    val bundle = BundleSerializer(context, path).read()
-    val pipeline = Pipeline(uid = bundle.name, transformers = bundle.nodes.map(_.asInstanceOf[Transformer]))
-
-    (bundle, pipeline)
-  }
-
   def readTransformer(path: File)
-                     (implicit context: MleapContext): (Bundle, Transformer) = {
-    val bundle = BundleSerializer(context, path).read()
-    val model = if(bundle.nodes.length == 1) {
-      bundle.nodes.head.asInstanceOf[Transformer]
-    } else {
-      Pipeline(uid = bundle.name, transformers = bundle.nodes.map(_.asInstanceOf[Transformer]))
-    }
-
-    (bundle, model)
-  }
-
-  def writeTransformerGraph(graph: Pipeline,
-                            path: File,
-                            list: Option[AttributeList] = None,
-                            format: SerializationFormat = SerializationFormat.Mixed)
-                           (implicit context: MleapContext): Unit = {
-    val bundle = Bundle.createBundle(graph.uid, format, graph.transformers, list)
-    BundleSerializer(context, path).write(bundle)
+                     (implicit context: MleapContext): Bundle[Transformer] = {
+    BundleSerializer(context, path).read[Transformer]()
   }
 
   def writeTransformer(transformer: Transformer,
                        path: File,
-                       list: Option[AttributeList] = None,
                        format: SerializationFormat = SerializationFormat.Mixed)
                       (implicit context: MleapContext): Unit = {
-    transformer match {
-      case transformer: Pipeline => writeTransformerGraph(transformer, path, list, format)
-      case _ =>
-        val bundle = Bundle.createBundle(transformer.uid,
-          format,
-          Seq(transformer),
-          list)
-        BundleSerializer(context, path).write(bundle)
-    }
+    BundleSerializer(context, path).write[Transformer](Bundle(transformer.uid,
+      format,
+      transformer))
   }
 }

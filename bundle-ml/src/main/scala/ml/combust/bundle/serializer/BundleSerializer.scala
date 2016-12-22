@@ -65,16 +65,15 @@ case class BundleSerializer[Context](context: Context,
     *
     * @param bundle bundle to write
     */
-  def write(bundle: Bundle): Unit = {
+  def write[Transformer <: AnyRef](bundle: Bundle[Transformer]): Unit = {
     val bundleContext = bundle.bundleContext(context, hr.bundleRegistry, fs, path)
     implicit val sc = bundleContext.serializationContext(SerializationFormat.Json)
 
     Files.createDirectories(path)
-    GraphSerializer(bundleContext).write(bundle.nodes)
-    val meta = bundle.meta
+    NodeSerializer(bundleContext.bundleContext("root")).write(bundle.root)
 
     for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.bundleJson)))) {
-      val json = meta.toJson.prettyPrint.getBytes
+      val json = bundle.meta.toJson.prettyPrint.getBytes
       out.write(json)
     }
   }
@@ -83,7 +82,7 @@ case class BundleSerializer[Context](context: Context,
     *
     * @return deserialized bundle
     */
-  def read(): Bundle = {
+  def read[Transformer <: AnyRef](): Bundle[Transformer] = {
     val meta = readMeta()
     val bundleContext = BundleContext(context,
       meta.format,
@@ -92,12 +91,8 @@ case class BundleSerializer[Context](context: Context,
       path)
     implicit val sc = bundleContext.serializationContext(SerializationFormat.Json)
 
-    val nodes = GraphSerializer(bundleContext).read(meta.nodes)
-    Bundle(name = meta.name,
-      format = meta.format,
-      version = meta.version,
-      attributes = meta.attributes,
-      nodes = nodes)
+    val root = NodeSerializer(bundleContext.bundleContext("root")).read()
+    Bundle(meta, root.asInstanceOf[Transformer])
   }
 
   /** Read bundle definition from the path.

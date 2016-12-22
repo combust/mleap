@@ -1,10 +1,10 @@
 package ml.combust.bundle.dsl
 
-import java.io.File
 import java.nio.file.{FileSystem, Path}
+import java.util.UUID
 
 import ml.combust.mleap.BuildValues
-import ml.combust.bundle.{BundleContext, BundleRegistry, HasBundleRegistry}
+import ml.combust.bundle.{BundleContext, BundleRegistry}
 import ml.combust.bundle.serializer._
 
 /** Companion class for constants and constructors of [[Bundle]] objects.
@@ -72,80 +72,48 @@ object Bundle {
     val pipeline = "pipeline"
   }
 
-  /** Create a bundle.
-    *
-    * @param name name of bundle
-    * @param format format of bundle
-    * @param nodes nodes in bundle
-    * @param attributes attributes of bundle
-    * @return bundle
-    */
-  def createBundle(name: String,
-                   format: SerializationFormat,
-                   nodes: Seq[Any],
-                   attributes: Option[AttributeList] = None): Bundle = {
-    Bundle(name = name,
+  def apply[Transformer <: AnyRef](name: String,
+                                   format: SerializationFormat,
+                                   root: Transformer): Bundle[Transformer] = {
+    apply(BundleMeta(uid = UUID.randomUUID(),
+      name = name,
       format = format,
-      version = Bundle.version,
-      attributes = attributes, nodes)
+      version = Bundle.version), root)
   }
 }
 
 /** Meta data for a bundle.
   *
+  * @param uid uid for the bundle
   * @param name name of the bundle
   * @param format serialization format of the [[Bundle]]
   * @param version Bundle.ML version used for serializing
-  * @param attributes optional [[AttributeList]] to serialize with the bundle
-  * @param nodes list of root nodes in the bundle
   */
-case class BundleMeta(name: String,
+case class BundleMeta(uid: UUID,
+                      name: String,
                       format: SerializationFormat,
-                      version: String,
-                      attributes: Option[AttributeList],
-                      nodes: Seq[String])
+                      version: String)
 
 /** Root object for serializing Bundle.ML pipelines and graphs.
   *
-  * @param name name of the bundle
-  * @param format serialization format of the [[Bundle]]
-  * @param version Bundle.ML version used for serializing
-  * @param attributes optional [[AttributeList]] to serialize with the bundle
-  * @param nodes list of root nodes in the bundle
+  * @param meta meta data for the bundle
+  * @param root root transformer node
   */
-case class Bundle(name: String,
-                  format: SerializationFormat,
-                  version: String,
-                  override val attributes: Option[AttributeList],
-                  nodes: Seq[Any]) extends HasAttributeList[Bundle] {
-  /** Create meta data for this bundle.
-    *
-    * @param hr bundle registry for custom types
-    * @return bundle meta data
-    */
-  def meta(implicit hr: HasBundleRegistry): BundleMeta = {
-    val nodeNames = nodes.map(node => hr.bundleRegistry.opForObj[Any, Any, Any](node).name(node))
-    BundleMeta(name = name,
-      format = format,
-      version = version,
-      attributes = attributes,
-      nodes = nodeNames)
-  }
-
+case class Bundle[Transformer <: AnyRef](meta: BundleMeta,
+                                         root: Transformer) {
   /** Create a [[BundleContext]] for serializing to Bundle.ML
     *
     * @param bundleRegistry bundle registry for serializing ops, nodes, and custom types
     * @param fs file system for bundle
     * @param path path to the Bundle.ML directory
     * @tparam Context context for implementation
+    *
     * @return context for serializing Bundle.ML
     */
   def bundleContext[Context](context: Context,
                              bundleRegistry: BundleRegistry,
                              fs: FileSystem,
                              path: Path): BundleContext[Context] = {
-    BundleContext[Context](context, format, bundleRegistry, fs, path)
+    BundleContext[Context](context, meta.format, bundleRegistry, fs, path)
   }
-
-  override def replaceAttrList(list: Option[AttributeList]): Bundle = copy(attributes = list)
 }

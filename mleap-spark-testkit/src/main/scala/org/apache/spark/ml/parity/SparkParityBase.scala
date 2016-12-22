@@ -56,11 +56,11 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
   def mleapTransformer(transformer: Transformer)
                       (implicit context: SparkBundleContext): runtime.transformer.Transformer = {
-    serializedModel(transformer).deserializeBundle()(SparkParityBase.mleapRegistry)._2
+    serializedModel(transformer).deserializeBundle()(SparkParityBase.mleapRegistry).root
   }
 
   def deserializedSparkTransformer(transformer: Transformer): Transformer = {
-    SparkSupport.FileOps(serializedModel(transformer)).deserializeBundle()._2
+    SparkSupport.FileOps(serializedModel(transformer)).deserializeBundle().root
   }
 
   def parityTransformer(): Unit = {

@@ -1,6 +1,7 @@
 package ml.combust.bundle.tree
 
 import java.io._
+import java.nio.file.{Files, Path}
 
 import ml.bundle.tree.Node.Node
 import resource._
@@ -8,11 +9,11 @@ import resource._
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-case class TreeSerializer[N: NodeWrapper](path: File, withImpurities: Boolean) {
+case class TreeSerializer[N: NodeWrapper](path: Path, withImpurities: Boolean) {
   val ntc = implicitly[NodeWrapper[N]]
 
   def write(node: N): Unit = {
-    for(out <- managed(new DataOutputStream(new FileOutputStream(s"$path.pb")))) {
+    for(out <- managed(new DataOutputStream(Files.newOutputStream(path.getFileSystem.getPath(s"${path.toString}.pb"))))) {
       write(node, out)
     }
   }
@@ -33,7 +34,7 @@ case class TreeSerializer[N: NodeWrapper](path: File, withImpurities: Boolean) {
   }
 
   def read(): N = {
-    (for(in <- managed(new DataInputStream(new FileInputStream(s"$path.pb")))) yield {
+    (for(in <- managed(new DataInputStream(Files.newInputStream(path.getFileSystem.getPath(s"${path.toString}.pb"))))) yield {
       read(in)
     }).either.either match {
       case Left(errors) => throw errors.head

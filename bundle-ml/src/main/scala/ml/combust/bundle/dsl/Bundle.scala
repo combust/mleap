@@ -1,6 +1,7 @@
 package ml.combust.bundle.dsl
 
 import java.io.File
+import java.nio.file.{FileSystem, Path}
 
 import ml.combust.mleap.BuildValues
 import ml.combust.bundle.{BundleContext, BundleRegistry, HasBundleRegistry}
@@ -134,14 +135,16 @@ case class Bundle(name: String,
   /** Create a [[BundleContext]] for serializing to Bundle.ML
     *
     * @param bundleRegistry bundle registry for serializing ops, nodes, and custom types
+    * @param fs file system for bundle
     * @param path path to the Bundle.ML directory
     * @tparam Context context for implementation
     * @return context for serializing Bundle.ML
     */
   def bundleContext[Context](context: Context,
                              bundleRegistry: BundleRegistry,
-                             path: File): BundleContext[Context] = {
-    BundleContext[Context](context, format, bundleRegistry, path)
+                             fs: FileSystem,
+                             path: Path): BundleContext[Context] = {
+    BundleContext[Context](context, format, bundleRegistry, fs, path)
   }
 
   override def replaceAttrList(list: Option[AttributeList]): Bundle = copy(attributes = list)

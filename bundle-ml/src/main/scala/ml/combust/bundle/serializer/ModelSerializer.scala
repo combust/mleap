@@ -1,6 +1,7 @@
 package ml.combust.bundle.serializer
 
 import java.io.{FileInputStream, FileOutputStream, InputStream, OutputStream}
+import java.nio.file.Files
 
 import ml.bundle.ModelDef.ModelDef
 import ml.combust.bundle.{BundleContext, HasBundleRegistry}
@@ -84,7 +85,7 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
     * @param obj model to write
     */
   def write(obj: Any): Unit = {
-    bundleContext.path.mkdirs()
+    Files.createDirectories(bundleContext.path)
     val m = bundleContext.bundleRegistry.modelForObj[Context, Any](obj)
     var model = Model(op = m.opName)
     model = m.store(model, obj)(bundleContext)
@@ -97,7 +98,7 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
       case _ => model
     }
 
-    for(out <- managed(new FileOutputStream(bundleContext.file(Bundle.modelFile)))) {
+    for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.modelFile)))) {
       FormatModelSerializer.serializer.write(out, model)
     }
   }
@@ -113,7 +114,7 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
     * @return (deserialized model, model type class)
     */
   def readWithModel(): (Any, Model) = {
-    var bundleModel = (for(in <- managed(new FileInputStream(bundleContext.file(Bundle.modelFile)))) yield {
+    var bundleModel = (for(in <- managed(Files.newInputStream(bundleContext.file(Bundle.modelFile)))) yield {
       FormatModelSerializer.serializer.read(in)
     }).either.either match {
       case Left(errors) => throw errors.head
@@ -123,7 +124,7 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
 
     bundleModel = bundleContext.format match {
       case SerializationFormat.Mixed =>
-        if(bundleContext.file("model.pb").exists()) {
+        if(Files.exists(bundleContext.file("model.pb"))) {
           val large = AttributeListSerializer(bundleContext.file("model.pb")).readProto()
           bundleModel.withAttrList(large)
         } else { bundleModel }

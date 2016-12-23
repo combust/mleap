@@ -3,7 +3,7 @@ package org.apache.spark.sql.mleap
 import ml.combust.mleap.runtime.function.{UserDefinedFunction => MleapUDF}
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import ml.combust.mleap.runtime.types
-import ml.combust.mleap.runtime.types.{AnyType, ArrayType}
+import ml.combust.mleap.runtime.types.{AnyType, ListType}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.DataType
 
@@ -46,16 +46,7 @@ trait UserDefinedFunctionConverters {
   }
 
   private def converter(dataType: types.DataType): (Any) => Any = dataType match {
-    case lt: ArrayType if lt.base == AnyType => (row: Any) => row.asInstanceOf[Row].toSeq.toArray
-    case lt: ArrayType =>
-      lt.base match {
-        case types.DoubleType => (arr: Any) => arr.asInstanceOf[mutable.WrappedArray[Double]].toArray
-        case types.StringType => (arr: Any) => arr.asInstanceOf[mutable.WrappedArray[String]].toArray
-        case types.LongType => (arr: Any) => arr.asInstanceOf[mutable.WrappedArray[Long]].toArray
-        case types.IntegerType => (arr: Any) => arr.asInstanceOf[mutable.WrappedArray[Int]].toArray
-        case types.BooleanType =>  (arr: Any) => arr.asInstanceOf[mutable.WrappedArray[Boolean]].toArray
-        case _ => (arr: Any) => arr.asInstanceOf[mutable.WrappedArray[Any]].toArray
-      }
+    case lt: ListType if lt.base == AnyType => (row: Any) => row.asInstanceOf[Row].toSeq
     case _ => identity
   }
 

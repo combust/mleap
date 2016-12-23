@@ -20,14 +20,14 @@ object ValueSerializer {
     case IntegerType => IntegerSerializer
     case LongType => LongSerializer
     case BooleanType => BooleanSerializer
-    case at: ArrayType =>
+    case at: ListType =>
       at.base match {
-        case DoubleType => ArraySerializer(DoubleSerializer)
-        case StringType => ArraySerializer(StringSerializer)
-        case IntegerType => ArraySerializer(IntegerSerializer)
-        case LongType => ArraySerializer(LongSerializer)
-        case BooleanType => ArraySerializer(BooleanSerializer)
-        case _ => ArraySerializer(serializerForDataType(at.base))
+        case DoubleType => ListSerializer(DoubleSerializer)
+        case StringType => ListSerializer(StringSerializer)
+        case IntegerType => ListSerializer(IntegerSerializer)
+        case LongType => ListSerializer(LongSerializer)
+        case BooleanType => ListSerializer(BooleanSerializer)
+        case _ => ListSerializer(serializerForDataType(at.base))
       }
     case tt: TensorType if tt.base == DoubleType && tt.dimensions.length == 1 => VectorSerializer
     case ct: CustomType => CustomSerializer(ct)
@@ -73,13 +73,13 @@ object StringSerializer extends ValueSerializer[String] {
   }
 }
 
-case class ArraySerializer[T: ClassTag](base: ValueSerializer[T]) extends ValueSerializer[Array[T]] {
-  override def write(value: Array[T], out: DataOutputStream): Unit = {
+case class ListSerializer[T: ClassTag](base: ValueSerializer[T]) extends ValueSerializer[Seq[T]] {
+  override def write(value: Seq[T], out: DataOutputStream): Unit = {
     out.writeInt(value.length)
     for(v <- value) { base.write(v, out) }
   }
 
-  override def read(in: DataInputStream): Array[T] = {
+  override def read(in: DataInputStream): Seq[T] = {
     val length = in.readInt()
     val arr = new Array[T](length)
     for(i <- 0 until length) { arr(i) = base.read(in) }
@@ -91,8 +91,8 @@ object VectorSerializer extends ValueSerializer[Vector] {
   val DENSE_VECTOR = 0
   val SPARSE_VECTOR = 1
 
-  val indicesSerializer = ArraySerializer(IntegerSerializer)
-  val valuesSerializer = ArraySerializer(DoubleSerializer)
+  val indicesSerializer = ListSerializer(IntegerSerializer)
+  val valuesSerializer = ListSerializer(DoubleSerializer)
 
   override def write(value: Vector, out: DataOutputStream): Unit = value match {
     case DenseVector(values) =>
@@ -107,8 +107,11 @@ object VectorSerializer extends ValueSerializer[Vector] {
 
   override def read(in: DataInputStream): Vector = {
     in.readInt() match {
-      case DENSE_VECTOR => Vectors.dense(valuesSerializer.read(in))
-      case SPARSE_VECTOR => Vectors.sparse(in.readInt(), indicesSerializer.read(in), valuesSerializer.read(in))
+      case DENSE_VECTOR => Vectors.dense(valuesSerializer.read(in).toArray)
+      case SPARSE_VECTOR =>
+        Vectors.sparse(in.readInt(),
+          indicesSerializer.read(in).toArray,
+          valuesSerializer.read(in).toArray)
       case _ => throw new IllegalArgumentException("invalid vector type")
     }
   }

@@ -13,18 +13,18 @@ import scala.language.implicitConversions
   * Created by hollinwilkins on 8/23/16.
   */
 trait JsonSupport {
-  implicit val mleapListTypeWriterFormat: JsonWriter[ArrayType] = new JsonWriter[ArrayType] {
-    override def write(obj: ArrayType): JsValue = {
+  implicit val mleapListTypeWriterFormat: JsonWriter[ListType] = new JsonWriter[ListType] {
+    override def write(obj: ListType): JsValue = {
       JsObject("type" -> JsString("list"),
         "base" -> obj.base.toJson)
     }
   }
 
-  implicit def mleapListTypeReaderFormat(implicit context: MleapContext): JsonReader[ArrayType] = new JsonReader[ArrayType] {
-    override def read(json: JsValue): ArrayType = {
+  implicit def mleapListTypeReaderFormat(implicit context: MleapContext): JsonReader[ListType] = new JsonReader[ListType] {
+    override def read(json: JsValue): ListType = {
       val obj = json.asJsObject("invalid list type")
 
-      ArrayType(obj.fields("base").convertTo[DataType])
+      ListType(obj.fields("base").convertTo[DataType])
     }
   }
 
@@ -81,7 +81,7 @@ trait JsonSupport {
   implicit val mleapDataTypeWriterFormat: JsonWriter[DataType] = new JsonWriter[DataType] {
     override def write(obj: DataType): JsValue = obj match {
       case bt: BasicType => mleapBasicTypeFormat.write(bt)
-      case lt: ArrayType => mleapListTypeWriterFormat.write(lt)
+      case lt: ListType => mleapListTypeWriterFormat.write(lt)
       case tt: TensorType => mleapTensorTypeFormat.write(tt)
       case ct: CustomType => mleapCustomTypeWriterFormat.write(ct)
       case AnyType => serializationError("AnyType not supported for JSON serialization")

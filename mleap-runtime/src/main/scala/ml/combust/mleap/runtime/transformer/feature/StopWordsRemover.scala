@@ -11,5 +11,5 @@ case class StopWordsRemover(override val uid:String = Transformer.uniqueName("st
                             override val inputCol: String,
                             override val outputCol: String,
                             model: StopWordsRemoverModel) extends FeatureTransformer {
-  override val exec: UserDefinedFunction = (value: Array[String]) => model(value)
+  override val exec: UserDefinedFunction = (value: Seq[String]) => model(value)
 }

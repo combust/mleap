@@ -87,7 +87,7 @@ trait Row extends Iterable[Any] {
     * @tparam T inner type of the array
     * @return array value
     */
-  def getArray[T](index: Int): Array[T] = get(index).asInstanceOf[Array[T]]
+  def getSeq[T](index: Int): Seq[T] = get(index).asInstanceOf[Seq[T]]
 
   /** Convert row to a seq of values.
     *

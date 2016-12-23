@@ -3,9 +3,9 @@ package ml.combust.mleap.core.feature
 /**
   * Created by mikhail on 10/16/16.
   */
-case class StopWordsRemoverModel(stopWords: Array[String],
+case class StopWordsRemoverModel(stopWords: Seq[String],
                                  caseSensitive: Boolean) extends Serializable {
-  def apply(value: Array[String]): Array[String] = {
+  def apply(value: Seq[String]): Seq[String] = {
     if(caseSensitive) {
       val stopWordsSet = stopWords.toSet
       value.filter(s => !stopWordsSet.contains(s))

@@ -52,7 +52,7 @@ object SchemaConverter {
     case LongType => Schema.create(Schema.Type.LONG)
     case IntegerType => Schema.create(Schema.Type.INT)
     case BooleanType => Schema.create(Schema.Type.BOOLEAN)
-    case lt: ArrayType => Schema.createArray(mleapToAvroType(lt.base))
+    case lt: ListType => Schema.createArray(mleapToAvroType(lt.base))
     case tt: TensorType => tensorSchema(tt)
     case ct: CustomType => customSchema(ct)
     case AnyType => throw new IllegalArgumentException(s"invalid data type: $dataType")
@@ -76,7 +76,7 @@ object SchemaConverter {
     case Schema.Type.LONG => LongType
     case Schema.Type.INT => IntegerType
     case Schema.Type.BOOLEAN => BooleanType
-    case Schema.Type.ARRAY => ArrayType(avroToMleapType(schema.getElementType))
+    case Schema.Type.ARRAY => ListType(avroToMleapType(schema.getElementType))
     case Schema.Type.RECORD =>
       schema.getName match {
         case "Tensor" => mleapTensorTypeFormat.read(schema.getDoc.parseJson)

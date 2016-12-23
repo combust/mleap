@@ -9,7 +9,6 @@ import org.apache.spark.ml.{Estimator, Model}
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.param.shared.{HasInputCol, HasOutputCol}
 import org.apache.spark.ml.util._
-import org.apache.spark.ml.mleap.feature
 import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.functions._
@@ -19,7 +18,7 @@ import org.apache.spark.sql._
 /**
   * Params for [[Imputer]] and [[ImputerModel]].
   */
-@SparkCode("https://github.com/hhbyyh/spark/blob/imputer/mllib/src/main/scala/org/apache/spark/ml/feature/Imputer.scala")
+@SparkCode(uri = "https://github.com/hhbyyh/spark/blob/imputer/mllib/src/main/scala/org/apache/spark/ml/feature/Imputer.scala")
 private[feature] trait ImputerParams extends Params with HasInputCol with HasOutputCol {
 
   /**
@@ -128,7 +127,7 @@ class Imputer @Since("2.1.0")(override val uid: String)
       setMissingValue($(missingValue))
 
     val imputerModel = imputer.fit(dataset)
-    copyValues(new ImputerModel(uid, imputerModel.imputeValue, imputerModel.missingValue).setParent(this))
+    copyValues(new ImputerModel(uid, imputerModel.imputeValue, imputerModel.surrogateValue).setParent(this))
 
   }
 
@@ -159,7 +158,7 @@ object Imputer extends DefaultParamsReadable[Imputer] {
 class ImputerModel private[ml](
                                 override val uid: String,
                                 val imputeValue: Double,
-                                override val missingValue: Double
+                                val surrogateValue: Double
                               )
   extends Model[ImputerModel] with ImputerParams with MLWritable {
 
@@ -177,7 +176,7 @@ class ImputerModel private[ml](
     val ic = col($(inputCol))
 
     dataset.withColumn($(outputCol), when(ic.isNull, imputeValue)
-      .when(ic === missingValue, imputeValue)
+      .when(ic === surrogateValue, imputeValue)
       .otherwise(ic)
       .cast(inputType))
   }
@@ -187,7 +186,7 @@ class ImputerModel private[ml](
   }
 
   override def copy(extra: ParamMap): ImputerModel = {
-    val copied = new ImputerModel(uid, imputeValue, missingValue)
+    val copied = new ImputerModel(uid, imputeValue, surrogateValue)
     copyValues(copied, extra).setParent(parent)
   }
 

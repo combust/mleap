@@ -18,7 +18,7 @@ case class ValueConverter() {
 
   def mleapToAvro(dataType: DataType): (Any) => Any = dataType match {
     case _: BasicType => identity
-    case _: ListType => (value) => value.asInstanceOf[Array[_]].toSeq.asJava
+    case _: ListType => (value) => value.asInstanceOf[Seq[_]].asJava
     case dataType: TensorType =>
       val vectorRecord = new GenericData.Record(dataType)
       (value) => {

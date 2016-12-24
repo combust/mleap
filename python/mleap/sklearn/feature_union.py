@@ -30,10 +30,14 @@ def deserialize_from_bundle(self, path):
     serializer = SimpleSparkSerializer()
     return serializer.deserialize_from_bundle(path)
 
+
+def mleap_init(self):
+    self.name = "{}_{}".format(self.op, uuid.uuid1())
+
 setattr(FeatureUnion, 'serialize_to_bundle', serialize_to_bundle)
 setattr(FeatureUnion, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(FeatureUnion, 'op', 'feature_union')
-setattr(FeatureUnion, 'name', "{}_{}".format('feature_union', uuid.uuid1()))
+setattr(FeatureUnion, 'minit', mleap_init)
 setattr(FeatureUnion, 'serializable', True)
 
 
@@ -41,10 +45,10 @@ class SimpleSparkSerializer(object):
     def __init__(self):
         super(SimpleSparkSerializer, self).__init__()
 
-    def serialize_to_bundle(self, transformer, path, model_name):
+    @staticmethod
+    def serialize_to_bundle(transformer, path, model_name):
 
         for transformer in [x[1] for x in transformer.transformer_list]:
-            name = transformer.name
 
             if os.path.exists("{}/{}.node".format(path, transformer.name)):
                 shutil.rmtree("{}/{}.node".format(path, transformer.name))
@@ -59,5 +63,6 @@ class SimpleSparkSerializer(object):
             if isinstance(transformer, list):
                 pass
 
+    @staticmethod
     def deserialize_from_bundle(self, path):
         return NotImplementedError

@@ -19,9 +19,11 @@ from pyspark.ml.wrapper import JavaTransformer
 from pyspark.ml.base import Transformer
 from pyspark.ml.util import _jvm
 
+
 def serializeToBundle(self, path):
     serializer = SimpleSparkSerializer()
     serializer.serializeToBundle(self, path)
+
 
 def deserializeFromBundle(self, path):
     serializer = SimpleSparkSerializer()
@@ -29,6 +31,7 @@ def deserializeFromBundle(self, path):
 
 setattr(Transformer, 'serializeToBundle', serializeToBundle)
 setattr(Transformer.__class__, 'deserializeFromBundle', deserializeFromBundle)
+
 
 class SimpleSparkSerializer(object):
     def __init__(self):

@@ -21,29 +21,25 @@ from mleap.bundle.serialize import MLeapSerializer
 import uuid
 
 
-def get_mleap_node(self, path):
+def mleap_init(self, input_features, prediction_column):
+    self.input_features = input_features
+    self.prediction_column = prediction_column
+    self.name = "{}_{}".format(self.op, uuid.uuid1())
+
+
+def serialize_to_bundle(self, path, model_name):
     serializer = SimpleSparkSerializer()
-    return serializer.get_mleap_node(self)
-
-
-def set_prediction_column(self, prediction_column):
-    serializer = SimpleSparkSerializer()
-    return serializer.set_prediction_column(self, prediction_column)
-
-
-def set_input_features(self, input_features):
-    serializer = SimpleSparkSerializer()
-    return serializer.set_input_features(self, input_features)
+    return serializer.serialize_to_bundle(self, path, model_name)
 
 setattr(LogisticRegression, 'op', 'logistic_regression')
-setattr(LogisticRegression, 'name', "{}_{}".format('logistic_regression', uuid.uuid1()))
-setattr(LogisticRegression, 'set_prediction_column', set_prediction_column)
-setattr(LogisticRegression, 'set_input_features', set_input_features)
+setattr(LogisticRegression, 'minit', mleap_init)
+setattr(LogisticRegression, 'serialize_to_bundle', serialize_to_bundle)
+setattr(LogisticRegression, 'serializable', True)
 
 setattr(LogisticRegressionCV, 'op', 'logistic_regression')
-setattr(LogisticRegressionCV, 'name', "{}_{}".format('logistic_regression_cv', uuid.uuid1()))
-setattr(LogisticRegressionCV, 'set_prediction_column', set_prediction_column)
-setattr(LogisticRegressionCV, 'set_input_features', set_input_features)
+setattr(LogisticRegressionCV, 'minit', mleap_init)
+setattr(LogisticRegressionCV, 'serialize_to_bundle', serialize_to_bundle)
+setattr(LogisticRegressionCV, 'serializable', True)
 
 
 class SimpleSparkSerializer(MLeapSerializer):

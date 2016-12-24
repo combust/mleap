@@ -32,10 +32,15 @@ def deserialize_from_bundle(self, path):
     serializer = SimpleSparkSerializer()
     return serializer.deserialize_from_bundle(path)
 
+
+def mleap_init(self):
+    self.name = "{}_{}".format(self.op, uuid.uuid1())
+
+
 setattr(Pipeline, 'serialize_to_bundle', serialize_to_bundle)
 setattr(Pipeline, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(Pipeline, 'op', 'pipeline')
-setattr(Pipeline, 'name', "{}_{}".format('pipeline', uuid.uuid1()))
+setattr(Pipeline, 'minit', mleap_init)
 setattr(Pipeline, 'serializable', True)
 
 
@@ -51,12 +56,26 @@ class SimpleSparkSerializer(object):
             if os.path.exists("{}/{}".format(path, model_name)):
                 shutil.rmtree("{}/{}".format(path, model_name))
 
+            # make pipeline directory
             model_dir = "{}/{}".format(path, model_name)
             os.mkdir(model_dir)
+
+            # make pipeline root directory
+            root_dir = "{}/root".format(model_dir)
+            os.mkdir(root_dir)
 
             # Write Pipeline Bundle file
             with open("{}/{}".format(model_dir, 'bundle.json'), 'w') as outfile:
                 json.dump(self.get_bundle(transformer), outfile, indent=3)
+
+            model_dir = root_dir
+
+            # Write the model and node files
+            with open("{}/{}".format(model_dir, 'model.json'), 'w') as outfile:
+                json.dump(self.get_model(transformer), outfile, indent=3)
+
+            with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
+                json.dump(self.get_node(transformer), outfile, indent=3)
 
         else:
             # Write model file
@@ -97,18 +116,20 @@ class SimpleSparkSerializer(object):
     def deserialize_from_bundle(self, path):
         return NotImplementedError
 
-    def get_bundle(self, transformer):
+    @staticmethod
+    def get_bundle(transformer):
         js = {
           "name": transformer.name,
           "format": "json",
           "version": __version__,
-          "nodes": self._extract_nodes(transformer.steps)
+          "uid": "{}".format(uuid.uuid4())
         }
         return js
 
-    def get_node(self, transformer):
+    @staticmethod
+    def get_node(transformer):
         js = {
-          "name": "feature_pipeline",
+          "name": transformer.name,
           "shape": {
             "inputs": [],
             "outputs": []
@@ -130,7 +151,8 @@ class SimpleSparkSerializer(object):
         }
         return js
 
-    def _extract_nodes(self, steps):
+    @staticmethod
+    def _extract_nodes(steps):
         pipeline_steps = []
         for name, step in steps:
             if step.op == 'feature_union':

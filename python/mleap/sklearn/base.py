@@ -20,36 +20,20 @@ from mleap.bundle.serialize import MLeapSerializer
 import uuid
 
 
-def get_mleap_model(self, path):
-    serializer = SimpleSparkSerializer()
-    return serializer.get_mleap_model(self)
-
-
-def get_mleap_node(self, path):
-    serializer = SimpleSparkSerializer()
-    return serializer.get_mleap_node(self)
-
-
 def serialize_to_bundle(self, path, model_name):
     serializer = SimpleSparkSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
 
 
-def set_prediction_column(self, prediction_column):
-    serializer = SimpleSparkSerializer()
-    return serializer.set_prediction_column(self, prediction_column)
+def mleap_init(self, input_features, prediction_column):
+    self.input_features = input_features
+    self.prediction_column = prediction_column
+    self.name = "{}_{}".format(self.op, uuid.uuid1())
 
 
-def set_input_features(self, input_features):
-    serializer = SimpleSparkSerializer()
-    return serializer.set_input_features(self, input_features)
-
-
-setattr(LinearRegression, 'serialize_to_bundle', serialize_to_bundle)
 setattr(LinearRegression, 'op', 'linear_regression')
-setattr(LinearRegression, 'name', "{}_{}".format('linear_regression', uuid.uuid1()))
-setattr(LinearRegression, 'set_prediction_column', set_prediction_column)
-setattr(LinearRegression, 'set_input_features', set_input_features)
+setattr(LinearRegression, 'minit', mleap_init)
+setattr(LinearRegression, 'serialize_to_bundle', serialize_to_bundle)
 setattr(LinearRegression, 'serializable', True)
 
 

@@ -58,52 +58,44 @@ def serialize_to_bundle(self, path, model_name):
     return serializer.serialize_to_bundle(self, path, model_name)
 
 
+def mleap_init(self, input_features, output_features):
+    self.input_features = input_features
+    self.output_features = output_features
+    self.name = "{}_{}".format(self.op, uuid.uuid1())
+
+
 setattr(StandardScaler, 'op', ops.STANDARD_SCALER)
-setattr(StandardScaler, 'name', "{}_{}".format(ops.STANDARD_SCALER, uuid.uuid1()))
-setattr(StandardScaler, 'set_input_features', set_input_features)
-setattr(StandardScaler, 'set_output_features', set_output_features)
+setattr(StandardScaler, 'minit', mleap_init)
 setattr(StandardScaler, 'serialize_to_bundle', serialize_to_bundle)
 setattr(StandardScaler, 'serializable', True)
 
 setattr(MinMaxScaler, 'op', ops.MIN_MAX_SCALER)
-setattr(MinMaxScaler, 'name', "{}_{}".format(ops.MIN_MAX_SCALER, uuid.uuid1()))
-setattr(MinMaxScaler, 'set_input_features', set_input_features)
-setattr(MinMaxScaler, 'set_output_features', set_output_features)
+setattr(MinMaxScaler, 'minit', mleap_init)
 setattr(MinMaxScaler, 'serialize_to_bundle', serialize_to_bundle)
 setattr(MinMaxScaler, 'serializable', True)
 
 setattr(Imputer, 'op', ops.IMPUTER)
-setattr(Imputer, 'name', "{}_{}".format(ops.IMPUTER, uuid.uuid1()))
-setattr(Imputer, 'set_input_features', set_input_features)
-setattr(Imputer, 'set_output_features', set_output_features)
+setattr(Imputer, 'minit', mleap_init)
 setattr(Imputer, 'serialize_to_bundle', serialize_to_bundle)
 setattr(Imputer, 'serializable', True)
 
 setattr(LabelEncoder, 'op', ops.LABEL_ENCODER)
-setattr(LabelEncoder, 'name', "{}_{}".format(ops.LABEL_ENCODER, uuid.uuid1()))
-setattr(LabelEncoder, 'set_input_features', set_input_features)
-setattr(LabelEncoder, 'set_output_features', set_output_features)
+setattr(LabelEncoder, 'minit', mleap_init)
 setattr(LabelEncoder, 'serialize_to_bundle', serialize_to_bundle)
 setattr(LabelEncoder, 'serializable', True)
 
 setattr(OneHotEncoder, 'op', ops.ONE_HOT_ENCODER)
-setattr(OneHotEncoder, 'name', "{}_{}".format(ops.ONE_HOT_ENCODER, uuid.uuid1()))
-setattr(OneHotEncoder, 'set_input_features', set_input_features)
-setattr(OneHotEncoder, 'set_output_features', set_output_features)
+setattr(OneHotEncoder, 'minit', mleap_init)
 setattr(OneHotEncoder, 'serialize_to_bundle', serialize_to_bundle)
 setattr(OneHotEncoder, 'serializable', True)
 
 setattr(Binarizer, 'op', ops.BINARIZER)
-setattr(Binarizer, 'name', "{}_{}".format(ops.BINARIZER, uuid.uuid1()))
-setattr(Binarizer, 'set_input_features', set_input_features)
-setattr(Binarizer, 'set_output_features', set_output_features)
+setattr(Binarizer, 'minit', mleap_init)
 setattr(Binarizer, 'serialize_to_bundle', serialize_to_bundle)
 setattr(Binarizer, 'serializable', True)
 
 setattr(PolynomialFeatures, 'op', ops.POLYNOMIALEXPANSION)
-setattr(PolynomialFeatures, 'name', "{}_{}".format(ops.POLYNOMIALEXPANSION, uuid.uuid1()))
-setattr(PolynomialFeatures, 'set_input_features', set_input_features)
-setattr(PolynomialFeatures, 'set_output_features', set_output_features)
+setattr(PolynomialFeatures, 'minit', mleap_init)
 setattr(PolynomialFeatures, 'serialize_to_bundle', serialize_to_bundle)
 setattr(PolynomialFeatures, 'serializable', True)
 

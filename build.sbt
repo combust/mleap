@@ -10,7 +10,7 @@ lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
   spark,
   sparkExtension)
 
-lazy val rootSettings = Release.settings
+lazy val rootSettings = Release.settings ++ Seq(publishArtifact := false)
 
 lazy val root = Project(
   id = "mleap",

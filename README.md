@@ -3,15 +3,16 @@
 [![Join the chat at https://gitter.im/combust-ml/mleap](https://badges.gitter.im/combust-ml/mleap.svg)](https://gitter.im/combust-ml/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/combust-ml/mleap.svg?branch=master)](https://travis-ci.org/combust-ml/mleap)
 
-Easily put your Spark ML Pipelines into action with MLeap. Train your feature and regression/classification pipeline with Spark then easily convert them to MLeap pipelines to deploy them anywhere. Take your pipelines to an API server, Hadoop, or even back to Spark to execute on a DataFrame.
+Easily put your Spark ML Pipelines into action with MLeap. Train your feature and regression/classification pipeline with Spark or Scikit-Learn, then easily convert them to MLeap pipelines to deploy them anywhere. Take your pipelines to an API server, Hadoop, or even back to Spark to execute on a DataFrame.
 
 MLeap allows for easy serialization of your estimator and transformer pipelines so you can save them for reuse later. Executing an MLeap pipeline does not require a SparkContext or DataFrame so there is very little overhead for realtime one-off predictions. You don't have to worry about Spark dependencies for executing your models, just add the lightweight MLeap runtime library instead.
 
-MLeap makes deploying your Spark ML pipelines with 3 core functions:
+MLeap makes deploying your Spark and Scikit-Learn ML pipelines with 3 core functions:
 
 1. Release: Deploy your entire ML pipeline without a SparkContext or any dependency on Spark libraries.
-2. Reuse: Export your ML pipeline to easy-to-read JSON files so you can reuse pipelines.
+2. Reuse: Export your ML pipeline to easy-to-read JSON or Protobuf files so you can reuse pipelines.
 3. Recycle: Export your training pipelines to easy-to-read JSON files so you can easily modify your training pipelines.
+4. Don't Recode: Prototype quickly in Scikit-Learn and export your pipeline and models to Spark (without having rewrite any transformers)
 
 ## Setup
 
@@ -33,6 +34,16 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.3.0"
     <artifactId>mleap-runtime_2.10</artifactId>
     <version>0.3.0</version>
 </dependency>
+```
+
+
+#### Python
+
+```
+git clone
+cd mleap/python
+
+python setup.py install
 ```
 
 ### For Spark Integration
@@ -58,23 +69,24 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.3.0"
 MLeap is now a [Spark Package](http://spark-packages.org/package/combust-ml/mleap).
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.3.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.5.0
 ```
 
 ## Modules
 
-MLeap is broken into 3 modules:
+MLeap is broken into 4 modules:
 
 1. mleap-core - Core execution building blocks, includes runtime for executing linear regressions, random forest models, logisitic regressions, assembling feature vectors, string indexing, one hot encoding, etc.
 2. mleap-runtime - Provides LeapFrame data structure, MLeap transformers and Bundle.ML serialization for MLeap.
 3. mleap-spark - Provides Spark Bundle.ML serialization.
+4. python/mleap - Provides PySpark and Scikit learn extensions.
 
 ## Future of MLeap
 
-1. Provide Python/R bindings
+1. Provide TensorFlow bindings
 2. Unify linear algebra and core ML models library with Spark
 3. Deploy outside of the JVM to embedded systems
-4. Full support for all Spark transformers
+4. Easy serialization/deserialization of custom tranformers accross Spark/Scikit/TensorFlow
 
 ## Contributing
 

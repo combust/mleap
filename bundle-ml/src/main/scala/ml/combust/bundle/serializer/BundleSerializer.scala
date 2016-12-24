@@ -1,6 +1,6 @@
 package ml.combust.bundle.serializer
 
-import java.io.File
+import java.io.{Closeable, File}
 import java.net.URI
 import java.nio.file.{FileSystem, FileSystems, Files, Path}
 
@@ -12,6 +12,7 @@ import resource._
 
 import scala.collection.JavaConverters._
 import scala.io.Source
+import scala.util.Try
 
 object BundleSerializer {
   def apply[Context](context: Context,
@@ -60,7 +61,7 @@ object BundleSerializer {
 case class BundleSerializer[Context](context: Context,
                                      fs: FileSystem,
                                      path: Path)
-                                    (implicit hr: HasBundleRegistry) {
+                                    (implicit hr: HasBundleRegistry) extends Closeable {
   /** Write a bundle to the path.
     *
     * @param bundle bundle to write
@@ -108,5 +109,11 @@ case class BundleSerializer[Context](context: Context,
       case Left(errors) => throw errors.head
       case Right(meta) => meta
     }
+  }
+
+  override def close(): Unit = {
+    // closing some file systems, like Unix, raises an
+    // unsupported operation error
+    Try(fs.close())
   }
 }

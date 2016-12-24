@@ -14,11 +14,11 @@ class SimpleSparkSerializer() {
   implicit val hr: HasBundleRegistry = BundleRegistry("spark")
 
   def serializeToBundle(transformer: Transformer, path : String): Unit = {
-    transformer.serializeToBundle(new File(path))
+    transformer.serializeToBundle(new File(path)).get
   }
 
   def deserializeFromBundle(path: String): Transformer = {
-    new File(path).deserializeBundle().root
+    new File(path).deserializeBundle().get.root
   }
 
 }

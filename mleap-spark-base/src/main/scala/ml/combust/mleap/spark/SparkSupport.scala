@@ -9,6 +9,8 @@ import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.bundle.{SparkBundle, SparkBundleContext}
 import org.apache.spark.sql.DataFrame
 
+import scala.util.Try
+
 /**
   * Created by hollinwilkins on 8/22/16.
   */
@@ -16,7 +18,7 @@ trait SparkSupport {
   implicit class SparkTransformerOps(transformer: Transformer) {
     def serializeToBundle(path: File,
                           format: SerializationFormat = SerializationFormat.Mixed)
-                         (implicit context: SparkBundleContext = SparkBundleContext()): Unit = {
+                         (implicit context: SparkBundleContext = SparkBundleContext()): Try[Bundle[Transformer]] = {
       SparkBundle.writeTransformer(transformer, path, format)(context)
     }
   }
@@ -34,7 +36,7 @@ trait SparkSupport {
     }
 
     def deserializeBundle()
-                         (implicit context: SparkBundleContext = SparkBundleContext()): Bundle[Transformer] = {
+                         (implicit context: SparkBundleContext = SparkBundleContext()): Try[Bundle[Transformer]] = {
       SparkBundle.readTransformer(path)
     }
   }

@@ -8,6 +8,8 @@ import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.bundle.dsl.{Bundle, BundleMeta}
 import ml.combust.bundle.serializer._
 
+import scala.util.Try
+
 /** Object for support classes for easily working with Bundle.ML.
   */
 object MleapSupport {
@@ -27,7 +29,7 @@ object MleapSupport {
     def serializeToBundle(path: File,
                           format: SerializationFormat = SerializationFormat.Mixed)
                          (implicit hr: HasBundleRegistry = BundleRegistry("mleap"),
-                          context: MleapContext = MleapContext()): Unit = {
+                          context: MleapContext = MleapContext()): Try[Bundle[Transformer]] = {
       MleapBundle.writeTransformer(transformer, path, format)
     }
   }
@@ -51,6 +53,6 @@ object MleapSupport {
       * @return (bundle, MLeap transformer)
       */
     def deserializeBundle()
-                         (implicit context: MleapContext = MleapContext()): Bundle[Transformer] = MleapBundle.readTransformer(path)
+                         (implicit context: MleapContext = MleapContext()): Try[Bundle[Transformer]] = MleapBundle.readTransformer(path)
   }
 }

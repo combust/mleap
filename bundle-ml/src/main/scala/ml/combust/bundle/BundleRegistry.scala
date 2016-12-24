@@ -40,7 +40,11 @@ object BundleRegistry {
     }
 
     config.getStringList("ml.combust.bundle.customTypes").asScala.foldLeft(br) {
-      (br2, customClass) => br.register(cl.loadClass(customClass).newInstance().asInstanceOf[CustomType[_]])
+      (br2, customClass) =>
+        br.register(cl.loadClass(customClass).
+          getConstructor(classOf[BundleRegistry]).
+          newInstance(br).
+          asInstanceOf[CustomType[_]])
     }
   }
 }

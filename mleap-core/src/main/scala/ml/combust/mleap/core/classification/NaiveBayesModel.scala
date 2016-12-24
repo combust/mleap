@@ -15,15 +15,12 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors, D
 object NaiveBayesModel {
   def apply(numFeatures: Int,
             numClasses: Int,
-            w: Option[Array[Double]]) : NaiveBayesModel = {
-    val weight = w match {
-      case Some(w) => w
-      case None => Array.fill[Double](numFeatures)(1.0)
-    }
+            pi: Vector,
+            theta: DenseMatrix): NaiveBayesModel = {
     NaiveBayesModel(numFeatures,
       numClasses,
-      new Array[Double](numClasses),
-      new Array[Double](numFeatures * numClasses))
+      pi,
+      theta)
   }
 }
 
@@ -31,18 +28,16 @@ object NaiveBayesModel {
   *
   * @param numFeatures number of features in feature vector
   * @param numClasses number of labels or labels to classify predictions into
-  * @param piArray log of class priors
-  * @param thetaArray log of class conditional probabilities
+  * @param pi log of class priors
+  * @param theta log of class conditional probabilities
   */
 case class NaiveBayesModel (numFeatures: Int,
                             numClasses:Int,
-                            piArray: Array[Double],
-                            thetaArray: Array[Double])
+                            pi: Vector,
+                            theta: DenseMatrix)
   extends MultinomialClassificationModel with Serializable {
 
   override def predictRaw(raw: Vector): Vector = {
-    val pi = Vectors.dense(piArray)
-    val theta = new DenseMatrix(numClasses, numFeatures, thetaArray, true)
     val prob = theta.multiply(raw)
     BLAS.axpy(1.0, pi, prob)
     prob

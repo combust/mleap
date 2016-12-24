@@ -1,5 +1,6 @@
 package ml.combust.bundle.test
 
+import ml.combust.bundle.BundleRegistry
 import ml.combust.bundle.custom.CustomType
 import spray.json.RootJsonFormat
 import spray.json.DefaultJsonProtocol._
@@ -9,7 +10,7 @@ import spray.json.DefaultJsonProtocol._
   */
 case class MyCustomObject(name: String)
 
-class MyCustomType extends CustomType[MyCustomObject] {
+class MyCustomType(bundleRegistry: BundleRegistry) extends CustomType[MyCustomObject] {
   override val klazz: Class[MyCustomObject] = classOf[MyCustomObject]
 
   override def name: String = "my_custom_object"

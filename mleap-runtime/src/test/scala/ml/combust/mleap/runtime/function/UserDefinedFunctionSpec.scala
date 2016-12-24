@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.function
 
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.test.{MyCustomObject, MyCustomType}
 import ml.combust.mleap.runtime.types._
 import org.apache.spark.ml.linalg.Vector
@@ -25,7 +26,7 @@ class UserDefinedFunctionSpec extends FunSpec {
       assertUdfForm(udf3, AnyType, BooleanType, TensorType.doubleVector())
       assertUdfForm(udf4, StringType, ListType(BooleanType), ListType(StringType), ListType(DoubleType))
       assertUdfForm(udf5, DoubleType, DoubleType, DoubleType, DoubleType, DoubleType, StringType)
-      assertUdfForm(udf0custom, new MyCustomType)
+      assertUdfForm(udf0custom, MleapContext.defaultContext.customType[MyCustomObject])
     }
   }
 

@@ -1,4 +1,4 @@
-import ml.combust.mleap.Release
+import ml.combust.mleap.{Release, Common}
 
 lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
   bundleMl,
@@ -10,7 +10,7 @@ lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
   spark,
   sparkExtension)
 
-lazy val rootSettings = Release.settings ++ Seq(publishArtifact := false)
+lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Seq(publishArtifact := false)
 
 lazy val root = Project(
   id = "mleap",

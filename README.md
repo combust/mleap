@@ -81,6 +81,11 @@ MLeap is broken into 4 modules:
 3. mleap-spark - Provides Spark Bundle.ML serialization.
 4. python/mleap - Provides PySpark and Scikit learn extensions.
 
+
+## Demos
+
+We have demo notebooks as well as instructions on how to configure Toree to work with [Spark 2.x](https://github.com/combust-ml/mleap/wiki/Setting-up-a-Spark-2.0-notebook-with-MLeap-and-Toree), [PySpark](https://github.com/combust-ml/mleap/wiki/Setting-up-a-Spark-2.0-notebook-with-MLeap-and-Toree) and Scikit-Learn [here](https://github.com/combust-ml/mleap-demo/tree/master/notebooks).
+
 ## Future of MLeap
 
 1. Provide TensorFlow bindings

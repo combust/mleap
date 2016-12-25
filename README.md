@@ -84,7 +84,7 @@ MLeap is broken into 4 modules:
 
 ## Demos
 
-We have demo notebooks as well as instructions on how to configure Toree to work with [Spark 2.x](https://github.com/combust-ml/mleap/wiki/Setting-up-a-Spark-2.0-notebook-with-MLeap-and-Toree), [PySpark](https://github.com/combust-ml/mleap/wiki/Setting-up-a-Spark-2.0-notebook-with-MLeap-and-Toree) and Scikit-Learn [here](https://github.com/combust-ml/mleap-demo/tree/master/notebooks).
+We have demo notebooks as well as instructions on how to configure Toree to work with [Spark 2.x](https://github.com/combust-ml/mleap/wiki/Setting-up-a-Spark-2.0-notebook-with-MLeap-and-Toree), [PySpark](https://github.com/combust-ml/mleap/wiki/Setting-up-a-Spark-2.0-notebook-with-MLeap-and-Toree) and [Scikit-Learn](https://github.com/combust-ml/mleap/wiki/Setting-up-a-Scikit-Learn-notebook-with-MLeap-and-Jupyter) [here](https://github.com/combust-ml/mleap-demo/tree/master/notebooks).
 
 ## Future of MLeap
 

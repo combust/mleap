@@ -248,14 +248,14 @@ trait JsonSupportLowPriority {
 
   implicit def bundleModelFormat(implicit hr: HasBundleRegistry): RootJsonFormat[Model] = jsonFormat2(Model.apply)
   implicit val bundleNodeFormat: RootJsonFormat[Node] = jsonFormat2(Node.apply)
-  implicit def bundleBundleMetaFormat(implicit hr: HasBundleRegistry): RootJsonFormat[BundleMeta] = jsonFormat4(BundleMeta)
+  implicit val bundleBundleInfoFormat: RootJsonFormat[BundleInfo] = jsonFormat4(BundleInfo)
 }
 
 /** All spray.json.RootJsonFormat formats needed for Bundle.ML JSON serialization.
   *
   * The 4 spray.json.RootJsonFormat formats provided are:
   * <ul>
-  *   <li>[[JsonSupport.bundleBundleMetaFormat]]</li>
+  *   <li>[[JsonSupport.bundleBundleInfoFormat]]</li>
   *   <li>[[JsonSupport.bundleNodeFormat]]</li>
   *   <li>[[JsonSupport.bundleModelFormat]]</li>
   *   <li>[[JsonSupport.bundleAttributeListFormat]]</li>

@@ -75,31 +75,31 @@ object Bundle {
   def apply[Transformer <: AnyRef](name: String,
                                    format: SerializationFormat,
                                    root: Transformer): Bundle[Transformer] = {
-    apply(BundleMeta(uid = UUID.randomUUID(),
+    apply(BundleInfo(uid = UUID.randomUUID(),
       name = name,
       format = format,
       version = Bundle.version), root)
   }
 }
 
-/** Meta data for a bundle.
+/** Information data for a bundle.
   *
   * @param uid uid for the bundle
   * @param name name of the bundle
   * @param format serialization format of the [[Bundle]]
   * @param version Bundle.ML version used for serializing
   */
-case class BundleMeta(uid: UUID,
+case class BundleInfo(uid: UUID,
                       name: String,
                       format: SerializationFormat,
                       version: String)
 
 /** Root object for serializing Bundle.ML pipelines and graphs.
   *
-  * @param meta meta data for the bundle
+  * @param info info data for the bundle
   * @param root root transformer node
   */
-case class Bundle[Transformer <: AnyRef](meta: BundleMeta,
+case class Bundle[Transformer <: AnyRef](info: BundleInfo,
                                          root: Transformer) {
   /** Create a [[BundleContext]] for serializing to Bundle.ML
     *
@@ -107,13 +107,12 @@ case class Bundle[Transformer <: AnyRef](meta: BundleMeta,
     * @param fs file system for bundle
     * @param path path to the Bundle.ML directory
     * @tparam Context context for implementation
-    *
     * @return context for serializing Bundle.ML
     */
   def bundleContext[Context](context: Context,
                              bundleRegistry: BundleRegistry,
                              fs: FileSystem,
                              path: Path): BundleContext[Context] = {
-    BundleContext[Context](context, meta.format, bundleRegistry, fs, path)
+    BundleContext[Context](context, info.format, bundleRegistry, fs, path)
   }
 }

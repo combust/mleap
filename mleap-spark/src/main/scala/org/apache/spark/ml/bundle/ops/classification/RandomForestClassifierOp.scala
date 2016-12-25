@@ -25,7 +25,7 @@ class RandomForestClassifierOp extends OpNode[SparkBundleContext, RandomForestCl
       val trees = obj.trees.map {
         tree =>
           val name = s"tree$i"
-          ModelSerializer(context.bundleContext(name)).write(tree)
+          ModelSerializer(context.bundleContext(name)).write(tree).get
           i = i + 1
           name
       }
@@ -45,7 +45,7 @@ class RandomForestClassifierOp extends OpNode[SparkBundleContext, RandomForestCl
       for(weight <- treeWeights) { require(weight == 1.0, "tree weights must be 1.0 for Spark") }
 
       val models = model.value("trees").getStringList.map {
-        tree => ModelSerializer(context.bundleContext(tree)).read().asInstanceOf[DecisionTreeClassificationModel]
+        tree => ModelSerializer(context.bundleContext(tree)).read().get.asInstanceOf[DecisionTreeClassificationModel]
       }.toArray
 
       new RandomForestClassificationModel(uid = "",

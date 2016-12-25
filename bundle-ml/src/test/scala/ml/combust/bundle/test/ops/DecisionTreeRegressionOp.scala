@@ -90,14 +90,14 @@ class DecisionTreeRegressionOp extends OpNode[Any, DecisionTreeRegression, Decis
 
     override def store(model: Model, obj: DecisionTreeRegressionModel)
                       (implicit context: BundleContext[Any]): Model = {
-      TreeSerializer[Node](context.file("nodes"), withImpurities = true).write(obj.root)
+      TreeSerializer[Node](context.file("tree"), withImpurities = true).write(obj.root)
       model
     }
 
 
     override def load(model: Model)
                      (implicit context: BundleContext[Any]): DecisionTreeRegressionModel = {
-      val root = TreeSerializer[Node](context.file("nodes"), withImpurities = true).read()
+      val root = TreeSerializer[Node](context.file("tree"), withImpurities = true).read()
       DecisionTreeRegressionModel(root)
     }
   }

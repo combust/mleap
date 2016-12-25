@@ -30,7 +30,7 @@ class DecisionTreeClassifierOp extends OpNode[MleapContext, DecisionTreeClassifi
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): DecisionTreeClassifierModel = {
-      val rootNode = TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).read()
+      val rootNode = TreeSerializer[tree.Node](context.file("tree"), withImpurities = true).read()
       DecisionTreeClassifierModel(rootNode,
         numClasses = model.value("num_classes").getLong.toInt,
         numFeatures = model.value("num_features").getLong.toInt)

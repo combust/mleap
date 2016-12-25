@@ -30,11 +30,6 @@ trait SparkSupport {
   }
 
   implicit class FileOps(path: File) {
-    def deserializeBundleMeta()
-                             (implicit context: SparkBundleContext = SparkBundleContext()): BundleMeta = {
-      BundleSerializer(context, path).readMeta()
-    }
-
     def deserializeBundle()
                          (implicit context: SparkBundleContext = SparkBundleContext()): Try[Bundle[Transformer]] = {
       SparkBundle.readTransformer(path)

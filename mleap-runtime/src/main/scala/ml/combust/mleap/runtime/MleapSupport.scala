@@ -5,7 +5,7 @@ import java.io.File
 import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.mleap.bundle.MleapBundle
 import ml.combust.mleap.runtime.transformer.Transformer
-import ml.combust.bundle.dsl.{Bundle, BundleMeta}
+import ml.combust.bundle.dsl.{Bundle, BundleInfo}
 import ml.combust.bundle.serializer._
 
 import scala.util.Try
@@ -41,13 +41,6 @@ object MleapSupport {
     * @param path file to wrap
     */
   implicit class FileOps(path: File) {
-    /** Deserialize the bundle definition.
-      *
-      * @return bundle meta data
-      */
-    def deserializeBundleMeta()
-                             (implicit context: MleapContext = MleapContext()): BundleMeta = BundleSerializer(context, path).readMeta()
-
     /** Deserialize the Bundle.ML to MLeap.
       *
       * @return (bundle, MLeap transformer)

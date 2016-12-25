@@ -1,6 +1,5 @@
 package ml.combust.bundle.serializer
 
-import java.io.File
 import java.net.URI
 
 import ml.combust.bundle.{BundleRegistry, TestUtil}

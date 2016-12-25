@@ -1,10 +1,9 @@
 package ml.combust.mleap.spark
 
-import java.io.File
-
-import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
+import ml.combust.bundle.{BundleFile, BundleRegistry, HasBundleRegistry}
 import ml.combust.mleap.spark.SparkSupport._
 import org.apache.spark.ml.Transformer
+import resource._
 
 /**
   * Created by mikhail on 11/5/16.
@@ -13,12 +12,18 @@ import org.apache.spark.ml.Transformer
 class SimpleSparkSerializer() {
   implicit val hr: HasBundleRegistry = BundleRegistry("spark")
 
-  def serializeToBundle(transformer: Transformer, path : String): Unit = {
-    transformer.serializeToBundle(new File(path))
+  def serializeToBundle(transformer: Transformer, path: String): Unit = {
+    for(file <- managed(BundleFile(path))) {
+      transformer.write.force(true).save(file)
+    }
   }
 
   def deserializeFromBundle(path: String): Transformer = {
-    new File(path).deserializeBundle().root
+    (for(file <- managed(BundleFile(path))) yield {
+      file.load().get.root
+    }).either.either match {
+      case Right(root) => root
+      case Left(errors) => throw errors.head
+    }
   }
-
 }

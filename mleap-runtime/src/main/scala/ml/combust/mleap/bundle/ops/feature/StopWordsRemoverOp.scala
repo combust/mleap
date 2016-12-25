@@ -24,7 +24,7 @@ class StopWordsRemoverOp extends OpNode[MleapContext, StopWordsRemover, StopWord
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): StopWordsRemoverModel = {
-      StopWordsRemoverModel(stopWords = model.value("stop_words").getStringList.toArray,
+      StopWordsRemoverModel(stopWords = model.value("stop_words").getStringList,
         caseSensitive = model.value("case_sensitive").getBoolean)
     }
 

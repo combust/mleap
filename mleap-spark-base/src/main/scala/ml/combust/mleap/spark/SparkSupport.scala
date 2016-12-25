@@ -1,41 +1,30 @@
 package ml.combust.mleap.spark
 
-import java.io.File
-
-import ml.combust.bundle.dsl._
-import ml.combust.bundle.serializer._
+import ml.combust.bundle.dsl.Bundle
+import ml.combust.bundle.{BundleFile, BundleWriter}
 import ml.combust.mleap.runtime.transformer.{Transformer => MleapTransformer}
 import org.apache.spark.ml.Transformer
-import org.apache.spark.ml.bundle.{SparkBundle, SparkBundleContext}
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.sql.DataFrame
+
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
 trait SparkSupport {
   implicit class SparkTransformerOps(transformer: Transformer) {
-    def serializeToBundle(path: File,
-                          format: SerializationFormat = SerializationFormat.Mixed)
-                         (implicit context: SparkBundleContext = SparkBundleContext()): Unit = {
-      SparkBundle.writeTransformer(transformer, path, format)(context)
-    }
+    def write: BundleWriter[SparkBundleContext, Transformer] = BundleWriter(transformer)
   }
 
-  implicit class MleapTransformerOps[T <: MleapTransformer](transformer: T) {
+  implicit class SparkBundleFileOps(file: BundleFile) {
+    def load()
+            (implicit context: SparkBundleContext): Try[Bundle[Transformer]] = file.loadBundle()
+  }
+
+  implicit class MleapSparkTransformerOps[T <: MleapTransformer](transformer: T) {
     def sparkTransform(dataset: DataFrame): DataFrame = {
       transformer.transform(SparkTransformBuilder(dataset)).map(_.dataset).get
-    }
-  }
-
-  implicit class FileOps(path: File) {
-    def deserializeBundleMeta()
-                             (implicit context: SparkBundleContext = SparkBundleContext()): BundleMeta = {
-      BundleSerializer(context, path).readMeta()
-    }
-
-    def deserializeBundle()
-                         (implicit context: SparkBundleContext = SparkBundleContext()): Bundle[Transformer] = {
-      SparkBundle.readTransformer(path)
     }
   }
 }

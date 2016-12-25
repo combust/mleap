@@ -27,7 +27,7 @@ class PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
     override def load(model: Model)
                      (implicit context: BundleContext[Any]): PipelineModel = {
       PipelineModel(GraphSerializer(context).read(model.value("nodes").getStringList).
-        map(_.asInstanceOf[Transformer]))
+        map(_.map(_.asInstanceOf[Transformer])).get)
     }
   }
 

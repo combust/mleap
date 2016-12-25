@@ -24,7 +24,8 @@ class PipelineOp extends OpNode[MleapContext, Pipeline, Pipeline] {
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): Pipeline = {
-      val nodes = GraphSerializer(context).read(model.value("nodes").getStringList).map(_.asInstanceOf[Transformer])
+      val nodes = GraphSerializer(context).read(model.value("nodes").getStringList).
+        map(_.map(_.asInstanceOf[Transformer])).get
       Pipeline(transformers = nodes)
     }
   }

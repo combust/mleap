@@ -11,14 +11,14 @@ trait RowSpec[R <: Row] extends FunSpec {
   def create(values: Any *): R
 
   def row(): Unit = {
-    val rowValues = Seq("test", 42, Array(56, 78, 23), 57.3, Vectors.dense(Array(2.3, 4.4)), 56L)
+    val rowValues = Seq("test", 42, Seq(56, 78, 23), 57.3, Vectors.dense(Array(2.3, 4.4)), 56L)
     val row = create(rowValues: _*)
 
     describe("#apply") {
       it("gets the value at a given index") {
         assert(row(0) == "test")
         assert(row(1) == 42)
-        assert(row(2).asInstanceOf[Array[Int]] sameElements Array(56, 78, 23))
+        assert(row(2).asInstanceOf[Seq[Int]] == Seq(56, 78, 23))
       }
     }
 
@@ -26,7 +26,7 @@ trait RowSpec[R <: Row] extends FunSpec {
       it("gets the value at a given index") {
         assert(row.get(0) == "test")
         assert(row.get(1) == 42)
-        assert(row.get(2).asInstanceOf[Array[Int]] sameElements Array(56, 78, 23))
+        assert(row.get(2).asInstanceOf[Seq[Int]] == Seq(56, 78, 23))
       }
     }
 
@@ -34,7 +34,7 @@ trait RowSpec[R <: Row] extends FunSpec {
       it("gets the value at a given index and casts it") {
         assert(row.getAs[String](0) == "test")
         assert(row.getAs[Int](1) == 42)
-        assert(row.getAs[Array[Int]](2) sameElements Array(56, 78, 23))
+        assert(row.getAs[Seq[Int]](2) == Seq(56, 78, 23))
       }
     }
 
@@ -71,13 +71,13 @@ trait RowSpec[R <: Row] extends FunSpec {
       }
     }
 
-    describe("#getArray") {
-      it("gets the value at a given index as an array") {
-        val arr = row.getArray[Int](2)
+    describe("#getSeq") {
+      it("gets the value at a given index as a seq") {
+        val s = row.getSeq[Int](2)
 
-        assert(arr(0) == 56)
-        assert(arr(1) == 78)
-        assert(arr(2) == 23)
+        assert(s.head == 56)
+        assert(s(1) == 78)
+        assert(s(2) == 23)
       }
     }
 
@@ -97,7 +97,7 @@ trait RowSpec[R <: Row] extends FunSpec {
       describe("user defined function") {
         it("adds a value using a user defined function") {
           val r2 = row.withValue(r => r.get(1), r => r.get(2)) {
-            (v1: Int, v2: Array[Int]) => v1 + v2(0)
+            (v1: Int, v2: Seq[Int]) => v1 + v2(0)
           }
 
           assert(r2.getInt(6) == 98)

@@ -1,7 +1,7 @@
 package ml.combust.mleap.json
 
-import ml.combust.mleap.runtime.types.{BooleanType, DataType, LongType, _}
-import ml.combust.mleap.runtime.{Dataset, LocalDataset, Row}
+import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.runtime.{Dataset, LocalDataset}
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
@@ -9,13 +9,13 @@ import spray.json._
   * Created by hollinwilkins on 9/10/16.
   */
 object DatasetFormat {
-  def listSerializer(lt: ArrayType): JsonFormat[_] = immSeqFormat(serializer(lt.base))
+  def listSerializer(lt: ListType): JsonFormat[_] = seqFormat(serializer(lt.base))
   def tensorSerializer(tt: TensorType): JsonFormat[_] = {
     assert(tt.dimensions.length == 1, s"unsupported tensor type: $tt")
 
     tt.base match {
       case DoubleType => JsonSupport.mleapVectorFormat
-      case StringType => immSeqFormat[String]
+      case StringType => seqFormat[String]
       case _ => serializationError(s"unsupported tensor type: $tt")
     }
   }
@@ -26,7 +26,7 @@ object DatasetFormat {
     case BooleanType => BooleanJsonFormat
     case LongType => LongJsonFormat
     case IntegerType => IntJsonFormat
-    case lt: ArrayType => listSerializer(lt)
+    case lt: ListType => listSerializer(lt)
     case tt: TensorType => tensorSerializer(tt)
     case ct: CustomType => ct.format
     case AnyType => serializationError("AnyType unsupported for serialization")

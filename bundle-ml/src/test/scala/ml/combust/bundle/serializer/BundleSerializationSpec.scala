@@ -1,13 +1,14 @@
 package ml.combust.bundle.serializer
 
-import java.io.File
 import java.net.URI
 
-import ml.combust.bundle.{BundleRegistry, TestUtil}
-import ml.combust.bundle.dsl.Bundle
+import ml.combust.bundle.{BundleFile, BundleRegistry, TestUtil}
 import ml.combust.bundle.test._
 import ml.combust.bundle.test.ops._
 import org.scalatest.FunSpec
+import TestSupport._
+import ml.combust.bundle.dsl.Bundle
+import resource._
 
 import scala.util.Random
 
@@ -19,7 +20,7 @@ case object ZipFS extends FSType
 case object DirFS extends FSType
 
 class BundleSerializationSpec extends FunSpec {
-  implicit val registry = BundleRegistry("test")
+  implicit val testContext = TestContext(BundleRegistry("test"))
 
   it should behave like bundleSerializer("Serializing/Deserializing mixed a bundle as a dir",
     SerializationFormat.Mixed,
@@ -65,44 +66,53 @@ class BundleSerializationSpec extends FunSpec {
       describe("with a simple linear regression") {
         it("serializes/deserializes the same object") {
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/lr_bundle.$format$suffix")
-          val bundle = Bundle[Transformer]("my_bundle", format, lr)
-          val serializer = BundleSerializer(Unit, uri)
-          serializer.write(bundle)
-          val bundleRead = serializer.read[Transformer]()
+          for(file <- managed(BundleFile(uri))) {
+            lr.write.name("my_bundle").
+              format(format).
+              save(file)
 
-          assert(lr == bundleRead.root)
+            val bundleRead = file.load().get
+
+            assert(lr == bundleRead.root)
+          }
         }
       }
 
       describe("with a decision tree") {
         it("serializes/deserializes the same object") {
           val node = InternalNode(CategoricalSplit(1, isLeft = true, 5, Seq(1.0, 3.0)),
-            InternalNode(ContinuousSplit(2, 0.4), LeafNode(5.0, Some(Seq())), LeafNode(4.0, Some(Seq()))),
-            LeafNode(3.0, Some(Seq(0.4, 5.6, 3.2, 5.7, 5.5))))
+            InternalNode(ContinuousSplit(2, 0.4), LeafNode(Seq(5.0)), LeafNode(Seq(4.0))),
+            LeafNode(Seq(0.4, 5.6, 3.2, 5.7, 5.5)))
           val dt = DecisionTreeRegression(uid = "my_decision_tree",
             input = "my_input",
             output = "my_output",
             model = DecisionTreeRegressionModel(node))
 
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/dt_bundle.$format$suffix")
-          val bundle = Bundle[Transformer]("my_bundle", format, dt)
-          val serializer = BundleSerializer(Unit, uri)
-          serializer.write(bundle)
-          val bundleRead = serializer.read[Transformer]()
+          for(file <- managed(BundleFile(uri))) {
+            dt.write.name("my_bundle").
+              format(format).
+              save(file)
 
-          assert(dt == bundleRead.root)
+            val bundleRead = file.load().get
+
+            assert(dt == bundleRead.root)
+          }
         }
       }
 
       describe("with a pipeline") {
         it("serializes/deserializes the same object") {
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/pipeline_bundle.$format$suffix")
-          val bundle = Bundle[Transformer]("my_bundle", format, pipeline)
-          val serializer = BundleSerializer(Unit, uri)
-          serializer.write(bundle)
-          val bundleRead = serializer.read[Transformer]()
+          for(file <- managed(BundleFile(uri))) {
+            pipeline.write.name("my_bundle").
+              format(format).
+              save(file)
 
-          assert(pipeline == bundleRead.root)
+            val bundleRead: Bundle[Transformer] = file.load().get
+
+            assert(pipeline == bundleRead.root)
+          }
         }
       }
     }

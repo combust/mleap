@@ -29,7 +29,7 @@ class DecisionTreeRegressionOp extends OpNode[MleapContext, DecisionTreeRegressi
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): DecisionTreeRegressionModel = {
-      val rootNode = TreeSerializer[tree.Node](context.file("nodes"), withImpurities = false).read()
+      val rootNode = TreeSerializer[tree.Node](context.file("tree"), withImpurities = false).read()
       DecisionTreeRegressionModel(rootNode, numFeatures = model.value("num_features").getLong.toInt)
     }
   }

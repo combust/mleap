@@ -22,14 +22,14 @@ class DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeCl
 
     override def store(model: Model, obj: DecisionTreeClassificationModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).write(obj.rootNode)
+      TreeSerializer[tree.Node](context.file("tree"), withImpurities = true).write(obj.rootNode)
       model.withAttr("num_features", Value.long(obj.numFeatures)).
         withAttr("num_classes", Value.long(obj.numClasses))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): DecisionTreeClassificationModel = {
-      val rootNode = TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).read()
+      val rootNode = TreeSerializer[tree.Node](context.file("tree"), withImpurities = true).read()
       new DecisionTreeClassificationModel(uid = "",
         rootNode = rootNode,
         numClasses = model.value("num_classes").getLong.toInt,

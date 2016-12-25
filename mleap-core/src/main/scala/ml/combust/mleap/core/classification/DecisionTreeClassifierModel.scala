@@ -14,7 +14,7 @@ case class DecisionTreeClassifierModel(override val rootNode: Node,
                                        override val numClasses: Int)
   extends MultinomialClassificationModel with DecisionTree with Serializable {
   override def predictRaw(features: Vector): Vector = {
-    rootNode.predictImpl(features).impurities.get
+    rootNode.predictImpl(features).impurities
   }
 
   override def rawToProbabilityInPlace(raw: Vector): Vector = {

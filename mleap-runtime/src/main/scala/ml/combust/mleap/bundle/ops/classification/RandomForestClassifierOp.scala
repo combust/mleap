@@ -26,7 +26,7 @@ class RandomForestClassifierOp extends OpNode[MleapContext, RandomForestClassifi
       val trees = obj.trees.map {
         tree =>
           val name = s"tree$i"
-          ModelSerializer(context.bundleContext(name)).write(tree)
+          ModelSerializer(context.bundleContext(name)).write(tree).get
           i = i + 1
           name
       }
@@ -43,7 +43,7 @@ class RandomForestClassifierOp extends OpNode[MleapContext, RandomForestClassifi
       val treeWeights = model.value("tree_weights").getDoubleList
 
       val models = model.value("trees").getStringList.map {
-        tree => ModelSerializer(context.bundleContext(tree)).read().asInstanceOf[DecisionTreeClassifierModel]
+        tree => ModelSerializer(context.bundleContext(tree)).read().get.asInstanceOf[DecisionTreeClassifierModel]
       }
 
       RandomForestClassifierModel(numFeatures = numFeatures,

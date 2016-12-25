@@ -30,7 +30,7 @@ case class RandomForestClassifierModel(override val trees: Seq[DecisionTreeClass
   override def predictRaw(raw: Vector): Vector = {
     val votes = Array.fill[Double](numClasses)(0.0)
     trees.view.foreach { tree =>
-      val classCounts: Array[Double] = tree.rootNode.predictImpl(raw).impurities.get.toArray
+      val classCounts: Array[Double] = tree.rootNode.predictImpl(raw).impurities.toArray
       val total = classCounts.sum
       if (total != 0) {
         var i = 0

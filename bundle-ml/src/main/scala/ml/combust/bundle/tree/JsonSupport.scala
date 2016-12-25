@@ -39,7 +39,7 @@ trait JsonSupport {
   }
 
   implicit val bundleTreeInternalNodeFormat: RootJsonFormat[InternalNode] = jsonFormat1(InternalNode.apply)
-  implicit val bundleTreeLeafNodeFormat: RootJsonFormat[LeafNode] = jsonFormat2(LeafNode.apply)
+  implicit val bundleTreeLeafNodeFormat: RootJsonFormat[LeafNode] = jsonFormat1(LeafNode.apply)
 
   implicit val bundleTreeNodeFormat: RootJsonFormat[Node] = new RootJsonFormat[Node] {
     override def write(obj: Node): JsValue = {

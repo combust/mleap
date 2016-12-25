@@ -14,7 +14,7 @@ We also provide a high level of integration with existing technologies. Instead 
 ## Overview
 
 1. implemented in Scala
-2. full [Spark](http://spark.apache.org/) and new [Scikit-learn](http://scikit-learn.org/stable/) support
+2. full [Spark](http://spark.apache.org/) support
 3. supports 3 portable serialization formats (JSON, Protobuf, and Mixed)
 4. export a model with Scikit-learn or Spark and execute it on the MLeap engine anywhere in the JVM
 5. implement custom data types and transformers for use with MLeap data frames and transformer pipelines
@@ -76,6 +76,8 @@ For more complete examples, see our other Git repository: [MLeap Demos](https://
 
 The first step is to create our pipeline in Spark. Normally we would use real data to train a complete pipeline, but for our example we will manually build a simple Spark ML pipeline.
 
+Spark pipelines are not meant to be run outside of Spark. They require a DataFrame and therefore a SparkContext to run. These are expensive data structures and libraries to include in a project. With MLeap, there is no dependency on Spark to execute a pipeline. MLeap dependencies are lightweight and we use fast data structures to execute your ML pipelines.
+
 ```scala
 import org.apache.spark.ml.{StringIndexerModel, Binarizer}
 
@@ -98,7 +100,7 @@ val pipeline = SparkUtil.createPipelineModel(uid = "pipeline", Array(si, bin))
 import ml.combust.bundle.BundleFile
 import ml.combust.mleap.spark.SparkSupport._
 
-val modelFile = BundleFile("/tmp/simple-pipeline.zip")
+val modelFile = BundleFile("/tmp/simple-spark-pipeline.zip")
 pipeline.write.
   // delete the file if it already exists
   overwrite.
@@ -111,9 +113,13 @@ pipeline.write.
 modelFile.close()
 ```
 
-### Import and Transform Using Spark Pipeline
+### Create and Export a Scikit-learn Pipeline
 
-Spark pipelines are not meant to be run outside of Spark. They require a DataFrame and therefore a SparkContext to run as well. These are very expensive data structures and libraries to include in a project. With MLeap, there is no dependency on Spark to execute a pipeline. MLeap dependencies are very lightweight and we use very fast data structures for executing your ML pipelines.
+TODO: Mikhail
+
+### Load and Transform Using MLeap
+
+Becuase we export Spark and Scikit-learn pipelines to a standard format, we can use either our Spark-trained pipeline or our Scikit-learn pipeline from the previous steps to demonstrate usage of MLeap in this section. The choice is yours!
 
 ```scala
 import ml.combust.bundle.BundleFile
@@ -147,19 +153,9 @@ assert(data(1).getDouble(2) == 1.0)
 assert(data(1).getDouble(3) == 0.0)
 ```
 
-### Create and Export a Scikit-learn Pipeline
-
-TODO: Mikhail
-
-### Import and Transform Using Scikit-learn Pipeline
-
-TODO: Mikhail
-
 ## Documentation
 
-TODO: add links to the wiki here
-
-For more documentation, please see our github wiki, where you can learn to:
+For more documentation, please see our [wiki](https://github.com/combust-ml/mleap/wiki), where you can learn to:
 
 1. implement custom transformers that will work with Spark, MLeap and Scikit-learn
 2. implement custom data types to transform with Spark and MLeap pipelines
@@ -167,10 +163,14 @@ For more documentation, please see our github wiki, where you can learn to:
 4. serialize MLeap data frames to various formats like avro, json, and a custom binary format
 5. implement new serialization formats for MLeap data frames
 6. work through several demonstration pipelines which use real-world data to create predictive pipelines
+7. supported Spark transformers
+8. supported Scikit-learn transformers
+9. custom transformers provided by MLeap
 
 ## Contributing
 
-* Write documentation. As you can see looking through the source code, there is very little.
+* Write documentation.
+* Write a tutorial/walkthrough for an interesting ML problem.
 * Contribute an Estimator/Transformer from Spark.
 * Use MLeap at your company and tell us what you think.
 * Make a feature request or report a bug in github.

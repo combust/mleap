@@ -9,6 +9,8 @@ import ml.combust.bundle.dsl.Bundle
 import spray.json._
 import resource._
 
+import scala.util.{Failure, Try}
+
 /** Class for serializing/deserializing Bundle.ML [[ml.combust.bundle.dsl.Bundle]] objects.
   *
   * @param context context for implementation
@@ -22,17 +24,22 @@ case class BundleSerializer[Context](context: Context,
   /** Write a bundle to the path.
     *
     * @param bundle bundle to write
+    * @return try of the bundle transformer
     */
-  def write[Transformer <: AnyRef](bundle: Bundle[Transformer]): Unit = {
+  def write[Transformer <: AnyRef](bundle: Bundle[Transformer]): Try[Bundle[Transformer]] = {
     val bundleContext = bundle.bundleContext(context, hr.bundleRegistry, file.fs, file.path)
     implicit val sc = bundleContext.serializationContext(SerializationFormat.Json)
 
     Files.createDirectories(file.path)
     NodeSerializer(bundleContext.bundleContext("root")).write(bundle.root)
 
-    for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.bundleJson)))) {
+    (for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.bundleJson)))) yield {
       val json = bundle.info.toJson.prettyPrint.getBytes
       out.write(json)
+      bundle
+    }).either.either match {
+      case Right(b) => Try(b)
+      case Left(errors) => Failure(errors.head)
     }
   }
 
@@ -40,17 +47,17 @@ case class BundleSerializer[Context](context: Context,
     *
     * @return deserialized bundle
     */
-  def read[Transformer <: AnyRef](): Bundle[Transformer] = {
-    val info = file.readInfo()
-    val bundleContext = BundleContext(context,
-      info.format,
-      hr.bundleRegistry,
-      file.fs,
-      file.path)
-    implicit val sc = bundleContext.serializationContext(SerializationFormat.Json)
-
-    val root = NodeSerializer(bundleContext.bundleContext("root")).read()
-    Bundle(info, root.asInstanceOf[Transformer])
+  def read[Transformer <: AnyRef](): Try[Bundle[Transformer]] = {
+    for(info <- file.readInfo();
+        bundleContext = BundleContext(context,
+          info.format,
+          hr.bundleRegistry,
+          file.fs,
+          file.path);
+        sc = bundleContext.serializationContext(SerializationFormat.Json);
+        root <- NodeSerializer(bundleContext.bundleContext("root")).read()) yield {
+      Bundle(info, root.asInstanceOf[Transformer])
+    }
   }
 
   override def close(): Unit = file.close()

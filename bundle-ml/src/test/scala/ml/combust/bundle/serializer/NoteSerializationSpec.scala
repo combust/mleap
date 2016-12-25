@@ -2,9 +2,8 @@ package ml.combust.bundle.serializer
 
 import java.net.URI
 
-import ml.combust.bundle.{BundleRegistry, TestUtil}
+import ml.combust.bundle.{BundleFile, BundleRegistry, TestUtil}
 import org.scalatest.FunSpec
-import ml.combust.bundle.BundleFile
 import resource._
 
 /**

@@ -6,15 +6,17 @@ import ml.combust.mleap.runtime
 import org.apache.spark.ml.Transformer
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
-import ml.combust.mleap.spark.SparkSupport.{MleapTransformerOps, SparkTransformerOps}
-import ml.combust.mleap.spark.SparkSupport
-import ml.combust.mleap.runtime.MleapSupport.FileOps
+import ml.combust.mleap.spark.SparkSupport._
+import ml.combust.mleap.runtime.MleapSupport._
 import com.databricks.spark.avro._
+import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.FileUtil
 import ml.combust.mleap.runtime.MleapContext
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.sql.functions.col
+import resource._
 
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 10/30/16.
@@ -47,8 +49,12 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     bundleCache.getOrElse {
       new File("/tmp/mleap/spark-parity").mkdirs()
       val file = new File(s"/tmp/mleap/spark-parity/${getClass.getName}")
-      FileUtil().rmRF(file)
-      transformer.serializeToBundle(file)
+
+      BundleFile(file)
+      for(bf <- managed(BundleFile(file))) {
+        transformer.write.force(true).save(bf).get
+      }
+
       bundleCache = Some(file)
       file
     }
@@ -56,11 +62,11 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
   def mleapTransformer(transformer: Transformer)
                       (implicit context: SparkBundleContext): runtime.transformer.Transformer = {
-    serializedModel(transformer).deserializeBundle()(SparkParityBase.mleapRegistry).get.root
+    MleapBundleFileOps(serializedModel(transformer)).load().get.root
   }
 
   def deserializedSparkTransformer(transformer: Transformer): Transformer = {
-    SparkSupport.FileOps(serializedModel(transformer)).deserializeBundle().get.root
+    SparkBundleFileOps(serializedModel(transformer)).load().get.root
   }
 
   def parityTransformer(): Unit = {

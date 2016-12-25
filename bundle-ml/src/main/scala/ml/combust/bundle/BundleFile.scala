@@ -6,14 +6,15 @@ import java.nio.file.{FileSystem, FileSystems, Files, Path}
 import java.util.stream.Collectors
 
 import ml.combust.bundle.dsl.{Bundle, BundleInfo}
-import resource._
 import ml.combust.bundle.json.JsonSupport._
+import ml.combust.bundle.serializer.BundleSerializer
+import resource._
 import spray.json._
 
 import scala.collection.JavaConverters._
 import scala.io.Source
-import scala.util.Try
 import scala.language.implicitConversions
+import scala.util.{Failure, Try}
 
 /**
   * Created by hollinwilkins on 12/24/16.
@@ -54,21 +55,25 @@ case class BundleFile(fs: FileSystem,
     *
     * @return bundle definition
     */
-  def readInfo(): BundleInfo = {
+  def readInfo(): Try[BundleInfo] = {
     val bundleJson = fs.getPath(path.toString, Bundle.bundleJson)
     (for(in <- managed(Files.newInputStream(bundleJson))) yield {
       val json = Source.fromInputStream(in).getLines.mkString
       json.parseJson.convertTo[BundleInfo]
     }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(info) => info
+      case Right(info) => Try(info)
+      case Left(errors) => Failure(errors.head)
     }
   }
 
-  def writeNote(name: String, note: String): Unit = {
+  def writeNote(name: String, note: String): Try[String] = {
     Files.createDirectories(fs.getPath(path.toString, "notes"))
-    for(out <- managed(Files.newOutputStream(fs.getPath(path.toString, "notes", name)))) {
+    (for(out <- managed(Files.newOutputStream(fs.getPath(path.toString, "notes", name)))) yield {
       out.write(note.getBytes)
+      note
+    }).either.either match {
+      case Right(n) => Try(n)
+      case Left(errors) => Failure(errors.head)
     }
   }
 
@@ -81,6 +86,16 @@ case class BundleFile(fs: FileSystem,
       collect(Collectors.toList()).asScala.
       map(_.getFileName.toString).
       toSet
+  }
+
+  def loadBundle[Context <: HasBundleRegistry, Transformer <: AnyRef]()
+                                                                     (implicit context: Context): Try[Bundle[Transformer]] = {
+    BundleSerializer(context, this).read[Transformer]()
+  }
+
+  override def finalize(): Unit = {
+    super.finalize()
+    close()
   }
 
   override def close(): Unit = {

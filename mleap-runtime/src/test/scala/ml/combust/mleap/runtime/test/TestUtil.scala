@@ -14,9 +14,9 @@ object TestUtil {
   }
 
   def buildTri(prediction: Double, featureIndex: Int, goLeft: Boolean): Node = {
-    val node1 = LeafNode(prediction, None)
-    val node2 = LeafNode(42.34, None)
-    val split = ContinuousSplit(featureIndex, .5)
+    val node1 = LeafNode(prediction)
+    val node2 = LeafNode(42.34)
+    val split = ContinuousSplit(featureIndex, 0.5)
 
     if(goLeft) {
       InternalNode(node1, node2, split)

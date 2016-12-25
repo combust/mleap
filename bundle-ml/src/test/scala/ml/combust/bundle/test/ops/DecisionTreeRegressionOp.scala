@@ -17,7 +17,7 @@ case class ContinuousSplit(featureIndex: Int, threshold: Double) extends Split
 
 sealed trait Node
 case class InternalNode(split: Split, left: Node, right: Node) extends Node
-case class LeafNode(prediction: Double, impurities: Option[Seq[Double]]) extends Node
+case class LeafNode(values: Seq[Double]) extends Node
 
 case class DecisionTreeRegressionModel(root: Node)
 case class DecisionTreeRegression(uid: String,
@@ -41,19 +41,13 @@ object MyNodeWrapper extends NodeWrapper[Node] {
       }
       ml.bundle.tree.Node.Node(ml.bundle.tree.Node.Node.N.Internal(ml.bundle.tree.Node.Node.InternalNode(Some(split))))
     case node: LeafNode =>
-      val impurities = if(withImpurities) {
-        node.impurities.get
-      } else { Seq() }
-      ml.bundle.tree.Node.Node(ml.bundle.tree.Node.Node.N.Leaf(ml.bundle.tree.Node.Node.LeafNode(node.prediction, impurities)))
+      ml.bundle.tree.Node.Node(ml.bundle.tree.Node.Node.N.Leaf(ml.bundle.tree.Node.Node.LeafNode(values = node.values)))
   }
 
   override def isInternal(node: Node): Boolean = node.isInstanceOf[InternalNode]
 
   override def leaf(node: ml.bundle.tree.Node.Node.LeafNode, withImpurities: Boolean): Node = {
-    val impurities = if(withImpurities) {
-      Some(node.impurities)
-    } else { None }
-    LeafNode(node.prediction, impurities)
+    LeafNode(values = node.values)
   }
 
   override def internal(node: ml.bundle.tree.Node.Node.InternalNode, left: Node, right: Node): Node = {

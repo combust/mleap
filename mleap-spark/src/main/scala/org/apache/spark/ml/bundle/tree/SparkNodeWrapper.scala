@@ -33,21 +33,21 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
       }
       Node(Node.N.Internal(Node.InternalNode(Some(split))))
     case node: tree.LeafNode =>
-      val impurities = if(withImpurities) {
-        node.impurityStats.stats
-      } else { Array() }
-      Node(Node.N.Leaf(Node.LeafNode(node.prediction, impurities)))
+      val values = if(withImpurities) {
+        node.impurityStats.stats.toSeq
+      } else { Seq(node.prediction) }
+      Node(Node.N.Leaf(Node.LeafNode(values)))
   }
 
   override def isInternal(node: tree.Node): Boolean = node.isInstanceOf[tree.InternalNode]
 
   override def leaf(node: LeafNode, withImpurities: Boolean): tree.Node = {
     val calc: ImpurityCalculator = if(withImpurities) {
-      ImpurityCalculator.getCalculator("gini", node.impurities.toArray)
+      ImpurityCalculator.getCalculator("gini", node.values.toArray)
     } else {
       null
     }
-    new tree.LeafNode(prediction = node.prediction,
+    new tree.LeafNode(prediction = node.values.head,
       impurity = 0.0,
       impurityStats = calc)
   }

@@ -77,8 +77,8 @@ class BundleSerializationSpec extends FunSpec {
       describe("with a decision tree") {
         it("serializes/deserializes the same object") {
           val node = InternalNode(CategoricalSplit(1, isLeft = true, 5, Seq(1.0, 3.0)),
-            InternalNode(ContinuousSplit(2, 0.4), LeafNode(5.0, Some(Seq())), LeafNode(4.0, Some(Seq()))),
-            LeafNode(3.0, Some(Seq(0.4, 5.6, 3.2, 5.7, 5.5))))
+            InternalNode(ContinuousSplit(2, 0.4), LeafNode(Seq(5.0)), LeafNode(Seq(4.0))),
+            LeafNode(Seq(0.4, 5.6, 3.2, 5.7, 5.5)))
           val dt = DecisionTreeRegression(uid = "my_decision_tree",
             input = "my_input",
             output = "my_output",

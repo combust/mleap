@@ -12,8 +12,8 @@ class InternalNodeSpec extends FunSpec {
   }
 
   describe("#predictImpl") {
-    val leftNode = LeafNode(.45, None)
-    val rightNode = LeafNode(.33, None)
+    val leftNode = LeafNode(0.45)
+    val rightNode = LeafNode(0.33)
     val features = Vectors.dense(Array(0.3))
 
     describe("when split goes left") {
@@ -35,8 +35,8 @@ class InternalNodeSpec extends FunSpec {
 class LeafNodeSpec extends FunSpec {
   describe("#predictImpl") {
     it("returns itself") {
-      val node = LeafNode(.45, None)
-      assert(node.predictImpl(Vectors.dense(Array(.67))) == node)
+      val node = LeafNode(0.45)
+      assert(node.predictImpl(Vectors.dense(Array(0.67))) == node)
     }
   }
 }

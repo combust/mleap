@@ -6,7 +6,6 @@ import ml.bundle.tree.Split.Split.{CategoricalSplit, ContinuousSplit}
 import ml.bundle.tree.Node.Node
 import ml.bundle.tree.Node.Node.{InternalNode, LeafNode}
 import ml.combust.bundle.tree.NodeWrapper
-import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hollinwilkins on 8/22/16.
@@ -26,23 +25,13 @@ object MleapNodeWrapper extends NodeWrapper[ml.combust.mleap.core.tree.Node] {
       }
       Node(Node.N.Internal(Node.InternalNode(Some(split))))
     case node: ml.combust.mleap.core.tree.LeafNode =>
-      val impurities = if(withImpurities) {
-        node.impurities.get.toArray.toSeq
-      } else { Seq() }
-      Node(Node.N.Leaf(Node.LeafNode(node.prediction, impurities)))
+      Node(Node.N.Leaf(Node.LeafNode(node.values.toArray)))
   }
 
   override def isInternal(node: ml.combust.mleap.core.tree.Node): Boolean = node.isInstanceOf[ml.combust.mleap.core.tree.InternalNode]
 
   override def leaf(node: LeafNode, withImpurities: Boolean): ml.combust.mleap.core.tree.Node = {
-    val impurities = if(withImpurities) {
-      Some(Vectors.dense(node.impurities.toArray))
-    } else {
-      None
-    }
-
-    tree.LeafNode(prediction = node.prediction,
-      impurities = impurities)
+    tree.LeafNode(values = node.values)
   }
 
   override def internal(node: InternalNode,

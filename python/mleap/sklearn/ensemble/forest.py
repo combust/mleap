@@ -15,11 +15,11 @@
 # limitations under the License.
 #
 
-from sklearn.tree import _tree
 from sklearn.ensemble.forest import RandomForestRegressor
 from sklearn.ensemble.forest import RandomForestClassifier
 from mleap.bundle.serialize import MLeapSerializer
-import json
+from mleap.bundle.serialize import Vector
+import mleap.sklearn.tree.tree
 import uuid
 import os
 
@@ -50,55 +50,6 @@ class SimpleSparkSerializer(MLeapSerializer):
     def __init__(self):
         super(SimpleSparkSerializer, self).__init__()
 
-    @staticmethod
-    def serialize_tree(tree, feature_names, outfile):
-        """
-        :type feature_names: list
-        :type tree: sklearn.tree.tree.BaseDecisionTree
-        :param tree: sklearn.tree.tree
-        :param feature_names:
-        :return:
-        """
-
-        tree_ = tree.tree_
-        feature_names = [feature_names[i] if i != _tree.TREE_UNDEFINED else 'n/a' for i in tree_.feature]
-
-        def traverse(node, depth, outfile):
-            if tree_.feature[node] != _tree.TREE_UNDEFINED:
-                name = feature_names[node]
-                threshold = tree_.threshold[node]
-
-                # Define internal node for serialization
-                internal_node = {
-                    'type': 'internal',
-                    'split': {
-                        'type': 'continuous',
-                        'featureIndex': feature_names.index(name),
-                        'threshold': threshold
-                    }
-                }
-
-                # Serialize the internal Node
-                json.dump(internal_node, outfile)
-                outfile.write('\n')
-
-                # Traverse Left
-                traverse(tree_.children_left[node], depth + 1, outfile)
-
-                # Traverse Rigiht
-                traverse(tree_.children_right[node], depth + 1, outfile)
-            else:
-                leaf_node = {
-                    'type': 'leaf',
-                    'values': tree_.value[node].tolist()[0]
-                }
-
-                # Serialize the leaf node
-                json.dump(leaf_node, outfile)
-                outfile.write('\n')
-
-        traverse(0, 1, outfile)
-
     def serialize_to_bundle(self, transformer, path, model):
         """
         :type transformer: sklearn.ensemble.forest.BaseForest
@@ -107,12 +58,6 @@ class SimpleSparkSerializer(MLeapSerializer):
         :param model:
         :return:
         """
-
-        # Serialize the random forest transformer and then move on to serializing each node
-
-        # make pipeline directory
-        model_dir = "{}/{}".format(path, model)
-        os.mkdir(model_dir)
 
         # Define Node Inputs and Outputs
         inputs = [{
@@ -137,37 +82,24 @@ class SimpleSparkSerializer(MLeapSerializer):
             })
 
         # compile tuples of model attributes to serialize
+        tree_weights = Vector([1.0 for x in transformer.input_features])
         attributes = list()
+        attributes.append(('num_features', transformer.n_features_))
+        attributes.append(('tree_weights', tree_weights))
+        attributes.append(('trees', ["tree{}".format(x) for x in range(0, len(transformer.input_features))]))
         if transformer.n_outputs_ > 1:
             attributes.append(('num_classes', transformer.n_outputs_)) # TODO: get number of classes from the transformer
 
-        self.serialize(transformer, model_dir, transformer.name, attributes, inputs, outputs)
+        self.serialize(transformer, path, model, attributes, inputs, outputs)
 
-        rf_path = "{}/{}.node".format(model_dir, transformer.name)
+        rf_path = "{}/{}.node".format(path, model)
 
         estimators = transformer.estimators_
 
         i = 0
         for estimator in estimators:
-            # make pipeline directory
-            tree_name = "tree{}".format(i)
-            tree_dir = "{}/{}".format(rf_path, tree_name)
-            os.mkdir(tree_dir)
-
-            # Serialize tree.json
-            with open("{}/tree.json".format(tree_dir), 'w') as outfile:
-                self.serialize_tree(estimator, transformer.input_features, outfile)
-
-            # Serialize model.json
-            # Define attributes
-            attributes = list()
-            attributes.append(('num_features', len(transformer.input_features)))
-            if estimator.n_classes_ > 1:
-                attributes.append(('num_classes', estimator.n_classes_))
-
-            with open("{}/model.json".format(tree_dir), 'w') as outfile:
-                json.dump(self.get_mleap_model(transformer, attributes), outfile, indent=3)
+            estimator.minit(input_features = transformer.input_features, prediction_column = transformer.prediction_column)
+            model_name = "tree{}".format(i)
+            estimator.serialize_to_bundle(rf_path, model_name, serialize_node=False)
 
             i += 1
-
-

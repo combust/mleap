@@ -21,6 +21,7 @@ import os
 import json
 import shutil
 import uuid
+import zipfile
 
 
 def serialize_to_bundle(self, path, model_name, init=False):
@@ -113,6 +114,9 @@ class SimpleSparkSerializer(object):
             if isinstance(step, list):
                 pass
 
+        if init:
+            zip_pipeline(path, model_name)
+
     def deserialize_from_bundle(self, path):
         return NotImplementedError
 
@@ -161,3 +165,15 @@ class SimpleSparkSerializer(object):
             elif hasattr(step, 'serialize_to_bundle') and step.serializable:
                 pipeline_steps.append(name)
         return pipeline_steps
+
+
+def zip_pipeline(path, name):
+    zip_file = zipfile.ZipFile("{}/{}.zip".format(path, name), 'w', zipfile.ZIP_DEFLATED)
+    abs_src = os.path.abspath("{}/{}".format(path, name))
+    for root, dirs, files in os.walk("{}/{}".format(path, name)):
+        for file in files:
+            absname = os.path.abspath(os.path.join(root, file))
+            arcname = absname[len(abs_src) + 1:]
+
+            zip_file.write(os.path.join(root, file), arcname)
+    zip_file.close()

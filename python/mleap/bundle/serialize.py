@@ -11,6 +11,11 @@ _type_map = {
 }
 
 
+class Vector(object):
+    def __init__(self, values):
+        self.values = values
+
+
 class MLeapSerializer(object):
     def __init__(self):
         pass
@@ -49,6 +54,13 @@ class MLeapSerializer(object):
                     "name": name,
                     "type": "long",
                     "value": value
+                  }
+                attributes.append(attribute)
+            elif isinstance(value, Vector):
+                attribute = {
+                    "name": name,
+                    "type": "double",
+                    "value": value.values
                   }
                 attributes.append(attribute)
             elif isinstance(value, list) and (isinstance(value[0], np.float64) or isinstance(value[0], float)):
@@ -91,18 +103,27 @@ class MLeapSerializer(object):
             }
         return js
 
-    def serialize(self, transformer, path, model_name, attributes, inputs, outputs):
+    def serialize(self, transformer, path, model_name, attributes, inputs, outputs, node=True, model=True):
         # If bundle path already exists, delete it and create a clean directory
-        if os.path.exists("{}/{}.node".format(path, model_name)):
-            shutil.rmtree("{}/{}.node".format(path, model_name))
+        if node:
+            if os.path.exists("{}/{}.node".format(path, model_name)):
+                shutil.rmtree("{}/{}.node".format(path, model_name))
 
-        model_dir = "{}/{}.node".format(path, model_name)
+            model_dir = "{}/{}.node".format(path, model_name)
+        else:
+            if os.path.exists("{}/{}".format(path, model_name)):
+                shutil.rmtree("{}/{}".format(path, model_name))
+
+            model_dir = "{}/{}".format(path, model_name)
+
         os.mkdir(model_dir)
 
-        # Write bundle file
-        with open("{}/{}".format(model_dir, 'model.json'), 'w') as outfile:
-            json.dump(self.get_mleap_model(transformer, attributes), outfile, indent=3)
+        if model:
+            # Write bundle file
+            with open("{}/{}".format(model_dir, 'model.json'), 'w') as outfile:
+                json.dump(self.get_mleap_model(transformer, attributes), outfile, indent=3)
 
-        # Write node file
-        with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
-            json.dump(self.get_mleap_node(transformer, inputs, outputs), outfile, indent=3)
+        if node:
+            # Write node file
+            with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
+                json.dump(self.get_mleap_node(transformer, inputs, outputs), outfile, indent=3)

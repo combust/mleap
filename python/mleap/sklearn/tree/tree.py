@@ -19,7 +19,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import DecisionTreeRegressor
 from mleap.bundle.serialize import MLeapSerializer
 from sklearn.tree import _tree
-import os
 import json
 import uuid
 
@@ -30,9 +29,9 @@ def mleap_init(self, input_features, prediction_column):
     self.name = "{}_{}".format(self.op, uuid.uuid1())
 
 
-def serialize_to_bundle(self, path, model_name):
+def serialize_to_bundle(self, path, model_name, serialize_node=True):
     serializer = SimpleSparkSerializer()
-    return serializer.serialize_to_bundle(self, path, model_name)
+    return serializer.serialize_to_bundle(self, path, model_name, serialize_node=serialize_node)
 
 
 setattr(DecisionTreeRegressor, 'op', 'decision_tree_regression')
@@ -99,70 +98,43 @@ class SimpleSparkSerializer(MLeapSerializer):
 
         traverse(0, 1, outfile)
 
-    def serialize_to_bundle(self, transformer, path, model):
+    def serialize_to_bundle(self, transformer, path, model_name, serialize_node=True):
         """
-        :type transformer: sklearn.ensemble.forest.BaseForest
+        :type transformer: sklearn.tree.tree.BaseDecisionTree
+        :type path: str
+        :type model_name: str
+        :type serialize_node: bool
         :param transformer:
         :param path:
-        :param model:
+        :param model_name:
         :return:
         """
 
-        # Serialize the random forest transformer and then move on to serializing each node
-
-        # make pipeline directory
-        model_dir = "{}/{}".format(path, model)
-        os.mkdir(model_dir)
-
-        # Define Node Inputs and Outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "features"
-                }]
-
-        outputs = list()
-        outputs.append({
-                  "name": transformer.prediction_column,
-                  "port": "prediction"
-                })
-
-        outputs.append({
-              "name": "raw_prediction",
-              "port": "raw_prediction"
-             })
-
-        outputs.append({
-              "name": "probability",
-              "port": "probability"
-            })
-
-        # compile tuples of model attributes to serialize
-        attributes = list()
-        if transformer.n_outputs_ > 1:
-            attributes.append(('num_classes', transformer.n_outputs_)) # TODO: get number of classes from the transformer
-
-        self.serialize(transformer, model_dir, transformer.name, attributes, inputs, outputs)
-
-        rf_path = "{}/{}.node".format(model_dir, transformer.name)
-
-        estimators = transformer.estimators_
-
-        # make pipeline directory
-        tree_name = "tree{}".format(i)
-        tree_dir = "{}/{}".format(rf_path, tree_name)
-        os.mkdir(tree_dir)
-
-        # Serialize tree.json
-        with open("{}/tree.json".format(tree_dir), 'w') as outfile:
-            self.serialize_tree(transformer, transformer.input_features, outfile)
-
-        # Serialize model.json
         # Define attributes
         attributes = list()
         attributes.append(('num_features', len(transformer.input_features)))
-        if estimator.n_classes_ > 1:
-            attributes.append(('num_classes', estimator.n_classes_))
+        if transformer.n_classes_ > 1:
+            attributes.append(('num_classes', transformer.n_classes_))
 
-        with open("{}/model.json".format(tree_dir), 'w') as outfile:
-            json.dump(self.get_mleap_model(transformer, attributes), outfile, indent=3)
+        inputs = []
+        outputs = []
+        if serialize_node:
+            # define node inputs and outputs
+            inputs = [{
+                      "name": transformer.input_features,
+                      "port": "features"
+                    }]
 
+            outputs = [{
+                      "name": transformer.prediction_column,
+                      "port": "prediction"
+                    }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs, node=serialize_node)
+
+        # Serialize tree.json
+        tree_path = "{}/{}.node/tree.json".format(path, model_name)
+        if not serialize_node:
+            tree_path = "{}/{}/tree.json".format(path, model_name)
+        with open(tree_path, 'w') as outfile:
+            self.serialize_tree(transformer, transformer.input_features, outfile)

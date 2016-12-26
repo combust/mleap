@@ -11,7 +11,6 @@ object Vector {
     def toBreeze: breeze.linalg.Vector[Double] = vector.asBreeze
   }
   def fromBreeze(breezeVector: breeze.linalg.Vector[Double]): linalg.Vector = linalg.Vectors.fromBreeze(breezeVector)
-
 }
 
 object VectorWithNorm {

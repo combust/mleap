@@ -3,24 +3,28 @@
 [![Join the chat at https://gitter.im/combust-ml/mleap](https://badges.gitter.im/combust-ml/mleap.svg)](https://gitter.im/combust-ml/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/combust-ml/mleap.svg?branch=master)](https://travis-ci.org/combust-ml/mleap)
 
-Deploying machine learning pipelines should not be a time-consuming or difficult task. MLeap allows data scientists and engineers to deploy machine learning pipelines from Spark and Scikit-learn to a portable format and execution engine. Most of the time this process takes many developer hours and may not result in performant systems, we are here to change that.
+Deploying machine learning data pipelines and algorithms should not be a time-consuming or difficult task. MLeap allows data scientists and engineers to deploy machine learning pipelines from Spark and Scikit-learn to a portable format and execution engine.
 
-Using the MLeap execution engine and serialization format, we provide a performant, portable and easy-to-integrate production library for machine learning pipelines.
+Using the MLeap execution engine and serialization format, we provide a performant, portable and easy-to-integrate production library for machine learning data pipelines and algorithms.
 
 For portability, we build our software on the JVM and only use serialization formats that are widely-adopted.
 
-We also provide a high level of integration with existing technologies. Instead of trying to rebuild the wheel, we are adding the body and engine.
+We also provide a high level of integration with existing technologies.
+
+Our Goal:
+1. Build data pipelines and train algorithms with Spark and Scikit-Learn
+2. Serialize your pipeline and algorithm to Bundle.ML
+3. Use MLeap to execute your pipeline and algorithm without the Spark/Scikit dependencies
 
 ## Overview
 
-1. implemented in Scala
-2. full [Spark](http://spark.apache.org/) support
-3. supports 3 portable serialization formats (JSON, Protobuf, and Mixed)
-4. export a model with Scikit-learn or Spark and execute it on the MLeap engine anywhere in the JVM
-5. implement custom data types and transformers for use with MLeap data frames and transformer pipelines
+1. Core execution engine implemented in Scala
+2. [Spark](http://spark.apache.org/), PySpark and Scikit-Learn support
+3. Export a model with Scikit-learn or Spark and execute it on the MLeap engine anywhere in the JVM
+4. Choose from 3 portable serialization formats (JSON, Protobuf, and Mixed)
+5. Implement your own custom data types and transformers for use with MLeap data frames and transformer pipelines
 6. extensive test coverage with full parity tests for Spark and MLeap pipelines
 7. optional Spark transformer extension to extend Spark's default transformer offerings
-8. serialize MLeap data frames to multiple formats, including JSON, Avro and a binary format
 
 ## Setup
 
@@ -74,19 +78,19 @@ For more complete examples, see our other Git repository: [MLeap Demos](https://
 
 ### Create and Export a Spark Pipeline
 
-The first step is to create our pipeline in Spark. Normally we would use real data to train a complete pipeline, but for our example we will manually build a simple Spark ML pipeline.
+The first step is to create our pipeline in Spark. For our example we will manually build a simple Spark ML pipeline.
 
-Spark pipelines are not meant to be run outside of Spark. They require a DataFrame and therefore a SparkContext to run. These are expensive data structures and libraries to include in a project. With MLeap, there is no dependency on Spark to execute a pipeline. MLeap dependencies are lightweight and we use fast data structures to execute your ML pipelines.
 
 ```scala
 import org.apache.spark.ml.{StringIndexerModel, Binarizer}
 
 // User out-of-the-box Spark transformers like you normally would
-val si = new StringIndexerModel(uid = "si", labels = Array("hello", "MLeap")).
+val stringIndexer = new StringIndexerModel(uid = "si", labels = Array("hello", "MLeap")).
   setInputCol("test_string").
   setOutputCol("test_index")
-val bin = new Binarizer(uid = "bin").
-  setThreshold(0.34).
+  
+val binarizer = new Binarizer(uid = "bin").
+  setThreshold(0.5).
   setInputCol("test_double").
   setOutputCol("test_bin")
   
@@ -95,7 +99,7 @@ val bin = new Binarizer(uid = "bin").
 import org.apache.spark.ml.mleap.SparkUtil
 
 // Without needing to fit an org.apache.spark.ml.Pipeline
-val pipeline = SparkUtil.createPipelineModel(uid = "pipeline", Array(si, bin))
+val pipeline = SparkUtil.createPipelineModel(uid = "pipeline", Array(stringIndexer, binarizer))
 
 import ml.combust.bundle.BundleFile
 import ml.combust.mleap.spark.SparkSupport._
@@ -113,9 +117,50 @@ pipeline.write.
 modelFile.close()
 ```
 
+Spark pipelines are not meant to be run outside of Spark. They require a DataFrame and therefore a SparkContext to run. These are expensive data structures and libraries to include in a project. With MLeap, there is no dependency on Spark to execute a pipeline. MLeap dependencies are lightweight and we use fast data structures to execute your ML pipelines.
+
+
 ### Create and Export a Scikit-learn Pipeline
 
-TODO: Mikhail
+```python
+# Load scikit-learn mleap extensions
+import mleap.sklearn.pipeline
+import mleap.sklearn.preprocessing.data
+from mleap.sklearn.preprocessing.data import NDArrayToDataFrame
+
+# Load scikit-learn transformers and models
+from sklearn.preprocessing import LabelEncoder, Binarizer
+
+# Define the Label Encoder (minit method adds a unique `name` to the transformer as well as explicit input/output features)
+label_encoder_tf = LabelEncoder()
+label_encoder_tf.minit(input_features = 'col_a', output_features='col_a_label_le')
+
+# Convert output of Label Encoder to Data Frame instead of 1d-array
+n_dim_array_to_df_tf = NDArrayToDataFrame(label_encoder_tf.output_features)
+
+# Define our binarizer
+binarizer = Binarizer(0.5)
+binarizer.minit(input_features=n_dim_array_to_df_tf.output_features, output_features="{}_binarized".format(n_dim_array_to_df_tf.output_features))
+
+data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
+
+# Assemble the steps of our pipeline
+steps = [
+    (label_encoder_tf.name, label_encoder_tf),
+    (n_dim_array_to_df_tf.name, n_dim_array_to_df_tf),
+    (binarizer.name, binarizer)
+]
+
+pipeline = Pipeline(steps)
+pipeline.minit()
+
+# Fit the pipeline
+pipeline.fit(data)
+
+# Write the pipeline to bundle.ml
+pipeline.serialize_to_bundle('/tmp', 'simple-spark-pipeline', init=True)
+
+```
 
 ### Load and Transform Using MLeap
 
@@ -170,12 +215,12 @@ For more documentation, please see our [wiki](https://github.com/combust-ml/mlea
 ## Contributing
 
 * Write documentation.
-* Write a tutorial/walkthrough for an interesting ML problem.
-* Contribute an Estimator/Transformer from Spark.
-* Use MLeap at your company and tell us what you think.
-* Make a feature request or report a bug in github.
-* Make a pull request for an existing feature request or bug report.
-* Join the discussion of how to get MLeap into Spark as a dependency. Talk with us on Gitter (see link at top of README.md).
+* Write a tutorial/walkthrough for an interesting ML problem
+* Contribute an Estimator/Transformer from Spark
+* Use MLeap at your company and tell us what you think
+* Make a feature request or report a bug in github
+* Make a pull request for an existing feature request or bug report
+* Join the discussion of how to get MLeap into Spark as a dependency. Talk with us on Gitter (see link at top of README.md)
 
 ## Contact Information
 

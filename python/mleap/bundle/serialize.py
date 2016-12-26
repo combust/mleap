@@ -49,6 +49,15 @@ class MLeapSerializer(object):
                     "value": value
                   }
                 attributes.append(attribute)
+
+            elif isinstance(value, bool) and value in [True, False]:
+                attribute = {
+                    "name": name,
+                    "type": "boolean",
+                    "value": value
+                  }
+                attributes.append(attribute)
+
             elif isinstance(value, int):
                 attribute = {
                     "name": name,
@@ -59,7 +68,10 @@ class MLeapSerializer(object):
             elif isinstance(value, Vector):
                 attribute = {
                     "name": name,
-                    "type": "double",
+                    "type": {
+                      "type": "list",
+                      "base": "double"
+                    },
                     "value": value.values
                   }
                 attributes.append(attribute)
@@ -87,6 +99,20 @@ class MLeapSerializer(object):
                     },
                     "value": value
                   }
+                attributes.append(attribute)
+
+            elif isinstance(value, np.ndarray):
+                attribute = {
+                    "name": name,
+                    "type": {
+                        "type": "tensor",
+                        "tensor": {
+                            "base": "double",
+                            "dimension": list(value.shape)
+                        }
+                    },
+                    "value": list(value.flatten())
+                }
                 attributes.append(attribute)
 
         js['attributes'] = attributes

@@ -58,12 +58,12 @@ class SimpleSparkSerializer(MLeapSerializer):
         # define node inputs and outputs
         inputs = [{
                   "name": transformer.input_features,
-                  "port": "features"
+                  "port": "input"
                   }]
 
         outputs = [{
                   "name": transformer.prediction_column,
-                  "port": "prediction"
+                  "port": "output"
                    }]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)

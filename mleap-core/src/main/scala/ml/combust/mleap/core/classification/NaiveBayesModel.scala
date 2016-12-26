@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.classification
 
 import ml.combust.mleap.core.annotation.SparkCode
-import ml.combust.mleap.core.classification.NaiveBayesModel.{Multinomial, Bernoulli}
+import ml.combust.mleap.core.classification.NaiveBayesModel.{ModelType, Multinomial, Bernoulli}
 import org.apache.spark.ml.linalg.mleap.{Matrices, BLAS}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Matrix}
 
@@ -29,8 +29,8 @@ object NaiveBayesModel {
   * @param theta log of class conditional probabilities
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/classification/NaiveBayes.scala")
-case class NaiveBayesModel (numFeatures: Int,
-                            numClasses: Int,
+case class NaiveBayesModel (numFeatures: Double,
+                            numClasses: Double,
                             pi: Vector,
                             theta: Matrix,
                             modelType: NaiveBayesModel.ModelType)

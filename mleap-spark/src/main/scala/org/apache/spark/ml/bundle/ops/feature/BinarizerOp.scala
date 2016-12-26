@@ -4,7 +4,6 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
-import org.apache.spark.ml.bundle.util.ParamUtil
 import org.apache.spark.ml.feature.Binarizer
 
 /**

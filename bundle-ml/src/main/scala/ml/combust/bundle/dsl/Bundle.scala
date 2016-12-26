@@ -56,6 +56,7 @@ object Bundle {
     }
 
     object classification {
+      val naive_bayes = "naive_bayes"
       val logistic_regression = "logistic_regression"
       val random_forest_classifier = "random_forest_classifier"
       val gbt_classifier = "gbt_classifier"

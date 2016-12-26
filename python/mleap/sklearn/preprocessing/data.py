@@ -279,6 +279,7 @@ class OneHotEncoderSerializer(MLeapSerializer):
         # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('size', transformer.n_values_.tolist()[0]))
+        attributes.append(('drop_last', True))
 
         # define node inputs and outputs
         inputs = [{

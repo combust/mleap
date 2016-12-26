@@ -24,9 +24,10 @@ import uuid
 import os
 
 
-def mleap_init(self, input_features, prediction_column):
+def mleap_init(self, input_features, prediction_column, feature_names):
     self.input_features = input_features
     self.prediction_column = prediction_column
+    self.feature_names = feature_names
     self.name = "{}_{}".format(self.op, uuid.uuid1())
 
 
@@ -82,11 +83,11 @@ class SimpleSparkSerializer(MLeapSerializer):
             })
 
         # compile tuples of model attributes to serialize
-        tree_weights = Vector([1.0 for x in transformer.input_features])
+        tree_weights = Vector([1.0 for x in range(0, len(transformer.estimators_))])
         attributes = list()
         attributes.append(('num_features', transformer.n_features_))
         attributes.append(('tree_weights', tree_weights))
-        attributes.append(('trees', ["tree{}".format(x) for x in range(0, len(transformer.input_features))]))
+        attributes.append(('trees', ["tree{}".format(x) for x in range(0, len(transformer.estimators_))]))
         if transformer.n_outputs_ > 1:
             attributes.append(('num_classes', transformer.n_outputs_)) # TODO: get number of classes from the transformer
 
@@ -98,7 +99,7 @@ class SimpleSparkSerializer(MLeapSerializer):
 
         i = 0
         for estimator in estimators:
-            estimator.minit(input_features = transformer.input_features, prediction_column = transformer.prediction_column)
+            estimator.minit(input_features = transformer.input_features, prediction_column = transformer.prediction_column, feature_names=transformer.feature_names)
             model_name = "tree{}".format(i)
             estimator.serialize_to_bundle(rf_path, model_name, serialize_node=False)
 

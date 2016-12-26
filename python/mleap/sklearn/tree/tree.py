@@ -23,9 +23,10 @@ import json
 import uuid
 
 
-def mleap_init(self, input_features, prediction_column):
+def mleap_init(self, input_features, prediction_column, feature_names):
     self.input_features = input_features
     self.prediction_column = prediction_column
+    self.feature_names = feature_names
     self.name = "{}_{}".format(self.op, uuid.uuid1())
 
 
@@ -60,11 +61,11 @@ class SimpleSparkSerializer(MLeapSerializer):
         """
 
         tree_ = tree.tree_
-        feature_names = [feature_names[i] if i != _tree.TREE_UNDEFINED else 'n/a' for i in tree_.feature]
+        feature_name = [feature_names[i] if i != _tree.TREE_UNDEFINED else 'n/a' for i in tree_.feature]
 
         def traverse(node, depth, outfile):
             if tree_.feature[node] != _tree.TREE_UNDEFINED:
-                name = feature_names[node]
+                name = feature_name[node]
                 threshold = tree_.threshold[node]
 
                 # Define internal node for serialization
@@ -112,7 +113,7 @@ class SimpleSparkSerializer(MLeapSerializer):
 
         # Define attributes
         attributes = list()
-        attributes.append(('num_features', len(transformer.input_features)))
+        attributes.append(('num_features', transformer.n_features_))
         if transformer.n_classes_ > 1:
             attributes.append(('num_classes', transformer.n_classes_))
 
@@ -137,4 +138,4 @@ class SimpleSparkSerializer(MLeapSerializer):
         if not serialize_node:
             tree_path = "{}/{}/tree.json".format(path, model_name)
         with open(tree_path, 'w') as outfile:
-            self.serialize_tree(transformer, transformer.input_features, outfile)
+            self.serialize_tree(transformer, transformer.feature_names, outfile)

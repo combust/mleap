@@ -59,6 +59,7 @@ object Bundle {
       val logistic_regression = "logistic_regression"
       val random_forest_classifier = "random_forest_classifier"
       val gbt_classifier = "gbt_classifier"
+      val multi_layer_perceptron_classifier = "multi_layer_perceptron_classifier"
       val decision_tree_classifier = "decision_tree_classifier"
       val support_vector_machine = "support_vector_machine"
       val one_vs_rest = "one_vs_rest"

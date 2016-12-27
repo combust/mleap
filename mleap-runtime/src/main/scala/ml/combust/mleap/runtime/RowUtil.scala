@@ -28,7 +28,7 @@ object RowUtil {
         }
         i = i + 1
         rs
-    }
+    }.map(_.reverse)
   }
 
   /** Create a row selector from a frame selector.

@@ -1,11 +1,11 @@
-package org.apache.spark.ml.bundle.tree
+package org.apache.spark.ml.bundle.tree.decision
 
+import ml.bundle.tree.decision.Node.Node
+import ml.bundle.tree.decision.Node.Node.{InternalNode, LeafNode}
+import ml.bundle.tree.decision.Split.Split
+import ml.bundle.tree.decision.Split.Split.{CategoricalSplit, ContinuousSplit}
+import ml.combust.bundle.tree.decision.NodeWrapper
 import org.apache.spark.ml.tree
-import ml.bundle.tree.Split.Split
-import ml.bundle.tree.Split.Split.{CategoricalSplit, ContinuousSplit}
-import ml.bundle.tree.Node.Node
-import ml.bundle.tree.Node.Node.{InternalNode, LeafNode}
-import ml.combust.bundle.tree.NodeWrapper
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator
 
 /**

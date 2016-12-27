@@ -1,14 +1,14 @@
-package ml.combust.bundle.tree
+package ml.combust.bundle.tree.decision
 
 import java.io._
 import java.nio.file.{Files, Path}
 
-import JsonSupport._
-import spray.json._
-import ml.bundle.tree.Node.Node
+import ml.bundle.tree.decision.Node.Node
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.serializer.{SerializationContext, SerializationFormat}
+import ml.combust.bundle.tree.JsonSupport._
 import resource._
+import spray.json._
 
 /**
   * Created by hollinwilkins on 8/22/16.
@@ -37,7 +37,7 @@ trait FormatTreeReader extends Closeable {
 
 case class JsonFormatTreeWriter(out: BufferedWriter) extends FormatTreeWriter {
   override def write(node: Node): Unit = {
-    out.write(s"${node.toJson.compactPrint}\n")
+    out.write(node.toJson.compactPrint + "\n")
   }
 
   override def close(): Unit = out.close()

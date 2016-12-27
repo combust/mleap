@@ -1,11 +1,11 @@
-package ml.combust.mleap.bundle.tree
+package ml.combust.mleap.bundle.tree.decision
 
+import ml.combust.bundle.tree.decision.NodeWrapper
 import ml.combust.mleap.core.tree
-import ml.bundle.tree.Split.Split
-import ml.bundle.tree.Split.Split.{CategoricalSplit, ContinuousSplit}
-import ml.bundle.tree.Node.Node
-import ml.bundle.tree.Node.Node.{InternalNode, LeafNode}
-import ml.combust.bundle.tree.NodeWrapper
+import ml.bundle.tree.decision.Node.Node
+import ml.bundle.tree.decision.Node.Node.{InternalNode, LeafNode}
+import ml.bundle.tree.decision.Split.Split
+import ml.bundle.tree.decision.Split.Split.{CategoricalSplit, ContinuousSplit}
 
 /**
   * Created by hollinwilkins on 8/22/16.

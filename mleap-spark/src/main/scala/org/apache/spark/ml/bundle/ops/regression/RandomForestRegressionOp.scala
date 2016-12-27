@@ -5,7 +5,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
-import org.apache.spark.ml.bundle.tree.SparkNodeWrapper
+import org.apache.spark.ml.bundle.tree.decision.SparkNodeWrapper
 import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, RandomForestRegressionModel}
 
 /**

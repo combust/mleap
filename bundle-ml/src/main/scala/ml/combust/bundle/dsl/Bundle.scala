@@ -38,6 +38,7 @@ object Bundle {
     object feature {
       val binarizer = "binarizer"
       val string_indexer = "string_indexer"
+      val chi_sq_selector = "chi_sq_selector"
       val reverse_string_indexer = "reverse_string_indexer"
       val hashing_term_frequency = "hashing_term_frequency"
       val standard_scaler = "standard_scaler"

@@ -1,9 +1,10 @@
 package ml.combust.bundle.tree
 
-import ml.bundle.tree.Node.Node
-import ml.bundle.tree.Node.Node.{InternalNode, LeafNode}
-import ml.bundle.tree.Split.Split
-import ml.bundle.tree.Split.Split.{CategoricalSplit, ContinuousSplit}
+import ml.bundle.tree.clustering.Node.{Node => ClusterNode}
+import ml.bundle.tree.decision.Node.{Node => DecisionNode}
+import ml.bundle.tree.decision.Node.Node.{InternalNode, LeafNode}
+import ml.bundle.tree.decision.Split.Split
+import ml.bundle.tree.decision.Split.Split.{CategoricalSplit, ContinuousSplit}
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
@@ -41,8 +42,8 @@ trait JsonSupport {
   implicit val bundleTreeInternalNodeFormat: RootJsonFormat[InternalNode] = jsonFormat1(InternalNode.apply)
   implicit val bundleTreeLeafNodeFormat: RootJsonFormat[LeafNode] = jsonFormat1(LeafNode.apply)
 
-  implicit val bundleTreeNodeFormat: RootJsonFormat[Node] = new RootJsonFormat[Node] {
-    override def write(obj: Node): JsValue = {
+  implicit val bundleTreeNodeFormat: RootJsonFormat[DecisionNode] = new RootJsonFormat[DecisionNode] {
+    override def write(obj: DecisionNode): JsValue = {
       val (tpe, json) = if(obj.n.isInternal) {
         ("internal", obj.getInternal.toJson.asJsObject)
       } else if(obj.n.isLeaf) {
@@ -54,15 +55,19 @@ trait JsonSupport {
       JsObject(("type" -> JsString(tpe)) +: json.fields.toSeq: _*)
     }
 
-    override def read(json: JsValue): Node = json match {
+    override def read(json: JsValue): DecisionNode = json match {
       case json: JsObject =>
         json.fields("type") match {
-          case JsString("internal") => Node(Node.N.Internal(json.convertTo[InternalNode]))
-          case JsString("leaf") => Node(Node.N.Leaf(json.convertTo[LeafNode]))
+          case JsString("internal") => DecisionNode(DecisionNode.N.Internal(json.convertTo[InternalNode]))
+          case JsString("leaf") => DecisionNode(DecisionNode.N.Leaf(json.convertTo[LeafNode]))
           case _ => deserializationError("invalid node")
         }
       case _ => deserializationError("invalid node")
     }
+  }
+
+  implicit val bundleClusteringTreeNodeFormat: RootJsonFormat[ClusterNode] = {
+    jsonFormat4(ClusterNode.apply)
   }
 }
 object JsonSupport extends JsonSupport

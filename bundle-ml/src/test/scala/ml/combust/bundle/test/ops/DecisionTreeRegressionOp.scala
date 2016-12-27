@@ -2,7 +2,7 @@ package ml.combust.bundle.test.ops
 
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.tree.{NodeWrapper, TreeSerializer}
+import ml.combust.bundle.tree.decision.{NodeWrapper, TreeSerializer}
 import ml.combust.bundle.{BundleContext, dsl}
 
 /**
@@ -26,31 +26,31 @@ case class DecisionTreeRegression(uid: String,
                                   model: DecisionTreeRegressionModel) extends Transformer
 
 object MyNodeWrapper extends NodeWrapper[Node] {
-  override def node(node: Node, withImpurities: Boolean): ml.bundle.tree.Node.Node = node match {
+  override def node(node: Node, withImpurities: Boolean): ml.bundle.tree.decision.Node.Node = node match {
     case node: InternalNode =>
       val split = node.split match {
         case split: CategoricalSplit =>
-          val s = ml.bundle.tree.Split.Split.CategoricalSplit(split.featureIndex,
+          val s = ml.bundle.tree.decision.Split.Split.CategoricalSplit(split.featureIndex,
             split.isLeft,
             split.numCategories,
             split.categories)
-          ml.bundle.tree.Split.Split(ml.bundle.tree.Split.Split.S.Categorical(s))
+          ml.bundle.tree.decision.Split.Split(ml.bundle.tree.decision.Split.Split.S.Categorical(s))
         case split: ContinuousSplit =>
-          val s = ml.bundle.tree.Split.Split.ContinuousSplit(split.featureIndex, split.threshold)
-          ml.bundle.tree.Split.Split(ml.bundle.tree.Split.Split.S.Continuous(s))
+          val s = ml.bundle.tree.decision.Split.Split.ContinuousSplit(split.featureIndex, split.threshold)
+          ml.bundle.tree.decision.Split.Split(ml.bundle.tree.decision.Split.Split.S.Continuous(s))
       }
-      ml.bundle.tree.Node.Node(ml.bundle.tree.Node.Node.N.Internal(ml.bundle.tree.Node.Node.InternalNode(Some(split))))
+      ml.bundle.tree.decision.Node.Node(ml.bundle.tree.decision.Node.Node.N.Internal(ml.bundle.tree.decision.Node.Node.InternalNode(Some(split))))
     case node: LeafNode =>
-      ml.bundle.tree.Node.Node(ml.bundle.tree.Node.Node.N.Leaf(ml.bundle.tree.Node.Node.LeafNode(values = node.values)))
+      ml.bundle.tree.decision.Node.Node(ml.bundle.tree.decision.Node.Node.N.Leaf(ml.bundle.tree.decision.Node.Node.LeafNode(values = node.values)))
   }
 
   override def isInternal(node: Node): Boolean = node.isInstanceOf[InternalNode]
 
-  override def leaf(node: ml.bundle.tree.Node.Node.LeafNode, withImpurities: Boolean): Node = {
+  override def leaf(node: ml.bundle.tree.decision.Node.Node.LeafNode, withImpurities: Boolean): Node = {
     LeafNode(values = node.values)
   }
 
-  override def internal(node: ml.bundle.tree.Node.Node.InternalNode, left: Node, right: Node): Node = {
+  override def internal(node: ml.bundle.tree.decision.Node.Node.InternalNode, left: Node, right: Node): Node = {
     val split = if(node.split.get.s.isCategorical) {
       val s = node.split.get.getCategorical
       CategoricalSplit(s.featureIndex,

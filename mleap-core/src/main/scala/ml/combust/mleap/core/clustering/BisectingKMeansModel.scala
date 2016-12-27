@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.clustering
 
+import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.linalg.LinalgUtils
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.linalg.mleap.VectorWithNorm
@@ -9,6 +10,7 @@ import scala.annotation.tailrec
 /**
   * Created by hollinwilkins on 12/26/16.
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/clustering/BisectingKMeansModel.scala")
 case class BisectingKMeansModel(root: ClusteringTreeNode) {
   lazy val clusterCenters: Array[Vector] = root.leafNodes.map(_.center)
   lazy val k: Int = clusterCenters.length
@@ -18,6 +20,7 @@ case class BisectingKMeansModel(root: ClusteringTreeNode) {
   }
 }
 
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/clustering/BisectingKMeansModel.scala")
 case class ClusteringTreeNode(index: Int,
                               centerWithNorm: VectorWithNorm,
                               children: Array[ClusteringTreeNode]) extends Serializable {

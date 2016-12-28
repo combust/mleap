@@ -33,6 +33,7 @@ object Bundle {
       val decision_tree_regression = "decision_tree_regression"
       val random_forest_regression = "random_forest_regression"
       val gbt_regression = "gbt_regression"
+      val isotonic_regression = "isotonic_regression"
     }
 
     object feature {

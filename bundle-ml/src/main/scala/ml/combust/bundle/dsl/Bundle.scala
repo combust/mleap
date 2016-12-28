@@ -34,6 +34,7 @@ object Bundle {
       val random_forest_regression = "random_forest_regression"
       val gbt_regression = "gbt_regression"
       val isotonic_regression = "isotonic_regression"
+      val aft_survival_regression = "aft_survival_regression"
     }
 
     object feature {

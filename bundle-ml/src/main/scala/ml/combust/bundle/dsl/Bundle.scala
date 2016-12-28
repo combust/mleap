@@ -37,6 +37,8 @@ object Bundle {
 
     object feature {
       val binarizer = "binarizer"
+      val math_unary = "math_unary"
+      val math_binary = "math_binary"
       val string_indexer = "string_indexer"
       val chi_sq_selector = "chi_sq_selector"
       val reverse_string_indexer = "reverse_string_indexer"

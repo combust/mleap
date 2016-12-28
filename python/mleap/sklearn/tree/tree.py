@@ -31,7 +31,7 @@ def mleap_init(self, input_features, prediction_column, feature_names):
 
 
 def serialize_to_bundle(self, path, model_name, serialize_node=True):
-    serializer = SimpleSparkSerializer()
+    serializer = SimpleSerializer()
     return serializer.serialize_to_bundle(self, path, model_name, serialize_node=serialize_node)
 
 
@@ -46,9 +46,9 @@ setattr(DecisionTreeClassifier, 'serialize_to_bundle', serialize_to_bundle)
 setattr(DecisionTreeClassifier, 'serializable', True)
 
 
-class SimpleSparkSerializer(MLeapSerializer):
+class SimpleSerializer(MLeapSerializer):
     def __init__(self):
-        super(SimpleSparkSerializer, self).__init__()
+        super(SimpleSerializer, self).__init__()
 
     @staticmethod
     def serialize_tree(tree, feature_names, outfile):

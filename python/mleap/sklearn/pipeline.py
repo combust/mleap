@@ -25,12 +25,12 @@ import zipfile
 
 
 def serialize_to_bundle(self, path, model_name, init=False):
-    serializer = SimpleSparkSerializer()
+    serializer = SimpleSerializer()
     serializer.serialize_to_bundle(self, path, model_name, init)
 
 
 def deserialize_from_bundle(self, path):
-    serializer = SimpleSparkSerializer()
+    serializer = SimpleSerializer()
     return serializer.deserialize_from_bundle(path)
 
 
@@ -45,9 +45,9 @@ setattr(Pipeline, 'minit', mleap_init)
 setattr(Pipeline, 'serializable', True)
 
 
-class SimpleSparkSerializer(object):
+class SimpleSerializer(object):
     def __init__(self):
-        super(SimpleSparkSerializer, self).__init__()
+        super(SimpleSerializer, self).__init__()
 
     def serialize_to_bundle(self, transformer, path, model_name, init=False):
 

@@ -44,17 +44,17 @@ ops = ops()
 
 
 def set_input_features(self, input_features):
-    serializer = SimpleSparkSerializer()
+    serializer = SimpleSerializer()
     return serializer.set_input_features(self, input_features)
 
 
 def set_output_features(self, output_features):
-    serializer = SimpleSparkSerializer()
+    serializer = SimpleSerializer()
     return serializer.set_output_features(self, output_features)
 
 
 def serialize_to_bundle(self, path, model_name):
-    serializer = SimpleSparkSerializer()
+    serializer = SimpleSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
 
 
@@ -100,9 +100,16 @@ setattr(PolynomialFeatures, 'serialize_to_bundle', serialize_to_bundle)
 setattr(PolynomialFeatures, 'serializable', True)
 
 
-class SimpleSparkSerializer(object):
+class SimpleSerializer(object):
+    """
+    Extends base scikit-learn transformers to include:
+        - set_input_features
+        - set_output_features
+        - serialize_to_bundle
+    methods. The set input/output features are required to maintain parity with the Spark/MLeap execution engine.
+    """
     def __init__(self):
-        super(SimpleSparkSerializer, self).__init__()
+        super(SimpleSerializer, self).__init__()
 
     @staticmethod
     def _choose_serializer(transformer):
@@ -146,6 +153,12 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
     """
     Selects a subset of features from a pandas dataframe that are then passed into a subsequent transformer.
     MLeap treats this transformer like a VectorAssembler equivalent in spark.
+
+    >>> data = pd.DataFrame([['a', 0, 1], ['b', 1, 2], ['c', 3, 4]], columns=['col_a', 'col_b', 'col_c'])
+    >>> vector_items = ['col_b', 'col_c']
+    >>> feature_extractor2_tf = FeatureExtractor(vector_items, 'continuous_features', vector_items)
+    >>> feature_extractor2_tf.fit_transform(data).head(1).values
+    >>> array([[0, 1]])
     """
     def __init__(self, input_features, output_vector, output_vector_items):
         self.input_features = input_features
@@ -194,7 +207,17 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
 
 class StandardScalerSerializer(MLeapSerializer):
     """
-    Only serializing the degree of the polynomial to match Spark's implementation (2.0.1)
+    Standardizes features by removing the mean and scaling to unit variance using mean and standard deviation from
+    training data.
+
+    >>> data = pd.DataFrame([[1, 0], [5, 1], [6, 3], [1, 1]], columns=['col_a', 'col_b'])
+    >>> standard_scaler_tf = StandardScaler()
+    >>> standard_scaler_tf.minit(input_features=['col_a', 'col_b'], output_features='scaled_cont_features')
+    >>> standard_scaler_tf.fit_transform(data)
+    >>> array([[-0.98787834, -1.14707867],
+    >>>         [ 0.76834982, -0.22941573],
+    >>>         [ 1.20740686,  1.60591014],
+    >>>         [-0.98787834, -0.22941573]])
     """
     def __init__(self):
         super(StandardScalerSerializer, self).__init__()
@@ -221,6 +244,19 @@ class StandardScalerSerializer(MLeapSerializer):
 
 
 class MinMaxScalerSerializer(MLeapSerializer):
+    """
+    Scales features by the range of values using calculated min and max from training data.
+
+    >>> data = pd.DataFrame([[1, 0], [5, 1], [6, 3], [1, 1]], columns=['col_a', 'col_b'])
+    >>> minmax_scaler_tf = MinMaxScaler()
+    >>> minmax_scaler_tf.minit(input_features=['col_a', 'col_b'], output_features='scaled_cont_features')
+
+    >>> minmax_scaler_tf.fit_transform(data)
+    >>> array([[ 0.        ,  0.        ],
+    >>>      [ 0.8       ,  0.33333333],
+    >>>      [ 1.        ,  1.        ],
+    >>>      [ 0.        ,  0.33333333]])
+    """
     def __init__(self):
         super(MinMaxScalerSerializer, self).__init__()
 
@@ -270,16 +306,27 @@ class ImputerSerializer(MLeapSerializer):
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
 
-class OneHotEncoderSerializer(MLeapSerializer):
+class LabelEncoderSerializer(MLeapSerializer):
+    """
+    Converts categorical values of a single column into categorical indices. This transformer should be followed by a
+    NDArrayToDataFrame transformer to maintain a data structure required by scikit pipelines.
+
+    >>> data = pd.DataFrame([['a', 0], ['b', 1], ['b', 3], ['c', 1]], columns=['col_a', 'col_b'])
+    >>> # Label Encoder for x1 Label
+    >>> label_encoder_tf = LabelEncoder()
+    >>> label_encoder_tf.minit(input_features = ['col_a'] , output_features='col_a_label_le')
+    >>> # Convert output of Label Encoder to Data Frame instead of 1d-array
+    >>> n_dim_array_to_df_tf = NDArrayToDataFrame('col_a_label_le')
+    >>> n_dim_array_to_df_tf.fit_transform(label_encoder_tf.fit_transform(data['col_a']))
+    """
     def __init__(self):
-        super(OneHotEncoderSerializer, self).__init__()
+        super(LabelEncoderSerializer, self).__init__()
 
     def serialize_to_bundle(self, transformer, path, model_name):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('size', transformer.n_values_.tolist()[0]))
-        attributes.append(('drop_last', True))
+        attributes.append(('labels', transformer.classes_.tolist()))
 
         # define node inputs and outputs
         inputs = [{
@@ -295,15 +342,20 @@ class OneHotEncoderSerializer(MLeapSerializer):
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
 
-class LabelEncoderSerializer(MLeapSerializer):
+class OneHotEncoderSerializer(MLeapSerializer):
+    """
+    A one-hot encoder maps a single column of categorical indices to a
+    column of binary vectors, which can be re-assamble back to a DataFrame using a ToDense transformer.
+    """
     def __init__(self):
-        super(LabelEncoderSerializer, self).__init__()
+        super(OneHotEncoderSerializer, self).__init__()
 
     def serialize_to_bundle(self, transformer, path, model_name):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('labels', transformer.classes_.tolist()))
+        attributes.append(('size', transformer.n_values_.tolist()[0]))
+        attributes.append(('drop_last', True))
 
         # define node inputs and outputs
         inputs = [{

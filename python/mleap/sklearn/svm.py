@@ -28,7 +28,7 @@ def mleap_init(self, input_features, prediction_column):
 
 
 def serialize_to_bundle(self, path, model_name):
-    serializer = SimpleSparkSerializer()
+    serializer = SimpleSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
 
 setattr(SVC, 'op', 'svm')
@@ -42,9 +42,9 @@ setattr(LinearSVC, 'serialize_to_bundle', serialize_to_bundle)
 setattr(LinearSVC, 'serializable', True)
 
 
-class SimpleSparkSerializer(MLeapSerializer):
+class SimpleSerializer(MLeapSerializer):
     def __init__(self):
-        super(SimpleSparkSerializer, self).__init__()
+        super(SimpleSerializer, self).__init__()
 
     @staticmethod
     def set_prediction_column(transformer, prediction_column):

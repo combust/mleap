@@ -17,6 +17,12 @@ class Vector(object):
 
 
 class MLeapSerializer(object):
+    """
+    Base class to serialize transformers and estimators to a bundle.ml file. Main components that get serialized are:
+        - Model: Contains the data needed for the transformer. For example, if the transformer is a linear regression,
+                then we serialize the coefficients and the intercept of the model.
+        - Node: Contains the definition of the input and output data.
+    """
     def __init__(self):
         pass
 

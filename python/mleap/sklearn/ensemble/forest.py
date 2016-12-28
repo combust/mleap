@@ -21,7 +21,6 @@ from mleap.bundle.serialize import MLeapSerializer
 from mleap.bundle.serialize import Vector
 import mleap.sklearn.tree.tree
 import uuid
-import os
 
 
 def mleap_init(self, input_features, prediction_column, feature_names):
@@ -32,7 +31,7 @@ def mleap_init(self, input_features, prediction_column, feature_names):
 
 
 def serialize_to_bundle(self, path, model_name):
-    serializer = SimpleSparkSerializer()
+    serializer = SimpleSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
 
 
@@ -47,17 +46,19 @@ setattr(RandomForestClassifier, 'serialize_to_bundle', serialize_to_bundle)
 setattr(RandomForestClassifier, 'serializable', True)
 
 
-class SimpleSparkSerializer(MLeapSerializer):
+class SimpleSerializer(MLeapSerializer):
     def __init__(self):
-        super(SimpleSparkSerializer, self).__init__()
+        super(SimpleSerializer, self).__init__()
 
     def serialize_to_bundle(self, transformer, path, model):
         """
+        :param transformer: Random Forest Regressor or Classifier
+        :param path: Root path where to serialize the model
+        :param model: Name of the model to be serialized
         :type transformer: sklearn.ensemble.forest.BaseForest
-        :param transformer:
-        :param path:
-        :param model:
-        :return:
+        :type path: str
+        :type model: str
+        :return: None
         """
 
         # Define Node Inputs and Outputs

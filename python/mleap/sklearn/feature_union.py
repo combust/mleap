@@ -22,12 +22,12 @@ import uuid
 
 
 def serialize_to_bundle(self, path, model_name):
-    serializer = SimpleSparkSerializer()
+    serializer = SimplekSerializer()
     serializer.serialize_to_bundle(self, path, model_name)
 
 
 def deserialize_from_bundle(self, path):
-    serializer = SimpleSparkSerializer()
+    serializer = SimplekSerializer()
     return serializer.deserialize_from_bundle(path)
 
 
@@ -41,9 +41,9 @@ setattr(FeatureUnion, 'minit', mleap_init)
 setattr(FeatureUnion, 'serializable', True)
 
 
-class SimpleSparkSerializer(object):
+class SimplekSerializer(object):
     def __init__(self):
-        super(SimpleSparkSerializer, self).__init__()
+        super(SimplekSerializer, self).__init__()
 
     @staticmethod
     def serialize_to_bundle(transformer, path, model_name):

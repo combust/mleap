@@ -21,7 +21,7 @@ import uuid
 
 
 def serialize_to_bundle(self, path, model_name):
-    serializer = SimpleSparkSerializer()
+    serializer = SimpleSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
 
 
@@ -37,9 +37,9 @@ setattr(CountVectorizer, 'serialize_to_bundle', serialize_to_bundle)
 setattr(CountVectorizer, 'serializable', True)
 
 
-class SimpleSparkSerializer(MLeapSerializer):
+class SimpleSerializer(MLeapSerializer):
     def __init__(self):
-        super(SimpleSparkSerializer, self).__init__()
+        super(SimpleSerializer, self).__init__()
 
     @staticmethod
     def set_prediction_column(transformer, prediction_column):

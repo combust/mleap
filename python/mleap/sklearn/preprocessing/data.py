@@ -20,6 +20,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer, Binariz
 from sklearn.preprocessing.data import OneHotEncoder
 from sklearn.preprocessing.label import LabelEncoder
 from mleap.bundle.serialize import MLeapSerializer
+from sklearn.utils import column_or_1d
+import warnings
 import numpy as np
 import pandas as pd
 import uuid
@@ -524,3 +526,179 @@ class ToDense(BaseEstimator, TransformerMixin):
         # Write node file
         with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
             json.dump(self.get_mleap_node(), outfile, indent=3)
+
+
+class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer):
+    """
+    Performs basic math opperations on a single feature (column of a DataFrame). Supported opperations include:
+        - log
+        - exp
+        - sqrt
+        - sin
+        - cos
+        - tan
+    Note, currently we only support 1d-arrays.
+    Inputs need to be floats.
+    """
+    def __init__(self, input_features, output_features, transform_type):
+        self.valid_transforms = ['log', 'exp', 'sqrt', 'sin', 'cos', 'tan']
+        self.op = 'math_unary'
+        self.name = "{}_{}".format(self.op, uuid.uuid4())
+        self.input_features = input_features
+        self.output_features = output_features
+        self.transform_type = transform_type
+
+    def fit(self, y):
+        """
+        Fit Unary Math Operator
+        :param y:
+        :return:
+        """
+        y = column_or_1d(y, warn=True)
+        if self.transform_type not in self.valid_transforms:
+                warnings.warn("Invalid transform type.", stacklevel=2)
+        return self
+
+    def transform(self, y):
+        """
+        Transform features per specified math function.
+        :param y:
+        :return:
+        """
+        if self.transform_type == 'log':
+            return np.log(y)
+        elif self.transform_type == 'exp':
+            return np.exp(y)
+        elif self.transform_type == 'sqrt':
+            return np.sqrt(y)
+        elif self.transform_type == 'sin':
+            return np.sin(y)
+        elif self.transform_type == 'cos':
+            return np.cos(y)
+        elif self.transform_type == 'tan':
+            return np.tan(y)
+
+    def fit_transform(self, X, y=None, **fit_params):
+        """
+        Transform data per specified math function.
+        :param X:
+        :param y:
+        :param fit_params:
+        :return:
+        """
+        self.fit(X)
+
+        return self.transform(X)
+
+    def serialize_to_bundle(self, transformer, path, model_name):
+
+        # compile tuples of model attributes to serialize
+        attributes = list()
+        attributes.append(('opperation', self.transform_type))
+
+        # define node inputs and outputs
+        inputs = [{
+                  "name": transformer.input_features,
+                  "port": "input"
+                }]
+
+        outputs = [{
+                  "name": transformer.output_features,
+                  "port": "output"
+                }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+
+class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer):
+    """
+    Performs basic math opperations on a single feature (column of a DataFrame). Supported opperations include:
+        - add: Add x + y
+        - sub: Subtract x - y
+        - mul: Multiply x * y
+        - div: Divide x / y
+        - rem: Remainder x % y
+        - logn: LogN log(x) / log(y)
+        - pow: Power x^y
+    These transforms work on 2-dimensional arrays/vectors, where the the first column is x and second column is y.
+    Inputs need to be floats.
+    """
+    def __init__(self, input_features, output_features, transform_type):
+        self.valid_transforms = ['add', 'sub', 'mul', 'div', 'rem', 'logn', 'pow']
+        self.op = 'math_binary'
+        self.name = "{}_{}".format(self.op, uuid.uuid4())
+        self.input_features = input_features
+        self.output_features = output_features
+        self.transform_type = transform_type
+
+    def _return(self, y):
+        if type(y, np.ndarray):
+            return
+
+    def fit(self, y):
+        """
+        Fit Unary Math Operator
+        :param y:
+        :return:
+        """
+        if self.transform_type not in self.valid_transforms:
+                warnings.warn("Invalid transform type.", stacklevel=2)
+        return self
+
+    def transform(self, y):
+        """
+        Transform features per specified math function.
+        :param y:
+        :return:
+        """
+        if type(y, pd.DataFrame):
+            x = y.ix[:,0]
+            y = y.ix[:,1]
+        else:
+            x = y[:,0]
+            y = y[:,1]
+        if self.transform_type == 'add':
+            return np.add(x, y)
+        elif self.transform_type == 'sub':
+            return np.subtract(x, y)
+        elif self.transform_type == 'mul':
+            return np.multiply(x, y)
+        elif self.transform_type == 'div':
+            return np.divide(y)
+        elif self.transform_type == 'rem':
+            return np.remainder(x, y)
+        elif self.transform_type == 'logn':
+            return np.remainder(x, y)
+        elif self.transform_type == 'pow':
+            return x**y
+
+    def fit_transform(self, X, y=None, **fit_params):
+        """
+        Transform data per specified math function.
+        :param X:
+        :param y:
+        :param fit_params:
+        :return:
+        """
+        self.fit(X)
+
+        return self.transform(X)
+
+    def serialize_to_bundle(self, transformer, path, model_name):
+
+        # compile tuples of model attributes to serialize
+        attributes = list()
+        attributes.append(('opperation', self.transform_type))
+
+        # define node inputs and outputs
+        inputs = [{
+                  "name": transformer.input_features,
+                  "port": "input"
+                }]
+
+        outputs = [{
+                  "name": transformer.output_features,
+                  "port": "output"
+                }]
+
+        self.serialize(transformer, path, model_name, attributes, inputs, outputs)

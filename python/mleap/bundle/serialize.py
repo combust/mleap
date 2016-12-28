@@ -121,6 +121,14 @@ class MLeapSerializer(object):
                 }
                 attributes.append(attribute)
 
+            elif isinstance(value, str):
+                attribute = {
+                    'name': name,
+                    'type': 'string',
+                    'value': value
+                }
+                attributes.append(attribute)
+
         js['attributes'] = attributes
 
         return js

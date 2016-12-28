@@ -15,9 +15,9 @@ case class MathBinary(override val uid: String = Transformer.uniqueName("math_bi
                       inputB: Option[String] = None,
                       outputCol: String,
                       model: MathBinaryModel) extends Transformer {
+  val execAB: UserDefinedFunction = (a: Double, b: Double) => model(Some(a), Some(b))
   val execA: UserDefinedFunction = (a: Double) => model(Some(a), None)
   val execB: UserDefinedFunction = (b: Double) => model(None, Some(b))
-  val execAB: UserDefinedFunction = (a: Double, b: Double) => model(Some(a), Some(b))
   val execNone: UserDefinedFunction = () => model(None, None)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {

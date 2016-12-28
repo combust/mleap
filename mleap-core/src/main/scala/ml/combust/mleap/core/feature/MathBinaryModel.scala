@@ -3,7 +3,7 @@ package ml.combust.mleap.core.feature
 /**
   * Created by hollinwilkins on 12/27/16.
   */
-sealed trait BinaryOperation {
+sealed trait BinaryOperation extends Serializable {
   def name: String
 }
 object BinaryOperation {
@@ -35,7 +35,7 @@ object BinaryOperation {
 
 case class MathBinaryModel(operation: BinaryOperation,
                            da: Option[Double] = None,
-                           db: Option[Double] = None) {
+                           db: Option[Double] = None) extends Serializable {
   import BinaryOperation._
 
   def apply(ma: Option[Double], mb: Option[Double]): Double = {

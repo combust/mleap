@@ -54,7 +54,7 @@ class MathBinaryOp extends OpNode[MleapContext, MathBinary, MathBinaryModel] {
     }
 
     if(node.isSet(node.inputB)) {
-      shape = shape.withInput(node.getInputB, "input_B")
+      shape = shape.withInput(node.getInputB, "input_b")
     }
 
     shape

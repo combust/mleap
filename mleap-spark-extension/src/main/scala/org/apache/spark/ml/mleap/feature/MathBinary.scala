@@ -15,7 +15,7 @@ import org.apache.spark.sql.functions.udf
   */
 trait MathBinaryParams extends HasOutputCol {
   final val inputA: Param[String] = new Param[String](this, "inputA", "input for left side of binary operation")
-  final def getInputA: String = $(outputCol)
+  final def getInputA: String = $(inputA)
 
   final val inputB: Param[String] = new Param[String](this, "inputB", "input for right side of binary operation")
   final def getInputB: String = $(inputB)

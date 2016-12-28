@@ -16,6 +16,8 @@ Our Goal:
 2. Serialize your pipeline and algorithm to Bundle.ML
 3. Use MLeap to execute your pipeline and algorithm without the Spark/Scikit dependencies
 
+Basic examples are localed below, but you can read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
+
 ## Overview
 
 1. Core execution engine implemented in Scala
@@ -120,7 +122,7 @@ modelFile.close()
 Spark pipelines are not meant to be run outside of Spark. They require a DataFrame and therefore a SparkContext to run. These are expensive data structures and libraries to include in a project. With MLeap, there is no dependency on Spark to execute a pipeline. MLeap dependencies are lightweight and we use fast data structures to execute your ML pipelines.
 
 
-### Create and Export a Scikit-learn Pipeline
+### Create and Export a Scikit-Learn Pipeline
 
 ```python
 # Load scikit-learn mleap extensions

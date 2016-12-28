@@ -14,13 +14,13 @@ class SimpleSparkSerializer() {
 
   def serializeToBundle(transformer: Transformer, path: String): Unit = {
     for(file <- managed(BundleFile(path))) {
-      transformer.write.force(true).save(file)
+      transformer.writeBundle.force(true).save(file)
     }
   }
 
   def deserializeFromBundle(path: String): Transformer = {
     (for(file <- managed(BundleFile(path))) yield {
-      file.load().get.root
+      file.loadBundle().get.root
     }).either.either match {
       case Right(root) => root
       case Left(errors) => throw errors.head

@@ -52,7 +52,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
       BundleFile(file)
       for(bf <- managed(BundleFile(file))) {
-        transformer.write.force(true).save(bf).get
+        transformer.writeBundle.force(true).save(bf).get
       }
 
       bundleCache = Some(file)
@@ -62,11 +62,11 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
   def mleapTransformer(transformer: Transformer)
                       (implicit context: SparkBundleContext): runtime.transformer.Transformer = {
-    MleapBundleFileOps(serializedModel(transformer)).load().get.root
+    MleapBundleFileOps(serializedModel(transformer)).loadBundle().get.root
   }
 
   def deserializedSparkTransformer(transformer: Transformer): Transformer = {
-    SparkBundleFileOps(serializedModel(transformer)).load().get.root
+    SparkBundleFileOps(serializedModel(transformer)).loadBundle().get.root
   }
 
   def parityTransformer(): Unit = {

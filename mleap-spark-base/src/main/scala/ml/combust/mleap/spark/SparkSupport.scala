@@ -14,12 +14,12 @@ import scala.util.Try
   */
 trait SparkSupport {
   implicit class SparkTransformerOps(transformer: Transformer) {
-    def write: BundleWriter[SparkBundleContext, Transformer] = BundleWriter(transformer)
+    def writeBundle: BundleWriter[SparkBundleContext, Transformer] = BundleWriter(transformer)
   }
 
   implicit class SparkBundleFileOps(file: BundleFile) {
-    def load()
-            (implicit context: SparkBundleContext): Try[Bundle[Transformer]] = file.loadBundle()
+    def loadBundle()
+                  (implicit context: SparkBundleContext): Try[Bundle[Transformer]] = file.loadBundle()
   }
 
   implicit class MleapSparkTransformerOps[T <: MleapTransformer](transformer: T) {

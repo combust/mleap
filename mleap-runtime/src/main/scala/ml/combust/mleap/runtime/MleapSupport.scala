@@ -10,11 +10,11 @@ import scala.util.Try
   */
 object MleapSupport {
   implicit class MleapTransformerOps(transformer: Transformer) {
-    def write: BundleWriter[MleapContext, Transformer] = BundleWriter(transformer)
+    def writeBundle: BundleWriter[MleapContext, Transformer] = BundleWriter(transformer)
   }
 
   implicit class MleapBundleFileOps(file: BundleFile) {
-    def load()
-            (implicit context: MleapContext): Try[Bundle[Transformer]] = file.loadBundle()
+    def loadBundle()
+                  (implicit context: MleapContext): Try[Bundle[Transformer]] = file.loadBundle()
   }
 }

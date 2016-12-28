@@ -60,6 +60,7 @@ object Bundle {
       val ngram = "ngram"
       val polynomial_expansion = "polynomial_expansion"
       val stopwords_remover = "stopwords_remover"
+      val word_to_vector = "word_to_vector"
     }
 
     object classification {

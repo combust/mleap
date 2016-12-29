@@ -42,6 +42,8 @@ object Bundle {
       val binarizer = "binarizer"
       val count_vectorizer = "count_vectorizer"
       val dct = "dct"
+      val min_hash_lsh = "min_hash_lsh"
+      val bucketed_random_projection_lsh = "bucketed_random_projection_lsh"
       val math_unary = "math_unary"
       val math_binary = "math_binary"
       val string_indexer = "string_indexer"

@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.annotation.SparkCode
-import org.apache.spark.ml.linalg.mleap.{Vector => MleapVectors}
+import org.apache.spark.ml.linalg.mleap.{VectorUtil => MleapVectors}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 import scala.math.{max, min}

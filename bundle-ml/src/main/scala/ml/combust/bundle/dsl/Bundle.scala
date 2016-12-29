@@ -54,6 +54,7 @@ object Bundle {
       val min_max_scaler = "min_max_scaler"
       val max_abs_scaler = "max_abs_scaler"
       val bucketizer = "bucketizer"
+      val idf = "idf"
       val elementwise_product = "elementwise_product"
       val normalizer = "normalizer"
       val pca = "pca"

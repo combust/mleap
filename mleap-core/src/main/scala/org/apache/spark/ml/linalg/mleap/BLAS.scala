@@ -2,7 +2,6 @@ package org.apache.spark.ml.linalg.mleap
 
 import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg
-import org.apache.spark.ml.linalg.Vector
 
 /** BLAS public interface to the private mllib-local BLAS.
   */
@@ -19,10 +18,10 @@ object BLAS {
   /**
     * y += a * x
     */
-  def axpy(a: Double, x: Vector, y: Vector): Unit = linalg.BLAS.axpy(a, x, y)
+  def axpy(a: Double, x: linalg.Vector, y: linalg.Vector): Unit = linalg.BLAS.axpy(a, x, y)
 
   /**
     * x = a * x
     */
-  def scal(a: Double, x: Vector): Unit = linalg.BLAS.scal(a, x)
+  def scal(a: Double, x: linalg.Vector): Unit = linalg.BLAS.scal(a, x)
 }

@@ -547,7 +547,7 @@ object FeedForwardModel {
         initModel(new BDV[Double](weights.data, offset, 1, layers(i).weightSize), random)
       offset += layers(i).weightSize
     }
-    new FeedForwardModel(mleap.Vector.fromBreeze(weights), topology)
+    new FeedForwardModel(mleap.VectorUtil.fromBreeze(weights), topology)
   }
 }
 

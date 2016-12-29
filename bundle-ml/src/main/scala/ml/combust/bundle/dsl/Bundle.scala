@@ -62,6 +62,7 @@ object Bundle {
       val normalizer = "normalizer"
       val pca = "pca"
       val ngram = "ngram"
+      val vector_slicer = "vector_slicer"
       val polynomial_expansion = "polynomial_expansion"
       val stopwords_remover = "stopwords_remover"
       val word_to_vector = "word_to_vector"

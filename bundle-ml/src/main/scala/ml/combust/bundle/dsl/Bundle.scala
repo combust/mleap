@@ -41,6 +41,7 @@ object Bundle {
     object feature {
       val binarizer = "binarizer"
       val count_vectorizer = "count_vectorizer"
+      val dct = "dct"
       val math_unary = "math_unary"
       val math_binary = "math_binary"
       val string_indexer = "string_indexer"

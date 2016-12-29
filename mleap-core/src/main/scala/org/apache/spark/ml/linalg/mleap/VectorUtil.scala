@@ -2,6 +2,7 @@ package org.apache.spark.ml.linalg.mleap
 
 import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg
+import org.apache.spark.ml.linalg.SparseVector
 
 /** Expose private methods from mllib local.
   */
@@ -9,6 +10,9 @@ import org.apache.spark.ml.linalg
 object VectorUtil {
   implicit class VectorOps(vector: linalg.Vector) {
     def toBreeze: breeze.linalg.Vector[Double] = vector.asBreeze
+  }
+  implicit class SparseVectorOps(vector: SparseVector) {
+    def slice(indices: Array[Int]): SparseVector = vector.slice(indices)
   }
   def fromBreeze(breezeVector: breeze.linalg.Vector[Double]): linalg.Vector = linalg.Vectors.fromBreeze(breezeVector)
 }

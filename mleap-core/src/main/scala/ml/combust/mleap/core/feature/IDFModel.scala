@@ -1,10 +1,12 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/IDF.scala")
 case class IDFModel(idf: Vector) {
   def apply(v: Vector): Vector = {
     val n = v.size

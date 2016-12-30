@@ -3,11 +3,9 @@ package ml.combust.mleap.bundle.ops.classification
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.{Model, Node, Shape}
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.mleap.bundle.tree.MleapNodeWrapper
-import ml.combust.mleap.core.classification.NaiveBayesModel.{Multinomial, Bernoulli}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.classification.NaiveBayesClassifier
-import ml.combust.mleap.core.classification.{NaiveBayesModel}
+import ml.combust.mleap.core.classification.NaiveBayesModel
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
 
@@ -16,7 +14,6 @@ import org.apache.spark.ml.linalg.{Matrices, Vectors}
   * Created by fshabbir on 12/25/16.
   */
 class NaiveBayesClassifierOp extends OpNode[MleapContext, NaiveBayesClassifier, NaiveBayesModel]{
-  implicit val nodeWrapper = MleapNodeWrapper
   override val Model: OpModel[MleapContext, NaiveBayesModel] = new OpModel[MleapContext, NaiveBayesModel]{
     override val klazz: Class[NaiveBayesModel] = classOf[NaiveBayesModel]
 

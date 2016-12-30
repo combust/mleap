@@ -17,5 +17,13 @@ object BLAS {
 
   def axpy(a: Double, X: linalg.DenseMatrix, Y: linalg.DenseMatrix): Unit = linalg.BLAS.axpy(a, X, Y)
 
+  /**
+    * y += a * x
+    */
   def axpy(a: Double, x: linalg.Vector, y: linalg.Vector): Unit = linalg.BLAS.axpy(a, x, y)
+
+  /**
+    * x = a * x
+    */
+  def scal(a: Double, x: linalg.Vector): Unit = linalg.BLAS.scal(a, x)
 }

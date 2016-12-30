@@ -1,102 +1,72 @@
-name := "mleap"
+import ml.combust.mleap.{Release, Common}
 
-lazy val `root` = project.in(file(".")).
-  settings(Common.settings).
-  settings(Common.combustSettings).
-  settings(Common.sonatypeSettings).
-  settings(publishArtifact := false).
-  enablePlugins(ReleasePlugin).
-  aggregate(`mleap-base`, `mleap-core`, `mleap-runtime`,
-    `mleap-spark-base`, `mleap-spark`,
-    `mleap-spark-extension`, `mleap-spark-testkit`,
-    `mleap-avro`, `bundle-ml`)
+lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
+  bundleMl,
+  core,
+  runtime,
+  avro,
+  sparkBase,
+  sparkTestkit,
+  spark,
+  sparkExtension)
 
-lazy val `mleap-base` = project.in(file("mleap-base")).
-  settings(Common.settings).
-  settings(Common.combustSettings).
-  settings(Common.sonatypeSettings).
-  enablePlugins(BuildInfoPlugin, GitVersioning).
-  settings(buildInfoKeys := Seq[BuildInfoKey](name, version, git.gitHeadCommit),
-    buildInfoPackage := "ml.combust.mleap",
-    buildInfoObject := "BuildValues",
-    buildInfoOptions += BuildInfoOption.ToJson)
+lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Seq(publishArtifact := false)
 
-lazy val `mleap-core` = project.in(file("mleap-core")).
-  settings(Common.settings).
-  settings(Common.combustSettings).
-  settings(Common.sonatypeSettings).
-  settings(libraryDependencies ++= Dependencies.mleapCoreDependencies).
-  dependsOn(`mleap-base`)
+lazy val root = Project(
+  id = "mleap",
+  base = file("."),
+  aggregate = aggregatedProjects
+).settings(rootSettings)
 
-lazy val `mleap-runtime` = project.in(file("mleap-runtime")).
-  settings(Common.settings).
-  settings(Common.combustSettings).
-  settings(Common.sonatypeSettings).
-  settings(libraryDependencies ++= Dependencies.mleapRuntimeDependencies(scalaVersion.value)).
-  dependsOn(`mleap-core`, `bundle-ml`)
+lazy val baseProject = Project(
+  id = "mleap-base",
+  base = file("mleap-base")
+)
 
-lazy val `mleap-spark-base` = project.in(file("mleap-spark-base")).
-  settings(Common.settings).
-  settings(Common.combustSettings).
-  settings(Common.sonatypeSettings).
-  settings(libraryDependencies ++= Dependencies.mleapSparkBaseDependencies).
-  dependsOn(`mleap-runtime`)
+lazy val bundleMl = Project(
+  id = "bundle-ml",
+  base = file("bundle-ml"),
+  dependencies = Seq(baseProject)
+)
 
-lazy val `mleap-spark-testkit` = project.in(file("mleap-spark-testkit")).
-  settings(Common.settings).
-  settings(Common.combustSettings).
-  settings(Common.sonatypeSettings).
-  settings(libraryDependencies ++= Dependencies.mleapSparkTestKitDependencies).
-  dependsOn(`mleap-spark-base`, `mleap-runtime`)
+lazy val core = Project(
+  id = "mleap-core",
+  base = file("mleap-core"),
+  dependencies = Seq(baseProject)
+)
 
-lazy val `mleap-spark` = project.in(file("mleap-spark")).
-  settings(Common.settings).
-  settings(Common.combustSettings).
-  settings(Common.sonatypeSettings).
-  settings(libraryDependencies ++= Dependencies.mleapSparkDependencies).
-  dependsOn(`mleap-runtime`, `mleap-spark-base`, `mleap-spark-testkit` % "test")
+lazy val runtime = Project(
+  id = "mleap-runtime",
+  base = file("mleap-runtime"),
+  dependencies = Seq(core, bundleMl)
+)
 
-lazy val `mleap-spark-extension` = project.in(file("mleap-spark-extension")).
-  settings(Common.settings).
-  settings(Common.combustSettings).
-  settings(Common.sonatypeSettings).
-  settings(libraryDependencies ++= Dependencies.mleapSparkExtensionDependencies).
-  dependsOn(`mleap-spark`, `mleap-spark-testkit` % "test")
+lazy val avro = Project(
+  id = "mleap-avro",
+  base = file("mleap-avro"),
+  dependencies = Seq(runtime)
+)
 
-lazy val `mleap-avro` = project.in(file("mleap-avro")).
-  settings(Common.settings).
-  settings(Common.combustSettings).
-  settings(Common.sonatypeSettings).
-  settings(libraryDependencies ++= Dependencies.mleapAvroDependencies).
-  dependsOn(`mleap-runtime`)
+lazy val sparkBase = Project(
+  id = "mleap-spark-base",
+  base = file("mleap-spark-base"),
+  dependencies = Seq(runtime)
+)
 
-lazy val `bundle-ml` = project.in(file("bundle-ml")).
-  settings(Common.settings).
-  settings(Common.bundleSettings).
-  settings(Common.sonatypeSettings).
-  settings(PB.targets in Compile := Seq(scalapb.gen() -> (sourceManaged in Compile).value)).
-  settings(PB.includePaths in Compile := Seq(file("bundle-protobuf"))).
-  settings(PB.protoSources in Compile := Seq(file("bundle-protobuf"))).
-  settings(libraryDependencies ++= Dependencies.bundleMlDependencies).
-  dependsOn(`mleap-base`)
+lazy val sparkTestkit = Project(
+  id = "mleap-spark-testkit",
+  base = file("mleap-spark-testkit"),
+  dependencies = Seq(sparkBase)
+)
 
-import ReleaseTransformations._
-import xerial.sbt.Sonatype.SonatypeCommand
+lazy val spark = Project(
+  id = "mleap-spark",
+  base = file("mleap-spark"),
+  dependencies = Seq(sparkBase, sparkTestkit % "test")
+)
 
-releaseVersionBump := sbtrelease.Version.Bump.Minor
-releaseCrossBuild := true
-
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runClean,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  publishArtifacts,
-  releaseStepCommand(SonatypeCommand.sonatypeRelease),
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
+lazy val sparkExtension = Project(
+  id = "mleap-spark-extension",
+  base = file("mleap-spark-extension"),
+  dependencies = Seq(spark, sparkTestkit % "test")
 )

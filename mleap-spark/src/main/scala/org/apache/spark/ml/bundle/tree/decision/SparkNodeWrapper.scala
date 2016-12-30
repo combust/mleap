@@ -1,11 +1,11 @@
-package org.apache.spark.ml.bundle.tree
+package org.apache.spark.ml.bundle.tree.decision
 
+import ml.bundle.tree.decision.Node.Node
+import ml.bundle.tree.decision.Node.Node.{InternalNode, LeafNode}
+import ml.bundle.tree.decision.Split.Split
+import ml.bundle.tree.decision.Split.Split.{CategoricalSplit, ContinuousSplit}
+import ml.combust.bundle.tree.decision.NodeWrapper
 import org.apache.spark.ml.tree
-import ml.bundle.tree.Split.Split
-import ml.bundle.tree.Split.Split.{CategoricalSplit, ContinuousSplit}
-import ml.bundle.tree.Node.Node
-import ml.bundle.tree.Node.Node.{InternalNode, LeafNode}
-import ml.combust.bundle.tree.NodeWrapper
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator
 
 /**
@@ -33,21 +33,21 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
       }
       Node(Node.N.Internal(Node.InternalNode(Some(split))))
     case node: tree.LeafNode =>
-      val impurities = if(withImpurities) {
-        node.impurityStats.stats
-      } else { Array() }
-      Node(Node.N.Leaf(Node.LeafNode(node.prediction, impurities)))
+      val values = if(withImpurities) {
+        node.impurityStats.stats.toSeq
+      } else { Seq(node.prediction) }
+      Node(Node.N.Leaf(Node.LeafNode(values)))
   }
 
   override def isInternal(node: tree.Node): Boolean = node.isInstanceOf[tree.InternalNode]
 
   override def leaf(node: LeafNode, withImpurities: Boolean): tree.Node = {
     val calc: ImpurityCalculator = if(withImpurities) {
-      ImpurityCalculator.getCalculator("gini", node.impurities.toArray)
+      ImpurityCalculator.getCalculator("gini", node.values.toArray)
     } else {
       null
     }
-    new tree.LeafNode(prediction = node.prediction,
+    new tree.LeafNode(prediction = node.values.head,
       impurity = 0.0,
       impurityStats = calc)
   }

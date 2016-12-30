@@ -39,7 +39,7 @@ object BundleRegistry {
       (br, opNode) => br.register(opNode)
     }
 
-    config.getStringList("ml.combust.bundle.customTypes").asScala.foldLeft(br) {
+    config.getStringList("ml.combust.bundle.custom-types").asScala.foldLeft(br) {
       (br2, customClass) =>
         br.register(cl.loadClass(customClass).
           getConstructor(classOf[BundleRegistry]).

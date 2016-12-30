@@ -18,21 +18,21 @@ class NaiveBayesClassifierOp extends OpNode[SparkBundleContext, NaiveBayesModel,
 
     override def store(model: Model, obj: NaiveBayesModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("num_features", Value.double(obj.numFeatures)).
-        withAttr("num_classes", Value.double(obj.numClasses)).
+      model.withAttr("num_features", Value.long(obj.numFeatures)).
+        withAttr("num_classes", Value.long(obj.numClasses)).
         withAttr("pi", Value.doubleVector(obj.pi.toArray)).
         withAttr("theta", Value.tensor(obj.theta.toArray.toSeq, Seq(obj.theta.numRows, obj.theta.numCols))).
-        withAttr("model_type", Value.string(obj.modelType.toString()))
+        withAttr("model_type", Value.string(obj.getModelType))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): NaiveBayesModel = {
-      val Seq(rows, cols) = model.value("theta").bundleDataType.getList.getBase.getTensor.dimensions
+      val Seq(rows, cols) = model.value("theta").bundleDataType.getTensor.dimensions
       val nb = new NaiveBayesModel(uid = "",
         pi = Vectors.dense(model.value("pi").getDoubleVector.toArray),
         theta = Matrices.dense(rows, cols, model.value("theta").getTensor[Double].toArray))
       val modelType = model.value("model_type").getString
-      //how to initialize model type into the movie
+      nb.set(nb.modelType, modelType)
     }
 
   }
@@ -47,7 +47,7 @@ class NaiveBayesClassifierOp extends OpNode[SparkBundleContext, NaiveBayesModel,
       pi = model.pi,
       theta = model.theta).
       setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.input("prediction").name)
+      setPredictionCol(node.shape.output("prediction").name)
     nb = node.shape.getOutput("probability").map(p => nb.setProbabilityCol(p.name)).getOrElse(nb)
     node.shape.getOutput("raw_prediction").map(rp => nb.setRawPredictionCol(rp.name)).getOrElse(nb)
   }

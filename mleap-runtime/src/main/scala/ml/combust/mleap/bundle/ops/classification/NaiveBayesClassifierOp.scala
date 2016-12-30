@@ -9,7 +9,7 @@ import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.classification.NaiveBayesClassifier
 import ml.combust.mleap.core.classification.{NaiveBayesModel}
 import ml.combust.bundle.dsl._
-import org.apache.spark.ml.linalg.Matrices
+import org.apache.spark.ml.linalg.{Matrices, Vectors}
 
 
 /**
@@ -23,24 +23,19 @@ class NaiveBayesClassifierOp extends OpNode[MleapContext, NaiveBayesClassifier, 
     override def opName: String = Bundle.BuiltinOps.classification.naive_bayes
 
     override def store(model: Model, obj: NaiveBayesModel)(implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("num_features", Value.double(obj.numFeatures)).
-        withAttr("num_classes", Value.double(obj.numClasses)).
+      model.withAttr("num_features", Value.long(obj.numFeatures)).
+        withAttr("num_classes", Value.long(obj.numClasses)).
         withAttr("pi", Value.doubleVector(obj.pi.toArray)).
         withAttr("theta", Value.tensor(obj.theta.toArray.toSeq, Seq(obj.theta.numRows, obj.theta.numCols))).
         withAttr("model_type", Value.string(obj.modelType.toString))
     }
 
-    def modelType(modelType: String) = modelType match{
-      case "bernoulli" => Bernoulli
-      case "multinomial" => Multinomial
-    }
-
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): NaiveBayesModel = {
-      val Seq(rows, cols) = model.value("theta").bundleDataType.getList.getBase.getTensor.dimensions
-      val modelType = modelType(model.value("model_type").getString)
-      new NaiveBayesModel(numFeatures = model.value("num_features").getDouble,
-        numClasses = model.value("num_classes").getDouble,
-        pi = model.value("pi").getDoubleVector,  //how to fix
+      val Seq(rows, cols) = model.value("theta").bundleDataType.getTensor.dimensions
+      val modelType = NaiveBayesModel.forName(model.value("model_type").getString)
+      new NaiveBayesModel(numFeatures = model.value("num_features").getLong.toInt,
+        numClasses = model.value("num_classes").getLong.toInt,
+        pi = Vectors.dense(model.value("pi").getDoubleVector.toArray),
         theta = Matrices.dense(rows, cols, model.value("theta").getTensor[Double].toArray),
         modelType = modelType)
     }

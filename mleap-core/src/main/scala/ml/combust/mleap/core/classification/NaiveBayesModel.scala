@@ -16,9 +16,14 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Matrix}
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/classification/NaiveBayes.scala")
 object NaiveBayesModel {
 
+  def forName(name: String): ModelType = name match{
+    case "bernoulli" => Bernoulli
+    case "multinomial" => Multinomial
+  }
+
   sealed trait ModelType
-    case object Bernoulli extends ModelType
-    case object Multinomial extends ModelType
+  case object Bernoulli extends ModelType
+  case object Multinomial extends ModelType
 }
 
 /**
@@ -29,11 +34,11 @@ object NaiveBayesModel {
   * @param theta log of class conditional probabilities
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/classification/NaiveBayes.scala")
-case class NaiveBayesModel (numFeatures: Double,
-                            numClasses: Double,
-                            pi: Vector,
-                            theta: Matrix,
-                            modelType: NaiveBayesModel.ModelType)
+case class NaiveBayesModel(numFeatures: Int,
+                           numClasses: Int,
+                           pi: Vector,
+                           theta: Matrix,
+                           modelType: NaiveBayesModel.ModelType)
   extends MultinomialClassificationModel with Serializable {
 
   private def multinomialCalculation(raw: Vector) = {

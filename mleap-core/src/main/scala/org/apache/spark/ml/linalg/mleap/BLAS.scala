@@ -15,6 +15,8 @@ object BLAS {
     */
   def dot(v1: linalg.Vector, v2: linalg.Vector): Double = linalg.BLAS.dot(v1, v2)
 
+  def axpy(a: Double, X: linalg.DenseMatrix, Y: linalg.DenseMatrix): Unit = linalg.BLAS.axpy(a, X, Y)
+
   /**
     * y += a * x
     */

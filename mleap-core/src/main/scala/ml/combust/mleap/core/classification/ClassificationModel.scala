@@ -22,7 +22,7 @@ trait ClassificationModel {
 }
 
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/classification/ProbabilisticClassifier.scala")
-object MultinomialClassificationModel {
+object ProbabilisticClassificationModel {
   def normalizeToProbabilitiesInPlace(v: DenseVector): Unit = {
     val sum = v.values.sum
     if (sum != 0) {
@@ -42,7 +42,7 @@ object MultinomialClassificationModel {
   * binary classification models.
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/ProbabilisticClassifier.scala")
-trait MultinomialClassificationModel extends ClassificationModel {
+trait ProbabilisticClassificationModel extends ClassificationModel {
   /** Number of classes this model predicts.
     *
     * 2 indicates this is a binary classification model.
@@ -92,55 +92,4 @@ trait MultinomialClassificationModel extends ClassificationModel {
   def rawToProbabilityInPlace(raw: Vector): Vector
 
   def predictRaw(features: Vector): Vector
-}
-
-/** Trait for binary classifiers.
-  *
-  * This is only used for binary classifiers.
-  * See [[MultinomialClassificationModel]] for multinomial classifiers.
-  */
-trait BinaryClassificationModel extends MultinomialClassificationModel {
-  override val numClasses: Int = 2
-
-  /** Threshold for binary classifiers.
-    *
-    * If the prediction probability is over this value, then
-    * the prediction is pegged to 1.0. Otherwise the prediction
-    * is pegged to 0.0.
-    */
-  val threshold: Option[Double] = None
-
-  override lazy val thresholds: Option[Array[Double]] = threshold.map(t => Array[Double](1 - t, t))
-
-  /** Predict the class taking into account threshold.
-    *
-    * @param features features for prediction
-    * @return prediction with threshold
-    */
-  override def predict(features: Vector): Double = {
-    binaryProbabilityToPrediction(predictBinaryProbability(features))
-  }
-
-  /** Predict the class without taking into account threshold.
-    *
-    * @param features features for prediction
-    * @return probability that prediction is the predictable class
-    */
-  def predictBinaryProbability(features: Vector): Double
-
-  /** Predict class and probability.
-    *
-    * @param features features to predict
-    * @return (prediction, probability)
-    */
-  def predictBinaryWithProbability(features: Vector): (Double, Double) = {
-    val probability = predictBinaryProbability(features)
-
-    (binaryProbabilityToPrediction(probability), probability)
-  }
-
-  def binaryProbabilityToPrediction(probability: Double): Double = threshold match {
-    case Some(t) => if (probability > t) 1.0 else 0.0
-    case None => probability
-  }
 }

@@ -19,10 +19,14 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
 
     override def store(model: Model, obj: SVMModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      val thresholds = if(obj.isSet(obj.thresholds)) {
+        Some(obj.getThresholds)
+      } else None
+
       model.withAttr("coefficients", Value.doubleVector(obj.model.weights.toArray)).
         withAttr("intercept", Value.double(obj.model.intercept)).
         withAttr("num_classes", Value.long(2)).
-        withAttr("threshold", obj.get(obj.threshold).map(Value.double))
+        withAttr("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
     }
 
     override def load(model: Model)
@@ -34,8 +38,8 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
       val svm = new org.apache.spark.mllib.classification.SVMModel(weights = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
         intercept = model.value("intercept").getDouble)
       val svmModel = new SVMModel(uid = "", model = svm)
-      model.getValue("threshold").
-        map(t => svmModel.setThreshold(t.getDouble)).
+      model.getValue("thresholds").
+        map(t => svmModel.setThresholds(t.getDoubleList.toArray)).
         getOrElse(svmModel)
     }
   }

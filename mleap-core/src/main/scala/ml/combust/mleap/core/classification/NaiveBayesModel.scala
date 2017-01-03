@@ -39,7 +39,7 @@ case class NaiveBayesModel(numFeatures: Int,
                            pi: Vector,
                            theta: Matrix,
                            modelType: NaiveBayesModel.ModelType)
-  extends MultinomialClassificationModel with Serializable {
+  extends ProbabilisticClassificationModel with Serializable {
 
   private def multinomialCalculation(raw: Vector) = {
     val prob = theta.multiply(raw)
@@ -83,7 +83,7 @@ case class NaiveBayesModel(numFeatures: Int,
           dv.values(i) = math.exp(dv.values(i) - maxLog)
           i += 1
         }
-        MultinomialClassificationModel.normalizeToProbabilitiesInPlace(dv)
+        ProbabilisticClassificationModel.normalizeToProbabilitiesInPlace(dv)
         dv
       case sv: SparseVector =>
         throw new RuntimeException("Unexpected error in NaiveBayesModel:" +

@@ -12,7 +12,7 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 case class DecisionTreeClassifierModel(override val rootNode: Node,
                                        numFeatures: Int,
                                        override val numClasses: Int)
-  extends MultinomialClassificationModel with DecisionTree with Serializable {
+  extends ProbabilisticClassificationModel with DecisionTree with Serializable {
   override def predictRaw(features: Vector): Vector = {
     rootNode.predictImpl(features).impurities
   }
@@ -20,7 +20,7 @@ case class DecisionTreeClassifierModel(override val rootNode: Node,
   override def rawToProbabilityInPlace(raw: Vector): Vector = {
     raw match {
       case dv: DenseVector =>
-        MultinomialClassificationModel.normalizeToProbabilitiesInPlace(dv)
+        ProbabilisticClassificationModel.normalizeToProbabilitiesInPlace(dv)
         dv
       case sv: SparseVector =>
         throw new RuntimeException("Unexpected error in RandomForestClassificationModel:" +

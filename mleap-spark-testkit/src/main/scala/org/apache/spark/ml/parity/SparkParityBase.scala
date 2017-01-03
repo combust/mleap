@@ -76,7 +76,8 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       val mTransformer = mleapTransformer(sparkTransformer)
       val fields = sparkTransformed.schema.fields.map(_.name).map(col)
       val sparkDataset = sparkTransformed.select(fields: _*).collect()
-      val mleapDataset = mTransformer.sparkTransform(dataset).select(fields: _*).collect()
+      val mleapTransformed = mTransformer.sparkTransform(dataset).select(fields: _*)
+      val mleapDataset = mleapTransformed.collect()
 
       assert(sparkDataset sameElements mleapDataset)
     }

@@ -19,10 +19,20 @@ class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegression
 
     override def store(model: Model, obj: LogisticRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
-        withAttr("intercept", Value.double(obj.intercept)).
-        withAttr("num_classes", Value.long(obj.numClasses)).
-        withAttr("threshold", obj.get(obj.threshold).map(Value.double))
+      val m = model.withAttr("num_classes", Value.long(obj.numClasses))
+      if(obj.numClasses > 2) {
+        val cm = obj.coefficientMatrix
+        val thresholds = if(obj.isSet(obj.thresholds)) {
+          Some(obj.getThresholds)
+        } else None
+        m.withAttr("coefficient_matrix", Value.tensor[Double](cm.toArray, Seq(cm.numRows, cm.numCols))).
+          withAttr("intercept_vector", Value.doubleVector(obj.interceptVector.toArray)).
+          withAttr("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
+      } else {
+        m.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
+          withAttr("intercept", Value.double(obj.intercept)).
+          withAttr("threshold", Value.double(obj.getThreshold))
+      }
     }
 
     override def load(model: Model)

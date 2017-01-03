@@ -20,5 +20,5 @@ class SupportVectorMachineParitySpec extends SparkParityBase {
       setInputCols(Array("fico_index", "dti")).
       setOutputCol("features"),
     new SVMModel(uid = "svm",
-      model = new mllib.classification.SVMModel(weights = Vectors.dense(0.53, 0.67), intercept = 0.77)))).fit(dataset)
+      model = new mllib.classification.SVMModel(weights = Vectors.dense(0.53, 0.67), intercept = 0.77)).setRawPredictionCol("raw_prediction").setProbabilityCol("probability"))).fit(dataset)
 }

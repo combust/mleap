@@ -3,6 +3,7 @@ package org.apache.spark.ml.mleap.classification
 import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.classification.{ProbabilisticClassificationModel, ProbabilisticClassifier}
 import org.apache.spark.ml.linalg
+import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.util.Identifiable
 import org.apache.spark.mllib.classification
@@ -89,10 +90,7 @@ class SVMModel(override val uid: String,
   }
 
   protected override def predict(features: linalg.Vector): Double = {
-    get(threshold) match {
-      case Some(t) => if(margin(features)> t) 1.0 else 0.0
-      case None => margin(features)
-    }
+    if(margin(features) > getThreshold) 1.0 else 0.0
   }
 
   override protected def predictRaw(features: linalg.Vector): linalg.Vector = {

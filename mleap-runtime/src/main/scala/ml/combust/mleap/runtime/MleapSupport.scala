@@ -15,6 +15,6 @@ object MleapSupport {
 
   implicit class MleapBundleFileOps(file: BundleFile) {
     def loadBundle()
-                  (implicit context: MleapContext): Try[Bundle[Transformer]] = file.loadBundle()
+                  (implicit context: MleapContext): Try[Bundle[Transformer]] = file.load()
   }
 }

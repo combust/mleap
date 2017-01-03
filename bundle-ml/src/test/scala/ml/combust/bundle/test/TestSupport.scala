@@ -8,11 +8,11 @@ import ml.combust.bundle.test.ops.Transformer
   */
 trait TestSupport {
   implicit class TestTransformerOps(transformer: Transformer) {
-    def write: BundleWriter[TestContext, Transformer] = BundleWriter(transformer)
+    def writeBundle: BundleWriter[TestContext, Transformer] = BundleWriter(transformer)
   }
 
   implicit class BundleFileOps(file: BundleFile) {
-    def load()(implicit context: TestContext) = file.loadBundle[TestContext, Transformer]()
+    def loadBundle()(implicit context: TestContext) = file.load[TestContext, Transformer]()
   }
 }
 object TestSupport extends TestSupport

@@ -67,11 +67,11 @@ class BundleSerializationSpec extends FunSpec {
         it("serializes/deserializes the same object") {
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/lr_bundle.$format$suffix")
           for(file <- managed(BundleFile(uri))) {
-            lr.write.name("my_bundle").
+            lr.writeBundle.name("my_bundle").
               format(format).
               save(file)
 
-            val bundleRead = file.load().get
+            val bundleRead = file.loadBundle().get
 
             assert(lr == bundleRead.root)
           }
@@ -90,11 +90,11 @@ class BundleSerializationSpec extends FunSpec {
 
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/dt_bundle.$format$suffix")
           for(file <- managed(BundleFile(uri))) {
-            dt.write.name("my_bundle").
+            dt.writeBundle.name("my_bundle").
               format(format).
               save(file)
 
-            val bundleRead = file.load().get
+            val bundleRead = file.loadBundle().get
 
             assert(dt == bundleRead.root)
           }
@@ -105,11 +105,11 @@ class BundleSerializationSpec extends FunSpec {
         it("serializes/deserializes the same object") {
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/pipeline_bundle.$format$suffix")
           for(file <- managed(BundleFile(uri))) {
-            pipeline.write.name("my_bundle").
+            pipeline.writeBundle.name("my_bundle").
               format(format).
               save(file)
 
-            val bundleRead: Bundle[Transformer] = file.load().get
+            val bundleRead: Bundle[Transformer] = file.loadBundle().get
 
             assert(pipeline == bundleRead.root)
           }

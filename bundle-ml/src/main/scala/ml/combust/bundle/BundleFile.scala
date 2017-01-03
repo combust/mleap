@@ -88,8 +88,8 @@ case class BundleFile(fs: FileSystem,
       toSet
   }
 
-  def loadBundle[Context <: HasBundleRegistry, Transformer <: AnyRef]()
-                                                                     (implicit context: Context): Try[Bundle[Transformer]] = {
+  def load[Context <: HasBundleRegistry, Transformer <: AnyRef]()
+                                                               (implicit context: Context): Try[Bundle[Transformer]] = {
     BundleSerializer(context, this).read[Transformer]()
   }
 

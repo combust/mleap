@@ -20,7 +20,7 @@ class SimpleSparkSerializer() {
 
   def deserializeFromBundle(path: String): Transformer = {
     (for(file <- managed(BundleFile(path))) yield {
-      file.loadBundle().get.root
+      file.load().get.root
     }).either.either match {
       case Right(root) => root
       case Left(errors) => throw errors.head

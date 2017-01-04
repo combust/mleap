@@ -13,9 +13,9 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 10/30/16.
   */
 class RowTransformBuilderSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("feature1", DoubleType),
-    StructField("feature2", DoubleType),
-    StructField("feature3", DoubleType))).get
+  val schema = StructType(Seq(StructField("feature1", DoubleType()),
+    StructField("feature2", DoubleType()),
+    StructField("feature3", DoubleType()))).get
   val assembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
     outputCol = "features")
   val linearRegression = LinearRegression(featuresCol = "features",

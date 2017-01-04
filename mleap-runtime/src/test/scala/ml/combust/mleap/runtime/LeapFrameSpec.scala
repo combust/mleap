@@ -9,8 +9,8 @@ import org.scalatest.FunSpec
   * @tparam LF LeapFrame type
   */
 trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
-  val fields = Seq(StructField("test_string", StringType),
-    StructField("test_double", DoubleType))
+  val fields = Seq(StructField("test_string", StringType()),
+    StructField("test_double", DoubleType()))
   val schema = StructType(fields).get
   val dataset = LocalDataset(Array(
     Row("hello", 42.13),

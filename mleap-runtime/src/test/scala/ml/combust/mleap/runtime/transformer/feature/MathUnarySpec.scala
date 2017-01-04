@@ -10,7 +10,7 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 12/27/16.
   */
 class MathUnarySpec extends FunSpec {
-  val schema = StructType(StructField("test_a", DoubleType)).get
+  val schema = StructType(StructField("test_a", DoubleType())).get
   val dataset = LocalDataset(Seq(Row(42.0)))
   val frame = LeapFrame(schema, dataset)
 

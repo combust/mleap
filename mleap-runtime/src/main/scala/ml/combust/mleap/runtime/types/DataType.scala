@@ -11,26 +11,44 @@ object DataType {
 }
 
 sealed trait DataType extends Serializable {
+  val isNullable: Boolean
+  def asNullable: DataType
+
   def fits(other: DataType): Boolean = this == other
 }
 sealed trait BasicType extends DataType with Serializable
 
-object AnyType extends DataType {
+case class AnyType(override val isNullable: Boolean = false) extends DataType {
+  override def asNullable: DataType = copy(isNullable = true)
   override def fits(other: DataType): Boolean = true
 }
 
-object IntegerType extends BasicType
-object LongType extends BasicType
-object BooleanType extends BasicType
-object DoubleType extends BasicType
-object StringType extends BasicType
+case class IntegerType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
+case class LongType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
+case class BooleanType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
+case class DoubleType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
+case class StringType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
 
-case class TensorType(base: BasicType, dimensions: Seq[Int]) extends DataType {
+case class TensorType(base: BasicType,
+                      dimensions: Seq[Int],
+                      override val isNullable: Boolean = false) extends DataType {
+  override def asNullable: DataType = copy(isNullable = true)
+
   override def fits(other: DataType): Boolean = {
     if(super.fits(other)) { return true }
 
     other match {
-      case TensorType(ob, od) => base == ob && dimFit(od)
+      case TensorType(ob, od, _) => base == ob && dimFit(od)
       case _ => false
     }
   }
@@ -44,10 +62,14 @@ case class TensorType(base: BasicType, dimensions: Seq[Int]) extends DataType {
     } else { false }
   }
 }
-case class ListType(base: DataType) extends DataType
+case class ListType(base: DataType,
+                    override val isNullable: Boolean = false) extends DataType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
 
 object TensorType {
-  def doubleVector(dim: Int = -1): TensorType = TensorType(DoubleType, Seq(dim))
+  def doubleVector(dim: Int = -1,
+                   isNullable: Boolean = false): TensorType = TensorType(DoubleType(false), Seq(dim), isNullable)
 }
 
 object CustomType {
@@ -56,7 +78,10 @@ object CustomType {
   }
 }
 
-class CustomType private (ct: bundle.custom.CustomType[Any]) extends DataType with bundle.custom.CustomType[Any] {
+case class CustomType private (ct: bundle.custom.CustomType[Any],
+                          override val isNullable: Boolean = false) extends DataType with bundle.custom.CustomType[Any] {
+  override def asNullable: DataType = copy(isNullable = true)
+
   override val klazz: Class[Any] = ct.klazz
   override def name: String = ct.name
   override def format: RootJsonFormat[Any] = ct.format

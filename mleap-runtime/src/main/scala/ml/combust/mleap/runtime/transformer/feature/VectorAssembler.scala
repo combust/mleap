@@ -12,7 +12,7 @@ import scala.util.Try
 case class VectorAssembler(override val uid: String = Transformer.uniqueName("vector_assembler"),
                            inputCols: Array[String],
                            outputCol: String) extends Transformer {
-  val exec = (values: Array[Any]) => VectorAssemblerModel.default(values)
+  val exec = (values: Seq[Any]) => VectorAssemblerModel.default(values)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(outputCol, inputCols)(exec)

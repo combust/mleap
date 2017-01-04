@@ -9,7 +9,7 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 9/15/16.
   */
 class StringIndexerSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("test_string", StringType))).get
+  val schema = StructType(Seq(StructField("test_string", StringType()))).get
   val dataset = LocalDataset(Seq(Row("index1"), Row("index2"), Row("index3")))
   val frame = LeapFrame(schema, dataset)
 

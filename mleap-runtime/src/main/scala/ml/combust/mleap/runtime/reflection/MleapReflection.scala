@@ -21,20 +21,23 @@ trait MleapReflection {
   private def dataTypeFor(tpe: `Type`)
                          (implicit context: MleapContext): DataType = MleapReflectionLock.synchronized {
     tpe match {
-      case t if t <:< mirrorType[Boolean] => BooleanType
-      case t if t <:< mirrorType[String] => StringType
-      case t if t <:< mirrorType[Int] => IntegerType
-      case t if t <:< mirrorType[Long] => LongType
-      case t if t <:< mirrorType[Double] => DoubleType
-      case t if t <:< mirrorType[Array[_]] ||
-        t <:< mirrorType[mutable.WrappedArray[_]] =>
+      case t if t <:< mirrorType[Boolean] => BooleanType(false)
+      case t if t <:< mirrorType[String] => StringType(false)
+      case t if t <:< mirrorType[Int] => IntegerType(false)
+      case t if t <:< mirrorType[Long] => LongType(false)
+      case t if t <:< mirrorType[Double] => DoubleType(false)
+      case t if t <:< mirrorType[Seq[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t
         val baseType = dataTypeFor(elementType)
-        ArrayType(baseType)
+        ListType(baseType)
       case t if t <:< mirrorType[Vector] => TensorType.doubleVector()
-      case t if t =:= mirrorType[Any] => AnyType
+      case t if t =:= mirrorType[Any] => AnyType(false)
       case t if context.hasCustomType(t.erasure.typeSymbol.asClass.fullName) =>
-        context.customTypeForClass(t.erasure.typeSymbol.asClass.fullName)
+        context.customType(t.erasure.typeSymbol.asClass.fullName)
+      case t if t <:< mirrorType[Option[_]] =>
+        val TypeRef(_, _, Seq(elementType)) = t
+        val baseType = dataTypeFor(elementType)
+        baseType.asNullable
       case t => throw new IllegalArgumentException(s"unknown type $t")
     }
   }

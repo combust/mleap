@@ -1,5 +1,9 @@
 package ml.combust.mleap.runtime
 
+object LocalDataset {
+  def apply(row: Row, rows: Row *): LocalDataset = LocalDataset(row +: rows)
+}
+
 /** Class for holding local data as a [[ml.combust.mleap.runtime.Dataset]].
   *
   * @param data array of row data

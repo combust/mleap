@@ -2,11 +2,11 @@ package ml.combust.mleap.bundle.ops.regression
 
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.regression.{DecisionTreeRegressionModel, RandomForestRegressionModel}
-import ml.combust.mleap.bundle.tree.MleapNodeWrapper
 import ml.combust.mleap.runtime.transformer.regression.RandomForestRegression
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.bundle.tree.decision.MleapNodeWrapper
 import ml.combust.mleap.runtime.MleapContext
 
 /**
@@ -26,7 +26,7 @@ class RandomForestRegressionOp extends OpNode[MleapContext, RandomForestRegressi
       val trees = obj.trees.map {
         tree =>
           val name = s"tree$i"
-          ModelSerializer(context.bundleContext(name)).write(tree)
+          ModelSerializer(context.bundleContext(name)).write(tree).get
           i = i + 1
           name
       }
@@ -41,7 +41,7 @@ class RandomForestRegressionOp extends OpNode[MleapContext, RandomForestRegressi
       val treeWeights = model.value("tree_weights").getDoubleList
 
       val models = model.value("trees").getStringList.map {
-        tree => ModelSerializer(context.bundleContext(tree)).read().asInstanceOf[DecisionTreeRegressionModel]
+        tree => ModelSerializer(context.bundleContext(tree)).read().get.asInstanceOf[DecisionTreeRegressionModel]
       }
 
       RandomForestRegressionModel(numFeatures = numFeatures,

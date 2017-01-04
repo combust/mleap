@@ -2,10 +2,10 @@ package org.apache.spark.ml.bundle.ops.regression
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.tree.TreeSerializer
 import ml.combust.bundle.dsl._
+import ml.combust.bundle.tree.decision.TreeSerializer
 import org.apache.spark.ml.bundle.SparkBundleContext
-import org.apache.spark.ml.bundle.tree.SparkNodeWrapper
+import org.apache.spark.ml.bundle.tree.decision.SparkNodeWrapper
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel
 
 /**
@@ -21,13 +21,13 @@ class DecisionTreeRegressionOp extends OpNode[SparkBundleContext, DecisionTreeRe
 
     override def store(model: Model, obj: DecisionTreeRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      TreeSerializer[org.apache.spark.ml.tree.Node](context.file("nodes"), withImpurities = false).write(obj.rootNode)
+      TreeSerializer[org.apache.spark.ml.tree.Node](context.file("tree"), withImpurities = false).write(obj.rootNode)
       model.withAttr("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): DecisionTreeRegressionModel = {
-      val rootNode = TreeSerializer[org.apache.spark.ml.tree.Node](context.file("nodes"), withImpurities = false).read()
+      val rootNode = TreeSerializer[org.apache.spark.ml.tree.Node](context.file("tree"), withImpurities = false).read()
       new DecisionTreeRegressionModel(uid = "",
         rootNode = rootNode,
         numFeatures = model.value("num_features").getLong.toInt)

@@ -3,6 +3,8 @@ package ml.combust.bundle.serializer
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.Bundle
 
+import scala.util.Try
+
 /** Class for serializing a list of graph nodes.
   *
   * @param bundleContext bundle context for encoding/decoding custom types, op nodes and op models
@@ -36,8 +38,11 @@ case class GraphSerializer[Context](bundleContext: BundleContext[Context]) {
     * @param names list of names of the nodes to read
     * @return list of the deserialized nodes
     */
-  def read(names: Seq[String]): Seq[Any] = {
-    names.map(readNode)
+  def read(names: Seq[String]): Try[Seq[Any]] = {
+    names.map(readNode).foldLeft(Try(Seq[Any]())) {
+      (ts, tt) =>
+        tt.flatMap(t => ts.map(tss => tss :+ t))
+    }
   }
 
   /** Read a single node from the path in context.
@@ -45,7 +50,7 @@ case class GraphSerializer[Context](bundleContext: BundleContext[Context]) {
     * @param name name of the node to read
     * @return deserialized node
     */
-  def readNode(name: String): Any = {
+  def readNode(name: String): Try[Any] = {
     val nodeContext = bundleContext.bundleContext(Bundle.node(name))
     NodeSerializer(nodeContext).read()
   }

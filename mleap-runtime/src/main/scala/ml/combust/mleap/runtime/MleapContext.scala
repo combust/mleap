@@ -5,6 +5,8 @@ import ml.combust.mleap.runtime.types.CustomType
 import ml.combust.bundle
 import ml.combust.bundle.util.ClassLoaderUtil
 
+import scala.reflect.{ClassTag, classTag}
+
 /**
   * Created by hollinwilkins on 10/25/16.
   */
@@ -38,7 +40,8 @@ case class MleapContext private (registry: BundleRegistry,
   }
 
   def hasCustomType(klazz: String): Boolean = customTypes.contains(klazz)
-  def customTypeForClass(klazz: String): CustomType = customTypes(klazz)
+  def customType(klazz: String): CustomType = customTypes(klazz)
+  def customType[T: ClassTag]: CustomType = customTypes(classTag[T].runtimeClass.getName)
 
   def hasCustomTypeAlias(alias: String): Boolean = customTypeAliases.contains(alias)
   def customTypeForAlias(alias: String): CustomType = customTypeAliases(alias)

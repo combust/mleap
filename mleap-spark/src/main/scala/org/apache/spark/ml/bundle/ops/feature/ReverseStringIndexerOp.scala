@@ -34,7 +34,7 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
 
   override def load(node: Node, model: IndexToString)
                    (implicit context: BundleContext[SparkBundleContext]): IndexToString = {
-    new IndexToString(uid = node.name).copy(model.extractParamMap())
+    new IndexToString(uid = node.name).setLabels(model.getLabels)
   }
 
   override def shape(node: IndexToString): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

@@ -34,9 +34,10 @@ class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
 
   override def load(node: Node, model: Bucketizer)
                    (implicit context: BundleContext[SparkBundleContext]): Bucketizer = {
-    new Bucketizer(uid = node.name).copy(model.extractParamMap()).
+    new Bucketizer(uid = node.name).
       setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+      setOutputCol(node.shape.standardOutput.name).
+      setSplits(model.getSplits)
   }
 
   override def shape(node: Bucketizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

@@ -22,7 +22,7 @@ class SupportVectorMachineOp extends OpNode[MleapContext, SupportVectorMachine, 
       model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept)).
         withAttr("num_classes", Value.long(2)).
-        withAttr("threshold", obj.threshold.map(Value.double))
+        withAttr("thresholds", obj.thresholds.map(_.toSeq).map(Value.doubleList))
     }
 
     override def load(model: Model)
@@ -32,7 +32,7 @@ class SupportVectorMachineOp extends OpNode[MleapContext, SupportVectorMachine, 
       }
       SupportVectorMachineModel(coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
         intercept = model.value("intercept").getDouble,
-        threshold = model.getValue("threshold").map(_.getDouble))
+        thresholds = model.getValue("thresholds").map(_.getDoubleList.toArray))
     }
   }
 

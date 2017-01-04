@@ -8,11 +8,11 @@ import scala.util.Success
   * Created by pahsan on 3/8/16.
   */
 class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
-  val fields = Seq(StructField("first", StringType),
-                   StructField("second", StringType),
-                   StructField("third", StringType),
-                   StructField("fourth", StringType),
-                   StructField("fifth", StringType)
+  val fields = Seq(StructField("first", StringType()),
+                   StructField("second", StringType()),
+                   StructField("third", StringType()),
+                   StructField("fourth", StringType()),
+                   StructField("fifth", StringType())
   )
 
   val testStruct = StructType(fields).get
@@ -30,13 +30,13 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
   }
 
   test("contains should return false when a field doesn't exist") {
-    val fieldsPrime = fields:+StructField("sixth", StringType)
+    val fieldsPrime = fields:+StructField("sixth", StringType())
 
     assert(!fieldsPrime.map(f => testStruct.hasField(f.name)).forall(identity))
   }
 
   test("withField should return a StructType with the field added") {
-    val field = StructField("sixth", StringType)
+    val field = StructField("sixth", StringType())
 
     assert(testStruct.withField(field).get.hasField(field.name))
   }

@@ -1,5 +1,7 @@
 package ml.combust.bundle.json
 
+import java.util.UUID
+
 import ml.bundle.BasicType.BasicType
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.serializer.SerializationFormat
@@ -19,6 +21,15 @@ import spray.json._
   * There are no members that need to be overriden if using this trait as a mixin.
   */
 trait JsonSupportLowPriority {
+  implicit object UUIDFormat extends JsonFormat[UUID] {
+    override def read(json: JsValue): UUID = json match {
+      case JsString(value) => UUID.fromString(value)
+      case _ => throw new IllegalArgumentException("invalid UUID")
+    }
+
+    override def write(obj: UUID): JsValue = JsString(obj.toString)
+  }
+
   implicit val bundleSocketFormat: JsonFormat[Socket] = jsonFormat2(Socket.apply)
 
   implicit val bundleShapeFormat: JsonFormat[Shape] = new JsonFormat[Shape] {
@@ -36,7 +47,7 @@ trait JsonSupportLowPriority {
     }
   }
 
-  protected implicit val bundleBasicTypeFormat: JsonFormat[BasicType] = new JsonFormat[BasicType] {
+  implicit val bundleBasicTypeFormat: JsonFormat[BasicType] = new JsonFormat[BasicType] {
     override def read(json: JsValue): BasicType = json match {
       case JsString("double") => BasicType.DOUBLE
       case JsString("string") => BasicType.STRING
@@ -54,9 +65,9 @@ trait JsonSupportLowPriority {
     }
   }
 
-  protected implicit val bundleTensorTypeFormat: JsonFormat[TensorType] = jsonFormat2(TensorType.apply)
+  implicit val bundleTensorTypeFormat: JsonFormat[TensorType] = jsonFormat2(TensorType.apply)
 
-  protected implicit val bundleDataTypeFormat: JsonFormat[DataType] = new JsonFormat[DataType] {
+  implicit val bundleDataTypeFormat: JsonFormat[DataType] = new JsonFormat[DataType] {
     override def read(json: JsValue): DataType = json match {
       case _: JsString => DataType(DataType.Underlying.Basic(bundleBasicTypeFormat.read(json)))
       case obj: JsObject =>
@@ -87,7 +98,7 @@ trait JsonSupportLowPriority {
     }
   }
 
-  protected def bundleTensorFormat(tt: TensorType): JsonFormat[Any] = new JsonFormat[Any] {
+  def bundleTensorFormat(tt: TensorType): JsonFormat[Any] = new JsonFormat[Any] {
     override def read(json: JsValue): Any = {
       tt.base match {
         case BasicType.DOUBLE => json.convertTo[Seq[Double]]
@@ -105,7 +116,7 @@ trait JsonSupportLowPriority {
     }
   }
 
-  protected def bundleListValueFormat(lt: ListType)
+  def bundleListValueFormat(lt: ListType)
                                      (implicit hr: HasBundleRegistry): JsonFormat[Seq[Any]] = new JsonFormat[Seq[Any]] {
     val base = lt.base.get
     override def write(obj: Seq[Any]): JsValue = {
@@ -152,7 +163,7 @@ trait JsonSupportLowPriority {
     }
   }
 
-  protected def bundleValueFormat(dt: DataType)
+  def bundleValueFormat(dt: DataType)
                                  (implicit hr: HasBundleRegistry): JsonFormat[Any] = new JsonFormat[Any] {
     override def write(obj: Any): JsValue = {
       if(dt.underlying.isCustom) {
@@ -195,7 +206,7 @@ trait JsonSupportLowPriority {
     }
   }
 
-  protected implicit def bundleAttributeFormat(implicit hr: HasBundleRegistry): JsonFormat[Attribute] = new JsonFormat[Attribute] {
+  implicit def bundleAttributeFormat(implicit hr: HasBundleRegistry): JsonFormat[Attribute] = new JsonFormat[Attribute] {
     override def read(json: JsValue): Attribute = json match {
       case json: JsObject =>
         val name = StringJsonFormat.read(json.fields("name"))
@@ -214,7 +225,7 @@ trait JsonSupportLowPriority {
     }
   }
 
-  protected implicit def bundleEmbeddedAttributeListFormat(implicit hr: HasBundleRegistry): JsonFormat[AttributeList] = new JsonFormat[AttributeList] {
+  implicit def bundleEmbeddedAttributeListFormat(implicit hr: HasBundleRegistry): JsonFormat[AttributeList] = new JsonFormat[AttributeList] {
     override def write(obj: AttributeList): JsValue = obj.attributes.toJson
     override def read(json: JsValue): AttributeList = AttributeList(json.convertTo[Seq[Attribute]])
   }
@@ -237,14 +248,14 @@ trait JsonSupportLowPriority {
 
   implicit def bundleModelFormat(implicit hr: HasBundleRegistry): RootJsonFormat[Model] = jsonFormat2(Model.apply)
   implicit val bundleNodeFormat: RootJsonFormat[Node] = jsonFormat2(Node.apply)
-  implicit def bundleBundleMetaFormat(implicit hr: HasBundleRegistry): RootJsonFormat[BundleMeta] = jsonFormat5(BundleMeta)
+  implicit val bundleBundleInfoFormat: RootJsonFormat[BundleInfo] = jsonFormat4(BundleInfo)
 }
 
 /** All spray.json.RootJsonFormat formats needed for Bundle.ML JSON serialization.
   *
   * The 4 spray.json.RootJsonFormat formats provided are:
   * <ul>
-  *   <li>[[JsonSupport.bundleBundleMetaFormat]]</li>
+  *   <li>[[JsonSupport.bundleBundleInfoFormat]]</li>
   *   <li>[[JsonSupport.bundleNodeFormat]]</li>
   *   <li>[[JsonSupport.bundleModelFormat]]</li>
   *   <li>[[JsonSupport.bundleAttributeListFormat]]</li>

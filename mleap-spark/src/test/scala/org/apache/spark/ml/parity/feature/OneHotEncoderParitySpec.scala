@@ -1,8 +1,7 @@
 package org.apache.spark.ml.parity.feature
 
 import org.apache.spark.ml.parity.SparkParityBase
-import org.apache.spark.ml.feature.StringIndexer
-import org.apache.spark.ml.mleap.feature.OneHotEncoder
+import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer}
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.sql.DataFrame
 

@@ -21,5 +21,5 @@ case class TokenizerModel(regex: String = "\\s") {
     * @param document string to tokenize
     * @return array of tokens
     */
-  def apply(document: String): Array[String] = document.toLowerCase.split(regex)
+  def apply(document: String): Seq[String] = document.toLowerCase.split(regex).toSeq
 }

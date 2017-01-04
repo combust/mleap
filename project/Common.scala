@@ -1,3 +1,5 @@
+package ml.combust.mleap
+
 import sbt._
 import Keys._
 import com.typesafe.sbt.SbtPgp.autoImportImpl._
@@ -6,7 +8,12 @@ import sbtrelease.ReleasePlugin.autoImport._
 import xerial.sbt.Sonatype.autoImport._
 
 object Common {
-  val settings: Seq[Def.Setting[_]] = Seq(
+  lazy val defaultMleapSettings = defaultSettings ++ mleapSettings
+  lazy val defaultBundleSettings = defaultSettings ++ bundleSettings
+
+  lazy val defaultSettings = buildSettings ++ sonatypeSettings
+
+  lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
     scalaVersion := "2.11.8",
     crossScalaVersions := Seq("2.10.6", "2.11.8"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
@@ -22,10 +29,10 @@ object Common {
     }
   )
 
-  val combustSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")
-  val bundleSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.bundle")
+  lazy val mleapSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")
+  lazy val bundleSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.bundle")
 
-  val sonatypeSettings: Seq[Def.Setting[_]] = Seq(
+  lazy val sonatypeSettings: Seq[Def.Setting[_]] = Seq(
     sonatypeProfileName := "ml.combust",
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     publishMavenStyle in publishSigned := true,

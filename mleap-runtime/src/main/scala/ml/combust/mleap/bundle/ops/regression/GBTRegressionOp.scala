@@ -23,7 +23,7 @@ class GBTRegressionOp extends OpNode[MleapContext, GBTRegression, GBTRegressionM
       val trees = obj.trees.map {
         tree =>
           val name = s"tree$i"
-          ModelSerializer(context.bundleContext(name)).write(tree)
+          ModelSerializer(context.bundleContext(name)).write(tree).get
           i = i + 1
           name
       }
@@ -38,7 +38,7 @@ class GBTRegressionOp extends OpNode[MleapContext, GBTRegression, GBTRegressionM
       val treeWeights = model.value("tree_weights").getDoubleList
 
       val models = model.value("trees").getStringList.map {
-        tree => ModelSerializer(context.bundleContext(tree)).read().asInstanceOf[DecisionTreeRegressionModel]
+        tree => ModelSerializer(context.bundleContext(tree)).read().get.asInstanceOf[DecisionTreeRegressionModel]
       }
 
       GBTRegressionModel(trees = models,

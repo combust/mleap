@@ -13,5 +13,5 @@ case class HashingTermFrequency(override val uid: String = Transformer.uniqueNam
                                 override val inputCol: String,
                                 override val outputCol: String,
                                 model: HashingTermFrequencyModel) extends FeatureTransformer {
-  override val exec: UserDefinedFunction = (value: Array[String]) => model(value)
+  override val exec: UserDefinedFunction = (value: Seq[String]) => model(value)
 }

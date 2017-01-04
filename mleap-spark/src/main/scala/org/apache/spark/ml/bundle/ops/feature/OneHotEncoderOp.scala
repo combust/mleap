@@ -3,39 +3,77 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
+import org.apache.spark.ml.attribute.{Attribute, BinaryAttribute, NominalAttribute, NumericAttribute}
 import org.apache.spark.ml.bundle.SparkBundleContext
-import org.apache.spark.ml.mleap.feature.OneHotEncoderModel
+import org.apache.spark.ml.feature.OneHotEncoder
+import org.apache.spark.sql.types.StructField
+
+import scala.util.{Failure, Try}
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoderModel, OneHotEncoderModel] {
-  override val Model: OpModel[SparkBundleContext, OneHotEncoderModel] = new OpModel[SparkBundleContext, OneHotEncoderModel] {
-    override val klazz: Class[OneHotEncoderModel] = classOf[OneHotEncoderModel]
+object OneHotEncoderOp {
+  def sizeForField(field: StructField): Int = {
+    val attr = Attribute.fromStructField(field)
+
+    (attr match {
+      case nominal: NominalAttribute =>
+        if (nominal.values.isDefined) {
+          Try(nominal.values.get.length)
+        } else if (nominal.numValues.isDefined) {
+          Try(nominal.numValues.get)
+        } else {
+          Failure(new RuntimeException(s"invalid nominal value for field ${field.name}"))
+        }
+      case binary: BinaryAttribute =>
+        Try(2)
+      case _: NumericAttribute =>
+        Failure(new RuntimeException(s"invalid numeric attribute for field ${field.name}"))
+      case _ =>
+        Failure(new RuntimeException(s"unsupported attribute for field ${field.name}")) // optimistic about unknown attributes
+    }).get
+  }
+}
+
+class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoder, OneHotEncoder] {
+  override val Model: OpModel[SparkBundleContext, OneHotEncoder] = new OpModel[SparkBundleContext, OneHotEncoder] {
+    override val klazz: Class[OneHotEncoder] = classOf[OneHotEncoder]
 
     override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder
 
-    override def store(model: Model, obj: OneHotEncoderModel)
+    override def store(model: Model, obj: OneHotEncoder)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("size", Value.long(obj.size))
+      assert(context.context.dataset.isDefined, "must supply a transformed data frame to serialize the default OneHotEncoder\nuse mleap-spark-extension for an estimator/model OneHotEncoder")
+
+      val df = context.context.dataset.get
+      val size = OneHotEncoderOp.sizeForField(df.schema(obj.getInputCol))
+      val dropLast = obj.getDropLast
+      val arrSize = if(dropLast) { size - 1 } else { size }
+
+      model.withAttr("size", Value.long(arrSize)).
+        withAttr("drop_last", Value.boolean(dropLast))
     }
 
     override def load(model: Model)
-                     (implicit context: BundleContext[SparkBundleContext]): OneHotEncoderModel = {
-      new OneHotEncoderModel(uid = "", size = model.value("size").getLong.toInt)
+                     (implicit context: BundleContext[SparkBundleContext]): OneHotEncoder = {
+      new OneHotEncoder(uid = "")
     }
   }
 
-  override val klazz: Class[OneHotEncoderModel] = classOf[OneHotEncoderModel]
+  override val klazz: Class[OneHotEncoder] = classOf[OneHotEncoder]
 
-  override def name(node: OneHotEncoderModel): String = node.uid
+  override def name(node: OneHotEncoder): String = node.uid
 
-  override def model(node: OneHotEncoderModel): OneHotEncoderModel = node
+  override def model(node: OneHotEncoder): OneHotEncoder = node
 
-  override def load(node: Node, model: OneHotEncoderModel)
-                   (implicit context: BundleContext[SparkBundleContext]): OneHotEncoderModel = {
-    new OneHotEncoderModel(uid = node.name, size = model.size)
+  override def load(node: Node, model: OneHotEncoder)
+                   (implicit context: BundleContext[SparkBundleContext]): OneHotEncoder = {
+    new OneHotEncoder(uid = node.name).
+      setDropLast(model.getDropLast).
+      setInputCol(node.shape.standardInput.name).
+      setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: OneHotEncoderModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: OneHotEncoder): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

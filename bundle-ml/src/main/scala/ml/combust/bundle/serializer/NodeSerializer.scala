@@ -1,15 +1,17 @@
 package ml.combust.bundle.serializer
 
-import java.io.{FileInputStream, FileOutputStream, InputStream, OutputStream}
+import java.io.{InputStream, OutputStream}
+import java.nio.file.Files
 
 import ml.bundle.NodeDef.NodeDef
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.dsl.{Bundle, Node, Shape}
+import ml.combust.bundle.dsl.{Bundle, Node}
 import ml.combust.bundle.json.JsonSupport._
 import spray.json._
 import resource._
 
 import scala.io.Source
+import scala.util.{Failure, Try}
 
 /** Trait for serializing node definitions.
   */
@@ -79,34 +81,44 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
     *
     * @param obj node to write
     */
-  def write(obj: Any): Unit = {
-    bundleContext.path.mkdirs()
+  def write(obj: Any): Try[Any] = Try {
+    Files.createDirectories(bundleContext.path)
     val op = bundleContext.bundleRegistry.opForObj[Context, Any, Any](obj)
     val modelSerializer = ModelSerializer(bundleContext)
     modelSerializer.write(op.model(obj))
 
     val name = op.name(obj)
     val shape = op.shape(obj)
-    val node = Node(name = name, shape = shape)
-    for(out <- managed(new FileOutputStream(bundleContext.file(Bundle.nodeFile)))) {
-      FormatNodeSerializer.serializer.write(out, node)
-    }
+    Node(name = name, shape = shape)
+  }.flatMap {
+    node =>
+      (for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.nodeFile)))) yield {
+        FormatNodeSerializer.serializer.write(out, node)
+      }).either.either match {
+        case Right(_) => Try(obj)
+        case Left(errors) => Failure(errors.head)
+      }
   }
 
   /** Read a node from the current context path.
     *
     * @return deserialized node
     */
-  def read(): Any = {
-    val node = (for(in <- managed(new FileInputStream(bundleContext.file(Bundle.nodeFile)))) yield {
+  def read(): Try[Any] = {
+    ((for(in <- managed(Files.newInputStream(bundleContext.file(Bundle.nodeFile)))) yield {
       FormatNodeSerializer.serializer.read(in)
     }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(n) => n
+      case Right(n) => Try(n)
+      case Left(errors) => Failure(errors.head)
+    }).flatMap {
+      node =>
+        ModelSerializer(bundleContext).readWithModel().flatMap {
+          case (model, m) =>
+            Try {
+              val op = bundleContext.bundleRegistry[Context, Any, Any](m.op)
+              op.load(node, model)(bundleContext)
+            }
+        }
     }
-
-    val (model, m) = ModelSerializer(bundleContext).readWithModel()
-    val op = bundleContext.bundleRegistry[Context, Any, Any](m.op)
-    op.load(node, model)(bundleContext)
   }
 }

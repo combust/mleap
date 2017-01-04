@@ -14,23 +14,30 @@ import scala.reflect.ClassTag
 object ValueSerializer {
   val byteCharset = Charset.forName("UTF-8")
 
+  def maybeNullableSerializer[T](serializer: ValueSerializer[T],
+                                 isNullable: Boolean): ValueSerializer[Any] = {
+    if(isNullable) {
+      NullableSerializer(serializer).asInstanceOf[ValueSerializer[Any]]
+    } else { serializer.asInstanceOf[ValueSerializer[Any]] }
+  }
+
   def serializerForDataType(dataType: DataType): ValueSerializer[Any] = (dataType match {
-    case DoubleType => DoubleSerializer
-    case StringType => StringSerializer
-    case IntegerType => IntegerSerializer
-    case LongType => LongSerializer
-    case BooleanType => BooleanSerializer
-    case at: ArrayType =>
-      at.base match {
-        case DoubleType => ArraySerializer(DoubleSerializer)
-        case StringType => ArraySerializer(StringSerializer)
-        case IntegerType => ArraySerializer(IntegerSerializer)
-        case LongType => ArraySerializer(LongSerializer)
-        case BooleanType => ArraySerializer(BooleanSerializer)
-        case _ => ArraySerializer(serializerForDataType(at.base))
+    case DoubleType(isNullable) => maybeNullableSerializer(DoubleSerializer, isNullable)
+    case StringType(isNullable) => maybeNullableSerializer(StringSerializer, isNullable)
+    case IntegerType(isNullable) => maybeNullableSerializer(IntegerSerializer, isNullable)
+    case LongType(isNullable) => maybeNullableSerializer(LongSerializer, isNullable)
+    case BooleanType(isNullable) => maybeNullableSerializer(BooleanSerializer, isNullable)
+    case ListType(base, isNullable) =>
+      base match {
+        case DoubleType(_) => maybeNullableSerializer(ListSerializer(DoubleSerializer), isNullable)
+        case StringType(_) => maybeNullableSerializer(ListSerializer(StringSerializer), isNullable)
+        case IntegerType(_) => maybeNullableSerializer(ListSerializer(IntegerSerializer), isNullable)
+        case LongType(_) => maybeNullableSerializer(ListSerializer(LongSerializer), isNullable)
+        case BooleanType(_) => maybeNullableSerializer(ListSerializer(BooleanSerializer), isNullable)
+        case _ => maybeNullableSerializer(ListSerializer(serializerForDataType(base)), isNullable)
       }
-    case tt: TensorType if tt.base == DoubleType && tt.dimensions.length == 1 => VectorSerializer
-    case ct: CustomType => CustomSerializer(ct)
+    case tt: TensorType if tt.base == DoubleType(false) && tt.dimensions.length == 1 => maybeNullableSerializer(VectorSerializer, tt.isNullable)
+    case ct: CustomType => maybeNullableSerializer(CustomSerializer(ct), ct.isNullable)
     case _ => throw new IllegalArgumentException(s"invalid data type for serialization: $dataType")
   }).asInstanceOf[ValueSerializer[Any]]
 }
@@ -38,6 +45,19 @@ object ValueSerializer {
 trait ValueSerializer[T] {
   def write(value: T, out: DataOutputStream): Unit
   def read(in: DataInputStream): T
+}
+
+case class NullableSerializer[T](base: ValueSerializer[T]) extends ValueSerializer[Option[T]] {
+  override def write(value: Option[T], out: DataOutputStream): Unit = {
+    out.writeBoolean(value.isDefined)
+    value.foreach(v => base.write(v, out))
+  }
+
+  override def read(in: DataInputStream): Option[T] = {
+    if(in.readBoolean()) {
+      Option(base.read(in))
+    } else { None }
+  }
 }
 
 object DoubleSerializer extends ValueSerializer[Double] {
@@ -66,6 +86,7 @@ object StringSerializer extends ValueSerializer[String] {
     out.writeInt(bytes.length)
     out.write(bytes)
   }
+
   override def read(in: DataInputStream): String = {
     val bytes = new Array[Byte](in.readInt())
     in.readFully(bytes)
@@ -73,13 +94,13 @@ object StringSerializer extends ValueSerializer[String] {
   }
 }
 
-case class ArraySerializer[T: ClassTag](base: ValueSerializer[T]) extends ValueSerializer[Array[T]] {
-  override def write(value: Array[T], out: DataOutputStream): Unit = {
+case class ListSerializer[T: ClassTag](base: ValueSerializer[T]) extends ValueSerializer[Seq[T]] {
+  override def write(value: Seq[T], out: DataOutputStream): Unit = {
     out.writeInt(value.length)
     for(v <- value) { base.write(v, out) }
   }
 
-  override def read(in: DataInputStream): Array[T] = {
+  override def read(in: DataInputStream): Seq[T] = {
     val length = in.readInt()
     val arr = new Array[T](length)
     for(i <- 0 until length) { arr(i) = base.read(in) }
@@ -91,8 +112,8 @@ object VectorSerializer extends ValueSerializer[Vector] {
   val DENSE_VECTOR = 0
   val SPARSE_VECTOR = 1
 
-  val indicesSerializer = ArraySerializer(IntegerSerializer)
-  val valuesSerializer = ArraySerializer(DoubleSerializer)
+  val indicesSerializer = ListSerializer(IntegerSerializer)
+  val valuesSerializer = ListSerializer(DoubleSerializer)
 
   override def write(value: Vector, out: DataOutputStream): Unit = value match {
     case DenseVector(values) =>
@@ -107,8 +128,11 @@ object VectorSerializer extends ValueSerializer[Vector] {
 
   override def read(in: DataInputStream): Vector = {
     in.readInt() match {
-      case DENSE_VECTOR => Vectors.dense(valuesSerializer.read(in))
-      case SPARSE_VECTOR => Vectors.sparse(in.readInt(), indicesSerializer.read(in), valuesSerializer.read(in))
+      case DENSE_VECTOR => Vectors.dense(valuesSerializer.read(in).toArray)
+      case SPARSE_VECTOR =>
+        Vectors.sparse(in.readInt(),
+          indicesSerializer.read(in).toArray,
+          valuesSerializer.read(in).toArray)
       case _ => throw new IllegalArgumentException("invalid vector type")
     }
   }

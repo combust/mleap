@@ -26,11 +26,11 @@ case class RandomForestClassifierModel(override val trees: Seq[DecisionTreeClass
                                        override val treeWeights: Seq[Double],
                                        numFeatures: Int,
                                        override val numClasses: Int)
-  extends MultinomialClassificationModel with TreeEnsemble with Serializable {
+  extends ProbabilisticClassificationModel with TreeEnsemble with Serializable {
   override def predictRaw(raw: Vector): Vector = {
     val votes = Array.fill[Double](numClasses)(0.0)
     trees.view.foreach { tree =>
-      val classCounts: Array[Double] = tree.rootNode.predictImpl(raw).impurities.get.toArray
+      val classCounts: Array[Double] = tree.rootNode.predictImpl(raw).impurities.toArray
       val total = classCounts.sum
       if (total != 0) {
         var i = 0
@@ -46,7 +46,7 @@ case class RandomForestClassifierModel(override val trees: Seq[DecisionTreeClass
   override def rawToProbabilityInPlace(raw: Vector): Vector = {
     raw match {
       case dv: DenseVector =>
-        MultinomialClassificationModel.normalizeToProbabilitiesInPlace(dv)
+        ProbabilisticClassificationModel.normalizeToProbabilitiesInPlace(dv)
         dv
       case sv: SparseVector =>
         throw new RuntimeException("Unexpected error in RandomForestClassificationModel:" +

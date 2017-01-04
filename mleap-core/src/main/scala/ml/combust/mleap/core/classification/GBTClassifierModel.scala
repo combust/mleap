@@ -24,16 +24,13 @@ object GBTClassifierModel {
   */
 case class GBTClassifierModel(override val trees: Seq[DecisionTreeRegressionModel],
                               override val treeWeights: Seq[Double],
-                              numFeatures: Int) extends BinaryClassificationModel with TreeEnsemble with Serializable {
+                              numFeatures: Int) extends TreeEnsemble with Serializable {
   private val treeWeightsVector = Vectors.dense(treeWeights.toArray)
-  override val threshold: Option[Double] = Some(0.0)
 
-  override def predictBinaryProbability(features: Vector): Double = {
+  def apply(features: Vector): Double = if(predictProbability(features) > 0.0) 1.0 else 0.0
+
+  def predictProbability(features: Vector): Double = {
     val treePredictions = Vectors.dense(trees.map(_.predict(features)).toArray)
     BLAS.dot(treePredictions, treeWeightsVector)
   }
-
-  override def rawToProbabilityInPlace(raw: Vector): Vector = ???
-
-  override def predictRaw(features: Vector): Vector = ???
 }

@@ -22,7 +22,7 @@ class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBT
       val trees = obj.trees.map {
         tree =>
           val name = s"tree$i"
-          ModelSerializer(context.bundleContext(name)).write(tree)
+          ModelSerializer(context.bundleContext(name)).write(tree).get
           i = i + 1
           name
       }
@@ -37,7 +37,7 @@ class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBT
       val treeWeights = model.value("tree_weights").getDoubleList.toArray
 
       val models = model.value("trees").getStringList.map {
-        tree => ModelSerializer(context.bundleContext(tree)).read().asInstanceOf[DecisionTreeRegressionModel]
+        tree => ModelSerializer(context.bundleContext(tree)).read().get.asInstanceOf[DecisionTreeRegressionModel]
       }.toArray
 
       new GBTRegressionModel(uid = "",
@@ -58,7 +58,9 @@ class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBT
     new GBTRegressionModel(uid = node.name,
       _trees = model.trees,
       _treeWeights = model.treeWeights,
-      numFeatures = model.numFeatures)
+      numFeatures = model.numFeatures).
+      setFeaturesCol(node.shape.input("features").name).
+      setPredictionCol(node.shape.output("prediction").name)
   }
 
   override def shape(node: GBTRegressionModel): Shape = Shape().withInput(node.getFeaturesCol, "features").

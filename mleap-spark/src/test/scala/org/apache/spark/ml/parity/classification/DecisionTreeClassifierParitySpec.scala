@@ -5,7 +5,6 @@ import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.sql._
-import ml.combust.mleap.spark.SparkSupport._
 
 /**
   * Created by hollinwilkins on 10/30/16.

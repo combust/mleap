@@ -24,7 +24,8 @@ class PipelineOp extends OpNode[SparkBundleContext, PipelineModel, PipelineModel
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): PipelineModel = {
-      val nodes = GraphSerializer(context).read(model.value("nodes").getStringList).map(_.asInstanceOf[Transformer]).toArray
+      val nodes = GraphSerializer(context).read(model.value("nodes").getStringList).
+        map(_.map(_.asInstanceOf[Transformer])).get.toArray
       new PipelineModel(uid = "", stages = nodes)
     }
   }

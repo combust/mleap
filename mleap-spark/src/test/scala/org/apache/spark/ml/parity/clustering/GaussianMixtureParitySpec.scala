@@ -23,6 +23,8 @@ class GaussianMixtureParitySpec extends SparkParityBase {
   override val sparkTransformer: Transformer = {
     new GaussianMixture().
       setFeaturesCol("features").
-      setPredictionCol("prediction").fit(dataset)
+      setPredictionCol("prediction").
+      setProbabilityCol("probability"). // For some reason the tests fail when we don't set the probability column
+      fit(dataset)
   }
 }

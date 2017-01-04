@@ -5,7 +5,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
-import org.apache.spark.ml.bundle.tree.SparkNodeWrapper
+import org.apache.spark.ml.bundle.tree.decision.SparkNodeWrapper
 import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, RandomForestRegressionModel}
 
 /**
@@ -25,7 +25,7 @@ class RandomForestRegressionOp extends OpNode[SparkBundleContext, RandomForestRe
       val trees = obj.trees.map {
         tree =>
           val name = s"tree$i"
-          ModelSerializer(context.bundleContext(name)).write(tree)
+          ModelSerializer(context.bundleContext(name)).write(tree).get
           i = i + 1
           name
       }
@@ -43,7 +43,7 @@ class RandomForestRegressionOp extends OpNode[SparkBundleContext, RandomForestRe
       for(weight <- treeWeights) { require(weight == 1.0, "tree weights must be 1.0 for Spark") }
 
       val models = model.value("trees").getStringList.map {
-        tree => ModelSerializer(context.bundleContext(tree)).read().asInstanceOf[DecisionTreeRegressionModel]
+        tree => ModelSerializer(context.bundleContext(tree)).read().get.asInstanceOf[DecisionTreeRegressionModel]
       }.toArray
 
       new RandomForestRegressionModel(uid = "",
@@ -64,9 +64,10 @@ class RandomForestRegressionOp extends OpNode[SparkBundleContext, RandomForestRe
       numFeatures = model.numFeatures,
       _trees = model.trees).
       setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.input("prediction").name)
+      setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: RandomForestRegressionModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
+  override def shape(node: RandomForestRegressionModel): Shape = Shape().
+    withInput(node.getFeaturesCol, "features").
     withOutput(node.getPredictionCol, "prediction")
 }

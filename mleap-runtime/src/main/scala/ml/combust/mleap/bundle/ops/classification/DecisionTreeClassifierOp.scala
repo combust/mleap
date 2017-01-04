@@ -3,11 +3,11 @@ package ml.combust.mleap.bundle.ops.classification
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.classification.DecisionTreeClassifierModel
 import ml.combust.mleap.core.tree
-import ml.combust.mleap.bundle.tree.MleapNodeWrapper
 import ml.combust.mleap.runtime.transformer.classification.DecisionTreeClassifier
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.tree.TreeSerializer
 import ml.combust.bundle.dsl._
+import ml.combust.bundle.tree.decision.TreeSerializer
+import ml.combust.mleap.bundle.tree.decision.MleapNodeWrapper
 import ml.combust.mleap.runtime.MleapContext
 
 /**
@@ -30,7 +30,7 @@ class DecisionTreeClassifierOp extends OpNode[MleapContext, DecisionTreeClassifi
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): DecisionTreeClassifierModel = {
-      val rootNode = TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).read()
+      val rootNode = TreeSerializer[tree.Node](context.file("tree"), withImpurities = true).read()
       DecisionTreeClassifierModel(rootNode,
         numClasses = model.value("num_classes").getLong.toInt,
         numFeatures = model.value("num_features").getLong.toInt)

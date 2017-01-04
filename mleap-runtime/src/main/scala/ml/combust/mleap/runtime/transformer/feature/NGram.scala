@@ -11,5 +11,5 @@ case class NGram(override val uid: String = Transformer.uniqueName("ngram"),
                  override val inputCol: String,
                  override val outputCol: String,
                  model: NGramModel) extends FeatureTransformer {
-  override val exec: UserDefinedFunction = (value: Array[String]) => model(value)
+  override val exec: UserDefinedFunction = (value: Seq[String]) => model(value)
 }

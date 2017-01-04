@@ -11,14 +11,23 @@ trait RowSpec[R <: Row] extends FunSpec {
   def create(values: Any *): R
 
   def row(): Unit = {
-    val rowValues = Seq("test", 42, Array(56, 78, 23), 57.3, Vectors.dense(Array(2.3, 4.4)), 56L)
+    val rowValues = Seq("test", 42, Seq(56, 78, 23), 57.3, Vectors.dense(Array(2.3, 4.4)), 56L)
     val row = create(rowValues: _*)
+
+    val optionRowValues = Seq(Option("test"),
+      None,
+      Option(42),
+      Option(45.4),
+      Option(Vectors.dense(Array(42.3, 65.7))),
+      Option(33l),
+      Option(Seq(56, 78, 23)))
+    val optionRow = create(optionRowValues: _*)
 
     describe("#apply") {
       it("gets the value at a given index") {
         assert(row(0) == "test")
         assert(row(1) == 42)
-        assert(row(2).asInstanceOf[Array[Int]] sameElements Array(56, 78, 23))
+        assert(row(2).asInstanceOf[Seq[Int]] == Seq(56, 78, 23))
       }
     }
 
@@ -26,7 +35,15 @@ trait RowSpec[R <: Row] extends FunSpec {
       it("gets the value at a given index") {
         assert(row.get(0) == "test")
         assert(row.get(1) == 42)
-        assert(row.get(2).asInstanceOf[Array[Int]] sameElements Array(56, 78, 23))
+        assert(row.get(2).asInstanceOf[Seq[Int]] == Seq(56, 78, 23))
+      }
+    }
+
+    describe("#option") {
+      it("gets the optional value at a given index") {
+        assert(optionRow.option(0) == Option("test"))
+        assert(optionRow.option(1).isEmpty)
+        assert(optionRow.option(2) == Option(42))
       }
     }
 
@@ -34,7 +51,16 @@ trait RowSpec[R <: Row] extends FunSpec {
       it("gets the value at a given index and casts it") {
         assert(row.getAs[String](0) == "test")
         assert(row.getAs[Int](1) == 42)
-        assert(row.getAs[Array[Int]](2) sameElements Array(56, 78, 23))
+        assert(row.getAs[Seq[Int]](2) == Seq(56, 78, 23))
+      }
+    }
+
+    describe("#optionAs") {
+      it("gets the optional value at a given index and casts it") {
+        assert(optionRow.optionAs[String](0) == Option("test"))
+        assert(optionRow.optionAs[Int](1).isEmpty)
+        assert(optionRow.optionAs[Int](2) == Option(42))
+        assert(optionRow.optionAs[Double](3) == Option(45.4))
       }
     }
 
@@ -44,9 +70,21 @@ trait RowSpec[R <: Row] extends FunSpec {
       }
     }
 
+    describe("#optionDouble") {
+      it("gets the value at a given index as a double") {
+        assert(optionRow.optionDouble(3) == Option(45.4))
+      }
+    }
+
     describe("#getInt") {
       it("gets the value at a given index as an int") {
         assert(row.getInt(1) == 42)
+      }
+    }
+
+    describe("#optionInt") {
+      it("gets the value at a given index as an int") {
+        assert(optionRow.optionInt(2) == Option(42))
       }
     }
 
@@ -56,9 +94,21 @@ trait RowSpec[R <: Row] extends FunSpec {
       }
     }
 
+    describe("#optionLong") {
+      it("gets the value at a given index as a long") {
+        assert(optionRow.optionLong(5) == Option(33l))
+      }
+    }
+
     describe("#getString") {
       it("gets the value at a given index as a string") {
         assert(row.getString(0) == "test")
+      }
+    }
+
+    describe("#optionString") {
+      it("gets the value at a given index as a string") {
+        assert(optionRow.optionString(0) == Option("test"))
       }
     }
 
@@ -71,13 +121,32 @@ trait RowSpec[R <: Row] extends FunSpec {
       }
     }
 
-    describe("#getArray") {
-      it("gets the value at a given index as an array") {
-        val arr = row.getArray[Int](2)
+    describe("#optionVector") {
+      it("gets the value at a given index as a vector") {
+        val vec = optionRow.optionVector(4).get
 
-        assert(arr(0) == 56)
-        assert(arr(1) == 78)
-        assert(arr(2) == 23)
+        assert(vec(0) == 42.3)
+        assert(vec(1) == 65.7)
+      }
+    }
+
+    describe("#getSeq") {
+      it("gets the value at a given index as a seq") {
+        val s = row.getSeq[Int](2)
+
+        assert(s.head == 56)
+        assert(s(1) == 78)
+        assert(s(2) == 23)
+      }
+    }
+
+    describe("#optionSeq") {
+      it("gets the value at a given index as a seq") {
+        val s = optionRow.optionSeq[Int](6).get
+
+        assert(s.head == 56)
+        assert(s(1) == 78)
+        assert(s(2) == 23)
       }
     }
 
@@ -97,7 +166,7 @@ trait RowSpec[R <: Row] extends FunSpec {
       describe("user defined function") {
         it("adds a value using a user defined function") {
           val r2 = row.withValue(r => r.get(1), r => r.get(2)) {
-            (v1: Int, v2: Array[Int]) => v1 + v2(0)
+            (v1: Int, v2: Seq[Int]) => v1 + v2(0)
           }
 
           assert(r2.getInt(6) == 98)

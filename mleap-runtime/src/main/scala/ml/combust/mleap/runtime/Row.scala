@@ -38,6 +38,13 @@ trait Row extends Iterable[Any] {
     */
   def get(index: Int): Any
 
+  /** Get optional value at index.
+    *
+    * @param index index of value
+    * @return optional value at index
+    */
+  def option(index: Int): Option[Any] = getAs[Option[Any]](index)
+
   /** Get value at index as specified type.
     *
     * @param index index of value
@@ -46,12 +53,27 @@ trait Row extends Iterable[Any] {
     */
   def getAs[T](index: Int): T = get(index).asInstanceOf[T]
 
+  /** Get value at index as specified type.
+    *
+    * @param index index of value
+    * @tparam T type of value
+    * @return optional value at index cast to given type
+    */
+  def optionAs[T](index: Int): Option[T] = get(index).asInstanceOf[Option[T]]
+
   /** Get value at index as a double.
     *
     * @param index index of value
     * @return double value
     */
-  def getDouble(index: Int): Double = get(index).asInstanceOf[Double]
+  def getDouble(index: Int): Double = getAs[Double](index)
+
+  /** Get value at index as a double.
+    *
+    * @param index index of value
+    * @return optional double value
+    */
+  def optionDouble(index: Int): Option[Double] = optionAs[Double](index)
 
   /** Get value at index as an int.
     *
@@ -60,12 +82,26 @@ trait Row extends Iterable[Any] {
     */
   def getInt(index: Int): Int = get(index).asInstanceOf[Int]
 
+  /** Get value at index as an int.
+    *
+    * @param index index of value
+    * @return optional int value
+    */
+  def optionInt(index: Int): Option[Int] = optionAs[Int](index)
+
   /** Get value at index as a long.
     *
     * @param index index of value
     * @return long value
     */
   def getLong(index: Int): Long = get(index).asInstanceOf[Long]
+
+  /** Get value at index as a long.
+    *
+    * @param index index of value
+    * @return optional long value
+    */
+  def optionLong(index: Int): Option[Long] = optionAs[Long](index)
 
   /** Get value at index as a string.
     *
@@ -74,6 +110,13 @@ trait Row extends Iterable[Any] {
     */
   def getString(index: Int): String = get(index).asInstanceOf[String]
 
+  /** Get value at index as a string.
+    *
+    * @param index index of value
+    * @return optional string value
+    */
+  def optionString(index: Int): Option[String] = optionAs[String](index)
+
   /** Get value at index as a vector.
     *
     * @param index index of value
@@ -81,13 +124,28 @@ trait Row extends Iterable[Any] {
     */
   def getVector(index: Int): Vector = get(index).asInstanceOf[Vector]
 
+  /** Get value at index as a vector.
+    *
+    * @param index index of value
+    * @return optional vector value
+    */
+  def optionVector(index: Int): Option[Vector] = optionAs[Vector](index)
+
   /** Get value at index as an array.
     *
     * @param index index of value
     * @tparam T inner type of the array
-    * @return array value
+    * @return seq value
     */
-  def getArray[T](index: Int): Array[T] = get(index).asInstanceOf[Array[T]]
+  def getSeq[T](index: Int): Seq[T] = get(index).asInstanceOf[Seq[T]]
+
+  /** Get value at index as an array.
+    *
+    * @param index index of value
+    * @tparam T inner type of the array
+    * @return optional seq value
+    */
+  def optionSeq[T](index: Int): Option[Seq[T]] = optionAs[Seq[T]](index)
 
   /** Convert row to a seq of values.
     *

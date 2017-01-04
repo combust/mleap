@@ -9,8 +9,8 @@ import org.scalatest.FunSpec
   * @tparam LF LeapFrame type
   */
 trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
-  val fields = Seq(StructField("test_string", StringType),
-    StructField("test_double", DoubleType))
+  val fields = Seq(StructField("test_string", StringType()),
+    StructField("test_double", DoubleType()))
   val schema = StructType(fields).get
   val dataset = LocalDataset(Array(
     Row("hello", 42.13),
@@ -65,7 +65,7 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
           }.flatMap(_.select("test_custom")).get
           val data = frame2.dataset.toArray
 
-          assert(frame2.schema.getField("test_custom").get.dataType == CustomType(new MyCustomType))
+          assert(frame2.schema.getField("test_custom").get.dataType == MleapContext.defaultContext.customType[MyCustomObject])
           assert(data(0).getAs[MyCustomObject](0) == MyCustomObject("hello"))
           assert(data(1).getAs[MyCustomObject](0) == MyCustomObject("there"))
         }
@@ -82,7 +82,7 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
 
         describe("with ArraySelector and non Array[Any] data type") {
           val frame2 = frame.withField("test_double_2", Array("test_double")) {
-            (r: Array[Double]) => r.head
+            (r: Seq[Double]) => r.head
           }
 
           assert(frame2.isFailure)

@@ -1,7 +1,7 @@
 package ml.combust.mleap.json
 
-import ml.combust.mleap.runtime.types.{BooleanType, DataType, LongType, _}
-import ml.combust.mleap.runtime.{Dataset, LocalDataset, Row}
+import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.runtime.{Dataset, LocalDataset}
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
@@ -9,27 +9,36 @@ import spray.json._
   * Created by hollinwilkins on 9/10/16.
   */
 object DatasetFormat {
-  def listSerializer(lt: ArrayType): JsonFormat[_] = immSeqFormat(serializer(lt.base))
+  def maybeNullableFormat[T](base: JsonFormat[T],
+                             isNullable: Boolean): JsonFormat[_] = {
+    if(isNullable) {
+      optionFormat(base)
+    } else {
+      base
+    }
+  }
+
+  def listSerializer(lt: ListType): JsonFormat[_] = seqFormat(serializer(lt.base))
   def tensorSerializer(tt: TensorType): JsonFormat[_] = {
     assert(tt.dimensions.length == 1, s"unsupported tensor type: $tt")
 
     tt.base match {
-      case DoubleType => JsonSupport.mleapVectorFormat
-      case StringType => immSeqFormat[String]
+      case DoubleType(isNullable) => maybeNullableFormat(JsonSupport.mleapVectorFormat, isNullable)
+      case StringType(isNullable) => maybeNullableFormat(seqFormat[String], isNullable)
       case _ => serializationError(s"unsupported tensor type: $tt")
     }
   }
 
   def serializer(tpe: DataType): JsonFormat[_] = tpe match {
-    case StringType => StringJsonFormat
-    case DoubleType => DoubleJsonFormat
-    case BooleanType => BooleanJsonFormat
-    case LongType => LongJsonFormat
-    case IntegerType => IntJsonFormat
-    case lt: ArrayType => listSerializer(lt)
+    case StringType(isNullable) => maybeNullableFormat(StringJsonFormat, isNullable)
+    case DoubleType(isNullable) => maybeNullableFormat(DoubleJsonFormat, isNullable)
+    case BooleanType(isNullable) => maybeNullableFormat(BooleanJsonFormat, isNullable)
+    case LongType(isNullable) => maybeNullableFormat(LongJsonFormat, isNullable)
+    case IntegerType(isNullable) => maybeNullableFormat(IntJsonFormat, isNullable)
+    case lt: ListType => listSerializer(lt)
     case tt: TensorType => tensorSerializer(tt)
     case ct: CustomType => ct.format
-    case AnyType => serializationError("AnyType unsupported for serialization")
+    case AnyType(_) => serializationError("AnyType unsupported for serialization")
   }
 }
 

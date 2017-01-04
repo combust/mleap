@@ -1,16 +1,18 @@
 package ml.combust.bundle.serializer
 
-import java.io.{FileInputStream, FileOutputStream, InputStream, OutputStream}
+import java.io.{InputStream, OutputStream}
+import java.nio.file.Files
 
 import ml.bundle.ModelDef.ModelDef
 import ml.combust.bundle.{BundleContext, HasBundleRegistry}
 import ml.combust.bundle.json.JsonSupport._
 import ml.combust.bundle.serializer.attr.{AttributeListSeparator, AttributeListSerializer}
-import ml.combust.bundle.dsl.{AttributeList, Bundle, Model}
+import ml.combust.bundle.dsl.{Bundle, Model}
 import resource._
 import spray.json._
 
 import scala.io.Source
+import scala.util.{Failure, Try}
 
 /** Trait for serializing a protobuf model definition.
   */
@@ -83,53 +85,63 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
     *
     * @param obj model to write
     */
-  def write(obj: Any): Unit = {
-    bundleContext.path.mkdirs()
+  def write(obj: Any): Try[Any] = Try {
+    Files.createDirectories(bundleContext.path)
     val m = bundleContext.bundleRegistry.modelForObj[Context, Any](obj)
     var model = Model(op = m.opName)
     model = m.store(model, obj)(bundleContext)
 
-    model = bundleContext.format match {
+    bundleContext.format match {
       case SerializationFormat.Mixed =>
         val (small, large) = AttributeListSeparator().separate(model.attributes)
-        for(l <- large) { AttributeListSerializer(bundleContext.file("model.pb")).writeProto(l) }
+        for (l <- large) {
+          AttributeListSerializer(bundleContext.file("model.pb")).writeProto(l)
+        }
         model.replaceAttrList(small)
       case _ => model
     }
-
-    for(out <- managed(new FileOutputStream(bundleContext.file(Bundle.modelFile)))) {
-      FormatModelSerializer.serializer.write(out, model)
-    }
+  }.flatMap {
+    model =>
+      (for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.modelFile)))) yield {
+        FormatModelSerializer.serializer.write(out, model)
+      }).either.either match {
+        case Right(_) => Try(model)
+        case Left(errors) => Failure(errors.head)
+      }
   }
 
   /** Read a model from the current bundle context.
     *
     * @return deserialized model
     */
-  def read(): Any = { readWithModel()._1 }
+  def read(): Try[Any] = readWithModel().map(_._1)
 
   /** Read a model and return it along with its type class.
     *
     * @return (deserialized model, model type class)
     */
-  def readWithModel(): (Any, Model) = {
-    var bundleModel = (for(in <- managed(new FileInputStream(bundleContext.file(Bundle.modelFile)))) yield {
+  def readWithModel(): Try[(Any, Model)] = {
+    ((for(in <- managed(Files.newInputStream(bundleContext.file(Bundle.modelFile)))) yield {
       FormatModelSerializer.serializer.read(in)
     }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(bm) => bm
-    }
-    val m = bundleContext.bundleRegistry.model[Context, Any](bundleModel.op)
+      case Right(bm) => Try(bm)
+      case Left(errors) => Failure(errors.head)
+    }).map {
+      bundleModel =>
+        val m = bundleContext.bundleRegistry.model[Context, Any](bundleModel.op)
 
-    bundleModel = bundleContext.format match {
-      case SerializationFormat.Mixed =>
-        if(bundleContext.file("model.pb").exists()) {
-          val large = AttributeListSerializer(bundleContext.file("model.pb")).readProto()
-          bundleModel.withAttrList(large)
-        } else { bundleModel }
-      case _ => bundleModel
-    }
+        val bm = bundleContext.format match {
+          case SerializationFormat.Mixed =>
+            if (Files.exists(bundleContext.file("model.pb"))) {
+              val large = AttributeListSerializer(bundleContext.file("model.pb")).readProto()
+              bundleModel.withAttrList(large)
+            } else {
+              bundleModel
+            }
+          case _ => bundleModel
+        }
 
-    (m.load(bundleModel)(bundleContext), bundleModel)
+        (m.load(bm)(bundleContext), bm)
+    }
   }
 }

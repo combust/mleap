@@ -1,6 +1,6 @@
 package ml.combust.bundle.serializer.attr
 
-import java.io.{File, FileInputStream, FileOutputStream}
+import java.nio.file.{Files, Path}
 
 import ml.combust.bundle.HasBundleRegistry
 import ml.combust.bundle.json.JsonSupport._
@@ -15,7 +15,7 @@ import scala.io.Source
   *
   * @param path path to base attribute list file (no extension)
   */
-case class AttributeListSerializer(path: File) {
+case class AttributeListSerializer(path: Path) {
   /** Write an attribute list to a file.
     *
     * Depending on the [[SerializationFormat]], the attribute list will
@@ -38,7 +38,7 @@ case class AttributeListSerializer(path: File) {
   def writeJson(list: AttributeList)
                (implicit hr: HasBundleRegistry): Unit = {
     val json = list.toJson.prettyPrint.getBytes
-    for(out <- managed(new FileOutputStream(path))) {
+    for(out <- managed(Files.newOutputStream(path))) {
       out.write(json)
     }
   }
@@ -50,7 +50,7 @@ case class AttributeListSerializer(path: File) {
     */
   def writeProto(list: AttributeList)
                 (implicit hr: HasBundleRegistry): Unit = {
-    for(out <- managed(new FileOutputStream(path))) {
+    for(out <- managed(Files.newOutputStream(path))) {
       list.asBundle.writeTo(out)
     }
   }
@@ -75,7 +75,7 @@ case class AttributeListSerializer(path: File) {
     */
   def readJson()
               (implicit context: SerializationContext): AttributeList = {
-    (for(in <- managed(new FileInputStream(path))) yield {
+    (for(in <- managed(Files.newInputStream(path))) yield {
       Source.fromInputStream(in).getLines().mkString.parseJson.convertTo[AttributeList]
     }).either.either match {
       case Left(errors) => throw errors.head
@@ -90,7 +90,7 @@ case class AttributeListSerializer(path: File) {
     */
   def readProto()
                (implicit context: SerializationContext): AttributeList = {
-    (for(in <- managed(new FileInputStream(path))) yield {
+    (for(in <- managed(Files.newInputStream(path))) yield {
       AttributeList.fromBundle(ml.bundle.AttributeList.AttributeList.parseFrom(in))
     }).either.either match {
       case Left(errors) => throw errors.head

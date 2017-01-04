@@ -5,6 +5,6 @@ package ml.combust.mleap.core.feature
   */
 case class ImputerModel(imputeValue: Double, missingValue: Option[Double], strategy: String) extends Serializable{
   def apply(value: Double): Double = {
-    if (value.isNaN || missingValue.contains(value)) imputeValue else value
+    if (value.isNaN || missingValue.exists( _ == value)) imputeValue else value
   }
 }

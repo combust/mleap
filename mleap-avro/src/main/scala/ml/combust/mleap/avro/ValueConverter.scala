@@ -40,23 +40,23 @@ case class ValueConverter() {
       (value) =>
         customRecord.put(customSchemaIndex, new String(dataType.toBytes(value), bytesCharset))
         customRecord
-    case AnyType => throw new IllegalArgumentException(s"invalid data type: $dataType")
+    case AnyType(_) => throw new IllegalArgumentException(s"invalid data type: $dataType")
   }
 
   def avroToMleap(dataType: DataType): (Any) => Any = dataType match {
-    case StringType => (value) => value.asInstanceOf[Utf8].toString
+    case StringType(false) => (value) => value.asInstanceOf[Utf8].toString
     case _: BasicType => identity
     case at: ListType => at.base match {
-      case DoubleType => (value) => value.asInstanceOf[GenericData.Array[Double]].asScala.toArray
-      case StringType => (value) => value.asInstanceOf[GenericData.Array[Utf8]].asScala.map(_.toString).toArray
-      case LongType => (value) => value.asInstanceOf[GenericData.Array[Long]].asScala.toArray
-      case IntegerType => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.toArray
-      case BooleanType => (value) => value.asInstanceOf[GenericData.Array[Boolean]].asScala.toArray
+      case DoubleType(false) => (value) => value.asInstanceOf[GenericData.Array[Double]].asScala.toArray
+      case StringType(false) => (value) => value.asInstanceOf[GenericData.Array[Utf8]].asScala.map(_.toString).toArray
+      case LongType(false) => (value) => value.asInstanceOf[GenericData.Array[Long]].asScala.toArray
+      case IntegerType(false) => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.toArray
+      case BooleanType(false) => (value) => value.asInstanceOf[GenericData.Array[Boolean]].asScala.toArray
       case _ =>
         val atm = avroToMleap(at.base)
         (value) => value.asInstanceOf[GenericData.Array[_]].asScala.toArray.map(atm)
     }
-    case tt: TensorType if tt.base == DoubleType && tt.dimensions.length == 1 =>
+    case tt: TensorType if tt.base == DoubleType(false) && tt.dimensions.length == 1 =>
       (value) => {
         val record = value.asInstanceOf[GenericData.Record].
           get(tensorSchemaIndex).

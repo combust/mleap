@@ -47,15 +47,16 @@ object SchemaConverter {
   implicit def mleapToAvroField(field: StructField): Schema.Field = new Schema.Field(field.name, mleapToAvroType(field.dataType), "", null: AnyRef)
 
   implicit def mleapToAvroType(dataType: DataType): Schema = dataType match {
-    case DoubleType => Schema.create(Schema.Type.DOUBLE)
-    case StringType => Schema.create(Schema.Type.STRING)
-    case LongType => Schema.create(Schema.Type.LONG)
-    case IntegerType => Schema.create(Schema.Type.INT)
-    case BooleanType => Schema.create(Schema.Type.BOOLEAN)
+    case DoubleType(false) => Schema.create(Schema.Type.DOUBLE)
+    case StringType(false) => Schema.create(Schema.Type.STRING)
+    case LongType(false) => Schema.create(Schema.Type.LONG)
+    case IntegerType(false) => Schema.create(Schema.Type.INT)
+    case BooleanType(false) => Schema.create(Schema.Type.BOOLEAN)
     case lt: ListType => Schema.createArray(mleapToAvroType(lt.base))
     case tt: TensorType => tensorSchema(tt)
     case ct: CustomType => customSchema(ct)
-    case AnyType => throw new IllegalArgumentException(s"invalid data type: $dataType")
+    case AnyType(false) => throw new IllegalArgumentException(s"invalid data type: $dataType")
+    case _ => throw new IllegalArgumentException("invalid avro data type")
   }
 
   implicit def avroToMleap(schema: Schema)
@@ -71,11 +72,11 @@ object SchemaConverter {
 
   implicit def avroToMleapType(schema: Schema)
                               (implicit context: MleapContext): DataType = schema.getType match {
-    case Schema.Type.DOUBLE => DoubleType
-    case Schema.Type.STRING => StringType
-    case Schema.Type.LONG => LongType
-    case Schema.Type.INT => IntegerType
-    case Schema.Type.BOOLEAN => BooleanType
+    case Schema.Type.DOUBLE => DoubleType(false)
+    case Schema.Type.STRING => StringType(false)
+    case Schema.Type.LONG => LongType(false)
+    case Schema.Type.INT => IntegerType(false)
+    case Schema.Type.BOOLEAN => BooleanType(false)
     case Schema.Type.ARRAY => ListType(avroToMleapType(schema.getElementType))
     case Schema.Type.RECORD =>
       schema.getName match {

@@ -10,8 +10,8 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 10/31/16.
   */
 class DefaultFrameSerializerSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("test_double", DoubleType),
-    StructField("test_string", StringType),
+  val schema = StructType(Seq(StructField("test_double", DoubleType()),
+    StructField("test_string", StringType()),
     StructField("test_vector", TensorType.doubleVector()))).get
   val row = Row(2.0, "hello", Vectors.dense(Array(0.1, 2.33, 4.5)))
   val dataset = LocalDataset(Seq(row))

@@ -44,20 +44,40 @@ trait JsonSupport {
   })
 
   val mleapBasicTypeFormat: JsonFormat[BasicType] = lazyFormat(new JsonFormat[BasicType] {
+    def writeMaybeNullable(base: JsString, isNullable: Boolean): JsValue = {
+      if(isNullable) {
+        JsObject("type" -> JsString("basic"),
+          "base" -> base,
+          "isNullable" -> JsBoolean(true))
+      } else { base }
+    }
+
+    def readNullable(json: JsObject): BasicType = {
+      json.getFields("base", "isNullable") match {
+        case Seq(JsString(base), JsBoolean(isNullable)) => forName(base, isNullable)
+        case _ => deserializationError("invalid basic type format")
+      }
+    }
+
+    def forName(name: String, isNullable: Boolean = false): BasicType = name match {
+      case "double" => DoubleType(isNullable)
+      case "string" => StringType(isNullable)
+      case "long" => LongType(isNullable)
+      case "boolean" => BooleanType(isNullable)
+      case "integer" => IntegerType(isNullable)
+    }
+
     override def write(obj: BasicType): JsValue = obj match {
-      case DoubleType => JsString("double")
-      case StringType => JsString("string")
-      case LongType => JsString("long")
-      case BooleanType => JsString("boolean")
-      case IntegerType => JsString("integer")
+      case DoubleType(isNullable) => writeMaybeNullable(JsString("double"), isNullable)
+      case StringType(isNullable) => writeMaybeNullable(JsString("string"), isNullable)
+      case LongType(isNullable) => writeMaybeNullable(JsString("long"), isNullable)
+      case BooleanType(isNullable) => writeMaybeNullable(JsString("boolean"), isNullable)
+      case IntegerType(isNullable) => writeMaybeNullable(JsString("integer"), isNullable)
     }
 
     override def read(json: JsValue): BasicType = json match {
-      case JsString("double") => DoubleType
-      case JsString("string") => StringType
-      case JsString("long") => LongType
-      case JsString("boolean") => BooleanType
-      case JsString("integer") => IntegerType
+      case JsString(name) => forName(name)
+      case json: JsObject => readNullable(json)
       case _ => throw new Error("Invalid basic type") // TODO: better error
     }
   })
@@ -84,7 +104,7 @@ trait JsonSupport {
       case lt: ListType => mleapListTypeWriterFormat.write(lt)
       case tt: TensorType => mleapTensorTypeFormat.write(tt)
       case ct: CustomType => mleapCustomTypeWriterFormat.write(ct)
-      case AnyType => serializationError("AnyType not supported for JSON serialization")
+      case AnyType(_) => serializationError("AnyType not supported for JSON serialization")
     }
   }
 
@@ -93,6 +113,7 @@ trait JsonSupport {
       case obj: JsString => mleapBasicTypeFormat.read(obj)
       case obj: JsObject =>
         obj.fields.get("type") match {
+          case Some(JsString("basic")) => mleapBasicTypeFormat.read(obj)
           case Some(JsString("list")) => mleapListTypeReaderFormat.read(obj)
           case Some(JsString("tensor")) => mleapTensorTypeFormat.read(obj)
           case Some(JsString("custom")) => mleapCustomTypeReaderFormat.read(obj)

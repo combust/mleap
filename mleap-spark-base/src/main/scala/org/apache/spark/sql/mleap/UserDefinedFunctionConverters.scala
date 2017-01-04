@@ -46,7 +46,7 @@ trait UserDefinedFunctionConverters {
   }
 
   private def converter(dataType: types.DataType): (Any) => Any = dataType match {
-    case lt: ListType if lt.base == AnyType => (row: Any) => row.asInstanceOf[Row].toSeq
+    case lt: ListType if lt.base == AnyType(false) => (row: Any) => row.asInstanceOf[Row].toSeq
     case _ => identity
   }
 

@@ -9,7 +9,7 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 9/28/16.
   */
 class BucketizerSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("test_double", DoubleType))).get
+  val schema = StructType(Seq(StructField("test_double", DoubleType()))).get
   val dataset = LocalDataset(Seq(Row(11.0), Row(0.0), Row(55.0)))
   val frame = LeapFrame(schema, dataset)
 

@@ -10,10 +10,12 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 11/1/16.
   */
 class FrameSerializerSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("features", TensorType.doubleVector()),
-    StructField("name", StringType),
-    StructField("list_data", ListType(StringType)))).get
-  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(20.0, 10.0, 5.0)), "hello", Seq("hello", "there"))))
+  val schema = StructType(StructField("features", TensorType.doubleVector()),
+    StructField("name", StringType()),
+    StructField("list_data", ListType(StringType())),
+    StructField("nullable_double", DoubleType(true)),
+    StructField("nullable_string", StringType(true))).get
+  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(20.0, 10.0, 5.0)), "hello", Seq("hello", "there"), Option(56.7), None)))
   val frame = LeapFrame(schema, dataset).withOutput("custom_object", "name")((name: String) => MyCustomObject(name)).get
   import MleapContext.defaultContext
 

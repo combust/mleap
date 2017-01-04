@@ -46,16 +46,23 @@ object SchemaConverter {
 
   implicit def mleapToAvroField(field: StructField): Schema.Field = new Schema.Field(field.name, mleapToAvroType(field.dataType), "", null: AnyRef)
 
+  def maybeNullableAvroType(base: Schema, isNullable: Boolean): Schema = {
+    if(isNullable) {
+      Schema.createUnion(base, Schema.create(Schema.Type.NULL))
+    } else { base }
+  }
+
   implicit def mleapToAvroType(dataType: DataType): Schema = dataType match {
-    case DoubleType => Schema.create(Schema.Type.DOUBLE)
-    case StringType => Schema.create(Schema.Type.STRING)
-    case LongType => Schema.create(Schema.Type.LONG)
-    case IntegerType => Schema.create(Schema.Type.INT)
-    case BooleanType => Schema.create(Schema.Type.BOOLEAN)
-    case lt: ListType => Schema.createArray(mleapToAvroType(lt.base))
-    case tt: TensorType => tensorSchema(tt)
-    case ct: CustomType => customSchema(ct)
-    case AnyType => throw new IllegalArgumentException(s"invalid data type: $dataType")
+    case DoubleType(isNullable) => maybeNullableAvroType(Schema.create(Schema.Type.DOUBLE), isNullable)
+    case StringType(isNullable) => maybeNullableAvroType(Schema.create(Schema.Type.STRING), isNullable)
+    case LongType(isNullable) => maybeNullableAvroType(Schema.create(Schema.Type.LONG), isNullable)
+    case IntegerType(isNullable) => maybeNullableAvroType(Schema.create(Schema.Type.INT), isNullable)
+    case BooleanType(isNullable) => maybeNullableAvroType(Schema.create(Schema.Type.BOOLEAN), isNullable)
+    case lt: ListType => maybeNullableAvroType(Schema.createArray(mleapToAvroType(lt.base)), lt.isNullable)
+    case tt: TensorType => maybeNullableAvroType(tensorSchema(tt), tt.isNullable)
+    case ct: CustomType => maybeNullableAvroType(customSchema(ct), ct.isNullable)
+    case AnyType(false) => throw new IllegalArgumentException(s"invalid data type: $dataType")
+    case _ => throw new IllegalArgumentException(s"invalid data type: $dataType")
   }
 
   implicit def avroToMleap(schema: Schema)
@@ -69,14 +76,26 @@ object SchemaConverter {
   implicit def avroToMleapField(field: Schema.Field)
                                (implicit context: MleapContext): StructField = StructField(field.name(), avroToMleapType(field.schema()))
 
+  def maybeNullableMleapType(schema: Schema): DataType = {
+    val types = schema.getTypes.asScala
+    assert(types.size == 2, "only nullable unions supported (2 type unions)")
+
+    types.find(_.getType == Schema.Type.NULL).flatMap {
+      _ => types.find(_.getType != Schema.Type.NULL)
+    }.map(avroToMleapType).getOrElse {
+      throw new IllegalArgumentException(s"unsupported schema: $schema")
+    }.asNullable
+  }
+
   implicit def avroToMleapType(schema: Schema)
                               (implicit context: MleapContext): DataType = schema.getType match {
-    case Schema.Type.DOUBLE => DoubleType
-    case Schema.Type.STRING => StringType
-    case Schema.Type.LONG => LongType
-    case Schema.Type.INT => IntegerType
-    case Schema.Type.BOOLEAN => BooleanType
+    case Schema.Type.DOUBLE => DoubleType(false)
+    case Schema.Type.STRING => StringType(false)
+    case Schema.Type.LONG => LongType(false)
+    case Schema.Type.INT => IntegerType(false)
+    case Schema.Type.BOOLEAN => BooleanType(false)
     case Schema.Type.ARRAY => ListType(avroToMleapType(schema.getElementType))
+    case Schema.Type.UNION => maybeNullableMleapType(schema)
     case Schema.Type.RECORD =>
       schema.getName match {
         case "Tensor" => mleapTensorTypeFormat.read(schema.getDoc.parseJson)

@@ -1,4 +1,4 @@
-package org.apache.spark.ml.bundle.ops.feature
+package org.apache.spark.ml.bundle.extension.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._

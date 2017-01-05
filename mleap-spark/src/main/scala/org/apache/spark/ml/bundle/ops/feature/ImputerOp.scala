@@ -16,18 +16,20 @@ class ImputerOp extends OpNode[SparkBundleContext, ImputerModel, ImputerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.imputer
 
     override def store(model: Model, obj: ImputerModel)(implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("imputeValue", Value.double(obj.imputeValue))
-        .withAttr("missingValue", Value.double(obj.getMissingValue))
+      model.withAttr("surrogate_value", Value.double(obj.surrogateValue))
+        .withAttr("missing_value", Value.double(obj.getMissingValue))
         .withAttr("strategy", Value.string(obj.getStrategy))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): ImputerModel = {
-      val missingValue = model.value("missingValue").getDouble
+      val missingValue = model.value("missing_value").getDouble
+      val surrogateValue = model.value("surrogate_value").getDouble
+      val strategy = model.value("strategy").getString
 
-      val imputeValue = model.value("imputeValue").getDouble
-
-      new ImputerModel(uid = "", surrogateValue = missingValue, imputeValue = imputeValue)
+      new ImputerModel(uid = "", surrogateValue = surrogateValue).
+        setMissingValue(missingValue).
+        setStrategy(strategy)
     }
   }
 
@@ -39,7 +41,11 @@ class ImputerOp extends OpNode[SparkBundleContext, ImputerModel, ImputerModel] {
 
   override def load(node: Node, model: ImputerModel)
                    (implicit context: BundleContext[SparkBundleContext]): ImputerModel = {
-    new ImputerModel(uid = node.name, imputeValue = model.imputeValue, surrogateValue = model.surrogateValue)
+    new ImputerModel(uid = node.name, surrogateValue = model.surrogateValue).
+      setMissingValue(model.getMissingValue).
+      setStrategy(model.getStrategy).
+      setInputCol(node.shape.standardInput.name).
+      setOutputCol(node.shape.standardOutput.name)
   }
 
   override def shape(node: ImputerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

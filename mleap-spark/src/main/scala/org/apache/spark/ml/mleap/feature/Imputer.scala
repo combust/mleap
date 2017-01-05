@@ -46,6 +46,7 @@ private[feature] trait ImputerParams extends Params with HasInputCol with HasOut
     */
   val missingValue: DoubleParam = new DoubleParam(this, "missingValue",
     "The placeholder for the missing values. All occurrences of missingValue will be imputed")
+  setDefault(missingValue, Double.NaN)
 
   /** @group getParam */
   def getMissingValue: Double = $(missingValue)
@@ -89,7 +90,7 @@ class Imputer @Since("2.1.0")(override val uid: String)
 
   /**
     * Imputation strategy. Available options are ["mean", "median"].
- *
+    *
     * @group setParam
     */
   @Since("2.1.0")
@@ -122,12 +123,7 @@ class Imputer @Since("2.1.0")(override val uid: String)
       case "median" => filtered.stat.approxQuantile($(inputCol), Array(0.5), 0.001)(0)
     }
 
-    val imputer = new Imputer().
-      setStrategy($(strategy)).
-      setMissingValue($(missingValue))
-
-    val imputerModel = imputer.fit(dataset)
-    copyValues(new ImputerModel(uid, imputerModel.imputeValue, imputerModel.surrogateValue).setParent(this))
+    copyValues(new ImputerModel(uid, surrogate).setParent(this))
 
   }
 
@@ -152,14 +148,11 @@ object Imputer extends DefaultParamsReadable[Imputer] {
   * :: Experimental ::
   * Model fitted by [[Imputer]].
   *
-  * @param imputeValue Value by which missing values in the input columns will be replaced.
+  * @param surrogateValue value to replace missing values with
   */
 @Experimental
-class ImputerModel private[ml](
-                                override val uid: String,
-                                val imputeValue: Double,
-                                val surrogateValue: Double
-                              )
+class ImputerModel private[ml](override val uid: String,
+                               val surrogateValue: Double)
   extends Model[ImputerModel] with ImputerParams with MLWritable {
 
   import ImputerModel._
@@ -170,13 +163,21 @@ class ImputerModel private[ml](
   /** @group setParam */
   def setOutputCol(value: String): this.type = set(outputCol, value)
 
+  /** @group setParam */
+  @Since("2.1.0")
+  def setMissingValue(value: Double): this.type = set(missingValue, value)
+
+  /** @group setParam */
+  @Since("2.1.0")
+  def setStrategy(value: String): this.type = set(strategy, value)
+
   override def transform(dataset: Dataset[_]): DataFrame = {
     transformSchema(dataset.schema, logging = true)
     val inputType = dataset.schema($(inputCol)).dataType
     val ic = col($(inputCol))
 
-    dataset.withColumn($(outputCol), when(ic.isNull, imputeValue)
-      .when(ic === surrogateValue, imputeValue)
+    dataset.withColumn($(outputCol), when(ic.isNull, surrogateValue)
+      .when(ic === $(missingValue), surrogateValue)
       .otherwise(ic)
       .cast(inputType))
   }
@@ -186,7 +187,7 @@ class ImputerModel private[ml](
   }
 
   override def copy(extra: ParamMap): ImputerModel = {
-    val copied = new ImputerModel(uid, imputeValue, surrogateValue)
+    val copied = new ImputerModel(uid, surrogateValue)
     copyValues(copied, extra).setParent(parent)
   }
 
@@ -204,7 +205,7 @@ object ImputerModel extends MLReadable[ImputerModel] {
 
     override protected def saveImpl(path: String): Unit = {
       DefaultParamsWriter.saveMetadata(instance, path, sc)
-      val data = Data(instance.imputeValue, instance.getMissingValue, instance.getStrategy)
+      val data = Data(instance.surrogateValue, instance.getMissingValue, instance.getStrategy)
       val dataPath = new Path(path, "data").toString
       sparkSession.createDataFrame(Seq(data)).repartition(1).write.parquet(dataPath)
     }
@@ -219,11 +220,13 @@ object ImputerModel extends MLReadable[ImputerModel] {
       val dataPath = new Path(path, "data").toString
       val data = sparkSession.read.parquet(dataPath)
 
-      val Row(imputeValue: Double, missingValue: Double, strategy: String) = MLUtils.convertVectorColumnsToML(data, "imputeValue", "missingValue", "strategy")
-        .select("imputeValue", "missingValue", "strategy")
+      val Row(surrogateValue: Double, missingValue: Double, strategy: String) = MLUtils.convertVectorColumnsToML(data, "imputeValue", "missingValue", "strategy")
+        .select("surrogateValue", "missingValue", "strategy")
         .head()
 
-      val model = new ImputerModel(metadata.uid, imputeValue, missingValue)
+      val model = new ImputerModel(metadata.uid, surrogateValue).
+        setMissingValue(missingValue).
+        setStrategy(strategy)
       DefaultParamsReader.getAndSetParams(model, metadata)
       model
     }

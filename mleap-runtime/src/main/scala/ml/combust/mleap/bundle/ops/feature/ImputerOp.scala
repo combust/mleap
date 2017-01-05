@@ -18,14 +18,14 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
 
     override def store(model: Model, obj: ImputerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("imputeValue", Value.double(obj.imputeValue)).
-        withAttr("missingValue", obj.missingValue.map(Value.double)).
+      model.withAttr("surrogate_value", Value.double(obj.surrogateValue)).
+        withAttr("missing_value", Value.double(obj.missingValue)).
         withAttr("strategy", Value.string(obj.strategy))
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): ImputerModel = {
-      ImputerModel(model.value("imputeValue").getDouble,
-        model.getValue("missingValue").map(_.getDouble),
+      ImputerModel(model.value("surrogate_value").getDouble,
+        model.value("missing_value").getDouble,
         model.value("strategy").getString)
     }
 
@@ -38,7 +38,8 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
   override def model(node: Imputer): ImputerModel = node.model
 
 
-  override def load(node: Node, model: ImputerModel)(implicit context: BundleContext[MleapContext]): Imputer = {
+  override def load(node: Node, model: ImputerModel)
+                   (implicit context: BundleContext[MleapContext]): Imputer = {
     Imputer(uid = node.name,
       inputCol = node.shape.standardInput.name,
       outputCol = node.shape.standardOutput.name,
@@ -46,5 +47,4 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
   }
 
   override def shape(node: Imputer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
-
 }

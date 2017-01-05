@@ -13,7 +13,7 @@ class ImputerSpec extends FunSpec {
   describe("#transform") {
     val model = Imputer(inputCol = "test_a",
       outputCol = "test_out",
-      model = ImputerModel(45.7, Some(23.6), ""))
+      model = ImputerModel(45.7, 23.6, ""))
 
     describe("null values") {
       val schema = StructType(StructField("test_a", DoubleType(true))).get

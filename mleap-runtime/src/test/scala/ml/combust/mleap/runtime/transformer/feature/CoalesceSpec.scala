@@ -39,8 +39,8 @@ class CoalesceSpec extends FunSpec {
       it("returns the first non-null value") {
         val data = coalesce.transform(frame).get.dataset
 
-        assert(data(0).optionDouble(4).contains(23.4))
-        assert(data(1).optionDouble(4).contains(34.4))
+        assert(data(0).optionDouble(4).exists(_ == 23.4))
+        assert(data(1).optionDouble(4).exists(_ == 34.4))
       }
     }
   }

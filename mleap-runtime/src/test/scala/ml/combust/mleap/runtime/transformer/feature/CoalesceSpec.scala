@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.feature.{BucketizerModel, CoalesceModel}
+import ml.combust.mleap.core.feature.CoalesceModel
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType}
 import org.scalatest.FunSpec
@@ -26,7 +26,7 @@ class CoalesceSpec extends FunSpec {
       it("returns the non-null value or null if no value exists") {
         val data = coalesce.transform(frame).get.dataset
 
-        assert(data(0).optionDouble(4).contains(23.4))
+        assert(data(0).optionDouble(4).exists(_ == 23.4))
         assert(data(1).optionDouble(4).isEmpty)
       }
     }

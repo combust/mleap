@@ -4,6 +4,8 @@ import ml.combust.mleap.core.DenseTensor
 import ml.combust.mleap.runtime.types._
 import org.tensorflow
 
+import scala.collection.mutable
+
 /**
   * Created by hollinwilkins on 1/12/17.
   */
@@ -28,30 +30,59 @@ object TensorflowConverter {
       val v = new String(tensor.bytesValue(), "UTF-8")
       if(isNullable) Some(v) else v
     case tt: TensorType =>
-      val shape = tensor.shape().map(_.toInt).toSeq
-      val arrF: (Int) => Array[_] = tt.base match {
+      val shape = tensor.shape().map(_.toInt).toList
+      val nested = createArray(shape)(arrF(tt.base))
+      tensor.copyTo(nested)
+
+      tt.base match {
         case FloatType(false) =>
-          (i) => new Array[Float](i)
+          DenseTensor(flatten[Float](nested, shape)(a => a.asInstanceOf[Array[Float]]).toArray, shape)
         case DoubleType(false) =>
-          (i) => new Array[Double](i)
+          DenseTensor(flatten[Double](nested, shape)(a => a.asInstanceOf[Array[Double]]).toArray, shape)
         case IntegerType(false) =>
-          (i) => new Array[Integer](i)
+          DenseTensor(flatten[Int](nested, shape)(a => a.asInstanceOf[Array[Int]]).toArray, shape)
         case LongType(false) =>
-          (i) => new Array[Long](i)
+          DenseTensor(flatten[Long](nested, shape)(a => a.asInstanceOf[Array[Long]]).toArray, shape)
         case BooleanType(false) =>
-          (i) => new Array[Boolean](i)
-        case StringType(false) =>
+          DenseTensor(flatten[Boolean](nested, shape)(a => a.asInstanceOf[Array[Boolean]]).toArray, shape)
+        case _ =>
           throw new RuntimeException(s"unsupported tensorflow type: $dataType")
       }
-
-      DenseTensor(createArray(shape, arrF), shape)
     case _ =>
       throw new RuntimeException(s"unsupported tensorflow type: $dataType")
   }
 
-  private def createArray(shape: Seq[Int],
-                          f: (Int) => Array[_]): Array[_] = shape match {
-    case head :: Nil => f(head)
-    case head :: tail => Array.tabulate[Array[_]](head)(_ => createArray(tail, f))
+  private def arrF(base: BasicType): (Int) => AnyRef = base match {
+    case FloatType(false) =>
+      (i) => new Array[Float](i)
+    case DoubleType(false) =>
+      (i) => new Array[Double](i)
+    case IntegerType(false) =>
+      (i) => new Array[Integer](i)
+    case LongType(false) =>
+      (i) => new Array[Long](i)
+    case BooleanType(false) =>
+      (i) => new Array[Boolean](i)
+    case _ =>
+      throw new RuntimeException(s"unsupported tensorflow type: $base")
   }
+
+  private def createArray(shape: Seq[Int])
+                         (f: (Int) => AnyRef): AnyRef = shape match {
+    case head :: Nil => f(head)
+    case head :: tail => Array.tabulate[AnyRef](head)(_ => createArray(tail)(f))
+  }
+
+  private def flatten[T](arr: AnyRef, shape: Seq[Int])
+                        (f: (AnyRef) => mutable.IndexedSeq[T]): mutable.IndexedSeq[T] = shape match {
+    case head :: Nil => f(arr)
+    case head :: tail =>
+      val arrArr = mutable.WrappedArray.make[AnyRef](arr.asInstanceOf[Array[AnyRef]])
+      arrArr.flatMap {
+        a =>
+          val r = mutable.WrappedArray.make[T](flatten[T](a, tail)(f))
+          r
+      }
+  }
+
 }

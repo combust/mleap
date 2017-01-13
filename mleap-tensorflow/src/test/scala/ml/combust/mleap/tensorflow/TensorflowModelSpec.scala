@@ -1,14 +1,15 @@
 package ml.combust.mleap.tensorflow
 
-import ml.combust.mleap.runtime.types.FloatType
+import ml.combust.mleap.core.DenseTensor
+import ml.combust.mleap.runtime.types.{FloatType, TensorType}
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 1/12/17.
   */
 class TensorflowModelSpec extends FunSpec {
-  describe("with a scaling tensorflow model") {
-    it("scales the vector using the model and returns the result") {
+  describe("with an adding tensorflow model") {
+    it("adds two floats together") {
       val model = TensorflowModel(TestUtil.createAddGraph(),
         inputs = Seq(("InputA", FloatType(false)), ("InputB", FloatType(false))),
         outputs = Seq(("MyResult", FloatType(false))))
@@ -18,6 +19,20 @@ class TensorflowModelSpec extends FunSpec {
       assert(model(65.8f, 34.6f).head == 65.8f + 34.6f)
 
       model.close()
+    }
+  }
+
+  describe("with a multiple tensorflow model") {
+    describe("with a float and a float vector") {
+      it("scales the float vector") {
+        val model = TensorflowModel(TestUtil.createMultiplyGraph(),
+          inputs = Seq(("InputA", FloatType(false)), ("InputB", TensorType(base = FloatType(false), dimensions = Seq(-1)))),
+          outputs = Seq(("MyResult", TensorType(base = FloatType(false), dimensions = Seq(-1)))))
+        val tensor1 = DenseTensor(Array(1.0f, 2.0f, 3.0f), Seq(3))
+        val scale1 = 2.0f
+
+        assert(model(scale1, tensor1).head.asInstanceOf[DenseTensor[Float]].values sameElements Array(2.0f, 4.0f, 6.0f))
+      }
     }
   }
 }

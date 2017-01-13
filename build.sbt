@@ -1,18 +1,23 @@
 import ml.combust.mleap.{Release, Common}
 
-lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
-  bundleMl,
-  core,
-  runtime,
-  avro,
-  sparkBase,
-  sparkTestkit,
-  spark,
-  sparkExtension,
-  tensorflow)
+lazy val aggregatedProjects: Seq[ProjectReference] = {
+  val base: Seq[ProjectReference] = Seq(baseProject,
+    bundleMl,
+    core,
+    runtime,
+    avro,
+    sparkBase,
+    sparkTestkit,
+    spark,
+    sparkExtension)
 
-lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Seq(publishArtifact := false) ++
-Seq(aggregate in test in tensorflow := false)
+  sys.props.get("mleap.tensorflow.compile") match {
+    case Some("true") => base :+ (tensorflow: ProjectReference)
+    case _ => base
+  }
+}
+
+lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Seq(publishArtifact := false)
 
 lazy val root = Project(
   id = "mleap",

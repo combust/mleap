@@ -18,6 +18,7 @@ class MleapReflectionSpec extends FunSpec {
       assert(dataType[String] == StringType())
       assert(dataType[Int] == IntegerType())
       assert(dataType[Long] == LongType())
+      assert(dataType[Float] == FloatType())
       assert(dataType[Double] == DoubleType())
       assert(dataType[Seq[Boolean]] == ListType(BooleanType()))
       assert(dataType[Seq[String]] == ListType(StringType()))

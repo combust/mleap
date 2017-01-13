@@ -21,7 +21,8 @@ object ValueSerializer {
     } else { serializer.asInstanceOf[ValueSerializer[Any]] }
   }
 
-  def serializerForDataType(dataType: DataType): ValueSerializer[Any] = (dataType match {
+  def serializerForDataType(dataType: DataType): ValueSerializer[Any] = dataType match {
+    case FloatType(isNullable) => maybeNullableSerializer(FloatSerializer, isNullable)
     case DoubleType(isNullable) => maybeNullableSerializer(DoubleSerializer, isNullable)
     case StringType(isNullable) => maybeNullableSerializer(StringSerializer, isNullable)
     case IntegerType(isNullable) => maybeNullableSerializer(IntegerSerializer, isNullable)
@@ -29,6 +30,7 @@ object ValueSerializer {
     case BooleanType(isNullable) => maybeNullableSerializer(BooleanSerializer, isNullable)
     case ListType(base, isNullable) =>
       base match {
+        case FloatType(_) => maybeNullableSerializer(ListSerializer(FloatSerializer), isNullable)
         case DoubleType(_) => maybeNullableSerializer(ListSerializer(DoubleSerializer), isNullable)
         case StringType(_) => maybeNullableSerializer(ListSerializer(StringSerializer), isNullable)
         case IntegerType(_) => maybeNullableSerializer(ListSerializer(IntegerSerializer), isNullable)
@@ -39,7 +41,7 @@ object ValueSerializer {
     case tt: TensorType if tt.base == DoubleType(false) && tt.dimensions.length == 1 => maybeNullableSerializer(VectorSerializer, tt.isNullable)
     case ct: CustomType => maybeNullableSerializer(CustomSerializer(ct), ct.isNullable)
     case _ => throw new IllegalArgumentException(s"invalid data type for serialization: $dataType")
-  }).asInstanceOf[ValueSerializer[Any]]
+  }
 }
 
 trait ValueSerializer[T] {
@@ -63,6 +65,11 @@ case class NullableSerializer[T](base: ValueSerializer[T]) extends ValueSerializ
 object DoubleSerializer extends ValueSerializer[Double] {
   override def write(value: Double, out: DataOutputStream): Unit = out.writeDouble(value)
   override def read(in: DataInputStream): Double = in.readDouble()
+}
+
+object FloatSerializer extends ValueSerializer[Float] {
+  override def write(value: Float, out: DataOutputStream): Unit = out.writeFloat(value)
+  override def read(in: DataInputStream): Float = in.readFloat()
 }
 
 object IntegerSerializer extends ValueSerializer[Int] {

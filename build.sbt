@@ -8,7 +8,8 @@ lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
   sparkBase,
   sparkTestkit,
   spark,
-  sparkExtension)
+  sparkExtension,
+  tensorflow)
 
 lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Seq(publishArtifact := false)
 
@@ -69,4 +70,10 @@ lazy val sparkExtension = Project(
   id = "mleap-spark-extension",
   base = file("mleap-spark-extension"),
   dependencies = Seq(spark, sparkTestkit % "test")
+)
+
+lazy val tensorflow = Project(
+  id = "mleap-tensorflow",
+  base = file("mleap-tensorflow"),
+  dependencies = Seq(runtime)
 )

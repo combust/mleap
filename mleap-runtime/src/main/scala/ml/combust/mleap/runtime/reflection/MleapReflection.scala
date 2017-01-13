@@ -25,6 +25,7 @@ trait MleapReflection {
       case t if t <:< mirrorType[String] => StringType(false)
       case t if t <:< mirrorType[Int] => IntegerType(false)
       case t if t <:< mirrorType[Long] => LongType(false)
+      case t if t <:< mirrorType[Float] => FloatType(false)
       case t if t <:< mirrorType[Double] => DoubleType(false)
       case t if t <:< mirrorType[Seq[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t

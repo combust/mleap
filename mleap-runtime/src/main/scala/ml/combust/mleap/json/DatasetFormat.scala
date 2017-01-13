@@ -31,6 +31,7 @@ object DatasetFormat {
 
   def serializer(tpe: DataType): JsonFormat[_] = tpe match {
     case StringType(isNullable) => maybeNullableFormat(StringJsonFormat, isNullable)
+    case FloatType(isNullable) => maybeNullableFormat(FloatJsonFormat, isNullable)
     case DoubleType(isNullable) => maybeNullableFormat(DoubleJsonFormat, isNullable)
     case BooleanType(isNullable) => maybeNullableFormat(BooleanJsonFormat, isNullable)
     case LongType(isNullable) => maybeNullableFormat(LongJsonFormat, isNullable)

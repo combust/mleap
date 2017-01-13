@@ -53,6 +53,7 @@ object SchemaConverter {
   }
 
   implicit def mleapToAvroType(dataType: DataType): Schema = dataType match {
+    case FloatType(isNullable) => maybeNullableAvroType(Schema.create(Schema.Type.FLOAT), isNullable)
     case DoubleType(isNullable) => maybeNullableAvroType(Schema.create(Schema.Type.DOUBLE), isNullable)
     case StringType(isNullable) => maybeNullableAvroType(Schema.create(Schema.Type.STRING), isNullable)
     case LongType(isNullable) => maybeNullableAvroType(Schema.create(Schema.Type.LONG), isNullable)
@@ -89,6 +90,7 @@ object SchemaConverter {
 
   implicit def avroToMleapType(schema: Schema)
                               (implicit context: MleapContext): DataType = schema.getType match {
+    case Schema.Type.FLOAT => FloatType(false)
     case Schema.Type.DOUBLE => DoubleType(false)
     case Schema.Type.STRING => StringType(false)
     case Schema.Type.LONG => LongType(false)

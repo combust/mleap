@@ -24,6 +24,7 @@ object Dependencies {
     val sparkAvro = "com.databricks" %% "spark-avro" % "3.0.1"
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "edu.emory.mathcs" % "JTransforms" % "2.4"
+    val tensorflowCppPresets = "org.bytedeco.javacpp-presets" % "tensorflow" % "0.11.0-1.3"
   }
 
   object Test {
@@ -54,6 +55,8 @@ object Dependencies {
   val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
   val avro = l ++= Seq(avroDep)
+
+  val tensorflow = l ++= Seq(tensorflowCppPresets)
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

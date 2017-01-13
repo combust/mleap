@@ -60,6 +60,7 @@ trait JsonSupport {
     }
 
     def forName(name: String, isNullable: Boolean = false): BasicType = name match {
+      case "float" => FloatType(isNullable)
       case "double" => DoubleType(isNullable)
       case "string" => StringType(isNullable)
       case "long" => LongType(isNullable)
@@ -68,6 +69,7 @@ trait JsonSupport {
     }
 
     override def write(obj: BasicType): JsValue = obj match {
+      case FloatType(isNullable) => writeMaybeNullable(JsString("float"), isNullable)
       case DoubleType(isNullable) => writeMaybeNullable(JsString("double"), isNullable)
       case StringType(isNullable) => writeMaybeNullable(JsString("string"), isNullable)
       case LongType(isNullable) => writeMaybeNullable(JsString("long"), isNullable)

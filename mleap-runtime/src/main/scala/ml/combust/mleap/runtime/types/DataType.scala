@@ -32,6 +32,9 @@ case class LongType(override val isNullable: Boolean = false) extends BasicType 
 case class BooleanType(override val isNullable: Boolean = false) extends BasicType {
   override def asNullable: DataType = copy(isNullable = true)
 }
+case class FloatType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
 case class DoubleType(override val isNullable: Boolean = false) extends BasicType {
   override def asNullable: DataType = copy(isNullable = true)
 }

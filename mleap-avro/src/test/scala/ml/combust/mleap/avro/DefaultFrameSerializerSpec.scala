@@ -11,10 +11,11 @@ import org.scalatest.FunSpec
   */
 class DefaultFrameSerializerSpec extends FunSpec {
   val schema = StructType(StructField("test_double", DoubleType()),
+    StructField("test_float", FloatType()),
     StructField("test_string", StringType()),
     StructField("test_vector", TensorType.doubleVector()),
     StructField("test_nullable", StringType(true))).get
-  val row = Row(2.0, "hello", Vectors.dense(Array(0.1, 2.33, 4.5)), None)
+  val row = Row(2.0d, 45.3f, "hello", Vectors.dense(Array(0.1, 2.33, 4.5)), None)
   val dataset = LocalDataset(Seq(row))
   val frame = LeapFrame(schema, dataset)
 

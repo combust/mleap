@@ -1,10 +1,8 @@
 package ml.combust.mleap.tensorflow.converter
 
-import java.nio._
-
 import ml.combust.mleap.core.DenseTensor
 import ml.combust.mleap.runtime.types._
-import org.bytedeco.javacpp.tensorflow
+import org.tensorflow
 
 /**
   * Created by hollinwilkins on 1/12/17.
@@ -12,49 +10,43 @@ import org.bytedeco.javacpp.tensorflow
 object TensorflowConverter {
   def convert(tensor: tensorflow.Tensor, dataType: DataType): Any = dataType match {
     case FloatType(isNullable) =>
-      val b: FloatBuffer = tensor.createBuffer()
-      val v = b.get(0)
+      val v = tensor.floatValue()
       if(isNullable) Some(v) else v
     case DoubleType(isNullable) =>
-      val b: DoubleBuffer = tensor.createBuffer()
-      val v = b.get(0)
+      val v = tensor.doubleValue()
       if(isNullable) Some(v) else v
     case IntegerType(isNullable) =>
-      val b: IntBuffer = tensor.createBuffer()
-      val v = b.get(0)
+      val v = tensor.intValue()
       if(isNullable) Some(v) else v
     case LongType(isNullable) =>
-      val b: LongBuffer = tensor.createBuffer()
-      val v = b.get(0)
+      val v = tensor.longValue()
       if(isNullable) Some(v) else v
     case BooleanType(isNullable) =>
-      throw new RuntimeException("boolean conversion to tensor not yet supported")
-    case StringType(isNullable) =>
-      throw new RuntimeException("string conversion to tensor not yet supported")
+      val v = tensor.booleanValue()
+      if(isNullable) Some(v) else v
     case tt: TensorType =>
-      tt.base match {
+      val shape = tensor.shape().map(_.toInt).toSeq
+      val arrF: (Int) => Array[_] = tt.base match {
         case FloatType(isNullable) =>
-          val b: FloatBuffer = tensor.createBuffer()
-          val v = DenseTensor(b.array(), tt.dimensions)
-          if(isNullable) Some(v) else v
+          (i) => new Array[Float](i)
         case DoubleType(isNullable) =>
-          val b: DoubleBuffer = tensor.createBuffer()
-          val v = DenseTensor(b.array(), tt.dimensions)
-          if(isNullable) Some(v) else v
+          (i) => new Array[Double](i)
         case IntegerType(isNullable) =>
-          val b: IntBuffer = tensor.createBuffer()
-          val v = DenseTensor(b.array(), tt.dimensions)
-          if(isNullable) Some(v) else v
+          (i) => new Array[Integer](i)
         case LongType(isNullable) =>
-          val b: LongBuffer = tensor.createBuffer()
-          val v = DenseTensor(b.array(), tt.dimensions)
-          if(isNullable) Some(v) else v
+          (i) => new Array[Long](i)
         case BooleanType(isNullable) =>
-          throw new RuntimeException("boolean conversion to tensor not yet supported")
-        case StringType(isNullable) =>
-          throw new RuntimeException("string conversion to tensor not yet supported")
+          (i) => new Array[Boolean](i)
       }
+
+      DenseTensor(createArray(shape, arrF), shape)
     case _ =>
       throw new RuntimeException(s"unsupported tensorflow type: $dataType")
+  }
+
+  private def createArray(shape: Seq[Int],
+                          f: (Int) => Array[_]): Array[_] = shape match {
+    case head :: Nil => f(head)
+    case head :: tail => Array.tabulate[Array[_]](head)(_ => createArray(tail, f))
   }
 }

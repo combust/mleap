@@ -11,7 +11,8 @@ lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
   sparkExtension,
   tensorflow)
 
-lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Seq(publishArtifact := false)
+lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Seq(publishArtifact := false) ++
+Seq(aggregate in test in tensorflow := false)
 
 lazy val root = Project(
   id = "mleap",

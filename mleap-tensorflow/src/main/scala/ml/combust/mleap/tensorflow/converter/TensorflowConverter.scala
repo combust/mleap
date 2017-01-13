@@ -24,19 +24,24 @@ object TensorflowConverter {
     case BooleanType(isNullable) =>
       val v = tensor.booleanValue()
       if(isNullable) Some(v) else v
+    case StringType(isNullable) =>
+      val v = new String(tensor.bytesValue(), "UTF-8")
+      if(isNullable) Some(v) else v
     case tt: TensorType =>
       val shape = tensor.shape().map(_.toInt).toSeq
       val arrF: (Int) => Array[_] = tt.base match {
-        case FloatType(isNullable) =>
+        case FloatType(false) =>
           (i) => new Array[Float](i)
-        case DoubleType(isNullable) =>
+        case DoubleType(false) =>
           (i) => new Array[Double](i)
-        case IntegerType(isNullable) =>
+        case IntegerType(false) =>
           (i) => new Array[Integer](i)
-        case LongType(isNullable) =>
+        case LongType(false) =>
           (i) => new Array[Long](i)
-        case BooleanType(isNullable) =>
+        case BooleanType(false) =>
           (i) => new Array[Boolean](i)
+        case StringType(false) =>
+          throw new RuntimeException(s"unsupported tensorflow type: $dataType")
       }
 
       DenseTensor(createArray(shape, arrF), shape)

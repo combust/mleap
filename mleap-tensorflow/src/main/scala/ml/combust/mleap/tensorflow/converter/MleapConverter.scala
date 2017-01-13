@@ -19,8 +19,15 @@ object MleapConverter {
       tensorflow.Tensor.create(value.asInstanceOf[Long])
     case BooleanType(isNullable) =>
       tensorflow.Tensor.create(value.asInstanceOf[Boolean])
+    case StringType(isNullable) =>
+      tensorflow.Tensor.create(value.asInstanceOf[String].getBytes("UTF-8"))
     case tt: TensorType =>
-      tensorflow.Tensor.create(value.asInstanceOf[Tensor[_]].toDense.values)
+      tt.base match {
+        case StringType(false) =>
+          throw new RuntimeException(s"unsupported tensorflow type: $dataType")
+        case _ =>
+          tensorflow.Tensor.create(value.asInstanceOf[Tensor[_]].toDense.values)
+      }
     case _ =>
       throw new RuntimeException(s"unsupported tensorflow type: $dataType")
   }

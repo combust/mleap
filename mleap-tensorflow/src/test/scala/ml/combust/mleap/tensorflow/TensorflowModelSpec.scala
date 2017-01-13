@@ -1,8 +1,5 @@
 package ml.combust.mleap.tensorflow
 
-import java.nio.file.{FileSystems, Files}
-
-import org.tensorflow
 import ml.combust.mleap.runtime.types.FloatType
 import org.scalatest.FunSpec
 
@@ -12,19 +9,7 @@ import org.scalatest.FunSpec
 class TensorflowModelSpec extends FunSpec {
   describe("with a scaling tensorflow model") {
     it("scales the vector using the model and returns the result") {
-      val graph = new tensorflow.Graph
-      val inputA = graph.opBuilder("Placeholder", "InputA").
-        setAttr("dtype", tensorflow.DataType.FLOAT).
-        build()
-      val inputB = graph.opBuilder("Placeholder", "InputB").
-        setAttr("dtype", tensorflow.DataType.FLOAT).
-        build()
-      graph.opBuilder("Add", "MyResult").
-        setAttr("T", tensorflow.DataType.FLOAT).
-        addInput(inputA.output(0)).
-        addInput(inputB.output(0)).
-        build()
-      val model = TensorflowModel(graph,
+      val model = TensorflowModel(TestUtil.createAddGraph(),
         inputs = Seq(("InputA", FloatType(false)), ("InputB", FloatType(false))),
         outputs = Seq(("MyResult", FloatType(false))))
 

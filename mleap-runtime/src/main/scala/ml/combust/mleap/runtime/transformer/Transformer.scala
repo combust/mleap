@@ -20,7 +20,7 @@ object Transformer {
 
 /** Trait for implementing an MLeap transformer.
   */
-trait Transformer {
+trait Transformer extends AutoCloseable {
   /** Unique identifier for this transformer.
     */
   val uid: String
@@ -32,6 +32,8 @@ trait Transformer {
     * @return try new builder with transformation applied
     */
   def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB]
+
+  override def close(): Unit = { /* do nothing by default */ }
 }
 
 trait FeatureTransformer extends Transformer {

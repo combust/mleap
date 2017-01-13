@@ -15,9 +15,20 @@ case class TensorflowTransformer(override val uid: String = Transformer.uniqueNa
                                  rawOutputCol: Option[String] = None,
                                  model: TensorflowModel) extends Transformer {
   val actualRawCol = rawOutputCol.getOrElse(uid)
-  val exec: UserDefinedFunction = (tensors: Seq[Any]) => model()
+  val exec: UserDefinedFunction = (tensors: Seq[Any]) => model(tensors: _*)
+  val outputUdfs: Seq[UserDefinedFunction] = outputCols.zipWithIndex.map {
+    case (output, index) =>
+      val udf: UserDefinedFunction = (raw: Seq[Any]) => raw(index)
+      udf.copy(returnType = model.outputs(index)._2)
+  }
+  private val outputs = outputCols.zip(outputUdfs)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(actualRawCol, inputCols.toArray)(exec)
+    val builder2 = builder.withOutput(actualRawCol, inputCols.toArray)(exec)
+    outputs.foldLeft(builder2) {
+      case (b, (name, udf)) => b.flatMap(_.withOutput(name, actualRawCol)(udf))
+    }
   }
+
+  override def close(): Unit = { model.close() }
 }

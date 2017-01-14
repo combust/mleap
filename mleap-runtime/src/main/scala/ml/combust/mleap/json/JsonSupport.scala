@@ -1,13 +1,14 @@
 package ml.combust.mleap.json
 
+import ml.combust.mleap.core.{DenseTensor, SparseTensor, Tensor}
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, MleapContext}
 import ml.combust.mleap.runtime.types._
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 import spray.json.{JsValue, JsonFormat}
 
 import scala.language.implicitConversions
+import scala.reflect.ClassTag
 
 /**
   * Created by hollinwilkins on 8/23/16.
@@ -31,15 +32,13 @@ trait JsonSupport {
   implicit val mleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
     override def write(obj: TensorType): JsValue = {
       JsObject("type" -> JsString("tensor"),
-        "base" -> mleapBasicTypeFormat.write(obj.base),
-        "dimensions" -> obj.dimensions.toJson)
+        "base" -> mleapBasicTypeFormat.write(obj.base))
     }
 
     override def read(json: JsValue): TensorType = {
       val obj = json.asJsObject("invalid tensor type")
 
-      TensorType(base = mleapBasicTypeFormat.read(obj.fields("base")),
-        dimensions = obj.fields("dimensions").convertTo[Seq[Int]])
+      TensorType(base = mleapBasicTypeFormat.read(obj.fields("base")))
     }
   })
 
@@ -125,38 +124,6 @@ trait JsonSupport {
     }
   }
 
-  implicit val mleapDenseVectorFormat: JsonFormat[DenseVector] = new JsonFormat[DenseVector] {
-    override def write(obj: DenseVector): JsValue = obj.values.toJson
-    override def read(json: JsValue): DenseVector = new DenseVector(json.convertTo[Array[Double]])
-  }
-
-  implicit val mleapSparseVectorFormat: JsonFormat[SparseVector] = new JsonFormat[SparseVector] {
-    override def write(obj: SparseVector): JsValue = JsObject("size" -> obj.size.toJson,
-      "indices" -> obj.indices.toJson,
-      "values" -> obj.values.toJson)
-
-    override def read(json: JsValue): SparseVector = {
-      val obj = json.asJsObject("invalid sparse vector")
-      new SparseVector(size = obj.fields("size").convertTo[Int],
-        indices = obj.fields("indices").convertTo[Array[Int]],
-        values = obj.fields("values").convertTo[Array[Double]])
-    }
-  }
-
-  implicit val mleapVectorFormat: JsonFormat[Vector] = new JsonFormat[Vector] {
-    override def write(obj: Vector): JsValue = obj match {
-      case obj: DenseVector => mleapDenseVectorFormat.write(obj)
-      case obj: SparseVector => mleapSparseVectorFormat.write(obj)
-      case _ => serializationError("invalid vector")
-    }
-
-    override def read(json: JsValue): Vector = json match {
-      case json: JsArray => mleapDenseVectorFormat.read(json)
-      case json: JsObject => mleapSparseVectorFormat.read(json)
-      case _ => deserializationError(s"invalid vector: $json")
-    }
-  }
-
   implicit val mleapStructFieldWriterFormat: JsonWriter[StructField] = new JsonWriter[StructField] {
     override def write(obj: StructField): JsValue = {
       JsObject("name" -> JsString(obj.name),
@@ -180,6 +147,43 @@ trait JsonSupport {
 
     override def write(obj: StructType): JsValue = {
       JsObject("fields" -> obj.fields.toJson)
+    }
+  }
+
+  implicit def mleapArrayFormat[T: JsonFormat: ClassTag]: RootJsonFormat[Array[T]] = new RootJsonFormat[Array[T]] {
+    val base = implicitly[JsonFormat[T]]
+
+    override def write(obj: Array[T]): JsValue = {
+      JsArray(obj.map(base.write): _*)
+    }
+
+    override def read(json: JsValue): Array[T] = json match {
+      case json: JsArray =>
+        val elements = json.elements
+        val size = elements.size
+        val values = new Array[T](size)
+        (0 until size).foreach(i => values(i) = base.read(elements(i)))
+        values
+      case _ => deserializationError("invalid array")
+    }
+  }
+
+  implicit def mleapDenseTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[DenseTensor[T]] = jsonFormat2(DenseTensor[T])
+  implicit def mleapSparseTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[SparseTensor[T]] = jsonFormat3(SparseTensor[T])
+  implicit def mleapTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[Tensor[T]] = new RootJsonFormat[Tensor[T]] {
+    override def write(obj: Tensor[T]): JsValue = obj match {
+      case obj: DenseTensor[_] => obj.asInstanceOf[DenseTensor[T]].toJson
+      case obj: SparseTensor[_] => obj.asInstanceOf[SparseTensor[T]].toJson
+    }
+
+    override def read(json: JsValue): Tensor[T] = json match {
+      case json: JsObject =>
+        if(json.fields.contains("indices")) {
+          mleapSparseTensorFormat[T].read(json)
+        } else {
+          mleapDenseTensorFormat[T].read(json)
+        }
+      case _ => deserializationError("invalid tensor")
     }
   }
 

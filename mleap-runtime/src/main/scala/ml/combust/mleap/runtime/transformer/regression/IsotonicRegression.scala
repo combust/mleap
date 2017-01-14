@@ -1,10 +1,10 @@
 package ml.combust.mleap.runtime.transformer.regression
 
+import ml.combust.mleap.core.Tensor
 import ml.combust.mleap.core.regression.IsotonicRegressionModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import org.apache.spark.ml.linalg.Vector
 
 import scala.util.Try
 
@@ -15,7 +15,7 @@ case class IsotonicRegression(override val uid: String = Transformer.uniqueName(
                               featuresCol: String,
                               predictionCol: String,
                               model: IsotonicRegressionModel) extends Transformer {
-  val execIndexed: UserDefinedFunction = (features: Vector) => model(features)
+  val execIndexed: UserDefinedFunction = (features: Tensor[Double]) => model(features)
   val exec: UserDefinedFunction = (feature: Double) => model(feature)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {

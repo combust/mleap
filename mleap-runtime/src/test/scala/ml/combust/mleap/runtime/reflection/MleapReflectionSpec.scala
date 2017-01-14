@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.reflection
 
+import ml.combust.mleap.core.Tensor
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
-import org.apache.spark.ml.linalg.Vector
 import org.scalatest.FunSpec
 
 /**
@@ -35,7 +35,7 @@ class MleapReflectionSpec extends FunSpec {
       assert(dataType[Option[Int]] == IntegerType(true))
       assert(dataType[Option[Long]] == LongType(true))
       assert(dataType[Option[Double]] == DoubleType(true))
-      assert(dataType[Vector] == TensorType.doubleVector())
+      assert(dataType[Tensor[Double]] == TensorType(DoubleType()))
       assert(dataType[Any] == AnyType())
     }
 

@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.core.Tensor
 import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import org.apache.spark.ml.linalg.Vector
 
 import scala.collection.mutable
 
@@ -117,19 +117,19 @@ trait Row extends Iterable[Any] {
     */
   def optionString(index: Int): Option[String] = optionAs[String](index)
 
-  /** Get value at index as a vector.
+  /** Get value at index as a tensor.
     *
     * @param index index of value
-    * @return vector value
+    * @return tensor value
     */
-  def getVector(index: Int): Vector = get(index).asInstanceOf[Vector]
+  def getTensor[T](index: Int): Tensor[T] = get(index).asInstanceOf[Tensor[T]]
 
-  /** Get value at index as a vector.
+  /** Get value at index as a tensor.
     *
     * @param index index of value
-    * @return optional vector value
+    * @return optional tensor value
     */
-  def optionVector(index: Int): Option[Vector] = optionAs[Vector](index)
+  def optionTensor[T](index: Int): Option[Tensor[T]] = optionAs[Tensor[T]](index)
 
   /** Get value at index as an array.
     *

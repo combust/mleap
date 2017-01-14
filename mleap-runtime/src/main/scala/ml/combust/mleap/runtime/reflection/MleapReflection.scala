@@ -1,10 +1,8 @@
 package ml.combust.mleap.runtime.reflection
 
+import ml.combust.mleap.core.Tensor
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
-import org.apache.spark.ml.linalg.Vector
-
-import scala.collection.mutable
 
 /**
   * Created by hollinwilkins on 10/21/16.
@@ -31,7 +29,10 @@ trait MleapReflection {
         val TypeRef(_, _, Seq(elementType)) = t
         val baseType = dataTypeFor(elementType)
         ListType(baseType)
-      case t if t <:< mirrorType[Vector] => TensorType.doubleVector()
+      case t if t <:< mirrorType[Tensor[_]] =>
+        val TypeRef(_, _, Seq(elementType)) = t
+        val baseType = dataTypeFor(elementType)
+        TensorType(baseType.asInstanceOf[BasicType])
       case t if t =:= mirrorType[Any] => AnyType(false)
       case t if context.hasCustomType(t.erasure.typeSymbol.asClass.fullName) =>
         context.customType(t.erasure.typeSymbol.asClass.fullName)

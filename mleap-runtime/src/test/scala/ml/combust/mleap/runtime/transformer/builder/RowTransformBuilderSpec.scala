@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.transformer.builder
 
+import ml.combust.mleap.core.Tensor
 import ml.combust.mleap.core.regression.LinearRegressionModel
 import ml.combust.mleap.runtime.transformer.Pipeline
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
@@ -31,8 +32,8 @@ class RowTransformBuilderSpec extends FunSpec {
       val row1 = transformer.transform(Row(20.0, 10.0, 5.0))
       val row2 = transformer.transform(Row(5.0, 17.0, 9.0))
 
-      assert(row1.toArray sameElements Array(20.0, 10.0, 5.0, Vectors.dense(Array(20.0, 10.0, 5.0)), 123.0))
-      assert(row2.toArray sameElements Array(5.0, 17.0, 9.0, Vectors.dense(Array(5.0, 17.0, 9.0)), 131.5))
+      assert(row1.toArray sameElements Array(20.0, 10.0, 5.0, Tensor.denseVector(Array(20.0, 10.0, 5.0)), 123.0))
+      assert(row2.toArray sameElements Array(5.0, 17.0, 9.0, Tensor.denseVector(Array(5.0, 17.0, 9.0)), 131.5))
     }
   }
 }

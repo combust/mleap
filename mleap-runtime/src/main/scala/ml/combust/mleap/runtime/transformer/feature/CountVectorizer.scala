@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.transformer.feature
 
+import ml.combust.mleap.core.Tensor
 import ml.combust.mleap.core.feature.CountVectorizerModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
@@ -11,5 +12,5 @@ case class CountVectorizer(override val uid: String = Transformer.uniqueName("co
                            override val inputCol: String,
                            override val outputCol: String,
                            model: CountVectorizerModel) extends FeatureTransformer {
-  override val exec: UserDefinedFunction = (document: Seq[String]) => model(document)
+  override val exec: UserDefinedFunction = (document: Seq[String]) => model(document): Tensor[Double]
 }

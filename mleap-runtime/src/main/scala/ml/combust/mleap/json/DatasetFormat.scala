@@ -4,6 +4,7 @@ import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.runtime.{Dataset, LocalDataset}
 import spray.json.DefaultJsonProtocol._
 import spray.json._
+import JsonSupport.mleapTensorFormat
 
 /**
   * Created by hollinwilkins on 9/10/16.
@@ -19,13 +20,18 @@ object DatasetFormat {
   }
 
   def listSerializer(lt: ListType): JsonFormat[_] = seqFormat(serializer(lt.base))
+
   def tensorSerializer(tt: TensorType): JsonFormat[_] = {
-    assert(tt.dimensions.length == 1, s"unsupported tensor type: $tt")
+    val isNullable = tt.isNullable
 
     tt.base match {
-      case DoubleType(isNullable) => maybeNullableFormat(JsonSupport.mleapVectorFormat, isNullable)
-      case StringType(isNullable) => maybeNullableFormat(seqFormat[String], isNullable)
-      case _ => serializationError(s"unsupported tensor type: $tt")
+      case StringType(false) => maybeNullableFormat(mleapTensorFormat[String], isNullable)
+      case FloatType(false) => maybeNullableFormat(mleapTensorFormat[Float], isNullable)
+      case DoubleType(false) => maybeNullableFormat(mleapTensorFormat[Double], isNullable)
+      case BooleanType(false) => maybeNullableFormat(mleapTensorFormat[Boolean], isNullable)
+      case LongType(false) => maybeNullableFormat(mleapTensorFormat[Long], isNullable)
+      case IntegerType(false) => maybeNullableFormat(mleapTensorFormat[Int], isNullable)
+      case _ => serializationError(s"invalid tensor base type: ${tt.base}")
     }
   }
 

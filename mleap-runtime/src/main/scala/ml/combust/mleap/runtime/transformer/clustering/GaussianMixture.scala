@@ -1,10 +1,10 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
+import ml.combust.mleap.core.Tensor
 import ml.combust.mleap.core.clustering.GaussianMixtureModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import org.apache.spark.ml.linalg.Vector
 
 import scala.util.Try
 
@@ -16,9 +16,9 @@ case class GaussianMixture(override val uid: String = Transformer.uniqueName("gm
                            predictionCol: String,
                            probabilityCol: Option[String] = None,
                            model: GaussianMixtureModel) extends Transformer {
-  val predictProbability: UserDefinedFunction = (features: Vector) => model.predictProbability(features)
-  val predictionFromProbability: UserDefinedFunction = (features: Vector) => model.predictionFromProbability(features)
-  val exec: UserDefinedFunction = (features: Vector) => model(features)
+  val predictProbability: UserDefinedFunction = (features: Tensor[Double]) => model.predictProbability(features): Tensor[Double]
+  val predictionFromProbability: UserDefinedFunction = (features: Tensor[Double]) => model.predictionFromProbability(features)
+  val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     probabilityCol match {

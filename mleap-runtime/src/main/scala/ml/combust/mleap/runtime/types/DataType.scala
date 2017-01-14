@@ -13,14 +13,11 @@ object DataType {
 sealed trait DataType extends Serializable {
   val isNullable: Boolean
   def asNullable: DataType
-
-  def fits(other: DataType): Boolean = this == other
 }
 sealed trait BasicType extends DataType with Serializable
 
 case class AnyType(override val isNullable: Boolean = false) extends DataType {
   override def asNullable: DataType = copy(isNullable = true)
-  override def fits(other: DataType): Boolean = true
 }
 
 case class IntegerType(override val isNullable: Boolean = false) extends BasicType {
@@ -43,36 +40,12 @@ case class StringType(override val isNullable: Boolean = false) extends BasicTyp
 }
 
 case class TensorType(base: BasicType,
-                      dimensions: Seq[Int],
                       override val isNullable: Boolean = false) extends DataType {
   override def asNullable: DataType = copy(isNullable = true)
-
-  override def fits(other: DataType): Boolean = {
-    if(super.fits(other)) { return true }
-
-    other match {
-      case TensorType(ob, od, _) => base == ob && dimFit(od)
-      case _ => false
-    }
-  }
-
-  private def dimFit(d2: Seq[Int]): Boolean = {
-    if(dimensions.length == d2.length) {
-      for((dd1, dd2) <- dimensions.zip(d2)) {
-        if(dd1 != -1 && dd1 != dd2) { return false }
-      }
-      true
-    } else { false }
-  }
 }
 case class ListType(base: DataType,
                     override val isNullable: Boolean = false) extends DataType {
   override def asNullable: DataType = copy(isNullable = true)
-}
-
-object TensorType {
-  def doubleVector(dim: Int = -1,
-                   isNullable: Boolean = false): TensorType = TensorType(DoubleType(false), Seq(dim), isNullable)
 }
 
 object CustomType {

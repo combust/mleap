@@ -14,7 +14,7 @@ class SimpleSparkSerializer() {
 
   def serializeToBundle(transformer: Transformer, path: String): Unit = {
     for(file <- managed(BundleFile(path))) {
-      transformer.writeBundle.force(true).save(file)
+      transformer.writeBundle.save(file)
     }
   }
 

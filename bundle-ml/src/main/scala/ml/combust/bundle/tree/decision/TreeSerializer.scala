@@ -86,8 +86,8 @@ case class TreeSerializer[N: NodeWrapper](path: Path,
   val ntc = implicitly[NodeWrapper[N]]
 
   def write(node: N): Unit = {
-    for(out <- managed(Files.newOutputStream(path.getFileSystem.getPath(s"${path.toString}.$extension")));
-        writer <- managed(FormatTreeSerializer.writer(sc, out))) {
+    val open = () => Files.newOutputStream(path.getFileSystem.getPath(s"${path.toString}.$extension"))
+    for(writer <- managed(FormatTreeSerializer.writer(sc, open()))) {
       write(node, writer)
     }
   }

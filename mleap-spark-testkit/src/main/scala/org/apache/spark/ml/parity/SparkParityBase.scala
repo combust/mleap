@@ -48,11 +48,11 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
                      (implicit context: SparkBundleContext): File = {
     bundleCache.getOrElse {
       new File("/tmp/mleap/spark-parity").mkdirs()
-      val file = new File(s"/tmp/mleap/spark-parity/${getClass.getName}")
+      val file = new File(s"/tmp/mleap/spark-parity/${getClass.getName}.zip")
+      file.delete()
 
-      BundleFile(file)
       for(bf <- managed(BundleFile(file))) {
-        transformer.writeBundle.force(true).save(bf).get
+        transformer.writeBundle.save(bf).get
       }
 
       bundleCache = Some(file)
@@ -62,11 +62,21 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
   def mleapTransformer(transformer: Transformer)
                       (implicit context: SparkBundleContext): runtime.transformer.Transformer = {
-    MleapBundleFileOps(serializedModel(transformer)).loadBundle().get.root
+    (for(bf <- managed(BundleFile(serializedModel(transformer)))) yield {
+      MleapBundleFileOps(bf).loadBundle().get.root
+    }).either.either match {
+      case Right(t) => t
+      case Left(errors) => throw errors.head
+    }
   }
 
   def deserializedSparkTransformer(transformer: Transformer): Transformer = {
-    SparkBundleFileOps(serializedModel(transformer)).loadBundle().get.root
+    (for(bf <- managed(BundleFile(serializedModel(transformer)))) yield {
+      SparkBundleFileOps(bf).loadBundle().get.root
+    }).either.either match {
+      case Right(t) => t
+      case Left(errors) => throw errors.head
+    }
   }
 
   def parityTransformer(): Unit = {

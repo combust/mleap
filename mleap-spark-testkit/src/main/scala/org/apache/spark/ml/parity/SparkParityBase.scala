@@ -10,8 +10,8 @@ import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.MleapSupport._
 import com.databricks.spark.avro._
 import ml.combust.bundle.BundleFile
-import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.linalg.{Vector, VectorUDT}
 import org.apache.spark.sql.mleap.TensorUDT

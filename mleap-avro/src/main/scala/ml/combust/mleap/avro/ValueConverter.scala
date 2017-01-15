@@ -1,7 +1,8 @@
 package ml.combust.mleap.avro
 
-import ml.combust.mleap.core.tensor.{DenseTensor, SparseTensor, Tensor}
+import ml.combust.mleap.core.tensor.SparseTensor
 import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
 import org.apache.avro.util.Utf8
@@ -29,7 +30,7 @@ case class ValueConverter() {
       val vectorRecord = new GenericData.Record(tt)
       (value) => {
         val tensor = value.asInstanceOf[Tensor[_]]
-        val values = tensor.rawValues.toSeq.asJava
+        val values = tensor.rawValuesIterator.toSeq.asJava
         vectorRecord.put(tensorSchemaDimensionsIndex, tensor.dimensions.asJava)
         vectorRecord.put(tensorSchemaValuesIndex, values)
         tensor match {

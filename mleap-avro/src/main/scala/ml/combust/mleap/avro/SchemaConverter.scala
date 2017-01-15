@@ -2,9 +2,9 @@ package ml.combust.mleap.avro
 
 import java.nio.charset.Charset
 
-import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.tensor.Tensor
 import org.apache.avro.Schema
 
 import scala.language.implicitConversions

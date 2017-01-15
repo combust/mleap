@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.reflection
 
-import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.tensor.Tensor
 
 /**
   * Created by hollinwilkins on 10/21/16.

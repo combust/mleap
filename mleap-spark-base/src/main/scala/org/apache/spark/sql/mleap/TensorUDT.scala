@@ -3,7 +3,7 @@ package org.apache.spark.sql.mleap
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, DataInputStream, DataOutputStream}
 
 import ml.combust.mleap.binary._
-import ml.combust.mleap.core.tensor.Tensor
+import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{GenericInternalRow, UnsafeArrayData}
 import org.apache.spark.sql.types._

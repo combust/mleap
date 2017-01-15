@@ -1,9 +1,9 @@
 package ml.combust.mleap.avro
 
-import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.serialization._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
 /**

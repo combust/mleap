@@ -1,10 +1,10 @@
 package ml.combust.mleap.runtime.transformer.classification
 
 import ml.combust.mleap.core.classification.GBTClassifierModel
-import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.test.TestUtil
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
 /**

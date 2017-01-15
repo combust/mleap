@@ -2,6 +2,7 @@ import ml.combust.mleap.{Release, Common}
 
 lazy val aggregatedProjects: Seq[ProjectReference] = {
   val base: Seq[ProjectReference] = Seq(baseProject,
+    tensor,
     bundleMl,
     core,
     runtime,
@@ -11,7 +12,7 @@ lazy val aggregatedProjects: Seq[ProjectReference] = {
     spark,
     sparkExtension)
 
-  sys.props.get("mleap.tensorflow.compile") match {
+  sys.props.get("mleap.tensorflow.enabled") match {
     case Some("true") => base :+ (tensorflow: ProjectReference)
     case _ => base
   }
@@ -30,16 +31,22 @@ lazy val baseProject = Project(
   base = file("mleap-base")
 )
 
+lazy val tensor = Project(
+  id = "mleap-tensor",
+  base = file("mleap-tensor"),
+  dependencies = Seq(baseProject)
+)
+
 lazy val bundleMl = Project(
   id = "bundle-ml",
   base = file("bundle-ml"),
-  dependencies = Seq(baseProject)
+  dependencies = Seq(baseProject, tensor)
 )
 
 lazy val core = Project(
   id = "mleap-core",
   base = file("mleap-core"),
-  dependencies = Seq(baseProject)
+  dependencies = Seq(baseProject, tensor)
 )
 
 lazy val runtime = Project(

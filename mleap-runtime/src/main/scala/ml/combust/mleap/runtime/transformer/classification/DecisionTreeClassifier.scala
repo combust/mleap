@@ -1,10 +1,10 @@
 package ml.combust.mleap.runtime.transformer.classification
 
 import ml.combust.mleap.core.classification.DecisionTreeClassifierModel
-import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.tensor.Tensor
 
 import scala.util.Try
 

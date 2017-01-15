@@ -39,7 +39,9 @@ object Dependencies {
   import Compile._
   val l = libraryDependencies
 
-  val bundleMl = l ++= Seq(sprayJson, arm, config, Test.scalaTest)
+  val tensor = l ++= Seq(sprayJson)
+
+  val bundleMl = l ++= Seq(arm, config, Test.scalaTest)
 
   val base = l ++= Seq()
 

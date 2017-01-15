@@ -1,7 +1,7 @@
 package ml.combust.mleap.tensorflow.converter
 
-import ml.combust.mleap.core.tensor.DenseTensor
 import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.tensor.DenseTensor
 import org.tensorflow
 
 import scala.collection.mutable

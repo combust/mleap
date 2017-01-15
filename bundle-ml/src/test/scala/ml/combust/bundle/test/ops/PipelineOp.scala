@@ -20,7 +20,7 @@ class PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
 
     override def store(model: Model, obj: PipelineModel)
                       (implicit context: BundleContext[Any]): Model = {
-      model.withAttr(Attribute("nodes", Value.stringList(GraphSerializer(context).write(obj.stages))))
+      model.withAttr("nodes", Value.stringList(GraphSerializer(context).write(obj.stages)))
     }
 
 

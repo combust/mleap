@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.OneHotEncoderModel
-import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
+import ml.combust.mleap.tensor.Tensor
 
 import scala.util.Try
 

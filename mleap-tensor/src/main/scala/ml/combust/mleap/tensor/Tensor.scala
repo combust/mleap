@@ -1,6 +1,4 @@
-package ml.combust.mleap.core.tensor
-
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
+package ml.combust.mleap.tensor
 
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
@@ -11,29 +9,12 @@ import scala.reflect.ClassTag
 object Tensor {
   val BOOLEAN: Byte = 0
   val STRING: Byte = 1
-  val INT: Byte = 2
-  val LONG: Byte = 3
-  val FLOAT: Byte = 4
-  val DOUBLE: Byte = 5
-
-  implicit def toVector(tensor: Tensor[Double]): Vector = tensor match {
-    case tensor: DenseTensor[_] if tensor.dimensions.size == 1 =>
-      Vectors.dense(tensor.asInstanceOf[DenseTensor[Double]].values)
-    case tensor: SparseTensor[_] if tensor.dimensions.size == 1 && tensor.dimensions.head > 0 =>
-      val t = tensor.asInstanceOf[SparseTensor[Double]]
-      Vectors.sparse(t.dimensions.head,
-        indices = t.indices.map(_.head).toArray,
-        values = t.values)
-  }
-
-  implicit def fromVector(vector: Vector): Tensor[Double] = vector match {
-    case vector: DenseVector =>
-      DenseTensor(DOUBLE, vector.values, Seq(vector.values.length))
-    case vector: SparseVector =>
-      SparseTensor(DOUBLE, indices = vector.indices.map(i => Seq(i)),
-        values = vector.values,
-        dimensions = Seq(vector.size))
-  }
+  val BYTE: Byte = 2
+  val SHORT: Byte = 3
+  val INT: Byte = 4
+  val LONG: Byte = 5
+  val FLOAT: Byte = 6
+  val DOUBLE: Byte = 7
 
   private val BooleanClass = classOf[Boolean]
   private val StringClass = classOf[String]
@@ -72,7 +53,8 @@ sealed trait Tensor[T] {
   def toDense: DenseTensor[T]
   def toArray(implicit ct: ClassTag[T]): Array[T]
 
-  def rawValues: Iterator[T]
+  def rawValues: Array[T]
+  def rawValuesIterator: Iterator[T]
 
   def get(indices: Int *): T
 }
@@ -91,7 +73,8 @@ case class DenseTensor[T](override val base: Byte,
 
   override def toDense: DenseTensor[T] = this
   override def toArray(implicit ct: ClassTag[T]): Array[T] = values
-  override def rawValues: Iterator[T] = values.iterator
+  override def rawValues: Array[T] = values
+  override def rawValuesIterator: Iterator[T] = values.iterator
 
   override def get(indices: Int *): T = {
     var i = 0
@@ -158,7 +141,8 @@ case class SparseTensor[T](override val base: Byte,
     array
   }
 
-  override def rawValues: Iterator[T] = values.iterator
+  override def rawValues: Array[T] = values
+  override def rawValuesIterator: Iterator[T] = values.iterator
   override def get(indices: Int*): T = ???
 
   private def denseIndex(index: Seq[Int]): Int = {

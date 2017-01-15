@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CountVectorizerModel
-import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
+import ml.combust.mleap.tensor.Tensor
 
 /**
   * Created by hollinwilkins on 12/28/16.

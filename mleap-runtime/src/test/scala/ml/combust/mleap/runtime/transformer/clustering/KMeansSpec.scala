@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.KMeansModel
-import ml.combust.mleap.core.tensor.DenseTensor
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 

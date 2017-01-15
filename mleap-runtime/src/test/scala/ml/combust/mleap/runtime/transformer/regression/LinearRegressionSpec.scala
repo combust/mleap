@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.LinearRegressionModel
-import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 

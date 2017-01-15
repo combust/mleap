@@ -10,6 +10,8 @@ import ml.bundle.DataType.DataType.ListType
 import ml.bundle.TensorType.TensorType
 import ml.bundle.Socket.Socket
 import ml.combust.bundle.HasBundleRegistry
+import ml.combust.mleap.tensor.JsonSupport._
+import ml.combust.mleap.tensor.Tensor
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
@@ -49,26 +51,35 @@ trait JsonSupportLowPriority {
 
   implicit val bundleBasicTypeFormat: JsonFormat[BasicType] = new JsonFormat[BasicType] {
     override def read(json: JsValue): BasicType = json match {
-      case JsString("double") => BasicType.DOUBLE
-      case JsString("string") => BasicType.STRING
       case JsString("boolean") => BasicType.BOOLEAN
+      case JsString("string") => BasicType.STRING
+      case JsString("byte") => BasicType.BYTE
+      case JsString("short") => BasicType.SHORT
+      case JsString("int") => BasicType.INT
       case JsString("long") => BasicType.LONG
+      case JsString("float") => BasicType.FLOAT
+      case JsString("double") => BasicType.DOUBLE
       case _ => deserializationError("invalid basic type")
     }
 
     override def write(obj: BasicType): JsValue = obj match {
-      case BasicType.DOUBLE => JsString("double")
-      case BasicType.STRING => JsString("string")
       case BasicType.BOOLEAN => JsString("boolean")
+      case BasicType.STRING => JsString("string")
+      case BasicType.BYTE => JsString("byte")
+      case BasicType.SHORT => JsString("short")
+      case BasicType.INT => JsString("int")
       case BasicType.LONG => JsString("long")
+      case BasicType.FLOAT => JsString("float")
+      case BasicType.DOUBLE => JsString("double")
       case _ => serializationError("invalid basic type")
     }
   }
 
-  implicit val bundleTensorTypeFormat: JsonFormat[TensorType] = jsonFormat2(TensorType.apply)
+  implicit val bundleTensorTypeFormat: JsonFormat[TensorType] = jsonFormat1(TensorType.apply)
 
   implicit val bundleDataTypeFormat: JsonFormat[DataType] = new JsonFormat[DataType] {
     override def read(json: JsValue): DataType = json match {
+      case JsString("data-type") => DataType(DataType.Underlying.Dt(true))
       case _: JsString => DataType(DataType.Underlying.Basic(bundleBasicTypeFormat.read(json)))
       case obj: JsObject =>
         obj.fields("type") match {
@@ -92,6 +103,8 @@ trait JsonSupportLowPriority {
         JsObject(("type", JsString("tensor")), ("tensor", bundleTensorTypeFormat.write(obj.getTensor)))
       } else if(obj.underlying.isCustom) {
         JsObject(("type", JsString("custom")), ("name", JsString(obj.getCustom)))
+      } else if(obj.underlying.isDt) {
+        JsString("data-type")
       } else {
         serializationError("invalid data type")
       }
@@ -101,16 +114,28 @@ trait JsonSupportLowPriority {
   def bundleTensorFormat(tt: TensorType): JsonFormat[Any] = new JsonFormat[Any] {
     override def read(json: JsValue): Any = {
       tt.base match {
-        case BasicType.DOUBLE => json.convertTo[Seq[Double]]
-        case BasicType.STRING => json.convertTo[Seq[String]]
-        case _ => deserializationError("unsupported tensor")
+        case BasicType.BOOLEAN => json.convertTo[Tensor[Boolean]]
+        case BasicType.STRING => json.convertTo[Tensor[String]]
+        case BasicType.BYTE => json.convertTo[Tensor[Byte]]
+        case BasicType.SHORT => json.convertTo[Tensor[Short]]
+        case BasicType.INT => json.convertTo[Tensor[Int]]
+        case BasicType.LONG => json.convertTo[Tensor[Long]]
+        case BasicType.FLOAT => json.convertTo[Tensor[Float]]
+        case BasicType.DOUBLE => json.convertTo[Tensor[Double]]
+        case _ => deserializationError(s"unsupported tensor ${tt.base}")
       }
     }
 
     override def write(obj: Any): JsValue = {
       tt.base match {
-        case BasicType.DOUBLE => obj.asInstanceOf[Seq[Double]].toJson
-        case BasicType.STRING => obj.asInstanceOf[Seq[String]].toJson
+        case BasicType.BOOLEAN => obj.asInstanceOf[Tensor[Boolean]].toJson
+        case BasicType.STRING => obj.asInstanceOf[Tensor[String]].toJson
+        case BasicType.BYTE => obj.asInstanceOf[Tensor[Byte]].toJson
+        case BasicType.SHORT => obj.asInstanceOf[Tensor[Short]].toJson
+        case BasicType.INT => obj.asInstanceOf[Tensor[Int]].toJson
+        case BasicType.LONG => obj.asInstanceOf[Tensor[Long]].toJson
+        case BasicType.FLOAT => obj.asInstanceOf[Tensor[Float]].toJson
+        case BasicType.DOUBLE => obj.asInstanceOf[Tensor[Double]].toJson
         case _ => serializationError("unsupported tensor")
       }
     }
@@ -129,11 +154,15 @@ trait JsonSupportLowPriority {
         JsArray(obj.map(format.write): _*)
       } else if(base.underlying.isBasic) {
         base.getBasic match {
-          case BasicType.DOUBLE => obj.asInstanceOf[Seq[Double]].toJson
-          case BasicType.STRING => obj.asInstanceOf[Seq[String]].toJson
           case BasicType.BOOLEAN => obj.asInstanceOf[Seq[Boolean]].toJson
+          case BasicType.STRING => obj.asInstanceOf[Seq[String]].toJson
+          case BasicType.BYTE => obj.asInstanceOf[Seq[Byte]].toJson
+          case BasicType.SHORT => obj.asInstanceOf[Seq[Short]].toJson
+          case BasicType.INT => obj.asInstanceOf[Seq[Int]].toJson
           case BasicType.LONG => obj.asInstanceOf[Seq[Long]].toJson
-          case _ => serializationError("invalid basic type")
+          case BasicType.FLOAT => obj.asInstanceOf[Seq[Float]].toJson
+          case BasicType.DOUBLE => obj.asInstanceOf[Seq[Double]].toJson
+          case _ => serializationError(s"invalid basic type ${base.getBasic}")
         }
       } else if(base.underlying.isList) {
         val format = bundleListValueFormat(base.getList)
@@ -150,10 +179,14 @@ trait JsonSupportLowPriority {
         json.convertTo[Seq[JsValue]].map(format.read)
       } else if(base.underlying.isBasic) {
         base.getBasic match {
-          case BasicType.DOUBLE => json.convertTo[Seq[Double]]
-          case BasicType.STRING => json.convertTo[Seq[String]]
           case BasicType.BOOLEAN => json.convertTo[Seq[Boolean]]
+          case BasicType.STRING => json.convertTo[Seq[String]]
+          case BasicType.BYTE => json.convertTo[Seq[Byte]]
+          case BasicType.SHORT => json.convertTo[Seq[Short]]
+          case BasicType.INT => json.convertTo[Seq[Int]]
           case BasicType.LONG => json.convertTo[Seq[Long]]
+          case BasicType.FLOAT => json.convertTo[Seq[Float]]
+          case BasicType.DOUBLE => json.convertTo[Seq[Double]]
           case _ => deserializationError("invalid basic type")
         }
       } else if(base.underlying.isList) {
@@ -175,11 +208,15 @@ trait JsonSupportLowPriority {
         bundleTensorFormat(dt.getTensor).write(obj)
       } else if(dt.underlying.isBasic) {
         dt.getBasic match {
-          case BasicType.DOUBLE => DoubleJsonFormat.write(obj.asInstanceOf[Double])
-          case BasicType.STRING => StringJsonFormat.write(obj.asInstanceOf[String])
           case BasicType.BOOLEAN => BooleanJsonFormat.write(obj.asInstanceOf[Boolean])
+          case BasicType.STRING => StringJsonFormat.write(obj.asInstanceOf[String])
+          case BasicType.BYTE => ByteJsonFormat.write(obj.asInstanceOf[Byte])
+          case BasicType.SHORT => ShortJsonFormat.write(obj.asInstanceOf[Short])
+          case BasicType.INT => IntJsonFormat.write(obj.asInstanceOf[Int])
           case BasicType.LONG => LongJsonFormat.write(obj.asInstanceOf[Long])
-          case _ => serializationError("invalid basic type")
+          case BasicType.FLOAT => FloatJsonFormat.write(obj.asInstanceOf[Float])
+          case BasicType.DOUBLE => DoubleJsonFormat.write(obj.asInstanceOf[Double])
+          case _ => serializationError(s"invalid basic type ${dt.getBasic}")
         }
       } else { serializationError("unsupported data type") }
     }
@@ -194,11 +231,15 @@ trait JsonSupportLowPriority {
         bundleTensorFormat(dt.getTensor).read(json)
       } else if(dt.underlying.isBasic) {
         dt.getBasic match {
-          case BasicType.DOUBLE => DoubleJsonFormat.read(json)
-          case BasicType.STRING => StringJsonFormat.read(json)
           case BasicType.BOOLEAN => BooleanJsonFormat.read(json)
+          case BasicType.STRING => StringJsonFormat.read(json)
+          case BasicType.BYTE => ByteJsonFormat.read(json)
+          case BasicType.SHORT => ShortJsonFormat.read(json)
+          case BasicType.INT => IntJsonFormat.read(json)
           case BasicType.LONG => LongJsonFormat.read(json)
-          case _ => deserializationError("invalid basic type")
+          case BasicType.FLOAT => FloatJsonFormat.read(json)
+          case BasicType.DOUBLE => DoubleJsonFormat.read(json)
+          case _ => deserializationError(s"invalid basic type ${dt.getBasic}")
         }
       } else { deserializationError("unsupported data type") }
 
@@ -209,25 +250,23 @@ trait JsonSupportLowPriority {
   implicit def bundleAttributeFormat(implicit hr: HasBundleRegistry): JsonFormat[Attribute] = new JsonFormat[Attribute] {
     override def read(json: JsValue): Attribute = json match {
       case json: JsObject =>
-        val name = StringJsonFormat.read(json.fields("name"))
         val dt = bundleDataTypeFormat.read(json.fields("type"))
         val value = bundleValueFormat(dt).read(json.fields("value"))
 
-        Attribute(name = name, value = Value(dt, value))
+        Attribute(value = Value(dt, value))
       case _ => deserializationError("invalid basic type")
     }
 
     override def write(obj: Attribute): JsValue = {
       implicit val format = bundleValueFormat(obj.value.bundleDataType)
-      JsObject(("name", JsString(obj.name)),
-        ("type", obj.value.bundleDataType.toJson),
+      JsObject(("type", obj.value.bundleDataType.toJson),
         ("value", format.write(obj.value.value)))
     }
   }
 
   implicit def bundleEmbeddedAttributeListFormat(implicit hr: HasBundleRegistry): JsonFormat[AttributeList] = new JsonFormat[AttributeList] {
-    override def write(obj: AttributeList): JsValue = obj.attributes.toJson
-    override def read(json: JsValue): AttributeList = AttributeList(json.convertTo[Seq[Attribute]])
+    override def write(obj: AttributeList): JsValue = obj.lookup.toJson
+    override def read(json: JsValue): AttributeList = AttributeList(json.convertTo[Map[String, Attribute]])
   }
 
   implicit val bundleFormatFormat: JsonFormat[SerializationFormat] = new JsonFormat[SerializationFormat] {
@@ -267,11 +306,11 @@ trait JsonSupport extends JsonSupportLowPriority {
   implicit def bundleAttributeListFormat(implicit hr: HasBundleRegistry): RootJsonFormat[AttributeList] = new RootJsonFormat[AttributeList] {
     override def read(json: JsValue): AttributeList = json match {
       case json: JsObject =>
-        AttributeList(json.fields("attributes").convertTo[Seq[Attribute]])
+        AttributeList(json.fields("attributes").convertTo[Map[String, Attribute]])
       case _ => deserializationError("invalid attribute list")
     }
 
-    override def write(obj: AttributeList): JsValue = JsObject("attributes" -> obj.attributes.toJson)
+    override def write(obj: AttributeList): JsValue = JsObject("attributes" -> obj.lookup.toJson)
   }
 }
 

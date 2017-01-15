@@ -45,33 +45,14 @@ trait HasAttributeList[T] {
 
   /** Add an attribute to the list.
     *
-    * @param attribute attribute to add to the list
-    * @return a copy of T with the attribute added to the attribute list
-    */
-  def withAttr(attribute: Attribute): T = attributes match {
-    case Some(l) => replaceAttrList(Some(l.withAttr(attribute)))
-    case None => replaceAttrList(Some(AttributeList(attribute)))
-  }
-
-  /** Add an optional attribute to the list.
-    *
-    * @param attribute optional attribute to add to the list
-    * @return a copy of T with the attribute optionally added
-    */
-  def withAttr(attribute: Option[Attribute]): T = (attributes, attribute) match {
-    case (Some(attrs), Some(attr)) => replaceAttrList(Some(attrs.withAttr(attr)))
-    case (Some(attrs), None) => replaceAttrList(Some(attrs))
-    case (None, Some(attr)) => replaceAttrList(Some(AttributeList(attr)))
-    case (None, None) => replaceAttrList(None)
-  }
-
-  /** Add an attribute to the list.
-    *
     * @param name name of the attribute
     * @param value value of the attribute
     * @return a copy of T with the attribute added
     */
-  def withAttr(name: String, value: Value): T = withAttr(Attribute(name, value))
+  def withAttr(name: String, value: Value): T = attributes match {
+    case Some(l) => replaceAttrList(Some(l.withAttr(name, Attribute(value))))
+    case None => replaceAttrList(Some(AttributeList(name -> Attribute(value))))
+  }
 
   /** Add an optional attribute to the list.
     *
@@ -79,7 +60,12 @@ trait HasAttributeList[T] {
     * @param value optional value
     * @return a copy of T with the attribute optionally added
     */
-  def withAttr(name: String, value: Option[Value]): T = withAttr(value.map(Attribute(name, _)))
+  def withAttr(name: String, value: Option[Value]): T = (attributes, value) match {
+    case (Some(attrs), Some(v)) => replaceAttrList(Some(attrs.withAttr(name, Attribute(v))))
+    case (Some(attrs), None) => replaceAttrList(Some(attrs))
+    case (None, Some(v)) => replaceAttrList(Some(AttributeList(name -> Attribute(v))))
+    case (None, None) => replaceAttrList(None)
+  }
 
   /** Add a list of attributes to [[attributes]].
     *
@@ -109,8 +95,8 @@ object AttributeList {
     * @param attrs list of [[Attribute]]
     * @return [[AttributeList]] with all attrs passed in
     */
-  def apply(attrs: Seq[Attribute]): AttributeList = {
-    AttributeList(attrs.map(a => (a.name, a)).toMap)
+  def apply(attrs: Seq[(String, Attribute)]): AttributeList = {
+    AttributeList(attrs.toMap)
   }
 
   /** Construct an [[AttributeList]] from a list of [[Attribute]].
@@ -119,7 +105,7 @@ object AttributeList {
     * @param attrs tail of [[Attribute]] list
     * @return [[AttributeList]] with attr1 and attrs in the list
     */
-  def apply(attr1: Attribute, attrs: Attribute *): AttributeList = {
+  def apply(attr1: (String, Attribute), attrs: (String, Attribute) *): AttributeList = {
     AttributeList(Seq(attr1) ++ attrs)
   }
 
@@ -131,7 +117,9 @@ object AttributeList {
     */
   def fromBundle(list: ml.bundle.AttributeList.AttributeList)
                 (implicit hr: HasBundleRegistry): AttributeList = {
-    val attrs = list.attributes.map(Attribute.fromBundle)
+    val attrs = list.attributes.map {
+      case (key, attr) => (key, Attribute.fromBundle(attr))
+    }
     AttributeList(attrs)
   }
 
@@ -142,7 +130,7 @@ object AttributeList {
     * @param attrs [[Attribute]] in the list
     * @return None if {{{attrs.isEmpty}}} otherwise Some(attributeList)
     */
-  def option(attrs: Seq[Attribute]): Option[AttributeList] = {
+  def option(attrs: Map[String, Attribute]): Option[AttributeList] = {
     if(attrs.nonEmpty) { Some(apply(attrs)) } else { None }
   }
 }
@@ -163,7 +151,9 @@ case class AttributeList(lookup: Map[String, Attribute]) {
     * @return bundle attribute list
     */
   def asBundle(implicit hr: HasBundleRegistry): ml.bundle.AttributeList.AttributeList = {
-    val attrs = lookup.values.map(_.asBundle).toSeq
+    val attrs = lookup.map {
+      case (key, attr) => (key, attr.asBundle)
+    }
     ml.bundle.AttributeList.AttributeList(attrs)
   }
 
@@ -175,12 +165,6 @@ case class AttributeList(lookup: Map[String, Attribute]) {
     * @return the attribute
     */
   def apply(name: String): Attribute = attr(name)
-
-  /** Iteratable of all [[Attribute]] in the list.
-    *
-    * @return iterable of all [[Attribute]] in list
-    */
-  def attributes: Iterable[Attribute] = lookup.values
 
   /** Get an [[Attribute]] from the list.
     *
@@ -200,11 +184,12 @@ case class AttributeList(lookup: Map[String, Attribute]) {
 
   /** Add an attribute to the list.
     *
+    * @param name name of attribute
     * @param attribute attribute to add
     * @return copy of [[AttributeList]] with attribute added
     */
-  def withAttr(attribute: Attribute): AttributeList = {
-    copy(lookup = lookup + (attribute.name -> attribute))
+  def withAttr(name: String, attribute: Attribute): AttributeList = {
+    copy(lookup = lookup + (name -> attribute))
   }
 
   /** Add a list of attributes to the list.
@@ -213,8 +198,8 @@ case class AttributeList(lookup: Map[String, Attribute]) {
     * @return copy of [[AttributeList]] with all attributes added
     */
   def withAttrList(list: AttributeList): AttributeList = {
-    list.attributes.foldLeft(this) {
-      case (l, attr) => l.withAttr(attr)
+    list.lookup.foldLeft(this) {
+      case (l, (name, attr)) => l.withAttr(name, attr)
     }
   }
 }

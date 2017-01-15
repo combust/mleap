@@ -1,12 +1,12 @@
 package ml.combust.mleap.runtime.transformer.builder
 
 import ml.combust.mleap.core.regression.LinearRegressionModel
-import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.transformer.Pipeline
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
 import ml.combust.mleap.runtime.Row
 import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType}
+import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 

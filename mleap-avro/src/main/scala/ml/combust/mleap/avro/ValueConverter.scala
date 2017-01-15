@@ -1,6 +1,5 @@
 package ml.combust.mleap.avro
 
-import ml.combust.mleap.core.tensor.SparseTensor
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 import org.apache.avro.Schema

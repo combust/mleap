@@ -17,6 +17,7 @@ import org.apache.spark.ml.linalg.{Vector, VectorUDT}
 import org.apache.spark.sql.mleap.TensorUDT
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.types.ArrayType
+import ml.combust.mleap.runtime.converter.VectorConverters._
 import resource._
 
 import scala.collection.mutable

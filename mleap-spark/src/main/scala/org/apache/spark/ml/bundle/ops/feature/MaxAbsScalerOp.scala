@@ -18,13 +18,13 @@ class MaxAbsScalerOp extends OpNode[SparkBundleContext, MaxAbsScalerModel, MaxAb
 
     override def store(model: Model, obj: MaxAbsScalerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("maxAbs", Value.doubleVector(obj.maxAbs.toArray))
+      model.withAttr("maxAbs", Value.vector(obj.maxAbs.toArray))
   }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): MaxAbsScalerModel = {
       new MaxAbsScalerModel(uid = "",
-        maxAbs = Vectors.dense(model.value("maxAbs").getDoubleVector.toArray))
+        maxAbs = Vectors.dense(model.value("maxAbs").getTensor[Double].toArray))
     }
 
   }

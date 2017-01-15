@@ -9,14 +9,14 @@ import scala.language.implicitConversions
   * Created by hollinwilkins on 1/15/17.
   */
 trait VectorConverters {
-  implicit def toTensor(vector: Vector): Tensor[Double] = vector match {
+  implicit def sparkVectorToMleapTensor(vector: Vector): Tensor[Double] = vector match {
     case vector: DenseVector => DenseTensor(vector.toArray, Seq(vector.size))
     case vector: SparseVector => SparseTensor(indices = vector.indices.map(i => Seq(i)),
       values = vector.values,
       dimensions = Seq(vector.size))
   }
 
-  implicit def fromTensor(tensor: Tensor[Double]): Vector = tensor match {
+  implicit def mleapTensorToSparkVector(tensor: Tensor[Double]): Vector = tensor match {
     case tensor: DenseTensor[_] =>
       Vectors.dense(tensor.rawValues.asInstanceOf[Array[Double]])
     case tensor: SparseTensor[_] =>

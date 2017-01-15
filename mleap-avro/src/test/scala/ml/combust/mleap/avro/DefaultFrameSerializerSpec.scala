@@ -1,9 +1,9 @@
 package ml.combust.mleap.avro
 
+import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.serialization._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types._
-import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 
 /**
@@ -13,9 +13,15 @@ class DefaultFrameSerializerSpec extends FunSpec {
   val schema = StructType(StructField("test_double", DoubleType()),
     StructField("test_float", FloatType()),
     StructField("test_string", StringType()),
-    StructField("test_vector", TensorType.doubleVector()),
+    StructField("test_vector", TensorType(DoubleType())),
+    StructField("test_vector2", TensorType(DoubleType())),
+    StructField("test_float_vector", TensorType(FloatType())),
     StructField("test_nullable", StringType(true))).get
-  val row = Row(2.0d, 45.3f, "hello", Vectors.dense(Array(0.1, 2.33, 4.5)), None)
+  val row = Row(2.0d, 45.3f, "hello",
+    Tensor.denseVector(Array(0.1, 2.33, 4.5)),
+    Tensor.denseVector(Array(0.1, 2.33, 4.5)),
+    Tensor.denseVector(Array(0.1f, 2.33f, 4.5f)),
+    None)
   val dataset = LocalDataset(Seq(row))
   val frame = LeapFrame(schema, dataset)
 

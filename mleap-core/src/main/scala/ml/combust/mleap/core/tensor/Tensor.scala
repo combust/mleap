@@ -52,6 +52,13 @@ object Tensor {
     case _ => throw new RuntimeException(s"unsupported class ${implicitly[ClassTag[T]].runtimeClass}")
   }
 
+  def create[T: ClassTag](values: Array[T],
+                          dimensions: Seq[Int],
+                          indices: Option[Seq[Seq[Int]]]): Tensor[T] = indices match {
+    case Some(is) => SparseTensor(is, values, dimensions)
+    case None => DenseTensor(values, dimensions)
+  }
+
   def denseVector[T: ClassTag](values: Array[T]): DenseTensor[T] = DenseTensor(tensorType[T], values, Seq(values.length))
 }
 
@@ -64,6 +71,8 @@ sealed trait Tensor[T] {
 
   def toDense: DenseTensor[T]
   def toArray(implicit ct: ClassTag[T]): Array[T]
+
+  def rawValues: Iterator[T]
 
   def get(indices: Int *): T
 }
@@ -82,6 +91,7 @@ case class DenseTensor[T](override val base: Byte,
 
   override def toDense: DenseTensor[T] = this
   override def toArray(implicit ct: ClassTag[T]): Array[T] = values
+  override def rawValues: Iterator[T] = values.iterator
 
   override def get(indices: Int *): T = {
     var i = 0
@@ -148,6 +158,7 @@ case class SparseTensor[T](override val base: Byte,
     array
   }
 
+  override def rawValues: Iterator[T] = values.iterator
   override def get(indices: Int*): T = ???
 
   private def denseIndex(index: Seq[Int]): Int = {

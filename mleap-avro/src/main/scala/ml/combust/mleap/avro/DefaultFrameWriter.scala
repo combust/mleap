@@ -11,6 +11,8 @@ import org.apache.avro.generic.{GenericData, GenericDatumWriter}
 import SchemaConverter._
 import resource._
 
+import scala.util.{Failure, Try}
+
 /**
   * Created by hollinwilkins on 11/2/16.
   */
@@ -33,7 +35,10 @@ class DefaultFrameWriter extends FrameWriter {
           i = i + 1
         }
 
-        writer.append(record)
+        Try(writer.append(record)) match {
+          case Failure(error) => error.printStackTrace()
+          case _ =>
+        }
       }
 
       writer.close()

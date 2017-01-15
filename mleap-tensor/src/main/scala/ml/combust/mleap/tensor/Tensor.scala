@@ -53,6 +53,7 @@ sealed trait Tensor[T] {
   def toDense: DenseTensor[T]
   def toArray(implicit ct: ClassTag[T]): Array[T]
 
+  def rawSize: Int = rawValues.size
   def rawValues: Array[T]
   def rawValuesIterator: Iterator[T]
 
@@ -73,6 +74,8 @@ case class DenseTensor[T](override val base: Byte,
 
   override def toDense: DenseTensor[T] = this
   override def toArray(implicit ct: ClassTag[T]): Array[T] = values
+
+
   override def rawValues: Array[T] = values
   override def rawValuesIterator: Iterator[T] = values.iterator
 

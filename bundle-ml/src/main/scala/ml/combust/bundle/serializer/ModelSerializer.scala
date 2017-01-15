@@ -106,7 +106,8 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
         FormatModelSerializer.serializer.write(out, model)
       }).either.either match {
         case Right(_) => Try(model)
-        case Left(errors) => Failure(errors.head)
+        case Left(errors) =>
+          Failure(errors.head)
       }
   }
 

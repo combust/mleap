@@ -492,7 +492,7 @@ case class Value(bundleDataType: DataType, value: Any) {
     * @return true if the value has a large serialization size, false otherwise
     */
   def isLarge(implicit hr: HasBundleRegistry): Boolean = {
-    bundleDataType.underlying.isTensor && getTensor[Any].rawValues.length > 1024 ||
+    bundleDataType.underlying.isTensor && getTensor[Any].rawSize > 1024 ||
       bundleDataType.underlying.isList && !bundleDataType.getList.base.get.underlying.isBasic ||
       bundleDataType.underlying.isCustom && hr.bundleRegistry.custom[Any](bundleDataType.getCustom).isLarge(value)
   }

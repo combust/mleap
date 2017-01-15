@@ -6,6 +6,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.PcaModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Pca
+import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.linalg.DenseMatrix
 
 /**
@@ -19,15 +20,14 @@ class PcaOp extends OpNode[MleapContext, Pca, PcaModel] {
 
     override def store(model: Model, obj: PcaModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("principal_components", Value.tensor[Double](obj.principalComponents.values.toSeq,
-        Seq(obj.principalComponents.numRows, obj.principalComponents.numCols)))
+      model.withAttr("principal_components", Value.tensor[Double](DenseTensor(obj.principalComponents.values,
+        Seq(obj.principalComponents.numRows, obj.principalComponents.numCols))))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): PcaModel = {
-      val tt = model.value("principal_components").bundleDataType.getTensor
-      val values = model.value("principal_components").getTensor[Double].toArray
-      PcaModel(new DenseMatrix(tt.dimensions.head, tt.dimensions(1), values))
+      val values = model.value("principal_components").getTensor[Double]
+      PcaModel(new DenseMatrix(values.dimensions.head, values.dimensions(1), values.toArray))
     }
   }
 

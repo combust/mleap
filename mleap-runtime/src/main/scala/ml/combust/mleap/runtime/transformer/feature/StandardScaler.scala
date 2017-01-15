@@ -4,6 +4,7 @@ import ml.combust.mleap.core.feature.StandardScalerModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.runtime.converter.VectorConverters._
 
 /**
   * Created by hwilkins on 10/23/15.

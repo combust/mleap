@@ -3,7 +3,6 @@ package ml.combust.mleap.binary
 import java.io.{DataInputStream, DataOutputStream}
 import java.nio.charset.Charset
 
-import ml.combust.mleap.core.tensor.SparseTensor
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 

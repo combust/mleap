@@ -1,7 +1,6 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.annotation.SparkCode
-import ml.combust.mleap.core.tensor.SparseTensor
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 

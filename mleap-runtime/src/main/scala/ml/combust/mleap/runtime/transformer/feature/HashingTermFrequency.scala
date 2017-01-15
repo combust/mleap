@@ -4,8 +4,7 @@ import ml.combust.mleap.core.feature.HashingTermFrequencyModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
-
-import scala.util.Try
+import ml.combust.mleap.runtime.converter.VectorConverters._
 
 /**
   * Created by hwilkins on 12/30/15.

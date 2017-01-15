@@ -340,6 +340,10 @@ object Value {
     Value(tensorDataType(TensorSerializer.toBundleType(tensor.base)), tensor)
   }
 
+  def vector[T: ClassTag](values: Array[T]): Value = {
+    tensor(mleap.tensor.Tensor.denseVector(values))
+  }
+
   /** Create a list of booleans value.
     *
     * @param value Scala boolean list

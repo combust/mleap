@@ -19,12 +19,12 @@ class ElementwiseProductOp extends OpNode[MleapContext, ElementwiseProduct, Elem
 
     override def store(model: Model, obj: ElementwiseProductModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("scaling_vec", Value.doubleVector(obj.scalingVec.toArray))
+      model.withAttr("scaling_vec", Value.vector(obj.scalingVec.toArray))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): ElementwiseProductModel = {
-      ElementwiseProductModel(scalingVec = Vectors.dense(model.value("scaling_vec").getDoubleVector.toArray))
+      ElementwiseProductModel(scalingVec = Vectors.dense(model.value("scaling_vec").getTensor[Double].toArray))
     }
   }
 

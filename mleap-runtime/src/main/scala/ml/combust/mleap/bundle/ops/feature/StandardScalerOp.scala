@@ -19,14 +19,14 @@ class StandardScalerOp extends OpNode[MleapContext, StandardScaler, StandardScal
 
     override def store(model: Model, obj: StandardScalerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("mean", obj.mean.map(_.toArray.toSeq).map(Value.doubleVector)).
-        withAttr("std", obj.mean.map(_.toArray.toSeq).map(Value.doubleVector))
+      model.withAttr("mean", obj.mean.map(_.toArray).map(Value.vector)).
+        withAttr("std", obj.mean.map(_.toArray).map(Value.vector))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): StandardScalerModel = {
-      val mean = model.getValue("mean").map(_.getDoubleVector.toArray).map(Vectors.dense)
-      val std = model.getValue("std").map(_.getDoubleVector.toArray).map(Vectors.dense)
+      val mean = model.getValue("mean").map(_.getTensor[Double].toArray).map(Vectors.dense)
+      val std = model.getValue("std").map(_.getTensor[Double].toArray).map(Vectors.dense)
       StandardScalerModel(mean = mean, std = std)
     }
   }

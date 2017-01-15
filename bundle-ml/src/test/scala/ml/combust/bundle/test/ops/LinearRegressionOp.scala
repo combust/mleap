@@ -3,7 +3,6 @@ package ml.combust.bundle.test.ops
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.{BundleContext, dsl}
-import ml.combust.mleap.tensor.Tensor
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -23,14 +22,14 @@ class LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
 
     override def store(model: Model, obj: LinearModel)
                       (implicit context: BundleContext[Any]): Model = {
-      model.withAttr("coefficients", Value.tensor(Tensor.denseVector(obj.coefficients.toArray))).
+      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept))
     }
 
 
     override def load(model: Model)
                      (implicit context: BundleContext[Any]): LinearModel = {
-      LinearModel(coefficients = model.value("coefficients").getTensor[Double].toDense.values,
+      LinearModel(coefficients = model.value("coefficients").getTensor[Double].toArray,
         intercept = model.value("intercept").getDouble)
     }
   }

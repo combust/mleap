@@ -4,6 +4,7 @@ import ml.combust.mleap.core.feature.PcaModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.runtime.converter.VectorConverters._
 
 /**
   * Created by hollinwilkins on 10/12/16.

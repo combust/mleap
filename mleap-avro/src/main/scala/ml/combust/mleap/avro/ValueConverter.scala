@@ -1,5 +1,7 @@
 package ml.combust.mleap.avro
 
+import java.nio.ByteBuffer
+
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 import org.apache.avro.Schema
@@ -29,7 +31,11 @@ case class ValueConverter() {
       val vectorRecord = new GenericData.Record(tt)
       (value) => {
         val tensor = value.asInstanceOf[Tensor[_]]
-        val values = tensor.rawValuesIterator.toSeq.asJava
+        val values = if(tensor.base == Tensor.BYTE) {
+          ByteBuffer.wrap(tensor.rawValues.asInstanceOf[Array[Byte]])
+        } else {
+          tensor.rawValuesIterator.toSeq.asJava
+        }
         vectorRecord.put(tensorSchemaDimensionsIndex, tensor.dimensions.asJava)
         vectorRecord.put(tensorSchemaValuesIndex, values)
         tensor match {
@@ -63,6 +69,8 @@ case class ValueConverter() {
     case at: ListType => at.base match {
       case BooleanType(_) => (value) => value.asInstanceOf[GenericData.Array[Boolean]].asScala
       case StringType(_) => (value) => value.asInstanceOf[GenericData.Array[Utf8]].asScala.map(_.toString)
+      case ByteType(_) => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.map(_.toByte)
+      case ShortType(_) => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.map(_.toShort)
       case IntegerType(_) => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala
       case LongType(_) => (value) => value.asInstanceOf[GenericData.Array[Long]].asScala
       case FloatType(_) => (value) => value.asInstanceOf[GenericData.Array[Float]].asScala
@@ -81,18 +89,22 @@ case class ValueConverter() {
           case is => Some(is.asInstanceOf[java.util.List[java.util.List[Int]]].asScala.map(_.asScala))
         }
 
-        record.getSchema.getField("values").schema().getElementType.getType match {
-          case Schema.Type.BOOLEAN =>
+        tt.base match {
+          case BooleanType(_) =>
             Tensor.create(values.asInstanceOf[java.util.List[Boolean]].asScala.toArray, dimensions, indices)
-          case Schema.Type.STRING =>
+          case StringType(_) =>
             Tensor.create(values.asInstanceOf[java.util.List[String]].asScala.toArray, dimensions, indices)
-          case Schema.Type.INT =>
+          case ByteType(_) =>
+            Tensor.create(values.asInstanceOf[ByteBuffer].array(), dimensions, indices)
+          case ShortType(_) =>
+            Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.map(_.toShort).toArray, dimensions, indices)
+          case IntegerType(_) =>
             Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.toArray, dimensions, indices)
-          case Schema.Type.LONG =>
+          case LongType(_) =>
             Tensor.create(values.asInstanceOf[java.util.List[Long]].asScala.toArray, dimensions, indices)
-          case Schema.Type.FLOAT =>
+          case FloatType(_) =>
             Tensor.create(values.asInstanceOf[java.util.List[Float]].asScala.toArray, dimensions, indices)
-          case Schema.Type.DOUBLE =>
+          case DoubleType(_) =>
             Tensor.create(values.asInstanceOf[java.util.List[Double]].asScala.toArray, dimensions, indices)
           case tpe => throw new IllegalArgumentException(s"invalid base type for tensor $tpe")
         }

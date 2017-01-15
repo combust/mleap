@@ -16,11 +16,15 @@ class DefaultFrameSerializerSpec extends FunSpec {
     StructField("test_vector", TensorType(DoubleType())),
     StructField("test_vector2", TensorType(DoubleType())),
     StructField("test_float_vector", TensorType(FloatType())),
+    StructField("test_byte_vector", TensorType(ByteType())),
+    StructField("test_short_vector", TensorType(ShortType())),
     StructField("test_nullable", StringType(true))).get
   val row = Row(2.0d, 45.3f, "hello",
     Tensor.denseVector(Array(0.1, 2.33, 4.5)),
     Tensor.denseVector(Array(0.1, 2.33, 4.5)),
     Tensor.denseVector(Array(0.1f, 2.33f, 4.5f)),
+    Tensor.denseVector(Array[Byte](1, 2, 3, 4)),
+    Tensor.denseVector(Array[Short](16, 45, 78)),
     None)
   val dataset = LocalDataset(Seq(row))
   val frame = LeapFrame(schema, dataset)

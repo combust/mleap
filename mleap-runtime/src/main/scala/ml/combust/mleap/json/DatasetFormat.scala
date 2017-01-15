@@ -25,23 +25,27 @@ object DatasetFormat {
     val isNullable = tt.isNullable
 
     tt.base match {
+      case BooleanType(false) => maybeNullableFormat(mleapTensorFormat[Boolean], isNullable)
       case StringType(false) => maybeNullableFormat(mleapTensorFormat[String], isNullable)
+      case ByteType(false) => maybeNullableFormat(mleapTensorFormat[Byte], isNullable)
+      case ShortType(false) => maybeNullableFormat(mleapTensorFormat[Short], isNullable)
+      case IntegerType(false) => maybeNullableFormat(mleapTensorFormat[Int], isNullable)
+      case LongType(false) => maybeNullableFormat(mleapTensorFormat[Long], isNullable)
       case FloatType(false) => maybeNullableFormat(mleapTensorFormat[Float], isNullable)
       case DoubleType(false) => maybeNullableFormat(mleapTensorFormat[Double], isNullable)
-      case BooleanType(false) => maybeNullableFormat(mleapTensorFormat[Boolean], isNullable)
-      case LongType(false) => maybeNullableFormat(mleapTensorFormat[Long], isNullable)
-      case IntegerType(false) => maybeNullableFormat(mleapTensorFormat[Int], isNullable)
       case _ => serializationError(s"invalid tensor base type: ${tt.base}")
     }
   }
 
   def serializer(tpe: DataType): JsonFormat[_] = tpe match {
+    case BooleanType(isNullable) => maybeNullableFormat(BooleanJsonFormat, isNullable)
     case StringType(isNullable) => maybeNullableFormat(StringJsonFormat, isNullable)
+    case ByteType(isNullable) => maybeNullableFormat(ByteJsonFormat, isNullable)
+    case ShortType(isNullable) => maybeNullableFormat(ShortJsonFormat, isNullable)
+    case IntegerType(isNullable) => maybeNullableFormat(IntJsonFormat, isNullable)
+    case LongType(isNullable) => maybeNullableFormat(LongJsonFormat, isNullable)
     case FloatType(isNullable) => maybeNullableFormat(FloatJsonFormat, isNullable)
     case DoubleType(isNullable) => maybeNullableFormat(DoubleJsonFormat, isNullable)
-    case BooleanType(isNullable) => maybeNullableFormat(BooleanJsonFormat, isNullable)
-    case LongType(isNullable) => maybeNullableFormat(LongJsonFormat, isNullable)
-    case IntegerType(isNullable) => maybeNullableFormat(IntJsonFormat, isNullable)
     case lt: ListType => listSerializer(lt)
     case tt: TensorType => tensorSerializer(tt)
     case ct: CustomType => ct.format

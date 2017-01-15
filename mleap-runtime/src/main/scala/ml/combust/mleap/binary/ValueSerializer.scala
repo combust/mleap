@@ -22,35 +22,41 @@ object ValueSerializer {
   }
 
   def serializerForBasicType(basicType: BasicType): ValueSerializer[Any] = basicType match {
-    case FloatType(isNullable) => maybeNullableSerializer(FloatSerializer, isNullable)
-    case DoubleType(isNullable) => maybeNullableSerializer(DoubleSerializer, isNullable)
+    case BooleanType(isNullable) => maybeNullableSerializer(BooleanSerializer, isNullable)
     case StringType(isNullable) => maybeNullableSerializer(StringSerializer, isNullable)
+    case ByteType(isNullable) => maybeNullableSerializer(ByteSerializer, isNullable)
+    case ShortType(isNullable) => maybeNullableSerializer(ShortSerializer, isNullable)
     case IntegerType(isNullable) => maybeNullableSerializer(IntegerSerializer, isNullable)
     case LongType(isNullable) => maybeNullableSerializer(LongSerializer, isNullable)
-    case BooleanType(isNullable) => maybeNullableSerializer(BooleanSerializer, isNullable)
+    case FloatType(isNullable) => maybeNullableSerializer(FloatSerializer, isNullable)
+    case DoubleType(isNullable) => maybeNullableSerializer(DoubleSerializer, isNullable)
   }
 
   def serializerForDataType(dataType: DataType): ValueSerializer[Any] = dataType match {
     case basicType: BasicType => serializerForBasicType(basicType)
     case ListType(base, isNullable) =>
       base match {
-        case FloatType(_) => maybeNullableSerializer(ListSerializer(FloatSerializer), isNullable)
-        case DoubleType(_) => maybeNullableSerializer(ListSerializer(DoubleSerializer), isNullable)
+        case BooleanType(_) => maybeNullableSerializer(ListSerializer(BooleanSerializer), isNullable)
         case StringType(_) => maybeNullableSerializer(ListSerializer(StringSerializer), isNullable)
+        case ByteType(_) => maybeNullableSerializer(ListSerializer(ByteSerializer), isNullable)
+        case ShortType(_) => maybeNullableSerializer(ListSerializer(ShortSerializer), isNullable)
         case IntegerType(_) => maybeNullableSerializer(ListSerializer(IntegerSerializer), isNullable)
         case LongType(_) => maybeNullableSerializer(ListSerializer(LongSerializer), isNullable)
-        case BooleanType(_) => maybeNullableSerializer(ListSerializer(BooleanSerializer), isNullable)
+        case FloatType(_) => maybeNullableSerializer(ListSerializer(FloatSerializer), isNullable)
+        case DoubleType(_) => maybeNullableSerializer(ListSerializer(DoubleSerializer), isNullable)
         case _ => maybeNullableSerializer(ListSerializer(serializerForDataType(base)), isNullable)
       }
     case tt: TensorType =>
       val isNullable = tt.isNullable
       tt.base match {
-        case FloatType(_) => maybeNullableSerializer(TensorSerializer(FloatSerializer), isNullable)
-        case DoubleType(_) => maybeNullableSerializer(TensorSerializer(DoubleSerializer), isNullable)
+        case BooleanType(_) => maybeNullableSerializer(TensorSerializer(BooleanSerializer), isNullable)
         case StringType(_) => maybeNullableSerializer(TensorSerializer(StringSerializer), isNullable)
+        case ByteType(_) => maybeNullableSerializer(TensorSerializer(ByteSerializer), isNullable)
+        case ShortType(_) => maybeNullableSerializer(TensorSerializer(ShortSerializer), isNullable)
         case IntegerType(_) => maybeNullableSerializer(TensorSerializer(IntegerSerializer), isNullable)
         case LongType(_) => maybeNullableSerializer(TensorSerializer(LongSerializer), isNullable)
-        case BooleanType(_) => maybeNullableSerializer(TensorSerializer(BooleanSerializer), isNullable)
+        case FloatType(_) => maybeNullableSerializer(TensorSerializer(FloatSerializer), isNullable)
+        case DoubleType(_) => maybeNullableSerializer(TensorSerializer(DoubleSerializer), isNullable)
       }
     case ct: CustomType => maybeNullableSerializer(CustomSerializer(ct), ct.isNullable)
     case _ => throw new IllegalArgumentException(s"invalid data type for serialization: $dataType")
@@ -75,26 +81,6 @@ case class NullableSerializer[T](base: ValueSerializer[T]) extends ValueSerializ
   }
 }
 
-object DoubleSerializer extends ValueSerializer[Double] {
-  override def write(value: Double, out: DataOutputStream): Unit = out.writeDouble(value)
-  override def read(in: DataInputStream): Double = in.readDouble()
-}
-
-object FloatSerializer extends ValueSerializer[Float] {
-  override def write(value: Float, out: DataOutputStream): Unit = out.writeFloat(value)
-  override def read(in: DataInputStream): Float = in.readFloat()
-}
-
-object IntegerSerializer extends ValueSerializer[Int] {
-  override def write(value: Int, out: DataOutputStream): Unit = out.writeInt(value)
-  override def read(in: DataInputStream): Int = in.readInt()
-}
-
-object LongSerializer extends ValueSerializer[Long] {
-  override def write(value: Long, out: DataOutputStream): Unit = out.writeLong(value)
-  override def read(in: DataInputStream): Long = in.readLong()
-}
-
 object BooleanSerializer extends ValueSerializer[Boolean] {
   override def write(value: Boolean, out: DataOutputStream): Unit = out.writeBoolean(value)
   override def read(in: DataInputStream): Boolean = in.readBoolean()
@@ -112,6 +98,36 @@ object StringSerializer extends ValueSerializer[String] {
     in.readFully(bytes)
     new String(bytes, ValueSerializer.byteCharset)
   }
+}
+
+object ByteSerializer extends ValueSerializer[Byte] {
+  override def write(value: Byte, out: DataOutputStream): Unit = out.writeByte(value)
+  override def read(in: DataInputStream): Byte = in.readByte()
+}
+
+object ShortSerializer extends ValueSerializer[Short] {
+  override def write(value: Short, out: DataOutputStream): Unit = out.writeShort(value)
+  override def read(in: DataInputStream): Short = in.readShort()
+}
+
+object IntegerSerializer extends ValueSerializer[Int] {
+  override def write(value: Int, out: DataOutputStream): Unit = out.writeInt(value)
+  override def read(in: DataInputStream): Int = in.readInt()
+}
+
+object LongSerializer extends ValueSerializer[Long] {
+  override def write(value: Long, out: DataOutputStream): Unit = out.writeLong(value)
+  override def read(in: DataInputStream): Long = in.readLong()
+}
+
+object FloatSerializer extends ValueSerializer[Float] {
+  override def write(value: Float, out: DataOutputStream): Unit = out.writeFloat(value)
+  override def read(in: DataInputStream): Float = in.readFloat()
+}
+
+object DoubleSerializer extends ValueSerializer[Double] {
+  override def write(value: Double, out: DataOutputStream): Unit = out.writeDouble(value)
+  override def read(in: DataInputStream): Double = in.readDouble()
 }
 
 case class ListSerializer[T: ClassTag](base: ValueSerializer[T]) extends ValueSerializer[Seq[T]] {

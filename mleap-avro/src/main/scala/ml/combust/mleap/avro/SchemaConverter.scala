@@ -17,22 +17,25 @@ import scala.util.Try
 object SchemaConverter {
   def tensorSchema(base: Byte) = {
     val r = Try {
-      val (name, avroBase) = base match {
+      val (name, valuesSchema) = base match {
         case Tensor.BOOLEAN =>
-          ("Boolean", Schema.Type.BOOLEAN)
+          ("Boolean", Schema.createArray(Schema.create(Schema.Type.BOOLEAN)))
         case Tensor.STRING =>
-          ("String", Schema.Type.STRING)
+          ("String", Schema.createArray(Schema.create(Schema.Type.STRING)))
+        case Tensor.BYTE =>
+          ("Byte", Schema.create(Schema.Type.BYTES))
+        case Tensor.SHORT =>
+          ("Short", Schema.createArray(Schema.create(Schema.Type.INT)))
         case Tensor.INT =>
-          ("Int", Schema.Type.INT)
+          ("Int", Schema.createArray(Schema.create(Schema.Type.INT)))
         case Tensor.LONG =>
-          ("Long", Schema.Type.LONG)
+          ("Long", Schema.createArray(Schema.create(Schema.Type.LONG)))
         case Tensor.FLOAT =>
-          ("Float", Schema.Type.FLOAT)
+          ("Float", Schema.createArray(Schema.create(Schema.Type.FLOAT)))
         case Tensor.DOUBLE =>
-          ("Double", Schema.Type.DOUBLE)
+          ("Double", Schema.createArray(Schema.create(Schema.Type.DOUBLE)))
         case _ => throw new IllegalArgumentException(s"invalid base $base")
       }
-      val valuesSchema = Schema.createArray(Schema.create(avroBase))
       val indicesSchema = Schema.createUnion(Schema.createArray(Schema.createArray(Schema.create(Schema.Type.INT))),
         Schema.create(Schema.Type.NULL))
       Schema.createRecord(s"${name}Tensor", "", "ml.combust.mleap.avro", false,
@@ -46,6 +49,8 @@ object SchemaConverter {
 
   val booleanTensorSchema = tensorSchema(Tensor.BOOLEAN)
   val stringTensorSchema = tensorSchema(Tensor.STRING)
+  val byteTensorSchema = tensorSchema(Tensor.BYTE)
+  val shortTensorSchema = tensorSchema(Tensor.SHORT)
   val integerTensorSchema = tensorSchema(Tensor.INT)
   val longTensorSchema = tensorSchema(Tensor.LONG)
   val floatTensorSchema = tensorSchema(Tensor.FLOAT)
@@ -75,12 +80,14 @@ object SchemaConverter {
   }
 
   implicit def mleapBasicToAvroType(basicType: BasicType): Schema = basicType match {
+    case BooleanType(isNullable) => Schema.create(Schema.Type.BOOLEAN)
+    case StringType(isNullable) => Schema.create(Schema.Type.STRING)
+    case ByteType(isNullable) => Schema.create(Schema.Type.INT)
+    case ShortType(isNullable) => Schema.create(Schema.Type.INT)
+    case IntegerType(isNullable) => Schema.create(Schema.Type.INT)
+    case LongType(isNullable) => Schema.create(Schema.Type.LONG)
     case FloatType(isNullable) => Schema.create(Schema.Type.FLOAT)
     case DoubleType(isNullable) => Schema.create(Schema.Type.DOUBLE)
-    case StringType(isNullable) => Schema.create(Schema.Type.STRING)
-    case LongType(isNullable) => Schema.create(Schema.Type.LONG)
-    case IntegerType(isNullable) => Schema.create(Schema.Type.INT)
-    case BooleanType(isNullable) => Schema.create(Schema.Type.BOOLEAN)
   }
 
   implicit def mleapToAvroType(dataType: DataType): Schema = dataType match {
@@ -90,6 +97,8 @@ object SchemaConverter {
       val ts = tt.base match {
         case BooleanType(_) => booleanTensorSchema
         case StringType(_) => stringTensorSchema
+        case ByteType(_) => byteTensorSchema
+        case ShortType(_) => shortTensorSchema
         case IntegerType(_) => integerTensorSchema
         case LongType(_) => longTensorSchema
         case FloatType(_) => floatTensorSchema
@@ -126,18 +135,20 @@ object SchemaConverter {
 
   implicit def avroToMleapType(schema: Schema)
                               (implicit context: MleapContext): DataType = schema.getType match {
+    case Schema.Type.BOOLEAN => BooleanType(false)
+    case Schema.Type.STRING => StringType(false)
+    case Schema.Type.INT => IntegerType(false)
+    case Schema.Type.LONG => LongType(false)
     case Schema.Type.FLOAT => FloatType(false)
     case Schema.Type.DOUBLE => DoubleType(false)
-    case Schema.Type.STRING => StringType(false)
-    case Schema.Type.LONG => LongType(false)
-    case Schema.Type.INT => IntegerType(false)
-    case Schema.Type.BOOLEAN => BooleanType(false)
     case Schema.Type.ARRAY => ListType(avroToMleapType(schema.getElementType))
     case Schema.Type.UNION => maybeNullableMleapType(schema)
     case Schema.Type.RECORD =>
       schema.getName match {
         case "BooleanTensor" => TensorType(BooleanType(false))
         case "StringTensor" => TensorType(StringType(false))
+        case "ByteTensor" => TensorType(ByteType(false))
+        case "ShortTensor" => TensorType(ShortType(false))
         case "IntTensor" => TensorType(IntegerType(false))
         case "LongTensor" => TensorType(LongType(false))
         case "FloatTensor" => TensorType(FloatType(false))

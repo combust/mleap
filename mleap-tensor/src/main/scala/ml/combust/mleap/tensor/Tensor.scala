@@ -18,6 +18,8 @@ object Tensor {
 
   private val BooleanClass = classOf[Boolean]
   private val StringClass = classOf[String]
+  private val ByteClass = classOf[Byte]
+  private val ShortClass = classOf[Short]
   private val IntClass = classOf[Int]
   private val LongClass = classOf[Long]
   private val FloatClass = classOf[Float]
@@ -26,6 +28,8 @@ object Tensor {
   def tensorType[T: ClassTag]: Byte = implicitly[ClassTag[T]].runtimeClass match {
     case BooleanClass => BOOLEAN
     case StringClass => STRING
+    case ByteClass => BYTE
+    case ShortClass => SHORT
     case IntClass => INT
     case LongClass => LONG
     case FloatClass => FLOAT

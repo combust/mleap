@@ -15,8 +15,15 @@ class FrameSerializerSpec extends FunSpec {
     StructField("list_data", ListType(StringType())),
     StructField("nullable_double", DoubleType(true)),
     StructField("float", FloatType(false)),
+    StructField("byte_tensor", TensorType(ByteType(false))),
+    StructField("short_list", ListType(ShortType(false))),
     StructField("nullable_string", StringType(true))).get
-  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)), "hello", Seq("hello", "there"), Option(56.7d), 32.4f, None)))
+  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)),
+    "hello", Seq("hello", "there"),
+    Option(56.7d), 32.4f,
+    Tensor.denseVector(Array[Byte](1, 2, 3, 4)),
+    Seq[Short](99, 12, 45),
+    None)))
   val frame = LeapFrame(schema, dataset).withOutput("custom_object", "name")((name: String) => MyCustomObject(name)).get
   import MleapContext.defaultContext
 

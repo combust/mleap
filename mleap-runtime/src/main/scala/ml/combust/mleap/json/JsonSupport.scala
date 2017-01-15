@@ -57,21 +57,25 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     }
 
     def forName(name: String, isNullable: Boolean = false): BasicType = name match {
+      case "boolean" => BooleanType(isNullable)
+      case "string" => StringType(isNullable)
+      case "byte" => ByteType(isNullable)
+      case "short" => ShortType(isNullable)
+      case "integer" => IntegerType(isNullable)
+      case "long" => LongType(isNullable)
       case "float" => FloatType(isNullable)
       case "double" => DoubleType(isNullable)
-      case "string" => StringType(isNullable)
-      case "long" => LongType(isNullable)
-      case "boolean" => BooleanType(isNullable)
-      case "integer" => IntegerType(isNullable)
     }
 
     override def write(obj: BasicType): JsValue = obj match {
+      case BooleanType(isNullable) => writeMaybeNullable(JsString("boolean"), isNullable)
+      case StringType(isNullable) => writeMaybeNullable(JsString("string"), isNullable)
+      case ByteType(isNullable) => writeMaybeNullable(JsString("byte"), isNullable)
+      case ShortType(isNullable) => writeMaybeNullable(JsString("short"), isNullable)
+      case IntegerType(isNullable) => writeMaybeNullable(JsString("integer"), isNullable)
+      case LongType(isNullable) => writeMaybeNullable(JsString("long"), isNullable)
       case FloatType(isNullable) => writeMaybeNullable(JsString("float"), isNullable)
       case DoubleType(isNullable) => writeMaybeNullable(JsString("double"), isNullable)
-      case StringType(isNullable) => writeMaybeNullable(JsString("string"), isNullable)
-      case LongType(isNullable) => writeMaybeNullable(JsString("long"), isNullable)
-      case BooleanType(isNullable) => writeMaybeNullable(JsString("boolean"), isNullable)
-      case IntegerType(isNullable) => writeMaybeNullable(JsString("integer"), isNullable)
     }
 
     override def read(json: JsValue): BasicType = json match {

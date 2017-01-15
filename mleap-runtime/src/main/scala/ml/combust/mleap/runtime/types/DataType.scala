@@ -19,23 +19,28 @@ sealed trait BasicType extends DataType with Serializable
 case class AnyType(override val isNullable: Boolean = false) extends DataType {
   override def asNullable: DataType = copy(isNullable = true)
 }
-
+case class StringType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
+case class BooleanType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
+case class ByteType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
+case class ShortType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
 case class IntegerType(override val isNullable: Boolean = false) extends BasicType {
   override def asNullable: DataType = copy(isNullable = true)
 }
 case class LongType(override val isNullable: Boolean = false) extends BasicType {
   override def asNullable: DataType = copy(isNullable = true)
 }
-case class BooleanType(override val isNullable: Boolean = false) extends BasicType {
-  override def asNullable: DataType = copy(isNullable = true)
-}
 case class FloatType(override val isNullable: Boolean = false) extends BasicType {
   override def asNullable: DataType = copy(isNullable = true)
 }
 case class DoubleType(override val isNullable: Boolean = false) extends BasicType {
-  override def asNullable: DataType = copy(isNullable = true)
-}
-case class StringType(override val isNullable: Boolean = false) extends BasicType {
   override def asNullable: DataType = copy(isNullable = true)
 }
 

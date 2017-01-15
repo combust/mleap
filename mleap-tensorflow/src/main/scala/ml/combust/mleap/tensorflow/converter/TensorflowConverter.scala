@@ -1,6 +1,6 @@
 package ml.combust.mleap.tensorflow.converter
 
-import ml.combust.mleap.core.DenseTensor
+import ml.combust.mleap.core.tensor.DenseTensor
 import ml.combust.mleap.runtime.types._
 import org.tensorflow
 

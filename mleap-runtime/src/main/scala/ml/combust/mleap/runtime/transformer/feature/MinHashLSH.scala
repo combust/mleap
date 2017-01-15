@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.Tensor
 import ml.combust.mleap.core.feature.MinHashLSHModel
+import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.FeatureTransformer
 
@@ -12,5 +12,5 @@ case class MinHashLSH(override val uid: String,
                       override val inputCol: String,
                       override val outputCol: String,
                       model: MinHashLSHModel) extends FeatureTransformer {
-  override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
+  override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features).map(v => v: Tensor[Double])
 }

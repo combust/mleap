@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.Tensor
 import ml.combust.mleap.core.feature.NormalizerModel
+import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
 import org.scalatest.FunSpec

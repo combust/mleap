@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.serialization
 
-import ml.combust.mleap.core.Tensor
+import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.test.MyCustomObject
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, MleapContext, Row}
 import ml.combust.mleap.runtime.types._

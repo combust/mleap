@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.mleap.core.Tensor
+import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 

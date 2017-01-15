@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.mleap.core.Tensor
+import ml.combust.mleap.core.tensor.Tensor
 import org.scalatest.FunSpec
 
 /** Base trait for testing [[ml.combust.mleap.runtime.Row]] implementations.

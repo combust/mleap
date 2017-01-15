@@ -3,7 +3,7 @@ package ml.combust.mleap.binary
 import java.io.{DataInputStream, DataOutputStream}
 import java.nio.charset.Charset
 
-import ml.combust.mleap.core.{DenseTensor, SparseTensor, Tensor}
+import ml.combust.mleap.core.tensor.{DenseTensor, SparseTensor, Tensor}
 import ml.combust.mleap.runtime.types._
 
 import scala.reflect.ClassTag
@@ -167,7 +167,7 @@ case class TensorSerializer[T: ClassTag](base: ValueSerializer[T]) extends Value
       DenseTensor(values, dimensions)
     } else if(tpe == SPARSE) {
       size = in.readInt()
-      val indices = new Array[Array[Int]](size)
+      val indices = new Array[Seq[Int]](size)
       indices.indices.foreach {
         i =>
           val indexSize = in.readChar()

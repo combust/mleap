@@ -2,7 +2,7 @@ package ml.combust.mleap.tensorflow.converter
 
 import java.util
 
-import ml.combust.mleap.core.Tensor
+import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.types._
 import org.tensorflow
 

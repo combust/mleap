@@ -11,20 +11,16 @@ import org.apache.spark.sql.DataFrame
   */
 class GaussianMixtureParitySpec extends SparkParityBase {
   override val dataset: DataFrame = {
-    val training = baseDataset.select("dti", "loan_amount", "fico_score_group_fnl")
-    val pipeline = new Pipeline().setStages(Array(new StringIndexer().
-      setInputCol("fico_score_group_fnl").
-      setOutputCol("fico_index"),
-      new VectorAssembler().
-        setInputCols(Array("fico_index", "dti")).
-        setOutputCol("features"))).fit(training)
-    pipeline.transform(training)
+    baseDataset.select("dti", "loan_amount", "fico_score_group_fnl")
   }
-  override val sparkTransformer: Transformer = {
+  override val sparkTransformer: Transformer = new Pipeline().setStages(Array(new StringIndexer().
+    setInputCol("fico_score_group_fnl").
+    setOutputCol("fico_index"),
+    new VectorAssembler().
+      setInputCols(Array("fico_index", "dti")).
+      setOutputCol("features"),
     new GaussianMixture().
       setFeaturesCol("features").
       setPredictionCol("prediction").
-      setProbabilityCol("probability"). // For some reason the tests fail when we don't set the probability column
-      fit(dataset)
-  }
+      setProbabilityCol("probability"))).fit(dataset)
 }

@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.reflection
 
-import ml.combust.mleap.core.Tensor
+import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec

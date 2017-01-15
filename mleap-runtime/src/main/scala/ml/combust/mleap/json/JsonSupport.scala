@@ -1,6 +1,6 @@
 package ml.combust.mleap.json
 
-import ml.combust.mleap.core.{DenseTensor, SparseTensor, Tensor}
+import ml.combust.mleap.core.tensor.{DenseTensor, SparseTensor, Tensor}
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, MleapContext}
 import ml.combust.mleap.runtime.types._
 import spray.json.DefaultJsonProtocol._
@@ -168,8 +168,8 @@ trait JsonSupport {
     }
   }
 
-  implicit def mleapDenseTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[DenseTensor[T]] = jsonFormat2(DenseTensor[T])
-  implicit def mleapSparseTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[SparseTensor[T]] = jsonFormat3(SparseTensor[T])
+  implicit def mleapDenseTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[DenseTensor[T]] = jsonFormat3(DenseTensor[T])
+  implicit def mleapSparseTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[SparseTensor[T]] = jsonFormat4(SparseTensor[T])
   implicit def mleapTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[Tensor[T]] = new RootJsonFormat[Tensor[T]] {
     override def write(obj: Tensor[T]): JsValue = obj match {
       case obj: DenseTensor[_] => obj.asInstanceOf[DenseTensor[T]].toJson

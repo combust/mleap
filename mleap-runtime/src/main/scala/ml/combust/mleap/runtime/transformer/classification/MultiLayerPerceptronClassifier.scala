@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.classification
 
-import ml.combust.mleap.core.Tensor
 import ml.combust.mleap.core.classification.MultiLayerPerceptronClassifierModel
+import ml.combust.mleap.core.tensor.Tensor
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder

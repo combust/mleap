@@ -4,7 +4,8 @@ import ml.combust.mleap.core.regression.GeneralizedLinearRegressionModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import org.apache.spark.ml.linalg.Vector
+import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.runtime.converter.VectorConverters._
 
 import scala.util.Try
 
@@ -16,8 +17,8 @@ case class GeneralizedLinearRegression(override val uid: String = Transformer.un
                                        predictionCol: String,
                                        linkPredictionCol: Option[String] = None,
                                        model: GeneralizedLinearRegressionModel) extends Transformer {
-  val predict: UserDefinedFunction = (features: Vector) => model.predict(features)
-  val predictLink: UserDefinedFunction = (features: Vector) => model.predictLink(features)
+  val predict: UserDefinedFunction = (features: Tensor[Double]) => model.predict(features)
+  val predictLink: UserDefinedFunction = (features: Tensor[Double]) => model.predictLink(features)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     linkPredictionCol match {

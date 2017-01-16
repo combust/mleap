@@ -22,7 +22,7 @@ class StringIndexerOp extends OpNode[Any, StringIndexer, StringIndexerModel] {
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[Any]): Model = {
-      model.withAttr(Attribute("labels", Value.stringList(obj.strings)))
+      model.withAttr("labels", Value.stringList(obj.strings))
     }
 
 

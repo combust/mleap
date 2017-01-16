@@ -19,6 +19,7 @@ object Common {
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
+    resolvers += "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
     resolvers ++= {
       // Only add Sonatype Snapshots if this version itself is a snapshot version
       if(isSnapshot.value) {

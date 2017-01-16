@@ -3,6 +3,7 @@ package org.apache.spark.ml.bundle.ops.clustering
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.clustering.KMeansModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
@@ -20,9 +21,7 @@ class KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
 
     override def store(model: Model, obj: KMeansModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("cluster_centers", Value.tensorList(
-        value = obj.clusterCenters.map(_.toArray.toSeq),
-        dims = Seq(-1)))
+      model.withAttr("cluster_centers", Value.tensorList(obj.clusterCenters.map(_.toArray).map(Tensor.denseVector)))
     }
 
     override def load(model: Model)

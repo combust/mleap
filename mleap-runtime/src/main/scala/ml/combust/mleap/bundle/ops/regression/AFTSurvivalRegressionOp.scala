@@ -19,7 +19,7 @@ class AFTSurvivalRegressionOp extends OpNode[MleapContext, AFTSurvivalRegression
 
     override def store(model: Model, obj: AFTSurvivalRegressionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray.toSeq)).
+      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept)).
         withAttr("quantile_probabilities", Value.doubleList(obj.quantileProbabilities)).
         withAttr("scale", Value.double(obj.scale))
@@ -27,7 +27,7 @@ class AFTSurvivalRegressionOp extends OpNode[MleapContext, AFTSurvivalRegression
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): AFTSurvivalRegressionModel = {
-      AFTSurvivalRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
+      AFTSurvivalRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble,
         quantileProbabilities = model.value("quantile_probabilities").getDoubleList.toArray,
         scale = model.value("scale").getDouble)

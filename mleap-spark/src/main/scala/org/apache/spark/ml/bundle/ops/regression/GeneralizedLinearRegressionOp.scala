@@ -18,7 +18,7 @@ class GeneralizedLinearRegressionOp extends OpNode[SparkBundleContext, Generaliz
 
     override def store(model: Model, obj: GeneralizedLinearRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray.toSeq)).
+      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept)).
         withAttr("family", Value.string(obj.getFamily)).
         withAttr("link", Value.string(obj.getLink))
@@ -27,7 +27,7 @@ class GeneralizedLinearRegressionOp extends OpNode[SparkBundleContext, Generaliz
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): GeneralizedLinearRegressionModel = {
       val m = new GeneralizedLinearRegressionModel(uid = "",
-        coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
+        coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble)
       m.set(m.family, model.value("family").getString)
       m.set(m.link, model.value("link").getString)

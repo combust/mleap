@@ -18,14 +18,14 @@ class LinearRegressionOp extends OpNode[SparkBundleContext, LinearRegressionMode
 
     override def store(model: Model, obj: LinearRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
+      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): LinearRegressionModel = {
       new LinearRegressionModel(uid = "",
-        coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
+        coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble)
     }
   }

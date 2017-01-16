@@ -22,14 +22,14 @@ class LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
 
     override def store(model: Model, obj: LinearModel)
                       (implicit context: BundleContext[Any]): Model = {
-      model.withAttr(Attribute("coefficients", Value.doubleVector(obj.coefficients))).
-        withAttr(Attribute("intercept", Value.double(obj.intercept)))
+      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
+        withAttr("intercept", Value.double(obj.intercept))
     }
 
 
     override def load(model: Model)
                      (implicit context: BundleContext[Any]): LinearModel = {
-      LinearModel(coefficients = model.value("coefficients").getDoubleVector,
+      LinearModel(coefficients = model.value("coefficients").getTensor[Double].toArray,
         intercept = model.value("intercept").getDouble)
     }
   }

@@ -44,7 +44,7 @@ object RowUtil {
     case FieldSelector(name) =>
       schema.indexedField(name).flatMap {
         case (index, field) =>
-          if (dataType.fits(field.dataType)) {
+          if(dataType == field.dataType || dataType.isInstanceOf[AnyType]) {
             Try(r => r.get(index))
           } else {
             Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))

@@ -4,7 +4,8 @@ import ml.combust.mleap.core.regression.AFTSurvivalRegressionModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import org.apache.spark.ml.linalg.Vector
+import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.runtime.converter.VectorConverters._
 
 import scala.util.Try
 
@@ -16,8 +17,8 @@ case class AFTSurvivalRegression(override val uid: String = Transformer.uniqueNa
                                  predictionCol: String,
                                  quantilesCol: Option[String] = None,
                                  model: AFTSurvivalRegressionModel) extends Transformer {
-  val exec: UserDefinedFunction = (features: Vector) => model.predict(features)
-  val execQuantiles: UserDefinedFunction = (features: Vector) => model.predictQuantiles(features)
+  val exec: UserDefinedFunction = (features: Tensor[Double]) => model.predict(features)
+  val execQuantiles: UserDefinedFunction = (features: Tensor[Double]) => model.predictQuantiles(features): Tensor[Double]
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     quantilesCol match {

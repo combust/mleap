@@ -8,6 +8,7 @@ object Dependencies {
 
   val sparkVersion = "2.1.0"
   val scalaTestVersion = "3.0.0"
+  val tensorflowVersion = "0.12.head"
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion
@@ -24,6 +25,7 @@ object Dependencies {
     val sparkAvro = "com.databricks" %% "spark-avro" % "3.0.1"
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "edu.emory.mathcs" % "JTransforms" % "2.4"
+    val tensorflowDep = "org.tensorflow" % "libtensorflow" % tensorflowVersion
   }
 
   object Test {
@@ -37,7 +39,9 @@ object Dependencies {
   import Compile._
   val l = libraryDependencies
 
-  val bundleMl = l ++= Seq(sprayJson, arm, config, Test.scalaTest)
+  val tensor = l ++= Seq(sprayJson)
+
+  val bundleMl = l ++= Seq(arm, config, Test.scalaTest)
 
   val base = l ++= Seq()
 
@@ -54,6 +58,8 @@ object Dependencies {
   val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
   val avro = l ++= Seq(avroDep)
+
+  val tensorflow = l ++= Seq(tensorflowDep)
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

@@ -19,12 +19,12 @@ class MaxAbsScalerOp extends OpNode[MleapContext, MaxAbsScaler, MaxAbsScalerMode
 
     override def store(model: Model, obj: MaxAbsScalerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("maxAbs", Value.doubleVector(obj.maxAbs.toArray))
+      model.withAttr("maxAbs", Value.vector(obj.maxAbs.toArray))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): MaxAbsScalerModel = {
-      MaxAbsScalerModel(maxAbs = Vectors.dense(model.value("maxAbs").getDoubleVector.toArray))
+      MaxAbsScalerModel(maxAbs = Vectors.dense(model.value("maxAbs").getTensor[Double].toArray))
     }
   }
 

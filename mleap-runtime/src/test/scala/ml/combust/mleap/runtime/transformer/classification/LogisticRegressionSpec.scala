@@ -2,7 +2,8 @@ package ml.combust.mleap.runtime.transformer.classification
 
 import ml.combust.mleap.core.classification.{BinaryLogisticRegressionModel, LogisticRegressionModel}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{StructField, StructType, TensorType}
+import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 
@@ -10,8 +11,8 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 9/15/16.
   */
 class LogisticRegressionSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("features", TensorType.doubleVector()))).get
-  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(0.5, -0.5, 1.0)))))
+  val schema = StructType(Seq(StructField("features", TensorType(DoubleType())))).get
+  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.5, -0.5, 1.0)))))
   val frame = LeapFrame(schema, dataset)
   val logisticRegression = LogisticRegression(featuresCol = "features",
     predictionCol = "prediction",
@@ -34,7 +35,7 @@ class LogisticRegressionSpec extends FunSpec {
         it("executes the logistic regression model and outputs the prediction/probability") {
           val frame2 = logisticRegression2.transform(frame).get
           val data = frame2.dataset.toArray
-          val probability = data(0).getVector(1)(1)
+          val probability = data(0).getTensor[Double](1)(1)
           val prediction = data(0).getDouble(2)
 
           assert(prediction == 1.0)

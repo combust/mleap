@@ -4,7 +4,8 @@ import ml.combust.mleap.core.clustering.BisectingKMeansModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import org.apache.spark.ml.linalg.Vector
+import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.runtime.converter.VectorConverters._
 
 import scala.util.Try
 
@@ -15,7 +16,7 @@ case class BisectingKMeans(override val uid: String = Transformer.uniqueName("bi
                            featuresCol: String,
                            predictionCol: String,
                            model: BisectingKMeansModel) extends Transformer {
-  val exec: UserDefinedFunction = (features: Vector) => model(features)
+  val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(predictionCol, featuresCol)(exec)

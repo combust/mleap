@@ -18,12 +18,12 @@ class ElementwiseProductOp extends OpNode[SparkBundleContext, ElementwiseProduct
 
     override def store(model: Model, obj: ElementwiseProduct)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("scaling_vec", Value.doubleVector(obj.getScalingVec.toArray))
+      model.withAttr("scaling_vec", Value.vector(obj.getScalingVec.toArray))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): ElementwiseProduct = {
-      new ElementwiseProduct(uid = "").setScalingVec(Vectors.dense(model.value("scaling_vec").getDoubleVector.toArray))
+      new ElementwiseProduct(uid = "").setScalingVec(Vectors.dense(model.value("scaling_vec").getTensor[Double].toArray))
     }
   }
 

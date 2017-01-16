@@ -1,5 +1,7 @@
 package ml.combust.bundle.dsl
 
+import java.nio.ByteBuffer
+
 import com.google.protobuf.ByteString
 import ml.bundle.BasicType.BasicType
 import ml.bundle.DataType.DataType
@@ -9,8 +11,10 @@ import ml.bundle.TensorType.TensorType
 import ml.bundle.Value.Value.ListValue
 import ml.bundle.Value.{Value => BValue}
 import ml.combust.bundle.HasBundleRegistry
+import ml.combust.bundle.tensor.TensorSerializer
+import ml.combust.mleap
 
-import scala.reflect.{ClassTag, classTag}
+import scala.reflect.ClassTag
 
 /** Provides a set of helper methods for easily creating
   * [[ml.combust.bundle.dsl.Value]] objects.
@@ -25,17 +29,14 @@ import scala.reflect.{ClassTag, classTag}
   * Scala objects.
   */
 object Value {
-  /** Convert a [[ml.bundle.Tensor.Tensor]] into a Scala object
-    * representing the tensor.
+  /** Convert from a [[ml.bundle.Tensor.Tensor]] to a [[ml.combust.mleap.tensor.Tensor]].
     *
-    * @param base base type of the tensor
-    * @param tensor tensor to convert
-    * @return Scala value of protobuf object
+    * @param tt bundle type of tensor
+    * @param tensor bundle tensor
+    * @return mleap tensor
     */
-  def fromTensorValue(base: BasicType, tensor: Tensor): Any = base match {
-    case BasicType.DOUBLE => tensor.doubleVal
-    case BasicType.STRING => tensor.stringVal
-    case _ => throw new IllegalArgumentException(s"unsupported tensor type: $base")
+  def fromTensorValue(tt: TensorType, tensor: Tensor): mleap.tensor.Tensor[_] = {
+    TensorSerializer.fromProto(tt, tensor)
   }
 
   /** Convert a [[ml.bundle.Value.Value.ListValue]] into a Scala Seq.
@@ -56,18 +57,23 @@ object Value {
       list.list.map(l => fromListValue(base.getList, l))
     } else if(u.isBasic) {
       base.getBasic match {
-        case BasicType.STRING => list.s
-        case BasicType.DOUBLE => list.f
         case BasicType.BOOLEAN => list.b
+        case BasicType.STRING => list.s
+        case BasicType.BYTE => list.i.map(_.toByte)
+        case BasicType.SHORT => list.i.map(_.toShort)
+        case BasicType.INT => list.i.map(_.toInt)
         case BasicType.LONG => list.i
+        case BasicType.FLOAT => list.f.map(_.toFloat)
+        case BasicType.DOUBLE => list.f
         case _ => throw new IllegalArgumentException("unsupported list type")
       }
     } else if(u.isTensor) {
-      val basic = base.getTensor.base
-      list.tensor.map(t => fromTensorValue(basic, t))
+      list.tensor.map(t => fromTensorValue(base.getTensor, t))
     } else if(u.isCustom) {
       val ct = hr.bundleRegistry.custom(base.getCustom)
       list.custom.map(b => ct.fromBytes(b.toByteArray))
+    } else if(u.isDt) {
+      list.`type`
     } else { throw new IllegalArgumentException("unsupported list type") }
   }
 
@@ -83,13 +89,17 @@ object Value {
     val v = if(dataType.underlying.isCustom) {
       hr.bundleRegistry.custom(dataType.getCustom).fromBytes(value.getCustom.toByteArray)
     } else if(dataType.underlying.isTensor) {
-      fromTensorValue(dataType.getTensor.base, value.getTensor)
+      fromTensorValue(dataType.getTensor, value.getTensor)
     } else if(dataType.underlying.isBasic) {
       dataType.getBasic match {
         case BasicType.STRING => value.getS
-        case BasicType.DOUBLE => value.getF
         case BasicType.BOOLEAN => value.getB
+        case BasicType.BYTE => value.getI.toByte
+        case BasicType.SHORT => value.getI.toShort
+        case BasicType.INT => value.getI.toInt
         case BasicType.LONG => value.getI
+        case BasicType.FLOAT => value.getF.toFloat
+        case BasicType.DOUBLE => value.getF
         case _ => throw new IllegalArgumentException("unsupported basic type")
       }
     } else if(dataType.underlying.isList) {
@@ -99,18 +109,13 @@ object Value {
     Value(dataType, v)
   }
 
-  /** Create a tensor value.
+  /** Convert [[ml.combust.mleap.tensor.Tensor]] to [[ml.bundle.Tensor.Tensor]].
     *
-    * value should be a Seq[Double] or Seq[String] depending on the base
-    *
-    * @param base basic type of the tensor
-    * @param value Scala object holding the tensor data
-    * @return tensor protobuf object of the Scala tensor
+    * @param tensor mleap tensor
+    * @return bundle tensor
     */
-  def tensorValue(base: BasicType, value: Any): Tensor = base match {
-    case BasicType.DOUBLE => Tensor(doubleVal = value.asInstanceOf[Seq[Double]])
-    case BasicType.STRING => Tensor(stringVal = value.asInstanceOf[Seq[String]])
-    case _ => throw new IllegalArgumentException("unsupported vector base type")
+  def tensorValue(tensor: mleap.tensor.Tensor[_]): Tensor = {
+    TensorSerializer.toProto(tensor)
   }
 
   /** Create a list value.
@@ -131,8 +136,12 @@ object Value {
     if(u.isBasic) {
       base.getBasic match {
         case BasicType.STRING => ListValue(s = value.asInstanceOf[Seq[String]])
-        case BasicType.LONG => ListValue(i = value.asInstanceOf[Seq[Long]])
         case BasicType.BOOLEAN => ListValue(b = value.asInstanceOf[Seq[Boolean]])
+        case BasicType.BYTE => ListValue(i = value.asInstanceOf[Seq[Byte]].map(_.toLong))
+        case BasicType.SHORT => ListValue(i = value.asInstanceOf[Seq[Short]].map(_.toLong))
+        case BasicType.INT => ListValue(i = value.asInstanceOf[Seq[Int]].map(_.toLong))
+        case BasicType.LONG => ListValue(i = value.asInstanceOf[Seq[Long]])
+        case BasicType.FLOAT => ListValue(f = value.asInstanceOf[Seq[Float]].map(_.toDouble))
         case BasicType.DOUBLE => ListValue(f = value.asInstanceOf[Seq[Double]])
         case _ => throw new IllegalArgumentException("unsupported basic type")
       }
@@ -141,13 +150,13 @@ object Value {
       val custom = value.map(a => ByteString.copyFrom(ct.toBytes(a)))
       ListValue(custom = custom)
     } else if(u.isTensor) {
-      val tb = base.getTensor.base
-      val tensor = value.map(a => tensorValue(tb, a))
-      ListValue(tensor = tensor)
+      ListValue(tensor = value.map(_.asInstanceOf[mleap.tensor.Tensor[_]]).map(tensorValue))
     } else if(u.isList) {
       val lb = base.getList
       val list = value.map(a => listValue(lb, a.asInstanceOf[Seq[_]]))
       ListValue(list = list)
+    } else if(u.isDt) {
+      ListValue(`type` = value.asInstanceOf[Seq[DataType]])
     } else { throw new IllegalArgumentException("unsupported data type") }
   }
 
@@ -162,14 +171,18 @@ object Value {
                  (implicit hr: HasBundleRegistry): BValue = {
     val u = dataType.underlying
     val v = if(u.isTensor) {
-      BValue.V.Tensor(tensorValue(dataType.getTensor.base, value))
+      BValue.V.Tensor(tensorValue(value.asInstanceOf[mleap.tensor.Tensor[_]]))
     } else if(u.isBasic) {
       dataType.getBasic match {
-        case BasicType.STRING => BValue.V.S(value.asInstanceOf[String])
-        case BasicType.LONG => BValue.V.I(value.asInstanceOf[Long])
         case BasicType.BOOLEAN => BValue.V.B(value.asInstanceOf[Boolean])
+        case BasicType.STRING => BValue.V.S(value.asInstanceOf[String])
+        case BasicType.BYTE => BValue.V.I(value.asInstanceOf[Long].toByte)
+        case BasicType.SHORT => BValue.V.I(value.asInstanceOf[Long].toShort)
+        case BasicType.INT => BValue.V.I(value.asInstanceOf[Long].toInt)
+        case BasicType.LONG => BValue.V.I(value.asInstanceOf[Long])
+        case BasicType.FLOAT => BValue.V.F(value.asInstanceOf[Double].toFloat)
         case BasicType.DOUBLE => BValue.V.F(value.asInstanceOf[Double])
-        case _ => throw new IllegalArgumentException("unsupported basic type")
+        case _ => throw new IllegalArgumentException(s"unsupported basic type ${dataType.getBasic}")
       }
     } else if(u.isList) {
       BValue.V.List(listValue(dataType.getList, value.asInstanceOf[Seq[_]]))
@@ -201,30 +214,33 @@ object Value {
 
   /** Create a tensor data type.
     *
-    * Supported basic types are double and string.
-    *
-    * Dimensions must be a positive integer for how many values are contained
-    * in each of the tensor dimensions. -1 can be used if a dimension can
-    * be of arbitrary size.
-    *
     * @param basic basic data type of the tensor
-    * @param dims size of each dimension of the tensor
     * @return tensor data type
     */
-  def tensorDataType(basic: BasicType, dims: Seq[Int]): DataType = DataType(DataType.Underlying.Tensor(TensorType(basic, dims)))
+  def tensorDataType(basic: BasicType): DataType = DataType(DataType.Underlying.Tensor(TensorType(basic)))
 
-  val stringDataType: DataType = basicDataType(BasicType.STRING)
-  val doubleDataType: DataType = basicDataType(BasicType.DOUBLE)
   val booleanDataType: DataType = basicDataType(BasicType.BOOLEAN)
+  val stringDataType: DataType = basicDataType(BasicType.STRING)
+  val byteDataType: DataType = basicDataType(BasicType.BYTE)
+  val shortDataType: DataType = basicDataType(BasicType.SHORT)
+  val intDataType: DataType = basicDataType(BasicType.INT)
   val longDataType: DataType = basicDataType(BasicType.LONG)
+  val floatDataType: DataType = basicDataType(BasicType.FLOAT)
+  val doubleDataType: DataType = basicDataType(BasicType.DOUBLE)
 
   val stringListDataType: DataType = listDataType(stringDataType)
-  val doubleListDataType: DataType = listDataType(doubleDataType)
   val booleanListDataType: DataType = listDataType(booleanDataType)
+  val byteListDataType: DataType = listDataType(byteDataType)
+  val shortListDataType: DataType = listDataType(shortDataType)
+  val intListDataType: DataType = listDataType(intDataType)
   val longListDataType: DataType = listDataType(longDataType)
+  val floatListDataType: DataType = listDataType(floatDataType)
+  val doubleListDataType: DataType = listDataType(doubleDataType)
 
-  val doubleVectorDataType: DataType = tensorDataType(BasicType.DOUBLE, Seq(-1))
-  val stringVectorDataType: DataType = tensorDataType(BasicType.STRING, Seq(-1))
+  val dataTypeDataType: DataType = DataType(DataType.Underlying.Dt(true))
+  val listDataTypeDataType: DataType = {
+    DataType(DataType.Underlying.List(DataType.ListType(Some(DataType(DataType.Underlying.Dt(true))))))
+  }
 
   /** Create a nested list data type of any depth.
     *
@@ -260,13 +276,6 @@ object Value {
     */
   def string(value: String): Value = Value(stringDataType, value)
 
-  /** Create a double value.
-    *
-    * @param value value to wrap
-    * @return wrapped value
-    */
-  def double(value: Double): Value = Value(doubleDataType, value)
-
   /** Create a boolean value.
     *
     * @param value value to wrap
@@ -274,12 +283,47 @@ object Value {
     */
   def boolean(value: Boolean): Value = Value(booleanDataType, value)
 
+  /** Create a byte value.
+    *
+    * @param value value to wrap
+    * @return wrapped value
+    */
+  def byte(value: Byte): Value = Value(byteDataType, value)
+
+  /** Create a short value.
+    *
+    * @param value value to wrap
+    * @return wrapped value
+    */
+  def short(value: Short): Value = Value(shortDataType, value)
+
+  /** Create an int value.
+    *
+    * @param value value to wrap
+    * @return wrapped value
+    */
+  def int(value: Int): Value = Value(intDataType, value)
+
   /** Create a long value.
     *
     * @param value value to wrap
     * @return wrapped value
     */
   def long(value: Long): Value = Value(longDataType, value)
+
+  /** Create a float value.
+    *
+    * @param value value to wrap
+    * @return wrapped value
+    */
+  def float(value: Float): Value = Value(floatDataType, value)
+
+  /** Create a double value.
+    *
+    * @param value value to wrap
+    * @return wrapped value
+    */
+  def double(value: Double): Value = Value(doubleDataType, value)
 
   /** Create a custom value.
     *
@@ -298,34 +342,31 @@ object Value {
     * Dimensions must have size greater than 0. Use -1 for
     * dimensions that can be any size.
     *
-    * @param value tensor data
-    * @param dims dimensional data for tensor
-    * @tparam T Scala class of underlying tensor data Double or String
+    * @param tensor tensor value
     * @return tensor value
     */
-  def tensor[T: ClassTag](value: Seq[T], dims: Seq[Int]): Value = {
-    val name = classTag[T].runtimeClass.getName
-    val (basic, tensor) = name match {
-      case "double" => (BasicType.DOUBLE, value.asInstanceOf[Seq[Double]])
-      case "java.lang.String" => (BasicType.STRING, value.asInstanceOf[Seq[String]])
-      case _ => throw new IllegalArgumentException(s"unsupported vector type: $name")
-    }
-    Value(tensorDataType(basic, dims), tensor)
+  def tensor[T](tensor: mleap.tensor.Tensor[T]): Value = {
+    Value(tensorDataType(TensorSerializer.toBundleType(tensor.base)), tensor)
   }
 
-  /** Create a list of strings value.
+  /** Create a tensor value with 1 dimension.
     *
-    * @param value Scala string list
-    * @return wrapped value
+    * @param values values of vector
+    * @tparam T type of vector
+    * @return tensor with vector
     */
-  def stringList(value: Seq[String]): Value = Value(stringListDataType, value)
+  def vector[T: ClassTag](values: Array[T]): Value = {
+    tensor(mleap.tensor.Tensor.denseVector(values))
+  }
 
-  /** Create a list of doubles value.
+  /** Create a data type value.
     *
-    * @param value Scala double list
-    * @return wrapped value
+    * @param dt data type to store
+    * @return value with data type
     */
-  def doubleList(value: Seq[Double]): Value = Value(doubleListDataType, value)
+  def dataType(dt: DataType): Value = {
+    Value(dataTypeDataType, dt)
+  }
 
   /** Create a list of booleans value.
     *
@@ -334,12 +375,54 @@ object Value {
     */
   def booleanList(value: Seq[Boolean]): Value = Value(booleanListDataType, value)
 
+  /** Create a list of strings value.
+    *
+    * @param value Scala string list
+    * @return wrapped value
+    */
+  def stringList(value: Seq[String]): Value = Value(stringListDataType, value)
+
+  /** Create a list of byte value.
+    *
+    * @param value Scala byte list
+    * @return wrapped value
+    */
+  def byteList(value: Seq[Byte]): Value = Value(byteListDataType, value)
+
+  /** Create a list of short value.
+    *
+    * @param value Scala long list
+    * @return wrapped value
+    */
+  def shortList(value: Seq[Short]): Value = Value(shortListDataType, value)
+
+  /** Create a list of int value.
+    *
+    * @param value Scala int list
+    * @return wrapped value
+    */
+  def intList(value: Seq[Int]): Value = Value(intListDataType, value)
+
   /** Create a list of longs value.
     *
     * @param value Scala long list
     * @return wrapped value
     */
   def longList(value: Seq[Long]): Value = Value(longListDataType, value)
+
+  /** Create a list of float value.
+    *
+    * @param value Scala float list
+    * @return wrapped value
+    */
+  def floatList(value: Seq[Float]): Value = Value(floatListDataType, value)
+
+  /** Create a list of doubles value.
+    *
+    * @param value Scala double list
+    * @return wrapped value
+    */
+  def doubleList(value: Seq[Double]): Value = Value(doubleListDataType, value)
 
   /** Create a list of custom objects value.
     *
@@ -361,18 +444,20 @@ object Value {
     * Each dimension must be a positive integer. Use -1 if the dimension
     * can have any number of values in it.
     *
-    * @param value Scala list of tensor data
-    * @param dims dimensions of the tensor data
-    * @tparam T base type of the tensor, Double or String
+    * @param tensors tensors in the list
     * @return wrapped list of tensors
     */
-  def tensorList[T: ClassTag](value: Seq[Seq[T]], dims: Seq[Int]): Value = {
-    val basic = classTag[T].runtimeClass.getName match {
-      case "double" => BasicType.DOUBLE
-      case "java.lang.String" => BasicType.STRING
-      case _ => throw new IllegalArgumentException("unsupported vector type")
-    }
-    Value(listDataType(tensorDataType(basic, dims)), value)
+  def tensorList[T: ClassTag](tensors: Seq[mleap.tensor.Tensor[T]]): Value = {
+    Value(listDataType(tensorDataType(TensorSerializer.toBundleType(mleap.tensor.Tensor.tensorType[T]))), tensors)
+  }
+
+  /** Create a list of data types.
+    *
+    * @param dts data types
+    * @return value with data types
+    */
+  def dataTypeList(dts: Seq[DataType]): Value = {
+    Value(listDataTypeDataType, dts)
   }
 
   /** Construct a nested list of any value.
@@ -413,24 +498,6 @@ object Value {
     val base = customDataType[T]
     listN(base, n, value)
   }
-
-  /** Create a double vector.
-    *
-    * A double vector is a type of tensor with 1 dimension.
-    *
-    * @param value Scala vector data
-    * @return wrapped double vector
-    */
-  def doubleVector(value: Seq[Double]): Value = Value(doubleVectorDataType, value)
-
-  /** Create a string vector.
-    *
-    * A string vector is a type of tensor with 1 dimension.
-    *
-    * @param value Scala vector data
-    * @return wrapped string vector
-    */
-  def stringVector(value: Seq[String]): Value = Value(stringVectorDataType, value)
 }
 
 /** This class is used to wrap Scala objects for later serialization into Bundle.ML
@@ -462,10 +529,16 @@ case class Value(bundleDataType: DataType, value: Any) {
     * @return true if the value has a large serialization size, false otherwise
     */
   def isLarge(implicit hr: HasBundleRegistry): Boolean = {
-    bundleDataType.underlying.isTensor && getTensor[Any].length > 1024 ||
-      bundleDataType.underlying.isList && !bundleDataType.getList.base.get.underlying.isBasic ||
+    bundleDataType.underlying.isTensor && getTensor[Any].rawSize > 1024 ||
+      bundleDataType.underlying.isList && !(bundleDataType.getList.base.get.underlying.isBasic || bundleDataType.getList.base.get.underlying.isDt) ||
       bundleDataType.underlying.isCustom && hr.bundleRegistry.custom[Any](bundleDataType.getCustom).isLarge(value)
   }
+
+  /** Get value as a boolean.
+    *
+    * @return boolean value
+    */
+  def getBoolean: Boolean = value.asInstanceOf[Boolean]
 
   /** Get value as a string.
     *
@@ -473,23 +546,41 @@ case class Value(bundleDataType: DataType, value: Any) {
     */
   def getString: String = value.asInstanceOf[String]
 
+  /** Get value as a byte.
+    *
+    * @return byte value
+    */
+  def getByte: Byte = value.asInstanceOf[Byte]
+
+  /** Get value as a short.
+    *
+    * @return short value
+    */
+  def getShort: Short = value.asInstanceOf[Short]
+
+  /** Get value as an int.
+    *
+    * @return int value
+    */
+  def getInt: Int = value.asInstanceOf[Int]
+
   /** Get value as a long.
     *
     * @return long value
     */
   def getLong: Long = value.asInstanceOf[Long]
 
+  /** Get value as a float.
+    *
+    * @return float value
+    */
+  def getFloat: Float = value.asInstanceOf[Float]
+
   /** Get value as a double.
     *
     * @return double value
     */
   def getDouble: Double = value.asInstanceOf[Double]
-
-  /** Get value as a boolean.
-    *
-    * @return boolean value
-    */
-  def getBoolean: Boolean = value.asInstanceOf[Boolean]
 
   /** Get value as a Scala object.
     *
@@ -503,13 +594,13 @@ case class Value(bundleDataType: DataType, value: Any) {
     * @tparam T base type of tensor Double or String
     * @return Scala seq of tensor values.
     */
-  def getTensor[T]: Seq[T] = value.asInstanceOf[Seq[T]]
+  def getTensor[T]: mleap.tensor.Tensor[T] = value.asInstanceOf[mleap.tensor.Tensor[T]]
 
-  /** Get value as seq of doubles.
+  /** Get value as a data type.
     *
-    * @return double tensor values
+    * @return data type
     */
-  def getDoubleVector: Seq[Double] = value.asInstanceOf[Seq[Double]]
+  def getDataType: DataType = value.asInstanceOf[DataType]
 
   /** Get value as seq of strings.
     *
@@ -553,7 +644,13 @@ case class Value(bundleDataType: DataType, value: Any) {
     * @tparam T Scala class of tensors Double or String
     * @return list of tensors
     */
-  def getTensorList[T]: Seq[Seq[T]] = value.asInstanceOf[Seq[Seq[T]]]
+  def getTensorList[T]: Seq[mleap.tensor.Tensor[T]] = value.asInstanceOf[Seq[mleap.tensor.Tensor[T]]]
+
+  /** Get list of data types.
+    *
+    * @return list of data types
+    */
+  def getDataTypeList: Seq[DataType] = value.asInstanceOf[Seq[DataType]]
 
   /** Get nested list of any type.
     *

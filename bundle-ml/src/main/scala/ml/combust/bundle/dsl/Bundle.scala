@@ -88,6 +88,7 @@ object Bundle {
     }
 
     val pipeline = "pipeline"
+    val tensorflow = "tensorflow"
   }
 
   def apply[Transformer <: AnyRef](name: String,

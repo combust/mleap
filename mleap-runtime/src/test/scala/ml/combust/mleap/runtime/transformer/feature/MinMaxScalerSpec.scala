@@ -1,8 +1,9 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MinMaxScalerModel
-import ml.combust.mleap.runtime.{LeapFrame, Row, LocalDataset}
-import ml.combust.mleap.runtime.types.{TensorType, StructField, StructType}
+import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 
@@ -10,8 +11,8 @@ import org.scalatest.FunSpec
   * Created by mikhail on 9/25/16.
   */
 class MinMaxScalerSpec extends FunSpec{
-  val schema = StructType(Seq(StructField("test_vec", TensorType.doubleVector()))).get
-  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(0.0, 20.0, 20.0)))))
+  val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
+  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 20.0)))))
   val frame = LeapFrame(schema, dataset)
 
   val minMaxScaler = MinMaxScaler(inputCol = "test_vec",
@@ -22,7 +23,7 @@ class MinMaxScalerSpec extends FunSpec{
     it("Scales the input data between min / max value vectors") {
       val frame2 = minMaxScaler.transform(frame).get
       val data = frame2.dataset.toArray
-      val norm = data(0).getVector(1)
+      val norm = data(0).getTensor[Double](1)
 
       assert(norm(0) == 0.0)
       assert(norm(1) == 1.0)

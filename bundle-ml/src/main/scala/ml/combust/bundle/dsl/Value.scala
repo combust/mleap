@@ -72,6 +72,8 @@ object Value {
     } else if(u.isCustom) {
       val ct = hr.bundleRegistry.custom(base.getCustom)
       list.custom.map(b => ct.fromBytes(b.toByteArray))
+    } else if(u.isDt) {
+      list.`type`
     } else { throw new IllegalArgumentException("unsupported list type") }
   }
 
@@ -153,6 +155,8 @@ object Value {
       val lb = base.getList
       val list = value.map(a => listValue(lb, a.asInstanceOf[Seq[_]]))
       ListValue(list = list)
+    } else if(u.isDt) {
+      ListValue(`type` = value.asInstanceOf[Seq[DataType]])
     } else { throw new IllegalArgumentException("unsupported data type") }
   }
 
@@ -232,6 +236,11 @@ object Value {
   val longListDataType: DataType = listDataType(longDataType)
   val floatListDataType: DataType = listDataType(floatDataType)
   val doubleListDataType: DataType = listDataType(doubleDataType)
+
+  val dataTypeDataType: DataType = DataType(DataType.Underlying.Dt(true))
+  val listDataTypeDataType: DataType = {
+    DataType(DataType.Underlying.List(DataType.ListType(Some(DataType(DataType.Underlying.Dt(true))))))
+  }
 
   /** Create a nested list data type of any depth.
     *
@@ -340,8 +349,23 @@ object Value {
     Value(tensorDataType(TensorSerializer.toBundleType(tensor.base)), tensor)
   }
 
+  /** Create a tensor value with 1 dimension.
+    *
+    * @param values values of vector
+    * @tparam T type of vector
+    * @return tensor with vector
+    */
   def vector[T: ClassTag](values: Array[T]): Value = {
     tensor(mleap.tensor.Tensor.denseVector(values))
+  }
+
+  /** Create a data type value.
+    *
+    * @param dt data type to store
+    * @return value with data type
+    */
+  def dataType(dt: DataType): Value = {
+    Value(dataTypeDataType, dt)
   }
 
   /** Create a list of booleans value.
@@ -427,6 +451,15 @@ object Value {
     Value(listDataType(tensorDataType(TensorSerializer.toBundleType(mleap.tensor.Tensor.tensorType[T]))), tensors)
   }
 
+  /** Create a list of data types.
+    *
+    * @param dts data types
+    * @return value with data types
+    */
+  def dataTypeList(dts: Seq[DataType]): Value = {
+    Value(listDataTypeDataType, dts)
+  }
+
   /** Construct a nested list of any value.
     *
     * For custom values use [[Value.customListN]]
@@ -497,7 +530,7 @@ case class Value(bundleDataType: DataType, value: Any) {
     */
   def isLarge(implicit hr: HasBundleRegistry): Boolean = {
     bundleDataType.underlying.isTensor && getTensor[Any].rawSize > 1024 ||
-      bundleDataType.underlying.isList && !bundleDataType.getList.base.get.underlying.isBasic ||
+      bundleDataType.underlying.isList && !(bundleDataType.getList.base.get.underlying.isBasic || bundleDataType.getList.base.get.underlying.isDt) ||
       bundleDataType.underlying.isCustom && hr.bundleRegistry.custom[Any](bundleDataType.getCustom).isLarge(value)
   }
 
@@ -563,6 +596,12 @@ case class Value(bundleDataType: DataType, value: Any) {
     */
   def getTensor[T]: mleap.tensor.Tensor[T] = value.asInstanceOf[mleap.tensor.Tensor[T]]
 
+  /** Get value as a data type.
+    *
+    * @return data type
+    */
+  def getDataType: DataType = value.asInstanceOf[DataType]
+
   /** Get value as seq of strings.
     *
     * @return string tensor values
@@ -606,6 +645,12 @@ case class Value(bundleDataType: DataType, value: Any) {
     * @return list of tensors
     */
   def getTensorList[T]: Seq[mleap.tensor.Tensor[T]] = value.asInstanceOf[Seq[mleap.tensor.Tensor[T]]]
+
+  /** Get list of data types.
+    *
+    * @return list of data types
+    */
+  def getDataTypeList: Seq[DataType] = value.asInstanceOf[Seq[DataType]]
 
   /** Get nested list of any type.
     *

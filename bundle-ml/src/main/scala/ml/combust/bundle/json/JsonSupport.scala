@@ -79,7 +79,7 @@ trait JsonSupportLowPriority {
 
   implicit val bundleDataTypeFormat: JsonFormat[DataType] = new JsonFormat[DataType] {
     override def read(json: JsValue): DataType = json match {
-      case JsString("data-type") => DataType(DataType.Underlying.Dt(true))
+      case JsString("data_type") => DataType(DataType.Underlying.Dt(true))
       case _: JsString => DataType(DataType.Underlying.Basic(bundleBasicTypeFormat.read(json)))
       case obj: JsObject =>
         obj.fields("type") match {
@@ -104,7 +104,7 @@ trait JsonSupportLowPriority {
       } else if(obj.underlying.isCustom) {
         JsObject(("type", JsString("custom")), ("name", JsString(obj.getCustom)))
       } else if(obj.underlying.isDt) {
-        JsString("data-type")
+        JsString("data_type")
       } else {
         serializationError("invalid data type")
       }
@@ -167,6 +167,9 @@ trait JsonSupportLowPriority {
       } else if(base.underlying.isList) {
         val format = bundleListValueFormat(base.getList)
         JsArray(obj.asInstanceOf[Seq[Seq[Any]]].map(format.write): _*)
+      } else if(base.underlying.isDt) {
+        val format = bundleDataTypeFormat
+        JsArray(obj.asInstanceOf[Seq[DataType]].map(format.write): _*)
       } else { serializationError("invalid list") }
     }
 
@@ -191,6 +194,9 @@ trait JsonSupportLowPriority {
         }
       } else if(base.underlying.isList) {
         val format = bundleListValueFormat(base.getList)
+        json.convertTo[Seq[JsValue]].map(format.read)
+      } else if(base.underlying.isDt) {
+        val format = bundleDataTypeFormat
         json.convertTo[Seq[JsValue]].map(format.read)
       } else { deserializationError("invalid list") }
     }
@@ -218,6 +224,8 @@ trait JsonSupportLowPriority {
           case BasicType.DOUBLE => DoubleJsonFormat.write(obj.asInstanceOf[Double])
           case _ => serializationError(s"invalid basic type ${dt.getBasic}")
         }
+      } else if(dt.underlying.isDt) {
+        bundleDataTypeFormat.write(obj.asInstanceOf[DataType])
       } else { serializationError("unsupported data type") }
     }
 
@@ -241,6 +249,8 @@ trait JsonSupportLowPriority {
           case BasicType.DOUBLE => DoubleJsonFormat.read(json)
           case _ => deserializationError(s"invalid basic type ${dt.getBasic}")
         }
+      } else if(dt.underlying.isDt) {
+        bundleDataTypeFormat.read(json)
       } else { deserializationError("unsupported data type") }
 
       v

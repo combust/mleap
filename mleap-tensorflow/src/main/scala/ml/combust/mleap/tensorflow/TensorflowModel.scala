@@ -11,10 +11,13 @@ import scala.util.Try
 /**
   * Created by hollinwilkins on 1/12/17.
   */
-case class TensorflowModel(graph: tensorflow.Graph,
+case class TensorflowModel(graphBytes: Array[Byte],
                            inputs: Seq[(String, DataType)],
                            outputs: Seq[(String, DataType)],
                            nodes: Option[Seq[String]] = None) extends AutoCloseable {
+  @transient
+  private var graph: Option[tensorflow.Graph] = None
+
   @transient
   private var session: Option[tensorflow.Session] = None
 
@@ -63,7 +66,12 @@ case class TensorflowModel(graph: tensorflow.Graph,
 
   private def withSession[T](f: (tensorflow.Session) => T): T = {
     val s = session.getOrElse {
-      session = Some(new tensorflow.Session(graph))
+      graph = Some {
+        val g = new tensorflow.Graph()
+        g.importGraphDef(graphBytes)
+        g
+      }
+      session = Some(new tensorflow.Session(graph.get))
       session.get
     }
 
@@ -72,7 +80,7 @@ case class TensorflowModel(graph: tensorflow.Graph,
 
   override def close(): Unit = {
     session.foreach(_.close())
-    graph.close()
+    graph.foreach(_.close())
   }
 
   override def finalize(): Unit = {

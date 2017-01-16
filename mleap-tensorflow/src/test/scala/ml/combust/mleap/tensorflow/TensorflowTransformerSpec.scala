@@ -1,8 +1,10 @@
 package ml.combust.mleap.tensorflow
 
+import ml.combust.bundle.dsl.Shape
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types.{FloatType, StructField, StructType}
 import org.scalatest.FunSpec
+import resource._
 
 /**
   * Created by hollinwilkins on 1/13/17.
@@ -10,11 +12,18 @@ import org.scalatest.FunSpec
 class TensorflowTransformerSpec extends FunSpec {
   describe("with a scaling tensorflow model") {
     it("scales the vector using the model and returns the result") {
-      val model = TensorflowModel(TestUtil.createAddGraph(),
+      val bytes = (for(graph <- managed(TestUtil.createAddGraph())) yield {
+        graph.toGraphDef
+      }).opt.get
+
+      val model = TensorflowModel(bytes,
         inputs = Seq(("InputA", FloatType(false)), ("InputB", FloatType(false))),
         outputs = Seq(("MyResult", FloatType(false))))
-      val transformer = TensorflowTransformer(inputCols = Seq("input_a", "input_b"),
-        outputCols = Seq("my_result"),
+      val shape = Shape().withInput("input_a", "InputA").
+        withInput("input_b", "InputB").
+        withOutput("my_result", "MyResult")
+      val transformer = TensorflowTransformer(inputs = shape.inputs,
+        outputs = shape.outputs ,
         rawOutputCol = Some("raw_result"),
         model = model)
       val schema = StructType(StructField("input_a", FloatType()), StructField("input_b", FloatType())).get

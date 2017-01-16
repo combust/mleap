@@ -11,18 +11,18 @@ import org.tensorflow
   */
 object MleapConverter {
   def convert(value: Any, dataType: DataType): tensorflow.Tensor = dataType match {
-    case FloatType(isNullable) =>
-      tensorflow.Tensor.create(value.asInstanceOf[Float])
-    case DoubleType(isNullable) =>
-      tensorflow.Tensor.create(value.asInstanceOf[Double])
-    case IntegerType(isNullable) =>
-      tensorflow.Tensor.create(value.asInstanceOf[Int])
-    case LongType(isNullable) =>
-      tensorflow.Tensor.create(value.asInstanceOf[Long])
     case BooleanType(isNullable) =>
       tensorflow.Tensor.create(value.asInstanceOf[Boolean])
     case StringType(isNullable) =>
       tensorflow.Tensor.create(value.asInstanceOf[String].getBytes("UTF-8"))
+    case IntegerType(isNullable) =>
+      tensorflow.Tensor.create(value.asInstanceOf[Int])
+    case LongType(isNullable) =>
+      tensorflow.Tensor.create(value.asInstanceOf[Long])
+    case FloatType(isNullable) =>
+      tensorflow.Tensor.create(value.asInstanceOf[Float])
+    case DoubleType(isNullable) =>
+      tensorflow.Tensor.create(value.asInstanceOf[Double])
     case tt: TensorType =>
       tt.base match {
         case StringType(false) =>
@@ -62,11 +62,14 @@ object MleapConverter {
   }
 
   def copyArray(base: BasicType): (AnyRef, Int, Int) => AnyRef = (base match {
-    case FloatType(false) =>
-      (arr: Array[Float], from: Int, to: Int) =>
+    case BooleanType(false) =>
+      (arr: Array[Boolean], from: Int, to: Int) =>
         util.Arrays.copyOfRange(arr, from, to)
-    case DoubleType(false) =>
-      (arr: Array[Double], from: Int, to: Int) =>
+    case ByteType(false) =>
+      (arr: Array[Byte], from: Int, to: Int) =>
+        util.Arrays.copyOfRange(arr, from, to)
+    case ShortType(false) =>
+      (arr: Array[Short], from: Int, to: Int) =>
         util.Arrays.copyOfRange(arr, from, to)
     case IntegerType(false) =>
       (arr: Array[Int], from: Int, to: Int) =>
@@ -74,8 +77,12 @@ object MleapConverter {
     case LongType(false) =>
       (arr: Array[Long], from: Int, to: Int) =>
         util.Arrays.copyOfRange(arr, from, to)
-    case BooleanType(false) =>
-      (arr: Array[Boolean], from: Int, to: Int) =>
+    case FloatType(false) =>
+      (arr: Array[Float], from: Int, to: Int) =>
         util.Arrays.copyOfRange(arr, from, to)
+    case DoubleType(false) =>
+      (arr: Array[Double], from: Int, to: Int) =>
+        util.Arrays.copyOfRange(arr, from, to)
+    case _ => throw new IllegalArgumentException(s"unsupported base type $base")
   }).asInstanceOf[(AnyRef, Int, Int) => AnyRef]
 }

@@ -4,29 +4,43 @@ import java.io.File
 
 import ml.combust.mleap.runtime
 import org.apache.spark.ml.Transformer
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.MleapSupport._
 import com.databricks.spark.avro._
 import ml.combust.bundle.BundleFile
-import ml.combust.bundle.serializer.FileUtil
 import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.bundle.SparkBundleContext
-import org.apache.spark.sql.functions.col
+import org.apache.spark.ml.linalg.{Vector, VectorUDT}
+import org.apache.spark.sql.mleap.TensorUDT
+import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.types.ArrayType
+import ml.combust.mleap.runtime.converter.VectorConverters._
 import resource._
 
-import scala.util.Try
+import scala.collection.mutable
 
 /**
   * Created by hollinwilkins on 10/30/16.
   */
 object SparkParityBase extends FunSpec {
+  TensorUDT // make sure UDT is registered
+
   val sparkRegistry = SparkBundleContext.defaultContext
   val mleapRegistry = MleapContext.defaultContext
 
   def dataset(spark: SparkSession): DataFrame = {
     spark.sqlContext.read.avro(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").toString)
+  }
+
+  val toTensor = udf {
+    v: Vector => v: Tensor[Double]
+  }
+
+  val toTensorArray = udf {
+    v: mutable.WrappedArray[Vector] => v.map(vv => vv: Tensor[Double])
   }
 }
 
@@ -34,6 +48,22 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   val baseDataset: DataFrame = SparkParityBase.dataset(spark)
   val dataset: DataFrame
   val sparkTransformer: Transformer
+
+  def sparkCols(dataset: DataFrame): Seq[Column] = {
+    dataset.schema.fields.sortBy(_.name).map {
+      field =>
+        field.dataType match {
+          case _: VectorUDT =>
+            SparkParityBase.toTensor(dataset.col(field.name))
+          case at: ArrayType if at.elementType.isInstanceOf[VectorUDT] =>
+            SparkParityBase.toTensorArray(dataset.col(field.name))
+          case _ => dataset.col(field.name)
+        }
+    }
+  }
+  def mleapCols(dataset: DataFrame): Seq[Column] = {
+    dataset.schema.fieldNames.sortBy(identity).map(dataset.col)
+  }
 
   lazy val spark = SparkSession.builder().
     appName("Spark/MLeap Parity Tests").
@@ -48,11 +78,11 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
                      (implicit context: SparkBundleContext): File = {
     bundleCache.getOrElse {
       new File("/tmp/mleap/spark-parity").mkdirs()
-      val file = new File(s"/tmp/mleap/spark-parity/${getClass.getName}")
+      val file = new File(s"/tmp/mleap/spark-parity/${getClass.getName}.zip")
+      file.delete()
 
-      BundleFile(file)
       for(bf <- managed(BundleFile(file))) {
-        transformer.writeBundle.force(true).save(bf).get
+        transformer.writeBundle.save(bf).get
       }
 
       bundleCache = Some(file)
@@ -62,11 +92,21 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
   def mleapTransformer(transformer: Transformer)
                       (implicit context: SparkBundleContext): runtime.transformer.Transformer = {
-    MleapBundleFileOps(serializedModel(transformer)).loadBundle().get.root
+    (for(bf <- managed(BundleFile(serializedModel(transformer)))) yield {
+      MleapBundleFileOps(bf).loadBundle().get.root
+    }).either.either match {
+      case Right(t) => t
+      case Left(errors) => throw errors.head
+    }
   }
 
   def deserializedSparkTransformer(transformer: Transformer): Transformer = {
-    SparkBundleFileOps(serializedModel(transformer)).loadBundle().get.root
+    (for(bf <- managed(BundleFile(serializedModel(transformer)))) yield {
+      SparkBundleFileOps(bf).loadBundle().get.root
+    }).either.either match {
+      case Right(t) => t
+      case Left(errors) => throw errors.head
+    }
   }
 
   def parityTransformer(): Unit = {
@@ -74,10 +114,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       val sparkTransformed = sparkTransformer.transform(dataset)
       implicit val sbc = SparkBundleContext().withDataset(sparkTransformed)
       val mTransformer = mleapTransformer(sparkTransformer)
-      val fields = sparkTransformed.schema.fields.map(_.name).map(col)
-      val sparkDataset = sparkTransformed.select(fields: _*).collect()
-      val mleapTransformed = mTransformer.sparkTransform(dataset).select(fields: _*)
-      val mleapDataset = mleapTransformed.collect()
+      val sparkDataset = sparkTransformed.select(sparkCols(sparkTransformed): _*).collect()
+      val mleapTransformed = mTransformer.sparkTransform(dataset)
+      val mleapDataset = mleapTransformed.select(mleapCols(mleapTransformed): _*).collect()
 
       assert(sparkDataset sameElements mleapDataset)
     }

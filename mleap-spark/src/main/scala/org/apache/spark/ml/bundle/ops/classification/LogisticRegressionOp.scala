@@ -3,6 +3,7 @@ package org.apache.spark.ml.bundle.ops.classification
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.classification.LogisticRegressionModel
 import org.apache.spark.ml.linalg.Vectors
@@ -25,11 +26,11 @@ class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegression
         val thresholds = if(obj.isSet(obj.thresholds)) {
           Some(obj.getThresholds)
         } else None
-        m.withAttr("coefficient_matrix", Value.tensor[Double](cm.toArray, Seq(cm.numRows, cm.numCols))).
-          withAttr("intercept_vector", Value.doubleVector(obj.interceptVector.toArray)).
+        m.withAttr("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
+          withAttr("intercept_vector", Value.vector(obj.interceptVector.toArray)).
           withAttr("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
       } else {
-        m.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
+        m.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
           withAttr("intercept", Value.double(obj.intercept)).
           withAttr("threshold", Value.double(obj.getThreshold))
       }
@@ -42,7 +43,7 @@ class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegression
       }
 
       val lr = new LogisticRegressionModel(uid = "",
-        coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
+        coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble)
 
       model.getValue("threshold").

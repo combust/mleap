@@ -20,7 +20,7 @@ class GeneralizedLinearRegressionOp extends OpNode[MleapContext, GeneralizedLine
 
     override def store(model: Model, obj: GeneralizedLinearRegressionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray.toSeq)).
+      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept)).
         withAttr("family", Value.string(obj.fal.family.name)).
         withAttr("link", Value.string(obj.fal.link.name))
@@ -28,7 +28,7 @@ class GeneralizedLinearRegressionOp extends OpNode[MleapContext, GeneralizedLine
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): GeneralizedLinearRegressionModel = {
-      GeneralizedLinearRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
+      GeneralizedLinearRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble,
         fal = new FamilyAndLink(Family.fromName(model.value("family").getString),
           Link.fromName(model.value("link").getString)))

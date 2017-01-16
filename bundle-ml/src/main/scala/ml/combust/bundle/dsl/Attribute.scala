@@ -13,24 +13,22 @@ object Attribute {
     */
   def fromBundle(attr: ml.bundle.Attribute.Attribute)
                 (implicit hr: HasBundleRegistry): Attribute = {
-    Attribute(attr.name, Value.fromBundle(attr.`type`.get, attr.value.get))
+    Attribute(Value.fromBundle(attr.`type`.get, attr.value.get))
   }
 }
 
 /** Attribute class stores a named value.
   *
-  * @param name name of the value
   * @param value stored value of the attribute
   */
-case class Attribute(name: String, value: Value) {
+case class Attribute(value: Value) {
   /** Convert to bundle attribute.
     *
     * @param hr bundle registry for custom types
     * @return bundle attribute
     */
   def asBundle(implicit hr: HasBundleRegistry): ml.bundle.Attribute.Attribute = {
-    ml.bundle.Attribute.Attribute(name = name,
-      `type` = Some(value.bundleDataType),
+    ml.bundle.Attribute.Attribute(`type` = Some(value.bundleDataType),
       value = Some(value.asBundle))
   }
 }

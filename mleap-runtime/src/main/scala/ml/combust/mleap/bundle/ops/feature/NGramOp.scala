@@ -18,7 +18,7 @@ class NGramOp extends OpNode[MleapContext, NGram, NGramModel]{
 
     override def store(model: Model, obj: NGramModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr(Attribute("n", Value.long(obj.n)))
+      model.withAttr("n", Value.long(obj.n))
     }
 
     override def load(model: Model)

@@ -3,19 +3,27 @@ package ml.combust.mleap.runtime.serialization
 import ml.combust.mleap.runtime.test.MyCustomObject
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, MleapContext, Row}
 import ml.combust.mleap.runtime.types._
-import org.apache.spark.ml.linalg.Vectors
+import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 11/1/16.
   */
 class FrameSerializerSpec extends FunSpec {
-  val schema = StructType(StructField("features", TensorType.doubleVector()),
+  val schema = StructType(StructField("features", TensorType(DoubleType())),
     StructField("name", StringType()),
     StructField("list_data", ListType(StringType())),
     StructField("nullable_double", DoubleType(true)),
+    StructField("float", FloatType(false)),
+    StructField("byte_tensor", TensorType(ByteType(false))),
+    StructField("short_list", ListType(ShortType(false))),
     StructField("nullable_string", StringType(true))).get
-  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(20.0, 10.0, 5.0)), "hello", Seq("hello", "there"), Option(56.7), None)))
+  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)),
+    "hello", Seq("hello", "there"),
+    Option(56.7d), 32.4f,
+    Tensor.denseVector(Array[Byte](1, 2, 3, 4)),
+    Seq[Short](99, 12, 45),
+    None)))
   val frame = LeapFrame(schema, dataset).withOutput("custom_object", "name")((name: String) => MyCustomObject(name)).get
   import MleapContext.defaultContext
 

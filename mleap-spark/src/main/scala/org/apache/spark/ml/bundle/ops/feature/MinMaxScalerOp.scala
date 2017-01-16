@@ -18,15 +18,15 @@ class MinMaxScalerOp extends OpNode[SparkBundleContext, MinMaxScalerModel, MinMa
 
     override def store(model: Model, obj: MinMaxScalerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("min", Value.doubleVector(obj.originalMin.toArray)).
-        withAttr("max", Value.doubleVector(obj.originalMax.toArray))
+      model.withAttr("min", Value.vector(obj.originalMin.toArray)).
+        withAttr("max", Value.vector(obj.originalMax.toArray))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): MinMaxScalerModel = {
       new MinMaxScalerModel(uid = "",
-        originalMin = Vectors.dense(model.value("min").getDoubleVector.toArray),
-        originalMax = Vectors.dense(model.value("max").getDoubleVector.toArray))
+        originalMin = Vectors.dense(model.value("min").getTensor[Double].toArray),
+        originalMax = Vectors.dense(model.value("max").getTensor[Double].toArray))
     }
 
   }

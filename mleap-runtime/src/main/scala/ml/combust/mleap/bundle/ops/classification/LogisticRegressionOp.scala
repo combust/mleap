@@ -6,6 +6,7 @@ import ml.combust.mleap.runtime.transformer.classification.LogisticRegression
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
 
 /**
@@ -23,11 +24,11 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
       if(obj.isMultinomial) {
         val mm = obj.multinomialModel
         val cm = mm.coefficientMatrix
-        m.withAttr("coefficient_matrix", Value.tensor[Double](cm.toArray, Seq(cm.numRows, cm.numCols))).
-          withAttr("intercept_vector", Value.doubleVector(mm.interceptVector.toArray)).
+        m.withAttr("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
+          withAttr("intercept_vector", Value.vector(mm.interceptVector.toArray)).
           withAttr("thresholds", mm.thresholds.map(_.toSeq).map(Value.doubleList))
       } else {
-        m.withAttr("coefficients", Value.doubleVector(obj.binaryModel.coefficients.toArray)).
+        m.withAttr("coefficients", Value.vector(obj.binaryModel.coefficients.toArray)).
           withAttr("intercept", Value.double(obj.binaryModel.intercept)).
           withAttr("threshold", Value.double(obj.binaryModel.threshold))
       }
@@ -39,14 +40,13 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
 
       val lm = if(numClasses > 2) {
         val tensor = model.value("coefficient_matrix").getTensor[Double]
-        val Seq(rows, cols) = model.value("coefficient_matrix").bundleDataType.getTensor.dimensions
-        val cm = Matrices.dense(numRows = rows, numCols = cols, tensor.toArray)
+        val cm = Matrices.dense(numRows = tensor.dimensions.head, numCols = tensor.dimensions(1), tensor.toArray)
 
         ProbabilisticLogisticsRegressionModel(coefficientMatrix = cm,
-          interceptVector = Vectors.dense(model.value("intercept_vector").getDoubleVector.toArray),
+          interceptVector = Vectors.dense(model.value("intercept_vector").getTensor[Double].toArray),
           thresholds = model.getValue("thresholds").map(_.getDoubleList.toArray))
       } else {
-        BinaryLogisticRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
+        BinaryLogisticRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
           intercept = model.value("intercept").getDouble,
           threshold = model.value("threshold").getDouble)
       }

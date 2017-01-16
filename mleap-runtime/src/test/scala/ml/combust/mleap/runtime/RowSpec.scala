@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime
 
-import org.apache.spark.ml.linalg.Vectors
+import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
 /** Base trait for testing [[ml.combust.mleap.runtime.Row]] implementations.
@@ -11,14 +11,14 @@ trait RowSpec[R <: Row] extends FunSpec {
   def create(values: Any *): R
 
   def row(): Unit = {
-    val rowValues = Seq("test", 42, Seq(56, 78, 23), 57.3, Vectors.dense(Array(2.3, 4.4)), 56L)
+    val rowValues = Seq("test", 42, Seq(56, 78, 23), 57.3, Tensor.denseVector(Array(2.3, 4.4)), 56L)
     val row = create(rowValues: _*)
 
     val optionRowValues = Seq(Option("test"),
       None,
       Option(42),
       Option(45.4),
-      Option(Vectors.dense(Array(42.3, 65.7))),
+      Option(Tensor.denseVector(Array(42.3, 65.7))),
       Option(33l),
       Option(Seq(56, 78, 23)))
     val optionRow = create(optionRowValues: _*)
@@ -114,7 +114,7 @@ trait RowSpec[R <: Row] extends FunSpec {
 
     describe("#getVector") {
       it("gets the value at a given index as a vector") {
-        val vec = row.getVector(4)
+        val vec = row.getTensor[Double](4)
 
         assert(vec(0) == 2.3)
         assert(vec(1) == 4.4)
@@ -123,7 +123,7 @@ trait RowSpec[R <: Row] extends FunSpec {
 
     describe("#optionVector") {
       it("gets the value at a given index as a vector") {
-        val vec = optionRow.optionVector(4).get
+        val vec = optionRow.optionTensor[Double](4).get
 
         assert(vec(0) == 42.3)
         assert(vec(1) == 65.7)

@@ -3,6 +3,7 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.BucketedRandomProjectionLSHModel
 import org.apache.spark.ml.linalg.Vectors
@@ -18,7 +19,7 @@ class BucketedRandomProjectionLSHOp extends OpNode[SparkBundleContext, BucketedR
 
     override def store(model: Model, obj: BucketedRandomProjectionLSHModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("random_unit_vectors", Value.tensorList[Double](obj.randUnitVectors.map(_.toArray.toSeq), Seq(-1))).
+      model.withAttr("random_unit_vectors", Value.tensorList[Double](obj.randUnitVectors.map(_.toArray).map(Tensor.denseVector))).
         withAttr("bucket_length", Value.double(obj.getBucketLength))
     }
 

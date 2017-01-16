@@ -23,7 +23,7 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
         Some(obj.getThresholds)
       } else None
 
-      model.withAttr("coefficients", Value.doubleVector(obj.model.weights.toArray)).
+      model.withAttr("coefficients", Value.vector(obj.model.weights.toArray)).
         withAttr("intercept", Value.double(obj.model.intercept)).
         withAttr("num_classes", Value.long(2)).
         withAttr("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
@@ -35,7 +35,7 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
         throw new IllegalArgumentException("only binary logistic regression supported in Spark")
       }
 
-      val svm = new org.apache.spark.mllib.classification.SVMModel(weights = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
+      val svm = new org.apache.spark.mllib.classification.SVMModel(weights = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble)
       val svmModel = new SVMModel(uid = "", model = svm)
       model.getValue("thresholds").

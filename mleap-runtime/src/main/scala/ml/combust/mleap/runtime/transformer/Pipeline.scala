@@ -12,4 +12,6 @@ case class Pipeline(uid: String = Transformer.uniqueName("pipeline"),
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     transformers.foldLeft(Try(builder))((b, stage) => b.flatMap(stage.transform))
   }
+
+  override def close(): Unit = transformers.foreach(_.close())
 }

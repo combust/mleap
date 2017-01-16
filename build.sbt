@@ -1,14 +1,22 @@
 import ml.combust.mleap.{Release, Common}
 
-lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
-  bundleMl,
-  core,
-  runtime,
-  avro,
-  sparkBase,
-  sparkTestkit,
-  spark,
-  sparkExtension)
+lazy val aggregatedProjects: Seq[ProjectReference] = {
+  val base: Seq[ProjectReference] = Seq(baseProject,
+    tensor,
+    bundleMl,
+    core,
+    runtime,
+    avro,
+    sparkBase,
+    sparkTestkit,
+    spark,
+    sparkExtension)
+
+  sys.props.get("mleap.tensorflow.enabled") match {
+    case Some("true") => base :+ (tensorflow: ProjectReference)
+    case _ => base
+  }
+}
 
 lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Seq(publishArtifact := false)
 
@@ -23,16 +31,22 @@ lazy val baseProject = Project(
   base = file("mleap-base")
 )
 
+lazy val tensor = Project(
+  id = "mleap-tensor",
+  base = file("mleap-tensor"),
+  dependencies = Seq(baseProject)
+)
+
 lazy val bundleMl = Project(
   id = "bundle-ml",
   base = file("bundle-ml"),
-  dependencies = Seq(baseProject)
+  dependencies = Seq(baseProject, tensor)
 )
 
 lazy val core = Project(
   id = "mleap-core",
   base = file("mleap-core"),
-  dependencies = Seq(baseProject)
+  dependencies = Seq(baseProject, tensor)
 )
 
 lazy val runtime = Project(
@@ -69,4 +83,10 @@ lazy val sparkExtension = Project(
   id = "mleap-spark-extension",
   base = file("mleap-spark-extension"),
   dependencies = Seq(spark, sparkTestkit % "test")
+)
+
+lazy val tensorflow = Project(
+  id = "mleap-tensorflow",
+  base = file("mleap-tensorflow"),
+  dependencies = Seq(runtime)
 )

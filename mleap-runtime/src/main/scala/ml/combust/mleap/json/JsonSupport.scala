@@ -2,7 +2,6 @@ package ml.combust.mleap.json
 
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, MleapContext}
 import ml.combust.mleap.runtime.types._
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 import spray.json.{JsValue, JsonFormat}
@@ -12,7 +11,7 @@ import scala.language.implicitConversions
 /**
   * Created by hollinwilkins on 8/23/16.
   */
-trait JsonSupport {
+trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
   implicit val mleapListTypeWriterFormat: JsonWriter[ListType] = new JsonWriter[ListType] {
     override def write(obj: ListType): JsValue = {
       JsObject("type" -> JsString("list"),
@@ -31,15 +30,13 @@ trait JsonSupport {
   implicit val mleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
     override def write(obj: TensorType): JsValue = {
       JsObject("type" -> JsString("tensor"),
-        "base" -> mleapBasicTypeFormat.write(obj.base),
-        "dimensions" -> obj.dimensions.toJson)
+        "base" -> mleapBasicTypeFormat.write(obj.base))
     }
 
     override def read(json: JsValue): TensorType = {
       val obj = json.asJsObject("invalid tensor type")
 
-      TensorType(base = mleapBasicTypeFormat.read(obj.fields("base")),
-        dimensions = obj.fields("dimensions").convertTo[Seq[Int]])
+      TensorType(base = mleapBasicTypeFormat.read(obj.fields("base")))
     }
   })
 
@@ -60,19 +57,25 @@ trait JsonSupport {
     }
 
     def forName(name: String, isNullable: Boolean = false): BasicType = name match {
-      case "double" => DoubleType(isNullable)
-      case "string" => StringType(isNullable)
-      case "long" => LongType(isNullable)
       case "boolean" => BooleanType(isNullable)
+      case "string" => StringType(isNullable)
+      case "byte" => ByteType(isNullable)
+      case "short" => ShortType(isNullable)
       case "integer" => IntegerType(isNullable)
+      case "long" => LongType(isNullable)
+      case "float" => FloatType(isNullable)
+      case "double" => DoubleType(isNullable)
     }
 
     override def write(obj: BasicType): JsValue = obj match {
-      case DoubleType(isNullable) => writeMaybeNullable(JsString("double"), isNullable)
-      case StringType(isNullable) => writeMaybeNullable(JsString("string"), isNullable)
-      case LongType(isNullable) => writeMaybeNullable(JsString("long"), isNullable)
       case BooleanType(isNullable) => writeMaybeNullable(JsString("boolean"), isNullable)
+      case StringType(isNullable) => writeMaybeNullable(JsString("string"), isNullable)
+      case ByteType(isNullable) => writeMaybeNullable(JsString("byte"), isNullable)
+      case ShortType(isNullable) => writeMaybeNullable(JsString("short"), isNullable)
       case IntegerType(isNullable) => writeMaybeNullable(JsString("integer"), isNullable)
+      case LongType(isNullable) => writeMaybeNullable(JsString("long"), isNullable)
+      case FloatType(isNullable) => writeMaybeNullable(JsString("float"), isNullable)
+      case DoubleType(isNullable) => writeMaybeNullable(JsString("double"), isNullable)
     }
 
     override def read(json: JsValue): BasicType = json match {
@@ -120,38 +123,6 @@ trait JsonSupport {
           case _ => deserializationError(s"invalid data type: ${obj.fields.get("type")}")
         }
       case _ => throw new Error("Invalid data type") // TODO: better error
-    }
-  }
-
-  implicit val mleapDenseVectorFormat: JsonFormat[DenseVector] = new JsonFormat[DenseVector] {
-    override def write(obj: DenseVector): JsValue = obj.values.toJson
-    override def read(json: JsValue): DenseVector = new DenseVector(json.convertTo[Array[Double]])
-  }
-
-  implicit val mleapSparseVectorFormat: JsonFormat[SparseVector] = new JsonFormat[SparseVector] {
-    override def write(obj: SparseVector): JsValue = JsObject("size" -> obj.size.toJson,
-      "indices" -> obj.indices.toJson,
-      "values" -> obj.values.toJson)
-
-    override def read(json: JsValue): SparseVector = {
-      val obj = json.asJsObject("invalid sparse vector")
-      new SparseVector(size = obj.fields("size").convertTo[Int],
-        indices = obj.fields("indices").convertTo[Array[Int]],
-        values = obj.fields("values").convertTo[Array[Double]])
-    }
-  }
-
-  implicit val mleapVectorFormat: JsonFormat[Vector] = new JsonFormat[Vector] {
-    override def write(obj: Vector): JsValue = obj match {
-      case obj: DenseVector => mleapDenseVectorFormat.write(obj)
-      case obj: SparseVector => mleapSparseVectorFormat.write(obj)
-      case _ => serializationError("invalid vector")
-    }
-
-    override def read(json: JsValue): Vector = json match {
-      case json: JsArray => mleapDenseVectorFormat.read(json)
-      case json: JsObject => mleapSparseVectorFormat.read(json)
-      case _ => deserializationError(s"invalid vector: $json")
     }
   }
 

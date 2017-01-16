@@ -19,12 +19,12 @@ class IDFOp extends OpNode[MleapContext, IDF, IDFModel] {
 
     override def store(model: Model, obj: IDFModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("idf", Value.doubleVector(obj.idf.toArray.toSeq))
+      model.withAttr("idf", Value.vector(obj.idf.toArray))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): IDFModel = {
-      IDFModel(idf = Vectors.dense(model.value("idf").getDoubleVector.toArray))
+      IDFModel(idf = Vectors.dense(model.value("idf").getTensor[Double].toArray))
     }
   }
 

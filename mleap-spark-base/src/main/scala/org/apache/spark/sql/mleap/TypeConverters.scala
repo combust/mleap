@@ -15,9 +15,10 @@ trait TypeConverters {
     case types.StringType(_) => Some(StringType)
     case types.IntegerType(_) => Some(IntegerType)
     case types.LongType(_) => Some(LongType)
+    case types.FloatType(_) => Some(FloatType)
     case types.DoubleType(_) => Some(DoubleType)
     case lt: types.ListType => sparkType(lt.base).map(t => ArrayType(t, containsNull = false))
-    case tt: types.TensorType if tt.base == types.DoubleType(false) && tt.dimensions.length == 1 => Some(new VectorUDT())
+    case tt: types.TensorType => Some(new TensorUDT)
     case ct: types.CustomType => UDTRegistration.getUDTFor(ct.klazz.getCanonicalName).
       map(_.newInstance().asInstanceOf[UserDefinedType[_]])
     case types.AnyType(_) => None

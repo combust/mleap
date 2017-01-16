@@ -1,5 +1,7 @@
 package ml.combust.mleap.tensor
 
+import java.util
+
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
@@ -34,7 +36,19 @@ object Tensor {
     case LongClass => LONG
     case FloatClass => FLOAT
     case DoubleClass => DOUBLE
-    case _ => throw new RuntimeException(s"unsupported class ${implicitly[ClassTag[T]].runtimeClass}")
+    case _ => throw new IllegalArgumentException(s"unsupported class ${implicitly[ClassTag[T]].runtimeClass}")
+  }
+
+  def zero(base: Byte): Any = base match {
+    case BOOLEAN => false
+    case STRING => ""
+    case BYTE => 0: Byte
+    case SHORT => 0: Short
+    case INT => 0: Int
+    case LONG => 0: Long
+    case FLOAT => 0.0f
+    case DOUBLE => 0.0d
+    case _ => throw new IllegalArgumentException(s"unsupported class $base")
   }
 
   def create[T: ClassTag](values: Array[T],
@@ -54,10 +68,10 @@ sealed trait Tensor[T] {
   def isDense: Boolean = false
   def isSparse: Boolean = false
 
-  def toDense: DenseTensor[T]
+  def toDense(implicit ct: ClassTag[T]): DenseTensor[T]
   def toArray(implicit ct: ClassTag[T]): Array[T]
 
-  def rawSize: Int = rawValues.size
+  def rawSize: Int = rawValues.length
   def rawValues: Array[T]
   def rawValuesIterator: Iterator[T]
 
@@ -77,7 +91,7 @@ case class DenseTensor[T](override val base: Byte,
                           override val dimensions: Seq[Int]) extends Tensor[T] {
   override def isDense: Boolean = true
 
-  override def toDense: DenseTensor[T] = this
+  override def toDense(implicit ct: ClassTag[T]): DenseTensor[T] = this
   override def toArray(implicit ct: ClassTag[T]): Array[T] = values
 
   override def rawValues: Array[T] = values
@@ -136,7 +150,9 @@ case class SparseTensor[T](override val base: Byte,
                            override val dimensions: Seq[Int]) extends Tensor[T] {
   override def isSparse: Boolean = true
 
-  override def toDense: DenseTensor[T] = ???
+  override def toDense(implicit ct: ClassTag[T]): DenseTensor[T] = {
+    DenseTensor(toArray, dimensions)
+  }
   override def toArray(implicit ct: ClassTag[T]): Array[T] = {
     val array = new Array[T](dimensions.product)
     var i = 0
@@ -150,7 +166,14 @@ case class SparseTensor[T](override val base: Byte,
 
   override def rawValues: Array[T] = values
   override def rawValuesIterator: Iterator[T] = values.iterator
-  override def get(indices: Int*): T = ???
+  override def get(is: Int *): T = {
+    val index = util.Arrays.binarySearch(indices.toArray: Array[AnyRef], is)
+
+    if(index >= 0) { values(denseIndex(indices(index))) }
+    else if(is.zip(dimensions).exists(v => v._1 >= v._2)) {
+      throw new IndexOutOfBoundsException(s"index is out of bounds")
+    } else { Tensor.zero(base).asInstanceOf[T] }
+  }
 
   private def denseIndex(index: Seq[Int]): Int = {
     var n = index.last

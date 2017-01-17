@@ -11,13 +11,14 @@ import spray.json._
 import resource._
 
 import scala.collection.mutable
+import scala.util.{Failure, Try}
 
 /**
   * Created by hollinwilkins on 11/2/16.
   */
 class DefaultFrameReader extends FrameReader {
   override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset)
-                        (implicit context: MleapContext): DefaultLeapFrame = {
+                        (implicit context: MleapContext): Try[DefaultLeapFrame] = {
     (for(in <- managed(new ByteArrayInputStream(bytes))) yield {
       val din = new DataInputStream(in)
       val length = din.readInt()
@@ -43,8 +44,8 @@ class DefaultFrameReader extends FrameReader {
       val dataset = LocalDataset(rows)
       DefaultLeapFrame(schema, dataset)
     }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(frame) => frame
+      case Left(errors) => Failure(errors.head)
+      case Right(frame) => Try(frame)
     }
   }
 }

@@ -48,6 +48,7 @@ trait BundleTypeConverters {
     case LongType(false) => bundle.BasicType.BasicType.LONG
     case FloatType(false) => bundle.BasicType.BasicType.FLOAT
     case DoubleType(false) => bundle.BasicType.BasicType.DOUBLE
+    case _ => throw new IllegalArgumentException(s"unsupported type $b")
   }
 
   implicit def mleapTypeToBundleType(bt: DataType): bundle.DataType.DataType = bt match {

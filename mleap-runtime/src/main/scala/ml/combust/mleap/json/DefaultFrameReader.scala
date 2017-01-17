@@ -7,12 +7,14 @@ import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
 import JsonSupport._
 import spray.json._
 
+import scala.util.Try
+
 /**
   * Created by hollinwilkins on 11/2/16.
   */
 class DefaultFrameReader extends FrameReader {
   override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset)
-                        (implicit context: MleapContext): DefaultLeapFrame = {
-    new String(bytes, charset).parseJson.convertTo[DefaultLeapFrame]
+                        (implicit context: MleapContext): Try[DefaultLeapFrame] = {
+    Try(new String(bytes, charset).parseJson.convertTo[DefaultLeapFrame])
   }
 }

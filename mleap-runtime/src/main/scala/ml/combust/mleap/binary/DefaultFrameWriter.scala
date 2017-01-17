@@ -9,11 +9,13 @@ import ml.combust.mleap.json.JsonSupport._
 import spray.json._
 import resource._
 
+import scala.util.Try
+
 /**
   * Created by hollinwilkins on 11/2/16.
   */
-class DefaultFrameWriter extends FrameWriter {
-  override def toBytes[LF <: LeapFrame[LF]](frame: LF, charset: Charset = BuiltinFormats.charset): Array[Byte] = {
+class DefaultFrameWriter[LF <: LeapFrame[LF]](frame: LF) extends FrameWriter {
+  override def toBytes(charset: Charset = BuiltinFormats.charset): Try[Array[Byte]] = {
     (for(out <- managed(new ByteArrayOutputStream())) yield {
       val serializers = frame.schema.fields.map(_.dataType).map(ValueSerializer.serializerForDataType)
       val dout = new DataOutputStream(out)
@@ -32,9 +34,6 @@ class DefaultFrameWriter extends FrameWriter {
 
       dout.flush()
       out.toByteArray
-    }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(bytes) => bytes
-    }
+    }).tried
   }
 }

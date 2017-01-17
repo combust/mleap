@@ -20,6 +20,6 @@ object ClusteringTreeNodeUtil {
 
   def read()
           (implicit context: BundleContext[SparkBundleContext]): BisectingKMeansModel = {
-    new BisectingKMeansModel(NodeSerializer[ClusteringTreeNode](context.file("tree")).read())
+    new BisectingKMeansModel(NodeSerializer[ClusteringTreeNode](context.file("tree")).read().get)
   }
 }

@@ -8,13 +8,15 @@ import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader}
 import ml.combust.mleap.runtime.types.StructType
 import resource._
 
+import scala.util.Try
+
 /**
   * Created by hollinwilkins on 11/2/16.
   */
 class DefaultRowReader(override val schema: StructType) extends RowReader {
   val serializers = schema.fields.map(_.dataType).map(ValueSerializer.serializerForDataType)
 
-  override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Row = {
+  override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Try[Row] = {
     (for(in <- managed(new ByteArrayInputStream(bytes))) yield {
       val din = new DataInputStream(in)
       val row = ArrayRow(new Array[Any](schema.fields.length))
@@ -24,9 +26,6 @@ class DefaultRowReader(override val schema: StructType) extends RowReader {
         i = i + 1
       }
       row
-    }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(row) => row
-    }
+    }).tried
   }
 }

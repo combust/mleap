@@ -60,10 +60,7 @@ case class BundleFile(fs: FileSystem,
     (for(in <- managed(Files.newInputStream(bundleJson))) yield {
       val json = Source.fromInputStream(in).getLines.mkString
       json.parseJson.convertTo[BundleInfo]
-    }).either.either match {
-      case Right(info) => Try(info)
-      case Left(errors) => Failure(errors.head)
-    }
+    }).tried
   }
 
   def writeNote(name: String, note: String): Try[String] = {
@@ -71,10 +68,7 @@ case class BundleFile(fs: FileSystem,
     (for(out <- managed(Files.newOutputStream(fs.getPath(path.toString, "notes", name)))) yield {
       out.write(note.getBytes)
       note
-    }).either.either match {
-      case Right(n) => Try(n)
-      case Left(errors) => Failure(errors.head)
-    }
+    }).tried
   }
 
   def readNote(name: String): String = {

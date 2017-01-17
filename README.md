@@ -28,6 +28,10 @@ Basic examples are localed below, but you can read [Serializing a Spark ML Pipel
 6. extensive test coverage with full parity tests for Spark and MLeap pipelines
 7. optional Spark transformer extension to extend Spark's default transformer offerings
 
+## Documentation
+
+Documentation is available at [mleap-docs.combust.ml](http://mleap-docs.combust.ml).
+
 ## Setup
 
 ### Link with Maven or SBT

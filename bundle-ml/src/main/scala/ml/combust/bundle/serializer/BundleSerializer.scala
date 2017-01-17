@@ -26,22 +26,20 @@ case class BundleSerializer[Context](context: Context,
     * @param bundle bundle to write
     * @return try of the bundle transformer
     */
-  def write[Transformer <: AnyRef](bundle: Bundle[Transformer]): Try[Bundle[Transformer]] = {
+  def write[Transformer <: AnyRef](bundle: Bundle[Transformer]): Try[Bundle[Transformer]] = Try {
     val bundleContext = bundle.bundleContext(context, hr.bundleRegistry, file.fs, file.path)
     implicit val sc = bundleContext.serializationContext(SerializationFormat.Json)
 
     Files.createDirectories(file.path)
-    NodeSerializer(bundleContext.bundleContext("root")).write(bundle.root)
-
-    (for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.bundleJson)))) yield {
-      val json = bundle.info.toJson.prettyPrint.getBytes
-      out.write(json)
-      bundle
-    }).either.either match {
-      case Right(b) => Try(b)
-      case Left(errors) => Failure(errors.head)
+    NodeSerializer(bundleContext.bundleContext("root")).write(bundle.root).flatMap {
+      _ =>
+        (for (out <- managed(Files.newOutputStream(bundleContext.file(Bundle.bundleJson)))) yield {
+          val json = bundle.info.toJson.prettyPrint.getBytes
+          out.write(json)
+          bundle
+        }).tried
     }
-  }
+  }.flatMap(identity)
 
   /** Read a bundle from the path.
     *

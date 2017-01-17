@@ -29,7 +29,7 @@ class DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeCl
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): DecisionTreeClassificationModel = {
-      val rootNode = TreeSerializer[tree.Node](context.file("tree"), withImpurities = true).read()
+      val rootNode = TreeSerializer[tree.Node](context.file("tree"), withImpurities = true).read().get
       new DecisionTreeClassificationModel(uid = "",
         rootNode = rootNode,
         numClasses = model.value("num_classes").getLong.toInt,

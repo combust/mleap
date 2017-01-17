@@ -85,19 +85,17 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
     Files.createDirectories(bundleContext.path)
     val op = bundleContext.bundleRegistry.opForObj[Context, Any, Any](obj)
     val modelSerializer = ModelSerializer(bundleContext)
-    modelSerializer.write(op.model(obj))
-
-    val name = op.name(obj)
-    val shape = op.shape(obj)
-    Node(name = name, shape = shape)
-  }.flatMap {
+    modelSerializer.write(op.model(obj)).map {
+      _ =>
+        val name = op.name(obj)
+        val shape = op.shape(obj)
+        Node(name = name, shape = shape)
+    }
+  }.flatMap(identity).flatMap {
     node =>
       (for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.nodeFile)))) yield {
         FormatNodeSerializer.serializer.write(out, node)
-      }).either.either match {
-        case Right(_) => Try(obj)
-        case Left(errors) => Failure(errors.head)
-      }
+      }).tried
   }
 
   /** Read a node from the current context path.
@@ -105,12 +103,9 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
     * @return deserialized node
     */
   def read(): Try[Any] = {
-    ((for(in <- managed(Files.newInputStream(bundleContext.file(Bundle.nodeFile)))) yield {
+    (for(in <- managed(Files.newInputStream(bundleContext.file(Bundle.nodeFile)))) yield {
       FormatNodeSerializer.serializer.read(in)
-    }).either.either match {
-      case Right(n) => Try(n)
-      case Left(errors) => Failure(errors.head)
-    }).flatMap {
+    }).tried.flatMap {
       node =>
         ModelSerializer(bundleContext).readWithModel().flatMap {
           case (model, m) =>

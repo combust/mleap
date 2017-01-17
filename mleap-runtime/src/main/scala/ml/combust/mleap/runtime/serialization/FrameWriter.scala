@@ -1,32 +1,43 @@
 package ml.combust.mleap.runtime.serialization
 
-import java.io.{File, FileOutputStream}
+import java.io.{File, FileOutputStream, OutputStream}
 import java.nio.charset.Charset
 
 import ml.combust.bundle.util.ClassLoaderUtil
 import ml.combust.mleap.runtime.LeapFrame
 import resource._
 
+import scala.reflect.ClassTag
+import scala.util.Try
+
 /**
   * Created by hollinwilkins on 11/1/16.
   */
 object FrameWriter {
-  def apply(format: String = BuiltinFormats.json,
-            clOption: Option[ClassLoader] = None): FrameWriter = {
+  def apply[LF <: LeapFrame[LF]](frame: LF,
+                                 format: String = BuiltinFormats.json,
+                                 clOption: Option[ClassLoader] = None)
+                                (implicit ct: ClassTag[LF]): FrameWriter = {
     val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[FrameWriter].getCanonicalName))
     cl.loadClass(s"$format.DefaultFrameWriter").
-      newInstance().
+      getConstructor(classOf[LeapFrame[_]]).
+      newInstance(frame).
       asInstanceOf[FrameWriter]
   }
 }
 
 trait FrameWriter {
-  def toBytes[LF <: LeapFrame[LF]](frame: LF, charset: Charset = BuiltinFormats.charset): Array[Byte]
+  def toBytes(charset: Charset = BuiltinFormats.charset): Try[Array[Byte]]
 
-  def write[LF <: LeapFrame[LF]](frame: LF, file: File, charset: Charset = BuiltinFormats.charset): Unit = {
-    val bytes = toBytes(frame)
-    for(out <- managed(new FileOutputStream(file))) {
-      out.write(bytes)
-    }
+  def save(file: File): Try[Any] = save(file, BuiltinFormats.charset)
+  def save(file: File, charset: Charset = BuiltinFormats.charset): Try[Any] = {
+    (for(out <- managed(new FileOutputStream(file))) yield {
+      save(out, charset)
+    }).tried.flatMap(identity)
+  }
+
+  def save(out: OutputStream): Try[Any] = save(out, BuiltinFormats.charset)
+  def save(out: OutputStream, charset: Charset): Try[Any] = {
+    toBytes(charset).map(out.write)
   }
 }

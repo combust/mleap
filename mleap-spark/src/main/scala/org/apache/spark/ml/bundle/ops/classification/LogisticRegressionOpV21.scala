@@ -6,13 +6,13 @@ import ml.combust.bundle.dsl._
 import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.classification.LogisticRegressionModel
-import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.ml.linalg.{Matrices, Vectors}
 import org.apache.spark.ml.bundle.util.ParamUtil
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
+class LogisticRegressionOpV21 extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
   override val Model: OpModel[SparkBundleContext, LogisticRegressionModel] = new OpModel[SparkBundleContext, LogisticRegressionModel] {
     override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 
@@ -38,13 +38,20 @@ class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegression
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
-      if(model.value("num_classes").getLong != 2) {
-        throw new IllegalArgumentException("Only binary logistic regression supported in Spark")
+      val numClasses = model.value("num_classes").getLong
+      val lr = if(numClasses > 2) {
+        val cmTensor = model.value("coefficient_matrix").getTensor[Double]
+        val coefficientMatrix = Matrices.dense(cmTensor.dimensions.head, cmTensor.dimensions(1), cmTensor.toArray)
+        new LogisticRegressionModel(uid = "",
+          coefficientMatrix = coefficientMatrix,
+          interceptVector = Vectors.dense(model.value("intercept").getTensor[Double].toArray),
+          numClasses = numClasses.toInt,
+          isMultinomial = true)
+      } else {
+        new LogisticRegressionModel(uid = "",
+          coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
+          intercept = model.value("intercept").getDouble)
       }
-
-      val lr = new LogisticRegressionModel(uid = "",
-        coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
-        intercept = model.value("intercept").getDouble)
 
       model.getValue("threshold").
         map(t => lr.setThreshold(t.getDouble)).

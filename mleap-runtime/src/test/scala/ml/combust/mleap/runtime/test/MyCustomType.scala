@@ -10,7 +10,7 @@ import spray.json.DefaultJsonProtocol._
   */
 case class MyCustomObject(name: String)
 
-class MyCustomType(bundleRegistry: BundleRegistry = BundleRegistry("mleap")) extends CustomType[MyCustomObject] {
+class MyCustomType(bundleRegistry: BundleRegistry = BundleRegistry("ml.combust.mleap.registry.default")) extends CustomType[MyCustomObject] {
   override val klazz: Class[MyCustomObject] = classOf[MyCustomObject]
 
   override def name: String = "my_custom_object"

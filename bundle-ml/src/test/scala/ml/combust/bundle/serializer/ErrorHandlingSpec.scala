@@ -19,7 +19,7 @@ case class UnknownTransformer() extends Transformer {
 }
 
 class ErrorHandlingSpec extends FunSpec {
-  implicit val testContext = TestContext(BundleRegistry("test"))
+  implicit val testContext = TestContext(BundleRegistry("test-registry"))
   val randomCoefficients = (0 to 100000).map(v => Random.nextDouble())
   val lr = LinearRegression(uid = "linear_regression_example",
     input = "input_field",

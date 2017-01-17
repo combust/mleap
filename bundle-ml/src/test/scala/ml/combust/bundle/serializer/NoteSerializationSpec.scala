@@ -10,7 +10,7 @@ import resource._
   * Created by hollinwilkins on 12/24/16.
   */
 class NoteSerializationSpec extends FunSpec {
-  implicit val registry = BundleRegistry("test")
+  implicit val registry = BundleRegistry("test-registry")
 
   describe("Bundle.ML notes serialization") {
     it("serializes and deserializes text notes") {

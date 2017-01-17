@@ -1,7 +1,5 @@
 package ml.combust.bundle.dsl
 
-import java.nio.ByteBuffer
-
 import com.google.protobuf.ByteString
 import ml.bundle.BasicType.BasicType
 import ml.bundle.DataType.DataType
@@ -14,7 +12,7 @@ import ml.combust.bundle.HasBundleRegistry
 import ml.combust.bundle.tensor.TensorSerializer
 import ml.combust.mleap
 
-import scala.reflect.ClassTag
+import scala.reflect.{ClassTag, classTag}
 
 /** Provides a set of helper methods for easily creating
   * [[ml.combust.bundle.dsl.Value]] objects.
@@ -448,7 +446,7 @@ object Value {
     * @return wrapped list of tensors
     */
   def tensorList[T: ClassTag](tensors: Seq[mleap.tensor.Tensor[T]]): Value = {
-    Value(listDataType(tensorDataType(TensorSerializer.toBundleType(mleap.tensor.Tensor.tensorType[T]))), tensors)
+    Value(listDataType(tensorDataType(TensorSerializer.toBundleType(classTag[T]))), tensors)
   }
 
   /** Create a list of data types.

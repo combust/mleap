@@ -27,8 +27,8 @@ trait JsonSupport {
     }
   }
 
-  implicit def mleapDenseTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[DenseTensor[T]] = jsonFormat3(DenseTensor[T])
-  implicit def mleapSparseTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[SparseTensor[T]] = jsonFormat4(SparseTensor[T])
+  implicit def mleapDenseTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[DenseTensor[T]] = jsonFormat[Array[T], Seq[Int], DenseTensor[T]](DenseTensor[T], "values", "dimensions")
+  implicit def mleapSparseTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[SparseTensor[T]] = jsonFormat[Seq[Seq[Int]], Array[T], Seq[Int], SparseTensor[T]](SparseTensor[T], "indices", "values", "dimensions")
   implicit def mleapTensorFormat[T: JsonFormat: ClassTag]: RootJsonFormat[Tensor[T]] = new RootJsonFormat[Tensor[T]] {
     override def write(obj: Tensor[T]): JsValue = obj match {
       case obj: DenseTensor[_] => obj.asInstanceOf[DenseTensor[T]].toJson

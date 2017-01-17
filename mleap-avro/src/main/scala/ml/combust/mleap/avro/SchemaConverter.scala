@@ -9,32 +9,33 @@ import org.apache.avro.Schema
 
 import scala.language.implicitConversions
 import scala.collection.JavaConverters._
+import scala.reflect.{ClassTag, classTag}
 import scala.util.Try
 
 /**
   * Created by hollinwilkins on 10/31/16.
   */
 object SchemaConverter {
-  def tensorSchema(base: Byte) = {
+  def tensorSchema[T: ClassTag] = {
     val r = Try {
-      val (name, valuesSchema) = base match {
-        case Tensor.BOOLEAN =>
+      val (name, valuesSchema) = classTag[T].runtimeClass match {
+        case Tensor.BooleanClass =>
           ("Boolean", Schema.createArray(Schema.create(Schema.Type.BOOLEAN)))
-        case Tensor.STRING =>
+        case Tensor.StringClass =>
           ("String", Schema.createArray(Schema.create(Schema.Type.STRING)))
-        case Tensor.BYTE =>
+        case Tensor.ByteClass =>
           ("Byte", Schema.create(Schema.Type.BYTES))
-        case Tensor.SHORT =>
+        case Tensor.ShortClass =>
           ("Short", Schema.createArray(Schema.create(Schema.Type.INT)))
-        case Tensor.INT =>
+        case Tensor.IntClass =>
           ("Int", Schema.createArray(Schema.create(Schema.Type.INT)))
-        case Tensor.LONG =>
+        case Tensor.LongClass =>
           ("Long", Schema.createArray(Schema.create(Schema.Type.LONG)))
-        case Tensor.FLOAT =>
+        case Tensor.FloatClass =>
           ("Float", Schema.createArray(Schema.create(Schema.Type.FLOAT)))
-        case Tensor.DOUBLE =>
+        case Tensor.DoubleClass =>
           ("Double", Schema.createArray(Schema.create(Schema.Type.DOUBLE)))
-        case _ => throw new IllegalArgumentException(s"invalid base $base")
+        case _ => throw new IllegalArgumentException(s"invalid base ${classTag[T].runtimeClass.getName}")
       }
       val indicesSchema = Schema.createUnion(Schema.createArray(Schema.createArray(Schema.create(Schema.Type.INT))),
         Schema.create(Schema.Type.NULL))
@@ -47,14 +48,14 @@ object SchemaConverter {
     r.get
   }
 
-  val booleanTensorSchema = tensorSchema(Tensor.BOOLEAN)
-  val stringTensorSchema = tensorSchema(Tensor.STRING)
-  val byteTensorSchema = tensorSchema(Tensor.BYTE)
-  val shortTensorSchema = tensorSchema(Tensor.SHORT)
-  val integerTensorSchema = tensorSchema(Tensor.INT)
-  val longTensorSchema = tensorSchema(Tensor.LONG)
-  val floatTensorSchema = tensorSchema(Tensor.FLOAT)
-  val doubleTensorSchema = tensorSchema(Tensor.DOUBLE)
+  val booleanTensorSchema = tensorSchema[Boolean]
+  val stringTensorSchema = tensorSchema[String]
+  val byteTensorSchema = tensorSchema[Byte]
+  val shortTensorSchema = tensorSchema[Short]
+  val integerTensorSchema = tensorSchema[Int]
+  val longTensorSchema = tensorSchema[Long]
+  val floatTensorSchema = tensorSchema[Float]
+  val doubleTensorSchema = tensorSchema[Double]
 
   val bytesCharset = Charset.forName("UTF-8")
 

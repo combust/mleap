@@ -4,7 +4,6 @@ import java.nio.ByteBuffer
 
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
-import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
 import org.apache.avro.util.Utf8
 
@@ -31,7 +30,7 @@ case class ValueConverter() {
       val vectorRecord = new GenericData.Record(tt)
       (value) => {
         val tensor = value.asInstanceOf[Tensor[_]]
-        val values = if(tensor.base == Tensor.BYTE) {
+        val values = if(tensor.base.runtimeClass == Tensor.ByteClass) {
           ByteBuffer.wrap(tensor.rawValues.asInstanceOf[Array[Byte]])
         } else {
           tensor.rawValuesIterator.toSeq.asJava

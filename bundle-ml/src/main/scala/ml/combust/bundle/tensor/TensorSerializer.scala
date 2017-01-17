@@ -8,20 +8,22 @@ import ml.bundle.Tensor.Tensor
 import ml.bundle.TensorType.TensorType
 import ml.combust.mleap.tensor
 
+import scala.reflect.ClassTag
+
 /**
   * Created by hollinwilkins on 1/15/17.
   */
 object TensorSerializer {
-  def toBundleType(tpe: Byte): BasicType = tpe match {
-    case tensor.Tensor.BOOLEAN => BasicType.BOOLEAN
-    case tensor.Tensor.STRING => BasicType.STRING
-    case tensor.Tensor.BYTE => BasicType.BYTE
-    case tensor.Tensor.SHORT => BasicType.SHORT
-    case tensor.Tensor.INT => BasicType.INT
-    case tensor.Tensor.LONG => BasicType.LONG
-    case tensor.Tensor.FLOAT => BasicType.FLOAT
-    case tensor.Tensor.DOUBLE => BasicType.DOUBLE
-    case _ => throw new RuntimeException(s"unsupported base type $tpe")
+  def toBundleType[T](base: ClassTag[T]): BasicType = base.runtimeClass match {
+    case tensor.Tensor.BooleanClass => BasicType.BOOLEAN
+    case tensor.Tensor.StringClass => BasicType.STRING
+    case tensor.Tensor.ByteClass => BasicType.BYTE
+    case tensor.Tensor.ShortClass => BasicType.SHORT
+    case tensor.Tensor.IntClass => BasicType.INT
+    case tensor.Tensor.LongClass => BasicType.LONG
+    case tensor.Tensor.FloatClass => BasicType.FLOAT
+    case tensor.Tensor.DoubleClass => BasicType.DOUBLE
+    case _ => throw new RuntimeException(s"unsupported base type ${base.runtimeClass.getName}")
   }
 
   def toProto(t: tensor.Tensor[_]): Tensor = {
@@ -31,20 +33,20 @@ object TensorSerializer {
       case t: tensor.DenseTensor[_] => ByteString.EMPTY
     }
 
-    val (tpe, values) = t.base match {
-      case tensor.Tensor.BOOLEAN =>
+    val (tpe, values) = t.base.runtimeClass match {
+      case tensor.Tensor.BooleanClass =>
         (BasicType.BOOLEAN, BooleanArraySerializer.write(t.rawValues.asInstanceOf[Array[Boolean]]))
-      case tensor.Tensor.BYTE =>
+      case tensor.Tensor.ByteClass =>
         (BasicType.BYTE, ByteArraySerializer.write(t.rawValues.asInstanceOf[Array[Byte]]))
-      case tensor.Tensor.SHORT =>
+      case tensor.Tensor.ShortClass =>
         (BasicType.SHORT, ShortArraySerializer.write(t.rawValues.asInstanceOf[Array[Short]]))
-      case tensor.Tensor.INT =>
+      case tensor.Tensor.IntClass =>
         (BasicType.INT, IntArraySerializer.write(t.rawValues.asInstanceOf[Array[Int]]))
-      case tensor.Tensor.LONG =>
+      case tensor.Tensor.LongClass =>
         (BasicType.LONG, LongArraySerializer.write(t.rawValues.asInstanceOf[Array[Long]]))
-      case tensor.Tensor.FLOAT =>
+      case tensor.Tensor.FloatClass =>
         (BasicType.FLOAT, FloatArraySerializer.write(t.rawValues.asInstanceOf[Array[Float]]))
-      case tensor.Tensor.DOUBLE =>
+      case tensor.Tensor.DoubleClass =>
         (BasicType.DOUBLE, DoubleArraySerializer.write(t.rawValues.asInstanceOf[Array[Double]]))
       case _ => throw new IllegalArgumentException(s"unsupported tensor type ${t.base}")
     }

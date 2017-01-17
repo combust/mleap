@@ -31,7 +31,15 @@ object BundleRegistry {
     val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[BundleRegistry].getCanonicalName))
     val config = configOption.getOrElse(ConfigFactory.load(cl))
 
-    val br = config.getStringList(s"ml.combust.bundle.registry.$registry.ops").asScala.foldLeft(Map[String, OpNode[_, _, _]]()) {
+    val registryConfig = config.getConfig(registry)
+    val ops = registryConfig.getStringList("ops").asScala.flatMap {
+      opsPath => config.getStringList(opsPath).asScala
+    }
+    val customTypes = registryConfig.getStringList("custom-types").asScala.flatMap {
+      ctPath => config.getStringList(ctPath).asScala
+    }
+
+    val br = ops.foldLeft(Map[String, OpNode[_, _, _]]()) {
       (m, opClass) =>
         val opNode = cl.loadClass(opClass).newInstance().asInstanceOf[OpNode[_, _, _]]
         m + (opNode.Model.opName -> opNode)
@@ -39,7 +47,7 @@ object BundleRegistry {
       (br, opNode) => br.register(opNode)
     }
 
-    config.getStringList("ml.combust.bundle.custom-types").asScala.foldLeft(br) {
+    customTypes.foldLeft(br) {
       (br2, customClass) =>
         br.register(cl.loadClass(customClass).
           getConstructor(classOf[BundleRegistry]).

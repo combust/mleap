@@ -17,7 +17,7 @@ object MleapContext {
 
   def apply(clOption: Option[ClassLoader]): MleapContext = {
     val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[MleapContext].getCanonicalName))
-    apply(BundleRegistry("mleap", Some(cl)))
+    apply(BundleRegistry("ml.combust.mleap.registry.default", Some(cl)))
   }
 
   def apply(registry: BundleRegistry): MleapContext = {

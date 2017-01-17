@@ -12,7 +12,7 @@ import org.apache.spark.ml.bundle.util.ParamUtil
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class LogisticRegressionOp extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
+class LogisticRegressionOpV21 extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
   override val Model: OpModel[SparkBundleContext, LogisticRegressionModel] = new OpModel[SparkBundleContext, LogisticRegressionModel] {
     override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 

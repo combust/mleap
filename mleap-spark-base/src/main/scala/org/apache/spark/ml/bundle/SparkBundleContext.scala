@@ -14,7 +14,7 @@ object SparkBundleContext {
 
   def apply(dataset: Option[DataFrame], clOption: Option[ClassLoader]): SparkBundleContext = {
     val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[SparkBundleContext].getCanonicalName))
-    apply(dataset, BundleRegistry("spark", Some(cl)))
+    apply(dataset, BundleRegistry("ml.combust.mleap.spark.registry.default", Some(cl)))
   }
 }
 

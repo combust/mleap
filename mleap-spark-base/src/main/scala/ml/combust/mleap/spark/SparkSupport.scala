@@ -19,8 +19,8 @@ trait SparkSupport {
   }
 
   implicit class SparkBundleFileOps(file: BundleFile) {
-    def loadBundle()
-                  (implicit context: SparkBundleContext): Try[Bundle[Transformer]] = file.load()
+    def loadSparkBundle()
+                       (implicit context: SparkBundleContext): Try[Bundle[Transformer]] = file.load()
   }
 
   implicit class MleapSparkTransformerOps[T <: MleapTransformer](transformer: T) {

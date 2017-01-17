@@ -76,6 +76,12 @@ case class VectorAssemblerModel() extends Serializable {
           values += d
         }
         cur += 1
+      case Some(v: Double) =>
+        if(v != 0.0) {
+          indices += cur
+          values += v
+        }
+        cur += 1
     }
     Vectors.sparse(cur, indices.result(), values.result()).compressed
   }

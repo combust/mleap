@@ -40,6 +40,7 @@ object Bundle {
 
     object feature {
       val binarizer = "binarizer"
+      val coalesce = "coalesce"
       val count_vectorizer = "count_vectorizer"
       val dct = "dct"
       val min_hash_lsh = "min_hash_lsh"
@@ -59,6 +60,7 @@ object Bundle {
       val max_abs_scaler = "max_abs_scaler"
       val bucketizer = "bucketizer"
       val idf = "idf"
+      val string_map = "string_map"
       val elementwise_product = "elementwise_product"
       val normalizer = "normalizer"
       val pca = "pca"

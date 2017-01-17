@@ -10,6 +10,8 @@ import ml.combust.bundle.tree.JsonSupport._
 import resource._
 import spray.json._
 
+import scala.util.Try
+
 /**
   * Created by hollinwilkins on 8/22/16.
   */
@@ -102,14 +104,11 @@ case class TreeSerializer[N: NodeWrapper](path: Path,
     }
   }
 
-  def read(): N = {
+  def read(): Try[N] = {
     (for(in <- managed(Files.newInputStream(path.getFileSystem.getPath(s"${path.toString}.$extension")))) yield {
       val reader = FormatTreeSerializer.reader(sc, in)
       read(reader)
-    }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(n) => n
-    }
+    }).tried
   }
 
   def read(reader: FormatTreeReader): N = {

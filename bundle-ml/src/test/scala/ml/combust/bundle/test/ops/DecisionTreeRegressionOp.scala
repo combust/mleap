@@ -91,7 +91,7 @@ class DecisionTreeRegressionOp extends OpNode[Any, DecisionTreeRegression, Decis
 
     override def load(model: Model)
                      (implicit context: BundleContext[Any]): DecisionTreeRegressionModel = {
-      val root = TreeSerializer[Node](context.file("tree"), withImpurities = true).read()
+      val root = TreeSerializer[Node](context.file("tree"), withImpurities = true).read().get
       DecisionTreeRegressionModel(root)
     }
   }

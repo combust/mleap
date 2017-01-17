@@ -12,7 +12,7 @@ import resource._
 import spray.json._
 
 import scala.io.Source
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 /** Trait for serializing a protobuf model definition.
   */
@@ -104,11 +104,7 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
     model =>
       (for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.modelFile)))) yield {
         FormatModelSerializer.serializer.write(out, model)
-      }).either.either match {
-        case Right(_) => Try(model)
-        case Left(errors) =>
-          Failure(errors.head)
-      }
+      }).tried
   }
 
   /** Read a model from the current bundle context.
@@ -122,27 +118,28 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
     * @return (deserialized model, model type class)
     */
   def readWithModel(): Try[(Any, Model)] = {
-    ((for(in <- managed(Files.newInputStream(bundleContext.file(Bundle.modelFile)))) yield {
+    (for(in <- managed(Files.newInputStream(bundleContext.file(Bundle.modelFile)))) yield {
       FormatModelSerializer.serializer.read(in)
-    }).either.either match {
-      case Right(bm) => Try(bm)
-      case Left(errors) => Failure(errors.head)
-    }).map {
+    }).tried.flatMap {
       bundleModel =>
         val m = bundleContext.bundleRegistry.model[Context, Any](bundleModel.op)
 
-        val bm = bundleContext.format match {
+        val tbm = bundleContext.format match {
           case SerializationFormat.Mixed =>
             if (Files.exists(bundleContext.file("model.pb"))) {
-              val large = AttributeListSerializer(bundleContext.file("model.pb")).readProto()
-              bundleModel.withAttrList(large)
+              AttributeListSerializer(bundleContext.file("model.pb")).
+                readProto().
+                map(bundleModel.withAttrList)
             } else {
-              bundleModel
+              Try(bundleModel)
             }
-          case _ => bundleModel
+          case _ => Try(bundleModel)
         }
 
-        (m.load(bm)(bundleContext), bm)
+        tbm.map {
+          bm =>
+            (m.load(bm)(bundleContext), bm)
+        }
     }
   }
 }

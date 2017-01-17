@@ -27,7 +27,7 @@ class DecisionTreeRegressionOp extends OpNode[SparkBundleContext, DecisionTreeRe
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): DecisionTreeRegressionModel = {
-      val rootNode = TreeSerializer[org.apache.spark.ml.tree.Node](context.file("tree"), withImpurities = false).read()
+      val rootNode = TreeSerializer[org.apache.spark.ml.tree.Node](context.file("tree"), withImpurities = false).read().get
       new DecisionTreeRegressionModel(uid = "",
         rootNode = rootNode,
         numFeatures = model.value("num_features").getLong.toInt)

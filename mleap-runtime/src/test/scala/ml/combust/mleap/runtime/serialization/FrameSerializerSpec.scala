@@ -42,8 +42,8 @@ class FrameSerializerSpec extends FunSpec {
         val writer = frame.schema.rowWriter("ml.combust.mleap.json")
         val reader = frame.schema.rowReader("ml.combust.mleap.json")
         val row = frame.dataset(0)
-        val bytes = writer.toBytes(row)
-        val dRow = reader.fromBytes(bytes)
+        val bytes = writer.toBytes(row).get
+        val dRow = reader.fromBytes(bytes).get
 
         assert(row == dRow)
       }
@@ -64,8 +64,8 @@ class FrameSerializerSpec extends FunSpec {
         val writer = frame.schema.rowWriter("ml.combust.mleap.binary")
         val reader = frame.schema.rowReader("ml.combust.mleap.binary")
         val row = frame.dataset(0)
-        val bytes = writer.toBytes(row)
-        val dRow = reader.fromBytes(bytes)
+        val bytes = writer.toBytes(row).get
+        val dRow = reader.fromBytes(bytes).get
 
         assert(row == dRow)
       }

@@ -43,9 +43,6 @@ class DefaultFrameReader extends FrameReader {
 
       val dataset = LocalDataset(rows)
       DefaultLeapFrame(schema, dataset)
-    }).either.either match {
-      case Left(errors) => Failure(errors.head)
-      case Right(frame) => Try(frame)
-    }
+    }).tried
   }
 }

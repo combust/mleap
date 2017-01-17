@@ -10,6 +10,7 @@ import spray.json._
 import resource._
 
 import scala.io.Source
+import scala.util.Try
 
 /** Class for serializing an [[ml.combust.bundle.dsl.AttributeList]].
   *
@@ -63,7 +64,7 @@ case class AttributeListSerializer(path: Path) {
     * @return attribute list deserialized from the appropriate file
     */
   def read()
-          (implicit context: SerializationContext): AttributeList = context.concrete match {
+          (implicit context: SerializationContext): Try[AttributeList] = context.concrete match {
     case SerializationFormat.Json => readJson()
     case SerializationFormat.Protobuf => readProto()
   }
@@ -74,13 +75,10 @@ case class AttributeListSerializer(path: Path) {
     * @return attribute list from the JSON file
     */
   def readJson()
-              (implicit context: SerializationContext): AttributeList = {
+              (implicit context: SerializationContext): Try[AttributeList] = {
     (for(in <- managed(Files.newInputStream(path))) yield {
       Source.fromInputStream(in).getLines().mkString.parseJson.convertTo[AttributeList]
-    }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(list) => list
-    }
+    }).tried
   }
 
   /** Read an attribute list from a Protobuf file.
@@ -89,12 +87,9 @@ case class AttributeListSerializer(path: Path) {
     * @return attribute list from the protobuf file
     */
   def readProto()
-               (implicit context: SerializationContext): AttributeList = {
+               (implicit context: SerializationContext): Try[AttributeList] = {
     (for(in <- managed(Files.newInputStream(path))) yield {
       AttributeList.fromBundle(ml.bundle.AttributeList.AttributeList.parseFrom(in))
-    }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(list) => list
-    }
+    }).tried
   }
 }

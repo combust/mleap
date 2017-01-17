@@ -37,10 +37,7 @@ case class BundleSerializer[Context](context: Context,
       val json = bundle.info.toJson.prettyPrint.getBytes
       out.write(json)
       bundle
-    }).either.either match {
-      case Right(b) => Try(b)
-      case Left(errors) => Failure(errors.head)
-    }
+    }).tried
   }
 
   /** Read a bundle from the path.

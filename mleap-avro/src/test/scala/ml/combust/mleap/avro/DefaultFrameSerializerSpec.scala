@@ -45,8 +45,8 @@ class DefaultFrameSerializerSpec extends FunSpec {
         val writer = frame.schema.rowWriter("ml.combust.mleap.avro")
         val reader = frame.schema.rowReader("ml.combust.mleap.avro")
         val row = frame.dataset(0)
-        val bytes = writer.toBytes(row)
-        val dRow = reader.fromBytes(bytes)
+        val bytes = writer.toBytes(row).get
+        val dRow = reader.fromBytes(bytes).get
 
         assert(row == dRow)
       }

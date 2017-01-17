@@ -6,13 +6,13 @@ import ml.combust.bundle.dsl._
 import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.classification.LogisticRegressionModel
-import org.apache.spark.ml.linalg.{Matrices, Vectors}
+import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.bundle.util.ParamUtil
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class LogisticRegressionOpV21 extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
+class LogisticRegressionOpV20 extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
   override val Model: OpModel[SparkBundleContext, LogisticRegressionModel] = new OpModel[SparkBundleContext, LogisticRegressionModel] {
     override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 
@@ -20,38 +20,23 @@ class LogisticRegressionOpV21 extends OpNode[SparkBundleContext, LogisticRegress
 
     override def store(model: Model, obj: LogisticRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      assert(obj.numClasses == 2, "This op only supports binary logistic regression")
+
       val m = model.withAttr("num_classes", Value.long(obj.numClasses))
-      if(obj.numClasses > 2) {
-        val cm = obj.coefficientMatrix
-        val thresholds = if(obj.isSet(obj.thresholds)) {
-          Some(obj.getThresholds)
-        } else None
-        m.withAttr("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
-          withAttr("intercept_vector", Value.vector(obj.interceptVector.toArray)).
-          withAttr("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
-      } else {
-        m.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
-          withAttr("intercept", Value.double(obj.intercept)).
-          withAttr("threshold", Value.double(obj.getThreshold))
-      }
+      m.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
+        withAttr("intercept", Value.double(obj.intercept)).
+        withAttr("threshold", Value.double(obj.getThreshold))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
-      val numClasses = model.value("num_classes").getLong
-      val lr = if(numClasses > 2) {
-        val cmTensor = model.value("coefficient_matrix").getTensor[Double]
-        val coefficientMatrix = Matrices.dense(cmTensor.dimensions.head, cmTensor.dimensions(1), cmTensor.toArray)
-        new LogisticRegressionModel(uid = "",
-          coefficientMatrix = coefficientMatrix,
-          interceptVector = Vectors.dense(model.value("intercept").getTensor[Double].toArray),
-          numClasses = numClasses.toInt,
-          isMultinomial = true)
-      } else {
-        new LogisticRegressionModel(uid = "",
-          coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
-          intercept = model.value("intercept").getDouble)
+      if(model.value("num_classes").getLong != 2) {
+        throw new IllegalArgumentException("Only binary logistic regression supported in Spark")
       }
+
+      val lr = new LogisticRegressionModel(uid = "",
+        coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
+        intercept = model.value("intercept").getDouble)
 
       model.getValue("threshold").
         map(t => lr.setThreshold(t.getDouble)).

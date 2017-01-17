@@ -85,12 +85,13 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
     Files.createDirectories(bundleContext.path)
     val op = bundleContext.bundleRegistry.opForObj[Context, Any, Any](obj)
     val modelSerializer = ModelSerializer(bundleContext)
-    modelSerializer.write(op.model(obj))
-
-    val name = op.name(obj)
-    val shape = op.shape(obj)
-    Node(name = name, shape = shape)
-  }.flatMap {
+    modelSerializer.write(op.model(obj)).map {
+      _ =>
+        val name = op.name(obj)
+        val shape = op.shape(obj)
+        Node(name = name, shape = shape)
+    }
+  }.flatMap(identity).flatMap {
     node =>
       (for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.nodeFile)))) yield {
         FormatNodeSerializer.serializer.write(out, node)

@@ -94,13 +94,15 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
     bundleContext.format match {
       case SerializationFormat.Mixed =>
         val (small, large) = AttributeListSeparator().separate(model.attributes)
-        for (l <- large) {
-          AttributeListSerializer(bundleContext.file("model.pb")).writeProto(l)
-        }
-        model.replaceAttrList(small)
-      case _ => model
+        val m = model.replaceAttrList(small)
+        (for (l <- large) yield {
+          AttributeListSerializer(bundleContext.file("model.pb")).
+            writeProto(l).
+            map(_ => m)
+        }).getOrElse(Try(m))
+      case _ => Try(model)
     }
-  }.flatMap {
+  }.flatMap(identity).flatMap {
     model =>
       (for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.modelFile)))) yield {
         FormatModelSerializer.serializer.write(out, model)

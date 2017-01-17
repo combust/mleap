@@ -26,7 +26,7 @@ case class AttributeListSerializer(path: Path) {
     * @param context serialization context for determining format
     */
   def write(attrs: AttributeList)
-           (implicit context: SerializationContext): Unit = context.concrete match {
+           (implicit context: SerializationContext): Try[Any] = context.concrete match {
     case SerializationFormat.Json => writeJson(attrs)
     case SerializationFormat.Protobuf => writeProto(attrs)
   }
@@ -37,11 +37,11 @@ case class AttributeListSerializer(path: Path) {
     * @param hr bundle registry for custom types
     */
   def writeJson(list: AttributeList)
-               (implicit hr: HasBundleRegistry): Unit = {
+               (implicit hr: HasBundleRegistry): Try[Any] = {
     val json = list.toJson.prettyPrint.getBytes
-    for(out <- managed(Files.newOutputStream(path))) {
+    (for(out <- managed(Files.newOutputStream(path))) yield {
       out.write(json)
-    }
+    }).tried
   }
 
   /** Write attribute list as a Protobuf file.
@@ -50,10 +50,10 @@ case class AttributeListSerializer(path: Path) {
     * @param hr bundle registry for custom types
     */
   def writeProto(list: AttributeList)
-                (implicit hr: HasBundleRegistry): Unit = {
-    for(out <- managed(Files.newOutputStream(path))) {
+                (implicit hr: HasBundleRegistry): Try[Any] = {
+    (for(out <- managed(Files.newOutputStream(path))) yield {
       list.asBundle.writeTo(out)
-    }
+    }).tried
   }
 
   /** Read an attribute list.

@@ -7,11 +7,13 @@ import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import JsonSupport._
 import spray.json._
 
+import scala.util.Try
+
 /**
   * Created by hollinwilkins on 11/2/16.
   */
-class DefaultFrameWriter() extends FrameWriter {
-  override def toBytes[LF <: LeapFrame[LF]](frame: LF, charset: Charset = BuiltinFormats.charset): Array[Byte] = {
-    frame.toJson.prettyPrint.getBytes(charset)
+class DefaultFrameWriter[LF <: LeapFrame[LF]](frame: LF) extends FrameWriter {
+  override def toBytes(charset: Charset = BuiltinFormats.charset): Try[Array[Byte]] = {
+    Try(frame.toJson.prettyPrint.getBytes(charset))
   }
 }

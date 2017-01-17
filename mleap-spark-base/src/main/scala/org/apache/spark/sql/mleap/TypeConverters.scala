@@ -13,6 +13,8 @@ trait TypeConverters {
   implicit def sparkType(dataType: types.DataType): Option[DataType] = dataType match {
     case types.BooleanType(_) => Some(BooleanType)
     case types.StringType(_) => Some(StringType)
+    case types.ByteType(_) => Some(ByteType)
+    case types.ShortType(_) => Some(ShortType)
     case types.IntegerType(_) => Some(IntegerType)
     case types.LongType(_) => Some(LongType)
     case types.FloatType(_) => Some(FloatType)

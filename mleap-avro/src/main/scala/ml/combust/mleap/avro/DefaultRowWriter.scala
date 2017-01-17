@@ -12,6 +12,8 @@ import org.apache.avro.io.{BinaryDecoder, BinaryEncoder, EncoderFactory}
 import SchemaConverter._
 import resource._
 
+import scala.util.Try
+
 /**
   * Created by hollinwilkins on 11/2/16.
   */
@@ -23,7 +25,7 @@ class DefaultRowWriter(override val schema: StructType) extends RowWriter {
   var encoder: BinaryEncoder = null
   var record = new GenericData.Record(avroSchema)
 
-  override def toBytes(row: Row, charset: Charset = BuiltinFormats.charset): Array[Byte] = {
+  override def toBytes(row: Row, charset: Charset = BuiltinFormats.charset): Try[Array[Byte]] = {
     (for(out <- managed(new ByteArrayOutputStream(1024))) yield {
       encoder = EncoderFactory.get().binaryEncoder(out, encoder)
 
@@ -36,9 +38,6 @@ class DefaultRowWriter(override val schema: StructType) extends RowWriter {
       encoder.flush()
 
       out.toByteArray
-    }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(bytes) => bytes
-    }
+    }).tried
   }
 }

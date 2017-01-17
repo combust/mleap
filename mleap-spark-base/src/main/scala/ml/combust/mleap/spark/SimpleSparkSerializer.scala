@@ -21,9 +21,6 @@ class SimpleSparkSerializer() {
   def deserializeFromBundle(path: String): Transformer = {
     (for(file <- managed(BundleFile(path))) yield {
       file.load().get.root
-    }).either.either match {
-      case Right(root) => root
-      case Left(errors) => throw errors.head
-    }
+    }).tried.get
   }
 }

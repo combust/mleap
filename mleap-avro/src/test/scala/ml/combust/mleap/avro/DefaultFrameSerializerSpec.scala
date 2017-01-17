@@ -33,8 +33,8 @@ class DefaultFrameSerializerSpec extends FunSpec {
 
   describe("with format ml.combust.mleap.avro") {
     it("serializes the leap frame as avro") {
-      val bytes = FrameWriter("ml.combust.mleap.avro").toBytes(frame)
-      val dFrame = FrameReader("ml.combust.mleap.avro").fromBytes(bytes)
+      val bytes = frame.writer("ml.combust.mleap.avro").toBytes().get
+      val dFrame = FrameReader("ml.combust.mleap.avro").fromBytes(bytes).get
 
       assert(dFrame.schema == frame.schema)
       assert(dFrame.dataset == frame.dataset)
@@ -42,11 +42,11 @@ class DefaultFrameSerializerSpec extends FunSpec {
 
     describe("row serializer") {
       it("serializes rows as avro") {
-        val writer = RowWriter(frame.schema, "ml.combust.mleap.avro")
-        val reader = RowReader(frame.schema, "ml.combust.mleap.avro")
+        val writer = frame.schema.rowWriter("ml.combust.mleap.avro")
+        val reader = frame.schema.rowReader("ml.combust.mleap.avro")
         val row = frame.dataset(0)
-        val bytes = writer.toBytes(row)
-        val dRow = reader.fromBytes(bytes)
+        val bytes = writer.toBytes(row).get
+        val dRow = reader.fromBytes(bytes).get
 
         assert(row == dRow)
       }

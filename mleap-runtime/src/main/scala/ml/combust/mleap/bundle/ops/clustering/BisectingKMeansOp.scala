@@ -28,7 +28,7 @@ class BisectingKMeansOp extends OpNode[MleapContext, BisectingKMeans, BisectingK
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): BisectingKMeansModel = {
-      val root = NodeSerializer[ClusteringTreeNode](context.file("tree")).read()
+      val root = NodeSerializer[ClusteringTreeNode](context.file("tree")).read().get
       BisectingKMeansModel(root)
     }
   }

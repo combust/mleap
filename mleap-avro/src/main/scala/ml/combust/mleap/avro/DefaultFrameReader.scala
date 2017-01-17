@@ -10,6 +10,7 @@ import org.apache.avro.generic.{GenericData, GenericDatumReader}
 import SchemaConverter._
 
 import scala.collection.mutable
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 11/2/16.
@@ -18,7 +19,7 @@ class DefaultFrameReader extends FrameReader {
   val valueConverter = ValueConverter()
 
   override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset)
-                        (implicit context: MleapContext): DefaultLeapFrame = {
+                        (implicit context: MleapContext): Try[DefaultLeapFrame] = Try {
     val datumReader = new GenericDatumReader[GenericData.Record]()
     val reader = new DataFileReader[GenericData.Record](new SeekableByteArrayInput(bytes), datumReader)
     val avroSchema = reader.getSchema

@@ -1,6 +1,7 @@
 package org.apache.spark.sql.mleap
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, DataInputStream, DataOutputStream}
+import java.nio.ByteBuffer
 
 import ml.combust.mleap.binary._
 import ml.combust.mleap.tensor.Tensor
@@ -28,7 +29,7 @@ class TensorUDT extends UserDefinedType[Tensor[_]] {
 
   override def sqlType: DataType = StructType(Seq(
     StructField("type", ByteType, nullable = false),
-    StructField("binary", ArrayType(ByteType, containsNull = false), nullable = false)
+    StructField("binary", ArrayType(IntegerType, containsNull = false), nullable = false)
   ))
 
   override def userClass: Class[Tensor[_]] = classOf[Tensor[_]]
@@ -59,7 +60,7 @@ class TensorUDT extends UserDefinedType[Tensor[_]] {
 
       out.flush()
       outByte.toByteArray
-    }).opt.get
+    }).tried.get.map(_.toInt)
 
     val typeByte = obj.base.runtimeClass match {
       case Tensor.BooleanClass => BOOLEAN
@@ -74,22 +75,26 @@ class TensorUDT extends UserDefinedType[Tensor[_]] {
         throw new RuntimeException(s"unsupported tensor type: ${obj.base}")
     }
 
-    val row = new GenericInternalRow(2)
-    row.setByte(0, typeByte)
-    row.update(1, UnsafeArrayData.fromPrimitiveArray(binary))
-    row
+    new GenericInternalRow(Array(typeByte, UnsafeArrayData.fromPrimitiveArray(binary)))
   }
 
   override def deserialize(datum: Any): Tensor[_] = {
     datum match {
       case row: InternalRow =>
-        val binary = row.getArray(1).toByteArray()
+        val rawInts = row.getArray(1).toIntArray()
+        val b = ByteBuffer.allocate(rawInts.length)
+        rawInts.foreach(i => b.put(i.toByte))
+        val binary = b.array()
         (for(in <- managed(new DataInputStream(new ByteArrayInputStream(binary)))) yield {
           row.getByte(0) match {
             case BOOLEAN =>
               TensorSerializer(BooleanSerializer).read(in)
             case STRING =>
               TensorSerializer(StringSerializer).read(in)
+            case BYTE =>
+              TensorSerializer(ByteSerializer).read(in)
+            case SHORT =>
+              TensorSerializer(ShortSerializer).read(in)
             case INT =>
               TensorSerializer(IntegerSerializer).read(in)
             case LONG =>
@@ -101,7 +106,7 @@ class TensorUDT extends UserDefinedType[Tensor[_]] {
             case _ =>
               throw new RuntimeException(s"invalid base type byte: ${row.getByte(0)}")
           }
-        }).opt.get
+        }).tried.get
     }
   }
 

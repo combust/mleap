@@ -13,6 +13,8 @@ object MleapConverter {
   def convert(value: Any, dataType: DataType): tensorflow.Tensor = dataType match {
     case BooleanType(isNullable) =>
       tensorflow.Tensor.create(value.asInstanceOf[Boolean])
+    case ListType(ByteType(false), false) =>
+      tensorflow.Tensor.create(value.asInstanceOf[Seq[Byte]].toArray)
     case StringType(isNullable) =>
       tensorflow.Tensor.create(value.asInstanceOf[String].getBytes("UTF-8"))
     case IntegerType(isNullable) =>

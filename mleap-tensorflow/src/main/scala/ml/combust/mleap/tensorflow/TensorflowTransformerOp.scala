@@ -20,7 +20,7 @@ class TensorflowTransformerOp extends OpNode[MleapContext, TensorflowTransformer
 
     override def store(model: Model, obj: TensorflowModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      Files.write(context.file("graph.pb"), obj.graphBytes)
+      Files.write(context.file("graph.pb"), obj.graph.toGraphDef)
       val (inputNames, inputMleapDataTypes) = obj.inputs.unzip
       val (outputNames, outputMleapDataTypes) = obj.outputs.unzip
 
@@ -46,7 +46,9 @@ class TensorflowTransformerOp extends OpNode[MleapContext, TensorflowTransformer
       val inputs = inputNames.zip(inputTypes)
       val outputs = outputNames.zip(outputTypes)
 
-      TensorflowModel(graphBytes,
+      val graph = new org.tensorflow.Graph()
+      graph.importGraphDef(graphBytes)
+      TensorflowModel(graph,
         inputs,
         outputs,
         nodes)

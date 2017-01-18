@@ -1,6 +1,6 @@
 package ml.combust.bundle.serializer.attr
 
-import java.io.{File, FileInputStream, FileOutputStream}
+import java.nio.file.{Files, Path}
 
 import ml.combust.bundle.HasBundleRegistry
 import ml.combust.bundle.json.JsonSupport._
@@ -10,12 +10,13 @@ import spray.json._
 import resource._
 
 import scala.io.Source
+import scala.util.Try
 
 /** Class for serializing an [[ml.combust.bundle.dsl.AttributeList]].
   *
   * @param path path to base attribute list file (no extension)
   */
-case class AttributeListSerializer(path: File) {
+case class AttributeListSerializer(path: Path) {
   /** Write an attribute list to a file.
     *
     * Depending on the [[SerializationFormat]], the attribute list will
@@ -25,7 +26,7 @@ case class AttributeListSerializer(path: File) {
     * @param context serialization context for determining format
     */
   def write(attrs: AttributeList)
-           (implicit context: SerializationContext): Unit = context.concrete match {
+           (implicit context: SerializationContext): Try[Any] = context.concrete match {
     case SerializationFormat.Json => writeJson(attrs)
     case SerializationFormat.Protobuf => writeProto(attrs)
   }
@@ -36,11 +37,11 @@ case class AttributeListSerializer(path: File) {
     * @param hr bundle registry for custom types
     */
   def writeJson(list: AttributeList)
-               (implicit hr: HasBundleRegistry): Unit = {
+               (implicit hr: HasBundleRegistry): Try[Any] = {
     val json = list.toJson.prettyPrint.getBytes
-    for(out <- managed(new FileOutputStream(path))) {
+    (for(out <- managed(Files.newOutputStream(path))) yield {
       out.write(json)
-    }
+    }).tried
   }
 
   /** Write attribute list as a Protobuf file.
@@ -49,10 +50,10 @@ case class AttributeListSerializer(path: File) {
     * @param hr bundle registry for custom types
     */
   def writeProto(list: AttributeList)
-                (implicit hr: HasBundleRegistry): Unit = {
-    for(out <- managed(new FileOutputStream(path))) {
+                (implicit hr: HasBundleRegistry): Try[Any] = {
+    (for(out <- managed(Files.newOutputStream(path))) yield {
       list.asBundle.writeTo(out)
-    }
+    }).tried
   }
 
   /** Read an attribute list.
@@ -63,7 +64,7 @@ case class AttributeListSerializer(path: File) {
     * @return attribute list deserialized from the appropriate file
     */
   def read()
-          (implicit context: SerializationContext): AttributeList = context.concrete match {
+          (implicit context: SerializationContext): Try[AttributeList] = context.concrete match {
     case SerializationFormat.Json => readJson()
     case SerializationFormat.Protobuf => readProto()
   }
@@ -74,13 +75,10 @@ case class AttributeListSerializer(path: File) {
     * @return attribute list from the JSON file
     */
   def readJson()
-              (implicit context: SerializationContext): AttributeList = {
-    (for(in <- managed(new FileInputStream(path))) yield {
+              (implicit context: SerializationContext): Try[AttributeList] = {
+    (for(in <- managed(Files.newInputStream(path))) yield {
       Source.fromInputStream(in).getLines().mkString.parseJson.convertTo[AttributeList]
-    }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(list) => list
-    }
+    }).tried
   }
 
   /** Read an attribute list from a Protobuf file.
@@ -89,12 +87,9 @@ case class AttributeListSerializer(path: File) {
     * @return attribute list from the protobuf file
     */
   def readProto()
-               (implicit context: SerializationContext): AttributeList = {
-    (for(in <- managed(new FileInputStream(path))) yield {
+               (implicit context: SerializationContext): Try[AttributeList] = {
+    (for(in <- managed(Files.newInputStream(path))) yield {
       AttributeList.fromBundle(ml.bundle.AttributeList.AttributeList.parseFrom(in))
-    }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(list) => list
-    }
+    }).tried
   }
 }

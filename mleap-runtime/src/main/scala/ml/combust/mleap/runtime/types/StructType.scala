@@ -1,5 +1,7 @@
 package ml.combust.mleap.runtime.types
 
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader, RowWriter}
+
 import scala.util.{Failure, Success, Try}
 
 /**  Structured container (schema) for fields.
@@ -178,4 +180,7 @@ case class StructType private(fields: Seq[StructField],
   def indexedField(name: String): Try[(Int, StructField)] = {
     indexOf(name).map(index => (index, fields(index)))
   }
+
+  def rowWriter(format: String = BuiltinFormats.json): RowWriter = RowWriter(this, format)
+  def rowReader(format: String = BuiltinFormats.json): RowReader = RowReader(this, format)
 }

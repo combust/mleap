@@ -3,11 +3,11 @@ package ml.combust.mleap.bundle.ops.regression
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.regression.DecisionTreeRegressionModel
 import ml.combust.mleap.core.tree
-import ml.combust.mleap.bundle.tree.MleapNodeWrapper
 import ml.combust.mleap.runtime.transformer.regression.DecisionTreeRegression
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.tree.TreeSerializer
 import ml.combust.bundle.dsl._
+import ml.combust.bundle.tree.decision.TreeSerializer
+import ml.combust.mleap.bundle.tree.decision.MleapNodeWrapper
 import ml.combust.mleap.runtime.MleapContext
 
 /**
@@ -29,7 +29,7 @@ class DecisionTreeRegressionOp extends OpNode[MleapContext, DecisionTreeRegressi
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): DecisionTreeRegressionModel = {
-      val rootNode = TreeSerializer[tree.Node](context.file("nodes"), withImpurities = false).read()
+      val rootNode = TreeSerializer[tree.Node](context.file("tree"), withImpurities = false).read().get
       DecisionTreeRegressionModel(rootNode, numFeatures = model.value("num_features").getLong.toInt)
     }
   }

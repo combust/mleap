@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime
 
 import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector}
-import ml.combust.mleap.runtime.types.{AnyType, DataType, ArrayType, StructType}
+import ml.combust.mleap.runtime.types.{AnyType, DataType, ListType, StructType}
 
 import scala.util.{Failure, Try}
 
@@ -28,7 +28,7 @@ object RowUtil {
         }
         i = i + 1
         rs
-    }
+    }.map(_.reverse)
   }
 
   /** Create a row selector from a frame selector.
@@ -44,17 +44,17 @@ object RowUtil {
     case FieldSelector(name) =>
       schema.indexedField(name).flatMap {
         case (index, field) =>
-          if (dataType.fits(field.dataType)) {
+          if(dataType == field.dataType || dataType.isInstanceOf[AnyType]) {
             Try(r => r.get(index))
           } else {
             Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
           }
       }
     case ArraySelector(fields@_*) =>
-      if (dataType == ArrayType(AnyType)) {
+      if (dataType == ListType(AnyType(false))) {
         schema.indicesOf(fields: _*).map {
           indices =>
-            val indicesArr = indices.toArray
+            val indicesArr = indices
             r => indicesArr.map(r.get)
         }
       } else {

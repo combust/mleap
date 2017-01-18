@@ -5,6 +5,7 @@ import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter, RowR
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.runtime.types._
 
+import scala.reflect.ClassTag
 import scala.util.Try
 
 object LeapFrame {
@@ -91,9 +92,8 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     }
   }
 
-  def writer(format: String = BuiltinFormats.json): FrameWriter = FrameWriter(format)
-  def rowWriter(format: String = BuiltinFormats.json): RowWriter = RowWriter(schema, format)
-  def rowReader(format: String = BuiltinFormats.json): RowReader = RowReader(schema, format)
+  def writer(format: String = BuiltinFormats.json)
+            (implicit ct: ClassTag[LF]): FrameWriter = FrameWriter(lf, format)
 
   /** Creates a new instance of this LeapFrame with new schema and dataset.
     *

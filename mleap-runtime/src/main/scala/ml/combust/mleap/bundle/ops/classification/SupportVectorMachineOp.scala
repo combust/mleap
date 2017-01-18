@@ -19,10 +19,10 @@ class SupportVectorMachineOp extends OpNode[MleapContext, SupportVectorMachine, 
 
     override def store(model: Model, obj: SupportVectorMachineModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
+      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept)).
         withAttr("num_classes", Value.long(2)).
-        withAttr("threshold", obj.threshold.map(Value.double))
+        withAttr("thresholds", obj.thresholds.map(_.toSeq).map(Value.doubleList))
     }
 
     override def load(model: Model)
@@ -30,9 +30,9 @@ class SupportVectorMachineOp extends OpNode[MleapContext, SupportVectorMachine, 
       if(model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("MLeap only supports binary SVM")
       }
-      SupportVectorMachineModel(coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
+      SupportVectorMachineModel(coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble,
-        threshold = model.getValue("threshold").map(_.getDouble))
+        thresholds = model.getValue("thresholds").map(_.getDoubleList.toArray))
     }
   }
 

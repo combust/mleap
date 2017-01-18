@@ -4,6 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import org.apache.spark.ml.clustering.GaussianMixtureModel
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
 import org.apache.spark.ml.stat.distribution.MultivariateGaussian
@@ -24,16 +25,15 @@ class GaussianMixtureOp extends OpNode[MleapContext, GaussianMixtureModel, Gauss
         getOrElse((-1, -1))
       val (means, covs) = obj.gaussians.map(g => (g.mean, g.cov)).unzip
 
-      model.withAttr("means", Value.tensorList(means.map(_.toArray.toSeq).toSeq, Seq(-1))).
-        withAttr("covs", Value.tensorList(covs.map(_.toArray.toSeq).toSeq, Seq(rows, cols))).
+      model.withAttr("means", Value.tensorList(means.map(_.toArray).map(Tensor.denseVector))).
+        withAttr("covs", Value.tensorList(covs.map(m => DenseTensor(m.toArray, Seq(m.numRows, m.numCols))))).
         withAttr("weights", Value.doubleList(obj.weights.toSeq))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): GaussianMixtureModel = {
-      val Seq(rows, cols) = model.value("covs").bundleDataType.getList.getBase.getTensor.dimensions
       val means = model.value("means").getTensorList[Double].map(values => Vectors.dense(values.toArray))
-      val covs = model.value("covs").getTensorList[Double].map(values => Matrices.dense(rows, cols, values.toArray))
+      val covs = model.value("covs").getTensorList[Double].map(values => Matrices.dense(values.dimensions.head, values.dimensions(1), values.toArray))
       val gaussians = means.zip(covs).map {
         case (mean, cov) => new MultivariateGaussian(mean, cov)
       }.toArray
@@ -58,11 +58,17 @@ class GaussianMixtureOp extends OpNode[MleapContext, GaussianMixtureModel, Gauss
       weights = model.weights)
     gmm.set(gmm.featuresCol, node.shape.input("features").name)
     gmm.set(gmm.predictionCol, node.shape.output("prediction").name)
-    for(p <- node.shape.getOutput("probability")) { gmm.set(gmm.probabilityCol, p.name) }
+    for(p <- node.shape.getOutput("probability")) {
+      gmm.set(gmm.probabilityCol, p.name)
+    }
     gmm
   }
 
-  override def shape(node: GaussianMixtureModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction").
-    withOutput(node.getProbabilityCol, "probability")
+  override def shape(node: GaussianMixtureModel): Shape = {
+    val probability = if(node.isSet(node.probabilityCol)) Some(node.getProbabilityCol) else None
+
+    Shape().withInput(node.getFeaturesCol, "features").
+      withOutput(node.getPredictionCol, "prediction").
+      withOutput(probability, "probability")
+  }
 }

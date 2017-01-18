@@ -19,14 +19,14 @@ class MinMaxScalerOp extends OpNode[MleapContext, MinMaxScaler, MinMaxScalerMode
 
     override def store(model: Model, obj: MinMaxScalerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("min", Value.doubleVector(obj.originalMin.toArray)).
-        withAttr("max", Value.doubleVector(obj.originalMax.toArray))
+      model.withAttr("min", Value.vector(obj.originalMin.toArray)).
+        withAttr("max", Value.vector(obj.originalMax.toArray))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): MinMaxScalerModel = {
-      MinMaxScalerModel(originalMin = Vectors.dense(model.value("min").getDoubleVector.toArray),
-        originalMax = Vectors.dense(model.value("max").getDoubleVector.toArray))
+      MinMaxScalerModel(originalMin = Vectors.dense(model.value("min").getTensor[Double].toArray),
+        originalMax = Vectors.dense(model.value("max").getTensor[Double].toArray))
     }
   }
 

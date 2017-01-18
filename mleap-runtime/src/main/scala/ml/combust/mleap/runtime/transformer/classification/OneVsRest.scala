@@ -4,7 +4,8 @@ import ml.combust.mleap.core.classification.OneVsRestModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import org.apache.spark.ml.linalg.Vector
+import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.runtime.converter.VectorConverters._
 
 import scala.util.Try
 
@@ -16,8 +17,8 @@ case class OneVsRest(override val uid: String = Transformer.uniqueName("one_vs_r
                      predictionCol: String,
                      probabilityCol: Option[String] = None,
                      model: OneVsRestModel) extends Transformer {
-  val predictProbability: UserDefinedFunction = (features: Vector) => model.predictProbability(features)
-  val exec: UserDefinedFunction = (features: Vector) => model(features)
+  val predictProbability: UserDefinedFunction = (features: Tensor[Double]) => model.predictProbability(features)
+  val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     probabilityCol match {

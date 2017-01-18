@@ -4,7 +4,8 @@ import ml.combust.mleap.core.regression.DecisionTreeRegressionModel
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import org.apache.spark.ml.linalg.Vector
+import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.runtime.converter.VectorConverters._
 
 import scala.util.Try
 
@@ -15,7 +16,7 @@ case class DecisionTreeRegression(uid: String = Transformer.uniqueName("decision
                                   featuresCol: String,
                                   predictionCol: String,
                                   model: DecisionTreeRegressionModel) extends Transformer {
-  val exec: UserDefinedFunction = (features: Vector) => model(features)
+  val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(predictionCol, featuresCol)(exec)

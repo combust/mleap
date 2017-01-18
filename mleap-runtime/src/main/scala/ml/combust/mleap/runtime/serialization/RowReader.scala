@@ -6,6 +6,8 @@ import ml.combust.bundle.util.ClassLoaderUtil
 import ml.combust.mleap.runtime.types.StructType
 import ml.combust.mleap.runtime.Row
 
+import scala.util.Try
+
 /**
   * Created by hollinwilkins on 11/1/16.
   */
@@ -24,5 +26,5 @@ object RowReader {
 trait RowReader {
   val schema: StructType
 
-  def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Row
+  def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Try[Row]
 }

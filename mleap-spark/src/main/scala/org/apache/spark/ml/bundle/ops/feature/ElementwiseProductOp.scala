@@ -18,12 +18,12 @@ class ElementwiseProductOp extends OpNode[SparkBundleContext, ElementwiseProduct
 
     override def store(model: Model, obj: ElementwiseProduct)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("scaling_vec", Value.doubleVector(obj.getScalingVec.toArray))
+      model.withAttr("scaling_vec", Value.vector(obj.getScalingVec.toArray))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): ElementwiseProduct = {
-      new ElementwiseProduct(uid = "").setScalingVec(Vectors.dense(model.value("scaling_vec").getDoubleVector.toArray))
+      new ElementwiseProduct(uid = "").setScalingVec(Vectors.dense(model.value("scaling_vec").getTensor[Double].toArray))
     }
   }
 
@@ -36,9 +36,10 @@ class ElementwiseProductOp extends OpNode[SparkBundleContext, ElementwiseProduct
 
   override def load(node: Node, model: ElementwiseProduct)
                    (implicit context: BundleContext[SparkBundleContext]): ElementwiseProduct = {
-    new ElementwiseProduct(uid = node.name).copy(model.extractParamMap()).
+    new ElementwiseProduct(uid = node.name).
       setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+      setOutputCol(node.shape.standardOutput.name).
+      setScalingVec(model.getScalingVec)
   }
 
   override def shape(node: ElementwiseProduct): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

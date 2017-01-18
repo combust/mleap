@@ -21,14 +21,14 @@ class StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, S
       val mean = if(obj.getWithMean) Some(obj.mean.toArray.toSeq) else None
       val std = if(obj.getWithStd) Some(obj.std.toArray.toSeq) else None
 
-      model.withAttr("mean", mean.map(Value.doubleVector)).
-        withAttr("std", std.map(Value.doubleVector))
+      model.withAttr("mean", mean.map(_.toArray).map(Value.vector)).
+        withAttr("std", std.map(_.toArray).map(Value.vector))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): StandardScalerModel = {
-      val std = model.getValue("std").map(_.getDoubleVector.toArray).map(Vectors.dense).orNull
-      val mean = model.getValue("mean").map(_.getDoubleVector.toArray).map(Vectors.dense).orNull
+      val std = model.getValue("std").map(_.getTensor[Double].toArray).map(Vectors.dense).orNull
+      val mean = model.getValue("mean").map(_.getTensor[Double].toArray).map(Vectors.dense).orNull
       new StandardScalerModel(uid = "", std = std, mean = mean)
     }
   }

@@ -23,12 +23,12 @@ case class AttributeListSeparator() {
               (implicit hr: HasBundleRegistry): (Option[AttributeList], Option[AttributeList]) = attributes match {
     case None => (None, None)
     case Some(list) =>
-      val (small, large) = list.attributes.foldLeft((Seq[Attribute](), Seq[Attribute]())) {
-        case ((s, l), attr) =>
-          if(attr.value.isSmall) {
-            (s :+ attr, l)
+      val (small, large) = list.lookup.foldLeft((Map[String, Attribute](), Map[String, Attribute]())) {
+        case ((s, l), namedAttr) =>
+          if(namedAttr._2.value.isSmall) {
+            (s + namedAttr, l)
           } else {
-            (s, l :+ attr)
+            (s, l + namedAttr)
           }
       }
 

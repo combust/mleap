@@ -2,15 +2,15 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.NGramModel
 import ml.combust.mleap.runtime.{LeapFrame, Row, LocalDataset}
-import ml.combust.mleap.runtime.types.{ArrayType, StringType, StructField, StructType}
+import ml.combust.mleap.runtime.types.{ListType, StringType, StructField, StructType}
 import org.scalatest.FunSpec
 
 /**
   * Created by mikhail on 10/16/16.
   */
 class NGramSpec extends FunSpec{
-  val schema = StructType(Seq(StructField("test_string_seq", ArrayType(StringType)))).get
-  val dataset = LocalDataset(Seq(Row("a b c".split(" ")), Row("d e f".split(" ")), Row("g h i".split(" "))))
+  val schema = StructType(Seq(StructField("test_string_seq", ListType(StringType())))).get
+  val dataset = LocalDataset(Seq(Row("a b c".split(" ").toSeq), Row("d e f".split(" ").toSeq), Row("g h i".split(" ").toSeq)))
   val frame = LeapFrame(schema,dataset)
 
   val ngram = NGram(inputCol = "test_string_seq",
@@ -23,8 +23,8 @@ class NGramSpec extends FunSpec{
       val frame2 = ngram.transform(frame).get
       val data = frame2.dataset.toArray
 
-      assert(data(0).getArray[String](1)(0) == "a b")
-      assert(data(0).getArray[String](1)(1) == "b c")
+      assert(data(0).getSeq[String](1).head == "a b")
+      assert(data(0).getSeq[String](1)(1) == "b c")
     }
   }
 

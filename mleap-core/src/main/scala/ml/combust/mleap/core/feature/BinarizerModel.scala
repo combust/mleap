@@ -1,8 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.annotation.SparkCode
-import org.apache.spark.ml.linalg.{Vectors, Vector}
+import org.apache.spark.ml.linalg.{Vector, Vectors}
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuilder
 
 /**
@@ -15,8 +16,8 @@ case class BinarizerModel(threshold: Double) extends Serializable {
   }
 
   def apply(value: Vector): Vector = {
-    val indices = ArrayBuilder.make[Int]
-    val values = ArrayBuilder.make[Double]
+    val indices = mutable.ArrayBuilder.make[Int]
+    val values = mutable.ArrayBuilder.make[Double]
 
     value.foreachActive { (index, value) =>
       if (value > threshold) {

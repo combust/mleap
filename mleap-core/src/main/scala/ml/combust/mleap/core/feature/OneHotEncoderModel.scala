@@ -11,7 +11,8 @@ import org.apache.spark.ml.linalg.{Vector, Vectors}
   *
   * @param size size of the output one hot vectors
   */
-case class OneHotEncoderModel(size: Int) extends Serializable {
+case class OneHotEncoderModel(size: Int,
+                              dropLast: Boolean = true) extends Serializable {
   private val oneValue = Array(1.0)
   private val emptyIndices = Array[Int]()
   private val emptyValues = Array[Double]()

@@ -11,13 +11,15 @@ import org.apache.avro.generic.{GenericData, GenericDatumWriter}
 import SchemaConverter._
 import resource._
 
+import scala.util.{Failure, Try}
+
 /**
   * Created by hollinwilkins on 11/2/16.
   */
-class DefaultFrameWriter extends FrameWriter {
+class DefaultFrameWriter[LF <: LeapFrame[LF]](frame: LF) extends FrameWriter {
   val valueConverter = ValueConverter()
 
-  override def toBytes[LF <: LeapFrame[LF]](frame: LF, charset: Charset = BuiltinFormats.charset): Array[Byte] = {
+  override def toBytes(charset: Charset = BuiltinFormats.charset): Try[Array[Byte]] = {
     (for(out <- managed(new ByteArrayOutputStream())) yield {
       val writers = frame.schema.fields.map(_.dataType).map(valueConverter.mleapToAvro)
       val avroSchema = frame.schema: Schema
@@ -33,15 +35,15 @@ class DefaultFrameWriter extends FrameWriter {
           i = i + 1
         }
 
-        writer.append(record)
+        Try(writer.append(record)) match {
+          case Failure(error) => error.printStackTrace()
+          case _ =>
+        }
       }
 
       writer.close()
 
       out.toByteArray
-    }).either.either match {
-      case Left(errors) => throw errors.head
-      case Right(bytes) => bytes
-    }
+    }).tried
   }
 }

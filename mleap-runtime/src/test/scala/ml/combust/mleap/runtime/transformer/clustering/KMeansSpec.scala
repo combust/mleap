@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.KMeansModel
-import ml.combust.mleap.core.regression.GBTRegressionModel
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{StructField, StructType, TensorType}
+import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 
@@ -15,14 +15,14 @@ class KMeansSpec extends FunSpec {
   val v2 = Vectors.dense(Array(11.0, 200.0, 55.0))
   val v3 = Vectors.dense(Array(100.0, 22.0, 55.0))
 
-  val schema = StructType(Seq(StructField("features", TensorType.doubleVector()))).get
-  val dataset = LocalDataset(Seq(Row(Vectors.dense(Array(2.0, 5.0, 34.0))),
-    Row(Vectors.dense(Array(20.0, 230.0, 34.0))),
-    Row(Vectors.dense(Array(111.0, 20.0, 56.0)))))
+  val schema = StructType(Seq(StructField("features", TensorType(DoubleType())))).get
+  val dataset = LocalDataset(Seq(Row(DenseTensor(Array(2.0, 5.0, 34.0), Seq(-1))),
+    Row(DenseTensor(Array(20.0, 230.0, 34.0), Seq(-1))),
+    Row(DenseTensor(Array(111.0, 20.0, 56.0), Seq(-1)))))
   val frame = LeapFrame(schema, dataset)
   val km = KMeans(featuresCol = "features",
     predictionCol = "prediction",
-    model = KMeansModel(Array(v1, v2, v3)))
+    model = KMeansModel(Seq(v1, v2, v3)))
 
   describe("#transform") {
     it("uses the k-means to find closest cluster") {

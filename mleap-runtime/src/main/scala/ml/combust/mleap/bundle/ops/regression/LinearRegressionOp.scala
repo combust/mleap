@@ -19,13 +19,13 @@ class LinearRegressionOp extends OpNode[MleapContext, LinearRegression, LinearRe
 
     override def store(model: Model, obj: LinearRegressionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("coefficients", Value.doubleVector(obj.coefficients.toArray)).
+      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
         withAttr("intercept", Value.double(obj.intercept))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): LinearRegressionModel = {
-      LinearRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getDoubleVector.toArray),
+      LinearRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble)
     }
   }

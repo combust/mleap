@@ -2,7 +2,6 @@ package ml.combust.mleap.json
 
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, MleapContext}
 import ml.combust.mleap.runtime.types._
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 import spray.json.{JsValue, JsonFormat}
@@ -12,52 +11,76 @@ import scala.language.implicitConversions
 /**
   * Created by hollinwilkins on 8/23/16.
   */
-trait JsonSupport {
-  implicit val mleapListTypeWriterFormat: JsonWriter[ArrayType] = new JsonWriter[ArrayType] {
-    override def write(obj: ArrayType): JsValue = {
+trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
+  implicit val mleapListTypeWriterFormat: JsonWriter[ListType] = new JsonWriter[ListType] {
+    override def write(obj: ListType): JsValue = {
       JsObject("type" -> JsString("list"),
         "base" -> obj.base.toJson)
     }
   }
 
-  implicit def mleapListTypeReaderFormat(implicit context: MleapContext): JsonReader[ArrayType] = new JsonReader[ArrayType] {
-    override def read(json: JsValue): ArrayType = {
+  implicit def mleapListTypeReaderFormat(implicit context: MleapContext): JsonReader[ListType] = new JsonReader[ListType] {
+    override def read(json: JsValue): ListType = {
       val obj = json.asJsObject("invalid list type")
 
-      ArrayType(obj.fields("base").convertTo[DataType])
+      ListType(obj.fields("base").convertTo[DataType])
     }
   }
 
   implicit val mleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
     override def write(obj: TensorType): JsValue = {
       JsObject("type" -> JsString("tensor"),
-        "base" -> mleapBasicTypeFormat.write(obj.base),
-        "dimensions" -> obj.dimensions.toJson)
+        "base" -> mleapBasicTypeFormat.write(obj.base))
     }
 
     override def read(json: JsValue): TensorType = {
       val obj = json.asJsObject("invalid tensor type")
 
-      TensorType(base = mleapBasicTypeFormat.read(obj.fields("base")),
-        dimensions = obj.fields("dimensions").convertTo[Seq[Int]])
+      TensorType(base = mleapBasicTypeFormat.read(obj.fields("base")))
     }
   })
 
   val mleapBasicTypeFormat: JsonFormat[BasicType] = lazyFormat(new JsonFormat[BasicType] {
+    def writeMaybeNullable(base: JsString, isNullable: Boolean): JsValue = {
+      if(isNullable) {
+        JsObject("type" -> JsString("basic"),
+          "base" -> base,
+          "isNullable" -> JsBoolean(true))
+      } else { base }
+    }
+
+    def readNullable(json: JsObject): BasicType = {
+      json.getFields("base", "isNullable") match {
+        case Seq(JsString(base), JsBoolean(isNullable)) => forName(base, isNullable)
+        case _ => deserializationError("invalid basic type format")
+      }
+    }
+
+    def forName(name: String, isNullable: Boolean = false): BasicType = name match {
+      case "boolean" => BooleanType(isNullable)
+      case "string" => StringType(isNullable)
+      case "byte" => ByteType(isNullable)
+      case "short" => ShortType(isNullable)
+      case "integer" => IntegerType(isNullable)
+      case "long" => LongType(isNullable)
+      case "float" => FloatType(isNullable)
+      case "double" => DoubleType(isNullable)
+    }
+
     override def write(obj: BasicType): JsValue = obj match {
-      case DoubleType => JsString("double")
-      case StringType => JsString("string")
-      case LongType => JsString("long")
-      case BooleanType => JsString("boolean")
-      case IntegerType => JsString("integer")
+      case BooleanType(isNullable) => writeMaybeNullable(JsString("boolean"), isNullable)
+      case StringType(isNullable) => writeMaybeNullable(JsString("string"), isNullable)
+      case ByteType(isNullable) => writeMaybeNullable(JsString("byte"), isNullable)
+      case ShortType(isNullable) => writeMaybeNullable(JsString("short"), isNullable)
+      case IntegerType(isNullable) => writeMaybeNullable(JsString("integer"), isNullable)
+      case LongType(isNullable) => writeMaybeNullable(JsString("long"), isNullable)
+      case FloatType(isNullable) => writeMaybeNullable(JsString("float"), isNullable)
+      case DoubleType(isNullable) => writeMaybeNullable(JsString("double"), isNullable)
     }
 
     override def read(json: JsValue): BasicType = json match {
-      case JsString("double") => DoubleType
-      case JsString("string") => StringType
-      case JsString("long") => LongType
-      case JsString("boolean") => BooleanType
-      case JsString("integer") => IntegerType
+      case JsString(name) => forName(name)
+      case json: JsObject => readNullable(json)
       case _ => throw new Error("Invalid basic type") // TODO: better error
     }
   })
@@ -81,10 +104,10 @@ trait JsonSupport {
   implicit val mleapDataTypeWriterFormat: JsonWriter[DataType] = new JsonWriter[DataType] {
     override def write(obj: DataType): JsValue = obj match {
       case bt: BasicType => mleapBasicTypeFormat.write(bt)
-      case lt: ArrayType => mleapListTypeWriterFormat.write(lt)
+      case lt: ListType => mleapListTypeWriterFormat.write(lt)
       case tt: TensorType => mleapTensorTypeFormat.write(tt)
       case ct: CustomType => mleapCustomTypeWriterFormat.write(ct)
-      case AnyType => serializationError("AnyType not supported for JSON serialization")
+      case AnyType(_) => serializationError("AnyType not supported for JSON serialization")
     }
   }
 
@@ -93,44 +116,13 @@ trait JsonSupport {
       case obj: JsString => mleapBasicTypeFormat.read(obj)
       case obj: JsObject =>
         obj.fields.get("type") match {
+          case Some(JsString("basic")) => mleapBasicTypeFormat.read(obj)
           case Some(JsString("list")) => mleapListTypeReaderFormat.read(obj)
           case Some(JsString("tensor")) => mleapTensorTypeFormat.read(obj)
           case Some(JsString("custom")) => mleapCustomTypeReaderFormat.read(obj)
           case _ => deserializationError(s"invalid data type: ${obj.fields.get("type")}")
         }
       case _ => throw new Error("Invalid data type") // TODO: better error
-    }
-  }
-
-  implicit val mleapDenseVectorFormat: JsonFormat[DenseVector] = new JsonFormat[DenseVector] {
-    override def write(obj: DenseVector): JsValue = obj.values.toJson
-    override def read(json: JsValue): DenseVector = new DenseVector(json.convertTo[Array[Double]])
-  }
-
-  implicit val mleapSparseVectorFormat: JsonFormat[SparseVector] = new JsonFormat[SparseVector] {
-    override def write(obj: SparseVector): JsValue = JsObject("size" -> obj.size.toJson,
-      "indices" -> obj.indices.toJson,
-      "values" -> obj.values.toJson)
-
-    override def read(json: JsValue): SparseVector = {
-      val obj = json.asJsObject("invalid sparse vector")
-      new SparseVector(size = obj.fields("size").convertTo[Int],
-        indices = obj.fields("indices").convertTo[Array[Int]],
-        values = obj.fields("values").convertTo[Array[Double]])
-    }
-  }
-
-  implicit val mleapVectorFormat: JsonFormat[Vector] = new JsonFormat[Vector] {
-    override def write(obj: Vector): JsValue = obj match {
-      case obj: DenseVector => mleapDenseVectorFormat.write(obj)
-      case obj: SparseVector => mleapSparseVectorFormat.write(obj)
-      case _ => serializationError("invalid vector")
-    }
-
-    override def read(json: JsValue): Vector = json match {
-      case json: JsArray => mleapDenseVectorFormat.read(json)
-      case json: JsObject => mleapSparseVectorFormat.read(json)
-      case _ => deserializationError(s"invalid vector: $json")
     }
   }
 

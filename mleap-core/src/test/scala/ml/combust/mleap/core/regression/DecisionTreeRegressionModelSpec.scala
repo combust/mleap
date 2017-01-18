@@ -10,14 +10,14 @@ import org.scalatest.FunSpec
 class DecisionTreeRegressionModelSpec extends FunSpec {
   describe("#predict") {
     it("returns the prediction for the decision tree") {
-      val leftNode = LeafNode(.78, None)
-      val rightNode = LeafNode(.34, None)
-      val split = ContinuousSplit(0, .5)
+      val leftNode = LeafNode(Seq(0.78))
+      val rightNode = LeafNode(Seq(0.34))
+      val split = ContinuousSplit(0, 0.5)
       val node = InternalNode(leftNode, rightNode, split)
       val features = Vectors.dense(Array(0.3, 1.0, 43.23, -21.2, 66.7))
       val regression = DecisionTreeRegressionModel(node, 5)
 
-      assert(regression.predict(features) == .78)
+      assert(regression.predict(features) == 0.78)
     }
   }
 }

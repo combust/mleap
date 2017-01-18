@@ -6,6 +6,8 @@ import ml.combust.bundle.util.ClassLoaderUtil
 import ml.combust.mleap.runtime.Row
 import ml.combust.mleap.runtime.types.StructType
 
+import scala.util.Try
+
 /**
   * Created by hollinwilkins on 11/1/16.
   */
@@ -24,5 +26,5 @@ object RowWriter {
 trait RowWriter {
   val schema: StructType
 
-  def toBytes(row: Row, charset: Charset = BuiltinFormats.charset): Array[Byte]
+  def toBytes(row: Row, charset: Charset = BuiltinFormats.charset): Try[Array[Byte]]
 }

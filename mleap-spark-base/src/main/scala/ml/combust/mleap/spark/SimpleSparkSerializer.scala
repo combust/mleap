@@ -1,8 +1,9 @@
 package ml.combust.mleap.spark
 
-import ml.combust.bundle.{BundleFile, BundleRegistry, HasBundleRegistry}
+import ml.combust.bundle.BundleFile
 import ml.combust.mleap.spark.SparkSupport._
 import org.apache.spark.ml.Transformer
+import org.apache.spark.ml.bundle.SparkBundleContext
 import resource._
 
 /**
@@ -10,7 +11,7 @@ import resource._
   *
   */
 class SimpleSparkSerializer() {
-  implicit val hr: HasBundleRegistry = BundleRegistry("spark")
+  implicit val hr: SparkBundleContext = SparkBundleContext()
 
   def serializeToBundle(transformer: Transformer, path: String): Unit = {
     for(file <- managed(BundleFile(path))) {

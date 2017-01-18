@@ -79,9 +79,7 @@ object TensorflowConverter {
     case head :: tail =>
       val arrArr = mutable.WrappedArray.make[AnyRef](arr.asInstanceOf[Array[AnyRef]])
       arrArr.flatMap {
-        a =>
-          val r = mutable.WrappedArray.make[T](flatten[T](a, tail)(f))
-          r
+        a => flatten[T](a, tail)(f)
       }
   }
 

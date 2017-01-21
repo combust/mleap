@@ -1,5 +1,6 @@
 package ml.combust.mleap.tensorflow.converter
 
+import ml.combust.bundle.ByteString
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.DenseTensor
 import org.tensorflow
@@ -28,6 +29,9 @@ object TensorflowConverter {
       if(isNullable) Some(v) else v
     case StringType(isNullable) =>
       val v = new String(tensor.bytesValue(), "UTF-8")
+      if(isNullable) Some(v) else v
+    case ByteStringType(isNullable) =>
+      val v = ByteString(tensor.bytesValue())
       if(isNullable) Some(v) else v
     case tt: TensorType =>
       val shape = tensor.shape().map(_.toInt).toList

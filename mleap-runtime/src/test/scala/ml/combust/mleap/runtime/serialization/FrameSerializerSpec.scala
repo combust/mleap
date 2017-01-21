@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.serialization
 
+import ml.combust.bundle.ByteString
 import ml.combust.mleap.runtime.test.MyCustomObject
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, MleapContext, Row}
 import ml.combust.mleap.runtime.types._
@@ -17,12 +18,14 @@ class FrameSerializerSpec extends FunSpec {
     StructField("float", FloatType(false)),
     StructField("byte_tensor", TensorType(ByteType(false))),
     StructField("short_list", ListType(ShortType(false))),
+    StructField("byte_string", ByteStringType()),
     StructField("nullable_string", StringType(true))).get
   val dataset = LocalDataset(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)),
     "hello", Seq("hello", "there"),
     Option(56.7d), 32.4f,
     Tensor.denseVector(Array[Byte](1, 2, 3, 4)),
     Seq[Short](99, 12, 45),
+    ByteString(Array[Byte](32, 4, 55, 67)),
     None))
   val frame = LeapFrame(schema, dataset).withOutput("custom_object", "name")((name: String) => MyCustomObject(name)).get
   import MleapContext.defaultContext

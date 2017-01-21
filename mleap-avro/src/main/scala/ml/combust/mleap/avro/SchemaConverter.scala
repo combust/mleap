@@ -89,6 +89,7 @@ object SchemaConverter {
     case LongType(isNullable) => Schema.create(Schema.Type.LONG)
     case FloatType(isNullable) => Schema.create(Schema.Type.FLOAT)
     case DoubleType(isNullable) => Schema.create(Schema.Type.DOUBLE)
+    case ByteStringType(isNullable) => Schema.create(Schema.Type.BYTES)
   }
 
   implicit def mleapToAvroType(dataType: DataType): Schema = dataType match {
@@ -142,6 +143,7 @@ object SchemaConverter {
     case Schema.Type.LONG => LongType(false)
     case Schema.Type.FLOAT => FloatType(false)
     case Schema.Type.DOUBLE => DoubleType(false)
+    case Schema.Type.BYTES => ByteStringType(false)
     case Schema.Type.ARRAY => ListType(avroToMleapType(schema.getElementType))
     case Schema.Type.UNION => maybeNullableMleapType(schema)
     case Schema.Type.RECORD =>

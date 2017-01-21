@@ -3,6 +3,7 @@ package ml.combust.mleap.binary
 import java.io.{DataInputStream, DataOutputStream}
 import java.nio.charset.Charset
 
+import ml.combust.bundle.ByteString
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 
@@ -30,6 +31,7 @@ object ValueSerializer {
     case LongType(isNullable) => maybeNullableSerializer(LongSerializer, isNullable)
     case FloatType(isNullable) => maybeNullableSerializer(FloatSerializer, isNullable)
     case DoubleType(isNullable) => maybeNullableSerializer(DoubleSerializer, isNullable)
+    case ByteStringType(isNullable) => maybeNullableSerializer(ByteStringSerializer, isNullable)
   }
 
   def serializerForDataType(dataType: DataType): ValueSerializer[Any] = dataType match {
@@ -44,6 +46,7 @@ object ValueSerializer {
         case LongType(_) => maybeNullableSerializer(ListSerializer(LongSerializer), isNullable)
         case FloatType(_) => maybeNullableSerializer(ListSerializer(FloatSerializer), isNullable)
         case DoubleType(_) => maybeNullableSerializer(ListSerializer(DoubleSerializer), isNullable)
+        case ByteStringType(_) => maybeNullableSerializer(ListSerializer(ByteStringSerializer), isNullable)
         case _ => maybeNullableSerializer(ListSerializer(serializerForDataType(base)), isNullable)
       }
     case tt: TensorType =>
@@ -57,6 +60,7 @@ object ValueSerializer {
         case LongType(_) => maybeNullableSerializer(TensorSerializer(LongSerializer), isNullable)
         case FloatType(_) => maybeNullableSerializer(TensorSerializer(FloatSerializer), isNullable)
         case DoubleType(_) => maybeNullableSerializer(TensorSerializer(DoubleSerializer), isNullable)
+        case ByteStringType(_) => maybeNullableSerializer(TensorSerializer(ByteStringSerializer), isNullable)
       }
     case ct: CustomType => maybeNullableSerializer(CustomSerializer(ct), ct.isNullable)
     case _ => throw new IllegalArgumentException(s"invalid data type for serialization: $dataType")
@@ -128,6 +132,19 @@ object FloatSerializer extends ValueSerializer[Float] {
 object DoubleSerializer extends ValueSerializer[Double] {
   override def write(value: Double, out: DataOutputStream): Unit = out.writeDouble(value)
   override def read(in: DataInputStream): Double = in.readDouble()
+}
+
+object ByteStringSerializer extends ValueSerializer[ByteString] {
+  override def write(value: ByteString, out: DataOutputStream): Unit = {
+    out.writeInt(value.size)
+    out.write(value.bytes)
+  }
+  override def read(in: DataInputStream): ByteString = {
+    val size = in.readInt()
+    val bytes = new Array[Byte](size)
+    in.readFully(bytes)
+    ByteString(bytes)
+  }
 }
 
 case class ListSerializer[T: ClassTag](base: ValueSerializer[T]) extends ValueSerializer[Seq[T]] {

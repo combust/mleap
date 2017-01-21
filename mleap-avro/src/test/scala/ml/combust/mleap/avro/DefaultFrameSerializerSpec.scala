@@ -1,5 +1,6 @@
 package ml.combust.mleap.avro
 
+import ml.combust.bundle.ByteString
 import ml.combust.mleap.runtime.serialization._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types._
@@ -18,6 +19,7 @@ class DefaultFrameSerializerSpec extends FunSpec {
     StructField("test_float_vector", TensorType(FloatType())),
     StructField("test_byte_vector", TensorType(ByteType())),
     StructField("test_short_vector", TensorType(ShortType())),
+    StructField("test_byte_string", ByteStringType()),
     StructField("test_nullable", StringType(true))).get
   val row = Row(2.0d, 45.3f, "hello",
     Tensor.denseVector(Array(0.1, 2.33, 4.5)),
@@ -25,6 +27,7 @@ class DefaultFrameSerializerSpec extends FunSpec {
     Tensor.denseVector(Array(0.1f, 2.33f, 4.5f)),
     Tensor.denseVector(Array[Byte](1, 2, 3, 4)),
     Tensor.denseVector(Array[Short](16, 45, 78)),
+    ByteString(Array[Byte](1, 2, 3, 4, 5)),
     None)
   val dataset = LocalDataset(Seq(row))
   val frame = LeapFrame(schema, dataset)

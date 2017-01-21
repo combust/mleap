@@ -18,7 +18,7 @@ lazy val aggregatedProjects: Seq[ProjectReference] = {
   }
 }
 
-lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Seq(publishArtifact := false)
+lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Common.sonatypeSettings ++ Seq(publishArtifact := false)
 
 lazy val root = Project(
   id = "mleap",

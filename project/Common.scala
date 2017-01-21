@@ -8,8 +8,8 @@ import sbtrelease.ReleasePlugin.autoImport._
 import xerial.sbt.Sonatype.autoImport._
 
 object Common {
-  lazy val defaultMleapSettings = defaultSettings ++ mleapSettings
-  lazy val defaultBundleSettings = defaultSettings ++ bundleSettings
+  lazy val defaultMleapSettings = defaultSettings ++ mleapSettings ++ sonatypeSettings
+  lazy val defaultBundleSettings = defaultSettings ++ bundleSettings ++ sonatypeSettings
 
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 

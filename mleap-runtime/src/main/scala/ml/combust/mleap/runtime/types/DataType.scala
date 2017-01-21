@@ -43,6 +43,9 @@ case class FloatType(override val isNullable: Boolean = false) extends BasicType
 case class DoubleType(override val isNullable: Boolean = false) extends BasicType {
   override def asNullable: DataType = copy(isNullable = true)
 }
+case class ByteStringType(override val isNullable: Boolean = false) extends BasicType {
+  override def asNullable: DataType = copy(isNullable = true)
+}
 
 case class TensorType(base: BasicType,
                       override val isNullable: Boolean = false) extends DataType {

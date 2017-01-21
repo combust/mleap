@@ -24,6 +24,7 @@ trait TypeConverters {
     case ct: types.CustomType => UDTRegistration.getUDTFor(ct.klazz.getCanonicalName).
       map(_.newInstance().asInstanceOf[UserDefinedType[_]])
     case types.AnyType(_) => None
+    case _ => throw new RuntimeException(s"unsupported data type: $dataType")
   }
 }
 object TypeConverters extends TypeConverters

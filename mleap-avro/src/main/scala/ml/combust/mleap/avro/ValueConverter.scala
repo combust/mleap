@@ -2,6 +2,7 @@ package ml.combust.mleap.avro
 
 import java.nio.ByteBuffer
 
+import ml.combust.bundle.ByteString
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 import org.apache.avro.generic.GenericData
@@ -24,6 +25,7 @@ case class ValueConverter() {
   }
 
   def mleapToAvroBase(dataType: DataType): (Any) => Any = dataType match {
+    case _: ByteStringType => (value) =>ByteBuffer.wrap(value.asInstanceOf[ByteString].bytes)
     case _: BasicType => identity
     case _: ListType => (value) => value.asInstanceOf[Seq[_]].asJava
     case tt: TensorType =>
@@ -64,6 +66,7 @@ case class ValueConverter() {
 
   def avroToMleapBase(dataType: DataType): (Any) => Any = dataType match {
     case StringType(_) => (value) => value.asInstanceOf[Utf8].toString
+    case ByteStringType(_) => (value) => ByteString(value.asInstanceOf[ByteBuffer].array())
     case _: BasicType => identity
     case at: ListType => at.base match {
       case BooleanType(_) => (value) => value.asInstanceOf[GenericData.Array[Boolean]].asScala
@@ -74,6 +77,7 @@ case class ValueConverter() {
       case LongType(_) => (value) => value.asInstanceOf[GenericData.Array[Long]].asScala
       case FloatType(_) => (value) => value.asInstanceOf[GenericData.Array[Float]].asScala
       case DoubleType(_) => (value) => value.asInstanceOf[GenericData.Array[Double]].asScala
+      case ByteStringType(_) => (value) => value.asInstanceOf[GenericData.Array[ByteBuffer]].asScala.map(b => ByteString(b.array()))
       case _ =>
         val atm = avroToMleap(at.base)
         (value) => value.asInstanceOf[GenericData.Array[_]].asScala.map(atm)

@@ -5,6 +5,13 @@ import ml.combust.mleap.tensor.Tensor
 /**
   * Created by hollinwilkins on 1/18/17.
   */
+object MultinomialLabelerModel {
+  def apply(threshold: Double,
+            labels: Seq[String]): MultinomialLabelerModel = {
+    MultinomialLabelerModel(threshold, ReverseStringIndexerModel(labels))
+  }
+}
+
 case class MultinomialLabelerModel(threshold: Double,
                                    indexer: ReverseStringIndexerModel) {
   def apply(tensor: Tensor[Double]): Seq[(Double, Int, String)] = {
@@ -16,7 +23,7 @@ case class MultinomialLabelerModel(threshold: Double,
 
     tensor.toDense.values.
       zipWithIndex.
-      filter(_._1 > threshold)
+      filter(_._1 >= threshold)
   }
 
   def topLabels(tensor: Tensor[Double]): Seq[String] = {

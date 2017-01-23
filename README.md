@@ -185,8 +185,8 @@ import ml.combust.mleap.runtime.{Row, LeapFrame, LocalDataset}
 import ml.combust.mleap.runtime.types._
 
 // MLeap makes extensive use of monadic types like Try
-val schema = StructType(StructField("test_string", StringType),
-  StructField("test_double", DoubleType)).get
+val schema = StructType(StructField("test_string", StringType()),
+  StructField("test_double", DoubleType())).get
 val data = LocalDataset(Row("hello", 0.6),
   Row("MLeap", 0.2))
 val frame = LeapFrame(schema, data)

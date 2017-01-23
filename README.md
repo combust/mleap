@@ -114,16 +114,11 @@ import ml.combust.bundle.BundleFile
 import ml.combust.mleap.spark.SparkSupport._
 import resource._
 
-for(modelFile <- managed(BundleFile("/tmp/simple-spark-pipeline.zip"))) {
+for(modelFile <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) {
   pipeline.writeBundle.
-    // delete the file if it already exists
-    overwrite.
-    // name our pipeline
-    name("simple-pipeline").
     // save our pipeline to a zip file
     // we can save a file to any supported java.nio.FileSystem
     save(modelFile)
-}
 ```
 
 Spark pipelines are not meant to be run outside of Spark. They require a DataFrame and therefore a SparkContext to run. These are expensive data structures and libraries to include in a project. With MLeap, there is no dependency on Spark to execute a pipeline. MLeap dependencies are lightweight and we use fast data structures to execute your ML pipelines.
@@ -181,7 +176,7 @@ import ml.combust.mleap.runtime.MleapSupport._
 import resource._
 
 // load the Spark pipeline we saved in the previous section
-val bundle = (for(bundleFile <- managed(BundleFile("/tmp/simple-spark-pipeline.zip"))) yield {
+val bundle = (for(bundleFile <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) yield {
   bundleFile.loadBundle().get
 }).opt.get
 

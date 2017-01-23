@@ -1,9 +1,17 @@
-<img src="logo.png" alt="MLeap Logo" width="176" height="70" />
+<a href="http://mleap-docs.combust.ml"><img src="logo.png" alt="MLeap Logo" width="176" height="70" /></a>
 
 [![Gitter](https://badges.gitter.im/combust/mleap.svg)](https://gitter.im/combust/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Build Status](https://travis-ci.org/combust/mleap.svg?branch=master)](https://travis-ci.org/combust/mleap)
 
 Deploying machine learning data pipelines and algorithms should not be a time-consuming or difficult task. MLeap allows data scientists and engineers to deploy machine learning pipelines from Spark and Scikit-learn to a portable format and execution engine.
+
+## Documentation
+
+Documentation is available at [mleap-docs.combust.ml](http://mleap-docs.combust.ml).
+
+Read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
+
+## Introduction
 
 Using the MLeap execution engine and serialization format, we provide a performant, portable and easy-to-integrate production library for machine learning data pipelines and algorithms.
 
@@ -17,11 +25,6 @@ Our goals for this project are:
 2. Extend Spark/Scikit/TensorFlow by providing ML Pipelines serialization/deserialization to/from a common framework (Bundle.ML)
 3. Use MLeap Runtime to execute your pipeline and algorithm without dependenices on Spark or Scikit (numpy, pandas, etc)
 
-Basic examples are localed below, but you can:
-
-* Checkout complete MLeap documentation [here](http://mleap-docs.combust.ml/)
-* Read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
-
 ## Overview
 
 1. Core execution engine implemented in Scala
@@ -31,10 +34,6 @@ Basic examples are localed below, but you can:
 5. Implement your own custom data types and transformers for use with MLeap data frames and transformer pipelines
 6. extensive test coverage with full parity tests for Spark and MLeap pipelines
 7. optional Spark transformer extension to extend Spark's default transformer offerings
-
-## Documentation
-
-Documentation is available at [mleap-docs.combust.ml](http://mleap-docs.combust.ml).
 
 ## Setup
 

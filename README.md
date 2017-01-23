@@ -11,10 +11,11 @@ For portability, we build our software on the JVM and only use serialization for
 
 We also provide a high level of integration with existing technologies.
 
-Our Goal:
-1. Build data pipelines and train algorithms with Spark and Scikit-Learn
-2. Serialize your pipeline and algorithm to Bundle.ML
-3. Use MLeap to execute your pipeline and algorithm without the Spark/Scikit dependencies
+Our goals for this project are:
+
+1. Allow Researchers/Data Scientists and Engineers to continue to build data pipelines and train algorithms with Spark and Scikit-Learn
+2. Extend Spark/Scikit/TensorFlow by providing ML Pipelines serialization/deserialization to/from a common framework (Bundle.ML)
+3. Use MLeap Runtime to execute your pipeline and algorithm without dependenices on Spark or Scikit (numpy, pandas, etc)
 
 Basic examples are localed below, but you can read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
 

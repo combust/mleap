@@ -17,7 +17,10 @@ Our goals for this project are:
 2. Extend Spark/Scikit/TensorFlow by providing ML Pipelines serialization/deserialization to/from a common framework (Bundle.ML)
 3. Use MLeap Runtime to execute your pipeline and algorithm without dependenices on Spark or Scikit (numpy, pandas, etc)
 
-Basic examples are localed below, but you can read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
+Basic examples are localed below, but you can:
+
+* Checkout complete MLeap documentation [here](http://mleap-docs.combust.ml/)
+* Read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
 
 ## Overview
 

@@ -114,11 +114,14 @@ import ml.combust.bundle.BundleFile
 import ml.combust.mleap.spark.SparkSupport._
 import resource._
 
+// Optionally yield from here to get the try back from serializing
+// The try will indicate if serialization was successful
 for(modelFile <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) {
   pipeline.writeBundle.
     // save our pipeline to a zip file
     // we can save a file to any supported java.nio.FileSystem
     save(modelFile)
+}
 ```
 
 Spark pipelines are not meant to be run outside of Spark. They require a DataFrame and therefore a SparkContext to run. These are expensive data structures and libraries to include in a project. With MLeap, there is no dependency on Spark to execute a pipeline. MLeap dependencies are lightweight and we use fast data structures to execute your ML pipelines.
@@ -177,18 +180,20 @@ import resource._
 
 // load the Spark pipeline we saved in the previous section
 val bundle = (for(bundleFile <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) yield {
-  bundleFile.loadBundle().get
+  bundleFile.loadMleapBundle().get
 }).opt.get
 
 // create a simple LeapFrame to transform
 import ml.combust.mleap.runtime.{Row, LeapFrame, LocalDataset}
 import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.tensor.Tensor
+
 
 // MLeap makes extensive use of monadic types like Try
 val schema = StructType(StructField("test_string", StringType()),
-  StructField("test_double", DoubleType())).get
-val data = LocalDataset(Row("hello", 0.6),
-  Row("MLeap", 0.2))
+  StructField("test_double", TensorType(DoubleType()))).get
+val data = LocalDataset(Row("hello", Tensor.denseVector(Array(0.6))),
+  Row("MLeap", Tensor.denseVector(Array(0.2))))
 val frame = LeapFrame(schema, data)
 
 // transform the dataframe using our pipeline
@@ -198,11 +203,11 @@ val data2 = frame2.dataset
 
 // get data from the transformed rows and make some assertions
 assert(data2(0).getDouble(2) == 0.0) // string indexer output
-assert(data2(0).getDouble(3) == 1.0) // binarizer output
+assert(data2(0).getTensor[Double](3).get(0) == 1.0) // binarizer output
 
 // the second row
 assert(data2(1).getDouble(2) == 1.0)
-assert(data2(1).getDouble(3) == 0.0)
+assert(data2(1).getTensor[Double](3).get(0) == 0.0)
 ```
 
 ## Documentation

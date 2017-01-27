@@ -45,46 +45,37 @@ class MLeapSerializer(object):
         if attributes_to_serialize is None:
             return js
 
-        attributes = []
+        attributes = {}
 
         for name, value in attributes_to_serialize:
             if isinstance(value, float):
-                attribute = {
-                    "name": name,
+                attributes[name] = {
                     "type": "double",
                     "value": value
-                  }
-                attributes.append(attribute)
+                }
 
             elif isinstance(value, bool) and value in [True, False]:
-                attribute = {
-                    "name": name,
+                attributes[name] = {
                     "type": "boolean",
                     "value": value
-                  }
-                attributes.append(attribute)
+                }
 
             elif isinstance(value, int):
-                attribute = {
-                    "name": name,
+                attributes[name] = {
                     "type": "long",
                     "value": value
-                  }
-                attributes.append(attribute)
+                }
             elif isinstance(value, Vector):
-                attribute = {
-                    "name": name,
+                attributes[name] = {
                     "type": {
                       "type": "list",
                       "base": "double"
                     },
                     "value": value.values
-                  }
-                attributes.append(attribute)
+                }
             elif isinstance(value, list) and (isinstance(value[0], np.float64) or isinstance(value[0], float)):
                 base = type(value[0])
-                attribute = {
-                    "name": name,
+                attributes[name] = {
                     "type": {
                       "type": "tensor",
                       "tensor": {
@@ -93,23 +84,19 @@ class MLeapSerializer(object):
                       }
                     },
                     "value": value
-                  }
-                attributes.append(attribute)
+                }
 
             elif isinstance(value, list) and isinstance(value[0], str):
-                attribute = {
-                    "name": name,
+                attributes[name] = {
                     "type": {
                       "type": "list",
                       "base": "string"
                     },
                     "value": value
-                  }
-                attributes.append(attribute)
+                }
 
             elif isinstance(value, np.ndarray):
-                attribute = {
-                    "name": name,
+                attributes[name] = {
                     "type": {
                         "type": "tensor",
                         "tensor": {
@@ -119,15 +106,12 @@ class MLeapSerializer(object):
                     },
                     "value": list(value.flatten())
                 }
-                attributes.append(attribute)
 
             elif isinstance(value, str):
-                attribute = {
-                    'name': name,
+                attributes[name] = {
                     'type': 'string',
                     'value': value
                 }
-                attributes.append(attribute)
 
         js['attributes'] = attributes
 

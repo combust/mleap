@@ -44,17 +44,6 @@ class ops(object):
 
 ops = ops()
 
-
-def set_input_features(self, input_features):
-    serializer = SimpleSerializer()
-    return serializer.set_input_features(self, input_features)
-
-
-def set_output_features(self, output_features):
-    serializer = SimpleSerializer()
-    return serializer.set_output_features(self, output_features)
-
-
 def serialize_to_bundle(self, path, model_name):
     serializer = SimpleSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
@@ -67,37 +56,37 @@ def mleap_init(self, input_features, output_features):
 
 
 setattr(StandardScaler, 'op', ops.STANDARD_SCALER)
-setattr(StandardScaler, 'minit', mleap_init)
 setattr(StandardScaler, 'serialize_to_bundle', serialize_to_bundle)
+setattr(StandardScaler, 'mlinit', mleap_init)
 setattr(StandardScaler, 'serializable', True)
 
 setattr(MinMaxScaler, 'op', ops.MIN_MAX_SCALER)
-setattr(MinMaxScaler, 'minit', mleap_init)
+setattr(MinMaxScaler, 'mlinit', mleap_init)
 setattr(MinMaxScaler, 'serialize_to_bundle', serialize_to_bundle)
 setattr(MinMaxScaler, 'serializable', True)
 
 setattr(Imputer, 'op', ops.IMPUTER)
-setattr(Imputer, 'minit', mleap_init)
+setattr(Imputer, 'mlinit', mleap_init)
 setattr(Imputer, 'serialize_to_bundle', serialize_to_bundle)
 setattr(Imputer, 'serializable', True)
 
 setattr(LabelEncoder, 'op', ops.LABEL_ENCODER)
-setattr(LabelEncoder, 'minit', mleap_init)
+setattr(LabelEncoder, 'mlinit', mleap_init)
 setattr(LabelEncoder, 'serialize_to_bundle', serialize_to_bundle)
 setattr(LabelEncoder, 'serializable', True)
 
 setattr(OneHotEncoder, 'op', ops.ONE_HOT_ENCODER)
-setattr(OneHotEncoder, 'minit', mleap_init)
+setattr(OneHotEncoder, 'mlinit', mleap_init)
 setattr(OneHotEncoder, 'serialize_to_bundle', serialize_to_bundle)
 setattr(OneHotEncoder, 'serializable', True)
 
 setattr(Binarizer, 'op', ops.BINARIZER)
-setattr(Binarizer, 'minit', mleap_init)
+setattr(Binarizer, 'mlinit', mleap_init)
 setattr(Binarizer, 'serialize_to_bundle', serialize_to_bundle)
 setattr(Binarizer, 'serializable', True)
 
 setattr(PolynomialFeatures, 'op', ops.POLYNOMIALEXPANSION)
-setattr(PolynomialFeatures, 'minit', mleap_init)
+setattr(PolynomialFeatures, 'mlinit', mleap_init)
 setattr(PolynomialFeatures, 'serialize_to_bundle', serialize_to_bundle)
 setattr(PolynomialFeatures, 'serializable', True)
 
@@ -152,17 +141,20 @@ def _to_list(x):
 
 
 class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
-    """
-    Selects a subset of features from a pandas dataframe that are then passed into a subsequent transformer.
-    MLeap treats this transformer like a VectorAssembler equivalent in spark.
-
-    >>> data = pd.DataFrame([['a', 0, 1], ['b', 1, 2], ['c', 3, 4]], columns=['col_a', 'col_b', 'col_c'])
-    >>> vector_items = ['col_b', 'col_c']
-    >>> feature_extractor2_tf = FeatureExtractor(vector_items, 'continuous_features', vector_items)
-    >>> feature_extractor2_tf.fit_transform(data).head(1).values
-    >>> array([[0, 1]])
-    """
     def __init__(self, input_features, output_vector, output_vector_items):
+        """
+        Selects a subset of features from a pandas dataframe that are then passed into a subsequent transformer.
+        MLeap treats this transformer like a VectorAssembler equivalent in spark.
+        >>> data = pd.DataFrame([['a', 0, 1], ['b', 1, 2], ['c', 3, 4]], columns=['col_a', 'col_b', 'col_c'])
+        >>> vector_items = ['col_b', 'col_c']
+        >>> feature_extractor2_tf = FeatureExtractor(vector_items, 'continuous_features', vector_items)
+        >>> feature_extractor2_tf.fit_transform(data).head(1).values
+        >>> array([[0, 1]])
+        :param input_features: List of features to extracts from a pandas data frame
+        :param output_vector: Name of the output vector, only used for serialization
+        :param output_vector_items: List of output feature names
+        :return:
+        """
         self.input_features = input_features
         self.output_vector_items = output_vector_items
         self.output_vector = output_vector
@@ -292,7 +284,10 @@ class ImputerSerializer(MLeapSerializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append((transformer.strategy, transformer.statistics_.tolist()))
+        attributes.append(('strategy', transformer.strategy))
+        attributes.append(('surrogate_value', transformer.statistics_.tolist()[0]))
+        if transformer.missing_values is not np.NaN:
+            attributes.append(('missing_value', transformer.missing_values[0]))
 
         # define node inputs and outputs
         inputs = [{
@@ -419,6 +414,28 @@ class PolynomialExpansionSerializer(MLeapSerializer):
                 }]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+
+class ReshapeArrayToN1(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.serializable=False
+        self.op='reshape_array'
+        self.name = "{}_{}".format(self.op, uuid.uuid1())
+
+    def transform(self, X, **params):
+        """
+        :type X: np.ndarray
+        :param X:
+        :param params:
+        :return:
+        """
+        return X.reshape(X.size, 1)
+
+    def fit(self, df, y=None, **fit_params):
+        return self
+
+    def fit_transform(self, X, y=None, **fit_params):
+        return self.transform(X)
 
 
 class NDArrayToDataFrame(BaseEstimator, TransformerMixin):

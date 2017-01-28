@@ -71,18 +71,21 @@ class OneHotEncoder(OneHotEncoder, MLeapSerializer):
 class DefineEstimator(BaseEstimator, TransformerMixin):
     def __init__(self, transformer):
         """
-        :type transformer: TransformerMixin
-        :param transformer:
-        :return:
-        """
-        self.transformer = transformer
+        Selects all but the last column of a matrix and passes it as the X variable into the transformer,
+        and the last column as the y variable.
 
-    def _split(self, X):
-        return X[:,:-1], X[:,-1:]
+        This transformer is useful when we need to run a transformer or a series of transformers on the y-variable
+        :type transformer: BaseEstimator
+        :param transformer: Estimator (linear regression, random forest, etc)
+        :return: Estimator
+        """
+        self.op = 'define_estimator'
+        self.name = "{}_{}".format(self.op, uuid.uuid4())
+        self.transformer = transformer
+        self.serializable=False
 
     def fit(self, X, y, sample_weight=None):
-        self.transformer.fit(X[:,:-1], X[:,-1:])
-        return self
+        return self.transformer.fit(X[:, :-1], X[:, -1:])
 
     def transform(self, X):
         return self.transformer.predict(X[:,:-1])

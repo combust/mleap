@@ -32,12 +32,12 @@ def serialize_to_bundle(self, path, model_name):
     return serializer.serialize_to_bundle(self, path, model_name)
 
 setattr(LogisticRegression, 'op', 'logistic_regression')
-setattr(LogisticRegression, 'minit', mleap_init)
+setattr(LogisticRegression, 'mlinit', mleap_init)
 setattr(LogisticRegression, 'serialize_to_bundle', serialize_to_bundle)
 setattr(LogisticRegression, 'serializable', True)
 
 setattr(LogisticRegressionCV, 'op', 'logistic_regression')
-setattr(LogisticRegressionCV, 'minit', mleap_init)
+setattr(LogisticRegressionCV, 'mlinit', mleap_init)
 setattr(LogisticRegressionCV, 'serialize_to_bundle', serialize_to_bundle)
 setattr(LogisticRegressionCV, 'serializable', True)
 

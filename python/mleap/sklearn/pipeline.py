@@ -41,7 +41,7 @@ def mleap_init(self):
 setattr(Pipeline, 'serialize_to_bundle', serialize_to_bundle)
 setattr(Pipeline, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(Pipeline, 'op', 'pipeline')
-setattr(Pipeline, 'minit', mleap_init)
+setattr(Pipeline, 'mlinit', mleap_init)
 setattr(Pipeline, 'serializable', True)
 
 

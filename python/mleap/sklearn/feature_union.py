@@ -37,7 +37,7 @@ def mleap_init(self):
 setattr(FeatureUnion, 'serialize_to_bundle', serialize_to_bundle)
 setattr(FeatureUnion, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(FeatureUnion, 'op', 'feature_union')
-setattr(FeatureUnion, 'minit', mleap_init)
+setattr(FeatureUnion, 'mlinit', mleap_init)
 setattr(FeatureUnion, 'serializable', True)
 
 

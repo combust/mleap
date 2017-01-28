@@ -32,12 +32,12 @@ def serialize_to_bundle(self, path, model_name):
     return serializer.serialize_to_bundle(self, path, model_name)
 
 setattr(SVC, 'op', 'svm')
-setattr(SVC, 'minit', mleap_init)
+setattr(SVC, 'mlinit', mleap_init)
 setattr(SVC, 'serialize_to_bundle', serialize_to_bundle)
 setattr(SVC, 'serializable', True)
 
 setattr(LinearSVC, 'op', 'svm')
-setattr(LinearSVC, 'minit', mleap_init)
+setattr(LinearSVC, 'mlinit', mleap_init)
 setattr(LinearSVC, 'serialize_to_bundle', serialize_to_bundle)
 setattr(LinearSVC, 'serializable', True)
 

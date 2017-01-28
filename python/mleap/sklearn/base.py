@@ -32,7 +32,7 @@ def mleap_init(self, input_features, prediction_column):
 
 
 setattr(LinearRegression, 'op', 'linear_regression')
-setattr(LinearRegression, 'minit', mleap_init)
+setattr(LinearRegression, 'mlinit', mleap_init)
 setattr(LinearRegression, 'serialize_to_bundle', serialize_to_bundle)
 setattr(LinearRegression, 'serializable', True)
 

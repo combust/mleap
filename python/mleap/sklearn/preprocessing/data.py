@@ -668,7 +668,7 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer):
         :param y:
         :return:
         """
-        if type(y, pd.DataFrame):
+        if isinstance(y, pd.DataFrame):
             x = y.ix[:,0]
             y = y.ix[:,1]
         else:
@@ -681,10 +681,8 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer):
         elif self.transform_type == 'mul':
             return np.multiply(x, y)
         elif self.transform_type == 'div':
-            return np.divide(y)
+            return np.divide(x, y)
         elif self.transform_type == 'rem':
-            return np.remainder(x, y)
-        elif self.transform_type == 'logn':
             return np.remainder(x, y)
         elif self.transform_type == 'pow':
             return x**y

@@ -65,7 +65,7 @@ object Dependencies {
 
   val tensorflow = l ++= Seq(tensorflowDep)
 
-  val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson)
+  val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config)
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

@@ -14,4 +14,5 @@ case class HttpConfig(config: Config) {
 
 case class MleapConfig(config: Config) {
   val http = HttpConfig(config.getConfig("http"))
+  val model = if(config.hasPath("model")) Some(config.getString("model")) else None
 }

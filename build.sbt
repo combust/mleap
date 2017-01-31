@@ -94,5 +94,5 @@ lazy val tensorflow = Project(
 lazy val serving = Project(
   id = "mleap-serving",
   base = file("mleap-serving"),
-  dependencies = Seq(runtime)
+  dependencies = Seq(runtime, avro)
 )

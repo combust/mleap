@@ -1,0 +1,17 @@
+package ml.combust.mleap.serving
+
+import com.typesafe.config.Config
+
+/**
+  * Created by hollinwilkins on 1/31/17.
+  */
+case class HttpConfig(config: Config) {
+  val hostname = config.getString("hostname")
+  val port = config.getInt("port")
+  val bindHostname = config.getString("bind-hostname")
+  val bindPort = config.getInt("bind-port")
+}
+
+case class MleapConfig(config: Config) {
+  val http = HttpConfig(config.getConfig("http"))
+}

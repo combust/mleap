@@ -10,6 +10,7 @@ import xerial.sbt.Sonatype.autoImport._
 object Common {
   lazy val defaultMleapSettings = defaultSettings ++ mleapSettings ++ sonatypeSettings
   lazy val defaultBundleSettings = defaultSettings ++ bundleSettings ++ sonatypeSettings
+  lazy val defaultMleapServingSettings = defaultMleapSettings ++ Seq(crossScalaVersions := Seq("2.11.8"))
 
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 

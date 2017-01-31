@@ -24,7 +24,7 @@ class MleapService()
   def unsetBundle(): Unit = synchronized(this.bundle = None)
 
   def loadModel(request: LoadModelRequest): Future[LoadModelResponse] = Future {
-    (for(bf <- managed(BundleFile(new File(request.path.toString)))) yield {
+    (for(bf <- managed(BundleFile(new File(request.path.get.toString)))) yield {
       bf.loadMleapBundle()
     }).tried.flatMap(identity)
   }.flatMap(r => Future.fromTry(r)).andThen {

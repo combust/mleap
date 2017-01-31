@@ -30,7 +30,6 @@ object Dependencies {
     val tensorflowDep = "org.tensorflow" % "libtensorflow" % tensorflowVersion
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
-    val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
   }
 
   object Test {
@@ -66,7 +65,7 @@ object Dependencies {
 
   val tensorflow = l ++= Seq(tensorflowDep)
 
-  val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, scopt)
+  val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson)
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

@@ -19,7 +19,7 @@ object Common {
     crossScalaVersions := Seq("2.10.6", "2.11.8"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork in Test := true,
-    javaOptions in Test += sys.env.getOrElse("JVM_OPTS", ""),
+    javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
     resolvers += "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
     resolvers ++= {
       // Only add Sonatype Snapshots if this version itself is a snapshot version

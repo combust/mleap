@@ -22,7 +22,7 @@ In order to start using your models as a REST API, we will need to:
 2. Load our model into memory
 3. Transform a leap frame
 
-### Start the Server
+### Start Server
 
 First let's start the Docker image so we can start transforming data.
 Make sure to mount a directory containing your models on the host
@@ -36,7 +36,7 @@ docker run -v /tmp/models:/models combustml/mleap-serving:0.6.0-SNAPSHOT
 
 This will expose the model server locally on port `65327`.
 
-### Load a Model
+### Load Model
 
 Use curl to load the model into memory. If you don't have your own
 model, download one of our example models. Make sure to place it in the
@@ -73,7 +73,7 @@ You should get back a result leap frame, as JSON, that you can then
 extract the result from. If you used one of our example AirBnB models,
 the last field in the leap frame will be the prediction.
 
-### Unload the Model
+### Unload Model
 
 If for some reason you don't want any model to be loaded into memory,
 but keep the server running, just DELETE the `model` resource:
@@ -81,4 +81,3 @@ but keep the server running, just DELETE the `model` resource:
 ```
 curl -XDELETE http://localhost:65327/model
 ```
-

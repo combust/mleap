@@ -10,6 +10,7 @@ import xerial.sbt.Sonatype.autoImport._
 object Common {
   lazy val defaultMleapSettings = defaultSettings ++ mleapSettings ++ sonatypeSettings
   lazy val defaultBundleSettings = defaultSettings ++ bundleSettings ++ sonatypeSettings
+  lazy val defaultMleapServingSettings = defaultMleapSettings ++ Seq(crossScalaVersions := Seq("2.11.8"))
 
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
@@ -17,7 +18,7 @@ object Common {
     scalaVersion := "2.11.8",
     crossScalaVersions := Seq("2.10.6", "2.11.8"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
-    fork := true,
+    fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
     resolvers += "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
     resolvers ++= {

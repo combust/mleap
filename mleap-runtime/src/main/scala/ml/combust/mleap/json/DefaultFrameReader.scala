@@ -15,6 +15,6 @@ import scala.util.Try
 class DefaultFrameReader extends FrameReader {
   override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset)
                         (implicit context: MleapContext): Try[DefaultLeapFrame] = {
-    Try(new String(bytes, charset).parseJson.convertTo[DefaultLeapFrame])
+    Try(new String(bytes, charset).trim.parseJson.convertTo[DefaultLeapFrame])
   }
 }

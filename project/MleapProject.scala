@@ -100,4 +100,10 @@ object MleapProject {
     base = file("mleap-serving"),
     dependencies = Seq(runtime, avro)
   )
+
+  lazy val benchmark = Project(
+    id = "mleap-benchmark",
+    base = file("mleap-benchmark"),
+    dependencies = Seq(runtime, spark, avro)
+  )
 }

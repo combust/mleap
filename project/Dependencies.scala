@@ -69,7 +69,7 @@ object Dependencies {
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config)
 
-  val benchmark = l ++= Seq(scalameter, scopt) ++ Compile.spark
+  val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

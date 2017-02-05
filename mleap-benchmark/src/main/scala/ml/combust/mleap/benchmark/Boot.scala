@@ -10,13 +10,6 @@ import scala.collection.JavaConverters._
   * Created by hollinwilkins on 2/4/17.
   */
 object Boot extends App {
-  val defaultMap: Map[String, Integer] = Map(
-    "start" -> 10,
-    "end" -> 100,
-    "step" -> 10
-  )
-  val defaultConfig = ConfigFactory.parseMap(defaultMap.asJava)
-
   val parser = new scopt.OptionParser[Config]("mleap-benchmark") {
     head("mleap-benchmark", BuildInfo().version)
 
@@ -33,11 +26,25 @@ object Boot extends App {
     }
 
     cmd("mleap-transform").text("standard MLeap transform benchmark").action {
-      (_, config) => config.withValue("benchmark", fromAnyRef("ml.combust.mleap.benchmark.MleapTransformBenchmark"))
+      (_, config) =>
+        config.withValue("benchmark", fromAnyRef("ml.combust.mleap.benchmark.MleapTransformBenchmark")).
+          withFallback(ConfigFactory.load("mleap.conf"))
+    }.children(modelPath, framePath)
+
+    cmd("mleap-row").text("MLeap row transform benchmark").action {
+      (_, config) =>
+        config.withValue("benchmark", fromAnyRef("ml.combust.mleap.benchmark.MleapRowTransformBenchmark")).
+          withFallback(ConfigFactory.load("mleap.conf"))
+    }.children(modelPath, framePath)
+
+    cmd("spark-transform").text("standard Spark transform benchmark").action {
+      (_, config) =>
+        config.withValue("benchmark", fromAnyRef("ml.combust.mleap.benchmark.SparkTransformBenchmark")).
+          withFallback(ConfigFactory.load("spark.conf"))
     }.children(modelPath, framePath)
   }
 
-  parser.parse(args, defaultConfig) match {
+  parser.parse(args, ConfigFactory.empty()) match {
     case Some(config) =>
       Class.forName(config.getString("benchmark")).
         newInstance().

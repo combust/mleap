@@ -22,7 +22,7 @@ class MleapTransformBenchmark extends Benchmark {
     val start = config.getInt("start")
     val end = config.getInt("end")
     val step = config.getInt("step")
-    object TransformBenchmark extends Bench.LocalTime {
+    object TransformBenchmark extends Bench.ForkedTime {
       val sizes: Gen[Int] = Gen.range("size")(start, end, step)
       val ranges: Gen[Range] = for(size <- sizes) yield 0 until size
       performance of "Range" in {

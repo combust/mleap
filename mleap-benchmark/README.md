@@ -82,6 +82,10 @@ because of how long it takes to execute one-off transforms. Note that
 transform speed in this case is dictated more by how long it takes Spark
 to optimize your pipelines, rather than how long it takes to execute it.
 
+NOTE: We do not fork Spark benchmarks, as it causes issues with running
+Spark. This minimally affects transform time from what we have seen by
+about 10 microseconds per transform.
+
 ```scala
 // For random forest pipeline
 sbt "mleap-benchmark/run spark-transform --model-path ./mleap-benchmark/src/main/resources/models/airbnb.model.rf.zip --frame-path ./mleap-benchmark/src/main/resources/leap_frame/frame.airbnb.avro"

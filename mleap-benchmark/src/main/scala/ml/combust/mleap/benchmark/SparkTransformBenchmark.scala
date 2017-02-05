@@ -27,7 +27,7 @@ class SparkTransformBenchmark extends Benchmark {
       master("local[1]").
       getOrCreate()
 
-    val slowFrame = spark.sqlContext.read.avro(config.getString("frame-path"))
+    val slowFrame = spark.sqlContext.read.avro(new File(config.getString("frame-path")).getAbsolutePath)
     val data = slowFrame.collect().toSeq
     val frame = spark.sqlContext.createDataFrame(data.asJava, slowFrame.schema)
 
@@ -37,7 +37,6 @@ class SparkTransformBenchmark extends Benchmark {
     val benchRuns = config.getInt("bench-runs")
     object TransformBenchmark extends Bench.LocalTime {
       override def warmer: Warmer = Warmer.Zero
-
 
       val sizes: Gen[Int] = Gen.range("size")(start, end, step)
       val ranges: Gen[Range] = for(size <- sizes) yield 0 until size

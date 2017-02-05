@@ -26,7 +26,7 @@ object BundleFile {
 
   implicit def apply(file: File): BundleFile = {
     val uri = if(file.getPath.endsWith(".zip")) {
-      new URI(s"jar:file:${file.getPath}")
+      new URI(s"jar:file:${file.getAbsolutePath}")
     } else {
       new URI(s"file:$file")
     }

@@ -30,6 +30,10 @@ java version "1.8.0\_65"
 Java(TM) SE Runtime Environment (build 1.8.0\_65-b17)
 Java HotSpot(TM) 64-Bit Server VM (build 25.65-b01, mixed mode)
 
+## Included Benchmarks
+
+Our included benchmarks work off a pipeline that has several continuous and several categorical features. We run continuous features through a standard scaler and we run categorical features through string indexing and one hot encoding. We then combine the one hot vectors with the scaled continuous features and perform scoring with either a random forest or a linear regression.
+
 ### Default MLeap Transformer
 
 Use SBT to run the benchmarks, we fork separate JVM processes so it
@@ -47,33 +51,81 @@ sbt "mleap-benchmark/run mleap-transform --model-path ./mleap-benchmark/src/main
 
 Random Forest: ~24.6 microseconds (246/10000)
 
-```
-Parameters(size -> 1000): 23.990439
-Parameters(size -> 2000): 47.991208
-Parameters(size -> 3000): 72.809849
-Parameters(size -> 4000): 96.966391
-Parameters(size -> 5000): 121.449282
-Parameters(size -> 6000): 146.344077
-Parameters(size -> 7000): 170.942028
-Parameters(size -> 8000): 195.383286
-Parameters(size -> 9000): 222.241228
-Parameters(size -> 10000): 246.348788
-```
+| # of transforms | Total time (milliseconds) | Transform time (microseconds) |
+|:---:|:---:|:---:|
+| 1000 | 23.990439 | 24 |
+| 2000 | 47.991208 | 24 |
+| 3000 | 72.809849 | 24 |
+| 4000 | 96.966391 | 24 |
+| 5000 | 121.449282 | 24 |
+| 6000 | 146.344077 | 24 |
+| 7000 | 170.942028 | 24 |
+| 8000 | 195.383286 | 24 |
+| 9000 | 222.241228 | 25 |
+| 10000 | 246.348788 | 25 |
+
 
 Linear Regression: ~23.7 microseconds (237/10000)
 
+| # of transforms | Total time (milliseconds) | Transform time (microseconds) |
+|:---:|:---:|:---:|
+| 1000 | 23.348875 | 23 |
+| 2000 | 46.789762 | 23 |
+| 3000 | 70.088292 | 23 |
+| 4000 | 92.938216 | 23 |
+| 5000 | 116.56363 | 23 |
+| 6000 | 141.166164 | 23 |
+| 7000 | 162.03061 | 23 |
+| 8000 | 187.489697 | 23 |
+| 9000 | 208.484832 | 23 |
+| 10000 | 237.864215 | 24 |
+
+### MLeap Row-Transformer
+
+MLeap row transformers take a lot of overhead out of transforming data
+by predefining the input and output schema of the rows you are
+transforming. This is the fastest execution mode MLeap provides, and it
+roughly 4x faster than the default transorms for our example pipelines.
+
+```scala
+// For random forest pipeline
+sbt "mleap-benchmark/run mleap-row --model-path ./mleap-benchmark/src/main/resources/models/airbnb.model.rf.zip --frame-path ./mleap-benchmark/src/main/resources/leap_frame/frame.airbnb.json"
+
+// For linear regression pipeline
+sbt "mleap-benchmark/run mleap-row --model-path ./mleap-benchmark/src/main/resources/models/airbnb.model.lr.zip --frame-path ./mleap-benchmark/src/main/resources/leap_frame/frame.airbnb.json"
 ```
-Parameters(size -> 1000): 23.348875
-Parameters(size -> 2000): 46.789762
-Parameters(size -> 3000): 70.088292
-Parameters(size -> 4000): 92.938216
-Parameters(size -> 5000): 116.56363
-Parameters(size -> 6000): 141.166164
-Parameters(size -> 7000): 162.03061
-Parameters(size -> 8000): 187.489697
-Parameters(size -> 9000): 208.484832
-Parameters(size -> 10000): 237.864215
-```
+
+#### Results
+
+Random Forest: ~6.8 microseconds (68/10000)
+
+| # of transforms | Total time (milliseconds) | Transform time (microseconds) |
+|:---:|:---:|:---:|
+| 1000 | 6.956204 | 7 |
+| 2000 | 13.717578 | 7 |
+| 3000 | 20.424697 | 7 |
+| 4000 | 27.160537 | 7 |
+| 5000 | 34.025757 | 7 |
+| 6000 | 41.017156 | 7 |
+| 7000 | 48.140102 | 7 |
+| 8000 | 54.724859 | 7 |
+| 9000 | 61.769202 | 7 |
+| 10000 | 68.646654 | 7 |
+
+Linear Regression: ~6.2 microseconds (62/10000)
+
+| # of transforms | Total time (milliseconds) | Transform time (microseconds) |
+|:---:|:---:|:---:|
+| 1000 | 6.535936 | 7 |
+| 2000 | 12.432958 | 6 |
+| 3000 | 18.78803 | 6 |
+| 4000 | 25.055208 | 6 |
+| 5000 | 31.42303 | 6 |
+| 6000 | 37.868067 | 6 |
+| 7000 | 44.034418 | 6 |
+| 8000 | 51.660834 | 6 |
+| 9000 | 56.598257 | 6 |
+| 10000 | 62.713341 | 6 |
 
 ### Spark Transformer
 
@@ -98,78 +150,31 @@ sbt "mleap-benchmark/run spark-transform --model-path ./mleap-benchmark/src/main
 
 Random Forest: ~101 milliseconds (10100/100)
 
-```
-Parameters(size -> 10): 3003.134541
-Parameters(size -> 20): 2667.17666
-Parameters(size -> 30): 3625.830997
-Parameters(size -> 40): 4670.878447
-Parameters(size -> 50): 5595.42647
-Parameters(size -> 60): 6363.986371
-Parameters(size -> 70): 7157.167454
-Parameters(size -> 80): 8142.149347
-Parameters(size -> 90): 9035.291511
-Parameters(size -> 100): 10104.72628
-```
+| # of transforms | Total time (milliseconds) | Transform time (milliseconds) |
+|:---:|:---:|:---:|
+| 10 | 3003.134541 | 300 |
+| 20 | 2667.17666 | 133 |
+| 30 | 3625.830997 | 120 |
+| 40 | 4670.878447 | 116 |
+| 50 | 5595.42647 | 111 |
+| 60 | 6363.986371 | 106 |
+| 70 | 7157.167454 | 102 |
+| 80 | 8142.149347 | 102 |
+| 90 | 9035.291511 | 100 |
+| 100 | 10104.72628 | 101 |
 
 Linear Regression: ~ 116 milliseconds (11600/100)
 
-```
-Parameters(size -> 10): 2889.342366
-Parameters(size -> 20): 2728.041945
-Parameters(size -> 30): 4160.168527
-Parameters(size -> 40): 4985.649625
-Parameters(size -> 50): 5566.344499
-Parameters(size -> 60): 6595.621628
-Parameters(size -> 70): 7965.271514
-Parameters(size -> 80): 8762.643043
-Parameters(size -> 90): 10896.841689
-Parameters(size -> 100): 11646.638617
-```
-
-### MLeap Row-Transformer
-
-MLeap row transformers take a lot of overhead out of transforming data
-by predefining the input and output schema of the rows you are
-transforming. This is the fastest execution mode MLeap provides, and it
-roughly 4x faster than the default transorms for our example pipelines.
-
-```scala
-// For random forest pipeline
-sbt "mleap-benchmark/run mleap-row --model-path ./mleap-benchmark/src/main/resources/models/airbnb.model.rf.zip --frame-path ./mleap-benchmark/src/main/resources/leap_frame/frame.airbnb.json"
-
-// For linear regression pipeline
-sbt "mleap-benchmark/run mleap-row --model-path ./mleap-benchmark/src/main/resources/models/airbnb.model.lr.zip --frame-path ./mleap-benchmark/src/main/resources/leap_frame/frame.airbnb.json"
-```
-
-#### Results
-
-Random Forest: ~6.8 microseconds (68/10000)
-
-```
-Parameters(size -> 1000): 6.956204
-Parameters(size -> 2000): 13.717578
-Parameters(size -> 3000): 20.424697
-Parameters(size -> 4000): 27.160537
-Parameters(size -> 5000): 34.025757
-Parameters(size -> 6000): 41.017156
-Parameters(size -> 7000): 48.140102
-Parameters(size -> 8000): 54.724859
-Parameters(size -> 9000): 61.769202
-Parameters(size -> 10000): 68.646654
-```
-
-Linear Regression: ~6.2 microseconds (62/10000)
-
-```
-Parameters(size -> 1000): 6.535936
-Parameters(size -> 2000): 12.432958
-Parameters(size -> 3000): 18.78803
-Parameters(size -> 4000): 25.055208
-Parameters(size -> 5000): 31.42303
-Parameters(size -> 6000): 37.868067
-Parameters(size -> 7000): 44.034418
-Parameters(size -> 8000): 51.660834
-Parameters(size -> 9000): 56.598257
-Parameters(size -> 10000): 62.713341
-```
+| # of transforms | Total time (milliseconds) | Transform time (milliseconds) |
+|:---:|:---:|:---:|
+| 10 | 2889.342366 | 289 |
+| 20 | 2728.041945 | 136.4 |
+| 30 | 4160.168527 | 139 |
+| 40 | 4985.649625 | 125 |
+| 50 | 5566.344499 | 111 |
+| 60 | 6595.621628 | 110 |
+| 70 | 7965.271514 | 114 |
+| 80 | 8762.643043 | 110 |
+| 90 | 10896.841689 | 121 |
+| 100 | 11646.638617 | 116 |
 

@@ -8,8 +8,9 @@ import sbtrelease.ReleasePlugin.autoImport._
 import xerial.sbt.Sonatype.autoImport._
 
 object Common {
-  lazy val defaultMleapSettings = defaultSettings ++ mleapSettings
-  lazy val defaultBundleSettings = defaultSettings ++ bundleSettings
+  lazy val defaultMleapSettings = defaultSettings ++ mleapSettings ++ sonatypeSettings
+  lazy val defaultBundleSettings = defaultSettings ++ bundleSettings ++ sonatypeSettings
+  lazy val defaultMleapServingSettings = defaultMleapSettings ++ Seq(crossScalaVersions := Seq("2.11.8"))
 
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
@@ -17,7 +18,7 @@ object Common {
     scalaVersion := "2.11.8",
     crossScalaVersions := Seq("2.10.6", "2.11.8"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
-    fork := true,
+    fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
     resolvers += "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
     resolvers ++= {
@@ -47,9 +48,9 @@ object Common {
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },
     licenses := Seq("Apache 2.0 License" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
-    homepage := Some(url("https://github.com/combust-ml/mleap")),
-    scmInfo := Some(ScmInfo(url("https://github.com/combust-ml/mleap.git"),
-      "scm:git:git@github.com:combust-ml/mleap.git")),
+    homepage := Some(url("https://github.com/combust/mleap")),
+    scmInfo := Some(ScmInfo(url("https://github.com/combust/mleap.git"),
+      "scm:git:git@github.com:combust/mleap.git")),
     developers := List(Developer("hollinwilkins",
       "Hollin Wilkins",
       "hollinrwilkins@gmail.com",

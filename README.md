@@ -1,9 +1,17 @@
-# MLeap
+<a href="http://mleap-docs.combust.ml"><img src="logo.png" alt="MLeap Logo" width="176" height="70" /></a>
 
-[![Join the chat at https://gitter.im/combust-ml/mleap](https://badges.gitter.im/combust-ml/mleap.svg)](https://gitter.im/combust-ml/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://travis-ci.org/combust-ml/mleap.svg?branch=master)](https://travis-ci.org/combust-ml/mleap)
+[![Gitter](https://badges.gitter.im/combust/mleap.svg)](https://gitter.im/combust/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Build Status](https://travis-ci.org/combust/mleap.svg?branch=master)](https://travis-ci.org/combust/mleap)
 
 Deploying machine learning data pipelines and algorithms should not be a time-consuming or difficult task. MLeap allows data scientists and engineers to deploy machine learning pipelines from Spark and Scikit-learn to a portable format and execution engine.
+
+## Documentation
+
+Documentation is available at [mleap-docs.combust.ml](http://mleap-docs.combust.ml).
+
+Read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
+
+## Introduction
 
 Using the MLeap execution engine and serialization format, we provide a performant, portable and easy-to-integrate production library for machine learning data pipelines and algorithms.
 
@@ -11,12 +19,11 @@ For portability, we build our software on the JVM and only use serialization for
 
 We also provide a high level of integration with existing technologies.
 
-Our Goal:
-1. Build data pipelines and train algorithms with Spark and Scikit-Learn
-2. Serialize your pipeline and algorithm to Bundle.ML
-3. Use MLeap to execute your pipeline and algorithm without the Spark/Scikit dependencies
+Our goals for this project are:
 
-Basic examples are localed below, but you can read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
+1. Allow Researchers/Data Scientists and Engineers to continue to build data pipelines and train algorithms with Spark and Scikit-Learn
+2. Extend Spark/Scikit/TensorFlow by providing ML Pipelines serialization/deserialization to/from a common framework (Bundle.ML)
+3. Use MLeap Runtime to execute your pipeline and algorithm without dependenices on Spark or Scikit (numpy, pandas, etc)
 
 ## Overview
 
@@ -29,10 +36,6 @@ Basic examples are localed below, but you can read [Serializing a Spark ML Pipel
 7. Optional Spark transformer extension to extend Spark's default transformer offerings
 
 <img src="assets/images/single-runtime.jpg" alt="Unified Runtime"/>
-
-## Documentation
-
-Documentation is available at [mleap-docs.combust.ml](http://mleap-docs.combust.ml).
 
 ## Setup
 
@@ -113,12 +116,10 @@ import ml.combust.bundle.BundleFile
 import ml.combust.mleap.spark.SparkSupport._
 import resource._
 
-for(modelFile <- managed(BundleFile("/tmp/simple-spark-pipeline.zip"))) {
+// Optionally yield from here to get the try back from serializing
+// The try will indicate if serialization was successful
+for(modelFile <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) {
   pipeline.writeBundle.
-    // delete the file if it already exists
-    overwrite.
-    // name our pipeline
-    name("simple-pipeline").
     // save our pipeline to a zip file
     // we can save a file to any supported java.nio.FileSystem
     save(modelFile)
@@ -180,19 +181,21 @@ import ml.combust.mleap.runtime.MleapSupport._
 import resource._
 
 // load the Spark pipeline we saved in the previous section
-val bundle = (for(bundleFile <- managed(BundleFile("/tmp/simple-spark-pipeline.zip"))) yield {
-  bundleFile.loadBundle().get
+val bundle = (for(bundleFile <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) yield {
+  bundleFile.loadMleapBundle().get
 }).opt.get
 
 // create a simple LeapFrame to transform
 import ml.combust.mleap.runtime.{Row, LeapFrame, LocalDataset}
 import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.tensor.Tensor
+
 
 // MLeap makes extensive use of monadic types like Try
-val schema = StructType(StructField("test_string", StringType),
-  StructField("test_double", DoubleType)).get
-val data = LocalDataset(Row("hello", 0.6),
-  Row("MLeap", 0.2))
+val schema = StructType(StructField("test_string", StringType()),
+  StructField("test_double", TensorType(DoubleType()))).get
+val data = LocalDataset(Row("hello", Tensor.denseVector(Array(0.6))),
+  Row("MLeap", Tensor.denseVector(Array(0.2))))
 val frame = LeapFrame(schema, data)
 
 // transform the dataframe using our pipeline
@@ -202,11 +205,11 @@ val data2 = frame2.dataset
 
 // get data from the transformed rows and make some assertions
 assert(data2(0).getDouble(2) == 0.0) // string indexer output
-assert(data2(0).getDouble(3) == 1.0) // binarizer output
+assert(data2(0).getTensor[Double](3).get(0) == 1.0) // binarizer output
 
 // the second row
 assert(data2(1).getDouble(2) == 1.0)
-assert(data2(1).getDouble(3) == 0.0)
+assert(data2(1).getTensor[Double](3).get(0) == 0.0)
 ```
 
 ## Documentation

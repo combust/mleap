@@ -4,7 +4,8 @@ if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
   sed -i 's/https:\/\/github.com\//git@github.com:/' .git/config
 
   source travis/extract.sh
-  git config user.email "combust@combust.ml"
+  source travis/docker.sh
+  git config user.email "mleap@combust.ml"
   git config user.name "Combust, Inc."
   git checkout $TRAVIS_BRANCH
 

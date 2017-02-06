@@ -25,6 +25,8 @@ trait BundleTypeConverters {
       FloatType()
     } else if(b.isDouble) {
       DoubleType()
+    } else if(b.isByteString) {
+      ByteStringType()
     } else { throw new IllegalArgumentException(s"unsupported data type $b") }
   }
 
@@ -48,6 +50,7 @@ trait BundleTypeConverters {
     case LongType(false) => bundle.BasicType.BasicType.LONG
     case FloatType(false) => bundle.BasicType.BasicType.FLOAT
     case DoubleType(false) => bundle.BasicType.BasicType.DOUBLE
+    case ByteStringType(false) => bundle.BasicType.BasicType.BYTE_STRING
     case _ => throw new IllegalArgumentException(s"unsupported type $b")
   }
 

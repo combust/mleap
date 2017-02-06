@@ -5,6 +5,8 @@ import ml.combust.mleap.runtime.{Dataset, LocalDataset}
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 import JsonSupport.mleapTensorFormat
+import ml.combust.bundle.json.JsonSupport.bundleByteStringFormat
+import ml.combust.bundle.ByteString
 
 /**
   * Created by hollinwilkins on 9/10/16.
@@ -33,6 +35,7 @@ object DatasetFormat {
       case LongType(false) => maybeNullableFormat(mleapTensorFormat[Long], isNullable)
       case FloatType(false) => maybeNullableFormat(mleapTensorFormat[Float], isNullable)
       case DoubleType(false) => maybeNullableFormat(mleapTensorFormat[Double], isNullable)
+      case ByteStringType(false) => maybeNullableFormat(mleapTensorFormat[ByteString], isNullable)
       case _ => serializationError(s"invalid tensor base type: ${tt.base}")
     }
   }
@@ -46,6 +49,7 @@ object DatasetFormat {
     case LongType(isNullable) => maybeNullableFormat(LongJsonFormat, isNullable)
     case FloatType(isNullable) => maybeNullableFormat(FloatJsonFormat, isNullable)
     case DoubleType(isNullable) => maybeNullableFormat(DoubleJsonFormat, isNullable)
+    case ByteStringType(isNullable) => maybeNullableFormat(bundleByteStringFormat, isNullable)
     case lt: ListType => listSerializer(lt)
     case tt: TensorType => tensorSerializer(tt)
     case ct: CustomType => ct.format

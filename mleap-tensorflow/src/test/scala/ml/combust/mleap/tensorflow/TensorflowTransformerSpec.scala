@@ -12,11 +12,7 @@ import resource._
 class TensorflowTransformerSpec extends FunSpec {
   describe("with a scaling tensorflow model") {
     it("scales the vector using the model and returns the result") {
-      val bytes = (for(graph <- managed(TestUtil.createAddGraph())) yield {
-        graph.toGraphDef
-      }).opt.get
-
-      val model = TensorflowModel(bytes,
+      val model = TensorflowModel(TestUtil.createAddGraph(),
         inputs = Seq(("InputA", FloatType(false)), ("InputB", FloatType(false))),
         outputs = Seq(("MyResult", FloatType(false))))
       val shape = Shape().withInput("input_a", "InputA").

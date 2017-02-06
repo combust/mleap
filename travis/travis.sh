@@ -2,7 +2,8 @@
 
 if [[ $TRAVIS_BRANCH == 'master' ]] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
   source travis/extract.sh
-  sbt "+ test" "+ publishSigned"
+  source travis/docker.sh
+  sbt "+ test" "+ publishSigned" "mleap-serving/docker:publish"
 else
   sbt "+ test"
 fi

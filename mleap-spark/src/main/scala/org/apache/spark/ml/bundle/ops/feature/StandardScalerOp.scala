@@ -18,18 +18,25 @@ class StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, S
 
     override def store(model: Model, obj: StandardScalerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      val mean = if(obj.getWithMean) Some(obj.mean.toArray.toSeq) else None
-      val std = if(obj.getWithStd) Some(obj.std.toArray.toSeq) else None
+      val mean = if(obj.getWithMean) Some(obj.mean.toArray) else None
+      val std = if(obj.getWithStd) Some(obj.std.toArray) else None
 
-      model.withAttr("mean", mean.map(_.toArray).map(Value.vector)).
-        withAttr("std", std.map(_.toArray).map(Value.vector))
+      model.withAttr("mean", mean.map(Value.vector)).
+        withAttr("std", std.map(Value.vector))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): StandardScalerModel = {
-      val std = model.getValue("std").map(_.getTensor[Double].toArray).map(Vectors.dense).orNull
-      val mean = model.getValue("mean").map(_.getTensor[Double].toArray).map(Vectors.dense).orNull
-      new StandardScalerModel(uid = "", std = std, mean = mean)
+      val std = model.getValue("std").map(_.getTensor[Double].toArray).map(Vectors.dense)
+      val mean = model.getValue("mean").map(_.getTensor[Double].toArray).map(Vectors.dense)
+      val size = std.map(_.size).orElse(mean.map(_.size)).get
+
+      val m = new StandardScalerModel(uid = "",
+        std = std.getOrElse(Vectors.sparse(size, Array(), Array())),
+        mean = mean.getOrElse(Vectors.sparse(size, Array(), Array())))
+      std.foreach(_ => m.set(m.withStd, true))
+      mean.foreach(_ => m.set(m.withMean, true))
+      m
     }
   }
 
@@ -41,7 +48,9 @@ class StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, S
 
   override def load(node: Node, model: StandardScalerModel)
                    (implicit context: BundleContext[SparkBundleContext]): StandardScalerModel = {
-    new StandardScalerModel(uid = node.name, std = model.std, mean = model.mean)
+    new StandardScalerModel(uid = node.name, std = model.std, mean = model.mean).
+      setInputCol(node.shape.standardInput.name).
+      setOutputCol(node.shape.standardOutput.name)
   }
 
   override def shape(node: StandardScalerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

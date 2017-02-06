@@ -19,7 +19,7 @@ from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer, Binarizer, PolynomialFeatures
 from sklearn.preprocessing.data import OneHotEncoder
 from sklearn.preprocessing.label import LabelEncoder
-from mleap.bundle.serialize import MLeapSerializer
+from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer
 from sklearn.utils import column_or_1d
 import warnings
 import numpy as np
@@ -44,7 +44,13 @@ class ops(object):
 
 ops = ops()
 
+
 def serialize_to_bundle(self, path, model_name):
+    serializer = SimpleSerializer()
+    return serializer.serialize_to_bundle(self, path, model_name)
+
+
+def deserialize_to_bundle(self, path, model_name):
     serializer = SimpleSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
 
@@ -57,6 +63,7 @@ def mleap_init(self, input_features, output_features):
 
 setattr(StandardScaler, 'op', ops.STANDARD_SCALER)
 setattr(StandardScaler, 'serialize_to_bundle', serialize_to_bundle)
+setattr(StandardScaler, 'deserialize_from_bundle', deserialize_to_bundle)
 setattr(StandardScaler, 'mlinit', mleap_init)
 setattr(StandardScaler, 'serializable', True)
 
@@ -134,6 +141,28 @@ class SimpleSerializer(object):
         serializer.serialize_to_bundle(transformer, path, model_name)
 
 
+class SimpleDeSerializer(object):
+    """
+    Creates scikit-learn transformers from MLeap Bundles
+    """
+    def __init__(self):
+        super(SimpleDeSerializer, self).__init__()
+
+    def _choose_deserializer(self, op):
+        # TODO: Move this to it's own location
+        if op == ops.STANDARD_SCALER:
+            deserializer = StandardScalerSerializer
+
+        return deserializer
+
+    def deserialize_from_bundle(self, bundle_node):
+        # Get Model
+        with open(bundle_node) as json_data:
+            model = json.load(json_data)
+
+        op_name = model['op']
+
+
 def _to_list(x):
     if isinstance(x, list):
         return x
@@ -199,7 +228,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         self.serialize(self, path, model_name, attributes, inputs, outputs)
 
 
-class StandardScalerSerializer(MLeapSerializer):
+class StandardScalerSerializer(MLeapSerializer, MLeapDeserializer):
     """
     Standardizes features by removing the mean and scaling to unit variance using mean and standard deviation from
     training data.
@@ -235,6 +264,28 @@ class StandardScalerSerializer(MLeapSerializer):
                 }]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+    def deserialize_from_bundle(self, node_path):
+
+        # Set serialized attributes
+        standard_scaler = StandardScaler()
+        standard_scaler = self.deserialize(standard_scaler, node_path)
+
+        # Set Additional Attributes
+        if 'mean_' in standard_scaler.__dict__:
+            standard_scaler.with_mean = True
+        else:
+            standard_scaler.with_mean = False
+
+        if 'std_' in standard_scaler.__dict__:
+            standard_scaler.with_std = True
+            standard_scaler.scale_ = standard_scaler.std_
+        else:
+            standard_scaler.with_std = False
+
+        # Get Node
+        with open("{}/node.json".format(node_path)) as json_data:
+            node_json = json.load(json_data)
 
 
 class MinMaxScalerSerializer(MLeapSerializer):

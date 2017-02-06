@@ -151,3 +151,23 @@ class MLeapSerializer(object):
             # Write node file
             with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
                 json.dump(self.get_mleap_node(transformer, inputs, outputs), outfile, indent=3)
+
+
+class MLeapDeserializer(object):
+
+    @staticmethod
+    def deserialize(transformer, model):
+        """
+
+        :param transformer: Scikit or Pandas transformer
+        :param node: bundle.ml node json file
+        :param model: bundle.ml model json file
+        :return: Transformer
+        """
+
+        # Set Transformer Attributes
+        attributes = model['attributes']
+        for attribute in attributes:
+            setattr(transformer, attributes, model[attribute]['value'])
+
+        return transformer

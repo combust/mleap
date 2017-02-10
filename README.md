@@ -37,12 +37,11 @@ Our goals for this project are:
 
 ## Requirements
 
-MLeap is cross-compiled for Scala 2.10 and 2.11. This means that you
-should be able to run MLeap with the following configurations:
+MLeap is cross-compiled for Scala 2.10 and 2.11. Because we depend
+heavily on Typesafe config for MLeap, we only support Java 8 at the
+moment. This means the following configurations should be possible:
 
-1. Scala 2.10 and Java 7
 2. Scala 2.10 and Java 8
-3. Scala 2.11 and Java 7
 4. Scala 2.11 and Java 8
 
 ## Setup

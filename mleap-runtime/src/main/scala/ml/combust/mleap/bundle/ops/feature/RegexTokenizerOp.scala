@@ -24,7 +24,7 @@ class RegexTokenizerOp extends OpNode[MleapContext, RegexTokenizer, RegexTokeniz
     override def store(model: Model, obj: RegexTokenizerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       model
-        .withAttr(RegexIdentifier, Value.string(obj.regex.regex))
+        .withAttr(RegexIdentifier, Value.string(obj.regex.toString()))
         .withAttr(MatchGapsIdentifier, Value.boolean(obj.matchGaps))
         .withAttr(MinTokenLengthIdentifer, Value.int(obj.tokenMinLength))
         .withAttr(LowercaseText, Value.boolean(obj.lowercaseText))

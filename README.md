@@ -35,6 +35,16 @@ Our goals for this project are:
 6. extensive test coverage with full parity tests for Spark and MLeap pipelines
 7. optional Spark transformer extension to extend Spark's default transformer offerings
 
+## Requirements
+
+MLeap is cross-compiled for Scala 2.10 and 2.11. This means that you
+should be able to run MLeap with the following configurations:
+
+1. Scala 2.10 and Java 7
+2. Scala 2.10 and Java 8
+3. Scala 2.11 and Java 7
+4. Scala 2.11 and Java 8
+
 ## Setup
 
 ### Link with Maven or SBT

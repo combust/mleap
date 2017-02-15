@@ -1,5 +1,7 @@
 package ml.combust.mleap.runtime
 
+import java.io.PrintStream
+
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter, RowReader, RowWriter}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -107,4 +109,14 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
                          (udf: UserDefinedFunction): Try[LF] = {
     withField(name, selectors: _*)(udf)
   }
+
+  /** Print the schema to standard output.
+    */
+  def printSchema(): Unit = schema.print(System.out)
+
+  /** Print the schema to a PrintStream.
+    *
+    * @param out print stream to print schema to
+    */
+  def printSchema(out: PrintStream): Unit = schema.print(out)
 }

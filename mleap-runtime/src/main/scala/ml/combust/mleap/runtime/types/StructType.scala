@@ -1,5 +1,7 @@
 package ml.combust.mleap.runtime.types
 
+import java.io.{OutputStream, PrintStream}
+
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader, RowWriter}
 
 import scala.util.{Failure, Success, Try}
@@ -183,4 +185,19 @@ case class StructType private(fields: Seq[StructField],
 
   def rowWriter(format: String = BuiltinFormats.json): RowWriter = RowWriter(this, format)
   def rowReader(format: String = BuiltinFormats.json): RowReader = RowReader(this, format)
+
+  /** Print schema to standard out.
+    */
+  def print(): Unit = print(System.out)
+
+  /** Print schema to a PrintStream.
+    *
+    * @param out print stream to write schema to
+    */
+  def print(out: PrintStream): Unit = {
+    out.println("root")
+    fields.foreach {
+      field => out.println(s" |-- ${field.name}: ${field.dataType.printString}")
+    }
+  }
 }

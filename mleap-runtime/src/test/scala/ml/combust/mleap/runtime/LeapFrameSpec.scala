@@ -1,8 +1,11 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.mleap.runtime.test.{MyCustomObject, MyCustomType}
+import java.io.{ByteArrayOutputStream, PrintStream}
+
+import ml.combust.mleap.runtime.test.MyCustomObject
 import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
+import resource._
 
 /** Base trait for testing LeapFrame implementations.
   *
@@ -98,6 +101,29 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
 
         describe("with a non-existent field") {
           it("returns a Failure") { assert(frame.dropField("non_existent").isFailure) }
+        }
+      }
+
+      describe("#show") {
+        it("prints the leap frame to a PrintStream") {
+          val str = (for(out <- managed(new ByteArrayOutputStream())) yield {
+            val p = new PrintStream(out)
+            frame.show(p)
+            out.flush()
+            new String(out.toByteArray)
+          }).tried.get
+
+          val expected =
+            """
+              |+-----------+-----------+
+              ||test_string|test_double|
+              |+-----------+-----------+
+              ||      hello|      42.13|
+              ||      there|      13.42|
+              |+-----------+-----------+
+            """.stripMargin
+
+          assert(str.trim == expected.trim)
         }
       }
     }

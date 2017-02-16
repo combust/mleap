@@ -119,6 +119,7 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
     val schema = (for(out <- managed(new ByteArrayOutputStream())) yield {
       val print = new PrintStream(out)
       printStruct.print(print)
+      print.flush()
       new String(out.toByteArray)
     }).tried.get
 

@@ -5,6 +5,7 @@ import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.Tensor
 
 import scala.collection.mutable
+import scala.util.Try
 
 /** Companion object for creating default rows.
   */
@@ -52,6 +53,30 @@ trait Row extends Iterable[Any] {
     * @return value at index cast to given type
     */
   def getAs[T](index: Int): T = get(index).asInstanceOf[T]
+
+  /** Get value at index wrapped in an option as specified type.
+    *
+    * @param index index of value
+    * @tparam T type of value
+    * @return option of value at index cast to given type or None
+    */
+  def getAsOption[T: Manifest](index: Int): Option[T] = {
+    Try(get(index)).map { value =>
+      val erasure = manifest[T] match {
+        case Manifest.Byte => classOf[java.lang.Byte]
+        case Manifest.Short => classOf[java.lang.Short]
+        case Manifest.Char => classOf[java.lang.Character]
+        case Manifest.Long => classOf[java.lang.Long]
+        case Manifest.Float => classOf[java.lang.Float]
+        case Manifest.Double => classOf[java.lang.Double]
+        case Manifest.Boolean => classOf[java.lang.Boolean]
+        case Manifest.Int => classOf[java.lang.Integer]
+        case m => m.runtimeClass
+      }
+
+      if (erasure.isInstance(value)) Some(value.asInstanceOf[T]) else None
+    }.toOption.flatten
+  }
 
   /** Get value at index as specified type.
     *

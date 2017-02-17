@@ -28,7 +28,7 @@ class DefaultFrameReader extends FrameReader {
 
     var record = new GenericData.Record(avroSchema)
     var rows = mutable.ArrayBuilder.make[Row]()
-    while(Try(reader.hasNext).isSuccess) {
+    while(Try(reader.hasNext).getOrElse(false)) {
       record = reader.next(record)
       val row = ArrayRow(new Array[Any](schema.fields.length))
       for(i <- schema.fields.indices) { row.set(i, readers(i)(record.get(i))) }

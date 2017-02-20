@@ -71,6 +71,7 @@ object Bundle {
       val stopwords_remover = "stopwords_remover"
       val word_to_vector = "word_to_vector"
       val multinomial_labeler = "multinomial_labeler"
+      val regex_tokenizer = "regex_tokenizer"
     }
 
     object classification {

@@ -37,6 +37,15 @@ Our goals for this project are:
 
 <img src="assets/images/single-runtime.jpg" alt="Unified Runtime"/>
 
+## Requirements
+
+MLeap is cross-compiled for Scala 2.10 and 2.11. Because we depend
+heavily on Typesafe config for MLeap, we only support Java 8 at the
+moment. This means the following configurations should be possible:
+
+2. Scala 2.10 and Java 8
+4. Scala 2.11 and Java 8
+
 ## Setup
 
 ### Link with Maven or SBT

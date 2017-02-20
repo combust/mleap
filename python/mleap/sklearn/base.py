@@ -16,13 +16,20 @@
 #
 
 from sklearn.linear_model import LinearRegression
-from mleap.bundle.serialize import MLeapSerializer
+from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer
 import uuid
+import os
+import numpy as np
 
 
 def serialize_to_bundle(self, path, model_name):
-    serializer = SimplekSerializer()
+    serializer = SimpleSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
+
+
+def deserialize_from_bundle(self, path, node_name):
+    serializer = SimpleSerializer()
+    return serializer.deserialize_from_bundle(self, path, node_name)
 
 
 def mleap_init(self, input_features, prediction_column):
@@ -34,12 +41,13 @@ def mleap_init(self, input_features, prediction_column):
 setattr(LinearRegression, 'op', 'linear_regression')
 setattr(LinearRegression, 'mlinit', mleap_init)
 setattr(LinearRegression, 'serialize_to_bundle', serialize_to_bundle)
+setattr(LinearRegression, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(LinearRegression, 'serializable', True)
 
 
-class SimplekSerializer(MLeapSerializer):
+class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
     def __init__(self):
-        super(SimplekSerializer, self).__init__()
+        super(SimpleSerializer, self).__init__()
 
     @staticmethod
     def set_prediction_column(transformer, prediction_column):
@@ -68,3 +76,24 @@ class SimplekSerializer(MLeapSerializer):
                    }]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+    def deserialize_from_bundle(self, transformer, node_path, node_name):
+
+        attributes_map = {
+            'coefficients': 'coef_',
+            'intercept': 'intercept_'
+        }
+
+        # Set serialized attributes
+        full_node_path = os.path.join(node_path, node_name)
+        transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
+
+        # Set Additional Attributes
+        if 'intercept_' in transformer.__dict__:
+            transformer.fit_intercept = True
+        else:
+            transformer.fit_intercept = False
+
+        transformer.coef_ = np.array([transformer.coef_])
+
+        return transformer

@@ -17,8 +17,10 @@
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LogisticRegressionCV
-from mleap.bundle.serialize import MLeapSerializer
+from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer
 import uuid
+import os
+import numpy as np
 
 
 def mleap_init(self, input_features, prediction_column):
@@ -31,18 +33,25 @@ def serialize_to_bundle(self, path, model_name):
     serializer = SimpleSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
 
+
+def deserialize_from_bundle(self, path, node_name):
+    serializer = SimpleSerializer()
+    return serializer.deserialize_from_bundle(self, path, node_name)
+
 setattr(LogisticRegression, 'op', 'logistic_regression')
 setattr(LogisticRegression, 'mlinit', mleap_init)
 setattr(LogisticRegression, 'serialize_to_bundle', serialize_to_bundle)
+setattr(LogisticRegression, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(LogisticRegression, 'serializable', True)
 
 setattr(LogisticRegressionCV, 'op', 'logistic_regression')
 setattr(LogisticRegressionCV, 'mlinit', mleap_init)
 setattr(LogisticRegressionCV, 'serialize_to_bundle', serialize_to_bundle)
+setattr(LogisticRegressionCV, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(LogisticRegressionCV, 'serializable', True)
 
 
-class SimpleSerializer(MLeapSerializer):
+class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
     def __init__(self):
         super(SimpleSerializer, self).__init__()
 
@@ -74,3 +83,25 @@ class SimpleSerializer(MLeapSerializer):
                 }]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+
+    def deserialize_from_bundle(self, transformer, node_path, node_name):
+
+        attributes_map = {
+            'coefficients': 'coef_',
+            'intercept': 'intercept_'
+        }
+
+        # Set serialized attributes
+        full_node_path = os.path.join(node_path, node_name)
+        transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
+
+        # Set Additional Attributes
+        if 'intercept_' in transformer.__dict__:
+            transformer.fit_intercept = True
+        else:
+            transformer.fit_intercept = False
+
+        transformer.coef_ = np.array([transformer.coef_])
+        transformer.classes_ = np.array([0, 1])
+
+        return transformer

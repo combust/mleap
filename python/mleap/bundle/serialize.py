@@ -155,19 +155,47 @@ class MLeapSerializer(object):
 
 class MLeapDeserializer(object):
 
-    @staticmethod
-    def deserialize(transformer, model):
+    def deserialize_from_bundle(self, transformer, node_path, node_name):
         """
+        :type node_path: str
+        :type node_name: str
+        :type transformer: StandardScaler
+        :param transformer:
+        :param node_path:
+        :param node_name:
+        :return:
+        """
+        NotImplementedError()
 
+    @staticmethod
+    def deserialize_single_input_output(transformer, node_path, attributes_map=None):
+        """
+        :attributes_map: Map of attributes names. For example StandardScaler has `mean_` but is serialized as `mean`
         :param transformer: Scikit or Pandas transformer
         :param node: bundle.ml node json file
         :param model: bundle.ml model json file
         :return: Transformer
         """
+        # Load the model file
+        with open("{}/model.json".format(node_path)) as json_data:
+            model_j = json.load(json_data)
 
         # Set Transformer Attributes
-        attributes = model['attributes']
-        for attribute in attributes:
-            setattr(transformer, attributes, model[attribute]['value'])
+        attributes = model_j['attributes']
+        for attribute in attributes.keys():
+            if attributes_map is not None and attribute in attributes_map.keys():
+                setattr(transformer, attributes_map[attribute], attributes[attribute]['value'])
+            else:
+                setattr(transformer, attribute, attributes[attribute]['value'])
+
+        transformer.op = model_j['op']
+
+        # Load the node file
+        with open("{}/node.json".format(node_path)) as json_data:
+            node_j = json.load(json_data)
+
+        transformer.name = node_j['name']
+        transformer.input_features = node_j['shape']['inputs'][0]['name']
+        transformer.output_features = node_j['shape']['outputs'][0]['name']
 
         return transformer

@@ -13,7 +13,7 @@ object Dependencies {
   val akkaHttpVersion = "10.0.3"
 
   object Compile {
-    val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion
+    val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
     val spark = Seq("org.apache.spark" %% "spark-core" % sparkVersion,
       "org.apache.spark" %% "spark-sql" % sparkVersion,
       "org.apache.spark" %% "spark-mllib" % sparkVersion,
@@ -51,7 +51,7 @@ object Dependencies {
 
   val base = l ++= Seq()
 
-  val core = l ++= Seq(sparkMllibLocal, jTransform, scalaTest)
+  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)
 
   def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest) ++ scalaReflect.modules(scalaVersion.value))
 
@@ -63,7 +63,7 @@ object Dependencies {
 
   val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
-  val avro = l ++= Seq(avroDep)
+  val avro = l ++= Seq(avroDep, Test.scalaTest)
 
   val tensorflow = l ++= Seq(tensorflowDep)
 

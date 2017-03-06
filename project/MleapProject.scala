@@ -11,6 +11,7 @@ object MleapProject {
       core,
       runtime,
       avro,
+      serving,
       sparkBase,
       sparkTestkit,
       spark,

@@ -15,5 +15,6 @@ trait ApiMarshalling {
 
   implicit val mleapLoadModelResponseEntityMarshaller: ToEntityMarshaller[LoadModelResponse] = mleapLoadModelResponseFormat
   implicit val mleapUnloadModelResponseEntitytMarshaller: ToEntityMarshaller[UnloadModelResponse] = mleapUnloadModelResponseFormat
+  implicit val mleapLoadModelRequestEntityMarshaller: ToEntityMarshaller[LoadModelRequest] = mleapLoadModelRequestFormat
 }
 object ApiMarshalling extends ApiMarshalling

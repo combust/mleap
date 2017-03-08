@@ -1,5 +1,7 @@
 import ml.combust.mleap.MleapProject
 
+enablePlugins(CrossPerProjectPlugin)
+
 lazy val root = MleapProject.root
 lazy val base = MleapProject.baseProject
 lazy val bundleMl = MleapProject.bundleMl

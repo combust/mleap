@@ -45,10 +45,8 @@ class MleapResource(service: MleapService)
             complete(service.unloadModel(UnloadModelRequest()))
           }
         } ~ path("transform") {
-          post {
-            entity(as[DefaultLeapFrame]) {
-              frame => complete(service.transform(frame))
-            }
+          entity(as[DefaultLeapFrame]) {
+            frame => complete(service.transform(frame))
           }
         }
       }

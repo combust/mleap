@@ -36,7 +36,6 @@ object Dependencies {
 
   object Test {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
-    val akkaHttpTestkit =  "com.typesafe.akka" % "akka-http-testkit_2.11" % akkaHttpVersion % "test"
   }
 
   object Provided {
@@ -68,7 +67,7 @@ object Dependencies {
 
   val tensorflow = l ++= Seq(tensorflowDep)
 
-  val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
+  val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config)
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 

@@ -3,7 +3,7 @@ package ml.combust.mleap.serving
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import com.typesafe.config.Config
+import com.typesafe.config.{Config, ConfigFactory}
 import ml.combust.mleap.serving.domain.v1.LoadModelRequest
 
 

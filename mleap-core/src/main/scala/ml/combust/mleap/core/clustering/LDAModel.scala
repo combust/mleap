@@ -1,30 +1,16 @@
 package ml.combust.mleap.core.clustering
 
-//Referemce
-//MLeap Model
+import breeze.linalg.{Matrix, Vector, normalize, sum, DenseMatrix => BDM, DenseVector => BDV}
+import breeze.numerics.{exp, lgamma}
+import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.clustering.optimization.OnlineLDAOptimizer
-//import ml.combust.mleap.core.clustering.optimization.LDAOptimizer
-
-
-//Spark Model
-//MLeap Model
-
-//Mleap Loader/CT
-
-//Spark SerDer
-//MLeap SerDer
-
-/////
-
-//import ml.combust.mleap.core.clustering.{LDA, LDAModel, LDAUtils, LocalLDAModel}
 
 /**
   * Created by mageswarand on 15/2/17.
   *
-  *
+  * Note: All Spark Linear Algebra APIs are converted to bare Breeze APIs
   */
-
-
+@SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/mllib/clustering/LDAModel.scala")
 abstract class LDAModel private[clustering] {
 
   /** Number of topics */
@@ -85,76 +71,6 @@ abstract class LDAModel private[clustering] {
     *          Each topic's terms are sorted in order of decreasing weight.
     */
   def describeTopics(): Array[(Array[Int], Array[Double])] = describeTopics(vocabSize)
-
-  /* TODO (once LDA can be trained with Strings or given a dictionary)
-   * Return the topics described by weighted terms.
-   *
-   * This is similar to [[describeTopics()]] but returns String values for terms.
-   * If this model was trained using Strings or was given a dictionary, then this method returns
-   * terms as text.  Otherwise, this method returns terms as term indices.
-   *
-   * This limits the number of terms per topic.
-   * This is approximate; it may not return exactly the top-weighted terms for each topic.
-   * To get a more precise set of top terms, increase maxTermsPerTopic.
-   *
-   * @param maxTermsPerTopic  Maximum number of terms to collect for each topic.
-   * @return  Array over topics.  Each topic is represented as a pair of matching arrays:
-   *          (terms, term weights in topic) where terms are either the actual term text
-   *          (if available) or the term indices.
-   *          Each topic's terms are sorted in order of decreasing weight.
-   */
-  // def describeTopicsAsStrings(maxTermsPerTopic: Int): Array[(Array[Double], Array[String])]
-
-  /* TODO (once LDA can be trained with Strings or given a dictionary)
-   * Return the topics described by weighted terms.
-   *
-   * This is similar to [[describeTopics()]] but returns String values for terms.
-   * If this model was trained using Strings or was given a dictionary, then this method returns
-   * terms as text.  Otherwise, this method returns terms as term indices.
-   *
-   * WARNING: If vocabSize and k are large, this can return a large object!
-   *
-   * @return  Array over topics.  Each topic is represented as a pair of matching arrays:
-   *          (terms, term weights in topic) where terms are either the actual term text
-   *          (if available) or the term indices.
-   *          Each topic's terms are sorted in order of decreasing weight.
-   */
-  // def describeTopicsAsStrings(): Array[(Array[Double], Array[String])] =
-  //  describeTopicsAsStrings(vocabSize)
-
-  /* TODO
-   * Compute the log likelihood of the observed tokens, given the current parameter estimates:
-   *  log P(docs | topics, topic distributions for docs, alpha, eta)
-   *
-   * Note:
-   *  - This excludes the prior.
-   *  - Even with the prior, this is NOT the same as the data log likelihood given the
-   *    hyperparameters.
-   *
-   * @param documents  RDD of documents, which are term (word) count vectors paired with IDs.
-   *                   The term count vectors are "bags of words" with a fixed-size vocabulary
-   *                   (where the vocabulary size is the length of the vector).
-   *                   This must use the same vocabulary (ordering of term counts) as in training.
-   *                   Document IDs must be unique and >= 0.
-   * @return  Estimated log likelihood of the data under this model
-   */
-  // def logLikelihood(documents: RDD[(Long, Vector)]): Double
-
-  /* TODO
-   * Compute the estimated topic distribution for each document.
-   * This is often called 'theta' in the literature.
-   *
-   * @param documents  RDD of documents, which are term (word) count vectors paired with IDs.
-   *                   The term count vectors are "bags of words" with a fixed-size vocabulary
-   *                   (where the vocabulary size is the length of the vector).
-   *                   This must use the same vocabulary (ordering of term counts) as in training.
-   *                   Document IDs must be unique and greater than or equal to 0.
-   * @return  Estimated topic distribution for each document.
-   *          The returned RDD may be zipped with the given RDD, where each returned vector
-   *          is a multinomial distribution over topics.
-   */
-  // def topicDistributions(documents: RDD[(Long, Vector)]): RDD[(Long, Vector)]
-
 }
 
 /**
@@ -186,6 +102,7 @@ class LocalLDAModel ( val topics: Matrix[Double],
   }
 
 
+
   // TODO: declare in LDAModel and override once implemented in DistributedLDAModel
   /**
     * Calculates a lower bound on the log likelihood of the entire corpus.
@@ -195,10 +112,9 @@ class LocalLDAModel ( val topics: Matrix[Double],
     * @param documents test corpus to use for calculating log likelihood
     * @return variational lower bound on the log likelihood of the entire corpus
     */
-  def logLikelihood(documents: Array[(Long, BDV[Double])]): Double = logLikelihoodBound(documents,
+  def logLikelihood(documents: Array[(Long, Vector[Double])]): Double = logLikelihoodBound(documents,
     docConcentration, topicConcentration, topicsMatrix.toDenseMatrix, gammaShape, k,
     vocabSize)
-
   /**
     * Calculate an upper bound bound on perplexity.  (Lower is better.)
     * See Equation (16) in original Online LDA paper.
@@ -206,16 +122,12 @@ class LocalLDAModel ( val topics: Matrix[Double],
     * @param documents test corpus to use for calculating perplexity
     * @return Variational upper bound on log perplexity per token.
     */
-  def logPerplexity(documents: Array[(Long, BDV[Double])]): Double = {
-    //    val corpusTokenCount = documents
-    //      .map { case (_, termCounts) => termCounts.toArray.sum }
-    //      .sum()
+  def logPerplexity(documents: Array[(Long, Vector[Double])]): Double = {
     val corpusTokenCount = documents
       .map { case (_, termCounts) => sum(termCounts) }
 
     -logLikelihood(documents) / sum(corpusTokenCount)
   }
-
   /**
     * Estimate the variational likelihood bound of from `documents`:
     *    log p(documents) >= E_q[log p(documents)] - E_q[log q(documents)]
@@ -234,10 +146,8 @@ class LocalLDAModel ( val topics: Matrix[Double],
     * @param k number of topics
     * @param vocabSize number of unique terms in the entire test corpus
     */
-
-
   private def logLikelihoodBound(
-                                  documents: Array[(Long, BDV[Double])],
+                                  documents: Array[(Long, Vector[Double])],
                                   alpha: BDV[Double],
                                   eta: Double,
                                   lambda: BDM[Double],
@@ -251,34 +161,38 @@ class LocalLDAModel ( val topics: Matrix[Double],
 
     // Sum bound components for each document:
     //  component for prob(tokens) + component for prob(document-topic distribution)
-    val corpusPart: Double =
-    documents./*filter(_._2.numNonzeros > 0).*/map { case (id: Long, termCounts: BDV[Double]) =>
-      val localElogbeta = Elogbeta
-      var docBound = 0.0D
+    val corpusPart =
+    documents.filter{case (id: Long, termCounts: Vector[Double]) =>
+      var nnz = 0
+      termCounts.values.foreach { v =>
+        if (v != 0.0) {
+          nnz += 1
+        }
+      }
+      nnz > 0
+    }.map { case (id: Long, termCounts: Vector[Double]) =>
+      val localElogbeta = Elogbeta //TODO
+    var docBound = 0.0D
       val (gammad: BDV[Double], _, _) = OnlineLDAOptimizer.variationalTopicInference(
         termCounts, exp(localElogbeta), brzAlpha, gammaShape, k)
       val Elogthetad: BDV[Double] = LDAUtils.dirichletExpectation(gammad)
 
       // E[log p(doc | theta, beta)]
-      termCounts.foreachPair{  case (idx, count) =>
+      termCounts.foreachPair { case (idx, count) => //TODO check foreachActive-> foreachPair
         docBound += count * LDAUtils.logSumExp(Elogthetad + localElogbeta(idx, ::).t)
       }
-//      termCounts.foreach { case count =>
-//        docBound += count * LDAUtils.logSumExp(Elogthetad + localElogbeta(0, ::).t) //TODO 0 -> idx
-//      }
-
       // E[log p(theta | alpha) - log q(theta | gamma)]
       docBound += sum((brzAlpha - gammad) :* Elogthetad)
       docBound += sum(lgamma(gammad) - lgamma(brzAlpha))
       docBound += lgamma(sum(brzAlpha)) - lgamma(sum(gammad))
 
       docBound
-    }.reduce(_ + _)//.sum() //TODO reduce ok?
+    }.reduce(_ + _)
 
     // Bound component for prob(topic-term distributions):
     //   E[log p(beta | eta) - log q(beta | lambda)]
     val sumEta = eta * vocabSize
-    val topicsPart: Double = sum((eta - lambda) :* Elogbeta) +
+    val topicsPart = sum((eta - lambda) :* Elogbeta) +
       sum(lgamma(lambda) - lgamma(eta)) +
       sum(lgamma(sumEta) - lgamma(sum(lambda(::, breeze.linalg.*))))
 
@@ -296,7 +210,7 @@ class LocalLDAModel ( val topics: Matrix[Double],
     * @return An RDD of (document ID, topic mixture distribution for document)
     */
   // TODO: declare in LDAModel and override once implemented in DistributedLDAModel
-  def topicDistributions(documents: Array[(Long, BDV[Double])]): Array[(Long, BDV[Double])] = {
+  def topicDistributions(documents: Array[(Long, Vector[Double])]): Array[(Long, Vector[Double])] = {
     // Double transpose because dirichletExpectation normalizes by row and we need to normalize
     // by topic (columns of lambda)
     val expElogbeta = exp(LDAUtils.dirichletExpectation(topicsMatrix.toDenseMatrix.t).t)
@@ -304,9 +218,10 @@ class LocalLDAModel ( val topics: Matrix[Double],
     val gammaShape = this.gammaShape
     val k = this.k
 
-    documents.map { case (id: Long, termCounts: BDV[Double]) =>
-      if (termCounts.size == 0) {
-        (id, BDV(Array.fill[Double](k)(0)))
+    documents.map { case (id: Long, termCounts: Vector[Double]) =>
+      var nnz = 0
+      if (termCounts.toArray.filter(_!=0).size == 0) {
+        (id, BDV.zeros[Double](k))
       } else {
         val (gamma, _, _) = OnlineLDAOptimizer.variationalTopicInference(
           termCounts,
@@ -319,16 +234,17 @@ class LocalLDAModel ( val topics: Matrix[Double],
     }
   }
 
+
   /** Get a method usable as a UDF for [[topicDistributions()]] */
-  private def getTopicDistributionMethod(): BDV[Double] => BDV[Double]  = {
+  private def getTopicDistributionMethod():  Vector[Double] => Vector[Double]   = {
     val expElogbeta = exp(LDAUtils.dirichletExpectation(topicsMatrix.toDenseMatrix.t).t)
     val docConcentrationBrz = this.docConcentration
     val gammaShape = this.gammaShape
     val k = this.k
 
-    (termCounts: BDV[Double]) =>
-      if (termCounts.size == 0) {
-        BDV(Array.fill[Double](k)(0))
+    (termCounts: Vector[Double]) =>
+      if (termCounts.toArray.filter(_ != 0).size == 0) {
+        BDV.zeros[Double](k)
       } else {
         val (gamma, _, _) = OnlineLDAOptimizer.variationalTopicInference(
           termCounts,
@@ -350,10 +266,10 @@ class LocalLDAModel ( val topics: Matrix[Double],
     * @param document document to predict topic mixture distributions for
     * @return topic mixture distribution for the document
     */
-  def topicDistribution(document: BDV[Double]): BDV[Double] = {
+  def topicDistribution(document: Vector[Double]): Vector[Double] = {
     val expElogbeta = exp(LDAUtils.dirichletExpectation(topicsMatrix.toDenseMatrix.t).t)
-    if (document.size == 0) {
-      BDV(Array.fill[Double](this.k)(0))
+    if (document.toArray.filter(_ != 0).size == 0) {
+      BDV.zeros[Double](this.k)
     } else {
       val (gamma, _, _) = OnlineLDAOptimizer.variationalTopicInference(
         document,
@@ -364,12 +280,6 @@ class LocalLDAModel ( val topics: Matrix[Double],
       BDV(normalize(gamma, 1.0).toArray)
     }
   }
-
 }
 
-/**
-  * Local (non-distributed) model fitted by [[LDA]].
-  *
-  * This model stores the inferred topics only; it does not store info about the training dataset.
-  */
 object LocalLDAModel

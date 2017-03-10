@@ -9,14 +9,13 @@ import org.apache.spark.ml.mleap.feature.WordFilter
 
 /**
   * Created by mageswarand on 14/2/17.
-  * https://github.com/combust/mleap/blob/master/mleap-spark/src/main/scala/org/apache/spark/ml/bundle/ops/feature/TokenizerOp.scala
   */
 
 class WordLengthFilterOp extends OpNode[SparkBundleContext, WordFilter, WordLengthFilterModel] {
   override val Model: OpModel[SparkBundleContext, WordLengthFilterModel] = new OpModel[SparkBundleContext, WordLengthFilterModel]  {
     override val klazz: Class[WordLengthFilterModel] = classOf[WordLengthFilterModel]
 
-    override def opName: String = "word_filter"
+    override def opName: String = Bundle.BuiltinOps.feature.word_filter
 
     override def store(model: Model, obj: WordLengthFilterModel)(implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withAttr("length", Value.int(obj.length))

@@ -3,11 +3,12 @@ package ml.combust.mleap.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.mleap.core.feature.WordLengthFilterModel
 import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.runtime.transformer.feature.WordLengthFilter
 
 /**
   * Created by mageswarand on 14/2/17.
-  * https://github.com/combust/mleap/blob/master/mleap-runtime/src/main/scala/ml/combust/mleap/bundle/ops/feature/TokenizerOp.scala
   */
 class WordLengthFilterOp extends OpNode[MleapContext, WordLengthFilter, WordLengthFilterModel] {
 
@@ -16,7 +17,7 @@ class WordLengthFilterOp extends OpNode[MleapContext, WordLengthFilter, WordLeng
     override val klazz: Class[WordLengthFilterModel] = classOf[WordLengthFilterModel]
 
     // a unique name for our op
-    override def opName: String = "word_filter"
+    override def opName: String = Bundle.BuiltinOps.feature.word_filter
 
     override def store(model: Model, obj: WordLengthFilterModel)(implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("length", Value.int(obj.length))

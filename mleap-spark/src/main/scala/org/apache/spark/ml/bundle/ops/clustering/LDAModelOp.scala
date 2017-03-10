@@ -1,11 +1,15 @@
-package org.apache.spark.ml.bundle.extension.ops.clustering
+package org.apache.spark.ml.bundle.ops.clustering
 
-import ml.combust.bundle.BundleContext
-import ml.combust.bundle.dsl.{Model, Node, Shape, _}
-import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.tensor.DenseTensor
+import ml.combust.bundle.BundleContext
+import ml.combust.bundle.dsl.{Model, Node, Shape}
+import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.clustering.LocalLDAModel
 import org.apache.spark.mllib.clustering.{LocalLDAModel => oldLocalLDAModel}
+import ml.combust.bundle.dsl._
+import org.apache.spark.mllib.linalg.DenseMatrix
+import org.apache.spark.sql.SparkSession
 
 
 /**
@@ -16,32 +20,31 @@ class LDAModelOp extends OpNode[SparkBundleContext, LocalLDAModel, LocalLDAModel
   override val Model: OpModel[SparkBundleContext, LocalLDAModel] = new OpModel[SparkBundleContext, LocalLDAModel] {
     override val klazz: Class[LocalLDAModel] = classOf[LocalLDAModel]
 
-    override def opName: String = "lda_local_model_op"
+    override def opName: String = Bundle.BuiltinOps.clustering.lda
 
     override def store(model: Model, obj: LocalLDAModel)(implicit context: BundleContext[SparkBundleContext]): Model = {
-      val topicMatrixArray = obj.topicsMatrix.asBreeze.toDenseMatrix.toArray
+      val topicMatrixArray: Array[Double] = obj.topicsMatrix.asBreeze.toDenseMatrix.toArray
       val topicMatrixRows = obj.topicsMatrix.numRows
       val topicMatrixCols = obj.topicsMatrix.numCols
 
-
-      println("Modle Paramaters during Spark saving...")
-      println("Rows: " + topicMatrixRows)
-      println("Cols: " + topicMatrixCols)
-      println("Array: " + topicMatrixArray.size)
-
       model.withAttr("vocabSize", Value.int(obj.vocabSize)).
-        withAttr("docConcentration", Value.doubleList(obj.getEffectiveDocConcentration.toList)).
+        withAttr("docConcentration", Value.doubleList(obj.getEffectiveDocConcentration)).
         withAttr("topicConcentration", Value.double(obj.getEffectiveTopicConcentration)).
-        withAttr("topicMatrix", Value.tensor[Double](DenseTensor(topicMatrixArray, Seq(topicMatrixRows, topicMatrixCols))))
+        withAttr("topicMatrix", Value.tensor[Double](DenseTensor[Double](topicMatrixArray, Seq(topicMatrixRows, topicMatrixCols))))
     }
 
     override def load(model: Model)(implicit context: BundleContext[SparkBundleContext]): LocalLDAModel  = {
-      //      val vocabSize = model.value("vocabSize").getInt
-      val topicConcentration = model.value("topicConcentration")
-      val docConcentration = model.value("docConcentration")
+      val vocabSize = model.value("vocabSize").getInt
+      val topicConcentration = model.value("topicConcentration").getDouble
+      val docConcentration = model.value("docConcentration").getDoubleList.toArray
+      val topicMatrix = model.value("topicMatrix").getTensor[Double]
+      val rows = topicMatrix.dimensions.head
+      val cols = topicMatrix.dimensions(1)
+
       new LocalLDAModel("",
-        5000, //TODO dummy
-        new oldLocalLDAModel(new DenseMatrix(0,0, Array(), false), new org.apache.spark.mllib.linalg.DenseVector(Array()), 0.5),
+        vocabSize,
+        new oldLocalLDAModel(new DenseMatrix(rows,cols, topicMatrix.toArray, false),
+          new org.apache.spark.mllib.linalg.DenseVector(docConcentration), topicConcentration),
         SparkSession.builder().getOrCreate())
     }
   }
@@ -58,9 +61,6 @@ class LDAModelOp extends OpNode[SparkBundleContext, LocalLDAModel, LocalLDAModel
   }
 
   override def load(node: Node, model: LocalLDAModel)(implicit context: BundleContext[SparkBundleContext]): LocalLDAModel = {
-    new LocalLDAModel("",
-      5000, //TODO dummy
-      new oldLocalLDAModel(new DenseMatrix(0,0, Array(), false), new org.apache.spark.mllib.linalg.DenseVector(Array()), 0.5),
-      SparkSession.builder().getOrCreate())
+    model.setFeaturesCol(node.shape.input("features").name)
   }
 }

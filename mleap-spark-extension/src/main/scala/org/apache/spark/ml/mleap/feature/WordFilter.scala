@@ -1,25 +1,22 @@
 package org.apache.spark.ml.mleap.feature
 
 import ml.combust.mleap.core.feature.WordLengthFilterModel
+import org.apache.hadoop.fs.Path
 import org.apache.spark.annotation.DeveloperApi
-import org.apache.spark.ml.Transformer
+import org.apache.spark.ml.{Model, Transformer}
 import org.apache.spark.ml.param.{IntParam, ParamMap, ParamValidators, Params}
 import org.apache.spark.ml.param.shared.{HasInputCol, HasOutputCol}
-import org.apache.spark.ml.util.Identifiable
+import org.apache.spark.ml.util._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.types._
-import org.apache.spark.ml.bundle.ops.feature.TokenizerOp
 
 
 /**
   * Created by mageswarand on 14/2/17.
-  * import org.apache.spark.ml.feature.Tokenizer
-  * https://github.com/combust/mleap/blob/master/mleap-spark-extension/src/main/scala/org/apache/spark/ml/mleap/feature/StringMap.scala
-  * https://github.com/combust/mleap/blob/master/mleap-spark-extension/src/main/scala/org/apache/spark/ml/mleap/feature/OneHotEncoder.scala
   */
 
-private[ml] trait HasLength extends Params {
+private[ml] trait WordFilterParams extends Params with HasInputCol with HasOutputCol {
 
   /**
     * Param for word length to be filtered (&gt;= 0).
@@ -32,9 +29,9 @@ private[ml] trait HasLength extends Params {
 }
 
 class WordFilter(override val uid: String, val model: WordLengthFilterModel) extends Transformer
-  with HasInputCol
-  with HasOutputCol
-  with HasLength{
+  with WordFilterParams
+  with MLWritable
+  with MLReadable[WordFilter]{
 
 
   def this(model: WordLengthFilterModel) = this(uid = Identifiable.randomUID("filter_words"), model = model)
@@ -54,7 +51,6 @@ class WordFilter(override val uid: String, val model: WordLengthFilterModel) ext
 
   override def copy(extra: ParamMap): Transformer =  defaultCopy(extra)
 
-  @DeveloperApi
   override def transformSchema(schema: StructType): StructType = {
     require(schema($(inputCol)).dataType.isInstanceOf[ArrayType],
       s"Input column must be of type ArrayType(StringType,true) but got ${schema($(inputCol)).dataType}")
@@ -65,5 +61,42 @@ class WordFilter(override val uid: String, val model: WordLengthFilterModel) ext
 
     StructType(schema.fields :+ StructField($(outputCol), ArrayType(StringType, true)))
 
+  }
+
+  override def write: MLWriter = new WordFilterModelWritter(this)
+
+  override def read: MLReader[WordFilter] = new WordFilterModelReader
+
+  override def load(path: String): WordFilter = super.load(path)
+}
+
+class WordFilterModelWritter(instance: WordFilter) extends MLWriter {
+
+  private case class Data(length: Int)
+
+  override protected def saveImpl(path: String): Unit = {
+    DefaultParamsWriter.saveMetadata(instance, path, sc)
+    val data = Data(instance.model.length)
+    val dataPath = new Path(path, "data").toString
+    sparkSession.createDataFrame(Seq(data)).repartition(1).write.parquet(dataPath)
+  }
+}
+
+//TODO: not working check!
+class WordFilterModelReader  extends MLReader[WordFilter] {
+
+
+  private val className = classOf[WordFilter].getName
+
+  override def load(path: String): WordFilter = {
+    val metadata = DefaultParamsReader.loadMetadata(path, sc, className)
+    val dataPath = new Path(path, "data").toString
+    val data = sparkSession.read.parquet(dataPath)
+      .select("length")
+      .head()
+    val length = data.getAs[Int](0)
+    val model = new WordFilter(metadata.uid, new WordLengthFilterModel(length))
+    DefaultParamsReader.getAndSetParams(model, metadata)
+    model
   }
 }

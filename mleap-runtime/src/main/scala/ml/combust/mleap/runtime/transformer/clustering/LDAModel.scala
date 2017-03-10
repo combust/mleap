@@ -1,9 +1,11 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.LocalLDAModel
+import ml.combust.mleap.runtime.converter.VectorConverters._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.tensor.Tensor
 
 import scala.util.Try
 
@@ -15,14 +17,7 @@ case class LDAModel(override val uid: String = Transformer.uniqueName("lda"),
                     topicDistributionCol: String,
                     model: LocalLDAModel) extends Transformer {
 
-  println("Modle Paramaters @ LDAModelCT...")
-  println("Rows: " + model.topicsMatrix.rows)
-  println("Cols: " + model.topicsMatrix.cols)
-  println("Array: " + model.topicsMatrix.values.size)
-  println(featureCol)
-  println(topicDistributionCol)
-
-  val topicDistribution: UserDefinedFunction = (features: BDV[Double]) => model.topicDistribution(features)
+  val topicDistribution: UserDefinedFunction = (features: Tensor[Double]) => model.topicDistribution(features) : Tensor[Double]
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(topicDistributionCol, featureCol)(topicDistribution)

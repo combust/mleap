@@ -25,7 +25,7 @@ class LeapFrameConverterSpec extends FunSpec {
       assert(DummyData("hello", 42.13).toLeapFrame == expectedFrameWith1Row)
     }
 
-    it("converts a case class to a default leap frame wih multiple rows") {
+    it("converts a case class to a default leap frame with multiple rows") {
       assert(Seq(DummyData("hello", 42.13), DummyData("mleap", 4.3),
         DummyData("world", 1.2)).toLeapFrame == expectedFrameWithMultipleRows)
     }

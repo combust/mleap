@@ -2,8 +2,10 @@ package ml.combust.mleap.runtime
 
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.{BundleFile, BundleWriter}
+import ml.combust.mleap.runtime.converter.LeapFrameConverter
 import ml.combust.mleap.runtime.transformer.Transformer
 
+import scala.reflect.runtime.universe._
 import scala.util.Try
 
 /** Object for support classes for easily working with Bundle.ML.
@@ -16,5 +18,13 @@ object MleapSupport {
   implicit class MleapBundleFileOps(file: BundleFile) {
     def loadMleapBundle()
                        (implicit context: MleapContext): Try[Bundle[Transformer]] = file.load()
+  }
+
+  implicit class MleapLeapFrameOps[T <: Product](data: T)(implicit tag: TypeTag[T]) {
+    def toLeapFrame: DefaultLeapFrame = LeapFrameConverter.convert(data)
+  }
+
+  implicit class MleapSeqLeapFrameOps[T <: Product](data: Seq[T])(implicit tag: TypeTag[T]) {
+    def toLeapFrame: DefaultLeapFrame = LeapFrameConverter.convert(data)
   }
 }

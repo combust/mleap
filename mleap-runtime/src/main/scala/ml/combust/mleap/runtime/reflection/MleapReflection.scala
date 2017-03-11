@@ -44,7 +44,38 @@ trait MleapReflection {
     }
   }
 
-  private def mirrorType[T: TypeTag]: `Type` = typeTag[T].in(mirror).tpe.normalize
+  private def mirrorType[T: TypeTag]: `Type` = MleapReflectionLock.synchronized {
+    typeTag[T].in(mirror).tpe.normalize
+  }
+
+  def extractConstructorParameters[T: TypeTag] : Seq[(String, DataType)] = MleapReflectionLock.synchronized {
+    val tpe = mirrorType[T]
+    tpe match {
+      case t if tpe <:< mirrorType[Product] && tpe.typeSymbol.asClass.isCaseClass =>
+        val formalTypeArgs = t.typeSymbol.asClass.typeParams
+        val TypeRef(_, _, actualTypeArgs) = t
+        constructParams(tpe).map { p =>
+          p.name.toString -> dataTypeFor(p.typeSignature.substituteTypes(formalTypeArgs, actualTypeArgs))
+        }
+      case t => throw new IllegalArgumentException(s"unknown type $t")
+    }
+  }
+
+  private def constructParams(tpe: Type): Seq[Symbol] = {
+    val constructorSymbol = tpe.member(nme.CONSTRUCTOR)
+    val params = if (constructorSymbol.isMethod) {
+      constructorSymbol.asMethod.paramss
+    } else {
+      val primaryConstructorSymbol: Option[Symbol] = constructorSymbol.asTerm.alternatives.find(
+        s => s.isMethod && s.asMethod.isPrimaryConstructor)
+      if (primaryConstructorSymbol.isEmpty) {
+        throw new IllegalArgumentException(s"type $tpe did not have a primary constructor")
+      } else {
+        primaryConstructorSymbol.get.asMethod.paramss
+      }
+    }
+    params.flatten
+  }
 }
 
 object MleapReflection extends MleapReflection {

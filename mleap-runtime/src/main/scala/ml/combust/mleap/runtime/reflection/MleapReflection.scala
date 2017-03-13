@@ -51,7 +51,7 @@ trait MleapReflection {
   def extractConstructorParameters[T: TypeTag] : Seq[(String, DataType)] = MleapReflectionLock.synchronized {
     val tpe = mirrorType[T]
     tpe match {
-      case t if tpe <:< mirrorType[Product] && tpe.typeSymbol.asClass.isCaseClass =>
+      case t if representsCaseClass(t) =>
         val formalTypeArgs = t.typeSymbol.asClass.typeParams
         val TypeRef(_, _, actualTypeArgs) = t
         constructParams(tpe).map { p =>
@@ -61,20 +61,38 @@ trait MleapReflection {
     }
   }
 
+  private def representsCaseClass(tpe: Type): Boolean = {
+    tpe <:< mirrorType[Product] && tpe.typeSymbol.asClass.isCaseClass
+  }
+
   private def constructParams(tpe: Type): Seq[Symbol] = {
+    constructorSymbol(tpe).paramss.flatten
+  }
+
+  private def constructorSymbol(tpe: universe.Type) : MethodSymbol = {
     val constructorSymbol = tpe.member(nme.CONSTRUCTOR)
-    val params = if (constructorSymbol.isMethod) {
-      constructorSymbol.asMethod.paramss
+    if (constructorSymbol.isMethod) {
+      constructorSymbol.asMethod
     } else {
       val primaryConstructorSymbol: Option[Symbol] = constructorSymbol.asTerm.alternatives.find(
         s => s.isMethod && s.asMethod.isPrimaryConstructor)
       if (primaryConstructorSymbol.isEmpty) {
         throw new IllegalArgumentException(s"type $tpe did not have a primary constructor")
       } else {
-        primaryConstructorSymbol.get.asMethod.paramss
+        primaryConstructorSymbol.get.asMethod
       }
     }
-    params.flatten
+  }
+
+  def newInstance[T:TypeTag](args: Seq[_]) : T = MleapReflectionLock.synchronized {
+    val tpe = mirrorType[T]
+    tpe match {
+      case t if representsCaseClass(t) =>
+        val constructor = constructorSymbol(t)
+        val classMirror = mirror.reflectClass(t.typeSymbol.asClass)
+        classMirror.reflectConstructor(constructor).apply(args: _*).asInstanceOf[T]
+      case t => throw new IllegalArgumentException(s"unknown type $t")
+    }
   }
 }
 

@@ -20,11 +20,11 @@ object MleapSupport {
                        (implicit context: MleapContext): Try[Bundle[Transformer]] = file.load()
   }
 
-  implicit class MleapLeapFrameOps[T <: Product](data: T)(implicit tag: TypeTag[T]) {
+  implicit class MleapCaseClassOps[T <: Product](data: T)(implicit tag: TypeTag[T]) {
     def toLeapFrame: DefaultLeapFrame = LeapFrameConverter.convert(data)
   }
 
-  implicit class MleapSeqLeapFrameOps[T <: Product](data: Seq[T])(implicit tag: TypeTag[T]) {
+  implicit class MleapCaseClassSeqOps[T <: Product](data: Seq[T])(implicit tag: TypeTag[T]) {
     def toLeapFrame: DefaultLeapFrame = LeapFrameConverter.convert(data)
   }
 }

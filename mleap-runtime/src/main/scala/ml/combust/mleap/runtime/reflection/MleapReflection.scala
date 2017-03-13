@@ -54,7 +54,7 @@ trait MleapReflection {
       case t if representsCaseClass(t) =>
         val formalTypeArgs = t.typeSymbol.asClass.typeParams
         val TypeRef(_, _, actualTypeArgs) = t
-        constructParams(tpe).map { p =>
+        constructParams(t).map { p =>
           p.name.toString -> dataTypeFor(p.typeSignature.substituteTypes(formalTypeArgs, actualTypeArgs))
         }
       case t => throw new IllegalArgumentException(s"unknown type $t")

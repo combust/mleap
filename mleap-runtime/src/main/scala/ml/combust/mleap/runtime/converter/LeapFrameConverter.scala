@@ -22,6 +22,10 @@ trait LeapFrameConverter {
 
     LeapFrame(structType, LocalDataset(rows))
   }
+
+  def convert[T <: Product](frame: DefaultLeapFrame)(implicit tag: TypeTag[T]): Seq[T] = {
+    frame.dataset.map(row => newInstance[T](row.toSeq)).toSeq
+  }
 }
 
 object LeapFrameConverter extends LeapFrameConverter

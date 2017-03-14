@@ -14,24 +14,37 @@ class LeapFrameConverterSpec extends FunSpec {
     val expectedCustomSchema = StructType(Seq(StructField("custom",
       MleapContext.defaultContext.customType[MyCustomObject]))).get
 
-    val expectedFrameWith1Row = DefaultLeapFrame(expectedSchema,
+    val frameWith1Row = DefaultLeapFrame(expectedSchema,
       LocalDataset(Array(Row("hello", 42.13))))
-    val expectedFrameWithMultipleRows = DefaultLeapFrame(expectedSchema,
+    val frameWithMultipleRows = DefaultLeapFrame(expectedSchema,
       LocalDataset(Array(Row("hello", 42.13), Row("mleap", 4.3), Row("world", 1.2))))
-    val expectedFrameWithCustomType = DefaultLeapFrame(expectedCustomSchema,
+    val frameWithCustomType = DefaultLeapFrame(expectedCustomSchema,
       LocalDataset(Array(Row(MyCustomObject("hello world")))))
 
-    it("converts a case class to a default leap frame with 1 row") {
-      assert(DummyData("hello", 42.13).toLeapFrame == expectedFrameWith1Row)
+    it("converts from a case class to a default leap frame with 1 row") {
+      assert(DummyData("hello", 42.13).toLeapFrame == frameWith1Row)
     }
 
-    it("converts a case class to a default leap frame with multiple rows") {
+    it("creates a Seq with one new instance of a case class from a default leap frame with 1 row") {
+      assert(frameWith1Row.fromLeapFrame[DummyData] == Seq(DummyData("hello", 42.13)))
+    }
+
+    it("converts from a case class to a default leap frame with multiple rows") {
       assert(Seq(DummyData("hello", 42.13), DummyData("mleap", 4.3),
-        DummyData("world", 1.2)).toLeapFrame == expectedFrameWithMultipleRows)
+        DummyData("world", 1.2)).toLeapFrame == frameWithMultipleRows)
     }
 
-    it("converts a case class with custom type to a default leap frame") {
-      assert(CustomData(MyCustomObject("hello world")).toLeapFrame == expectedFrameWithCustomType)
+    it("creates a Seq with multiple new instances of a case class from a default leap frame with multiple row") {
+      assert(frameWithMultipleRows.fromLeapFrame[DummyData] ==
+        Seq(DummyData("hello", 42.13), DummyData("mleap", 4.3), DummyData("world", 1.2)))
+    }
+
+    it("converts from a case class with custom type to a default leap frame") {
+      assert(CustomData(MyCustomObject("hello world")).toLeapFrame == frameWithCustomType)
+    }
+
+    it("creates a Seq with one new instance of a case class with custom type from a default leap frame") {
+      assert(frameWithCustomType.fromLeapFrame[CustomData] == Seq(CustomData(MyCustomObject("hello world"))))
     }
   }
 }

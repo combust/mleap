@@ -27,4 +27,9 @@ object MleapSupport {
   implicit class MleapCaseClassSeqOps[T <: Product](data: Seq[T])(implicit tag: TypeTag[T]) {
     def toLeapFrame: DefaultLeapFrame = LeapFrameConverter.convert(data)
   }
+
+  implicit class MleapLeapFrameOps(frame: DefaultLeapFrame) {
+    def fromLeapFrame[T <: Product](implicit tag: TypeTag[T]): Seq[T] =
+      LeapFrameConverter.convert(frame)
+  }
 }

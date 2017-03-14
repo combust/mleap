@@ -79,7 +79,7 @@ abstract class LDAModel private[clustering] {
   *
   * @param topics Inferred topics (vocabSize x k matrix).
   */
-class LocalLDAModel ( val topics: Matrix[Double],
+case class LocalLDAModel ( val topics: Matrix[Double],
                       override val docConcentration: BDV[Double],
                       override val topicConcentration: Double,
                       override protected val gammaShape: Double = 100)

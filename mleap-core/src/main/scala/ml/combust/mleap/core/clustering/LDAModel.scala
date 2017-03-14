@@ -82,7 +82,7 @@ abstract class LDAModel private[clustering] {
 case class LocalLDAModel ( val topics: Matrix[Double],
                       override val docConcentration: BDV[Double],
                       override val topicConcentration: Double,
-                      override protected val gammaShape: Double = 100)
+                      protected val gammaShape: Double = 100)
   extends LDAModel {
 
   override def k: Int = topics.cols

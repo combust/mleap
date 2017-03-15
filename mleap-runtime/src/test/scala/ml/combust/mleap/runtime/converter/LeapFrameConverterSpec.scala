@@ -26,7 +26,7 @@ class LeapFrameConverterSpec extends FunSpec {
     }
 
     it("creates a Seq with one new instance of a case class from a default leap frame with 1 row") {
-      assert(frameWith1Row.fromLeapFrame[DummyData] == Seq(DummyData("hello", 42.13)))
+      assert(frameWith1Row.to[DummyData] == Seq(DummyData("hello", 42.13)))
     }
 
     it("converts from a case class to a default leap frame with multiple rows") {
@@ -35,7 +35,7 @@ class LeapFrameConverterSpec extends FunSpec {
     }
 
     it("creates a Seq with multiple new instances of a case class from a default leap frame with multiple row") {
-      assert(frameWithMultipleRows.fromLeapFrame[DummyData] ==
+      assert(frameWithMultipleRows.to[DummyData] ==
         Seq(DummyData("hello", 42.13), DummyData("mleap", 4.3), DummyData("world", 1.2)))
     }
 
@@ -44,7 +44,7 @@ class LeapFrameConverterSpec extends FunSpec {
     }
 
     it("creates a Seq with one new instance of a case class with custom type from a default leap frame") {
-      assert(frameWithCustomType.fromLeapFrame[CustomData] == Seq(CustomData(MyCustomObject("hello world"))))
+      assert(frameWithCustomType.to[CustomData] == Seq(CustomData(MyCustomObject("hello world"))))
     }
   }
 }

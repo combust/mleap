@@ -8,7 +8,7 @@ import ml.combust.mleap.runtime.transformer.Transformer
 import scala.reflect.runtime.universe._
 import scala.util.Try
 
-/** Object for support classes for easily working with Bundle.ML.
+/** Object for support classes for easily working with Bundle.ML and DefaultLeapFrame.
   */
 object MleapSupport {
   implicit class MleapTransformerOps(transformer: Transformer) {
@@ -29,7 +29,7 @@ object MleapSupport {
   }
 
   implicit class MleapLeapFrameOps(frame: DefaultLeapFrame) {
-    def fromLeapFrame[T <: Product](implicit tag: TypeTag[T]): Seq[T] =
+    def to[T <: Product](implicit tag: TypeTag[T]): Seq[T] =
       LeapFrameConverter.convert(frame)
   }
 }

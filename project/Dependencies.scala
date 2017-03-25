@@ -26,7 +26,7 @@ object Dependencies {
     val scalaReflect = ScalaVersionDependentModuleID.versioned("org.scala-lang" % "scala-reflect" % _)
     val sparkAvro = "com.databricks" %% "spark-avro" % "3.0.1"
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
-    val jTransform = "edu.emory.mathcs" % "JTransforms" % "2.4"
+    val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0"
     val tensorflowDep = "org.tensorflow" % "libtensorflow" % tensorflowVersion
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion

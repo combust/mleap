@@ -323,12 +323,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(np.exp(self.df.a[0]), Xres[0])
 
-        math_unary_tf.serialize_to_bundle(math_unary_tf, self.tmp_dir, math_unary_tf.name)
+        math_unary_tf.serialize_to_bundle(self.tmp_dir, math_unary_tf.name)
 
         expected_model = {
           "op": "math_unary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'exp'
             }
@@ -339,22 +339,22 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_unary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
 
     def math_unary_sin_test(self):
 
-        math_unary_tf = MathUnary(input_features=['a'], output_features=['cos_a'], transform_type='sin')
+        math_unary_tf = MathUnary(input_features=['a'], output_features=['sin_a'], transform_type='sin')
 
         Xres = math_unary_tf.fit_transform(self.df.a)
 
         self.assertEqual(np.sin(self.df.a[0]), Xres[0])
 
-        math_unary_tf.serialize_to_bundle(math_unary_tf, self.tmp_dir, math_unary_tf.name)
+        math_unary_tf.serialize_to_bundle(self.tmp_dir, math_unary_tf.name)
 
         expected_model = {
           "op": "math_unary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'sin'
             }
@@ -365,7 +365,7 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_unary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
 
     def math_binary_test(self):
 
@@ -375,12 +375,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual( self.df.a[0] + self.df.b[0], Xres[0])
 
-        math_binary_tf.serialize_to_bundle(math_binary_tf, self.tmp_dir, math_binary_tf.name)
+        math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
         expected_model = {
           "op": "math_binary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'add'
             }
@@ -391,7 +391,7 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
 
     def math_binary_subtract_test(self):
 
@@ -401,12 +401,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(self.df.a[0] - self.df.b[0], Xres[0])
 
-        math_binary_tf.serialize_to_bundle(math_binary_tf, self.tmp_dir, math_binary_tf.name)
+        math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
         expected_model = {
           "op": "math_binary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'sub'
             }
@@ -417,7 +417,7 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
 
     def math_binary_multiply_test(self):
 
@@ -427,12 +427,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(self.df.a[0] * self.df.b[0], Xres[0])
 
-        math_binary_tf.serialize_to_bundle(math_binary_tf, self.tmp_dir, math_binary_tf.name)
+        math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
         expected_model = {
           "op": "math_binary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'mul'
             }
@@ -443,7 +443,7 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
 
     def math_binary_divide_test(self):
 
@@ -453,12 +453,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(self.df.a[0] / self.df.b[0], Xres[0])
 
-        math_binary_tf.serialize_to_bundle(math_binary_tf, self.tmp_dir, math_binary_tf.name)
+        math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
         expected_model = {
           "op": "math_binary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'div'
             }
@@ -469,4 +469,4 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])

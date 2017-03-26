@@ -616,12 +616,12 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer):
 
         # define node inputs and outputs
         inputs = [{
-                  "name": self.input_features,
+                  "name": self.input_features[0],
                   "port": "input"
                 }]
 
         outputs = [{
-                  "name": self.output_features,
+                  "name": self.output_features[0],
                   "port": "output"
                 }]
 

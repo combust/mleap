@@ -233,7 +233,7 @@ class TransformerTests(unittest.TestCase):
 
         imputer.fit(df2[['a']])
 
-        self.assertEqual(imputer.statistics_[0], df2.a.mean())
+        self.assertAlmostEqual(imputer.statistics_[0], df2.a.mean(), places = 7)
 
         imputer.serialize_to_bundle(self.tmp_dir, imputer.name)
 
@@ -256,7 +256,7 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(expected_model['attributes']['strategy']['value'], model['attributes']['strategy']['value'])
-        self.assertEqual(expected_model['attributes']['surrogate_value']['value'], model['attributes']['surrogate_value']['value'])
+        self.assertAlmostEqual(expected_model['attributes']['surrogate_value']['value'], model['attributes']['surrogate_value']['value'], places = 7)
 
     def binarizer_test(self):
 
@@ -341,6 +341,14 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
 
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_unary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_unary_tf.name, node['name'])
+        self.assertEqual(math_unary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_unary_tf.output_features[0], node['shape']['outputs'][0]['name'])
+
     def math_unary_sin_test(self):
 
         math_unary_tf = MathUnary(input_features=['a'], output_features=['sin_a'], transform_type='sin')
@@ -366,6 +374,14 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_unary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_unary_tf.name, node['name'])
+        self.assertEqual(math_unary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_unary_tf.output_features[0], node['shape']['outputs'][0]['name'])
 
     def math_binary_test(self):
 

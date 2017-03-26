@@ -206,7 +206,7 @@ class StandardScalerSerializer(MLeapSerializer):
 
     >>> data = pd.DataFrame([[1, 0], [5, 1], [6, 3], [1, 1]], columns=['col_a', 'col_b'])
     >>> standard_scaler_tf = StandardScaler()
-    >>> standard_scaler_tf.minit(input_features=['col_a', 'col_b'], output_features='scaled_cont_features')
+    >>> standard_scaler_tf.mlinit(input_features=['col_a', 'col_b'], output_features='scaled_cont_features')
     >>> standard_scaler_tf.fit_transform(data)
     >>> array([[-0.98787834, -1.14707867],
     >>>         [ 0.76834982, -0.22941573],
@@ -243,7 +243,7 @@ class MinMaxScalerSerializer(MLeapSerializer):
 
     >>> data = pd.DataFrame([[1, 0], [5, 1], [6, 3], [1, 1]], columns=['col_a', 'col_b'])
     >>> minmax_scaler_tf = MinMaxScaler()
-    >>> minmax_scaler_tf.minit(input_features=['col_a', 'col_b'], output_features='scaled_cont_features')
+    >>> minmax_scaler_tf.mlinit(input_features=['col_a', 'col_b'], output_features='scaled_cont_features')
 
     >>> minmax_scaler_tf.fit_transform(data)
     >>> array([[ 0.        ,  0.        ],
@@ -311,7 +311,7 @@ class LabelEncoderSerializer(MLeapSerializer):
     >>> data = pd.DataFrame([['a', 0], ['b', 1], ['b', 3], ['c', 1]], columns=['col_a', 'col_b'])
     >>> # Label Encoder for x1 Label
     >>> label_encoder_tf = LabelEncoder()
-    >>> label_encoder_tf.minit(input_features = ['col_a'] , output_features='col_a_label_le')
+    >>> label_encoder_tf.mlinit(input_features = ['col_a'] , output_features='col_a_label_le')
     >>> # Convert output of Label Encoder to Data Frame instead of 1d-array
     >>> n_dim_array_to_df_tf = NDArrayToDataFrame('col_a_label_le')
     >>> n_dim_array_to_df_tf.fit_transform(label_encoder_tf.fit_transform(data['col_a']))

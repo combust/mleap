@@ -36,12 +36,12 @@ def serialize_to_bundle(self, path, model_name, serialize_node=True):
 
 
 setattr(DecisionTreeRegressor, 'op', 'decision_tree_regression')
-setattr(DecisionTreeRegressor, 'minit', mleap_init)
+setattr(DecisionTreeRegressor, 'mlinit', mleap_init)
 setattr(DecisionTreeRegressor, 'serialize_to_bundle', serialize_to_bundle)
 setattr(DecisionTreeRegressor, 'serializable', True)
 
 setattr(DecisionTreeClassifier, 'op', 'decision_tree_classifier')
-setattr(DecisionTreeClassifier, 'minit', mleap_init)
+setattr(DecisionTreeClassifier, 'mlinit', mleap_init)
 setattr(DecisionTreeClassifier, 'serialize_to_bundle', serialize_to_bundle)
 setattr(DecisionTreeClassifier, 'serializable', True)
 

@@ -547,7 +547,7 @@ class ToDense(BaseEstimator, TransformerMixin):
 
 class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer):
     """
-    Performs basic math opperations on a single feature (column of a DataFrame). Supported opperations include:
+    Performs basic math operations on a single feature (column of a DataFrame). Supported operations include:
         - log
         - exp
         - sqrt
@@ -564,6 +564,7 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer):
         self.input_features = input_features
         self.output_features = output_features
         self.transform_type = transform_type
+        self.serializable = True
 
     def fit(self, y):
         """
@@ -607,29 +608,29 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer):
 
         return self.transform(X)
 
-    def serialize_to_bundle(self, transformer, path, model_name):
+    def serialize_to_bundle(self, path, model_name):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('opperation', self.transform_type))
+        attributes.append(('operation', self.transform_type))
 
         # define node inputs and outputs
         inputs = [{
-                  "name": transformer.input_features,
+                  "name": self.input_features,
                   "port": "input"
                 }]
 
         outputs = [{
-                  "name": transformer.output_features,
+                  "name": self.output_features,
                   "port": "output"
                 }]
 
-        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+        self.serialize(self, path, model_name, attributes, inputs, outputs)
 
 
 class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer):
     """
-    Performs basic math opperations on a single feature (column of a DataFrame). Supported opperations include:
+    Performs basic math operations on two features (columns of a DataFrame). Supported operations include:
         - add: Add x + y
         - sub: Subtract x - y
         - mul: Multiply x * y
@@ -647,6 +648,7 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer):
         self.input_features = input_features
         self.output_features = output_features
         self.transform_type = transform_type
+        self.serializable = True
 
     def _return(self, y):
         if type(y, np.ndarray):
@@ -699,21 +701,21 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer):
 
         return self.transform(X)
 
-    def serialize_to_bundle(self, transformer, path, model_name):
+    def serialize_to_bundle(self, path, model_name):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('opperation', self.transform_type))
+        attributes.append(('operation', self.transform_type))
 
         # define node inputs and outputs
         inputs = [{
-                  "name": transformer.input_features,
+                  "name": self.input_features,
                   "port": "input"
                 }]
 
         outputs = [{
-                  "name": transformer.output_features,
+                  "name": self.output_features,
                   "port": "output"
                 }]
 
-        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+        self.serialize(self, path, model_name, attributes, inputs, outputs)

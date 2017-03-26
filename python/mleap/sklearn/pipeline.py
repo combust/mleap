@@ -144,14 +144,15 @@ class SimpleSerializer(object):
     def get_model(self, transformer):
         js = {
           "op": transformer.op,
-          "attributes": [{
-            "name": "nodes",
-            "type": {
-              "type": "list",
-              "base": "string"
-            },
-            "value": self._extract_nodes(transformer.steps)
-          }]
+            "attributes": {
+                "nodes": {
+                    "type": {
+                        "type": "list",
+                        "base": "string"
+                    },
+                    "value": self._extract_nodes(transformer.steps)
+                }
+            }
         }
         return js
 

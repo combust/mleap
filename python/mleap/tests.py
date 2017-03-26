@@ -409,6 +409,15 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
 
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_binary_tf.name, node['name'])
+        self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
+        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
+
     def math_binary_subtract_test(self):
 
         math_binary_tf = MathBinary(input_features=['a', 'b'], output_features=['a_less_b'], transform_type='sub')
@@ -434,6 +443,15 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_binary_tf.name, node['name'])
+        self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
+        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
 
     def math_binary_multiply_test(self):
 
@@ -461,6 +479,15 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
 
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_binary_tf.name, node['name'])
+        self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
+        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
+
     def math_binary_divide_test(self):
 
         math_binary_tf = MathBinary(input_features=['a', 'b'], output_features=['a_mul_b'], transform_type='div')
@@ -486,3 +513,12 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_binary_tf.name, node['name'])
+        self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
+        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])

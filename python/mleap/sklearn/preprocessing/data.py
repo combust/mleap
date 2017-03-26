@@ -709,12 +709,16 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer):
 
         # define node inputs and outputs
         inputs = [{
-                  "name": self.input_features,
-                  "port": "input"
+                  "name": self.input_features[0],
+                  "port": "input_a"
+                },
+                {
+                    "name": self.input_features[1],
+                    "port": "input_b"
                 }]
 
         outputs = [{
-                  "name": self.output_features,
+                  "name": self.output_features[0],
                   "port": "output"
                 }]
 

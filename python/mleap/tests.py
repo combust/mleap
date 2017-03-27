@@ -261,8 +261,8 @@ class TransformerTests(unittest.TestCase):
     def binarizer_test(self):
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features=['a'],
-                         output_features=['a_binary'])
+        binarizer.mlinit(input_features='a',
+                         output_features='a_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
@@ -286,6 +286,14 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(expected_model['attributes']['threshold']['value'], model['attributes']['threshold']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, binarizer.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(binarizer.name, node['name'])
+        self.assertEqual(binarizer.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(binarizer.output_features, node['shape']['outputs'][0]['name'])
 
     def polynomial_expansion_test(self):
 

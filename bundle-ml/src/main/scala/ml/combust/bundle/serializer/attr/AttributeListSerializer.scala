@@ -76,9 +76,7 @@ case class AttributeListSerializer(path: Path) {
     */
   def readJson()
               (implicit context: SerializationContext): Try[AttributeList] = {
-    (for(in <- managed(Files.newInputStream(path))) yield {
-      Source.fromInputStream(in).getLines().mkString.parseJson.convertTo[AttributeList]
-    }).tried
+    Try(Files.readAllBytes(path)).map(bytes => new String(bytes)).map(_.parseJson.convertTo[AttributeList])
   }
 
   /** Read an attribute list from a Protobuf file.

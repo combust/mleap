@@ -4,6 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.util.ParamUtil
 import org.apache.spark.ml.feature.IndexToString
 
 /**
@@ -17,12 +18,15 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
 
     override def store(model: Model, obj: IndexToString)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("labels", Value.stringList(obj.getLabels))
+      model.withAttr("labels", obj.get(obj.labels).map(l => Value.stringList(l)))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): IndexToString = {
-      new IndexToString(uid = "").setLabels(model.value("labels").getStringList.toArray)
+      val idxToStr = new IndexToString(uid = "")
+      model.getValue("labels").
+        map(l => idxToStr.setLabels(l.getStringList.toArray)).
+        getOrElse(idxToStr)
     }
   }
 
@@ -34,7 +38,9 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
 
   override def load(node: Node, model: IndexToString)
                    (implicit context: BundleContext[SparkBundleContext]): IndexToString = {
-    new IndexToString(uid = node.name).setLabels(model.getLabels)
+    val idxToStr = new IndexToString(uid = node.name)
+    ParamUtil.setOptional(idxToStr, model, idxToStr.labels, model.labels)
+    idxToStr
   }
 
   override def shape(node: IndexToString): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)

@@ -24,7 +24,7 @@ object ReverseStringIndexerOp {
         } else {
           Failure(new RuntimeException(s"invalid nominal value for field ${field.name}"))
         }
-      case binary: BinaryAttribute =>
+      case _: BinaryAttribute =>
         Failure(new RuntimeException(s"invalid binary attribute for field ${field.name}"))
       case _: NumericAttribute =>
         Failure(new RuntimeException(s"invalid numeric attribute for field ${field.name}"))

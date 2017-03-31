@@ -6,6 +6,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.BucketizerModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Bucketizer
+import ml.combust.mleap.runtime.transformer.feature.BucketizerUtil._
 
 /**
   * Created by mikhail on 9/19/16.
@@ -23,7 +24,7 @@ class BucketizerOp extends OpNode[MleapContext, Bucketizer, BucketizerModel]{
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): BucketizerModel = {
-      BucketizerModel(splits = model.value("splits").getDoubleList.toArray)
+      BucketizerModel(splits = restoreSplits(model.value("splits").getDoubleList.toArray))
     }
   }
 

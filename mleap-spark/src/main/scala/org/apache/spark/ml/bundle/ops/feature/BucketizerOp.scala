@@ -3,6 +3,7 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.mleap.runtime.transformer.feature.BucketizerUtil._
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.Bucketizer
 
@@ -22,7 +23,7 @@ class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): Bucketizer = {
-      new Bucketizer(uid = "").setSplits(model.value("splits").getDoubleList.toArray)
+      new Bucketizer(uid = "").setSplits(restoreSplits(model.value("splits").getDoubleList.toArray))
     }
   }
 

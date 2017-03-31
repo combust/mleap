@@ -32,7 +32,7 @@ def mleap_init(self, input_features, prediction_column):
 
 
 setattr(CountVectorizer, 'op', 'tokenizer')
-setattr(CountVectorizer, 'minit', mleap_init)
+setattr(CountVectorizer, 'mlinit', mleap_init)
 setattr(CountVectorizer, 'serialize_to_bundle', serialize_to_bundle)
 setattr(CountVectorizer, 'serializable', True)
 

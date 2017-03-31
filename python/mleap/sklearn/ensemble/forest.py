@@ -36,12 +36,12 @@ def serialize_to_bundle(self, path, model_name):
 
 
 setattr(RandomForestRegressor, 'op', 'random_forest_regression')
-setattr(RandomForestRegressor, 'minit', mleap_init)
+setattr(RandomForestRegressor, 'mlinit', mleap_init)
 setattr(RandomForestRegressor, 'serialize_to_bundle', serialize_to_bundle)
 setattr(RandomForestRegressor, 'serializable', True)
 
 setattr(RandomForestClassifier, 'op', 'random_forest_classifier')
-setattr(RandomForestClassifier, 'minit', mleap_init)
+setattr(RandomForestClassifier, 'mlinit', mleap_init)
 setattr(RandomForestClassifier, 'serialize_to_bundle', serialize_to_bundle)
 setattr(RandomForestClassifier, 'serializable', True)
 
@@ -100,7 +100,7 @@ class SimpleSerializer(MLeapSerializer):
 
         i = 0
         for estimator in estimators:
-            estimator.minit(input_features = transformer.input_features, prediction_column = transformer.prediction_column, feature_names=transformer.feature_names)
+            estimator.mlinit(input_features = transformer.input_features, prediction_column = transformer.prediction_column, feature_names=transformer.feature_names)
             model_name = "tree{}".format(i)
             estimator.serialize_to_bundle(rf_path, model_name, serialize_node=False)
 

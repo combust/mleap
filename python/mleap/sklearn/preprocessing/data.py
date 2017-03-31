@@ -206,7 +206,7 @@ class StandardScalerSerializer(MLeapSerializer):
 
     >>> data = pd.DataFrame([[1, 0], [5, 1], [6, 3], [1, 1]], columns=['col_a', 'col_b'])
     >>> standard_scaler_tf = StandardScaler()
-    >>> standard_scaler_tf.minit(input_features=['col_a', 'col_b'], output_features='scaled_cont_features')
+    >>> standard_scaler_tf.mlinit(input_features=['col_a', 'col_b'], output_features='scaled_cont_features')
     >>> standard_scaler_tf.fit_transform(data)
     >>> array([[-0.98787834, -1.14707867],
     >>>         [ 0.76834982, -0.22941573],
@@ -243,7 +243,7 @@ class MinMaxScalerSerializer(MLeapSerializer):
 
     >>> data = pd.DataFrame([[1, 0], [5, 1], [6, 3], [1, 1]], columns=['col_a', 'col_b'])
     >>> minmax_scaler_tf = MinMaxScaler()
-    >>> minmax_scaler_tf.minit(input_features=['col_a', 'col_b'], output_features='scaled_cont_features')
+    >>> minmax_scaler_tf.mlinit(input_features=['col_a', 'col_b'], output_features='scaled_cont_features')
 
     >>> minmax_scaler_tf.fit_transform(data)
     >>> array([[ 0.        ,  0.        ],
@@ -311,7 +311,7 @@ class LabelEncoderSerializer(MLeapSerializer):
     >>> data = pd.DataFrame([['a', 0], ['b', 1], ['b', 3], ['c', 1]], columns=['col_a', 'col_b'])
     >>> # Label Encoder for x1 Label
     >>> label_encoder_tf = LabelEncoder()
-    >>> label_encoder_tf.minit(input_features = ['col_a'] , output_features='col_a_label_le')
+    >>> label_encoder_tf.mlinit(input_features = ['col_a'] , output_features='col_a_label_le')
     >>> # Convert output of Label Encoder to Data Frame instead of 1d-array
     >>> n_dim_array_to_df_tf = NDArrayToDataFrame('col_a_label_le')
     >>> n_dim_array_to_df_tf.fit_transform(label_encoder_tf.fit_transform(data['col_a']))
@@ -547,7 +547,7 @@ class ToDense(BaseEstimator, TransformerMixin):
 
 class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer):
     """
-    Performs basic math opperations on a single feature (column of a DataFrame). Supported opperations include:
+    Performs basic math operations on a single feature (column of a DataFrame). Supported operations include:
         - log
         - exp
         - sqrt
@@ -564,6 +564,7 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer):
         self.input_features = input_features
         self.output_features = output_features
         self.transform_type = transform_type
+        self.serializable = True
 
     def fit(self, y):
         """
@@ -607,29 +608,29 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer):
 
         return self.transform(X)
 
-    def serialize_to_bundle(self, transformer, path, model_name):
+    def serialize_to_bundle(self, path, model_name):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('opperation', self.transform_type))
+        attributes.append(('operation', self.transform_type))
 
         # define node inputs and outputs
         inputs = [{
-                  "name": transformer.input_features,
+                  "name": self.input_features[0],
                   "port": "input"
                 }]
 
         outputs = [{
-                  "name": transformer.output_features,
+                  "name": self.output_features[0],
                   "port": "output"
                 }]
 
-        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+        self.serialize(self, path, model_name, attributes, inputs, outputs)
 
 
 class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer):
     """
-    Performs basic math opperations on a single feature (column of a DataFrame). Supported opperations include:
+    Performs basic math operations on two features (columns of a DataFrame). Supported operations include:
         - add: Add x + y
         - sub: Subtract x - y
         - mul: Multiply x * y
@@ -647,6 +648,7 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer):
         self.input_features = input_features
         self.output_features = output_features
         self.transform_type = transform_type
+        self.serializable = True
 
     def _return(self, y):
         if type(y, np.ndarray):
@@ -699,21 +701,25 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer):
 
         return self.transform(X)
 
-    def serialize_to_bundle(self, transformer, path, model_name):
+    def serialize_to_bundle(self, path, model_name):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('opperation', self.transform_type))
+        attributes.append(('operation', self.transform_type))
 
         # define node inputs and outputs
         inputs = [{
-                  "name": transformer.input_features,
-                  "port": "input"
+                  "name": self.input_features[0],
+                  "port": "input_a"
+                },
+                {
+                    "name": self.input_features[1],
+                    "port": "input_b"
                 }]
 
         outputs = [{
-                  "name": transformer.output_features,
+                  "name": self.output_features[0],
                   "port": "output"
                 }]
 
-        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+        self.serialize(self, path, model_name, attributes, inputs, outputs)

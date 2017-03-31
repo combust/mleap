@@ -13,3 +13,14 @@ case class Bucketizer(override val uid: String = Transformer.uniqueName("bucketi
                       model: BucketizerModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (value: Double) => model(value)
 }
+
+object BucketizerUtil {
+
+  def restoreSplits(splits : Array[Double]) = {
+    splits.update(0, update(splits.head, Double.NegativeInfinity))
+    splits.update(splits.length - 1, update(splits.last, Double.PositiveInfinity))
+    splits
+  }
+
+  private def update(orig: Double, updated: Double) = if (orig.isNaN) updated else orig
+}

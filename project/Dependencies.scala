@@ -40,7 +40,7 @@ object Dependencies {
   }
 
   object Provided {
-    val spark = Compile.spark.map(_ % "provided")
+    val spark = Compile.spark.map(_.excludeAll(ExclusionRule(organization = "org.scalatest"))).map(_ % "provided")
   }
 
   import Compile._

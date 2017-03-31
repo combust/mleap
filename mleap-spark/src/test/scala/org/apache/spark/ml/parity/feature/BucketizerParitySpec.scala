@@ -13,5 +13,5 @@ class BucketizerParitySpec extends SparkParityBase {
   override val sparkTransformer: Transformer = new Bucketizer().
     setInputCol("loan_amount").
     setOutputCol("loan_amount_bucket").
-    setSplits(Array(0.0, 1000.0, 10000.0, 9999999.0))
+    setSplits(Array(Double.NegativeInfinity, 1000.0, 10000.0, Double.PositiveInfinity))
 }

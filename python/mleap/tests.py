@@ -266,7 +266,6 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(imputer.input_features, node['shape']['inputs'][0]['name'])
         self.assertEqual(imputer.output_features, node['shape']['outputs'][0]['name'])
 
-
     def binarizer_test(self):
 
         binarizer = Binarizer(threshold=0.0)

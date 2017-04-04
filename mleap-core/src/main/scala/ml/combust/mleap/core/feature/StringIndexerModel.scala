@@ -14,7 +14,10 @@ case class StringIndexerModel(labels: Seq[String]) extends Serializable {
     * @param value label to index
     * @return index of label
     */
-  def apply(value: String): Double = stringToIndex(value)
+  def apply(value: Any): Double = value match {
+    case opt: Option[_] => stringToIndex(opt.get.toString)
+    case _ => stringToIndex(value.toString)
+  }
 
   /** Create a [[ml.combust.mleap.core.feature.ReverseStringIndexerModel]] from this model.
     *

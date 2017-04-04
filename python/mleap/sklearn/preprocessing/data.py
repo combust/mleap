@@ -204,14 +204,14 @@ class StandardScalerSerializer(MLeapSerializer):
     Standardizes features by removing the mean and scaling to unit variance using mean and standard deviation from
     training data.
 
-    >>> data = pd.DataFrame([[1, 0], [5, 1], [6, 3], [1, 1]], columns=['col_a', 'col_b'])
+    >>> data = pd.DataFrame([[1], [5], [6], [1]], columns=['col_a'])
     >>> standard_scaler_tf = StandardScaler()
-    >>> standard_scaler_tf.mlinit(input_features='cont_features', output_features='scaled_cont_features')
+    >>> standard_scaler_tf.mlinit(input_features='col_a', output_features='scaled_cont_features')
     >>> standard_scaler_tf.fit_transform(data)
-    >>> array([[-0.98787834, -1.14707867],
-    >>>         [ 0.76834982, -0.22941573],
-    >>>         [ 1.20740686,  1.60591014],
-    >>>         [-0.98787834, -0.22941573]])
+    >>> array([[-0.98787834],
+    >>>         [ 0.76834982],
+    >>>         [ 1.20740686],
+    >>>         [-0.98787834]])
     """
     def __init__(self):
         super(StandardScalerSerializer, self).__init__()
@@ -241,15 +241,15 @@ class MinMaxScalerSerializer(MLeapSerializer):
     """
     Scales features by the range of values using calculated min and max from training data.
 
-    >>> data = pd.DataFrame([[1, 0], [5, 1], [6, 3], [1, 1]], columns=['col_a', 'col_b'])
+    >>> data = pd.DataFrame([[1], [5], [6], [1]], columns=['col_a'])
     >>> minmax_scaler_tf = MinMaxScaler()
-    >>> minmax_scaler_tf.mlinit(input_features='cont_features', output_features='scaled_cont_features')
+    >>> minmax_scaler_tf.mlinit(input_features='col_a', output_features='scaled_cont_features')
 
     >>> minmax_scaler_tf.fit_transform(data)
-    >>> array([[ 0.        ,  0.        ],
-    >>>      [ 0.8       ,  0.33333333],
-    >>>      [ 1.        ,  1.        ],
-    >>>      [ 0.        ,  0.33333333]])
+    >>> array([[ 0.],
+    >>>      [ 0.8],
+    >>>      [ 1.],
+    >>>      [ 0.]])
     """
     def __init__(self):
         super(MinMaxScalerSerializer, self).__init__()

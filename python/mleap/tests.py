@@ -306,14 +306,12 @@ class TransformerTests(unittest.TestCase):
     def polynomial_expansion_test(self):
 
         polynomial_exp = PolynomialFeatures(degree=2, include_bias=False)
-        polynomial_exp.mlinit(input_features='features',
+        polynomial_exp.mlinit(input_features='a',
                               output_features='poly')
 
-        Xres = polynomial_exp.fit_transform(self.df[['a', 'b']])
+        Xres = polynomial_exp.fit_transform(self.df[['a']])
 
-        self.assertEqual(Xres[0][2], Xres[0][0] * Xres[0][0])
-        self.assertEqual(Xres[0][3], Xres[0][0] * Xres[0][1])
-        self.assertEqual(Xres[0][4], Xres[0][1] * Xres[0][1])
+        self.assertEqual(Xres[0][1], Xres[0][0] * Xres[0][0])
 
         polynomial_exp.serialize_to_bundle(self.tmp_dir, polynomial_exp.name)
 

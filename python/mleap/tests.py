@@ -224,8 +224,8 @@ class TransformerTests(unittest.TestCase):
             return df.a
 
         imputer = Imputer(strategy='mean')
-        imputer.mlinit(input_features=['a'],
-                       output_features=['a_imputed'])
+        imputer.mlinit(input_features='a',
+                       output_features='a_imputed')
 
         df2 = self.df
         df2.reset_index(inplace=True)
@@ -258,11 +258,20 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(expected_model['attributes']['strategy']['value'], model['attributes']['strategy']['value'])
         self.assertAlmostEqual(expected_model['attributes']['surrogate_value']['value'], model['attributes']['surrogate_value']['value'], places = 7)
 
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, imputer.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(imputer.name, node['name'])
+        self.assertEqual(imputer.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(imputer.output_features, node['shape']['outputs'][0]['name'])
+
+
     def binarizer_test(self):
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features='features',
-                         output_features='binary_features')
+        binarizer.mlinit(input_features='a',
+                         output_features='a_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 

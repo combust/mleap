@@ -187,8 +187,8 @@ class TransformerTests(unittest.TestCase):
         labels = ['a', 'b', 'c']
 
         le = LabelEncoder()
-        le.mlinit(input_features=['label_feature'],
-                  output_features=['label_feature_le_encoded'])
+        le.mlinit(input_features='label_feature',
+                  output_features='label_feature_le_encoded')
 
         le.fit(labels)
 
@@ -203,6 +203,14 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(le.op, model['op'])
         self.assertEqual('labels', model['attributes'].keys()[0])
 
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, le.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(le.name, node['name'])
+        self.assertEqual(le.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(le.output_features, node['shape']['outputs'][0]['name'])
+
     def feature_extractor_test(self):
 
         extract_features = ['a', 'd']
@@ -214,6 +222,17 @@ class TransformerTests(unittest.TestCase):
         res = feature_extractor.fit_transform(self.df)
 
         self.assertEqual(len(res.columns), 2)
+
+        feature_extractor.serialize_to_bundle(self.tmp_dir, feature_extractor.name)
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, feature_extractor.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(feature_extractor.name, node['name'])
+        self.assertEqual(feature_extractor.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(feature_extractor.input_features[1], node['shape']['inputs'][1]['name'])
+        self.assertEqual(feature_extractor.output_vector, node['shape']['outputs'][0]['name'])
 
     def imputer_test(self):
 

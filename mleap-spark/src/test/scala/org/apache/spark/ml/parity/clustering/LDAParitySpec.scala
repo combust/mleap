@@ -5,10 +5,13 @@ import org.apache.spark.ml.clustering.LDA
 import org.apache.spark.ml.feature.{CountVectorizer, StopWordsRemover, Tokenizer}
 import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.sql.DataFrame
+import org.scalatest.Ignore
 
 /**
   * Created by mageswarand on 14/3/17.
   */
+@Ignore
+// to re-enable as part of https://github.com/combust/mleap/issues/169
 class LDAParitySpec extends SparkParityBase {
   override val dataset: DataFrame = textDataset.select("text")
 

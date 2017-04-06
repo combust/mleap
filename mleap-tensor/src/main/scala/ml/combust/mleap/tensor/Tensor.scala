@@ -99,8 +99,8 @@ case class DenseTensor[T](values: Array[T],
           if (obj.values.isEmpty) { true }
           else { false }
         } else {
-          (dimensions == obj.dimensions) ||
-            (dimensions.head == -1 || obj.dimensions.head == -1 && dimensions.tail == obj.dimensions.tail) &&
+          ((dimensions == obj.dimensions) ||
+            ((dimensions.head == -1 || obj.dimensions.head == -1) && dimensions.tail == obj.dimensions.tail)) &&
               (values sameElements obj.asInstanceOf[DenseTensor[T]].values)
         }
       } else { false }
@@ -157,8 +157,8 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
           if (obj.values.isEmpty) { true }
           else { false }
         } else if(indices.length == obj.indices.length && indices == obj.indices) {
-          (dimensions == obj.dimensions) ||
-            (dimensions.head == -1 || obj.dimensions.head == -1 && dimensions.tail == obj.dimensions.tail) &&
+          ((dimensions == obj.dimensions) ||
+            ((dimensions.head == -1 || obj.dimensions.head == -1) && dimensions.tail == obj.dimensions.tail)) &&
               (values sameElements obj.asInstanceOf[SparseTensor[T]].values)
         } else { false }
       } else { false }

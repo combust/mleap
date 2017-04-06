@@ -79,11 +79,13 @@ class MLeapSerializer(object):
                     "type": {
                       "type": "tensor",
                       "tensor": {
-                        "base": _type_map[base],
-                        "dimensions": [-1]
+                        "base": _type_map[base]
                       }
                     },
-                    "value": value
+                    "value": {
+                        "values": value,
+                        "dimensions": [len(value)]
+                        }
                 }
 
             elif isinstance(value, list) and isinstance(value[0], str):

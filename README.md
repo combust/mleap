@@ -139,16 +139,16 @@ from mleap.sklearn.preprocessing.data import NDArrayToDataFrame
 # Load scikit-learn transformers and models
 from sklearn.preprocessing import LabelEncoder, Binarizer
 
-# Define the Label Encoder (minit method adds a unique `name` to the transformer as well as explicit input/output features)
+# Define the Label Encoder (mlinit method adds a unique `name` to the transformer as well as explicit input/output features)
 label_encoder_tf = LabelEncoder()
-label_encoder_tf.minit(input_features = 'col_a', output_features='col_a_label_le')
+label_encoder_tf.mlinit(input_features = 'col_a', output_features='col_a_label_le')
 
 # Convert output of Label Encoder to Data Frame instead of 1d-array
 n_dim_array_to_df_tf = NDArrayToDataFrame(label_encoder_tf.output_features)
 
 # Define our binarizer
 binarizer = Binarizer(0.5)
-binarizer.minit(input_features=n_dim_array_to_df_tf.output_features, output_features="{}_binarized".format(n_dim_array_to_df_tf.output_features))
+binarizer.mlinit(input_features=n_dim_array_to_df_tf.output_features, output_features="{}_binarized".format(n_dim_array_to_df_tf.output_features))
 
 data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
 
@@ -160,7 +160,7 @@ steps = [
 ]
 
 pipeline = Pipeline(steps)
-pipeline.minit()
+pipeline.mlinit()
 
 # Fit the pipeline
 pipeline.fit(data)

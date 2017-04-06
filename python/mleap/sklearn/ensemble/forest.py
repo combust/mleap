@@ -100,7 +100,7 @@ class SimpleSerializer(MLeapSerializer):
 
         i = 0
         for estimator in estimators:
-            estimator.minit(input_features = transformer.input_features, prediction_column = transformer.prediction_column, feature_names=transformer.feature_names)
+            estimator.mlinit(input_features = transformer.input_features, prediction_column = transformer.prediction_column, feature_names=transformer.feature_names)
             model_name = "tree{}".format(i)
             estimator.serialize_to_bundle(rf_path, model_name, serialize_node=False)
 

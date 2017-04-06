@@ -32,7 +32,7 @@ def mleap_init(self, input_features, prediction_column):
 
 
 setattr(PCA, 'op', 'pca')
-setattr(PCA, 'minit', mleap_init)
+setattr(PCA, 'mlinit', mleap_init)
 setattr(PCA, 'serialize_to_bundle', serialize_to_bundle)
 setattr(PCA, 'serializable', True)
 

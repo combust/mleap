@@ -38,21 +38,25 @@ A simple example is the `StandardScaler` transformer that normalizes the data gi
             "type": {
                 "type": "tensor",
                 "tensor": {
-                   "base": "double",
-                   "dimensions": [-1]
+                   "base": "double"
                 }
              },
-             "value": [0.2354223, 1.34502332]
+             "value": {
+                "values": [0.2354223, 1.34502332],
+                 "dimensions": [2]
+             }
         },
         "std": {
             "type": {
                 "type": "tensor",
                 "tensor": {
-                   "base": "double",
-                   "dimensions": [-1]
+                   "base": "double"
                 }
              },
-             "value": [0.13842223, 0.78320249]
+             "value": {
+                "values": [0.13842223, 0.78320249],
+                "dimensions": [2]
+             }
         }
     }
 }

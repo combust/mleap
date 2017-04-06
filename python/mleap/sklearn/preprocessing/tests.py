@@ -50,8 +50,8 @@ class TransformerTests(unittest.TestCase):
                                          with_std=True
                                          )
 
-        standard_scaler.mlinit(input_features=['a'],
-                               output_features=['a_scaled'])
+        standard_scaler.mlinit(input_features='a',
+                               output_features='a_scaled')
 
         standard_scaler.fit(self.df[['a']])
 
@@ -67,41 +67,45 @@ class TransformerTests(unittest.TestCase):
                     "type": {
                         "type": "tensor",
                         "tensor": {
-                           "base": "double",
-                           "dimensions": [
-                              -1
-                           ]
+                           "base": "double"
                         }
                      },
-                     "value": [expected_mean]
+                     "value": {
+                         "values": [expected_mean],
+                         "dimensions": [
+                             1
+                         ]
+                     }
                 },
                 "std": {
                     "type": {
                         "type": "tensor",
                         "tensor": {
-                           "base": "double",
-                           "dimensions": [
-                              -1
-                           ]
+                           "base": "double"
                         }
                      },
-                     "value": [expected_std]
+                     "value": {
+                         "values": [expected_std],
+                         "dimensions": [
+                             1
+                         ]
+                     }
                 }
             }
         }
 
-        self.assertEqual(expected_mean, standard_scaler.mean_.tolist()[0])
-        self.assertEqual(expected_std, np.sqrt(standard_scaler.var_.tolist()[0]))
+        self.assertAlmostEqual(expected_mean, standard_scaler.mean_.tolist()[0], places = 7)
+        self.assertAlmostEqual(expected_std, np.sqrt(standard_scaler.var_.tolist()[0]), places = 7)
 
         # Test model.json
         with open("{}/{}.node/model.json".format(self.tmp_dir, standard_scaler.name)) as json_data:
             model = json.load(json_data)
 
         self.assertEqual(standard_scaler.op, expected_model['op'])
-        self.assertEqual(expected_model['attributes']['mean']['type']['tensor']['dimensions'][0], model['attributes']['mean']['type']['tensor']['dimensions'][0])
-        self.assertEqual(expected_model['attributes']['std']['type']['tensor']['dimensions'][0], model['attributes']['std']['type']['tensor']['dimensions'][0])
-        self.assertEqual(expected_model['attributes']['mean']['value'][0], model['attributes']['mean']['value'][0])
-        self.assertEqual(expected_model['attributes']['std']['value'][0], model['attributes']['std']['value'][0])
+        self.assertEqual(expected_model['attributes']['mean']['value']['dimensions'][0], model['attributes']['mean']['value']['dimensions'][0])
+        self.assertEqual(expected_model['attributes']['std']['value']['dimensions'][0], model['attributes']['std']['value']['dimensions'][0])
+        self.assertAlmostEqual(expected_model['attributes']['mean']['value']['values'][0], model['attributes']['mean']['value']['values'][0], places = 7)
+        self.assertAlmostEqual(expected_model['attributes']['std']['value']['values'][0], model['attributes']['std']['value']['values'][0], places = 7)
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, standard_scaler.name)) as json_data:
@@ -244,8 +248,8 @@ class TransformerTests(unittest.TestCase):
     def test_min_max_scaler_serializer(self):
 
         scaler = MinMaxScaler()
-        scaler.mlinit(input_features=['a'],
-                      output_features=['a_scaled'])
+        scaler.mlinit(input_features='a',
+                      output_features='a_scaled')
 
         scaler.fit(self.df[['a']])
 
@@ -261,40 +265,45 @@ class TransformerTests(unittest.TestCase):
                          "type": {
                             "type": "tensor",
                             "tensor": {
-                               "base": "double",
-                               "dimensions": [
-                                  -1
-                               ]
+                               "base": "double"
                             }
                          },
-                         "value": [expected_min]
+                         "value": {
+                             "values": [expected_min],
+                             "dimensions": [
+                                 1
+                             ]
+                         }
                       },
                 "max": {
                          "type": {
                             "type": "tensor",
                             "tensor": {
-                               "base": "double",
-                               "dimensions": [
-                                  -1
-                               ]
+                               "base": "double"
                             }
                          },
-                         "value": [expected_max]
+                         "value": {
+                             "values": [expected_max],
+                             "dimensions": [
+                                 1
+                             ]
+                         }
                       }
             }
         }
 
-        self.assertEqual(expected_min, scaler.data_min_.tolist()[0])
-        self.assertEqual(expected_max, scaler.data_max_.tolist()[0])
+        self.assertAlmostEqual(expected_min, scaler.data_min_.tolist()[0], places = 7)
+        self.assertAlmostEqual(expected_max, scaler.data_max_.tolist()[0], places = 7)
 
         # Test model.json
         with open("{}/{}.node/model.json".format(self.tmp_dir, scaler.name)) as json_data:
             model = json.load(json_data)
 
         self.assertEqual(scaler.op, expected_model['op'])
-        self.assertEqual(expected_model['attributes']['min']['type']['tensor']['dimensions'][0], model['attributes']['min']['type']['tensor']['dimensions'][0])
-        self.assertEqual(expected_model['attributes']['min']['value'][0], model['attributes']['min']['value'][0])
-        self.assertEqual(expected_model['attributes']['max']['value'][0], model['attributes']['max']['value'][0])
+        self.assertEqual(expected_model['attributes']['min']['value']['dimensions'][0], model['attributes']['min']['value']['dimensions'][0])
+        self.assertEqual(expected_model['attributes']['max']['value']['dimensions'][0], model['attributes']['max']['value']['dimensions'][0])
+        self.assertAlmostEqual(expected_model['attributes']['min']['value']['values'][0], model['attributes']['min']['value']['values'][0])
+        self.assertAlmostEqual(expected_model['attributes']['max']['value']['values'][0], model['attributes']['max']['value']['values'][0])
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, scaler.name)) as json_data:
@@ -494,7 +503,7 @@ class TransformerTests(unittest.TestCase):
 
         imputer.fit(df2[['a']])
 
-        self.assertEqual(imputer.statistics_[0], df2.a.mean())
+        self.assertAlmostEqual(imputer.statistics_[0], df2.a.mean(), places = 7)
 
         imputer.serialize_to_bundle(self.tmp_dir, imputer.name)
 
@@ -517,13 +526,13 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(expected_model['attributes']['strategy']['value'], model['attributes']['strategy']['value'])
-        self.assertEqual(expected_model['attributes']['surrogate_value']['value'], model['attributes']['surrogate_value']['value'])
+        self.assertAlmostEqual(expected_model['attributes']['surrogate_value']['value'], model['attributes']['surrogate_value']['value'], places = 7)
 
     def binarizer_test(self):
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features=['a'],
-                         output_features=['a_binary'])
+        binarizer.mlinit(input_features='a',
+                         output_features='a_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
@@ -546,7 +555,8 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, binarizer.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['threshold']['value'], model['attributes']['threshold']['value'])
+        self.assertEqual(expected_model['attributes']['threshold']['value'],
+                         model['attributes']['threshold']['value'])
 
     def binarizer_deserializer_test(self):
 
@@ -574,6 +584,15 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(res_a[1][0], res_b[1][0])
         self.assertEqual(res_a[2][0], res_b[2][0])
         self.assertEqual(res_a[3][0], res_b[3][0])
+
+         # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, binarizer.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(binarizer.name, node['name'])
+        self.assertEqual(binarizer.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(binarizer.output_features, node['shape']['outputs'][0]['name'])
+
 
     def polynomial_expansion_test(self):
 
@@ -641,12 +660,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(np.exp(self.df.a[0]), Xres[0])
 
-        math_unary_tf.serialize_to_bundle(math_unary_tf, self.tmp_dir, math_unary_tf.name)
+        math_unary_tf.serialize_to_bundle(self.tmp_dir, math_unary_tf.name)
 
         expected_model = {
           "op": "math_unary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'exp'
             }
@@ -657,7 +676,15 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_unary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_unary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_unary_tf.name, node['name'])
+        self.assertEqual(math_unary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_unary_tf.output_features[0], node['shape']['outputs'][0]['name'])
 
     def math_unary_deserialize_exp_test(self):
 
@@ -683,18 +710,18 @@ class TransformerTests(unittest.TestCase):
 
     def math_unary_sin_test(self):
 
-        math_unary_tf = MathUnary(input_features=['a'], output_features=['cos_a'], transform_type='sin')
+        math_unary_tf = MathUnary(input_features=['a'], output_features=['sin_a'], transform_type='sin')
 
         Xres = math_unary_tf.fit_transform(self.df.a)
 
         self.assertEqual(np.sin(self.df.a[0]), Xres[0])
 
-        math_unary_tf.serialize_to_bundle(math_unary_tf, self.tmp_dir, math_unary_tf.name)
+        math_unary_tf.serialize_to_bundle(self.tmp_dir, math_unary_tf.name)
 
         expected_model = {
           "op": "math_unary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'sin'
             }
@@ -705,7 +732,15 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_unary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_unary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_unary_tf.name, node['name'])
+        self.assertEqual(math_unary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_unary_tf.output_features[0], node['shape']['outputs'][0]['name'])
 
     def math_binary_test(self):
 
@@ -715,12 +750,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual( self.df.a[0] + self.df.b[0], Xres[0])
 
-        math_binary_tf.serialize_to_bundle(math_binary_tf, self.tmp_dir, math_binary_tf.name)
+        math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
         expected_model = {
           "op": "math_binary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'add'
             }
@@ -731,7 +766,16 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_binary_tf.name, node['name'])
+        self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
+        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
 
     def math_binary_deserialize_exp_test(self):
 
@@ -763,12 +807,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(self.df.a[0] - self.df.b[0], Xres[0])
 
-        math_binary_tf.serialize_to_bundle(math_binary_tf, self.tmp_dir, math_binary_tf.name)
+        math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
         expected_model = {
           "op": "math_binary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'sub'
             }
@@ -779,7 +823,16 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_binary_tf.name, node['name'])
+        self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
+        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
 
     def math_binary_multiply_test(self):
 
@@ -789,12 +842,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(self.df.a[0] * self.df.b[0], Xres[0])
 
-        math_binary_tf.serialize_to_bundle(math_binary_tf, self.tmp_dir, math_binary_tf.name)
+        math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
         expected_model = {
           "op": "math_binary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'mul'
             }
@@ -805,7 +858,16 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_binary_tf.name, node['name'])
+        self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
+        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
 
     def math_binary_divide_test(self):
 
@@ -815,12 +877,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(self.df.a[0] / self.df.b[0], Xres[0])
 
-        math_binary_tf.serialize_to_bundle(math_binary_tf, self.tmp_dir, math_binary_tf.name)
+        math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
         expected_model = {
           "op": "math_binary",
           "attributes": {
-            "opperation": {
+            "operation": {
               "type": "string",
               "value": 'div'
             }
@@ -831,4 +893,13 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['opperation']['value'], model['attributes']['opperation']['value'])
+        self.assertEqual(expected_model['attributes']['operation']['value'], model['attributes']['operation']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(math_binary_tf.name, node['name'])
+        self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
+        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])

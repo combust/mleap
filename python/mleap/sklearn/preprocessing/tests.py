@@ -471,13 +471,14 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(res_a[0][0], res_b[0][0])
         self.assertEqual(res_a[1][0], res_b[1][0])
         self.assertEqual(res_a[2][0], res_b[2][0])
+
         # Test node.json
-        with open("{}/{}.node/node.json".format(self.tmp_dir, le.name)) as json_data:
+        with open("{}/{}.node/node.json".format(self.tmp_dir, one_hot_encoder_tf.name)) as json_data:
             node = json.load(json_data)
 
-        self.assertEqual(le.name, node['name'])
-        self.assertEqual(le.input_features, node['shape']['inputs'][0]['name'])
-        self.assertEqual(le.output_features, node['shape']['outputs'][0]['name'])
+        self.assertEqual(one_hot_encoder_tf_ds.name, node['name'])
+        self.assertEqual(one_hot_encoder_tf_ds.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(one_hot_encoder_tf_ds.output_features, node['shape']['outputs'][0]['name'])
 
     def feature_extractor_test(self):
 

@@ -366,8 +366,8 @@ class TransformerTests(unittest.TestCase):
         labels = ['a', 'b', 'c']
 
         le = LabelEncoder()
-        le.mlinit(input_features=['label_feature'],
-                  output_features=['label_feature_le_encoded'])
+        le.mlinit(input_features='label_feature',
+                  output_features='label_feature_le_encoded')
 
         le.fit(labels)
 
@@ -471,6 +471,13 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(res_a[0][0], res_b[0][0])
         self.assertEqual(res_a[1][0], res_b[1][0])
         self.assertEqual(res_a[2][0], res_b[2][0])
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, le.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(le.name, node['name'])
+        self.assertEqual(le.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(le.output_features, node['shape']['outputs'][0]['name'])
 
     def feature_extractor_test(self):
 
@@ -484,6 +491,17 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(len(res.columns), 2)
 
+        feature_extractor.serialize_to_bundle(self.tmp_dir, feature_extractor.name)
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, feature_extractor.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(feature_extractor.name, node['name'])
+        self.assertEqual(feature_extractor.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(feature_extractor.input_features[1], node['shape']['inputs'][1]['name'])
+        self.assertEqual(feature_extractor.output_vector, node['shape']['outputs'][0]['name'])
+
     def imputer_test(self):
 
         def _set_nulls(df):
@@ -493,8 +511,8 @@ class TransformerTests(unittest.TestCase):
             return df.a
 
         imputer = Imputer(strategy='mean')
-        imputer.mlinit(input_features=['a'],
-                       output_features=['a_imputed'])
+        imputer.mlinit(input_features='a',
+                       output_features='a_imputed')
 
         df2 = self.df
         df2.reset_index(inplace=True)
@@ -526,6 +544,14 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(expected_model['attributes']['strategy']['value'], model['attributes']['strategy']['value'])
         self.assertAlmostEqual(expected_model['attributes']['surrogate_value']['value'], model['attributes']['surrogate_value']['value'], places = 7)
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, imputer.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(imputer.name, node['name'])
+        self.assertEqual(imputer.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(imputer.output_features, node['shape']['outputs'][0]['name'])
 
     def binarizer_test(self):
 
@@ -595,12 +621,12 @@ class TransformerTests(unittest.TestCase):
     def polynomial_expansion_test(self):
 
         polynomial_exp = PolynomialFeatures(degree=2, include_bias=False)
-        polynomial_exp.mlinit(input_features=['a', 'b'],
-                              output_features=['a', 'b', 'a_sqd', 'a_mult_b', 'b_sqd'])
+        polynomial_exp.mlinit(input_features='a',
+                              output_features='poly')
 
-        Xres = polynomial_exp.fit_transform(self.df[['a', 'b']])
+        Xres = polynomial_exp.fit_transform(self.df[['a']])
 
-        self.assertEqual(Xres[0][2], Xres[0][0] * Xres[0][0])
+        self.assertEqual(Xres[0][1], Xres[0][0] * Xres[0][0])
 
         polynomial_exp.serialize_to_bundle(self.tmp_dir, polynomial_exp.name)
 
@@ -649,6 +675,13 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(res_a[1][1], res_b[1][1])
         self.assertEqual(res_a[2][1], res_b[2][1])
         self.assertEqual(res_a[3][1], res_b[3][1])
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, polynomial_exp.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(polynomial_exp.name, node['name'])
+        self.assertEqual(polynomial_exp.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(polynomial_exp.output_features, node['shape']['outputs'][0]['name'])
 
     def math_unary_exp_test(self):
 

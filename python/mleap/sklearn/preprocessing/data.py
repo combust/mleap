@@ -328,7 +328,6 @@ class MinMaxScalerSerializer(MLeapSerializer, MLeapDeserializer):
 
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
-
         transformer.data_range_ = np.array(transformer.data_max_) - np.array(transformer.data_min_)
 
         transformer.scale_ = ((feature_range[1] - feature_range[0]) / transformer.data_range_)
@@ -750,7 +749,7 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
 
     def deserialize_from_bundle(self, node_path, node_name):
         attributes_map = {
-            'opperation': 'transform_type'
+            'operation': 'transform_type'
         }
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(self, full_node_path, attributes_map)
@@ -855,7 +854,7 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
 
     def deserialize_from_bundle(self, node_path, node_name):
         attributes_map = {
-            'opperation': 'transform_type'
+            'operation': 'transform_type'
         }
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(self, full_node_path, attributes_map)

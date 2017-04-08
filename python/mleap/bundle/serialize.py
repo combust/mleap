@@ -186,9 +186,15 @@ class MLeapDeserializer(object):
         attributes = model_j['attributes']
         for attribute in attributes.keys():
             if attributes_map is not None and attribute in attributes_map.keys():
-                setattr(transformer, attributes_map[attribute], attributes[attribute]['value'])
+                if isinstance(attributes[attribute]['value'], dict):
+                    setattr(transformer, attributes_map[attribute], attributes[attribute]['value']['values'])
+                else:
+                    setattr(transformer, attributes_map[attribute], attributes[attribute]['value'])
             else:
-                setattr(transformer, attribute, attributes[attribute]['value'])
+                if isinstance(attributes[attribute]['value'], dict):
+                    setattr(transformer, attribute, attributes[attribute]['value']['values'])
+                else:
+                    setattr(transformer, attribute, attributes[attribute]['value'])
 
         transformer.op = model_j['op']
 

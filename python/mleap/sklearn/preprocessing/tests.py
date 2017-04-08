@@ -42,7 +42,6 @@ class TransformerTests(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)
-        pass
 
     def test_standard_scaler_serializer(self):
 
@@ -593,7 +592,6 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(binarizer.input_features, node['shape']['inputs'][0]['name'])
         self.assertEqual(binarizer.output_features, node['shape']['outputs'][0]['name'])
 
-
     def polynomial_expansion_test(self):
 
         polynomial_exp = PolynomialFeatures(degree=2, include_bias=False)
@@ -694,7 +692,7 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(np.exp(self.df.a[0]), Xres[0])
 
-        math_unary_tf.serialize_to_bundle(math_unary_tf, self.tmp_dir, math_unary_tf.name)
+        math_unary_tf.serialize_to_bundle(self.tmp_dir, math_unary_tf.name)
 
         node_name = "{}.node".format(math_unary_tf.name)
         math_unary_ds_tf = MathUnary()
@@ -785,14 +783,11 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual( self.df.a[0] + self.df.b[0], Xres[0])
 
-        math_binary_tf.serialize_to_bundle(math_binary_tf, self.tmp_dir, math_binary_tf.name)
+        math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
         node_name = "{}.node".format(math_binary_tf.name)
         math_binary_ds_tf = MathBinary()
         math_binary_ds_tf = math_binary_ds_tf.deserialize_from_bundle(self.tmp_dir, node_name)
-
-        with open("{}/{}.node/model.json".format(self.tmp_dir, math_binary_tf.name)) as json_data:
-            model = json.load(json_data)
 
         res_a = math_binary_tf.transform(self.df[['a', 'b']])
         res_b = math_binary_ds_tf.transform(self.df[['a', 'b']])

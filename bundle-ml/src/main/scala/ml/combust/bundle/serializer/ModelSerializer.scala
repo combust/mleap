@@ -1,17 +1,14 @@
 package ml.combust.bundle.serializer
 
-import java.io.{InputStream, OutputStream}
-import java.nio.file.Files
+import java.nio.file.{Files, Path}
 
 import ml.bundle.ModelDef.ModelDef
 import ml.combust.bundle.{BundleContext, HasBundleRegistry}
 import ml.combust.bundle.json.JsonSupport._
 import ml.combust.bundle.serializer.attr.{AttributeListSeparator, AttributeListSerializer}
 import ml.combust.bundle.dsl.{Bundle, Model}
-import resource._
 import spray.json._
 
-import scala.io.Source
 import scala.util.Try
 
 /** Trait for serializing a protobuf model definition.
@@ -19,17 +16,17 @@ import scala.util.Try
 trait FormatModelSerializer {
   /** Write a protobuf model definition.
     *
-    * @param out stream to write to
+    * @param path path to write to
     * @param model model to write
     */
-  def write(out: OutputStream, model: Model): Unit
+  def write(path: Path, model: Model): Unit
 
   /** Read a protobuf model definition.
     *
-    * @param in stream to read from
+    * @param path path to read from
     * @return model that was read
     */
-  def read(in: InputStream): Model
+  def read(path: Path): Model
 }
 
 /** Companion object for utility methods related to model definition serialization.
@@ -49,25 +46,24 @@ object FormatModelSerializer {
 /** Object for serializing/deserializing model definitions with JSON.
   */
 case class JsonFormatModelSerializer(implicit hr: HasBundleRegistry) extends FormatModelSerializer {
-  override def write(out: OutputStream, model: Model): Unit = {
-    out.write(model.toJson.prettyPrint.getBytes)
+  override def write(path: Path, model: Model): Unit = {
+    Files.write(path, model.toJson.prettyPrint.getBytes)
   }
 
-  override def read(in: InputStream): Model = {
-    val json = Source.fromInputStream(in).getLines.mkString
-    json.parseJson.convertTo[Model]
+  override def read(path: Path): Model = {
+    new String(Files.readAllBytes(path)).parseJson.convertTo[Model]
   }
 }
 
 /** Object for serializing/deserializing model definitions with Protobuf.
   */
 case class ProtoFormatModelSerializer(implicit hr: HasBundleRegistry) extends FormatModelSerializer {
-  override def write(out: OutputStream, model: Model): Unit = {
-    model.asBundle.writeTo(out)
+  override def write(path: Path, model: Model): Unit = {
+    Files.write(path, model.asBundle.toByteArray)
   }
 
-  override def read(in: InputStream): Model = {
-    Model.fromBundle(ModelDef.parseFrom(in))
+  override def read(path: Path): Model = {
+    Model.fromBundle(ModelDef.parseFrom(Files.readAllBytes(path)))
   }
 }
 
@@ -77,7 +73,7 @@ case class ProtoFormatModelSerializer(implicit hr: HasBundleRegistry) extends Fo
   * @tparam Context context class for implementation
   */
 case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
-  implicit val sc = bundleContext.preferredSerializationContext(SerializationFormat.Json)
+  private implicit val sc = bundleContext.preferredSerializationContext(SerializationFormat.Json)
 
   /** Write a model to the current context path.
     *
@@ -103,10 +99,7 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
       case _ => Try(model)
     }
   }.flatMap(identity).flatMap {
-    model =>
-      (for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.modelFile)))) yield {
-        FormatModelSerializer.serializer.write(out, model)
-      }).tried
+    model => Try(FormatModelSerializer.serializer.write(bundleContext.file(Bundle.modelFile), model))
   }
 
   /** Read a model from the current bundle context.
@@ -120,9 +113,7 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
     * @return (deserialized model, model type class)
     */
   def readWithModel(): Try[(Any, Model)] = {
-    (for(in <- managed(Files.newInputStream(bundleContext.file(Bundle.modelFile)))) yield {
-      FormatModelSerializer.serializer.read(in)
-    }).tried.flatMap {
+    Try(FormatModelSerializer.serializer.read(bundleContext.file(Bundle.modelFile))).flatMap {
       bundleModel =>
         val m = bundleContext.bundleRegistry.model[Context, Any](bundleModel.op)
 

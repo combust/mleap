@@ -72,6 +72,7 @@ object Bundle {
       val word_to_vector = "word_to_vector"
       val multinomial_labeler = "multinomial_labeler"
       val regex_tokenizer = "regex_tokenizer"
+      val word_filter = "word_filter"
     }
 
     object classification {
@@ -89,6 +90,7 @@ object Bundle {
       val gaussian_mixture = "gaussian_mixture"
       val bisecting_k_means = "bisecting_k_means"
       val k_means = "k_means"
+      val lda = "lda_local_model_op"
     }
 
     val pipeline = "pipeline"

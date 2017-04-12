@@ -31,7 +31,7 @@ models in `/tmp/models` and mounting it in the container at `/models`.
 
 ```
 mkdir /tmp/models
-docker run -v /tmp/models:/models combustml/mleap-serving:0.6.0-SNAPSHOT
+docker run -p 65327:65327 -v /tmp/models:/models combustml/mleap-serving:0.6.0-SNAPSHOT
 ```
 
 This will expose the model server locally on port `65327`.

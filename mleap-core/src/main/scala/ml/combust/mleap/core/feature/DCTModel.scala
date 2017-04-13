@@ -8,7 +8,7 @@ import org.apache.spark.ml.linalg.{Vector, Vectors}
   */
 case class DCTModel(inverse: Boolean) {
   def apply(features: Vector): Vector = {
-    val result = features.toArray
+    val result = features.toArray.clone()
     val jTransformer = new DoubleDCT_1D(result.length)
     if (inverse) jTransformer.inverse(result, true) else jTransformer.forward(result, true)
     Vectors.dense(result)

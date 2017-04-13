@@ -32,7 +32,25 @@ trait JsonSupportLowPriority {
     override def write(obj: UUID): JsValue = JsString(obj.toString)
   }
 
-  implicit val bundleSocketFormat: JsonFormat[Socket] = jsonFormat2(Socket.apply)
+  implicit val bundleSocketFormat: JsonFormat[Socket] = new JsonFormat[Socket] {
+    override def read(json: JsValue): Socket = {
+      val fields = json.asJsObject.fields
+      val name = fields.get("name").get.convertTo[String]
+      val port = fields.get("port").get.convertTo[String]
+      val dataType = fields.get("dataType").get match {
+        case t if t == JsNull => None
+        case t => Some(bundleDataTypeFormat.read(t))
+      }
+
+      new Socket(name, port, dataType)
+    }
+
+    override def write(obj: Socket): JsValue = {
+      JsObject("name" -> obj.name.toJson,
+        "port" -> obj.port.toJson,
+        "dataType" -> obj.dataType.toJson)
+    }
+  }
 
   implicit val bundleShapeFormat: JsonFormat[Shape] = new JsonFormat[Shape] {
     override def write(obj: Shape): JsValue = {

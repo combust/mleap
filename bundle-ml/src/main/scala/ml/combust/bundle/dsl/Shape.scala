@@ -1,5 +1,6 @@
 package ml.combust.bundle.dsl
 
+import ml.bundle.DataType.DataType
 import ml.bundle.Socket.Socket
 
 /** Companion object for holding constant values.
@@ -109,6 +110,21 @@ case class Shape private (inputs: Seq[Socket],
     withStandardInput(nameInput).withStandardOutput(nameOutput)
   }
 
+  /** Add typed standard input/output sockets to the shape.
+    *
+    * This is the same as calling [[Shape#withStandardInput]] and
+    * [[Shape#withStandardOutput]].
+    *
+    * @param nameInput name of the input socket
+    * @param inputType type of the input socket
+    * @param nameOutput name of the output socket
+    * @param outputType type of the output socket
+    * @return copy of the shape with standard input/output sockets added
+    */
+  def withStandardIO(nameInput: String, inputType: DataType, nameOutput: String, outputType: DataType): Shape = {
+    withStandardInput(nameInput, inputType).withStandardOutput(nameOutput, outputType)
+  }
+
   /** Add standard input socket to the shape.
     *
     * @param name name of standard input socket
@@ -116,12 +132,28 @@ case class Shape private (inputs: Seq[Socket],
     */
   def withStandardInput(name: String): Shape = withInput(name, Shape.standardInputPort)
 
+  /** Add typed standard input socket to the shape.
+    *
+    * @param name name of standard input socket
+    * @param dataType type of standard input socket
+    * @return copy of the shape with standard input socket added
+    */
+  def withStandardInput(name: String, dataType: DataType): Shape = withInput(name, Shape.standardInputPort, dataType)
+
   /** Add standard output socket to the shape.
     *
     * @param name name of standard output socket
     * @return copy of the shape with standard output socket added
     */
   def withStandardOutput(name: String): Shape = withOutput(name, Shape.standardOutputPort)
+
+  /** Add typed standard output socket to the shape.
+    *
+    * @param name name of standard output socket
+    * @param dataType type of standard output socket
+    * @return copy of the shape with standard output socket added
+    */
+  def withStandardOutput(name: String, dataType: DataType): Shape = withOutput(name, Shape.standardOutputPort, dataType)
 
   /** Add an optional input socket to the shape.
     *
@@ -191,6 +223,20 @@ case class Shape private (inputs: Seq[Socket],
     copy(inputs = inputs :+ socket, inputLookup = inputLookup2)
   }
 
+  /** Add a typed input socket to the shape. 
+    *
+    * @param name name of input socket 
+    * @param port port of input socket 
+    * @param dataType type of input socket
+    * @return copy of the shape with input socket added 
+    */
+  def withInput(name: String, port: String, dataType: DataType): Shape = {
+    require(!inputLookup.contains(port), s"input already exists for port: $port")
+    val socket = Socket(name, port, Some(dataType))
+    val inputLookup2 = inputLookup + (port -> socket)
+    copy(inputs = inputs :+ socket, inputLookup = inputLookup2)
+  }
+
   /** Add an output socket to the shape. 
     *
     * @param name name of output socket 
@@ -200,6 +246,20 @@ case class Shape private (inputs: Seq[Socket],
   def withOutput(name: String, port: String): Shape = {
     require(!outputLookup.contains(port), s"output already exists for port: $port")
     val socket = Socket(name, port)
+    val outputLookup2 = outputLookup + (port -> socket)
+    copy(outputs = outputs :+ socket, outputLookup = outputLookup2)
+  }
+
+  /** Add a typed output socket to the shape. 
+    *
+    * @param name name of output socket 
+    * @param port port of output socket 
+    * @param dataType type of output socket
+    * @return copy of the shape with output socket added 
+    */
+  def withOutput(name: String, port: String, dataType: DataType): Shape = {
+    require(!outputLookup.contains(port), s"output already exists for port: $port")
+    val socket = Socket(name, port, Some(dataType))
     val outputLookup2 = outputLookup + (port -> socket)
     copy(outputs = outputs :+ socket, outputLookup = outputLookup2)
   }

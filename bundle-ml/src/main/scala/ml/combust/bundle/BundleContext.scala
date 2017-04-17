@@ -1,6 +1,5 @@
 package ml.combust.bundle
 
-import java.io.File
 import java.nio.file.{FileSystem, Path}
 
 import ml.combust.bundle.serializer.{ConcreteSerializationFormat, SerializationContext, SerializationFormat}

@@ -6,7 +6,6 @@ import ml.combust.mleap.runtime.transformer.{Transformer => MleapTransformer}
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.mleap.TensorUDT
 
 import scala.util.Try
 

@@ -2,7 +2,6 @@ package org.apache.spark.sql.mleap
 
 import ml.combust.mleap.runtime.types
 import org.apache.spark.sql.types._
-import org.apache.spark.ml.linalg.VectorUDT
 
 import scala.language.implicitConversions
 

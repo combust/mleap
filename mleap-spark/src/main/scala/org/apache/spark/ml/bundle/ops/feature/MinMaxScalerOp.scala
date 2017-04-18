@@ -6,6 +6,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.MinMaxScalerModel
 import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by mikhail on 9/19/16.
@@ -43,6 +44,8 @@ class MinMaxScalerOp extends OpNode[SparkBundleContext, MinMaxScalerModel, MinMa
   }
 
   override def shape(node: MinMaxScalerModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
   }
 }

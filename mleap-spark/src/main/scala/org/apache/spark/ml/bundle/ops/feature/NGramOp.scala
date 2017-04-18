@@ -5,6 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.NGram
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by mikhail on 10/16/16.
@@ -42,6 +43,8 @@ class NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
   }
 
   override def shape(node: NGram)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
   }
 }

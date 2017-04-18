@@ -5,6 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.Binarizer
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by fshabbir on 12/1/16.
@@ -42,7 +43,8 @@ class BinarizerOp extends OpNode[SparkBundleContext, Binarizer, Binarizer] {
   }
 
   override def shape(node: Binarizer)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
   }
-
 }

@@ -45,8 +45,9 @@ class BisectingKMeansOp extends OpNode[SparkBundleContext, BisectingKMeansModel,
     new BisectingKMeansModel(node.name, getParentModel(model))
   }
 
-  override def shape(node: BisectingKMeansModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: BisectingKMeansModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+  }
 
   private def getParentModel(obj: BisectingKMeansModel): clustering.BisectingKMeansModel = {
     // UGLY: have to use reflection to get this private field :(

@@ -51,6 +51,8 @@ class BucketedRandomProjectionLSHOp extends OpNode[SparkBundleContext, BucketedR
     m
   }
 
-  override def shape(node: BucketedRandomProjectionLSHModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: BucketedRandomProjectionLSHModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }
 

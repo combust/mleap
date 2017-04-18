@@ -41,6 +41,8 @@ class BinarizerOp extends OpNode[SparkBundleContext, Binarizer, Binarizer] {
       setThreshold(model.getThreshold)
   }
 
-  override def shape(node: Binarizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: Binarizer)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 
 }

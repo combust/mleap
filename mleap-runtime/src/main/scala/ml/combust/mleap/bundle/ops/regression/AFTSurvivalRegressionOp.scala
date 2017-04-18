@@ -49,7 +49,9 @@ class AFTSurvivalRegressionOp extends OpNode[MleapContext, AFTSurvivalRegression
       model = model)
   }
 
-  override def shape(node: AFTSurvivalRegression): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.quantilesCol, "quantiles")
+  override def shape(node: AFTSurvivalRegression)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withInput(node.featuresCol, "features").
+      withOutput(node.predictionCol, "prediction").
+      withOutput(node.quantilesCol, "quantiles")
+  }
 }

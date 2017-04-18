@@ -73,7 +73,7 @@ class RandomForestClassifierOp extends OpNode[SparkBundleContext, RandomForestCl
     node.shape.getOutput("raw_prediction").map(rp => rf.setRawPredictionCol(rp.name)).getOrElse(rf)
   }
 
-  override def shape(node: RandomForestClassificationModel): Shape = {
+  override def shape(node: RandomForestClassificationModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
     val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
 

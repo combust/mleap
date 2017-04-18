@@ -60,6 +60,7 @@ class IsotonicRegressionOp extends OpNode[SparkBundleContext, IsotonicRegression
       setFeatureIndex(model.getFeatureIndex)
   }
 
-  override def shape(node: IsotonicRegressionModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: IsotonicRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+  }
 }

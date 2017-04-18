@@ -42,5 +42,7 @@ class PolynomialExpansionOp extends OpNode[SparkBundleContext, PolynomialExpansi
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: PolynomialExpansion): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: PolynomialExpansion)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

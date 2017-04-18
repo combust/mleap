@@ -42,5 +42,7 @@ class MinMaxScalerOp extends OpNode[SparkBundleContext, MinMaxScalerModel, MinMa
     new MinMaxScalerModel(uid = node.name, originalMin = model.originalMin, originalMax = model.originalMax)
   }
 
-  override def shape(node: MinMaxScalerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: MinMaxScalerModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

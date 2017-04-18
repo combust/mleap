@@ -69,6 +69,7 @@ class GBTClassifierOp extends OpNode[SparkBundleContext, GBTClassificationModel,
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: GBTClassificationModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: GBTClassificationModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+  }
 }

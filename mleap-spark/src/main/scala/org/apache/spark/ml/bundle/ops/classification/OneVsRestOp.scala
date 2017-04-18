@@ -66,6 +66,7 @@ class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestMo
     m
   }
 
-  override def shape(node: OneVsRestModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: OneVsRestModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+  }
 }

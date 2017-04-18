@@ -44,6 +44,7 @@ class LinearRegressionOp extends OpNode[MleapContext, LinearRegression, LinearRe
       model = model)
   }
 
-  override def shape(node: LinearRegression): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction")
+  override def shape(node: LinearRegression)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withInput(node.featuresCol, "features").withOutput(node.predictionCol, "prediction")
+  }
 }

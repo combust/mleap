@@ -40,5 +40,7 @@ class MathUnaryOp extends OpNode[MleapContext, MathUnary, MathUnaryModel] {
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: MathUnary): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: MathUnary)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

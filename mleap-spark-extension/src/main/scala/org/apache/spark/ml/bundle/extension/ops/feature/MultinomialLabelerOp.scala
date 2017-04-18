@@ -44,7 +44,9 @@ class MultinomialLabelerOp extends OpNode[SparkBundleContext, MultinomialLabeler
       setLabelsCol(node.shape.output("labels").name)
   }
 
-  override def shape(node: MultinomialLabeler): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getProbabilitiesCol, "probabilities").
-    withOutput(node.getLabelsCol, "labels")
+  override def shape(node: MultinomialLabeler)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withInput(node.getFeaturesCol, "features").
+      withOutput(node.getProbabilitiesCol, "probabilities").
+      withOutput(node.getLabelsCol, "labels")
+  }
 }

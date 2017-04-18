@@ -71,9 +71,10 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
       model = model)
   }
 
-  override def shape(node: LogisticRegression): Shape = Shape().
-    withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.rawPredictionCol, "raw_prediction").
-    withOutput(node.probabilityCol, "probability")
+  override def shape(node: LogisticRegression)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withInput(node.featuresCol, "features").
+      withOutput(node.predictionCol, "prediction").
+      withOutput(node.rawPredictionCol, "raw_prediction").
+      withOutput(node.probabilityCol, "probability")
+  }
 }

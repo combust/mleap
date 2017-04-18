@@ -64,6 +64,8 @@ class RandomForestRegressionOp extends OpNode[MleapContext, RandomForestRegressi
       model = model)
   }
 
-  override def shape(node: RandomForestRegression): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction")
+  override def shape(node: RandomForestRegression)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withInput(node.featuresCol, "features").
+      withOutput(node.predictionCol, "prediction")
+  }
 }

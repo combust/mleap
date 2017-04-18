@@ -53,8 +53,10 @@ class NaiveBayesClassifierOp extends OpNode[MleapContext, NaiveBayesClassifier, 
       probabilityCol = node.shape.getOutput("probability").map(_.name),
       model = model)
   }
-  override def shape(node: NaiveBayesClassifier): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.rawPredictionCol, "raw_prediction").
-    withOutput(node.probabilityCol, "probability")
+  override def shape(node: NaiveBayesClassifier)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withInput(node.featuresCol, "features").
+      withOutput(node.predictionCol, "prediction").
+      withOutput(node.rawPredictionCol, "raw_prediction").
+      withOutput(node.probabilityCol, "probability")
+  }
 }

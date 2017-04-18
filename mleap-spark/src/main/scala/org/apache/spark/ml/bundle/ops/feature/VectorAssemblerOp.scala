@@ -35,7 +35,7 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: VectorAssembler): Shape = {
+  override def shape(node: VectorAssembler)(implicit context: BundleContext[SparkBundleContext]): Shape = {
     var i = 0
     node.getInputCols.foldLeft(Shape()) {
       case (shape, inputCol) =>

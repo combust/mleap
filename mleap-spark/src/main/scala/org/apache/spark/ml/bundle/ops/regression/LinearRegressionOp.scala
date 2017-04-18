@@ -45,7 +45,7 @@ class LinearRegressionOp extends OpNode[SparkBundleContext, LinearRegressionMode
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: LinearRegressionModel): Shape = Shape().
-    withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: LinearRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+  }
 }

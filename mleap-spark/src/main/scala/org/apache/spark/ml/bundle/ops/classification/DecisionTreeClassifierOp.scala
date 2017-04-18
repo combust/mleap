@@ -55,7 +55,7 @@ class DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeCl
     node.shape.getOutput("raw_prediction").map(rp => dt.setRawPredictionCol(rp.name)).getOrElse(dt)
   }
 
-  override def shape(node: DecisionTreeClassificationModel): Shape = {
+  override def shape(node: DecisionTreeClassificationModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
     val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
 

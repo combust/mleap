@@ -55,5 +55,7 @@ class RegexTokenizerOp extends OpNode[MleapContext, RegexTokenizer, RegexTokeniz
       model = model)
   }
 
-  override def shape(node: RegexTokenizer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: RegexTokenizer)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

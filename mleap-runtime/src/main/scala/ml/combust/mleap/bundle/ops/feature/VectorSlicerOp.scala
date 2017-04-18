@@ -41,5 +41,7 @@ class VectorSlicerOp extends OpNode[MleapContext, VectorSlicer, VectorSlicerMode
       model = model)
   }
 
-  override def shape(node: VectorSlicer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: VectorSlicer)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

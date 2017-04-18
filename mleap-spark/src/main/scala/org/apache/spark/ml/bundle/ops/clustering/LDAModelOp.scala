@@ -54,7 +54,7 @@ class LDAModelOp extends OpNode[SparkBundleContext, LocalLDAModel, LocalLDAModel
 
   override def model(node: LocalLDAModel): LocalLDAModel = node
 
-  override def shape(node: LocalLDAModel): Shape = {
+  override def shape(node: LocalLDAModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
     Shape().
       withInput("features", "features").
       withOutput("topicDistribution", "topicDistribution")

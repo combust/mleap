@@ -39,5 +39,7 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: StringIndexerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: StringIndexerModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

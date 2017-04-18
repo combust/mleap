@@ -35,5 +35,7 @@ class TokenizerOp extends OpNode[SparkBundleContext, Tokenizer, Tokenizer] {
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: Tokenizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: Tokenizer)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

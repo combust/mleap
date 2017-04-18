@@ -50,7 +50,9 @@ class GeneralizedLinearRegressionOp extends OpNode[MleapContext, GeneralizedLine
       model = model)
   }
 
-  override def shape(node: GeneralizedLinearRegression): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.linkPredictionCol, "link_prediction")
+  override def shape(node: GeneralizedLinearRegression)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withInput(node.featuresCol, "features").
+      withOutput(node.predictionCol, "prediction").
+      withOutput(node.linkPredictionCol, "link_prediction")
+  }
 }

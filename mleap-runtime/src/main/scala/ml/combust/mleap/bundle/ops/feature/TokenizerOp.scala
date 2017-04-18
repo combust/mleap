@@ -36,5 +36,7 @@ class TokenizerOp extends OpNode[MleapContext, Tokenizer, TokenizerModel] {
       outputCol = node.shape.standardOutput.name)
   }
 
-  override def shape(node: Tokenizer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: Tokenizer)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

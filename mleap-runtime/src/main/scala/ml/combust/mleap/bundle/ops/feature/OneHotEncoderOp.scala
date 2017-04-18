@@ -43,5 +43,7 @@ class OneHotEncoderOp extends OpNode[MleapContext, OneHotEncoder, OneHotEncoderM
       model = model)
   }
 
-  override def shape(node: OneHotEncoder): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: OneHotEncoder)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

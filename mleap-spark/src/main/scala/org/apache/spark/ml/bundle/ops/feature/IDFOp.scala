@@ -43,5 +43,7 @@ class IDFOp extends OpNode[SparkBundleContext, IDFModel, IDFModel] {
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: IDFModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: IDFModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

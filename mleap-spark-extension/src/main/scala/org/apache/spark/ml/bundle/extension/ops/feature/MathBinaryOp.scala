@@ -46,7 +46,7 @@ class MathBinaryOp extends OpNode[MleapContext, MathBinary, MathBinaryModel] {
     mb
   }
 
-  override def shape(node: MathBinary): Shape = {
+  override def shape(node: MathBinary)(implicit context: BundleContext[MleapContext]): Shape = {
     var shape = Shape().withStandardOutput(node.getOutputCol)
 
     if(node.isSet(node.inputA)) {

@@ -53,7 +53,7 @@ class NaiveBayesClassifierOp extends OpNode[SparkBundleContext, NaiveBayesModel,
     node.shape.getOutput("raw_prediction").map(rp => nb.setRawPredictionCol(rp.name)).getOrElse(nb)
   }
 
-  override def shape(node: NaiveBayesModel): Shape = {
+  override def shape(node: NaiveBayesModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
     val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
 

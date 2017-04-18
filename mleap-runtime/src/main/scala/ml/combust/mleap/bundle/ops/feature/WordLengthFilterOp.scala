@@ -44,7 +44,7 @@ class WordLengthFilterOp extends OpNode[MleapContext, WordLengthFilter, WordLeng
   // a node. shapes can get fairly complicated and may be confusing at first
   // but all they do is connect fields from a data frame to certain input/output
   // locations of the node itself
-  override def shape(node: WordLengthFilter): Shape =
+  override def shape(node: WordLengthFilter)(implicit context: BundleContext[MleapContext]): Shape =
   Shape().withStandardIO(node.inputCol, node.outputCol)
 
   // reconstruct our MLeap transformer from the

@@ -86,7 +86,7 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
     modelSerializer.write(op.model(obj)).map {
       _ =>
         val name = op.name(obj)
-        val shape = op.shape(obj)
+        val shape = op.shape(obj)(bundleContext)
         Node(name = name, shape = shape)
     }
   }.flatMap(identity).flatMap {

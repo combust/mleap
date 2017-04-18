@@ -63,6 +63,7 @@ class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBT
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: GBTRegressionModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: GBTRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+  }
 }

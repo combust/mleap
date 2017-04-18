@@ -75,5 +75,7 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoder, OneHotEn
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: OneHotEncoder): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: OneHotEncoder)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

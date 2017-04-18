@@ -41,5 +41,7 @@ class NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: NGram): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: NGram)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

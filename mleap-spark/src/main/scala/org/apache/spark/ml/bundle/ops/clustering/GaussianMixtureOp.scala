@@ -64,7 +64,7 @@ class GaussianMixtureOp extends OpNode[MleapContext, GaussianMixtureModel, Gauss
     gmm
   }
 
-  override def shape(node: GaussianMixtureModel): Shape = {
+  override def shape(node: GaussianMixtureModel)(implicit context: BundleContext[MleapContext]): Shape = {
     val probability = if(node.isSet(node.probabilityCol)) Some(node.getProbabilityCol) else None
 
     Shape().withInput(node.getFeaturesCol, "features").

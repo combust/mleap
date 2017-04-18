@@ -66,6 +66,7 @@ class GBTRegressionOp extends OpNode[MleapContext, GBTRegression, GBTRegressionM
     * @param node node object
     * @return shape of the node
     */
-  override def shape(node: GBTRegression): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction")
+  override def shape(node: GBTRegression)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withInput(node.featuresCol, "features").withOutput(node.predictionCol, "prediction")
+  }
 }

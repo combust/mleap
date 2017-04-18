@@ -42,6 +42,7 @@ class ChiSqSelectorOp extends OpNode[SparkBundleContext, ChiSqSelectorModel, Chi
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: ChiSqSelectorModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withStandardOutput(node.getOutputCol)
+  override def shape(node: ChiSqSelectorModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withInput(node.getFeaturesCol, "features").withStandardOutput(node.getOutputCol)
+  }
 }

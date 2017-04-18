@@ -49,5 +49,7 @@ class LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
       model = model)
   }
 
-  override def shape(node: LinearRegression): Shape = Shape().withStandardIO(node.input, node.output)
+  override def shape(node: LinearRegression)(implicit context: BundleContext[Any]): Shape = {
+    Shape().withStandardIO(node.input, node.output)
+  }
 }

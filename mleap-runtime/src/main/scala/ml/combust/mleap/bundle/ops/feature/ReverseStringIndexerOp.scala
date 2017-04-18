@@ -41,5 +41,7 @@ class ReverseStringIndexerOp extends OpNode[MleapContext, ReverseStringIndexer, 
       model = model)
   }
 
-  override def shape(node: ReverseStringIndexer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: ReverseStringIndexer)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

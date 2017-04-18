@@ -53,5 +53,7 @@ class StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, S
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: StandardScalerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: StandardScalerModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

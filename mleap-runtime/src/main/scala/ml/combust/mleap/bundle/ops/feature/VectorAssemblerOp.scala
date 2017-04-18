@@ -36,7 +36,7 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
       outputCol = node.shape.standardOutput.name)
   }
 
-  override def shape(node: VectorAssembler): Shape = {
+  override def shape(node: VectorAssembler)(implicit context: BundleContext[MleapContext]): Shape = {
     var i = 0
     node.inputCols.foldLeft(Shape()) {
       case (shape, inputCol) =>

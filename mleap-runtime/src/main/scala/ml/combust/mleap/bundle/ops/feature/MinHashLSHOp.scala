@@ -47,5 +47,7 @@ class MinHashLSHOp extends OpNode[MleapContext, MinHashLSH, MinHashLSHModel] {
       model = model)
   }
 
-  override def shape(node: MinHashLSH): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: MinHashLSH)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

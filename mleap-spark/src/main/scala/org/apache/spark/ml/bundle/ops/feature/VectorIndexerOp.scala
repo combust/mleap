@@ -63,5 +63,7 @@ class VectorIndexerOp extends OpNode[SparkBundleContext, VectorIndexerModel, Vec
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: VectorIndexerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: VectorIndexerModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

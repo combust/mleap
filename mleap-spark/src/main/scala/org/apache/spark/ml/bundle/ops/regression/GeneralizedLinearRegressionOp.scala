@@ -54,7 +54,7 @@ class GeneralizedLinearRegressionOp extends OpNode[SparkBundleContext, Generaliz
     m
   }
 
-  override def shape(node: GeneralizedLinearRegressionModel): Shape = {
+  override def shape(node: GeneralizedLinearRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
     val s = Shape().withInput(node.getFeaturesCol, "features").
       withOutput(node.getPredictionCol, "prediction")
     if(node.isSet(node.linkPredictionCol)) { s.withOutput(node.getLinkPredictionCol, "link_prediction") }

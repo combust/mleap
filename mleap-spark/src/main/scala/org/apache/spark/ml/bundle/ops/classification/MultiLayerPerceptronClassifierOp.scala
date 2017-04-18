@@ -44,7 +44,8 @@ class MultiLayerPerceptronClassifierOp extends OpNode[MleapContext, MultilayerPe
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: MultilayerPerceptronClassificationModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: MultilayerPerceptronClassificationModel)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+  }
 }
 

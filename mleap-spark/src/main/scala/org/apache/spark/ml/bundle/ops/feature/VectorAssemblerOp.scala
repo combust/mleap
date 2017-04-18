@@ -5,6 +5,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -37,11 +38,12 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
 
   override def shape(node: VectorAssembler)(implicit context: BundleContext[SparkBundleContext]): Shape = {
     var i = 0
+    val dataset = context.context.dataset
     node.getInputCols.foldLeft(Shape()) {
       case (shape, inputCol) =>
-        val shape2 = shape.withInput(inputCol, s"input$i")
+        val shape2 = shape.withInput(inputCol, s"input$i", fieldType(inputCol, dataset))
         i += 1
         shape2
-    }.withStandardOutput(node.getOutputCol)
+    }.withStandardOutput(node.getOutputCol, fieldType(node.getOutputCol, dataset))
   }
 }

@@ -5,6 +5,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.StringIndexerModel
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -40,6 +41,8 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
   }
 
   override def shape(node: StringIndexerModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
   }
 }

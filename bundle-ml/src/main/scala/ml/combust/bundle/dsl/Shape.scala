@@ -121,7 +121,7 @@ case class Shape private (inputs: Seq[Socket],
     * @param outputType type of the output socket
     * @return copy of the shape with standard input/output sockets added
     */
-  def withStandardIO(nameInput: String, inputType: DataType, nameOutput: String, outputType: DataType): Shape = {
+  def withStandardIO(nameInput: String, inputType: Option[DataType], nameOutput: String, outputType: Option[DataType]): Shape = {
     withStandardInput(nameInput, inputType).withStandardOutput(nameOutput, outputType)
   }
 
@@ -138,7 +138,7 @@ case class Shape private (inputs: Seq[Socket],
     * @param dataType type of standard input socket
     * @return copy of the shape with standard input socket added
     */
-  def withStandardInput(name: String, dataType: DataType): Shape = withInput(name, Shape.standardInputPort, dataType)
+  def withStandardInput(name: String, dataType: Option[DataType]): Shape = withInput(name, Shape.standardInputPort, dataType)
 
   /** Add standard output socket to the shape.
     *
@@ -153,7 +153,7 @@ case class Shape private (inputs: Seq[Socket],
     * @param dataType type of standard output socket
     * @return copy of the shape with standard output socket added
     */
-  def withStandardOutput(name: String, dataType: DataType): Shape = withOutput(name, Shape.standardOutputPort, dataType)
+  def withStandardOutput(name: String, dataType: Option[DataType]): Shape = withOutput(name, Shape.standardOutputPort, dataType)
 
   /** Add an optional input socket to the shape.
     *
@@ -230,9 +230,9 @@ case class Shape private (inputs: Seq[Socket],
     * @param dataType type of input socket
     * @return copy of the shape with input socket added 
     */
-  def withInput(name: String, port: String, dataType: DataType): Shape = {
+  def withInput(name: String, port: String, dataType: Option[DataType]): Shape = {
     require(!inputLookup.contains(port), s"input already exists for port: $port")
-    val socket = Socket(name, port, Some(dataType))
+    val socket = Socket(name, port, dataType)
     val inputLookup2 = inputLookup + (port -> socket)
     copy(inputs = inputs :+ socket, inputLookup = inputLookup2)
   }
@@ -257,9 +257,9 @@ case class Shape private (inputs: Seq[Socket],
     * @param dataType type of output socket
     * @return copy of the shape with output socket added 
     */
-  def withOutput(name: String, port: String, dataType: DataType): Shape = {
+  def withOutput(name: String, port: String, dataType: Option[DataType]): Shape = {
     require(!outputLookup.contains(port), s"output already exists for port: $port")
-    val socket = Socket(name, port, Some(dataType))
+    val socket = Socket(name, port, dataType)
     val outputLookup2 = outputLookup + (port -> socket)
     copy(outputs = outputs :+ socket, outputLookup = outputLookup2)
   }

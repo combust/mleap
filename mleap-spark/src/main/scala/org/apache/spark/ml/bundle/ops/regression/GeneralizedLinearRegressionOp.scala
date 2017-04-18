@@ -6,6 +6,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -55,9 +56,12 @@ class GeneralizedLinearRegressionOp extends OpNode[SparkBundleContext, Generaliz
   }
 
   override def shape(node: GeneralizedLinearRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    val s = Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction")
-    if(node.isSet(node.linkPredictionCol)) { s.withOutput(node.getLinkPredictionCol, "link_prediction") }
+    val dataset = context.context.dataset
+    val s = Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset)).
+      withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset))
+    if(node.isSet(node.linkPredictionCol)) {
+      s.withOutput(node.getLinkPredictionCol, "link_prediction", fieldType(node.getLinkPredictionCol, dataset))
+    }
     s
   }
 }

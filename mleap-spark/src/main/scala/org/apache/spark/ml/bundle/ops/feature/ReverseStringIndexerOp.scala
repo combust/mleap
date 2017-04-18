@@ -6,6 +6,7 @@ import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.{Attribute, BinaryAttribute, NominalAttribute, NumericAttribute}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.IndexToString
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 import org.apache.spark.sql.types.StructField
 
 import scala.util.{Failure, Try}
@@ -69,6 +70,8 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
   }
 
   override def shape(node: IndexToString)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
   }
 }

@@ -5,6 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.feature.OneHotEncoderModel
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 import scala.util.{Failure, Try}
 
@@ -44,6 +45,8 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoderModel, One
   }
 
   override def shape(node: OneHotEncoderModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
   }
 }

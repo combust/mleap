@@ -39,8 +39,8 @@ trait TypeConverters {
     case LongType => Some(types.LongType())
     case FloatType => Some(types.FloatType())
     case DoubleType => Some(types.DoubleType())
-    case at: VectorUDT => Some(types.ListType(types.DoubleType()))
-
+    case vt:VectorUDT => Some(types.ListType(types.DoubleType()))
+    case at: ArrayType =>  Some(types.ListType(mleapType(at.elementType).get))
 //    case lt: types.ListType => sparkType(lt.base).map(t => ArrayType(t, containsNull = false))
 //    case tt: types.TensorType => Some(new TensorUDT)
 //    case ct: types.CustomType => UDTRegistration.getUDTFor(ct.klazz.getCanonicalName).

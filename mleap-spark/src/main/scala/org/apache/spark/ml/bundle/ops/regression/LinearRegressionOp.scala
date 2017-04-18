@@ -6,6 +6,7 @@ import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.regression.LinearRegressionModel
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -46,6 +47,8 @@ class LinearRegressionOp extends OpNode[SparkBundleContext, LinearRegressionMode
   }
 
   override def shape(node: LinearRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset))
+      .withOutput(node.getPredictionCol, "prediction",  fieldType(node.getPredictionCol, dataset))
   }
 }

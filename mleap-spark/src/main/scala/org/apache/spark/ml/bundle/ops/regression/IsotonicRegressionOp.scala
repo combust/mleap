@@ -7,6 +7,7 @@ import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.ml.regression.IsotonicRegressionModel
 import org.apache.spark.mllib.regression
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 import org.apache.spark.sql.types.DoubleType
 
 /**
@@ -61,6 +62,8 @@ class IsotonicRegressionOp extends OpNode[SparkBundleContext, IsotonicRegression
   }
 
   override def shape(node: IsotonicRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset))
+      .withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset))
   }
 }

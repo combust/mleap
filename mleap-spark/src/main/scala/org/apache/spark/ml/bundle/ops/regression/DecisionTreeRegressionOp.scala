@@ -7,6 +7,7 @@ import ml.combust.bundle.tree.decision.TreeSerializer
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.bundle.tree.decision.SparkNodeWrapper
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 8/22/16.
@@ -50,6 +51,8 @@ class DecisionTreeRegressionOp extends OpNode[SparkBundleContext, DecisionTreeRe
   }
 
   override def shape(node: DecisionTreeRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset))
+      .withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset))
   }
 }

@@ -21,9 +21,12 @@ class IsotonicRegressionOp extends OpNode[SparkBundleContext, IsotonicRegression
 
     override def store(model: Model, obj: IsotonicRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      assert(context.context.dataset.isDefined, "IsotonicRegressionModel requires a transformed DataFrame to serialize")
+
       var m = model.withAttr("boundaries", Value.doubleList(obj.boundaries.toArray.toSeq)).
         withAttr("predictions", Value.doubleList(obj.predictions.toArray.toSeq)).
         withAttr("isotonic", Value.boolean(obj.getIsotonic))
+
       if(context.context.dataset.get.schema(obj.getFeaturesCol).dataType.isInstanceOf[VectorUDT]) {
         m = m.withAttr("feature_index", Value.long(obj.getFeatureIndex))
       }

@@ -7,6 +7,7 @@ import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.BucketedRandomProjectionLSHModel
 import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -52,7 +53,9 @@ class BucketedRandomProjectionLSHOp extends OpNode[SparkBundleContext, BucketedR
   }
 
   override def shape(node: BucketedRandomProjectionLSHModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
   }
 }
 

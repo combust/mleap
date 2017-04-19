@@ -7,6 +7,7 @@ import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.clustering.BisectingKMeansModel
 import org.apache.spark.mllib.clustering
 import org.apache.spark.mllib.clustering.bundle.tree.clustering.{ClusteringTreeNodeUtil, SparkNodeWrapper}
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 import scala.util.Try
 
@@ -46,7 +47,9 @@ class BisectingKMeansOp extends OpNode[SparkBundleContext, BisectingKMeansModel,
   }
 
   override def shape(node: BisectingKMeansModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withInput(node.getFeaturesCol, "features").withOutput(node.getPredictionCol, "prediction")
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset))
+      .withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset))
   }
 
   private def getParentModel(obj: BisectingKMeansModel): clustering.BisectingKMeansModel = {

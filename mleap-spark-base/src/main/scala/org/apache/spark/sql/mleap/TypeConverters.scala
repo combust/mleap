@@ -41,11 +41,6 @@ trait TypeConverters {
     case DoubleType => Some(types.DoubleType())
     case vt:VectorUDT => Some(types.ListType(types.DoubleType()))
     case at: ArrayType =>  Some(types.ListType(mleapType(at.elementType).get))
-//    case lt: types.ListType => sparkType(lt.base).map(t => ArrayType(t, containsNull = false))
-//    case tt: types.TensorType => Some(new TensorUDT)
-//    case ct: types.CustomType => UDTRegistration.getUDTFor(ct.klazz.getCanonicalName).
-//      map(_.newInstance().asInstanceOf[UserDefinedType[_]])
-//    case types.AnyType(_) => None
     case _ => throw new RuntimeException(s"unsupported data type: $dataType")
   }
 

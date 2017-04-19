@@ -5,6 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.DCT
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -40,6 +41,8 @@ class DCTOp extends OpNode[SparkBundleContext, DCT, DCT] {
   }
 
   override def shape(node: DCT)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
   }
 }

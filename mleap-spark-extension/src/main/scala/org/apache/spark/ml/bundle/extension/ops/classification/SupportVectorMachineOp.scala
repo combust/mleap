@@ -7,6 +7,7 @@ import org.apache.spark.ml.bundle.util.ParamUtil
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.classification.SVMModel
 import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -61,12 +62,15 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
   }
 
   override def shape(node: SVMModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
     val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
+    val rawPredictionType = if(node.isDefined(node.rawPredictionCol)) fieldType(node.getRawPredictionCol, dataset) else None
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+    val probabilityType = if(node.isDefined(node.probabilityCol)) fieldType(node.getProbabilityCol, dataset) else None
 
-    Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction").
-      withOutput(rawPrediction, "raw_prediction").
-      withOutput(probability, "probability")
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset)).
+      withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset)).
+      withOutput(rawPrediction, "raw_prediction", rawPredictionType).
+      withOutput(probability, "probability", probabilityType)
   }
 }

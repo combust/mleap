@@ -175,6 +175,16 @@ case class Shape private (inputs: Seq[Socket],
     name.map(n => withOutput(n, port)).getOrElse(this)
   }
 
+  /** Add an optional typed output socket to the shape.
+    *
+    * @param name name of optional output socket
+    * @param port port of output socket
+    * @return copy of the shape with output socket optionally added
+    */
+  def withOutput(name: Option[String], port: String, dataType: Option[DataType]): Shape = {
+    name.map(n => withOutput(n, port, dataType)).getOrElse(this)
+  }
+
   /** Get the bundle protobuf shape.
     *
     * @return bundle protobuf shape

@@ -6,6 +6,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.ChiSqSelectorModel
 import org.apache.spark.mllib.feature
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 12/27/16.
@@ -43,6 +44,8 @@ class ChiSqSelectorOp extends OpNode[SparkBundleContext, ChiSqSelectorModel, Chi
   }
 
   override def shape(node: ChiSqSelectorModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
-    Shape().withInput(node.getFeaturesCol, "features").withStandardOutput(node.getOutputCol)
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset))
+      .withStandardOutput(node.getOutputCol, fieldType(node.getOutputCol, dataset))
   }
 }

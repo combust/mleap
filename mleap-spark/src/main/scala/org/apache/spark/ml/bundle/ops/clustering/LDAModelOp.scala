@@ -10,6 +10,7 @@ import org.apache.spark.mllib.clustering.{LocalLDAModel => oldLocalLDAModel}
 import ml.combust.bundle.dsl._
 import org.apache.spark.mllib.linalg.DenseMatrix
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 
 /**
@@ -55,9 +56,10 @@ class LDAModelOp extends OpNode[SparkBundleContext, LocalLDAModel, LocalLDAModel
   override def model(node: LocalLDAModel): LocalLDAModel = node
 
   override def shape(node: LocalLDAModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
     Shape().
-      withInput("features", "features").
-      withOutput("topicDistribution", "topicDistribution")
+      withInput("features", "features", fieldType("features", dataset)).
+      withOutput("topicDistribution", "topicDistribution", fieldType("topicDistribution", dataset))
   }
 
   override def load(node: Node, model: LocalLDAModel)(implicit context: BundleContext[SparkBundleContext]): LocalLDAModel = {

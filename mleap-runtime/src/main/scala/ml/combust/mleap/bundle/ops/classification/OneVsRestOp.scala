@@ -22,7 +22,7 @@ class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
       var i = 0
       for(cModel <- obj.classifiers) {
         val name = s"model$i"
-        ModelSerializer(context.bundleContext(name)).write(cModel)
+        ModelSerializer(context.bundleContext(name)).write(cModel).get
         i = i + 1
         name
       }
@@ -35,7 +35,7 @@ class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
       val numClasses = model.value("num_classes").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
-        i => ModelSerializer(context.bundleContext(s"model$i")).read().asInstanceOf[ProbabilisticClassificationModel]
+        i => ModelSerializer(context.bundleContext(s"model$i")).read().get.asInstanceOf[ProbabilisticClassificationModel]
       }
 
       OneVsRestModel(classifiers = models)

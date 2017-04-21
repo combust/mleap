@@ -18,6 +18,8 @@ case class RowTransformBuilder private (inputSchema: StructType,
                                         transforms: Array[(ArrayRow) => ArrayRow]) extends TransformBuilder[RowTransformBuilder] {
   def arraySize: Int = outputSchema.fields.length
 
+  override def schema: StructType = outputSchema
+
   override def withOutput(name: String, selectors: Selector *)
                          (udf: UserDefinedFunction): Try[RowTransformBuilder] = {
     val index = outputSchema.fields.length

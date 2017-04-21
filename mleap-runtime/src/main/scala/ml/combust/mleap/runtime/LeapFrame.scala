@@ -24,7 +24,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     *
     * @return schema
     */
-  def schema: StructType
+  override def schema: StructType
 
   /** Get the dataset.
     *

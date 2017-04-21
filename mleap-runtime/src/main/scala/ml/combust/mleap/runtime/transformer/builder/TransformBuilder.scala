@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime.transformer.builder
 
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
+import ml.combust.mleap.runtime.types.StructType
 
 import scala.util.Try
 
@@ -15,4 +16,6 @@ trait TransformBuilder[B <: TransformBuilder[B]] extends Serializable {
                 (udf: UserDefinedFunction): Try[B] = {
     withOutput(name: String, Selector(input) +: inputs.map(Selector.apply): _*)(udf)
   }
+
+  def schema: StructType
 }

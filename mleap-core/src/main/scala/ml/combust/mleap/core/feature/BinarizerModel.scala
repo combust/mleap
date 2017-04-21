@@ -4,7 +4,6 @@ import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuilder
 
 /**
   * Created by mikhail on 10/16/16.

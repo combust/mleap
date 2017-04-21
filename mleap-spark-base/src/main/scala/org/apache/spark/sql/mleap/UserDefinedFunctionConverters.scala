@@ -18,7 +18,7 @@ trait UserDefinedFunctionConverters {
 
   implicit def udfToSpark(udf: MleapUDF): UserDefinedFunction = {
     UserDefinedFunction(f = convertFunction(udf),
-      dataType = sparkType(udf.returnType).get,
+      dataType = sparkType(udf.returnTypes).get,
       inputTypes = sparkInputs(udf.inputs))
   }
 

@@ -3,13 +3,13 @@ package ml.combust.mleap.runtime
 import java.io.PrintStream
 
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
-import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter, RowReader, RowWriter}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.runtime.util.LeapFrameShow
 
 import scala.reflect.ClassTag
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object LeapFrame {
   def apply(schema: StructType, dataset: Dataset): DefaultLeapFrame = DefaultLeapFrame(schema, dataset)
@@ -77,6 +77,21 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     }
   }
 
+  def withFields(names: Seq[String], dts: TupleDataType, selectors: Selector *)
+                (udf: UserDefinedFunction): Try[LF] = {
+    RowUtil.createRowSelectors(schema, udf.inputs, selectors: _*).flatMap {
+      rowSelectors =>
+        val fields = names.zip(dts.dts).map {
+          case (name, dt) => StructField(name, dt)
+        }
+        schema.withFields(fields).map {
+          schema2 =>
+            val dataset2 = dataset.withValues(rowSelectors: _*)(udf)
+            withSchemaAndDataset(schema2, dataset2)
+        }
+    }
+  }
+
   /** Try to drop a field from the LeapFrame.
     *
     * Returns a Failure if the field does not exist.
@@ -109,6 +124,16 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
   override def withOutput(name: String, selectors: Selector *)
                          (udf: UserDefinedFunction): Try[LF] = {
     withField(name, selectors: _*)(udf)
+  }
+
+  override def withOutputs(outputs: Seq[String], inputs: Selector *)
+                          (udf: UserDefinedFunction): Try[LF] = {
+    (udf.returnType match {
+      case dts: TupleDataType => Success(dts)
+      case _ => Failure(new IllegalArgumentException("Must have a return type of DataTypeSeq for multiple outputs"))
+    }).flatMap {
+      dts => withFields(outputs, dts, inputs: _*)(udf)
+    }
   }
 
   /** Print the schema to standard output.

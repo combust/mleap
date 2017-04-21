@@ -20,6 +20,9 @@ case class RowTransformBuilder private (inputSchema: StructType,
 
   override def schema: StructType = outputSchema
 
+  override def withOutputs(outputs: Seq[String], inputs: Selector *)
+                          (udf: UserDefinedFunction): Try[RowTransformBuilder] = ???
+
   override def withOutput(name: String, selectors: Selector *)
                          (udf: UserDefinedFunction): Try[RowTransformBuilder] = {
     val index = outputSchema.fields.length

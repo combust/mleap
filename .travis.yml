@@ -9,12 +9,8 @@ scala:
 python:
   - "2.7"
 
-before_install:
-  - sudo apt-get -y install python2-pip python-dev
-  - sudo pip2 install -U setuptools
-  - sudo pip2 install -U virtualenvwrapper
-  - python2 -V
-  - pip2 -V
+install:
+  pip install --user -r ./python/requirements.txt
 
 script:
   - travis/travis.sh

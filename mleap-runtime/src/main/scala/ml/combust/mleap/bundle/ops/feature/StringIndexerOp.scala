@@ -1,7 +1,7 @@
 package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.mleap.core.feature.StringIndexerModel
+import ml.combust.mleap.core.feature.{HandleInvalid, StringIndexerModel}
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
@@ -18,12 +18,14 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("labels", Value.stringList(obj.labels))
+      model.withAttr("labels", Value.stringList(obj.labels)).
+        withAttr("handle_invalid", Value.string(obj.handleInvalid.asParamString))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): StringIndexerModel = {
-      StringIndexerModel(labels = model.value("labels").getStringList)
+      StringIndexerModel(labels = model.value("labels").getStringList,
+        handleInvalid = HandleInvalid.fromString(model.value("handle_invalid").getString))
     }
   }
 

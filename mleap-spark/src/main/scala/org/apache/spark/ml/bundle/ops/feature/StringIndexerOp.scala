@@ -17,12 +17,14 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("labels", Value.stringList(obj.labels))
+      model.withAttr("labels", Value.stringList(obj.labels)).
+        withAttr("handle_invalid", Value.string(obj.getHandleInvalid))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): StringIndexerModel = {
-      new StringIndexerModel(uid = "", labels = model.value("labels").getStringList.toArray)
+      new StringIndexerModel(uid = "", labels = model.value("labels").getStringList.toArray).
+        setHandleInvalid(model.value("handle_invalid").getString)
     }
   }
 

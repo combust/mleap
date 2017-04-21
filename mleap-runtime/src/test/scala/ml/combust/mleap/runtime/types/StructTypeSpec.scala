@@ -43,6 +43,13 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
 
     assert(testStruct.withField(field).get.hasField(field.name))
   }
+
+  test("withFields should return a StructType with the fields added") {
+    val fields = Seq(StructField("sixth", StringType()), StructField("seventh", DoubleType()))
+
+    assert(testStruct.withFields(fields).get.hasField("sixth"))
+    assert(testStruct.withFields(fields).get.hasField("seventh"))
+  }
   
   test("Dropping a field from a StructType should remove the field") {
     assert(testStruct.dropField("first").get.getField("first").isEmpty)

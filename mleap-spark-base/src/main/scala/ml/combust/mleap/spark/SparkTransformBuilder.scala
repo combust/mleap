@@ -17,6 +17,9 @@ case class SparkTransformBuilder(dataset: DataFrame) extends TransformBuilder[Sp
   override def schema: StructType = {
     TypeConverters.mleapStructType(dataset.schema)
   }
+  
+  override def withOutputs(outputs: Seq[String], inputs: Selector*)
+                          (udf: UserDefinedFunction): Try[SparkTransformBuilder] = ???
 
   override def withOutput(name: String, selectors: Selector *)
                          (udf: UserDefinedFunction): Try[SparkTransformBuilder] = Try {

@@ -52,7 +52,7 @@ class SupportVectorMachineOp extends OpNode[MleapContext, SupportVectorMachine, 
       model = model)
   }
 
-  override def shape(node: SupportVectorMachine): Shape = Shape().withInput(node.featuresCol, "features").
+  override def shape(node: SupportVectorMachine)(implicit context: BundleContext[MleapContext]): Shape = Shape().withInput(node.featuresCol, "features").
     withOutput(node.predictionCol, "prediction").
     withOutput(node.rawPredictionCol, "raw_prediction").
     withOutput(node.probabilityCol, "probability")

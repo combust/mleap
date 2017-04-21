@@ -57,7 +57,9 @@ class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
       model = model)
   }
 
-  override def shape(node: OneVsRest): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.probabilityCol, "probability"  )
+  override def shape(node: OneVsRest)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withInput(node.featuresCol, "features").
+      withOutput(node.predictionCol, "prediction").
+      withOutput(node.probabilityCol, "probability"  )
+  }
 }

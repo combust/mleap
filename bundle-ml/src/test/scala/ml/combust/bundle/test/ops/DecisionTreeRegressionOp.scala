@@ -111,5 +111,7 @@ class DecisionTreeRegressionOp extends OpNode[Any, DecisionTreeRegression, Decis
       model = model)
   }
 
-  override def shape(node: DecisionTreeRegression): Shape = Shape().withStandardIO(node.input, node.output)
+  override def shape(node: DecisionTreeRegression)(implicit context: BundleContext[Any]): Shape = {
+    Shape().withStandardIO(node.input, node.output)
+  }
 }

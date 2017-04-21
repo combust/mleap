@@ -43,5 +43,7 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
       model = model)
   }
 
-  override def shape(node: StringIndexer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: StringIndexer)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

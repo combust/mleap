@@ -5,6 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.feature.ImputerModel
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by mikhail on 12/18/16.
@@ -48,6 +49,10 @@ class ImputerOp extends OpNode[SparkBundleContext, ImputerModel, ImputerModel] {
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: ImputerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: ImputerModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 
 }

@@ -7,6 +7,7 @@ import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.NominalAttribute
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.classification.{ClassificationModel, OneVsRestModel}
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -66,6 +67,9 @@ class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestMo
     m
   }
 
-  override def shape(node: OneVsRestModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: OneVsRestModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset))
+      .withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset))
+  }
 }

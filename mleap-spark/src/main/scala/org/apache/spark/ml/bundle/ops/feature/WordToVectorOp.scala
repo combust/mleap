@@ -6,6 +6,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.Word2VecModel
 import org.apache.spark.mllib.feature
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -50,7 +51,11 @@ class WordToVectorOp extends OpNode[SparkBundleContext, Word2VecModel, Word2VecM
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: Word2VecModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: Word2VecModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 
   private def getWordVectors(obj: Word2VecModel): feature.Word2VecModel = {
     // UGLY: have to use reflection to get this private field :(

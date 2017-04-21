@@ -4,9 +4,9 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.StringMapModel
-import ml.combust.mleap.runtime.MleapContext
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.feature.StringMap
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 2/5/17.
@@ -58,5 +58,9 @@ class StringMapOp extends OpNode[SparkBundleContext, StringMap, StringMapModel] 
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: StringMap): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: StringMap)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 }

@@ -41,5 +41,7 @@ class NormalizerOp extends OpNode[MleapContext, Normalizer, NormalizerModel] {
       model = model)
   }
 
-  override def shape(node: Normalizer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: Normalizer)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

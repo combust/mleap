@@ -3,23 +3,24 @@ package org.apache.spark.ml.bundle.ops.clustering
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.tensor.{DenseTensor, Tensor}
+import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.clustering.GaussianMixtureModel
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
 import org.apache.spark.ml.stat.distribution.MultivariateGaussian
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 9/30/16.
   */
-class GaussianMixtureOp extends OpNode[MleapContext, GaussianMixtureModel, GaussianMixtureModel] {
-  override val Model: OpModel[MleapContext, GaussianMixtureModel] = new OpModel[MleapContext, GaussianMixtureModel] {
+class GaussianMixtureOp extends OpNode[SparkBundleContext, GaussianMixtureModel, GaussianMixtureModel] {
+  override val Model: OpModel[SparkBundleContext, GaussianMixtureModel] = new OpModel[SparkBundleContext, GaussianMixtureModel] {
     override val klazz: Class[GaussianMixtureModel] = classOf[GaussianMixtureModel]
 
     override def opName: String = Bundle.BuiltinOps.clustering.gaussian_mixture
 
     override def store(model: Model, obj: GaussianMixtureModel)
-                      (implicit context: BundleContext[MleapContext]): Model = {
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
       val (rows, cols) = obj.gaussians.headOption.
         map(g => (g.cov.numRows, g.cov.numCols)).
         getOrElse((-1, -1))
@@ -31,7 +32,7 @@ class GaussianMixtureOp extends OpNode[MleapContext, GaussianMixtureModel, Gauss
     }
 
     override def load(model: Model)
-                     (implicit context: BundleContext[MleapContext]): GaussianMixtureModel = {
+                     (implicit context: BundleContext[SparkBundleContext]): GaussianMixtureModel = {
       val means = model.value("means").getTensorList[Double].map(values => Vectors.dense(values.toArray))
       val covs = model.value("covs").getTensorList[Double].map(values => Matrices.dense(values.dimensions.head, values.dimensions(1), values.toArray))
       val gaussians = means.zip(covs).map {
@@ -52,7 +53,7 @@ class GaussianMixtureOp extends OpNode[MleapContext, GaussianMixtureModel, Gauss
   override def model(node: GaussianMixtureModel): GaussianMixtureModel = node
 
   override def load(node: Node, model: GaussianMixtureModel)
-                   (implicit context: BundleContext[MleapContext]): GaussianMixtureModel = {
+                   (implicit context: BundleContext[SparkBundleContext]): GaussianMixtureModel = {
     val gmm = new GaussianMixtureModel(uid = node.name,
       gaussians = model.gaussians,
       weights = model.weights)
@@ -64,11 +65,13 @@ class GaussianMixtureOp extends OpNode[MleapContext, GaussianMixtureModel, Gauss
     gmm
   }
 
-  override def shape(node: GaussianMixtureModel): Shape = {
+  override def shape(node: GaussianMixtureModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+    val probabilityType = if(node.isDefined(node.probabilityCol)) fieldType(node.getProbabilityCol, dataset) else None
 
-    Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction").
-      withOutput(probability, "probability")
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset)).
+      withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset)).
+      withOutput(probability, "probability", probabilityType)
   }
 }

@@ -45,5 +45,7 @@ class StandardScalerOp extends OpNode[MleapContext, StandardScaler, StandardScal
       model = model)
   }
 
-  override def shape(node: StandardScaler): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: StandardScaler)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

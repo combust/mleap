@@ -9,6 +9,7 @@ import org.apache.spark.ml.clustering.KMeansModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.mllib.clustering
 import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 9/30/16.
@@ -54,6 +55,9 @@ class KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: KMeansModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: KMeansModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset))
+      .withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset))
+  }
 }

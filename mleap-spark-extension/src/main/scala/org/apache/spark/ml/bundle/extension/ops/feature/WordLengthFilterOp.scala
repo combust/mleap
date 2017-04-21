@@ -6,6 +6,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.WordLengthFilterModel
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.feature.WordFilter
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by mageswarand on 14/2/17.
@@ -31,7 +32,11 @@ class WordLengthFilterOp extends OpNode[SparkBundleContext, WordFilter, WordLeng
 
   override def model(node: WordFilter): WordLengthFilterModel = node.model
 
-  override def shape(node: WordFilter): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: WordFilter)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 
   override def load(node: Node, model: WordLengthFilterModel)(implicit context: BundleContext[SparkBundleContext]): WordFilter = {
     new WordFilter(uid = node.name, model = model).

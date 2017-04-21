@@ -7,6 +7,7 @@ import ml.combust.bundle.serializer.ModelSerializer
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.classification.GBTClassificationModel
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 9/24/16.
@@ -69,6 +70,9 @@ class GBTClassifierOp extends OpNode[SparkBundleContext, GBTClassificationModel,
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: GBTClassificationModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: GBTClassificationModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset))
+      .withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset))
+  }
 }

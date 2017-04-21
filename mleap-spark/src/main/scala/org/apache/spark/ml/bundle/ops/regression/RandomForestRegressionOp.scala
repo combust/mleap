@@ -7,6 +7,7 @@ import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.bundle.tree.decision.SparkNodeWrapper
 import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, RandomForestRegressionModel}
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 8/22/16.
@@ -67,7 +68,9 @@ class RandomForestRegressionOp extends OpNode[SparkBundleContext, RandomForestRe
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: RandomForestRegressionModel): Shape = Shape().
-    withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: RandomForestRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset)).
+        withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset))
+  }
 }

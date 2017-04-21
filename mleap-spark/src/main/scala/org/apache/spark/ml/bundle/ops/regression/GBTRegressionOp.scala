@@ -6,6 +6,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.ModelSerializer
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, GBTRegressionModel}
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 9/24/16.
@@ -63,6 +64,9 @@ class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBT
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: GBTRegressionModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def shape(node: GBTRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset))
+      .withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset))
+  }
 }

@@ -36,7 +36,7 @@ class CoalesceOp extends OpNode[MleapContext, Coalesce, CoalesceModel] {
       model = model)
   }
 
-  override def shape(node: Coalesce): Shape = {
+  override def shape(node: Coalesce)(implicit context: BundleContext[MleapContext]): Shape = {
     var i = 0
     node.inputCols.foldLeft(Shape()) {
       case (shape, inputCol) =>

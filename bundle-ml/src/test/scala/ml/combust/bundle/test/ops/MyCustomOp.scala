@@ -43,5 +43,5 @@ class MyCustomOp extends OpNode[Any, MyCustomTransformer, MyCustomTransformer] {
     MyCustomTransformer(model.custom)
   }
 
-  override def shape(node: MyCustomTransformer): Shape = Shape()
+  override def shape(node: MyCustomTransformer)(implicit context: BundleContext[Any]): Shape = Shape()
 }

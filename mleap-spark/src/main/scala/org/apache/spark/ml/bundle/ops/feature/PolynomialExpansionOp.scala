@@ -5,6 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.PolynomialExpansion
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by mikhail on 10/16/16.
@@ -42,5 +43,9 @@ class PolynomialExpansionOp extends OpNode[SparkBundleContext, PolynomialExpansi
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: PolynomialExpansion): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: PolynomialExpansion)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 }

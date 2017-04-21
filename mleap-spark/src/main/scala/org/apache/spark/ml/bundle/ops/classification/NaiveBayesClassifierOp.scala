@@ -7,6 +7,7 @@ import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.classification.NaiveBayesModel
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by fshabbir on 12/25/16.
@@ -53,13 +54,16 @@ class NaiveBayesClassifierOp extends OpNode[SparkBundleContext, NaiveBayesModel,
     node.shape.getOutput("raw_prediction").map(rp => nb.setRawPredictionCol(rp.name)).getOrElse(nb)
   }
 
-  override def shape(node: NaiveBayesModel): Shape = {
+  override def shape(node: NaiveBayesModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
     val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
+    val rawPredictionType = if(node.isDefined(node.rawPredictionCol)) fieldType(node.getRawPredictionCol, dataset) else None
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+    val probabilityType = if(node.isDefined(node.probabilityCol)) fieldType(node.getProbabilityCol, dataset) else None
 
-    Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction").
-      withOutput(rawPrediction, "raw_prediction").
-      withOutput(probability, "probability")
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset)).
+      withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset)).
+      withOutput(rawPrediction, "raw_prediction", rawPredictionType).
+      withOutput(probability, "probability", probabilityType)
   }
 }

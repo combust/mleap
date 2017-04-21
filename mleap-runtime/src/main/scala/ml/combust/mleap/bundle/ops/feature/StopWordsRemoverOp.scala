@@ -45,5 +45,7 @@ class StopWordsRemoverOp extends OpNode[MleapContext, StopWordsRemover, StopWord
     )
   }
 
-  override def shape(node: StopWordsRemover): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: StopWordsRemover)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

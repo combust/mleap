@@ -42,5 +42,7 @@ class BinarizerOp extends OpNode[MleapContext, Binarizer, BinarizerModel] {
       model = model)
   }
 
-  override def shape(node: Binarizer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: Binarizer)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

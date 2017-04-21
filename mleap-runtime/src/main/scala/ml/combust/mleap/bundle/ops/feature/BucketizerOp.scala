@@ -42,5 +42,7 @@ class BucketizerOp extends OpNode[MleapContext, Bucketizer, BucketizerModel]{
       model = model)
   }
 
-  override def shape(node: Bucketizer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: Bucketizer)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

@@ -5,6 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.StopWordsRemover
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by mikhail on 10/16/16.
@@ -44,5 +45,9 @@ class StopWordsRemoverOp extends OpNode[SparkBundleContext, StopWordsRemover, St
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: StopWordsRemover): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: StopWordsRemover)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 }

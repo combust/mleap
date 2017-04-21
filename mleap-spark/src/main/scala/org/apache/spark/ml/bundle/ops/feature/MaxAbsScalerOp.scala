@@ -41,5 +41,7 @@ class MaxAbsScalerOp extends OpNode[SparkBundleContext, MaxAbsScalerModel, MaxAb
     new MaxAbsScalerModel(uid = node.name, maxAbs = model.maxAbs)
   }
 
-  override def shape(node: MaxAbsScalerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: MaxAbsScalerModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  }
 }

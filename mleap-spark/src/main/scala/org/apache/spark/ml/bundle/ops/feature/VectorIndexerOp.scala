@@ -5,6 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.VectorIndexerModel
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -63,5 +64,9 @@ class VectorIndexerOp extends OpNode[SparkBundleContext, VectorIndexerModel, Vec
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: VectorIndexerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: VectorIndexerModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 }

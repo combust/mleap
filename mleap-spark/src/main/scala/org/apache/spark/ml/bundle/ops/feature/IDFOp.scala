@@ -7,6 +7,7 @@ import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.IDFModel
 import org.apache.spark.mllib.feature
 import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -43,5 +44,9 @@ class IDFOp extends OpNode[SparkBundleContext, IDFModel, IDFModel] {
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: IDFModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: IDFModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 }

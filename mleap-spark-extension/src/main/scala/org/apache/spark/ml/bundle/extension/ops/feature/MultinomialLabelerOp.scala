@@ -6,6 +6,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.{MultinomialLabelerModel, ReverseStringIndexerModel}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.feature.MultinomialLabeler
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 1/18/17.
@@ -44,7 +45,10 @@ class MultinomialLabelerOp extends OpNode[SparkBundleContext, MultinomialLabeler
       setLabelsCol(node.shape.output("labels").name)
   }
 
-  override def shape(node: MultinomialLabeler): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getProbabilitiesCol, "probabilities").
-    withOutput(node.getLabelsCol, "labels")
+  override def shape(node: MultinomialLabeler)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset)).
+      withOutput(node.getProbabilitiesCol, "probabilities", fieldType(node.getProbabilitiesCol, dataset)).
+      withOutput(node.getLabelsCol, "labels", fieldType(node.getLabelsCol, dataset))
+  }
 }

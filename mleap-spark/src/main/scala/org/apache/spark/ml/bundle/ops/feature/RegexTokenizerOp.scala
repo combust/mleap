@@ -5,6 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.RegexTokenizer
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 class RegexTokenizerOp extends OpNode[SparkBundleContext, RegexTokenizer, RegexTokenizer] {
   override val Model: OpModel[SparkBundleContext, RegexTokenizer] = new OpModel[SparkBundleContext, RegexTokenizer] {
@@ -56,5 +57,9 @@ class RegexTokenizerOp extends OpNode[SparkBundleContext, RegexTokenizer, RegexT
       .setToLowercase(model.getToLowercase)
   }
 
-  override def shape(node: RegexTokenizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: RegexTokenizer)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 }

@@ -62,5 +62,7 @@ class VectorIndexerOp extends OpNode[MleapContext, VectorIndexer, VectorIndexerM
       model = model)
   }
 
-  override def shape(node: VectorIndexer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: VectorIndexer)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

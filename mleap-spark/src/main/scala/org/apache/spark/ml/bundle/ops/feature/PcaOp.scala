@@ -7,6 +7,7 @@ import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.PCAModel
 import org.apache.spark.ml.linalg.{DenseMatrix, DenseVector}
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 10/12/16.
@@ -47,5 +48,9 @@ class PcaOp extends OpNode[SparkBundleContext, PCAModel, PCAModel] {
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: PCAModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: PCAModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 }

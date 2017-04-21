@@ -41,5 +41,5 @@ class PipelineOp extends OpNode[MleapContext, Pipeline, Pipeline] {
     model.copy(uid = node.name)
   }
 
-  override def shape(node: Pipeline): Shape = Shape()
+  override def shape(node: Pipeline)(implicit context: BundleContext[MleapContext]): Shape = Shape()
 }

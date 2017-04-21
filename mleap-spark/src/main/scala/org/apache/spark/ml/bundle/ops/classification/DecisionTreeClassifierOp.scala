@@ -8,6 +8,7 @@ import ml.combust.bundle.tree.decision.TreeSerializer
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.bundle.tree.decision.SparkNodeWrapper
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 8/22/16.
@@ -55,13 +56,16 @@ class DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeCl
     node.shape.getOutput("raw_prediction").map(rp => dt.setRawPredictionCol(rp.name)).getOrElse(dt)
   }
 
-  override def shape(node: DecisionTreeClassificationModel): Shape = {
+  override def shape(node: DecisionTreeClassificationModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
     val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
+    val rawPredictionType = if(node.isDefined(node.rawPredictionCol)) fieldType(node.getRawPredictionCol, dataset) else None
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+    val probabilityType = if(node.isDefined(node.probabilityCol)) fieldType(node.getProbabilityCol, dataset) else None
 
-    Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction").
-      withOutput(rawPrediction, "raw_prediction").
-      withOutput(probability, "probability")
+    Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset)).
+      withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset)).
+      withOutput(rawPrediction, "raw_prediction", rawPredictionType).
+      withOutput(probability, "probability", probabilityType)
   }
 }

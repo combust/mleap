@@ -45,5 +45,7 @@ class PcaOp extends OpNode[MleapContext, Pca, PcaModel] {
       model = model)
   }
 
-  override def shape(node: Pca): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: Pca)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withStandardIO(node.inputCol, node.outputCol)
+  }
 }

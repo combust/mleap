@@ -5,6 +5,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.Tokenizer
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -35,5 +36,9 @@ class TokenizerOp extends OpNode[SparkBundleContext, Tokenizer, Tokenizer] {
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: Tokenizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: Tokenizer)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    Shape().withStandardIO(node.getInputCol, fieldType(node.getInputCol, dataset),
+      node.getOutputCol, fieldType(node.getOutputCol, dataset))
+  }
 }

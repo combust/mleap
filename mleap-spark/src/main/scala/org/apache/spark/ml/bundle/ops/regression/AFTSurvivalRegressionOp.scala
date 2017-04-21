@@ -6,6 +6,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.regression.AFTSurvivalRegressionModel
+import org.apache.spark.sql.mleap.TypeConverters.fieldType
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -53,10 +54,13 @@ class AFTSurvivalRegressionOp extends OpNode[SparkBundleContext, AFTSurvivalRegr
     r
   }
 
-  override def shape(node: AFTSurvivalRegressionModel): Shape = {
-    var s = Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction")
-    if(node.isSet(node.quantilesCol)) { s = s.withOutput(node.getQuantilesCol, "quantiles") }
+  override def shape(node: AFTSurvivalRegressionModel)(implicit context: BundleContext[SparkBundleContext]): Shape = {
+    val dataset = context.context.dataset
+    var s = Shape().withInput(node.getFeaturesCol, "features", fieldType(node.getFeaturesCol, dataset)).
+      withOutput(node.getPredictionCol, "prediction", fieldType(node.getPredictionCol, dataset))
+    if(node.isSet(node.quantilesCol)) {
+      s = s.withOutput(node.getQuantilesCol, "quantiles", fieldType(node.getQuantilesCol, dataset))
+    }
 
     s
   }

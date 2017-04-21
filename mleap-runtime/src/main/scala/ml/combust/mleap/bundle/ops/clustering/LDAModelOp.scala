@@ -49,9 +49,8 @@ class LDAModelOp extends OpNode[MleapContext, LDAModel, LocalLDAModel] {
 
   override def model(node: LDAModel): LocalLDAModel = node.model
 
-  override def shape(node: LDAModel): Shape = {
-    Shape().
-      withInput(node.featureCol, "features").
+  override def shape(node: LDAModel)(implicit context: BundleContext[MleapContext]): Shape = {
+    Shape().withInput(node.featureCol, "features").
       withOutput(node.topicDistributionCol, "topicDistribution")
   }
 

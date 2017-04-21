@@ -52,7 +52,7 @@ case class ValueConverter() {
       (value) =>
         customRecord.put(customSchemaIndex, new String(dataType.toBytes(value), bytesCharset))
         customRecord
-    case AnyType(_) => throw new IllegalArgumentException(s"invalid data type: $dataType")
+    case _ => throw new IllegalArgumentException(s"invalid data type: $dataType")
   }
 
   def avroToMleap(dataType: DataType): (Any) => Any = {

@@ -1,5 +1,7 @@
 package ml.combust.mleap.runtime
 
+import scala.collection.JavaConverters._
+
 object LocalDataset {
   def apply(row: Row, rows: Row *): LocalDataset = LocalDataset(row +: rows)
 }
@@ -9,6 +11,8 @@ object LocalDataset {
   * @param data array of row data
   */
 case class LocalDataset(data: Seq[Row]) extends Dataset {
+  def this(data: java.lang.Iterable[Row]) = this(data.asScala.toSeq)
+
   override def apply(index: Int): Row = data(index)
 
   override def update(f: (Row) => Row): LocalDataset = {

@@ -9,7 +9,7 @@ import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.runtime.util.LeapFrameShow
 
 import scala.reflect.ClassTag
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 object LeapFrame {
   def apply(schema: StructType, dataset: Dataset): DefaultLeapFrame = DefaultLeapFrame(schema, dataset)

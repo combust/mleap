@@ -19,6 +19,12 @@ trait TypeConverters {
     case types.LongType(_) => Some(LongType)
     case types.FloatType(_) => Some(FloatType)
     case types.DoubleType(_) => Some(DoubleType)
+    case tt: types.TupleType =>
+      val fields = tt.dts.zipWithIndex.map {
+        case (dt, index) =>
+          sparkType(dt).map(d => StructField(s"_$index", d)).get
+      }
+      Some(StructType(fields))
     case lt: types.ListType => sparkType(lt.base).map(t => ArrayType(t, containsNull = false))
     case _: types.TensorType => Some(new TensorUDT)
     case ct: types.CustomType => UDTRegistration.getUDTFor(ct.klazz.getCanonicalName).

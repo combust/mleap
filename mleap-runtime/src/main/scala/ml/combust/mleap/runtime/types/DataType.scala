@@ -97,7 +97,7 @@ case class CustomType private (ct: bundle.custom.CustomType[Any],
   override def fromBytes(bytes: Array[Byte]): Any = ct.fromBytes(bytes)
 }
 
-case class TupleDataType(dts: DataType *) extends DataType {
+case class TupleType(dts: DataType *) extends DataType {
   override val isNullable: Boolean = false
   override def asNullable: DataType = ???
 

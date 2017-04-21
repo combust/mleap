@@ -3,7 +3,7 @@ package org.apache.spark.sql.mleap
 import ml.combust.mleap.runtime.function.{UserDefinedFunction => MleapUDF}
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import ml.combust.mleap.runtime.types
-import ml.combust.mleap.runtime.types.{AnyType, ListType}
+import ml.combust.mleap.runtime.types.{AnyType, ListType, TupleType}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.DataType
 

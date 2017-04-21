@@ -54,7 +54,7 @@ object DatasetFormat {
     case tt: TensorType => tensorSerializer(tt)
     case ct: CustomType => ct.format
     case AnyType(_) => serializationError("AnyType unsupported for serialization")
-    case _: TupleDataType => serializationError("DataTypeSeq only used for UDFs with multiple outputs")
+    case _: TupleType => serializationError("DataTypeSeq only used for UDFs with multiple outputs")
   }
 }
 

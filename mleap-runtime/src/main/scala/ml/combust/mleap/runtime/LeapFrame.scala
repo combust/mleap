@@ -81,7 +81,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
                 (udf: UserDefinedFunction): Try[LF] = {
     RowUtil.createRowSelectors(schema, udf.inputs, selectors: _*).flatMap {
       rowSelectors =>
-        val fields = names.zip(udf.returnType.asInstanceOf[TupleDataType].dts).map {
+        val fields = names.zip(udf.returnType.asInstanceOf[TupleType].dts).map {
           case (name, dt) => StructField(name, dt)
         }
 

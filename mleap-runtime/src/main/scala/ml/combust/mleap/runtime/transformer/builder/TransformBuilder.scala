@@ -18,4 +18,12 @@ trait TransformBuilder[B <: TransformBuilder[B]] extends Serializable {
   }
 
   def schema: StructType
+
+  def withOutputs(outputs: Seq[String], inputs: Selector *)
+                 (udf: UserDefinedFunction): Try[B]
+
+  def withOutputs(outputs: Seq[String], input: String, inputs: String *)
+                 (udf: UserDefinedFunction): Try[B] = {
+    withOutputs(outputs, Selector(input) +: inputs.map(Selector.apply): _*)(udf)
+  }
 }

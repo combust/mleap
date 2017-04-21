@@ -163,6 +163,13 @@ trait Row extends Iterable[Any] {
     withValue(udfValue(selectors: _*)(udf))
   }
 
+  def withValues(selectors: RowSelector *)(udf: UserDefinedFunction): Row = {
+    udfValue(selectors: _*)(udf) match {
+      case s: Product => withValues(s.productIterator.toSeq)
+      case _ => throw new IllegalArgumentException("Output of udf must be a Seq for multiple outputs")
+    }
+  }
+
   def udfValue(selectors: RowSelector *)(udf: UserDefinedFunction): Any = {
     udf.inputs.length match {
       case 0 =>
@@ -186,6 +193,8 @@ trait Row extends Iterable[Any] {
     * @return row with the new value
     */
   def withValue(value: Any): Row
+
+  def withValues(values: Seq[Any]): Row
 
   /** Create a new row from specified indices.
     *
@@ -223,6 +232,7 @@ case class ArrayRow(values: mutable.WrappedArray[Any]) extends Row {
   override def iterator: Iterator[Any] = values.iterator
 
   override def withValue(value: Any): Row = ArrayRow(values :+ value)
+  override def withValues(values: Seq[Any]): Row = ArrayRow(this.values ++ values)
 
   override def selectIndices(indices: Int*): Row = ArrayRow(indices.toArray.map(values))
   override def dropIndex(index: Int): Row = ArrayRow(values.take(index) ++ values.drop(index + 1))

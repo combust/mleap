@@ -1,9 +1,11 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.bundle.ByteString
 import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.Tensor
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /** Companion object for creating default rows.
@@ -60,6 +62,41 @@ trait Row extends Iterable[Any] {
     * @return optional value at index cast to given type
     */
   def optionAs[T](index: Int): Option[T] = get(index).asInstanceOf[Option[T]]
+
+  /** Get value at index as a boolean.
+    *
+    * @param index index of value
+    * @return boolean value
+    */
+  def getBool(index: Int): Boolean = getAs[Boolean](index)
+
+  /** Get value at index as a byte.
+    *
+    * @param index index of value
+    * @return byte value
+    */
+  def getByte(index: Int): Byte = getAs[Byte](index)
+
+  /** Get value at index as a short.
+    *
+    * @param index index of value
+    * @return short value
+    */
+  def getShort(index: Int): Short = getAs[Short](index)
+
+  /** Get value at index as a byte string.
+    *
+    * @param index index of value
+    * @return byte string value
+    */
+  def getByteString(index: Int): ByteString = getAs[ByteString](index)
+
+  /** Get value at index as a float.
+    *
+    * @param index index of value
+    * @return float value
+    */
+  def getFloat(index: Int): Float = getAs[Float](index)
 
   /** Get value at index as a double.
     *
@@ -130,6 +167,14 @@ trait Row extends Iterable[Any] {
     * @return optional tensor value
     */
   def optionTensor[T](index: Int): Option[Tensor[T]] = optionAs[Tensor[T]](index)
+
+  /** Get value at index as an array.
+    *
+    * @param index index of value
+    * @tparam T inner type of the array
+    * @return seq value
+    */
+  def getList[T](index: Int): java.util.List[T] = getSeq[T](index).asJava
 
   /** Get value at index as an array.
     *
@@ -227,6 +272,8 @@ object ArrayRow {
   * @param values array of values in row
   */
 case class ArrayRow(values: mutable.WrappedArray[Any]) extends Row {
+  def this(values: java.lang.Iterable[Any]) = this(values.asScala.toArray)
+
   override def get(index: Int): Any = values(index)
 
   override def iterator: Iterator[Any] = values.iterator

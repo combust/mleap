@@ -77,13 +77,14 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     }
   }
 
-  def withFields(names: Seq[String], dts: TupleDataType, selectors: Selector *)
+  def withFields(names: Seq[String], selectors: Selector *)
                 (udf: UserDefinedFunction): Try[LF] = {
     RowUtil.createRowSelectors(schema, udf.inputs, selectors: _*).flatMap {
       rowSelectors =>
-        val fields = names.zip(dts.dts).map {
+        val fields = names.zip(udf.returnType.asInstanceOf[TupleDataType].dts).map {
           case (name, dt) => StructField(name, dt)
         }
+
         schema.withFields(fields).map {
           schema2 =>
             val dataset2 = dataset.withValues(rowSelectors: _*)(udf)
@@ -128,12 +129,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
 
   override def withOutputs(outputs: Seq[String], inputs: Selector *)
                           (udf: UserDefinedFunction): Try[LF] = {
-    (udf.returnType match {
-      case dts: TupleDataType => Success(dts)
-      case _ => Failure(new IllegalArgumentException("Must have a return type of DataTypeSeq for multiple outputs"))
-    }).flatMap {
-      dts => withFields(outputs, dts, inputs: _*)(udf)
-    }
+    withFields(outputs, inputs: _*)(udf)
   }
 
   /** Print the schema to standard output.

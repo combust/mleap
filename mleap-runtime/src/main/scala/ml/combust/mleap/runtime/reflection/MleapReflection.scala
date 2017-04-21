@@ -40,6 +40,9 @@ trait MleapReflection {
         val TypeRef(_, _, Seq(elementType)) = t
         val baseType = dataTypeFor(elementType)
         baseType.asNullable
+      case t if t <:< mirrorType[Product] =>
+        val dts = t.typeArgs.map(dataTypeFor)
+        TupleDataType(dts: _*)
       case t => throw new IllegalArgumentException(s"unknown type $t")
     }
   }

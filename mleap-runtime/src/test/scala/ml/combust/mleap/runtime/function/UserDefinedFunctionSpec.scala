@@ -32,7 +32,7 @@ class UserDefinedFunctionSpec extends FunSpec {
   }
 
   private def assertUdfForm(udf: UserDefinedFunction, returnType: DataType, argTypes: DataType *): Unit = {
-    assert(udf.returnTypes == returnType)
+    assert(udf.returnType == returnType)
     assert(udf.inputs.length == argTypes.length)
     udf.inputs.zip(argTypes).foreach {
       case (inputType, argType) => assert(inputType == argType)

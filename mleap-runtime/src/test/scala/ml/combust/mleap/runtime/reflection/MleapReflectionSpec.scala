@@ -36,6 +36,7 @@ class MleapReflectionSpec extends FunSpec {
       assert(dataType[Option[Double]] == DoubleType(true))
       assert(dataType[Tensor[Double]] == TensorType(DoubleType()))
       assert(dataType[Any] == AnyType())
+      assert(dataType[(String, Double)] == TupleDataType(StringType(), DoubleType()))
     }
 
     describe("#with an invalid Scala type") {

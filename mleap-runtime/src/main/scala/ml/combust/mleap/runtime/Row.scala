@@ -165,7 +165,7 @@ trait Row extends Iterable[Any] {
 
   def withValues(selectors: RowSelector *)(udf: UserDefinedFunction): Row = {
     udfValue(selectors: _*)(udf) match {
-      case s: Seq[_] => withValues(s)
+      case s: Product => withValues(s.productIterator.toSeq)
       case _ => throw new IllegalArgumentException("Output of udf must be a Seq for multiple outputs")
     }
   }

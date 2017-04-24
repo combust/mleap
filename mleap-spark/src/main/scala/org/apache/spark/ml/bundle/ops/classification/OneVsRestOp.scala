@@ -22,7 +22,7 @@ class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestMo
       var i = 0
       for(cModel <- obj.models) {
         val name = s"model$i"
-        ModelSerializer(context.bundleContext(name)).write(cModel)
+        ModelSerializer(context.bundleContext(name)).write(cModel).get
         i = i + 1
         name
       }
@@ -35,7 +35,7 @@ class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestMo
       val numClasses = model.value("num_classes").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
-        i => ModelSerializer(context.bundleContext(s"model$i")).read().asInstanceOf[ClassificationModel[_, _]]
+        i => ModelSerializer(context.bundleContext(s"model$i")).read().get.asInstanceOf[ClassificationModel[_, _]]
       }
 
       val labelMetadata = NominalAttribute.defaultAttr.

@@ -96,3 +96,16 @@ case class CustomType private (ct: bundle.custom.CustomType[Any],
   override def toBytes(obj: Any): Array[Byte] = ct.toBytes(obj)
   override def fromBytes(bytes: Array[Byte]): Any = ct.fromBytes(bytes)
 }
+
+case class TupleType(dts: DataType *) extends DataType {
+  override val isNullable: Boolean = false
+  override def asNullable: DataType = ???
+
+  override def simpleString: String = {
+    val sb = StringBuilder.newBuilder
+    sb.append("TupleDataType(")
+    sb.append(dts.map(_.simpleString).mkString(","))
+    sb.append(")")
+    sb.toString
+  }
+}

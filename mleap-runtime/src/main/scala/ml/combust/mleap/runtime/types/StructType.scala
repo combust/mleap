@@ -1,9 +1,10 @@
 package ml.combust.mleap.runtime.types
 
-import java.io.{OutputStream, PrintStream}
+import java.io.PrintStream
 
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader, RowWriter}
 
+import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 /**  Structured container (schema) for fields.
@@ -20,6 +21,10 @@ object StructType {
 
   def apply(fields: Seq[StructField]): Try[StructType] = {
     StructType().withFields(fields)
+  }
+
+  def apply(fields: java.lang.Iterable[StructField]): Try[StructType] = {
+    apply(fields.asScala.toSeq)
   }
 }
 

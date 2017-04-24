@@ -37,6 +37,21 @@ trait DatasetSpec[D <: Dataset] extends FunSpec {
         }
       }
 
+      describe("#withValues") {
+        describe("with a user defined function") {
+          it("created a new dataset with the calculated value from the user defined function") {
+            val dataset2 = dataset.withValues(r => r.get(1), r => r.get(0)) {
+              (v1: String, v2: Int) => (s"$v1:$v2", v2 + 10)
+            }
+            val data = dataset2.toSeq.map(r => r.getString(2))
+            val dataDoubles = dataset2.toSeq.map(r => r.getInt(3))
+
+            assert(data == Seq("hey:42", "there:13"))
+            assert(dataDoubles == Seq(52, 23))
+          }
+        }
+      }
+
       describe("#selectIndices") {
         it("creates a new dataset with the selected indices") {
           val dataset2 = dataset.selectIndices(0)

@@ -109,7 +109,7 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
       case lt: ListType => mleapListTypeWriterFormat.write(lt)
       case tt: TensorType => mleapTensorTypeFormat.write(tt)
       case ct: CustomType => mleapCustomTypeWriterFormat.write(ct)
-      case AnyType(_) => serializationError("AnyType not supported for JSON serialization")
+      case _ => serializationError(s"$obj not supported for JSON serialization")
     }
   }
 

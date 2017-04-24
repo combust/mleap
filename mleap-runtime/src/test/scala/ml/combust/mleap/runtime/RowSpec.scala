@@ -182,6 +182,27 @@ trait RowSpec[R <: Row] extends FunSpec {
       }
     }
 
+    describe("#withValues") {
+      describe("user defined function") {
+        it("adds a value using a user defined function") {
+          val r2 = row.withValues(r => r.get(1), r => r.get(2)) {
+            (v1: Int, v2: Seq[Int]) => (v1 + v2.head, v1 - v2.head)
+          }
+
+          assert(r2.getInt(6) == 98)
+          assert(r2.getInt(7) == -14)
+        }
+      }
+
+      describe("value arg") {
+        it("adds the value to the row") {
+          val r = row.withValue(789)
+
+          assert(r.getInt(6) == 789)
+        }
+      }
+    }
+
     describe("#selectIndices") {
       it("creates a new row from the selected indices") {
         val r = row.selectIndices(3, 0)

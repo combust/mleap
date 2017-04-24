@@ -92,6 +92,23 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
         }
       }
 
+      describe("#withFields") {
+        it("creates a new LeapFrame with fields added") {
+          val frame2 = frame.withFields(Seq("test_double_2", "test_double_string"), "test_double") {
+            (r: Double) => (r + 10, r.toString)
+          }.get
+          val data = frame2.dataset.toArray
+
+          assert(frame2.schema.fields.length == 4)
+          assert(frame2.schema.indexOf("test_double_2").get == 2)
+          assert(frame2.schema.indexOf("test_double_string").get == 3)
+          assert(data(0).getDouble(2) == 52.13)
+          assert(data(1).getDouble(2) == 23.42)
+          assert(data(0).getString(3) == "42.13")
+          assert(data(1).getString(3) == "13.42")
+        }
+      }
+
       describe("#dropField") {
         it("creates a new LeapFrame with field dropped") {
           val frame2 = frame.dropField("test_string").get

@@ -10,7 +10,7 @@ import ml.bundle.Value.Value.ListValue
 import ml.bundle.Value.{Value => BValue}
 import ml.combust.bundle.HasBundleRegistry
 import ml.combust.bundle.tensor.TensorSerializer
-import ml.combust.mleap
+import ml.combust.{bundle, mleap}
 
 import scala.reflect.{ClassTag, classTag}
 
@@ -63,6 +63,8 @@ object Value {
         case BasicType.LONG => list.i
         case BasicType.FLOAT => list.f.map(_.toFloat)
         case BasicType.DOUBLE => list.f
+        case BasicType.BYTE_STRING => list.bs
+        case BasicType.DATA_TYPE => list.`type`
         case _ => throw new IllegalArgumentException("unsupported list type")
       }
     } else if(u.isTensor) {
@@ -70,8 +72,6 @@ object Value {
     } else if(u.isCustom) {
       val ct = hr.bundleRegistry.custom(base.getCustom)
       list.custom.map(b => ct.fromBytes(b.toByteArray))
-    } else if(u.isDt) {
-      list.`type`
     } else { throw new IllegalArgumentException("unsupported list type") }
   }
 
@@ -98,6 +98,8 @@ object Value {
         case BasicType.LONG => value.getI
         case BasicType.FLOAT => value.getF.toFloat
         case BasicType.DOUBLE => value.getF
+        case BasicType.BYTE_STRING => value.getBs
+        case BasicType.DATA_TYPE => value.getType
         case _ => throw new IllegalArgumentException("unsupported basic type")
       }
     } else if(dataType.underlying.isList) {
@@ -141,6 +143,8 @@ object Value {
         case BasicType.LONG => ListValue(i = value.asInstanceOf[Seq[Long]])
         case BasicType.FLOAT => ListValue(f = value.asInstanceOf[Seq[Float]].map(_.toDouble))
         case BasicType.DOUBLE => ListValue(f = value.asInstanceOf[Seq[Double]])
+        case BasicType.BYTE_STRING => ListValue(bs = value.asInstanceOf[Seq[bundle.ByteString]].map(_.toProto))
+        case BasicType.DATA_TYPE => ListValue(`type` = value.asInstanceOf[Seq[DataType]])
         case _ => throw new IllegalArgumentException("unsupported basic type")
       }
     } else if(u.isCustom) {
@@ -153,8 +157,6 @@ object Value {
       val lb = base.getList
       val list = value.map(a => listValue(lb, a.asInstanceOf[Seq[_]]))
       ListValue(list = list)
-    } else if(u.isDt) {
-      ListValue(`type` = value.asInstanceOf[Seq[DataType]])
     } else { throw new IllegalArgumentException("unsupported data type") }
   }
 
@@ -180,6 +182,8 @@ object Value {
         case BasicType.LONG => BValue.V.I(value.asInstanceOf[Long])
         case BasicType.FLOAT => BValue.V.F(value.asInstanceOf[Double].toFloat)
         case BasicType.DOUBLE => BValue.V.F(value.asInstanceOf[Double])
+        case BasicType.BYTE_STRING => BValue.V.Bs(value.asInstanceOf[bundle.ByteString].toProto)
+        case BasicType.DATA_TYPE => BValue.V.Type(value.asInstanceOf[DataType])
         case _ => throw new IllegalArgumentException(s"unsupported basic type ${dataType.getBasic}")
       }
     } else if(u.isList) {
@@ -225,6 +229,8 @@ object Value {
   val longDataType: DataType = basicDataType(BasicType.LONG)
   val floatDataType: DataType = basicDataType(BasicType.FLOAT)
   val doubleDataType: DataType = basicDataType(BasicType.DOUBLE)
+  val byteStringDataType: DataType = basicDataType(BasicType.BYTE_STRING)
+  val dataTypeDataType: DataType = basicDataType(BasicType.DATA_TYPE)
 
   val stringListDataType: DataType = listDataType(stringDataType)
   val booleanListDataType: DataType = listDataType(booleanDataType)
@@ -234,11 +240,8 @@ object Value {
   val longListDataType: DataType = listDataType(longDataType)
   val floatListDataType: DataType = listDataType(floatDataType)
   val doubleListDataType: DataType = listDataType(doubleDataType)
-
-  val dataTypeDataType: DataType = DataType(DataType.Underlying.Dt(true))
-  val listDataTypeDataType: DataType = {
-    DataType(DataType.Underlying.List(DataType.ListType(Some(DataType(DataType.Underlying.Dt(true))))))
-  }
+  val byteStringListDataType: DataType = listDataType(byteStringDataType)
+  val listDataTypeDataType: DataType = listDataType(dataTypeDataType)
 
   /** Create a nested list data type of any depth.
     *
@@ -357,6 +360,15 @@ object Value {
     tensor(mleap.tensor.Tensor.denseVector(values))
   }
 
+  /** Create a byte string value.
+    *
+    * @param bs byte string
+    * @return value with byte string
+    */
+  def byteString(bs: bundle.ByteString): Value = {
+    Value(byteStringDataType, bs)
+  }
+
   /** Create a data type value.
     *
     * @param dt data type to store
@@ -449,6 +461,15 @@ object Value {
     Value(listDataType(tensorDataType(TensorSerializer.toBundleType(classTag[T]))), tensors)
   }
 
+  /** Create a list of byte string.
+    *
+    * @param bss data types
+    * @return value with data types
+    */
+  def byteStringList(bss: Seq[bundle.ByteString]): Value = {
+    Value(byteStringListDataType, bss)
+  }
+
   /** Create a list of data types.
     *
     * @param dts data types
@@ -528,7 +549,7 @@ case class Value(bundleDataType: DataType, value: Any) {
     */
   def isLarge(implicit hr: HasBundleRegistry): Boolean = {
     bundleDataType.underlying.isTensor && getTensor[Any].rawSize > 1024 ||
-      bundleDataType.underlying.isList && !(bundleDataType.getList.base.get.underlying.isBasic || bundleDataType.getList.base.get.underlying.isDt) ||
+      bundleDataType.underlying.isList && !bundleDataType.getList.base.get.underlying.isBasic ||
       bundleDataType.underlying.isCustom && hr.bundleRegistry.custom[Any](bundleDataType.getCustom).isLarge(value)
   }
 
@@ -594,6 +615,12 @@ case class Value(bundleDataType: DataType, value: Any) {
     */
   def getTensor[T]: mleap.tensor.Tensor[T] = value.asInstanceOf[mleap.tensor.Tensor[T]]
 
+  /** Get value as a byte string.
+    *
+    * @return byte string
+    */
+  def getByteString: bundle.ByteString = value.asInstanceOf[bundle.ByteString]
+
   /** Get value as a data type.
     *
     * @return data type
@@ -643,6 +670,12 @@ case class Value(bundleDataType: DataType, value: Any) {
     * @return list of tensors
     */
   def getTensorList[T]: Seq[mleap.tensor.Tensor[T]] = value.asInstanceOf[Seq[mleap.tensor.Tensor[T]]]
+
+  /** Get list of byte strings.
+    *
+    * @return list of byte strings
+    */
+  def getByteStringList: Seq[bundle.ByteString] = value.asInstanceOf[Seq[bundle.ByteString]]
 
   /** Get list of data types.
     *

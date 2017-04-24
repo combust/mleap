@@ -1,34 +1,31 @@
 package ml.combust.bundle.serializer
 
-import java.io.{InputStream, OutputStream}
-import java.nio.file.Files
+import java.nio.file.{Files, Path}
 
 import ml.bundle.NodeDef.NodeDef
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.{Bundle, Node}
 import ml.combust.bundle.json.JsonSupport._
 import spray.json._
-import resource._
 
-import scala.io.Source
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 /** Trait for serializing node definitions.
   */
 trait FormatNodeSerializer {
   /** Write a node definition to an output stream.
     *
-    * @param out stream to write to
+    * @param path path to write node to
     * @param obj node definition to write
     */
-  def write(out: OutputStream, obj: Node): Unit
+  def write(path: Path, obj: Node): Unit
 
   /** Read a node definition from an input stream.
     *
-    * @param in stream to read from
+    * @param path path to read node from
     * @return node definition
     */
-  def read(in: InputStream): Node
+  def read(path: Path): Node
 }
 
 /** Companion class for utility serializer methods for node definitions.
@@ -48,24 +45,25 @@ object FormatNodeSerializer {
 /** Object for serializing/deserializing node definitions with JSON.
   */
 object JsonFormatNodeSerializer extends FormatNodeSerializer {
-  override def write(out: OutputStream, node: Node): Unit = {
-    out.write(node.toJson.prettyPrint.getBytes)
+  override def write(path: Path, node: Node): Unit = {
+    Files.write(path, node.toJson.prettyPrint.getBytes)
   }
 
-  override def read(in: InputStream): Node = {
-    Source.fromInputStream(in).getLines.mkString.parseJson.convertTo[Node]
+  override def read(path: Path): Node = {
+    new String(Files.readAllBytes(path)).parseJson.convertTo[Node]
   }
 }
 
 /** Object for serializing/deserializing node definitions with Protobuf.
   */
 object ProtoFormatNodeSerializer extends FormatNodeSerializer {
-  override def write(out: OutputStream, node: Node): Unit = {
-    node.asBundle.writeTo(out)
+  override def write(path: Path, node: Node): Unit = {
+    Files.write(path, node.asBundle.toByteArray)
   }
 
-  override def read(in: InputStream): Node = {
-    Node.fromBundle(NodeDef.parseFrom(in))
+  override def read(path: Path): Node = {
+    val bytes = Files.readAllBytes(path)
+    Node.fromBundle(NodeDef.parseFrom(bytes))
   }
 }
 
@@ -75,7 +73,7 @@ object ProtoFormatNodeSerializer extends FormatNodeSerializer {
   * @tparam Context context class for implementation
   */
 case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
-  implicit val sc = bundleContext.preferredSerializationContext(SerializationFormat.Json)
+  private implicit val sc = bundleContext.preferredSerializationContext(SerializationFormat.Json)
 
   /** Write a node to the current context path.
     *
@@ -92,10 +90,7 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
         Node(name = name, shape = shape)
     }
   }.flatMap(identity).flatMap {
-    node =>
-      (for(out <- managed(Files.newOutputStream(bundleContext.file(Bundle.nodeFile)))) yield {
-        FormatNodeSerializer.serializer.write(out, node)
-      }).tried
+    node => Try(FormatNodeSerializer.serializer.write(bundleContext.file(Bundle.nodeFile), node))
   }
 
   /** Read a node from the current context path.
@@ -103,9 +98,7 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
     * @return deserialized node
     */
   def read(): Try[Any] = {
-    (for(in <- managed(Files.newInputStream(bundleContext.file(Bundle.nodeFile)))) yield {
-      FormatNodeSerializer.serializer.read(in)
-    }).tried.flatMap {
+    Try(FormatNodeSerializer.serializer.read(bundleContext.file(Bundle.nodeFile))).flatMap {
       node =>
         ModelSerializer(bundleContext).readWithModel().flatMap {
           case (model, m) =>

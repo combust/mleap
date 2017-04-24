@@ -1,8 +1,11 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.mleap.runtime.test.{MyCustomObject, MyCustomType}
+import java.io.{ByteArrayOutputStream, PrintStream}
+
+import ml.combust.mleap.runtime.test.MyCustomObject
 import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
+import resource._
 
 /** Base trait for testing LeapFrame implementations.
   *
@@ -89,6 +92,23 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
         }
       }
 
+      describe("#withFields") {
+        it("creates a new LeapFrame with fields added") {
+          val frame2 = frame.withFields(Seq("test_double_2", "test_double_string"), "test_double") {
+            (r: Double) => (r + 10, r.toString)
+          }.get
+          val data = frame2.dataset.toArray
+
+          assert(frame2.schema.fields.length == 4)
+          assert(frame2.schema.indexOf("test_double_2").get == 2)
+          assert(frame2.schema.indexOf("test_double_string").get == 3)
+          assert(data(0).getDouble(2) == 52.13)
+          assert(data(1).getDouble(2) == 23.42)
+          assert(data(0).getString(3) == "42.13")
+          assert(data(1).getString(3) == "13.42")
+        }
+      }
+
       describe("#dropField") {
         it("creates a new LeapFrame with field dropped") {
           val frame2 = frame.dropField("test_string").get
@@ -98,6 +118,29 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
 
         describe("with a non-existent field") {
           it("returns a Failure") { assert(frame.dropField("non_existent").isFailure) }
+        }
+      }
+
+      describe("#show") {
+        it("prints the leap frame to a PrintStream") {
+          val str = (for(out <- managed(new ByteArrayOutputStream())) yield {
+            val p = new PrintStream(out)
+            frame.show(p)
+            out.flush()
+            new String(out.toByteArray)
+          }).tried.get
+
+          val expected =
+            """
+              |+-----------+-----------+
+              ||test_string|test_double|
+              |+-----------+-----------+
+              ||      hello|      42.13|
+              ||      there|      13.42|
+              |+-----------+-----------+
+            """.stripMargin
+
+          assert(str.trim == expected.trim)
         }
       }
     }

@@ -2,6 +2,7 @@ package ml.combust.mleap.tensorflow.converter
 
 import java.util
 
+import ml.combust.bundle.ByteString
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 import org.tensorflow
@@ -23,9 +24,13 @@ object MleapConverter {
       tensorflow.Tensor.create(value.asInstanceOf[Float])
     case DoubleType(isNullable) =>
       tensorflow.Tensor.create(value.asInstanceOf[Double])
+    case ByteStringType(isNullable) =>
+      tensorflow.Tensor.create(value.asInstanceOf[ByteString].bytes)
     case tt: TensorType =>
       tt.base match {
         case StringType(false) =>
+          throw new RuntimeException(s"unsupported tensorflow type: $dataType")
+        case ByteStringType(false) =>
           throw new RuntimeException(s"unsupported tensorflow type: $dataType")
         case _ =>
           val tensor = value.asInstanceOf[Tensor[_]]

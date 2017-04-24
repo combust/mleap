@@ -15,6 +15,10 @@ class BinarizerParitySpec extends SparkParityBase {
     setOutputCol("features"),
     new Binarizer().
       setThreshold(0.12).
+      setInputCol("dti").
+      setOutputCol("thresholded_features_double"),
+    new Binarizer().
+      setThreshold(0.12).
       setInputCol("features").
       setOutputCol("thresholded_features"))).fit(dataset)
 }

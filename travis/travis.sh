@@ -2,8 +2,9 @@
 
 if [[ $TRAVIS_BRANCH == 'master' ]] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
   source travis/extract.sh
-  sbt "+ test" "+ publishSigned"
+  source travis/docker.sh
+  sbt "+ test" "mleap-serving/test" "+ publishSigned" "mleap-serving/docker:publish"
 else
   nosetests --nologcapture --exclude-dir=./python/mleap/pyspark --verbose
-  sbt "+ test"
+  sbt "+ test" "mleap-serving/test"
 fi

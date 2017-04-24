@@ -38,8 +38,8 @@ class VectorIndexerOp extends OpNode[MleapContext, VectorIndexer, VectorIndexerM
       val keys = model.value("keys").getLongList.map(_.toInt)
       val categoryMaps = keys.map {
         key =>
-          val kKeys = model.value(s"${key}_keys").getDoubleList
-          val kValues = model.value(s"${key}_values").getLongList.map(_.toInt)
+          val kKeys = model.value(s"key_${key}_keys").getDoubleList
+          val kValues = model.value(s"key_${key}_values").getLongList.map(_.toInt)
           (key, kKeys.zip(kValues).toMap)
       }.toMap
 

@@ -1,6 +1,9 @@
 package ml.combust.mleap.runtime.types
 
+import java.io.{ByteArrayOutputStream, PrintStream}
+
 import org.scalatest.{FunSuite, GivenWhenThen, TryValues}
+import resource._
 
 import scala.util.Success
 
@@ -39,6 +42,13 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
     val field = StructField("sixth", StringType())
 
     assert(testStruct.withField(field).get.hasField(field.name))
+  }
+
+  test("withFields should return a StructType with the fields added") {
+    val fields = Seq(StructField("sixth", StringType()), StructField("seventh", DoubleType()))
+
+    assert(testStruct.withFields(fields).get.hasField("sixth"))
+    assert(testStruct.withFields(fields).get.hasField("seventh"))
   }
   
   test("Dropping a field from a StructType should remove the field") {
@@ -106,5 +116,28 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
 
   test("indexOf should return a failure for an invalid field") {
     assert(testStruct.indexOf("sixth").isFailure)
+  }
+
+  test("prints the schema to a PrintStream") {
+    val printStruct = StructType(StructField("a_double", DoubleType()),
+      StructField("a_list", ListType(FloatType(), isNullable = true)),
+      StructField("a_tensor", TensorType(ByteType()))).get
+
+    val schema = (for(out <- managed(new ByteArrayOutputStream())) yield {
+      val print = new PrintStream(out)
+      printStruct.print(print)
+      print.flush()
+      new String(out.toByteArray)
+    }).tried.get
+
+    val expected =
+      """
+        |root
+        | |-- a_double: double (nullable = false)
+        | |-- a_list: list (base = [float (nullable = false)], nullable = true)
+        | |-- a_tensor: tensor (base = byte, nullable = false)
+      """.stripMargin
+
+    assert(schema.trim == expected.trim)
   }
 }

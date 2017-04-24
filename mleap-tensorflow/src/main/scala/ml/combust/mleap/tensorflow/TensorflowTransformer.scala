@@ -23,7 +23,7 @@ case class TensorflowTransformer(override val uid: String = Transformer.uniqueNa
   val outputUdfs: Seq[UserDefinedFunction] = outputCols.zipWithIndex.map {
     case (output, index) =>
       val udf: UserDefinedFunction = (raw: Seq[Any]) => raw(index)
-      udf.copy(returnType = model.outputs(index)._2)
+      udf.copy(returnTypes = model.outputs(index)._2)
   }
   private val outputsWithUdfs = outputCols.zip(outputUdfs)
 

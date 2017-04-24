@@ -31,6 +31,10 @@ object SparkParityBase extends FunSpec {
   val sparkRegistry = SparkBundleContext.defaultContext
   val mleapRegistry = MleapContext.defaultContext
 
+  def textDataset(spark: SparkSession): DataFrame = {
+    spark.sqlContext.read.text(getClass.getClassLoader.getResource("datasources/carroll-alice.txt").toString).
+      withColumnRenamed("value", "text")
+  }
   def dataset(spark: SparkSession): DataFrame = {
     spark.sqlContext.read.avro(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").toString)
   }
@@ -46,6 +50,7 @@ object SparkParityBase extends FunSpec {
 
 abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   val baseDataset: DataFrame = SparkParityBase.dataset(spark)
+  val textDataset: DataFrame = SparkParityBase.textDataset(spark)
   val dataset: DataFrame
   val sparkTransformer: Transformer
 

@@ -16,8 +16,10 @@ case class GraphSerializer[Context](bundleContext: BundleContext[Context]) {
     * @param nodes list of nodes to write
     * @return list of names of the nodes written
     */
-  def write(nodes: Seq[Any]): Seq[String] = {
-    nodes.map(writeNode)
+  def write(nodes: Seq[Any]): Try[Seq[String]] = {
+    nodes.foldLeft(Try(Seq[String]())) {
+      (s, n) => writeNode(n).flatMap(name => s.map(_ :+ name))
+    }
   }
 
   /** Write a single node to the path in the context.
@@ -25,11 +27,11 @@ case class GraphSerializer[Context](bundleContext: BundleContext[Context]) {
     * @param node node to write
     * @return name of node written
     */
-  def writeNode(node: Any): String = {
+  def writeNode(node: Any): Try[String] = Try {
     val op = bundleContext.bundleRegistry.opForObj[Context, Any, Any](node)
     val name = op.name(node)
     val nodeContext = bundleContext.bundleContext(Bundle.node(name))
-    NodeSerializer(nodeContext).write(node)
+    NodeSerializer(nodeContext).write(node).get
     name
   }
 
@@ -51,7 +53,8 @@ case class GraphSerializer[Context](bundleContext: BundleContext[Context]) {
     * @return deserialized node
     */
   def readNode(name: String): Try[Any] = {
-    val nodeContext = bundleContext.bundleContext(Bundle.node(name))
-    NodeSerializer(nodeContext).read()
+    Try(bundleContext.bundleContext(Bundle.node(name))).flatMap {
+      nodeContext => NodeSerializer(nodeContext).read()
+    }
   }
 }

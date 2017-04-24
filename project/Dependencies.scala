@@ -9,9 +9,11 @@ object Dependencies {
   val sparkVersion = "2.1.0"
   val scalaTestVersion = "3.0.0"
   val tensorflowVersion = "0.12.head"
+  val akkaVersion = "2.4.16"
+  val akkaHttpVersion = "10.0.3"
 
   object Compile {
-    val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion
+    val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
     val spark = Seq("org.apache.spark" %% "spark-core" % sparkVersion,
       "org.apache.spark" %% "spark-sql" % sparkVersion,
       "org.apache.spark" %% "spark-mllib" % sparkVersion,
@@ -24,22 +26,27 @@ object Dependencies {
     val scalaReflect = ScalaVersionDependentModuleID.versioned("org.scala-lang" % "scala-reflect" % _)
     val sparkAvro = "com.databricks" %% "spark-avro" % "3.0.1"
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
-    val jTransform = "edu.emory.mathcs" % "JTransforms" % "2.4"
+    val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0"
     val tensorflowDep = "org.tensorflow" % "libtensorflow" % tensorflowVersion
+    val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
+    val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
+    val scalameter = "com.storm-enroute" %% "scalameter" % "0.8.2"
+    val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
   }
 
   object Test {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
+    val akkaHttpTestkit =  "com.typesafe.akka" % "akka-http-testkit_2.11" % akkaHttpVersion % "test"
   }
 
   object Provided {
-    val spark = Compile.spark.map(_ % "provided")
+    val spark = Compile.spark.map(_.excludeAll(ExclusionRule(organization = "org.scalatest"))).map(_ % "provided")
   }
 
   import Compile._
   val l = libraryDependencies
 
-  val tensor = l ++= Seq(sprayJson)
+  val tensor = l ++= Seq(sprayJson, Test.scalaTest)
 
   val bundleMl = l ++= Seq(arm, config, Test.scalaTest)
 
@@ -57,9 +64,13 @@ object Dependencies {
 
   val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
-  val avro = l ++= Seq(avroDep)
+  val avro = l ++= Seq(avroDep, Test.scalaTest)
 
   val tensorflow = l ++= Seq(tensorflowDep)
+
+  val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
+
+  val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

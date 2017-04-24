@@ -65,6 +65,7 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
       case "long" => LongType(isNullable)
       case "float" => FloatType(isNullable)
       case "double" => DoubleType(isNullable)
+      case "byte_string" => ByteStringType(isNullable)
     }
 
     override def write(obj: BasicType): JsValue = obj match {
@@ -76,6 +77,7 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
       case LongType(isNullable) => writeMaybeNullable(JsString("long"), isNullable)
       case FloatType(isNullable) => writeMaybeNullable(JsString("float"), isNullable)
       case DoubleType(isNullable) => writeMaybeNullable(JsString("double"), isNullable)
+      case ByteStringType(isNullable) => writeMaybeNullable(JsString("byte_string"), isNullable)
     }
 
     override def read(json: JsValue): BasicType = json match {
@@ -107,7 +109,7 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
       case lt: ListType => mleapListTypeWriterFormat.write(lt)
       case tt: TensorType => mleapTensorTypeFormat.write(tt)
       case ct: CustomType => mleapCustomTypeWriterFormat.write(ct)
-      case AnyType(_) => serializationError("AnyType not supported for JSON serialization")
+      case _ => serializationError(s"$obj not supported for JSON serialization")
     }
   }
 

@@ -3,7 +3,6 @@ package ml.combust.mleap.tensorflow
 import ml.combust.mleap.runtime.types.{FloatType, TensorType}
 import ml.combust.mleap.tensor.DenseTensor
 import org.scalatest.FunSpec
-import resource._
 
 /**
   * Created by hollinwilkins on 1/12/17.
@@ -11,11 +10,7 @@ import resource._
 class TensorflowModelSpec extends FunSpec {
   describe("with an adding tensorflow model") {
     it("adds two floats together") {
-      val bytes = (for(graph <- managed(TestUtil.createAddGraph())) yield {
-        graph.toGraphDef
-      }).opt.get
-
-      val model = TensorflowModel(bytes,
+      val model = TensorflowModel(TestUtil.createAddGraph(),
         inputs = Seq(("InputA", FloatType(false)), ("InputB", FloatType(false))),
         outputs = Seq(("MyResult", FloatType(false))))
 
@@ -30,11 +25,7 @@ class TensorflowModelSpec extends FunSpec {
   describe("with a multiple tensorflow model") {
     describe("with a float and a float vector") {
       it("scales the float vector") {
-        val bytes = (for(graph <- managed(TestUtil.createMultiplyGraph())) yield {
-          graph.toGraphDef
-        }).opt.get
-
-        val model = TensorflowModel(bytes,
+        val model = TensorflowModel(TestUtil.createMultiplyGraph(),
           inputs = Seq(("InputA", FloatType(false)), ("InputB", TensorType(base = FloatType(false)))),
           outputs = Seq(("MyResult", TensorType(base = FloatType(false)))))
         val tensor1 = DenseTensor(Array(1.0f, 2.0f, 3.0f), Seq(3))

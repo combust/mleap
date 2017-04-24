@@ -31,6 +31,9 @@ trait Dataset extends Serializable with Iterable[Row] {
   def withValue(selectors: RowSelector *)
                (udf: UserDefinedFunction): Dataset = update(_.withValue(selectors: _*)(udf))
 
+  def withValues(selectors: RowSelector *)
+                (udf: UserDefinedFunction): Dataset = update(_.withValues(selectors: _*)(udf))
+
   /** Select given indices of every row.
     *
     * @param indices indices to select

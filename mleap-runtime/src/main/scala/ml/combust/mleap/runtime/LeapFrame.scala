@@ -1,9 +1,12 @@
 package ml.combust.mleap.runtime
 
+import java.io.PrintStream
+
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
-import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter, RowReader, RowWriter}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.runtime.util.LeapFrameShow
 
 import scala.reflect.ClassTag
 import scala.util.Try
@@ -21,7 +24,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     *
     * @return schema
     */
-  def schema: StructType
+  override def schema: StructType
 
   /** Get the dataset.
     *
@@ -74,6 +77,22 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     }
   }
 
+  def withFields(names: Seq[String], selectors: Selector *)
+                (udf: UserDefinedFunction): Try[LF] = {
+    RowUtil.createRowSelectors(schema, udf.inputs, selectors: _*).flatMap {
+      rowSelectors =>
+        val fields = names.zip(udf.returnType.asInstanceOf[TupleType].dts).map {
+          case (name, dt) => StructField(name, dt)
+        }
+
+        schema.withFields(fields).map {
+          schema2 =>
+            val dataset2 = dataset.withValues(rowSelectors: _*)(udf)
+            withSchemaAndDataset(schema2, dataset2)
+        }
+    }
+  }
+
   /** Try to drop a field from the LeapFrame.
     *
     * Returns a Failure if the field does not exist.
@@ -106,5 +125,47 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
   override def withOutput(name: String, selectors: Selector *)
                          (udf: UserDefinedFunction): Try[LF] = {
     withField(name, selectors: _*)(udf)
+  }
+
+  override def withOutputs(outputs: Seq[String], inputs: Selector *)
+                          (udf: UserDefinedFunction): Try[LF] = {
+    withFields(outputs, inputs: _*)(udf)
+  }
+
+  /** Print the schema to standard output.
+    */
+  def printSchema(): Unit = schema.print(System.out)
+
+  /** Print the schema to a PrintStream.
+    *
+    * @param out print stream to print schema to
+    */
+  def printSchema(out: PrintStream): Unit = schema.print(out)
+
+  /** Print this leap frame to standard out.
+    */
+  def show(): Unit = show(System.out)
+
+  /** Print this leap frame to a PrintStream.
+    *
+    * @param out stream to print to
+    */
+  def show(out: PrintStream): Unit = {
+    out.print(LeapFrameShow(this.lf))
+  }
+
+  /** Print this leap frame to standard out.
+    *
+    * @param n number of rows to display
+    */
+  def show(n: Int): Unit = show(System.out, n)
+
+  /** Print this leap frame to a PrintStream.
+    *
+    * @param out stream to print to
+    * @param n number of rows to show
+    */
+  def show(out: PrintStream, n: Int) = {
+    out.print(LeapFrameShow(this.lf, n))
   }
 }

@@ -12,9 +12,8 @@ import resource._
 import spray.json._
 
 import scala.collection.JavaConverters._
-import scala.io.Source
 import scala.language.implicitConversions
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 12/24/16.
@@ -26,7 +25,7 @@ object BundleFile {
 
   implicit def apply(file: File): BundleFile = {
     val uri = if(file.getPath.endsWith(".zip")) {
-      new URI(s"jar:file:${file.getPath}")
+      new URI(s"jar:file:${file.getAbsolutePath}")
     } else {
       new URI(s"file:$file")
     }
@@ -57,10 +56,7 @@ case class BundleFile(fs: FileSystem,
     */
   def readInfo(): Try[BundleInfo] = {
     val bundleJson = fs.getPath(path.toString, Bundle.bundleJson)
-    (for(in <- managed(Files.newInputStream(bundleJson))) yield {
-      val json = Source.fromInputStream(in).getLines.mkString
-      json.parseJson.convertTo[BundleInfo]
-    }).tried
+    Try(new String(Files.readAllBytes(bundleJson)).parseJson.convertTo[BundleInfo])
   }
 
   def writeNote(name: String, note: String): Try[String] = {

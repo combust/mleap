@@ -18,12 +18,19 @@ class VectorSlicerOp extends OpNode[MleapContext, VectorSlicer, VectorSlicerMode
 
     override def store(model: Model, obj: VectorSlicerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("indices", Value.longList(obj.indices.map(_.toLong).toSeq))
+      val (names, namedIndices) = obj.namedIndices.unzip
+      model.withAttr("indices", Value.longList(obj.indices.map(_.toLong).toSeq)).
+        withAttr("names", Value.stringList(names)).
+        withAttr("named_indices", Value.intList(namedIndices))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): VectorSlicerModel = {
-      VectorSlicerModel(indices = model.value("indices").getLongList.map(_.toInt).toArray)
+      val names = model.value("names").getStringList
+      val namedIndices = model.value("named_indices").getIntList
+      val namedIndicesMap = names.zip(namedIndices)
+      VectorSlicerModel(indices = model.value("indices").getLongList.map(_.toInt).toArray,
+        namedIndices = namedIndicesMap.toArray)
     }
   }
 

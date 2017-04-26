@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.LocalLDAModel
-import ml.combust.mleap.runtime.converter.VectorConverters._
+import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder

@@ -4,7 +4,7 @@ import ml.combust.mleap.core.feature.VectorAssemblerModel
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
-import ml.combust.mleap.runtime.converter.VectorConverters._
+import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 
 import scala.util.Try

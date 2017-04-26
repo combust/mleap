@@ -73,6 +73,7 @@ object Bundle {
       val multinomial_labeler = "multinomial_labeler"
       val regex_tokenizer = "regex_tokenizer"
       val word_filter = "word_filter"
+      val interaction = "interaction"
     }
 
     object classification {

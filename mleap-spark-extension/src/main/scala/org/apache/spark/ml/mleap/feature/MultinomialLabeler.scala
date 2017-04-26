@@ -11,7 +11,7 @@ import org.apache.spark.ml.util.Identifiable
 import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions.{udf, col}
-import ml.combust.mleap.runtime.converter.VectorConverters._
+import ml.combust.mleap.core.util.VectorConverters._
 
 /**
   * Created by hollinwilkins on 1/18/17.

@@ -50,6 +50,7 @@ sealed trait Tensor[T] {
   def toDense: DenseTensor[T]
   def toArray: Array[T]
 
+  def size: Int = dimensions.product
   def rawSize: Int = rawValues.length
   def rawValues: Array[T]
   def rawValuesIterator: Iterator[T]

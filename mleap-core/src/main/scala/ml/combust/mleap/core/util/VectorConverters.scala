@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.converter
+package ml.combust.mleap.core.util
 
 import breeze.linalg.{DenseVector => BDV, SparseVector => BSV, Vector => BV}
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}

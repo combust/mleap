@@ -15,6 +15,7 @@ class VectorSlicerParitySpec extends SparkParityBase {
     setOutputCol("features"),
     new VectorSlicer().
       setIndices(Array(1)).
+      setNames(Array("dti")).
       setInputCol("features").
       setOutputCol("scaled_features"))).fit(dataset)
 }

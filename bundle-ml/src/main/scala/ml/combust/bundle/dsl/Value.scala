@@ -639,6 +639,12 @@ case class Value(bundleDataType: DataType, value: Any) {
     */
   def getStringList: Seq[String] = value.asInstanceOf[Seq[String]]
 
+  /** Get list of ints.
+    *
+    * @return list of ints
+    */
+  def getIntList: Seq[Int] = value.asInstanceOf[Seq[Int]]
+
   /** Get list of longs.
     *
     * @return list of longs

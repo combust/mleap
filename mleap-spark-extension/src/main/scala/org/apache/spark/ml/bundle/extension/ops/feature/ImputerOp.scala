@@ -1,6 +1,5 @@
 package org.apache.spark.ml.bundle.extension.ops.feature
 
-import ml.bundle.DataType.DataType
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}

@@ -170,7 +170,12 @@ class MLeapDeserializer(object):
         NotImplementedError()
 
     @staticmethod
-    def deserialize_single_input_output(transformer, node_path, attributes_map=None):
+    def _node_features_format(x):
+        if isinstance(x, str) or isinstance(x, unicode):
+            return [str(x)]
+        return x
+
+    def deserialize_single_input_output(self, transformer, node_path, attributes_map=None):
         """
         :attributes_map: Map of attributes names. For example StandardScaler has `mean_` but is serialized as `mean`
         :param transformer: Scikit or Pandas transformer
@@ -203,7 +208,7 @@ class MLeapDeserializer(object):
             node_j = json.load(json_data)
 
         transformer.name = node_j['name']
-        transformer.input_features = node_j['shape']['inputs'][0]['name']
-        transformer.output_features = node_j['shape']['outputs'][0]['name']
+        transformer.input_features = self._node_features_format(node_j['shape']['inputs'][0]['name'])
+        transformer.output_features = self._node_features_format(node_j['shape']['outputs'][0]['name'])
 
         return transformer

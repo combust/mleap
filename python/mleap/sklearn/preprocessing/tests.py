@@ -365,8 +365,7 @@ class TransformerTests(unittest.TestCase):
 
         labels = ['a', 'b', 'c']
 
-        le = LabelEncoder()
-        le.mlinit(input_features='label_feature',
+        le = LabelEncoder(input_features='label_feature',
                   output_features='label_feature_le_encoded')
 
         le.fit(labels)
@@ -386,9 +385,8 @@ class TransformerTests(unittest.TestCase):
 
         labels = ['a', 'b', 'c']
 
-        le = LabelEncoder()
-        le.mlinit(input_features=['label_feature'],
-                  output_features=['label_feature_le_encoded'])
+        le = LabelEncoder(input_features=['label_feature'],
+                          output_features=['label_feature_le_encoded'])
 
         le.fit(labels)
 
@@ -408,18 +406,20 @@ class TransformerTests(unittest.TestCase):
         # Transform some sample data
         res_a = le.transform(labels)
         res_b = label_encoder_tf.transform(labels)
-
+        print("le.output_features: {}".format(le.output_features))
+        print("label_encoder_tf.output_features: {}".format(label_encoder_tf.output_features))
         self.assertEqual(res_a[0], res_b[0])
         self.assertEqual(res_a[1], res_b[1])
         self.assertEqual(res_a[2], res_b[2])
+        self.assertEqual(le.input_features, label_encoder_tf.input_features)
+        self.assertEqual(le.output_features, label_encoder_tf.output_features)
 
     def one_hot_encoder_serializer_test(self):
 
         labels = ['a', 'b', 'c']
 
-        le = LabelEncoder()
-        le.mlinit(input_features=['label_feature'],
-                  output_features=['label_feature_le_encoded'])
+        le = LabelEncoder(input_features=['label_feature'],
+                          output_features=['label_feature_le_encoded'])
 
         oh_data = le.fit_transform(labels).reshape(3, 1)
 
@@ -442,15 +442,14 @@ class TransformerTests(unittest.TestCase):
 
         labels = ['a', 'b', 'c']
 
-        le = LabelEncoder()
-        le.mlinit(input_features=['label_feature'],
-                  output_features=['label_feature_le_encoded'])
+        le = LabelEncoder(input_features=['label_feature'],
+                          output_features=['label_feature_le_encoded'])
 
         oh_data = le.fit_transform(labels).reshape(3, 1)
 
         one_hot_encoder_tf = OneHotEncoder(sparse=False)
         one_hot_encoder_tf.mlinit(input_features = le.output_features,
-                                  output_features = '{}_one_hot_encoded'.format(le.output_features))
+                                  output_features=['{}_one_hot_encoded'.format(le.output_features[0])])
         one_hot_encoder_tf.fit(oh_data)
 
         one_hot_encoder_tf.serialize_to_bundle(self.tmp_dir, one_hot_encoder_tf.name)

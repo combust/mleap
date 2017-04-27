@@ -280,7 +280,7 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
     ['tokyo', 'tokyo', 'paris']
 
     """
-    def __init__(self, input_features, output_features):
+    def __init__(self, input_features=None, output_features=None):
         self.input_features = input_features
         self.output_features = output_features
         self.op = 'string_indexer'
@@ -383,14 +383,14 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
 
         self.serialize(self, path, model_name, attributes, inputs, outputs)
 
-    def deserialize_from_bundle(self, transformer, node_path, node_name):
+    def deserialize_from_bundle(self, node_path, node_name):
 
         attributes_map = {
             'labels': 'classes_'
         }
 
         full_node_path = os.path.join(node_path, node_name)
-        transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
+        transformer = self.deserialize_single_input_output(self, full_node_path, attributes_map)
 
         return transformer
 

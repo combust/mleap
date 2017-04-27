@@ -24,8 +24,10 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): StringIndexerModel = {
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString).getOrElse(HandleInvalid.default)
+      
       StringIndexerModel(labels = model.value("labels").getStringList,
-        handleInvalid = HandleInvalid.fromString(model.value("handle_invalid").getString))
+        handleInvalid = handleInvalid)
     }
   }
 

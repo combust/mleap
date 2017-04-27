@@ -1,10 +1,13 @@
 package org.apache.spark.ml.bundle.ops.feature
 
+import ml.bundle.DataType.DataType
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.Binarizer
+import org.apache.spark.sql.mleap.TypeConverters._
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by fshabbir on 12/1/16.
@@ -17,14 +20,17 @@ class BinarizerOp extends OpNode[SparkBundleContext, Binarizer, Binarizer] {
 
     override def store(model: Model, obj: Binarizer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("threshold", Value.double(obj.getThreshold))
+      context.context.dataset.map(dataset => {
+        val mleapDataType : DataType = mleapType(dataset.schema(obj.getInputCol).dataType)
+        model.withAttr("input_types", Value.dataType(mleapDataType))
+             .withAttr("output_types", Value.dataType(mleapDataType))
+      }).getOrElse(model).withAttr("threshold", Value.double(obj.getThreshold))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): Binarizer = {
       new Binarizer(uid = "").setThreshold(model.value("threshold").getDouble)
     }
-
   }
 
   override val klazz: Class[Binarizer] = classOf[Binarizer]

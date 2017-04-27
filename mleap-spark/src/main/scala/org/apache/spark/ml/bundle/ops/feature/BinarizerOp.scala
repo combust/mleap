@@ -21,9 +21,8 @@ class BinarizerOp extends OpNode[SparkBundleContext, Binarizer, Binarizer] {
     override def store(model: Model, obj: Binarizer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       context.context.dataset.map(dataset => {
-        val mleapDataType : DataType = mleapType(dataset.schema(obj.getInputCol).dataType)
-        model.withAttr("input_types", Value.dataType(mleapDataType))
-             .withAttr("output_types", Value.dataType(mleapDataType))
+        model.withAttr("input_types", Value.dataType(mleapType(dataset.schema(obj.getInputCol).dataType)))
+             .withAttr("output_types", Value.dataType(mleapType(dataset.schema(obj.getOutputCol).dataType)))
       }).getOrElse(model).withAttr("threshold", Value.double(obj.getThreshold))
     }
 

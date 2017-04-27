@@ -21,6 +21,8 @@ from sklearn.preprocessing.data import OneHotEncoder
 from sklearn.preprocessing.label import LabelEncoder
 from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer
 from sklearn.utils import column_or_1d
+from sklearn.utils.validation import check_is_fitted
+from sklearn.utils.fixes import np_version
 import warnings
 import numpy as np
 import pandas as pd
@@ -43,6 +45,20 @@ class ops(object):
         self.POLYNOMIALEXPANSION = 'polynomial_expansion'
 
 ops = ops()
+
+
+def _check_numpy_unicode_bug(labels):
+    """Check that user is not subject to an old numpy bug
+
+    Fixed in master before 1.7.0:
+
+      https://github.com/numpy/numpy/pull/243
+
+    """
+    if np_version[:3] < (1, 7, 0) and labels.dtype.kind == 'U':
+        raise RuntimeError("NumPy < 1.7.0 does not implement searchsorted"
+                           " on unicode data correctly. Please upgrade"
+                           " NumPy to use LabelEncoder with unicode inputs.")
 
 
 def serialize_to_bundle(self, path, model_name):
@@ -77,12 +93,6 @@ setattr(Imputer, 'op', ops.IMPUTER)
 setattr(Imputer, 'mlinit', mleap_init)
 setattr(Imputer, 'serialize_to_bundle', serialize_to_bundle)
 setattr(Imputer, 'serializable', True)
-
-setattr(LabelEncoder, 'op', ops.LABEL_ENCODER)
-setattr(LabelEncoder, 'mlinit', mleap_init)
-setattr(LabelEncoder, 'serialize_to_bundle', serialize_to_bundle)
-setattr(LabelEncoder, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(LabelEncoder, 'serializable', True)
 
 setattr(OneHotEncoder, 'op', ops.ONE_HOT_ENCODER)
 setattr(OneHotEncoder, 'mlinit', mleap_init)
@@ -123,8 +133,6 @@ class SimpleSerializer(object):
             serializer = MinMaxScalerSerializer()
         elif transformer.op == ops.ONE_HOT_ENCODER:
             serializer = OneHotEncoderSerializer()
-        elif transformer.op == ops.LABEL_ENCODER:
-            serializer = LabelEncoderSerializer()
         elif transformer.op == ops.IMPUTER:
             serializer = ImputerSerializer()
         elif transformer.op == ops.BINARIZER:
@@ -216,65 +224,173 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         self.serialize(self, path, model_name, attributes, inputs, outputs)
 
 
-class StandardScalerSerializer(MLeapSerializer, MLeapDeserializer):
+class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserializer):
     """
-    Standardizes features by removing the mean and scaling to unit variance using mean and standard deviation from
-    training data.
+    Copied from sklearn, but enables passing X and Y features, which allows this transformer
+    to be used in Pipelines.
 
-    >>> data = pd.DataFrame([[1], [5], [6], [1]], columns=['col_a'])
-    >>> standard_scaler_tf = StandardScaler()
-    >>> standard_scaler_tf.mlinit(input_features='col_a', output_features='scaled_cont_features')
-    >>> standard_scaler_tf.fit_transform(data)
-    >>> array([[-0.98787834],
-    >>>         [ 0.76834982],
-    >>>         [ 1.20740686],
-    >>>         [-0.98787834]])
+    Converts categorical values of a single column into categorical indices. This transformer should be followed by a
+    NDArrayToDataFrame transformer to maintain a data structure required by scikit pipelines.
+
+    NOTE: You can only LabelEncode/String Index one feature at a time!!!
+
+    >>> data = pd.DataFrame([['a', 0], ['b', 1], ['b', 3], ['c', 1]], columns=['col_a', 'col_b'])
+    >>> # Label Encoder for x1 Label
+    >>> label_encoder_tf = LabelEncoder()
+    >>> label_encoder_tf.mlinit(input_features = ['col_a'] , output_features='col_a_label_le')
+    >>> # Convert output of Label Encoder to Data Frame instead of 1d-array
+    >>> n_dim_array_to_df_tf = NDArrayToDataFrame('col_a_label_le')
+    >>> n_dim_array_to_df_tf.fit_transform(label_encoder_tf.fit_transform(data['col_a']))
+
+    Encode labels with value between 0 and n_classes-1.
+
+    Read more in the :ref:`User Guide <preprocessing_targets>`.
+
+    Attributes
+    ----------
+    classes_ : array of shape (n_class,)
+        Holds the label for each class.
+
+    Examples
+    --------
+    `LabelEncoder` can be used to normalize labels.
+
+    >>> from sklearn import preprocessing
+    >>> le = preprocessing.LabelEncoder()
+    >>> le.fit([1, 2, 2, 6])
+    LabelEncoder()
+    >>> le.classes_
+    array([1, 2, 6])
+    >>> le.transform([1, 1, 2, 6]) #doctest: +ELLIPSIS
+    array([0, 0, 1, 2]...)
+    >>> le.inverse_transform([0, 0, 1, 2])
+    array([1, 1, 2, 6])
+
+    It can also be used to transform non-numerical labels (as long as they are
+    hashable and comparable) to numerical labels.
+
+    >>> le = preprocessing.LabelEncoder()
+    >>> le.fit(["paris", "paris", "tokyo", "amsterdam"])
+    LabelEncoder()
+    >>> list(le.classes_)
+    ['amsterdam', 'paris', 'tokyo']
+    >>> le.transform(["tokyo", "tokyo", "paris"]) #doctest: +ELLIPSIS
+    array([2, 2, 1]...)
+    >>> list(le.inverse_transform([2, 2, 1]))
+    ['tokyo', 'tokyo', 'paris']
+
     """
-    def __init__(self):
-        super(StandardScalerSerializer, self).__init__()
+    def __init__(self, input_features, output_features):
+        self.input_features = input_features
+        self.output_features = output_features
+        self.op = 'string_indexer'
+        self.name = "{}_{}".format(self.op, uuid.uuid1())
+        self.serializable = True
 
-    def serialize_to_bundle(self, transformer, path, model_name):
+
+    def fit(self, X):
+        """Fit label encoder
+
+        Parameters
+        ----------
+        y : array-like of shape (n_samples,)
+            Target values.
+
+        Returns
+        -------
+        self : returns an instance of self.
+        """
+        X = column_or_1d(X, warn=True)
+        _check_numpy_unicode_bug(X)
+        self.classes_ = np.unique(X)
+        return self
+
+    def fit_transform(self, X, y=None, **fit_params):
+        """Fit label encoder and return encoded labels
+
+        Parameters
+        ----------
+        y : array-like of shape [n_samples]
+            Target values.
+
+        Returns
+        -------
+        y : array-like of shape [n_samples]
+        """
+        y = column_or_1d(X, warn=True)
+        _check_numpy_unicode_bug(X)
+        self.classes_, X = np.unique(X, return_inverse=True)
+        return X
+
+    def transform(self, y):
+        """Transform labels to normalized encoding.
+
+        Parameters
+        ----------
+        y : array-like of shape [n_samples]
+            Target values.
+
+        Returns
+        -------
+        y : array-like of shape [n_samples]
+        """
+        check_is_fitted(self, 'classes_')
+        y = column_or_1d(y, warn=True)
+
+        classes = np.unique(y)
+        _check_numpy_unicode_bug(classes)
+        if len(np.intersect1d(classes, self.classes_)) < len(classes):
+            diff = np.setdiff1d(classes, self.classes_)
+            raise ValueError("y contains new labels: %s" % str(diff))
+        return np.searchsorted(self.classes_, y)
+
+    def inverse_transform(self, y):
+        """Transform labels back to original encoding.
+
+        Parameters
+        ----------
+        y : numpy array of shape [n_samples]
+            Target values.
+
+        Returns
+        -------
+        y : numpy array of shape [n_samples]
+        """
+        check_is_fitted(self, 'classes_')
+
+        diff = np.setdiff1d(y, np.arange(len(self.classes_)))
+        if diff:
+            raise ValueError("y contains new labels: %s" % str(diff))
+        y = np.asarray(y)
+        return self.classes_[y]
+
+    def serialize_to_bundle(self, path, model_name):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('mean', transformer.mean_.tolist()))
-        attributes.append(('std', [np.sqrt(x) for x in transformer.var_]))
+        attributes.append(('labels', self.classes_.tolist()))
 
         # define node inputs and outputs
         inputs = [{
-                  "name": transformer.input_features,
+                  "name": self.input_features[0],
                   "port": "input"
                 }]
 
         outputs = [{
-                  "name": transformer.output_features,
+                  "name": self.output_features,
                   "port": "output"
                 }]
 
-        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+        self.serialize(self, path, model_name, attributes, inputs, outputs)
 
     def deserialize_from_bundle(self, transformer, node_path, node_name):
 
         attributes_map = {
-            'mean': 'mean_',
-            'std': 'scale_'
+            'labels': 'classes_'
         }
 
-        # Set serialized attributes
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
-
-        # Set Additional Attributes
-        if 'mean_' in transformer.__dict__:
-            transformer.with_mean = True
-        else:
-            transformer.with_mean = False
-
-        if 'scale_' in transformer.__dict__:
-            transformer.with_std = True
-            transformer.var = np.square(transformer.scale_)
-        else:
-            transformer.with_std = False
 
         return transformer
 
@@ -365,27 +481,28 @@ class ImputerSerializer(MLeapSerializer):
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
 
-class LabelEncoderSerializer(MLeapSerializer, MLeapDeserializer):
+class StandardScalerSerializer(MLeapSerializer, MLeapDeserializer):
     """
-    Converts categorical values of a single column into categorical indices. This transformer should be followed by a
-    NDArrayToDataFrame transformer to maintain a data structure required by scikit pipelines.
-
-    >>> data = pd.DataFrame([['a', 0], ['b', 1], ['b', 3], ['c', 1]], columns=['col_a', 'col_b'])
-    >>> # Label Encoder for x1 Label
-    >>> label_encoder_tf = LabelEncoder()
-    >>> label_encoder_tf.mlinit(input_features = ['col_a'] , output_features='col_a_label_le')
-    >>> # Convert output of Label Encoder to Data Frame instead of 1d-array
-    >>> n_dim_array_to_df_tf = NDArrayToDataFrame('col_a_label_le')
-    >>> n_dim_array_to_df_tf.fit_transform(label_encoder_tf.fit_transform(data['col_a']))
+    Standardizes features by removing the mean and scaling to unit variance using mean and standard deviation from
+    training data.
+    >>> data = pd.DataFrame([[1], [5], [6], [1]], columns=['col_a'])
+    >>> standard_scaler_tf = StandardScaler()
+    >>> standard_scaler_tf.mlinit(input_features='col_a', output_features='scaled_cont_features')
+    >>> standard_scaler_tf.fit_transform(data)
+    >>> array([[-0.98787834],
+    >>>         [ 0.76834982],
+    >>>         [ 1.20740686],
+    >>>         [-0.98787834]])
     """
     def __init__(self):
-        super(LabelEncoderSerializer, self).__init__()
+        super(StandardScalerSerializer, self).__init__()
 
     def serialize_to_bundle(self, transformer, path, model_name):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('labels', transformer.classes_.tolist()))
+        attributes.append(('mean', transformer.mean_.tolist()))
+        attributes.append(('std', [np.sqrt(x) for x in transformer.var_]))
 
         # define node inputs and outputs
         inputs = [{
@@ -403,11 +520,25 @@ class LabelEncoderSerializer(MLeapSerializer, MLeapDeserializer):
     def deserialize_from_bundle(self, transformer, node_path, node_name):
 
         attributes_map = {
-            'labels': 'classes_'
+            'mean': 'mean_',
+            'std': 'scale_'
         }
 
+        # Set serialized attributes
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
+
+        # Set Additional Attributes
+        if 'mean_' in transformer.__dict__:
+            transformer.with_mean = True
+        else:
+            transformer.with_mean = False
+
+        if 'scale_' in transformer.__dict__:
+            transformer.with_std = True
+            transformer.var = np.square(transformer.scale_)
+        else:
+            transformer.with_std = False
 
         return transformer
 

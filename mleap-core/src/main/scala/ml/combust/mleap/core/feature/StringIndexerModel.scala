@@ -5,6 +5,8 @@ sealed trait HandleInvalid {
 }
 
 object HandleInvalid {
+  val default = Error
+
   case object Error extends HandleInvalid {
     override def asParamString: String = "error"
   }

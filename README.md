@@ -30,11 +30,13 @@ Our goals for this project are:
 
 1. Core execution engine implemented in Scala
 2. [Spark](http://spark.apache.org/), PySpark and Scikit-Learn support
-3. Export a model with Scikit-learn or Spark and execute it on the MLeap engine anywhere in the JVM
+3. Export a model with Scikit-learn or Spark and execute it using the MLeap Runtime (without dependencies on the Spark Context, or sklearn/numpy/pandas/etc)
 4. Choose from 3 portable serialization formats (JSON, Protobuf, and Mixed)
 5. Implement your own custom data types and transformers for use with MLeap data frames and transformer pipelines
-6. extensive test coverage with full parity tests for Spark and MLeap pipelines
-7. optional Spark transformer extension to extend Spark's default transformer offerings
+6. Extensive test coverage with full parity tests for Spark and MLeap pipelines
+7. Optional Spark transformer extension to extend Spark's default transformer offerings
+
+<img src="assets/images/single-runtime.jpg" alt="Unified Runtime"/>
 
 ## Requirements
 
@@ -148,16 +150,16 @@ from mleap.sklearn.preprocessing.data import NDArrayToDataFrame
 # Load scikit-learn transformers and models
 from sklearn.preprocessing import LabelEncoder, Binarizer
 
-# Define the Label Encoder (minit method adds a unique `name` to the transformer as well as explicit input/output features)
+# Define the Label Encoder (mlinit method adds a unique `name` to the transformer as well as explicit input/output features)
 label_encoder_tf = LabelEncoder()
-label_encoder_tf.minit(input_features = 'col_a', output_features='col_a_label_le')
+label_encoder_tf.mlinit(input_features = 'col_a', output_features='col_a_label_le')
 
 # Convert output of Label Encoder to Data Frame instead of 1d-array
 n_dim_array_to_df_tf = NDArrayToDataFrame(label_encoder_tf.output_features)
 
 # Define our binarizer
 binarizer = Binarizer(0.5)
-binarizer.minit(input_features=n_dim_array_to_df_tf.output_features, output_features="{}_binarized".format(n_dim_array_to_df_tf.output_features))
+binarizer.mlinit(input_features=n_dim_array_to_df_tf.output_features, output_features="{}_binarized".format(n_dim_array_to_df_tf.output_features))
 
 data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
 
@@ -169,7 +171,7 @@ steps = [
 ]
 
 pipeline = Pipeline(steps)
-pipeline.minit()
+pipeline.mlinit()
 
 # Fit the pipeline
 pipeline.fit(data)

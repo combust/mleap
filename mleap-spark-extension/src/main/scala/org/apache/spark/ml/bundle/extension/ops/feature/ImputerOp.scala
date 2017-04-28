@@ -5,7 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.feature.ImputerModel
-import org.apache.spark.sql.mleap.TypeConverters._
+import org.apache.spark.sql.mleap.TypeConverters.mleapType
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**

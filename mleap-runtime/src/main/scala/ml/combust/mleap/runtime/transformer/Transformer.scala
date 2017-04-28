@@ -4,6 +4,7 @@ import java.util.UUID
 
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.runtime.types.StructField
 
 import scala.util.Try
 
@@ -32,6 +33,8 @@ trait Transformer extends AutoCloseable {
     * @return try new builder with transformation applied
     */
   def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB]
+
+  def getSchema(): Try[Seq[StructField]]
 
   override def close(): Unit = { /* do nothing by default */ }
 }

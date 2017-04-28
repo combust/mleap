@@ -5,6 +5,9 @@ import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
+
+import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 5/10/16.
@@ -14,4 +17,8 @@ case class OneHotEncoder(override val uid: String = Transformer.uniqueName("one_
                          override val outputCol: String,
                          model: OneHotEncoderModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (value: Double) => model(value): Tensor[Double]
+
+  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+    StructField(inputCol, DoubleType()),
+    StructField(outputCol, TensorType(DoubleType()))))
 }

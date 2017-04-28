@@ -5,9 +5,10 @@ import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
 import ml.combust.mleap.tensor.Tensor
 
-import scala.util.Try
+import scala.util.{Success, Try}
 
 /**
   * Created by mageswarand on 3/3/17.
@@ -22,4 +23,8 @@ case class LDAModel(override val uid: String = Transformer.uniqueName("lda"),
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(topicDistributionCol, featureCol)(topicDistribution)
   }
+
+  override def getSchema(): Try[Seq[StructField]] = Success(
+    Seq(StructField(featureCol, TensorType(DoubleType())),
+      StructField(topicDistributionCol, TensorType(DoubleType()))))
 }

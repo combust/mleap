@@ -6,8 +6,9 @@ import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.runtime.types.{DoubleType, StringType, StructField, TensorType}
 
-import scala.util.Try
+import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 12/27/16.
@@ -21,4 +22,9 @@ case class ChiSqSelector(override val uid: String = Transformer.uniqueName("chi_
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(outputCol, featuresCol)(exec)
   }
+
+  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+    StructField(featuresCol, TensorType(DoubleType())),
+    StructField(outputCol, TensorType(DoubleType())))
+  )
 }

@@ -3,7 +3,7 @@ package ml.combust.mleap.runtime.transformer.regression
 import ml.combust.mleap.core.regression.GBTRegressionModel
 import ml.combust.mleap.runtime.test.TestUtil
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -33,6 +33,14 @@ class GBTRegressionSpec extends FunSpec {
       val gbt2 = gbt.copy(featuresCol = "bad_features")
 
       it("returns a Failure") { assert(gbt2.transform(frame).isFailure) }
+    }
+  }
+
+  describe("#getSchema") {
+    it("has the correct inputs and outputs") {
+      assert(gbt.getSchema().get ==
+        Seq(StructField("features", TensorType(DoubleType())),
+          StructField("prediction", DoubleType())))
     }
   }
 }

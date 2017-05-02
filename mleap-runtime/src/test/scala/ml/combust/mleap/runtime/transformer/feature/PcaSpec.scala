@@ -36,4 +36,12 @@ class PcaSpec extends FunSpec {
       it("returns a Failure") { assert(pca2.transform(frame).isFailure) }
     }
   }
+
+  describe("#getSchema") {
+    it("has the correct inputs and outputs") {
+      assert(pca.getSchema().get ==
+        Seq(StructField("test_vec", TensorType(DoubleType())),
+          StructField("test_pca", TensorType(DoubleType()))))
+    }
+  }
 }

@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.NormalizerModel
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -33,6 +33,14 @@ class NormalizerSpec extends FunSpec {
       val normalizer2 = normalizer.copy(inputCol = "bad_input")
 
       it("returns a Failure") { assert(normalizer2.transform(frame).isFailure) }
+    }
+  }
+
+  describe("#getSchema") {
+    it("has the correct inputs and outputs") {
+      assert(normalizer.getSchema().get ==
+        Seq(StructField("test_vec", TensorType(DoubleType())),
+          StructField("test_norm", TensorType(DoubleType()))))
     }
   }
 }

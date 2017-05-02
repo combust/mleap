@@ -37,4 +37,12 @@ class LinearRegressionSpec extends FunSpec {
       }
     }
   }
+
+  describe("#getSchema") {
+    it("has the correct inputs and outputs") {
+      assert(linearRegression.getSchema().get ==
+        Seq(StructField("features", TensorType(DoubleType())),
+          StructField("prediction", DoubleType())))
+    }
+  }
 }

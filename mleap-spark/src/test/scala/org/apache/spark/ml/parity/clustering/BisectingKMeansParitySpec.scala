@@ -1,6 +1,6 @@
 package org.apache.spark.ml.parity.clustering
 
-import org.apache.spark.ml.clustering.{BisectingKMeans, KMeans}
+import org.apache.spark.ml.clustering.BisectingKMeans
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.parity.SparkParityBase

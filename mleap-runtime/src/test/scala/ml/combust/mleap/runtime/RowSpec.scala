@@ -39,6 +39,24 @@ trait RowSpec[R <: Row] extends FunSpec {
       }
     }
 
+    describe("#getAsOption") {
+      it("get None if index is out of range") {
+        assert(row.getAsOption(999).isEmpty)
+      }
+    }
+
+    describe("#getAsOption") {
+      it("get None if value cant be casted") {
+        assert(row.getAsOption[Double](0).isEmpty)
+      }
+    }
+
+    describe("#getAsOption") {
+      it("get option of value at a given index") {
+        assert(row.getAsOption[Int](1) == Option(42))
+      }
+    }
+
     describe("#option") {
       it("gets the optional value at a given index") {
         assert(optionRow.option(0) == Option("test"))

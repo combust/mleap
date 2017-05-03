@@ -23,7 +23,7 @@ object LeafNode {
 final case class LeafNode(values: Vector) extends Node {
   override def predictImpl(features: Vector): LeafNode = this
 
-  def prediction: Double = values.argmax
+  def prediction: Double = values(0)
   def impurities: Vector = values
 }
 

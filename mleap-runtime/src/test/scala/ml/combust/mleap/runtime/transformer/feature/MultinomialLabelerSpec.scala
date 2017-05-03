@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.{MultinomialLabelerModel, ReverseStringIndexerModel}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -10,15 +10,17 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 1/18/17.
   */
 class MultinomialLabelerSpec extends FunSpec {
-  describe("#transform") {
-    val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
-    val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 10.0, 20.0)))))
-    val frame = LeapFrame(schema, dataset)
-    val transformer = MultinomialLabeler(featuresCol = "test_vec",
-      probabilitiesCol = "probs",
-      labelsCol = "labels",
-      model = MultinomialLabelerModel(9.0, ReverseStringIndexerModel(Seq("hello1", "world2", "!3"))))
 
+  val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
+  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 10.0, 20.0)))))
+  val frame = LeapFrame(schema, dataset)
+  val transformer = MultinomialLabeler(featuresCol = "test_vec",
+    probabilitiesCol = "probs",
+    labelsCol = "labels",
+    model = MultinomialLabelerModel(9.0, ReverseStringIndexerModel(Seq("hello1", "world2", "!3"))))
+
+
+  describe("#transform") {
     it("outputs the labels and probabilities for all classes with a probability greater than the threshold") {
       val frame2 = for(f <- transformer.transform(frame);
                        f2 <- f.select("probs", "labels")) yield f2
@@ -28,6 +30,15 @@ class MultinomialLabelerSpec extends FunSpec {
 
       assert(data(0).getSeq[Double](0) == Seq(10.0, 20.0))
       assert(data(0).getSeq[String](1) == Seq("world2", "!3"))
+    }
+  }
+
+  describe("#getSchema") {
+    it("has the correct inputs and outputs") {
+      assert(transformer.getSchema().get ==
+        Seq(StructField("test_vec", TensorType(DoubleType())),
+          StructField("probs", ListType(DoubleType())),
+          StructField("labels", ListType(StringType()))))
     }
   }
 }

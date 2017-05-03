@@ -6,8 +6,9 @@ import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
 
-import scala.util.Try
+import scala.util.{Success, Try}
 
 /**
   * Created by fshabbir on 12/24/16.
@@ -39,6 +40,23 @@ case class NaiveBayesClassifier(override val uid: String = Transformer.uniqueNam
             b2 <- b.withOutput(predictionCol, p)(probabilityToPrediction)) yield b2
       case (None, None) =>
         builder.withOutput(predictionCol, featuresCol)(predict)
+    }
+  }
+
+  override def getSchema(): Try[Seq[StructField]] = {
+    (rawPredictionCol, probabilityCol) match {
+      case ((Some(rp), Some(p))) => Success(Seq(StructField(featuresCol, TensorType(DoubleType())),
+                                                StructField(rp, TensorType(DoubleType())),
+                                                StructField(p, TensorType(DoubleType())),
+                                                StructField(predictionCol, DoubleType())))
+      case ((Some(rp), None)) => Success(Seq(StructField(featuresCol, TensorType(DoubleType())),
+                                              StructField(rp, TensorType(DoubleType())),
+                                              StructField(predictionCol, DoubleType())))
+      case (None, Some(p)) => Success(Seq(StructField(featuresCol, TensorType(DoubleType())),
+                                          StructField(p, TensorType(DoubleType())),
+                                          StructField(predictionCol, DoubleType())))
+      case (None, None) => Success(Seq(StructField(featuresCol, TensorType(DoubleType())),
+                                      StructField(predictionCol, DoubleType())))
     }
   }
 }

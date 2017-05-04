@@ -56,7 +56,7 @@ MLeap is cross-compiled for Scala 2.10 and 2.11, so just replace 2.10 with 2.11 
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.6.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.7.0"
 ```
 
 #### Maven
@@ -65,7 +65,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.6.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.10</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0</version>
 </dependency>
 ```
 
@@ -74,7 +74,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.6.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.6.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.7.0"
 ```
 
 #### Maven
@@ -83,15 +83,23 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.6.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.10</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.6.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.7.0
 ```
+
+### PySpark Integration
+
+Install MLeap from pypy
+```bash
+$ pip install mleap
+```
+
 
 ## Using the Library
 
@@ -138,47 +146,69 @@ for(modelFile <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip")))
 
 Spark pipelines are not meant to be run outside of Spark. They require a DataFrame and therefore a SparkContext to run. These are expensive data structures and libraries to include in a project. With MLeap, there is no dependency on Spark to execute a pipeline. MLeap dependencies are lightweight and we use fast data structures to execute your ML pipelines.
 
+### PySpark Integration
+
+Import the MLeap library in your PySpark job
+
+```python
+import mleap.pyspark
+from mleap.pyspark.spark_support import SimpleSparkSerializer
+```
 
 ### Create and Export a Scikit-Learn Pipeline
 
 ```python
+import pandas as pd
+
 # Load scikit-learn mleap extensions
 import mleap.sklearn.pipeline
 import mleap.sklearn.preprocessing.data
 from mleap.sklearn.preprocessing.data import NDArrayToDataFrame
 
+# Load the LabelEncoder from Mleap
+from mleap.sklearn.preprocessing.data import FeatureExtractor, LabelEncoder, ReshapeArrayToN1
+
 # Load scikit-learn transformers and models
-from sklearn.preprocessing import LabelEncoder, Binarizer
-
-# Define the Label Encoder (mlinit method adds a unique `name` to the transformer as well as explicit input/output features)
-label_encoder_tf = LabelEncoder()
-label_encoder_tf.mlinit(input_features = 'col_a', output_features='col_a_label_le')
-
-# Convert output of Label Encoder to Data Frame instead of 1d-array
-n_dim_array_to_df_tf = NDArrayToDataFrame(label_encoder_tf.output_features)
-
-# Define our binarizer
-binarizer = Binarizer(0.5)
-binarizer.mlinit(input_features=n_dim_array_to_df_tf.output_features, output_features="{}_binarized".format(n_dim_array_to_df_tf.output_features))
+from sklearn.preprocessing import OneHotEncoder, Binarizer
+from sklearn.pipeline import Pipeline
 
 data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
 
-# Assemble the steps of our pipeline
-steps = [
-    (label_encoder_tf.name, label_encoder_tf),
-    (n_dim_array_to_df_tf.name, n_dim_array_to_df_tf),
-    (binarizer.name, binarizer)
-]
+continuous_features = ['col_a']
 
-pipeline = Pipeline(steps)
-pipeline.mlinit()
+feature_extractor_tf = FeatureExtractor(input_features=continuous_features, 
+                                         output_vector='imputed_features', 
+                                         output_vector_items=continuous_features)
 
-# Fit the pipeline
-pipeline.fit(data)
+# Label Encoder for x1 Label 
+label_encoder_tf = LabelEncoder(input_features=feature_extractor_tf.output_vector_items,
+                               output_features=['{}_label_le'.format(x) for x in feature_extractor_tf.output_vector_items])
 
-# Write the pipeline to bundle.ml
-pipeline.serialize_to_bundle('/tmp', 'simple-sk-pipeline', init=True)
+# Reshape the output of the LabelEncoder to N-by-1 array
+reshape_le_tf = ReshapeArrayToN1()
 
+# Vector Assembler for x1 One Hot Encoder
+one_hot_encoder_tf = OneHotEncoder(sparse=False)
+one_hot_encoder_tf.mlinit(input_features = label_encoder_tf.output_features, 
+                          output_features = ['{}_label_one_hot_encoded'.format(x) for x in label_encoder_tf.output_features])
+
+one_hot_encoder_pipeline_x0 = Pipeline([
+                                         (feature_extractor_tf.name, feature_extractor_tf),
+                                         (label_encoder_tf.name, label_encoder_tf),
+                                         (reshape_le_tf.name, reshape_le_tf),
+                                         (one_hot_encoder_tf.name, one_hot_encoder_tf)
+                                        ])
+
+one_hot_encoder_pipeline_x0.mlinit()
+
+one_hot_encoder_pipeline_x0.serialize_to_bundle('/tmp', 'mleap-scikit-test-pipeline', init=True)
+
+
+one_hot_encoder_pipeline_x0.fit_transform(data)
+
+# array([[ 1.,  0.,  0.],
+#        [ 0.,  1.,  0.],
+#        [ 0.,  0.,  1.]])
 ```
 
 ### Load and Transform Using MLeap

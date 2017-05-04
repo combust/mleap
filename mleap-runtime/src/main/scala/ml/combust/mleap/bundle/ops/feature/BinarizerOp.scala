@@ -6,12 +6,18 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.BinarizerModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Binarizer
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
+import ml.combust.mleap.runtime.types.DataType
 
 /**
   * Created by fshabbir on 12/1/16.
   */
 class BinarizerOp extends OpNode[MleapContext, Binarizer, BinarizerModel] {
+  var inputDataType: Option[DataType] = None
+  var outputDataType: Option[DataType] = None
+
   override val Model: OpModel[MleapContext, BinarizerModel] = new OpModel[MleapContext, BinarizerModel] {
+
     override val klazz: Class[BinarizerModel] = classOf[BinarizerModel]
 
     override def opName: String = Bundle.BuiltinOps.feature.binarizer
@@ -23,9 +29,17 @@ class BinarizerOp extends OpNode[MleapContext, Binarizer, BinarizerModel] {
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): BinarizerModel = {
+      inputDataType = getDataType(model, "input_types")
+      outputDataType = getDataType(model, "output_types")
       BinarizerModel(model.value("threshold").getDouble)
     }
 
+    private def getDataType(model: Model, colName: String): Option[DataType] = {
+      model.attributes.get.get(colName) match {
+        case None => None
+        case Some(s) => Some(s.value.getDataType)
+      }
+    }
   }
 
   override val klazz: Class[Binarizer] = classOf[Binarizer]
@@ -38,7 +52,9 @@ class BinarizerOp extends OpNode[MleapContext, Binarizer, BinarizerModel] {
                    (implicit context: BundleContext[MleapContext]): Binarizer = {
     Binarizer(uid = node.name,
       inputCol = node.shape.standardInput.name,
+      inputDataType = inputDataType,
       outputCol = node.shape.standardOutput.name,
+      outputDataType = outputDataType,
       model = model)
   }
 

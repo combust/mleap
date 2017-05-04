@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BinarizerModel
+import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -11,11 +11,13 @@ import org.scalatest.FunSpec
   */
 class BinarizerSpec extends FunSpec {
   val binarizer = Binarizer(inputCol = "test_vec",
+    inputDataType = Some(TensorType(DoubleType())),
     outputCol = "test_binarizer",
+    outputDataType = Some(TensorType(DoubleType())),
     model = BinarizerModel(0.6))
 
-  describe("#transform") {
-    describe("with a double tensor input column") {
+  describe("with a double tensor input column") {
+    describe("#transform") {
       it("thresholds the input column to 0 or 1") {
         val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
         val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.1, 0.6, 0.7)))))
@@ -30,17 +32,38 @@ class BinarizerSpec extends FunSpec {
       }
     }
 
-    describe("with a double input column") {
+    describe("#getSchema") {
+      it("has the correct inputs and outputs") {
+        assert(binarizer.getSchema().get ==
+          Seq(StructField("test_vec", TensorType(DoubleType())),
+            StructField("test_binarizer", TensorType(DoubleType()))))
+      }
+    }
+  }
+
+  describe("with a double input column") {
+    val binarizer2 = binarizer.copy(inputCol = "test",
+                                    inputDataType = Some(DoubleType()),
+                                    outputDataType = Some(DoubleType()))
+    describe("#transform") {
       it("thresholds the input column to 0 or 1") {
-        val schema = StructType(Seq(StructField("test_vec", DoubleType()))).get
+        val schema = StructType(Seq(StructField("test", DoubleType()))).get
         val dataset = LocalDataset(Seq(Row(0.7), Row(0.1)))
         val frame = LeapFrame(schema, dataset)
 
-        val frame2 = binarizer.transform(frame).get
+        val frame2 = binarizer2.transform(frame).get
         val data = frame2.dataset
 
         assert(data(0).getDouble(1) == 1.0)
         assert(data(1).getDouble(1) == 0.0)
+      }
+    }
+
+    describe("#getSchema") {
+      it("has the correct inputs and outputs") {
+        assert(binarizer2.getSchema().get ==
+          Seq(StructField("test", DoubleType()),
+            StructField("test_binarizer", DoubleType())))
       }
     }
   }

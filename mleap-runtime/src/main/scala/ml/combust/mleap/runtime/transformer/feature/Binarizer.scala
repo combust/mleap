@@ -6,16 +6,18 @@ import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.{DoubleType, TensorType}
+import ml.combust.mleap.runtime.types.{DataType, DoubleType, StructField, TensorType}
 
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 /**
   * Created by fshabbir on 12/1/16.
   */
 case class Binarizer(override val uid: String = Transformer.uniqueName("binarizer"),
                      inputCol: String,
+                     inputDataType: Option[DataType],
                      outputCol: String,
+                     outputDataType: Option[DataType],
                      model: BinarizerModel) extends Transformer {
   val execTensor: UserDefinedFunction = (value: Tensor[Double]) => model(value): Tensor[Double]
   val execDouble: UserDefinedFunction = (value: Double) => model(value): Double
@@ -27,5 +29,14 @@ case class Binarizer(override val uid: String = Transformer.uniqueName("binarize
       case tt: TensorType if tt.base == DoubleType() && !tt.isNullable =>
         builder.withOutput(outputCol, inputCol)(execTensor)
     }.getOrElse(Failure(new IllegalArgumentException("Input column must be double or double tensor")))
+  }
+
+  override def getSchema(): Try[Seq[StructField]] = {
+    if (inputDataType == None || outputDataType == None) {
+      return Failure(new RuntimeException(s"Cannot determine schema for transformer ${this.uid}"))
+    }
+
+    Success(Seq(StructField(inputCol, inputDataType.get),
+                StructField(outputCol, outputDataType.get)))
   }
 }

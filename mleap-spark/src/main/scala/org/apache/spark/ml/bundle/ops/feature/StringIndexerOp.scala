@@ -21,7 +21,6 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       context.context.dataset.map(dataset => {
         model.withAttr("input_types", Value.dataType(mleapType(dataset.schema(obj.getInputCol).dataType)))
-          .withAttr("output_types", Value.dataType(mleapType(dataset.schema(obj.getOutputCol).dataType)))
       }).getOrElse(model)
         .withAttr("labels", Value.stringList(obj.labels))
         .withAttr("handle_invalid", Value.string(obj.getHandleInvalid))

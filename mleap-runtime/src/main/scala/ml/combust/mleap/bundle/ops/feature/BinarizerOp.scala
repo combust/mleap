@@ -39,7 +39,7 @@ class BinarizerOp extends OpNode[MleapContext, Binarizer, BinarizerModel] {
         case None => None
         case Some(attributeList) => attributeList.get(colName) match {
           case None => None
-          case Some(s) => Some(s.value.getDataType)
+          case Some(attribute) => Some(attribute.value.getDataType)
         }
       }
     }

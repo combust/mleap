@@ -6,11 +6,15 @@ import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.runtime.types.DataType
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
 class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerModel] {
+  var inputDataType: Option[DataType] = None
+
   override val Model: OpModel[MleapContext, StringIndexerModel] = new OpModel[MleapContext, StringIndexerModel] {
     override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
 
@@ -25,7 +29,15 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): StringIndexerModel = {
       val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString).getOrElse(HandleInvalid.default)
-      
+
+      inputDataType = model.attributes match {
+        case None => None
+        case Some(attributeList) => attributeList.get("input_types") match {
+          case None => None
+          case Some(attribute) => Some(attribute.value.getDataType)
+        }
+      }
+
       StringIndexerModel(labels = model.value("labels").getStringList,
         handleInvalid = handleInvalid)
     }
@@ -41,6 +53,7 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
                    (implicit context: BundleContext[MleapContext]): StringIndexer = {
     StringIndexer(uid = node.name,
       inputCol = node.shape.standardInput.name,
+      inputDataType = inputDataType,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

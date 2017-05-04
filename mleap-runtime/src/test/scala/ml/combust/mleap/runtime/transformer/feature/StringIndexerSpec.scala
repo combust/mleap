@@ -14,6 +14,7 @@ class StringIndexerSpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   val stringIndexer = StringIndexer(inputCol = "test_string",
+    inputDataType = Some(StringType()),
     outputCol = "test_index",
     model = StringIndexerModel(Seq("index1", "index2", "index3")))
 

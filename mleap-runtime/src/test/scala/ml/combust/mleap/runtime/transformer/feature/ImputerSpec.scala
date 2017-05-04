@@ -12,6 +12,7 @@ import org.scalatest.FunSpec
 class ImputerSpec extends FunSpec {
   describe("#transform") {
     val model = Imputer(inputCol = "test_a",
+      inputDataType = Some(DoubleType()),
       outputCol = "test_out",
       model = ImputerModel(45.7, 23.6, ""))
 

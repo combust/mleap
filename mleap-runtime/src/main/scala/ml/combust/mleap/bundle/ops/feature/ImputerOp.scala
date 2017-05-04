@@ -6,11 +6,15 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.ImputerModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Imputer
+import ml.combust.mleap.runtime.types.DataType
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by mikhail on 12/18/16.
   */
 class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
+  var inputDataType: Option[DataType] = None
+
   override val Model: OpModel[MleapContext, ImputerModel] = new OpModel[MleapContext, ImputerModel] {
     override val klazz: Class[ImputerModel] = classOf[ImputerModel]
 
@@ -24,6 +28,14 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): ImputerModel = {
+      inputDataType = model.attributes match {
+        case None => None
+        case Some(attributeList) => attributeList.get("input_types") match {
+          case None => None
+          case Some(attribute) => Some(attribute.value.getDataType)
+        }
+      }
+
       ImputerModel(model.value("surrogate_value").getDouble,
         model.value("missing_value").getDouble,
         model.value("strategy").getString)
@@ -42,6 +54,7 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
                    (implicit context: BundleContext[MleapContext]): Imputer = {
     Imputer(uid = node.name,
       inputCol = node.shape.standardInput.name,
+      inputDataType = inputDataType,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

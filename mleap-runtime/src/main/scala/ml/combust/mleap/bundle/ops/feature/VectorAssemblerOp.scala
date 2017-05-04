@@ -47,7 +47,7 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
                    (implicit context: BundleContext[MleapContext]): VectorAssembler = {
     VectorAssembler(uid = node.name,
       inputCols = node.shape.inputs.map(_.name).toArray,
-      inputDataTypes,
+      inputDataTypes = inputDataTypes,
       outputCol = node.shape.standardOutput.name)
   }
 

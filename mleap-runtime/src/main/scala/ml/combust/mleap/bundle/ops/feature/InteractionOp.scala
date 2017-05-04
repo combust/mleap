@@ -4,13 +4,17 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.InteractionModel
-import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.runtime.{MleapContext, types}
 import ml.combust.mleap.runtime.transformer.feature.Interaction
+import ml.combust.mleap.runtime.types.DataType
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by hollinwilkins on 4/26/17.
   */
 class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] {
+  var inputDataTypes: Option[Array[DataType]] = None
+
   override val Model: OpModel[MleapContext, InteractionModel] = new OpModel[MleapContext, InteractionModel] {
     override val klazz: Class[InteractionModel] = classOf[InteractionModel]
 
@@ -31,6 +35,14 @@ class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] 
         index => model.value(s"num_features$index").getIntList.toArray
       }.toArray
 
+      inputDataTypes = model.attributes match {
+        case None => None
+        case Some(attributeList) => attributeList.get("input_types") match {
+          case None => None
+          case Some(attribute) => Some(attribute.value.getDataTypeList.map(v => v: types.DataType).toArray)
+        }
+      }
+
       InteractionModel(spec)
     }
   }
@@ -45,6 +57,7 @@ class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] 
                    (implicit context: BundleContext[MleapContext]): Interaction = {
     Interaction(uid = node.name,
       inputCols = node.shape.inputs.map(_.name).toArray,
+      inputDataTypes = inputDataTypes,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

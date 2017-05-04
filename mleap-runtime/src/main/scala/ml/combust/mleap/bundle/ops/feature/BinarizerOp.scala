@@ -35,9 +35,12 @@ class BinarizerOp extends OpNode[MleapContext, Binarizer, BinarizerModel] {
     }
 
     private def getDataType(model: Model, colName: String): Option[DataType] = {
-      model.attributes.get.get(colName) match {
+      model.attributes match {
         case None => None
-        case Some(s) => Some(s.value.getDataType)
+        case Some(attributeList) => attributeList.get(colName) match {
+          case None => None
+          case Some(s) => Some(s.value.getDataType)
+        }
       }
     }
   }

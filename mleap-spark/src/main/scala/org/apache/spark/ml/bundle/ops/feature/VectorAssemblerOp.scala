@@ -22,7 +22,6 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
       context.context.dataset.map(dataset => {
         val inputDataTypes = obj.getInputCols.map(v => mleapTypeToBundleType(mleapType(dataset.schema(v).dataType))).toSeq
         model.withAttr("input_types", Value.dataTypeList(inputDataTypes))
-             .withAttr("output_types", Value.dataType(mleapType(dataset.schema(obj.getOutputCol).dataType)))
       }).getOrElse(model)
     }
 

@@ -18,6 +18,7 @@ class RowTransformBuilderSpec extends FunSpec {
     StructField("feature2", DoubleType()),
     StructField("feature3", DoubleType()))).get
   val assembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
+    inputDataTypes = Some(Array(DoubleType(), DoubleType(), DoubleType())),
     outputCol = "features")
   val linearRegression = LinearRegression(featuresCol = "features",
     predictionCol = "prediction",

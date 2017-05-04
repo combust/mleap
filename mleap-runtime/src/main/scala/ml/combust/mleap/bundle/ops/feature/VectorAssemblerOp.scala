@@ -5,12 +5,17 @@ import ml.combust.mleap.core.feature.VectorAssemblerModel
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
-import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.runtime.{MleapContext, types}
+import ml.combust.mleap.runtime.types.DataType
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
 class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAssemblerModel] {
+
+  var inputDataTypes: Option[Array[DataType]] = None
+
   override val Model: OpModel[MleapContext, VectorAssemblerModel] = new OpModel[MleapContext, VectorAssemblerModel] {
     override val klazz: Class[VectorAssemblerModel] = classOf[VectorAssemblerModel]
 
@@ -20,7 +25,16 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
                       (implicit context: BundleContext[MleapContext]): Model = { model }
 
     override def load(model: Model)
-                     (implicit context: BundleContext[MleapContext]): VectorAssemblerModel = VectorAssemblerModel.default
+                     (implicit context: BundleContext[MleapContext]): VectorAssemblerModel = {
+      inputDataTypes = model.attributes match {
+        case None => None
+        case Some(attributeList) => attributeList.get("input_types") match {
+          case None => None
+          case Some(attribute) => Some(attribute.value.getDataTypeList.map(v => v: types.DataType).toArray)
+        }
+      }
+      VectorAssemblerModel.default
+    }
   }
 
   override val klazz: Class[VectorAssembler] = classOf[VectorAssembler]
@@ -33,6 +47,7 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
                    (implicit context: BundleContext[MleapContext]): VectorAssembler = {
     VectorAssembler(uid = node.name,
       inputCols = node.shape.inputs.map(_.name).toArray,
+      inputDataTypes,
       outputCol = node.shape.standardOutput.name)
   }
 

@@ -4,13 +4,18 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.CoalesceModel
-import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.runtime.{MleapContext, types}
 import ml.combust.mleap.runtime.transformer.feature.Coalesce
+import ml.combust.mleap.runtime.types.DataType
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by hollinwilkins on 1/5/17.
   */
 class CoalesceOp extends OpNode[MleapContext, Coalesce, CoalesceModel] {
+
+  var inputDataTypes: Option[Array[DataType]] = None
+
   override val Model: OpModel[MleapContext, CoalesceModel] = new OpModel[MleapContext, CoalesceModel] {
     override val klazz: Class[CoalesceModel] = classOf[CoalesceModel]
 
@@ -19,7 +24,17 @@ class CoalesceOp extends OpNode[MleapContext, Coalesce, CoalesceModel] {
     override def store(model: Model, obj: CoalesceModel)
                       (implicit context: BundleContext[MleapContext]): Model = model
 
-    override def load(model: Model)(implicit context: BundleContext[MleapContext]): CoalesceModel = CoalesceModel()
+    override def load(model: Model)(implicit context: BundleContext[MleapContext]): CoalesceModel = {
+      inputDataTypes = model.attributes match {
+        case None => None
+        case Some(attributeList) => attributeList.get("input_types") match {
+          case None => None
+          case Some(attribute) => Some(attribute.value.getDataTypeList.map(v => v: types.DataType).toArray)
+        }
+      }
+
+      CoalesceModel()
+    }
   }
 
   override val klazz: Class[Coalesce] = classOf[Coalesce]
@@ -32,6 +47,7 @@ class CoalesceOp extends OpNode[MleapContext, Coalesce, CoalesceModel] {
                    (implicit context: BundleContext[MleapContext]): Coalesce = {
     Coalesce(uid = node.name,
       inputCols = node.shape.inputs.map(_.name).toArray,
+      inputDataTypes = inputDataTypes,
       outputCol = node.shape.standardOutput.name,
       model = model)
   }

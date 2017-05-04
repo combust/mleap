@@ -5,6 +5,7 @@ import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.runtime.types.StructField
 import ml.combust.mleap.tensor.Tensor
 
 import scala.util.Try
@@ -21,4 +22,6 @@ case class Interaction(override val uid: String = Transformer.uniqueName("intera
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(outputCol, inputCols)(exec)
   }
+
+  override def getSchema(): Try[Seq[StructField]] = ???
 }

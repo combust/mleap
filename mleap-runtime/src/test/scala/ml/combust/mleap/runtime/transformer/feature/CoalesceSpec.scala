@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CoalesceModel
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType}
+import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /**
@@ -17,12 +17,13 @@ class CoalesceSpec extends FunSpec {
     Row(None, None, None, 34.4)))
   val frame = LeapFrame(schema, dataset)
 
-  describe("#transform") {
-    describe("with all optional doubles") {
-      val coalesce = Coalesce(inputCols = Array("test1", "test2", "test3"),
-        outputCol = "test_bucket",
-        model = CoalesceModel())
+  describe("with all optional doubles") {
+    val coalesce = Coalesce(inputCols = Array("test1", "test2", "test3"),
+      inputDataTypes = Some(Array(DoubleType(true), DoubleType(true), DoubleType(true))),
+      outputCol = "test_bucket",
+      model = CoalesceModel())
 
+    describe("#transform") {
       it("returns the non-null value or null if no value exists") {
         val data = coalesce.transform(frame).get.dataset
 
@@ -31,16 +32,39 @@ class CoalesceSpec extends FunSpec {
       }
     }
 
-    describe("with a non-optional double") {
-      val coalesce = Coalesce(inputCols = Array("test1", "test3", "test4"),
-        outputCol = "test_bucket",
-        model = CoalesceModel())
+    describe("#getSchema") {
+      it("has the correct inputs and outputs") {
+        assert(coalesce.getSchema().get ==
+          Seq(StructField("test1", DoubleType(true)),
+          StructField("test2", DoubleType(true)),
+          StructField("test3", DoubleType(true)),
+          StructField("test_bucket", DoubleType(true))))
+      }
+    }
+  }
 
+  describe("with a non-optional double") {
+    val coalesce = Coalesce(inputCols = Array("test1", "test3", "test4"),
+      inputDataTypes = Some(Array(DoubleType(true), DoubleType(true), DoubleType(false))),
+      outputCol = "test_bucket",
+      model = CoalesceModel())
+
+    describe("#transform") {
       it("returns the first non-null value") {
         val data = coalesce.transform(frame).get.dataset
 
         assert(data(0).optionDouble(4).exists(_ == 23.4))
         assert(data(1).optionDouble(4).exists(_ == 34.4))
+      }
+    }
+
+    describe("#getSchema") {
+      it("has the correct inputs and outputs") {
+        assert(coalesce.getSchema().get ==
+          Seq(StructField("test1", DoubleType(true)),
+            StructField("test3", DoubleType(true)),
+            StructField("test4", DoubleType()),
+          StructField("test_bucket", DoubleType(true))))
       }
     }
   }

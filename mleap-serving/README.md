@@ -51,6 +51,13 @@ curl -XPUT -H "content-type: application/json" \
   http://localhost:65327/model
 ```
 
+### Retrieve Model Schema
+
+```
+curl -XGET -H "content-type: application/json" \
+  http://localhost:65327/model
+```
+
 ### Transform
 
 Next we will use our model to transform a JSON-encoded leap frame. If

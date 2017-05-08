@@ -22,7 +22,10 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
     override def opName: String = Bundle.BuiltinOps.feature.vector_assembler
 
     override def store(model: Model, obj: VectorAssemblerModel)
-                      (implicit context: BundleContext[MleapContext]): Model = { model }
+                      (implicit context: BundleContext[MleapContext]): Model = {
+      model.withAttr("input_types", Value.dataTypeList(
+        inputDataTypes.get.toSeq.map(dataType => mleapTypeToBundleType(dataType))))
+    }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): VectorAssemblerModel = {
@@ -41,7 +44,10 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
 
   override def name(node: VectorAssembler): String = node.uid
 
-  override def model(node: VectorAssembler): VectorAssemblerModel = VectorAssemblerModel.default
+  override def model(node: VectorAssembler): VectorAssemblerModel = {
+    inputDataTypes = node.inputDataTypes
+    VectorAssemblerModel.default
+  }
 
   override def load(node: Node, model: VectorAssemblerModel)
                    (implicit context: BundleContext[MleapContext]): VectorAssembler = {

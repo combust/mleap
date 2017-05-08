@@ -25,6 +25,7 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
       model.withAttr("surrogate_value", Value.double(obj.surrogateValue)).
         withAttr("missing_value", Value.double(obj.missingValue)).
         withAttr("strategy", Value.string(obj.strategy))
+        .withAttr("input_types", Value.dataType(inputDataType.get))
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): ImputerModel = {
@@ -47,7 +48,10 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
 
   override def name(node: Imputer): String = node.uid
 
-  override def model(node: Imputer): ImputerModel = node.model
+  override def model(node: Imputer): ImputerModel = {
+    inputDataType = node.inputDataType
+    node.model
+  }
 
 
   override def load(node: Node, model: ImputerModel)

@@ -22,7 +22,9 @@ class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] 
 
     override def store(model: Model, obj: InteractionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      val m = model.withAttr("num_inputs", Value.int(obj.featuresSpec.length))
+      val m = model.withAttr("input_types", Value.dataTypeList(
+        inputDataTypes.get.toSeq.map(dataType => mleapTypeToBundleType(dataType))))
+        .withAttr("num_inputs", Value.int(obj.featuresSpec.length))
       obj.featuresSpec.zipWithIndex.foldLeft(m) {
         case (m2, (numFeatures, index)) => m2.withAttr(s"num_features$index", Value.intList(numFeatures))
       }
@@ -51,7 +53,10 @@ class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] 
 
   override def name(node: Interaction): String = node.uid
 
-  override def model(node: Interaction): InteractionModel = node.model
+  override def model(node: Interaction): InteractionModel = {
+    inputDataTypes = node.inputDataTypes
+    node.model
+  }
 
   override def load(node: Node, model: InteractionModel)
                    (implicit context: BundleContext[MleapContext]): Interaction = {

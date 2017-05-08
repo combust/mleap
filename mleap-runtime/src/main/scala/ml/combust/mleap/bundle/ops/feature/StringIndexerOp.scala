@@ -24,6 +24,7 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
                       (implicit context: BundleContext[MleapContext]): Model = {
       model.withAttr("labels", Value.stringList(obj.labels)).
         withAttr("handle_invalid", Value.string(obj.handleInvalid.asParamString))
+      .withAttr("input_types", Value.dataType(mleapTypeToBundleType(inputDataType.get)))
     }
 
     override def load(model: Model)
@@ -47,7 +48,10 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
 
   override def name(node: StringIndexer): String = node.uid
 
-  override def model(node: StringIndexer): StringIndexerModel = node.model
+  override def model(node: StringIndexer): StringIndexerModel = {
+    inputDataType = node.inputDataType
+    node.model
+  }
 
   override def load(node: Node, model: StringIndexerModel)
                    (implicit context: BundleContext[MleapContext]): StringIndexer = {

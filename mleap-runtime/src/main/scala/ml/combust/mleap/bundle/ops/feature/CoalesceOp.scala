@@ -22,7 +22,10 @@ class CoalesceOp extends OpNode[MleapContext, Coalesce, CoalesceModel] {
     override def opName: String = Bundle.BuiltinOps.feature.coalesce
 
     override def store(model: Model, obj: CoalesceModel)
-                      (implicit context: BundleContext[MleapContext]): Model = model
+                      (implicit context: BundleContext[MleapContext]): Model = {
+      model.withAttr("input_types", Value.dataTypeList(
+        inputDataTypes.get.toSeq.map(dataType => mleapTypeToBundleType(dataType))))
+    }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): CoalesceModel = {
       inputDataTypes = model.attributes match {
@@ -41,7 +44,10 @@ class CoalesceOp extends OpNode[MleapContext, Coalesce, CoalesceModel] {
 
   override def name(node: Coalesce): String = node.uid
 
-  override def model(node: Coalesce): CoalesceModel = node.model
+  override def model(node: Coalesce): CoalesceModel = {
+    inputDataTypes = node.inputDataTypes
+    node.model
+  }
 
   override def load(node: Node, model: CoalesceModel)
                    (implicit context: BundleContext[MleapContext]): Coalesce = {

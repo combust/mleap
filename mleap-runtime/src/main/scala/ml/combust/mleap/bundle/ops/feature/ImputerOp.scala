@@ -22,10 +22,11 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
 
     override def store(model: Model, obj: ImputerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("surrogate_value", Value.double(obj.surrogateValue)).
-        withAttr("missing_value", Value.double(obj.missingValue)).
-        withAttr("strategy", Value.string(obj.strategy))
-        .withAttr("input_types", Value.dataType(inputDataType.get))
+      inputDataType.map(inputType => model.withAttr("input_types", Value.dataType(inputType)))
+      .getOrElse(model)
+        .withAttr("surrogate_value", Value.double(obj.surrogateValue))
+        .withAttr("missing_value", Value.double(obj.missingValue))
+        .withAttr("strategy", Value.string(obj.strategy))
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): ImputerModel = {

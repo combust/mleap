@@ -24,10 +24,13 @@ class BinarizerOp extends OpNode[MleapContext, Binarizer, BinarizerModel] {
 
     override def store(model: Model, obj: BinarizerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("threshold", Value.double(obj.threshold))
-            .withAttr("input_types", Value.dataType(mleapTypeToBundleType(inputDataType.get)))
-            .withAttr("output_types",  Value.dataType(mleapTypeToBundleType(outputDataType.get)))
-
+      if (inputDataType == None || outputDataType == None) {
+        model.withAttr("threshold", Value.double(obj.threshold))
+      } else {
+        model.withAttr("threshold", Value.double(obj.threshold))
+          .withAttr("input_types", Value.dataType(mleapTypeToBundleType(inputDataType.get)))
+          .withAttr("output_types",  Value.dataType(mleapTypeToBundleType(outputDataType.get)))
+      }
     }
 
     override def load(model: Model)

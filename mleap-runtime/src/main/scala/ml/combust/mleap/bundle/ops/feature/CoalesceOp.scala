@@ -23,8 +23,8 @@ class CoalesceOp extends OpNode[MleapContext, Coalesce, CoalesceModel] {
 
     override def store(model: Model, obj: CoalesceModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("input_types", Value.dataTypeList(
-        inputDataTypes.get.toSeq.map(dataType => mleapTypeToBundleType(dataType))))
+      inputDataTypes.map(inputTypes => model.withAttr("input_types", Value.dataTypeList(
+        inputTypes.toSeq.map(dataType => mleapTypeToBundleType(dataType))))).getOrElse(model)
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): CoalesceModel = {

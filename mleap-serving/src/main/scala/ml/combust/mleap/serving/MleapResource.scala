@@ -43,6 +43,8 @@ class MleapResource(service: MleapService)
             }
           } ~ delete {
             complete(service.unloadModel(UnloadModelRequest()))
+          } ~ get {
+            complete(service.getModelSchema())
           }
         } ~ path("transform") {
           post {

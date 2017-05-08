@@ -35,9 +35,14 @@ case class MathBinary(override val uid: String = Transformer.uniqueName("math_bi
       case (Some(a), Some(b)) => Success(Seq(StructField(a, DoubleType()),
                                               StructField(b, DoubleType()),
                                               StructField(outputCol, DoubleType())))
-      case (Some(a), None) => Success(Seq(StructField(a, DoubleType()), StructField(outputCol, DoubleType())))
-      case (None, Some(b)) => Success(Seq(StructField(b, DoubleType()), StructField(outputCol, DoubleType())))
-      case (None, None) => Success(Seq(StructField(outputCol, DoubleType())))
+      case (Some(a), None) => Success(Seq(
+        StructField(a, DoubleType()),
+        StructField(outputCol, DoubleType())))
+      case (None, Some(b)) => Success(Seq(
+        StructField(b, DoubleType()),
+        StructField(outputCol, DoubleType())))
+      case (None, None) => Success(Seq(
+        StructField(outputCol, DoubleType())))
     }
   }
 }

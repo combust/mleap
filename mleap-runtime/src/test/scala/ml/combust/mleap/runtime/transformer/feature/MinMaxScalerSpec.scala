@@ -20,7 +20,7 @@ class MinMaxScalerSpec extends FunSpec{
     model = MinMaxScalerModel(Vectors.dense(Array(0.0, 0.0, 0.0)), Vectors.dense(Array(10.0, 20.0, 40.0))))
 
   describe("#transform") {
-    it("Scales the input data between min / max value vectors") {
+    it("scales the input data between min / max value vectors") {
       val frame2 = minMaxScaler.transform(frame).get
       val data = frame2.dataset.toArray
       val norm = data(0).getTensor[Double](1)

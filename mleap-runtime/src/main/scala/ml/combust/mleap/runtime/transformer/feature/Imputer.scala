@@ -20,8 +20,9 @@ case class Imputer(override val uid: String = Transformer.uniqueName("imputer"),
   override def getSchema(): Try[Seq[StructField]] = {
     inputDataType match {
       case None => Failure(new RuntimeException(s"Cannot determine schema for transformer ${this.uid}"))
-      case Some(inputType) =>  Success(Seq(StructField(inputCol, inputType),
-        StructField(outputCol, DoubleType())))
+      case Some(inputType) =>  Success(Seq(
+                                  StructField(inputCol, inputType),
+                                  StructField(outputCol, DoubleType())))
     }
   }
 }

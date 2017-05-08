@@ -36,7 +36,8 @@ case class AFTSurvivalRegression(override val uid: String = Transformer.uniqueNa
         Success(Seq(StructField(featuresCol, TensorType(DoubleType())),
           StructField(predictionCol, DoubleType()),
           StructField(col, TensorType(DoubleType()))))
-      case None => Success(Seq(StructField(featuresCol, TensorType(DoubleType())),
+      case None => Success(
+        Seq(StructField(featuresCol, TensorType(DoubleType())),
         StructField(predictionCol, DoubleType())))
     }
   }

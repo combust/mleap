@@ -28,15 +28,15 @@ class BinarizerOp extends OpNode[MleapContext, Binarizer, BinarizerModel] {
         model.withAttr("threshold", Value.double(obj.threshold))
       } else {
         model.withAttr("threshold", Value.double(obj.threshold))
-          .withAttr("input_types", Value.dataType(mleapTypeToBundleType(inputDataType.get)))
-          .withAttr("output_types",  Value.dataType(mleapTypeToBundleType(outputDataType.get)))
+          .withAttr("input_type", Value.dataType(mleapTypeToBundleType(inputDataType.get)))
+          .withAttr("output_type",  Value.dataType(mleapTypeToBundleType(outputDataType.get)))
       }
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): BinarizerModel = {
-      inputDataType = getDataType(model, "input_types")
-      outputDataType = getDataType(model, "output_types")
+      inputDataType = getDataType(model, "input_type")
+      outputDataType = getDataType(model, "output_type")
       BinarizerModel(model.value("threshold").getDouble)
     }
 

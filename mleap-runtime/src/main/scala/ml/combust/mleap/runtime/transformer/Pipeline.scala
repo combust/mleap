@@ -21,8 +21,8 @@ case class Pipeline(uid: String = Transformer.uniqueName("pipeline"),
                                 .filter(transformerWithSchema => transformerWithSchema._2.isFailure)
                                 .map(transformerWithSchema => transformerWithSchema._1)
     missingSchemaTransformers match {
-      case Seq() => Success(transformers.map(transformer => transformer.getSchema().get).flatten)
-      case Seq(_) => Failure(new RuntimeException(s"Cannot determine schema for transformers ${missingSchemaTransformers}"))
+      case Nil => Success(transformers.map(transformer => transformer.getSchema().get).flatten)
+      case x :: _ => Failure(new RuntimeException(s"Cannot determine schema for transformers ${missingSchemaTransformers}"))
     }
   }
 }

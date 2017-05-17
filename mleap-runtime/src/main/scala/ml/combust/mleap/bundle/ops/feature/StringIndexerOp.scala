@@ -22,7 +22,7 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      inputDataType.map(inputType => model.withAttr("input_types", Value.dataType(mleapTypeToBundleType(inputType))))
+      inputDataType.map(inputType => model.withAttr("input_type", Value.dataType(mleapTypeToBundleType(inputType))))
       .getOrElse(model)
         .withAttr("labels", Value.stringList(obj.labels))
         .withAttr("handle_invalid", Value.string(obj.handleInvalid.asParamString))
@@ -35,7 +35,7 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
 
       inputDataType = model.attributes match {
         case None => None
-        case Some(attributeList) => attributeList.get("input_types") match {
+        case Some(attributeList) => attributeList.get("input_type") match {
           case None => None
           case Some(attribute) => Some(attribute.value.getDataType)
         }

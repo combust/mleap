@@ -25,9 +25,9 @@ class MathUnarySpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("test_a", DoubleType()),
           StructField("test_out", DoubleType())))
     }

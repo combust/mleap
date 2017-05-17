@@ -33,9 +33,9 @@ class MultinomialLabelerSpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("test_vec", TensorType(DoubleType())),
           StructField("probs", ListType(DoubleType())),
           StructField("labels", ListType(StringType()))))

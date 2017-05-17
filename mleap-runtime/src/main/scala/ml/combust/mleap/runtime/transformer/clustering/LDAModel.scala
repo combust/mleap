@@ -24,7 +24,7 @@ case class LDAModel(override val uid: String = Transformer.uniqueName("lda"),
     builder.withOutput(topicDistributionCol, featureCol)(topicDistribution)
   }
 
-  override def getSchema(): Try[Seq[StructField]] = Success(
+  override def getFields(): Try[Seq[StructField]] = Success(
     Seq(StructField(featureCol, TensorType(DoubleType())),
       StructField(topicDistributionCol, TensorType(DoubleType()))))
 }

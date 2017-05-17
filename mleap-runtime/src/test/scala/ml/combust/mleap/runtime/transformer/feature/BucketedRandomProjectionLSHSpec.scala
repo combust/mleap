@@ -5,10 +5,10 @@ import org.scalatest.FunSpec
 
 class BucketedRandomProjectionLSHSpec extends FunSpec {
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
       val transformer = new BucketedRandomProjectionLSH("transformer", "input", "output", null)
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("input", TensorType(DoubleType())),
           StructField("output", ListType(TensorType(DoubleType())))))
     }

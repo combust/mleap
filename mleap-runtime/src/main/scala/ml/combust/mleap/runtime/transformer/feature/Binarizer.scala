@@ -31,7 +31,7 @@ case class Binarizer(override val uid: String = Transformer.uniqueName("binarize
     }.getOrElse(Failure(new IllegalArgumentException("Input column must be double or double tensor")))
   }
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     if (inputDataType == None || outputDataType == None) {
       return Failure(new RuntimeException(s"Cannot determine schema for transformer ${this.uid}"))
     }

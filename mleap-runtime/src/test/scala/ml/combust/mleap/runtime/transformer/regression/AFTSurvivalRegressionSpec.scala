@@ -5,17 +5,17 @@ import org.scalatest.FunSpec
 
 class AFTSurvivalRegressionSpec extends FunSpec {
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs without quantilesCol") {
       val transformer = new AFTSurvivalRegression("transformer", "features", "prediction", None, null)
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("features", TensorType(DoubleType())),
           StructField("prediction", DoubleType())))
     }
 
     it("has the correct inputs and outputs with quantilesCol") {
       val transformer = new AFTSurvivalRegression("transformer", "features", "prediction", Some("quantiles"), null)
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("features", TensorType(DoubleType())),
           StructField("prediction", DoubleType()),
           StructField("quantiles", TensorType(DoubleType()))))

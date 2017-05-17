@@ -17,7 +17,7 @@ case class Imputer(override val uid: String = Transformer.uniqueName("imputer"),
                    model: ImputerModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (value: Any) => model.predictAny(value)
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     inputDataType match {
       case None => Failure(new RuntimeException(s"Cannot determine schema for transformer ${this.uid}"))
       case Some(inputType) =>  Success(Seq(

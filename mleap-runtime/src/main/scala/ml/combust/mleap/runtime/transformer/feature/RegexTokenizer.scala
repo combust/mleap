@@ -15,7 +15,7 @@ case class RegexTokenizer(override val uid: String = Transformer.uniqueName("reg
 
   override val exec: UserDefinedFunction = (value: String) => model(value)
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, StringType()),
     StructField(outputCol, ListType(StringType()))
   ))

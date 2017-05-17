@@ -34,9 +34,9 @@ class NGramSpec extends FunSpec{
     it("returns a failure") {assert(ngram2.transform(frame).isFailure)}
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(ngram.getSchema().get ==
+      assert(ngram.getFields().get ==
         Seq(StructField("test_string_seq", ListType(StringType())),
           StructField("output_ngram", ListType(StringType()))))
     }

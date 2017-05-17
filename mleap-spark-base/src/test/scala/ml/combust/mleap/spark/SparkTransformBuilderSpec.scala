@@ -26,7 +26,7 @@ case class MyTransformer() extends Transformer {
     }
   }
 
-  override def getSchema(): Try[Seq[types.StructField]] = {
+  override def getFields(): Try[Seq[types.StructField]] = {
     Success(Seq(types.StructField("input", types.DoubleType()),
       types.StructField("output1", types.DoubleType()),
       types.StructField("output2", types.StringType())))
@@ -52,10 +52,10 @@ class SparkTransformBuilderSpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
       val transformer = MyTransformer()
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("input", types.DoubleType()),
           StructField("output1", types.DoubleType()),
           StructField("output2", types.StringType())))

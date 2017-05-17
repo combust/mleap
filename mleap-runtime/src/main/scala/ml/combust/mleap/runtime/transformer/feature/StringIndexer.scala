@@ -26,7 +26,7 @@ case class StringIndexer(override val uid: String = Transformer.uniqueName("stri
     outputCol = outputCol,
     model = model.toReverse)
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     inputDataType match {
       case None => Failure(new RuntimeException(s"Cannot determine schema for transformer ${this.uid}"))
       case Some(inputType) =>  Success(Seq(StructField(inputCol, inputType),

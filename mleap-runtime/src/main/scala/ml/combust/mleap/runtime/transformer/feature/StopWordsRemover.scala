@@ -16,7 +16,7 @@ case class StopWordsRemover(override val uid:String = Transformer.uniqueName("st
                             model: StopWordsRemoverModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (value: Seq[String]) => model(value)
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, ListType(StringType())),
     StructField(outputCol, ListType(StringType()))
   ))

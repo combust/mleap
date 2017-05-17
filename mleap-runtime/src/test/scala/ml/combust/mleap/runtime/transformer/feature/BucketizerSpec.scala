@@ -41,9 +41,9 @@ class BucketizerSpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(bucketizer.getSchema().get ==
+      assert(bucketizer.getFields().get ==
         Seq(StructField("test_double", DoubleType()),
           StructField("test_bucket", DoubleType())))
     }

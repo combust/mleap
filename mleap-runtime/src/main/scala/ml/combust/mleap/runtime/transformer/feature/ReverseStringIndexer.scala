@@ -16,7 +16,7 @@ case class ReverseStringIndexer(override val uid: String = Transformer.uniqueNam
                                 model: ReverseStringIndexerModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (value: Double) => model(value.toInt)
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, DoubleType()),
     StructField(outputCol, StringType())))
 }

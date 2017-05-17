@@ -29,9 +29,9 @@ class PolynomialExpansionSpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("test_vec", TensorType(DoubleType())),
           StructField("test_expanded", TensorType(DoubleType()))))
     }

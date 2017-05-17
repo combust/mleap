@@ -27,7 +27,7 @@ case class IsotonicRegression(override val uid: String = Transformer.uniqueName(
     }
   }
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     model.featureIndex match {
       case Some(index) => Success(Seq(
         StructField(featuresCol, TensorType(DoubleType())),

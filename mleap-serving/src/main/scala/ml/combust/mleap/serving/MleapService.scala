@@ -43,9 +43,9 @@ class MleapService()
     }.getOrElse(Failure(new IllegalStateException("no transformer loaded")))
   }
 
-  def getModelSchema(): Try[StructType] = synchronized {
+  def getSchema(): Try[StructType] = synchronized {
     bundle.map {
-      _.root.getSchema() match {
+      _.root.getFields() match {
         case Success(fields) => StructType(fields.toSet.toSeq)
         case Failure(ex) => return Failure(ex)
       }

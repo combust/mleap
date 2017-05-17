@@ -18,7 +18,7 @@ case class Normalizer(override val uid: String = Transformer.uniqueName("normali
                       model: NormalizerModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (value: Tensor[Double]) => model(value): Tensor[Double]
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, TensorType(DoubleType())),
     StructField(outputCol, TensorType(DoubleType()))))
 }

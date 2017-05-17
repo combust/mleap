@@ -5,10 +5,10 @@ import org.scalatest.FunSpec
 
 class HashingTermFrequencySpec extends FunSpec {
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
       val transformer = new HashingTermFrequency("transformer", "input", "output", null)
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("input", ListType(StringType())),
           StructField("output", TensorType(DoubleType()))))
     }

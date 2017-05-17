@@ -29,7 +29,7 @@ class ImputerSpec extends FunSpec {
       }
 
       it("has the correct inputs and outputs") {
-        assert(transformer.getSchema().get ==
+        assert(transformer.getFields().get ==
           Seq(StructField("test_a", DoubleType(true)),
             StructField("test_out", DoubleType())))
       }
@@ -50,7 +50,7 @@ class ImputerSpec extends FunSpec {
       }
 
       it("has the correct inputs and outputs") {
-        assert(transformer2.getSchema().get ==
+        assert(transformer2.getFields().get ==
           Seq(StructField("test_a", DoubleType()),
             StructField("test_out", DoubleType())))
       }

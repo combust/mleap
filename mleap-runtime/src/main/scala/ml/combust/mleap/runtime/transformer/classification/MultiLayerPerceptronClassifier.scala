@@ -23,7 +23,7 @@ case class MultiLayerPerceptronClassifier(override val uid: String = Transformer
     builder.withOutput(predictionCol, featuresCol)(predict)
   }
 
-  override def getSchema(): Try[Seq[StructField]] = Success(
+  override def getFields(): Try[Seq[StructField]] = Success(
     Seq(StructField(featuresCol, TensorType(DoubleType())),
       StructField(predictionCol, DoubleType())))
 }

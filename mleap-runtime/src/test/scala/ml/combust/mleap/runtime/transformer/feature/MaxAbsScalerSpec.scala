@@ -37,9 +37,9 @@ class MaxAbsScalerSpec extends FunSpec{
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(maxAbsScaler.getSchema().get ==
+      assert(maxAbsScaler.getFields().get ==
         Seq(StructField("test_vec", TensorType(DoubleType())),
           StructField("test_normalized", TensorType(DoubleType()))))
     }

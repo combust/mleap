@@ -5,10 +5,10 @@ import org.scalatest.FunSpec
 
 class OneVsRestSpec extends FunSpec {
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs without probability column") {
       val transformer = new OneVsRest("transformer", "features", "prediction", None, null)
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("features", TensorType(DoubleType())),
           StructField("prediction", DoubleType())))
     }
@@ -16,7 +16,7 @@ class OneVsRestSpec extends FunSpec {
 
   it("has the correct inputs and outputs with probability column") {
     val transformer = new OneVsRest("transformer", "features", "prediction", Some("prob"), null)
-    assert(transformer.getSchema().get ==
+    assert(transformer.getFields().get ==
       Seq(StructField("features", TensorType(DoubleType())),
         StructField("prob", DoubleType()),
         StructField("prediction", DoubleType())))

@@ -36,9 +36,9 @@ class NormalizerSpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(normalizer.getSchema().get ==
+      assert(normalizer.getFields().get ==
         Seq(StructField("test_vec", TensorType(DoubleType())),
           StructField("test_norm", TensorType(DoubleType()))))
     }

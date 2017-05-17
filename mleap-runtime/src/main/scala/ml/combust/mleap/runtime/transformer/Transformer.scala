@@ -34,7 +34,7 @@ trait Transformer extends AutoCloseable {
     */
   def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB]
 
-  def getSchema(): Try[Seq[StructField]]
+  def getFields(): Try[Seq[StructField]]
 
   override def close(): Unit = { /* do nothing by default */ }
 }

@@ -23,7 +23,7 @@ case class RandomForestRegression(uid: String = Transformer.uniqueName("random_f
     builder.withOutput(predictionCol, featuresCol)(exec)
   }
 
-  override def getSchema(): Try[Seq[StructField]] = Success(
+  override def getFields(): Try[Seq[StructField]] = Success(
     Seq(StructField(featuresCol, TensorType(DoubleType())),
       StructField(predictionCol, DoubleType())))
 }

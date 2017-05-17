@@ -31,7 +31,7 @@ case class GaussianMixture(override val uid: String = Transformer.uniqueName("gm
     }
   }
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     probabilityCol match {
       case Some(probability) => Success(Seq(
         StructField(featuresCol, TensorType(DoubleType())),

@@ -15,7 +15,7 @@ case class Tokenizer(override val uid: String = Transformer.uniqueName("tokenize
                      override val outputCol: String) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (value: String) => TokenizerModel.defaultTokenizer(value)
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, StringType()),
     StructField(outputCol, ListType(StringType()))
   ))

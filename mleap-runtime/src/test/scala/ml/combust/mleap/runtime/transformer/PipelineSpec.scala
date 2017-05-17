@@ -6,11 +6,11 @@ import org.scalatest.FunSpec
 
 class PipelineSpec extends FunSpec {
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has inputs or outputs of its transformers") {
       val pipeline = new Pipeline(uid = "pipeline", Seq(
                       LinearRegression("transformer", "features", "prediction", null)))
-      assert(pipeline.getSchema().get == Seq(
+      assert(pipeline.getFields().get == Seq(
           StructField("features", TensorType(DoubleType())),
           StructField("prediction", DoubleType())
       ))

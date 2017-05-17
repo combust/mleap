@@ -23,7 +23,7 @@ case class VectorAssembler(override val uid: String = Transformer.uniqueName("ve
     builder.withOutput(outputCol, inputCols)(exec)
   }
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     inputDataTypes match {
       case None => Failure(new RuntimeException(s"Cannot determine schema for transformer ${this.uid}"))
       case Some(inputTypes) => val inputs : Seq[StructField] = (0 until inputCols.length).map(index => StructField(inputCols(index), inputTypes(index)))

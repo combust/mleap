@@ -41,9 +41,9 @@ class StringIndexerSpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(stringIndexer.getSchema().get ==
+      assert(stringIndexer.getFields().get ==
         Seq(StructField("test_string", StringType()),
           StructField("test_index", DoubleType())))
     }

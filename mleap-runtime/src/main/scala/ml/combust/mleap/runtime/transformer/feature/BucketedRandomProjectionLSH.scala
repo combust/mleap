@@ -18,7 +18,7 @@ case class BucketedRandomProjectionLSH(override val uid: String,
                                        model: BucketedRandomProjectionLSHModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features).map(v => v: Tensor[Double])
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, TensorType(DoubleType())),
     StructField(outputCol, ListType(TensorType(DoubleType())))
   ))

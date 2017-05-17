@@ -25,7 +25,7 @@ case class MultinomialLabeler(override val uid: String = Transformer.uniqueName(
         b2 <- b.withOutput(labelsCol, featuresCol)(labelsExec)) yield b2
   }
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     Success(Seq(StructField(featuresCol, TensorType(DoubleType())),
           StructField(probabilitiesCol, ListType(DoubleType())),
           StructField(labelsCol, ListType(StringType()))))

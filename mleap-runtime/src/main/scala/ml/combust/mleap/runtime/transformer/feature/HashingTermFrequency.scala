@@ -18,7 +18,7 @@ case class HashingTermFrequency(override val uid: String = Transformer.uniqueNam
                                 model: HashingTermFrequencyModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (value: Seq[String]) => model(value): Tensor[Double]
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, ListType(StringType())),
     StructField(outputCol, TensorType(DoubleType()))
   ))

@@ -18,7 +18,7 @@ case class IDF(override val uid: String = Transformer.uniqueName("idf"),
                model: IDFModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features): Tensor[Double]
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, TensorType(DoubleType())),
     StructField(outputCol, TensorType(DoubleType()))))
 }

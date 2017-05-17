@@ -16,7 +16,7 @@ case class MathUnary(override val uid: String = Transformer.uniqueName("math_una
                      model: MathUnaryModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (a: Double) => model(a)
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, DoubleType()),
     StructField(outputCol, DoubleType())))
 }

@@ -31,7 +31,7 @@ case class OneVsRest(override val uid: String = Transformer.uniqueName("one_vs_r
     }
   }
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     probabilityCol match {
       case Some(p) => Success(Seq(
         StructField(featuresCol, TensorType(DoubleType())),

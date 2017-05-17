@@ -30,7 +30,7 @@ case class AFTSurvivalRegression(override val uid: String = Transformer.uniqueNa
     }
   }
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     quantilesCol match {
       case Some(col) =>
         Success(Seq(StructField(featuresCol, TensorType(DoubleType())),

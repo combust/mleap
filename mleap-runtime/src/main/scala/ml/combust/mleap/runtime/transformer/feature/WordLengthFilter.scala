@@ -17,7 +17,7 @@ case class WordLengthFilter(override val uid: String = Transformer.uniqueName("w
                             model: WordLengthFilterModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (label: Seq[String]) => model(label)
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, ListType(StringType())),
     StructField(outputCol, ListType(StringType()))
   ))

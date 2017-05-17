@@ -27,7 +27,7 @@ case class LinearRegression(uid: String = Transformer.uniqueName("linear_regress
     builder.withOutput(predictionCol, featuresCol)(exec)
   }
 
-  override def getSchema(): Try[Seq[StructField]] = Success(
+  override def getFields(): Try[Seq[StructField]] = Success(
     Seq(StructField(featuresCol, TensorType(DoubleType())),
       StructField(predictionCol, DoubleType())))
 }

@@ -18,7 +18,7 @@ case class WordToVector(override val uid: String = Transformer.uniqueName("word_
                         model: WordToVectorModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (sentence: Seq[String]) => model(sentence): Tensor[Double]
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, ListType(StringType())),
     StructField(outputCol, TensorType(DoubleType()))
   ))

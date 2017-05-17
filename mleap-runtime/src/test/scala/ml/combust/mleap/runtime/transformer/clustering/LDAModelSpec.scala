@@ -5,10 +5,10 @@ import org.scalatest.FunSpec
 
 class LDAModelSpec extends FunSpec {
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
       val transformer = new LDAModel("transformer", "features", "topicDistribution", null)
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("features", TensorType(DoubleType())),
           StructField("topicDistribution", TensorType(DoubleType()))))
     }

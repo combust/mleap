@@ -41,9 +41,9 @@ class KMeansSpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(km.getSchema().get ==
+      assert(km.getFields().get ==
         Seq(StructField("features", TensorType(DoubleType())),
           StructField("prediction", IntegerType())))
     }

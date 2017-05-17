@@ -16,12 +16,12 @@ case class Pipeline(uid: String = Transformer.uniqueName("pipeline"),
 
   override def close(): Unit = transformers.foreach(_.close())
 
-  override def getSchema(): Try[Seq[StructField]] = {
-    val missingSchemaTransformers = transformers.map(transformer => (transformer.uid, transformer.getSchema()))
+  override def getFields(): Try[Seq[StructField]] = {
+    val missingSchemaTransformers = transformers.map(transformer => (transformer.uid, transformer.getFields()))
                                 .filter(transformerWithSchema => transformerWithSchema._2.isFailure)
                                 .map(transformerWithSchema => transformerWithSchema._1)
     missingSchemaTransformers match {
-      case Nil => Success(transformers.map(transformer => transformer.getSchema().get).flatten)
+      case Nil => Success(transformers.map(transformer => transformer.getFields().get).flatten)
       case x :: _ => Failure(new RuntimeException(s"Cannot determine schema for transformers ${missingSchemaTransformers}"))
     }
   }

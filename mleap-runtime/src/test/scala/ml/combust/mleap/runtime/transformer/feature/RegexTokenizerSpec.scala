@@ -48,9 +48,9 @@ class RegexTokenizerSpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(wordRegexTokenizer.getSchema().get ==
+      assert(wordRegexTokenizer.getFields().get ==
         Seq(StructField("test_string", StringType()),
           StructField("test_tokens", ListType(StringType()))))
     }

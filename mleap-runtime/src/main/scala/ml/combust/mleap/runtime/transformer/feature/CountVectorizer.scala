@@ -18,7 +18,7 @@ case class CountVectorizer(override val uid: String = Transformer.uniqueName("co
                            model: CountVectorizerModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (document: Seq[String]) => model(document): Tensor[Double]
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, ListType(StringType())),
     StructField(outputCol, TensorType(DoubleType()))
   ))

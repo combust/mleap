@@ -32,9 +32,9 @@ class CoalesceSpec extends FunSpec {
       }
     }
 
-    describe("#getSchema") {
+    describe("#getFields") {
       it("has the correct inputs and outputs") {
-        assert(coalesce.getSchema().get ==
+        assert(coalesce.getFields().get ==
           Seq(StructField("test1", DoubleType(true)),
           StructField("test2", DoubleType(true)),
           StructField("test3", DoubleType(true)),
@@ -58,9 +58,9 @@ class CoalesceSpec extends FunSpec {
       }
     }
 
-    describe("#getSchema") {
+    describe("#getFields") {
       it("has the correct inputs and outputs") {
-        assert(coalesce.getSchema().get ==
+        assert(coalesce.getFields().get ==
           Seq(StructField("test1", DoubleType(true)),
             StructField("test3", DoubleType(true)),
             StructField("test4", DoubleType()),

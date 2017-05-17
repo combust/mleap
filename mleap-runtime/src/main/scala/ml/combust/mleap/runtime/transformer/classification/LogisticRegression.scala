@@ -43,7 +43,7 @@ case class LogisticRegression(override val uid: String = Transformer.uniqueName(
     }
   }
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     (rawPredictionCol, probabilityCol) match {
       case ((Some(rp), Some(p))) => Success(Seq(
         StructField(featuresCol, TensorType(DoubleType())),

@@ -30,7 +30,7 @@ case class MathBinary(override val uid: String = Transformer.uniqueName("math_bi
     }
   }
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     (inputA, inputB) match {
       case (Some(a), Some(b)) => Success(Seq(StructField(a, DoubleType()),
                                               StructField(b, DoubleType()),

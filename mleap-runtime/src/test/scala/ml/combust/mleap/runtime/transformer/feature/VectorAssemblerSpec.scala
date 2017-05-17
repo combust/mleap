@@ -33,9 +33,9 @@ class VectorAssemblerSpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(vectorAssembler.getSchema().get ==
+      assert(vectorAssembler.getFields().get ==
         Seq(StructField("feature1", DoubleType()),
           StructField("feature2", DoubleType()),
           StructField("feature3", DoubleType()),

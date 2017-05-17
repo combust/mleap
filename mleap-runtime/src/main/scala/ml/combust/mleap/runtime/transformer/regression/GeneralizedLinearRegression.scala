@@ -30,7 +30,7 @@ case class GeneralizedLinearRegression(override val uid: String = Transformer.un
     }
   }
 
-  override def getSchema(): Try[Seq[StructField]] = {
+  override def getFields(): Try[Seq[StructField]] = {
     linkPredictionCol match {
       case Some(col) => Success(Seq(
         StructField(featuresCol, TensorType(DoubleType())),

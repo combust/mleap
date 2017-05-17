@@ -51,16 +51,16 @@ class LogisticRegressionSpec extends FunSpec {
       }
     }
 
-    describe("#getSchema") {
+    describe("#getFields") {
       it("has the correct inputs and outputs") {
-        assert(logisticRegression.getSchema().get ==
+        assert(logisticRegression.getFields().get ==
           Seq(StructField("features", TensorType(DoubleType())),
             StructField("prediction", DoubleType())))
       }
 
       it("has the correct inputs and outputs with probability column") {
         val logisticRegression2 = logisticRegression.copy(probabilityCol = Some("probability"))
-        assert(logisticRegression2.getSchema().get ==
+        assert(logisticRegression2.getFields().get ==
           Seq(StructField("features", TensorType(DoubleType())),
             StructField("probability", TensorType(DoubleType())),
             StructField("prediction", DoubleType())))
@@ -68,7 +68,7 @@ class LogisticRegressionSpec extends FunSpec {
 
       it("has the correct inputs and outputs with rawPrediction column") {
         val logisticRegression2 = logisticRegression.copy(rawPredictionCol = Some("rawPrediction"))
-        assert(logisticRegression2.getSchema().get ==
+        assert(logisticRegression2.getFields().get ==
           Seq(StructField("features", TensorType(DoubleType())),
             StructField("rawPrediction", TensorType(DoubleType())),
             StructField("prediction", DoubleType())))
@@ -77,7 +77,7 @@ class LogisticRegressionSpec extends FunSpec {
       it("has the correct inputs and outputs with both probability and rawPrediction column") {
         val logisticRegression2 = logisticRegression.copy(rawPredictionCol = Some("rawPrediction"),
                                                           probabilityCol = Some("probability"))
-        assert(logisticRegression2.getSchema().get ==
+        assert(logisticRegression2.getFields().get ==
           Seq(StructField("features", TensorType(DoubleType())),
             StructField("rawPrediction", TensorType(DoubleType())),
             StructField("probability", TensorType(DoubleType())),

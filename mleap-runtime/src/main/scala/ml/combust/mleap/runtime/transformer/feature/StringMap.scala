@@ -16,7 +16,7 @@ case class StringMap(override val uid: String = Transformer.uniqueName("string_m
                      model: StringMapModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (label: String) => model(label)
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, StringType()),
     StructField(outputCol, DoubleType()))
   )

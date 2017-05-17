@@ -23,7 +23,7 @@ case class GBTClassifier(override val uid: String = Transformer.uniqueName("gbt_
     builder.withOutput(predictionCol, featuresCol)(exec)
   }
 
-  override def getSchema(): Try[Seq[StructField]] = Success(
+  override def getFields(): Try[Seq[StructField]] = Success(
                 Seq(StructField(featuresCol, TensorType(DoubleType())),
                     StructField(predictionCol, DoubleType())))
 }

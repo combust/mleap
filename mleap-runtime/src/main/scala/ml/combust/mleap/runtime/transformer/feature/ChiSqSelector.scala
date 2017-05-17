@@ -23,7 +23,7 @@ case class ChiSqSelector(override val uid: String = Transformer.uniqueName("chi_
     builder.withOutput(outputCol, featuresCol)(exec)
   }
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(featuresCol, TensorType(DoubleType())),
     StructField(outputCol, TensorType(DoubleType())))
   )

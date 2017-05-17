@@ -16,7 +16,7 @@ case class Bucketizer(override val uid: String = Transformer.uniqueName("bucketi
                       model: BucketizerModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (value: Double) => model(value)
 
-  override def getSchema(): Try[Seq[StructField]] = Success(
+  override def getFields(): Try[Seq[StructField]] = Success(
     Seq(StructField(inputCol, DoubleType()),
       StructField(outputCol, DoubleType())))
 }

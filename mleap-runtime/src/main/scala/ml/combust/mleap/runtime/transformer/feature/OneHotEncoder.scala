@@ -18,7 +18,7 @@ case class OneHotEncoder(override val uid: String = Transformer.uniqueName("one_
                          model: OneHotEncoderModel) extends FeatureTransformer {
   override val exec: UserDefinedFunction = (value: Double) => model(value): Tensor[Double]
 
-  override def getSchema(): Try[Seq[StructField]] = Success(Seq(
+  override def getFields(): Try[Seq[StructField]] = Success(Seq(
     StructField(inputCol, DoubleType()),
     StructField(outputCol, TensorType(DoubleType()))))
 }

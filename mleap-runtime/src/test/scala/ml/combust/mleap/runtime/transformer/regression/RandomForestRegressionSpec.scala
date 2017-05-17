@@ -5,10 +5,10 @@ import org.scalatest.FunSpec
 
 class RandomForestRegressionSpec extends FunSpec {
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
       val transformer = new RandomForestRegression("transformer", "features", "prediction", null)
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("features", TensorType(DoubleType())),
           StructField("prediction", DoubleType())))
     }

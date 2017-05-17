@@ -5,17 +5,17 @@ import org.scalatest.FunSpec
 
 class GeneralizedLinearRegressionSpec extends FunSpec {
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs with prediction column only") {
       val transformer = new GeneralizedLinearRegression("transformer", "features", "prediction", None, null)
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("features", TensorType(DoubleType())),
           StructField("prediction", DoubleType())))
     }
 
     it("has the correct inputs and outputs with prediction column as well as linkPrediction column") {
       val transformer = new GeneralizedLinearRegression("transformer", "features", "prediction", Some("linkPrediction"), null)
-      assert(transformer.getSchema().get ==
+      assert(transformer.getFields().get ==
         Seq(StructField("features", TensorType(DoubleType())),
           StructField("prediction", DoubleType()),
           StructField("linkPrediction", DoubleType())))

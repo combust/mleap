@@ -33,9 +33,9 @@ class StringMapSpec extends FunSpec {
     }
   }
 
-  describe("#getSchema") {
+  describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(stringMap.getSchema().get ==
+      assert(stringMap.getFields().get ==
         Seq(StructField("test_string", StringType()),
           StructField("test_index", DoubleType())))
     }

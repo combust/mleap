@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.KMeansModel
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
@@ -38,6 +38,14 @@ class KMeansSpec extends FunSpec {
       val km2 = km.copy(featuresCol = "bad_features")
 
       it("returns a Failure") { assert(km2.transform(frame).isFailure) }
+    }
+  }
+
+  describe("#getFields") {
+    it("has the correct inputs and outputs") {
+      assert(km.getFields().get ==
+        Seq(StructField("features", TensorType(DoubleType())),
+          StructField("prediction", IntegerType())))
     }
   }
 }

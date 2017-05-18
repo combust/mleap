@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 /**
   * Created by hollinwilkins on 12/27/16.
   */
-class MathBinarySpec extends FunSpec {
+class MathBinaryModelSpec extends FunSpec {
   def binaryLike(operation: BinaryOperation,
                  name: String,
                  a: Double,

@@ -5,6 +5,8 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.feature.ImputerModel
+import org.apache.spark.sql.mleap.TypeConverters.mleapType
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by mikhail on 12/18/16.
@@ -16,7 +18,10 @@ class ImputerOp extends OpNode[SparkBundleContext, ImputerModel, ImputerModel] {
     override def opName: String = Bundle.BuiltinOps.feature.imputer
 
     override def store(model: Model, obj: ImputerModel)(implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("surrogate_value", Value.double(obj.surrogateValue))
+      context.context.dataset.map(dataset => {
+        model.withAttr("input_type", Value.dataType(mleapType(dataset.schema(obj.getInputCol).dataType)))
+      }).getOrElse(model)
+        .withAttr("surrogate_value", Value.double(obj.surrogateValue))
         .withAttr("missing_value", Value.double(obj.getMissingValue))
         .withAttr("strategy", Value.string(obj.getStrategy))
     }

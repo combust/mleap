@@ -27,4 +27,12 @@ class StopWordsRemoverSpec extends FunSpec{
       assert(data(1).getSeq[String](1) == Seq("use", "Mleap", "transformer"))
     }
   }
+
+  describe("#getFields") {
+    it("has the correct inputs and outputs") {
+      assert(stopWordsTransformer.getFields().get ==
+        Seq(StructField("test_string_seq", ListType(StringType())),
+          StructField("output_seq", ListType(StringType()))))
+    }
+  }
 }

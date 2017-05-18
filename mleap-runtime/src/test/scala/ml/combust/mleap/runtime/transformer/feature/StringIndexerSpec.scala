@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.StringIndexerModel
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{StringType, StructField, StructType}
+import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /**
@@ -14,6 +14,7 @@ class StringIndexerSpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   val stringIndexer = StringIndexer(inputCol = "test_string",
+    inputDataType = Some(StringType()),
     outputCol = "test_index",
     model = StringIndexerModel(Seq("index1", "index2", "index3")))
 
@@ -37,6 +38,14 @@ class StringIndexerSpec extends FunSpec {
       val frame2 = frame.copy(dataset = LocalDataset(Array(Row("bad_index"))))
 
       it("returns a Failure") { assert(stringIndexer.transform(frame2).isFailure) }
+    }
+  }
+
+  describe("#getFields") {
+    it("has the correct inputs and outputs") {
+      assert(stringIndexer.getFields().get ==
+        Seq(StructField("test_string", StringType()),
+          StructField("test_index", DoubleType())))
     }
   }
 }

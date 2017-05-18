@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.classification
 
 import ml.combust.mleap.core.classification.{BinaryLogisticRegressionModel, LogisticRegressionModel}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
@@ -48,6 +48,40 @@ class LogisticRegressionSpec extends FunSpec {
         val logisticRegression2 = logisticRegression.copy(featuresCol = "bad_features")
 
         it("returns a Failure") { assert(logisticRegression2.transform(frame).isFailure) }
+      }
+    }
+
+    describe("#getFields") {
+      it("has the correct inputs and outputs") {
+        assert(logisticRegression.getFields().get ==
+          Seq(StructField("features", TensorType(DoubleType())),
+            StructField("prediction", DoubleType())))
+      }
+
+      it("has the correct inputs and outputs with probability column") {
+        val logisticRegression2 = logisticRegression.copy(probabilityCol = Some("probability"))
+        assert(logisticRegression2.getFields().get ==
+          Seq(StructField("features", TensorType(DoubleType())),
+            StructField("probability", TensorType(DoubleType())),
+            StructField("prediction", DoubleType())))
+      }
+
+      it("has the correct inputs and outputs with rawPrediction column") {
+        val logisticRegression2 = logisticRegression.copy(rawPredictionCol = Some("rawPrediction"))
+        assert(logisticRegression2.getFields().get ==
+          Seq(StructField("features", TensorType(DoubleType())),
+            StructField("rawPrediction", TensorType(DoubleType())),
+            StructField("prediction", DoubleType())))
+      }
+
+      it("has the correct inputs and outputs with both probability and rawPrediction column") {
+        val logisticRegression2 = logisticRegression.copy(rawPredictionCol = Some("rawPrediction"),
+                                                          probabilityCol = Some("probability"))
+        assert(logisticRegression2.getFields().get ==
+          Seq(StructField("features", TensorType(DoubleType())),
+            StructField("rawPrediction", TensorType(DoubleType())),
+            StructField("probability", TensorType(DoubleType())),
+            StructField("prediction", DoubleType())))
       }
     }
   }

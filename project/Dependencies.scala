@@ -32,6 +32,7 @@ object Dependencies {
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
     val scalameter = "com.storm-enroute" %% "scalameter" % "0.8.2"
     val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
+    val cors = "ch.megard" %% "akka-http-cors" % "0.2.1"
   }
 
   object Test {
@@ -68,7 +69,7 @@ object Dependencies {
 
   val tensorflow = l ++= Seq(tensorflowDep)
 
-  val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
+  val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, cors, config, Test.scalaTest, Test.akkaHttpTestkit)
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 

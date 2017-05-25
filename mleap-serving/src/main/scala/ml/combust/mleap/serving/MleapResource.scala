@@ -7,10 +7,12 @@ import akka.http.scaladsl.model.{HttpRequest, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{ExceptionHandler, RouteResult}
 import akka.http.scaladsl.server.directives.LoggingMagnet
+import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 import ml.combust.mleap.runtime.DefaultLeapFrame
 import ml.combust.mleap.serving.domain.v1._
 import ml.combust.mleap.serving.marshalling.ApiMarshalling._
 import ml.combust.mleap.serving.marshalling.LeapFrameMarshalling._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 /**
   * Created by hollinwilkins on 1/30/17.
@@ -31,25 +33,32 @@ class MleapResource(service: MleapService)
   }
 
   val logger = Logging.getLogger(system.eventStream, classOf[MleapResource])
+  val corsSettings = CorsSettings.defaultSettings
 
   val routes = handleExceptions(errorHandler(logger)) {
     withLog(logger) {
       logRequestResult(LoggingMagnet(recordLog(_, Logging.InfoLevel))) {
-        path("model") {
-          put {
-            entity(as[LoadModelRequest]) {
-              request =>
-                complete(service.loadModel(request))
+        cors(corsSettings) {
+          path("model") {
+            put {
+              entity(as[LoadModelRequest]) {
+                request =>
+                  complete(service.loadModel(request))
+              }
+            } ~ delete {
+              complete(service.unloadModel(UnloadModelRequest()))
+            } ~ get {
+              complete(service.getSchema())
+            } ~ options {
+              complete("ok")
             }
-          } ~ delete {
-            complete(service.unloadModel(UnloadModelRequest()))
-          } ~ get {
-            complete(service.getSchema())
-          }
-        } ~ path("transform") {
-          post {
-            entity(as[DefaultLeapFrame]) {
-              frame => complete(service.transform(frame))
+          } ~ path("transform") {
+            post {
+              entity(as[DefaultLeapFrame]) {
+                frame => complete(service.transform(frame))
+              }
+            } ~ options {
+              complete("ok")
             }
           }
         }

@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.{Attribute, BinaryAttribute, NominalAttribute, NumericAttribute}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.feature.OneHotEncoder
 import org.apache.spark.sql.types.StructField
 
@@ -44,7 +44,7 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoder, OneHotEn
 
     override def store(model: Model, obj: OneHotEncoder)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      assert(context.context.dataset.isDefined, "must supply a transformed data frame to serialize the default OneHotEncoder\nuse mleap-spark-extension for an estimator/model OneHotEncoder")
+      assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
       val df = context.context.dataset.get
       val size = OneHotEncoderOp.sizeForField(df.schema(obj.getInputCol))

@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.attribute.AttributeGroup
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.feature.VectorSlicer
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.sql.DataFrame
@@ -22,7 +22,7 @@ class VectorSlicerOp extends OpNode[SparkBundleContext, VectorSlicer, VectorSlic
     override def store(model: Model, obj: VectorSlicer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val namedIndicesMap: Array[(String, Int)] = if(obj.getNames.nonEmpty) {
-        assert(context.context.dataset.isDefined, "Must provide a sample dataset when using names with VectorSlicer")
+        assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
         val dataset = context.context.dataset.get
         extractNamedIndices(obj.getInputCol, obj.getNames, dataset)
       } else { Array() }

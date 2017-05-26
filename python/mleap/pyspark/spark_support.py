@@ -25,12 +25,12 @@ def serializeToBundle(self, path, dataset=None):
     serializer.serializeToBundle(self, path, dataset=dataset)
 
 
-def deserializeFromBundle(self, path):
+def deserializeFromBundle(path):
     serializer = SimpleSparkSerializer()
     return serializer.deserializeFromBundle(path)
 
 setattr(Transformer, 'serializeToBundle', serializeToBundle)
-setattr(Transformer.__class__, 'deserializeFromBundle', deserializeFromBundle)
+setattr(Transformer, 'deserializeFromBundle', staticmethod(deserializeFromBundle))
 
 
 class SimpleSparkSerializer(object):

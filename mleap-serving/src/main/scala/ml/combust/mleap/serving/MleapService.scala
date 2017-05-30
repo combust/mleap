@@ -1,12 +1,13 @@
 package ml.combust.mleap.serving
 
 import java.io.File
+import java.nio.file.Files
 
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.mleap.runtime.DefaultLeapFrame
 import ml.combust.mleap.runtime.transformer.Transformer
-import ml.combust.mleap.serving.domain.v1.{LoadModelRequest, LoadModelResponse, UnloadModelRequest, UnloadModelResponse}
+import ml.combust.mleap.serving.domain.v1._
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.mleap.runtime.types.StructType
 import resource._
@@ -36,6 +37,12 @@ class MleapService()
     unsetBundle()
     Future.successful(UnloadModelResponse())
   }
+
+  def loadModelZip(request: LoadModelZipRequest): Future[LoadModelResponse] = Future {
+    val tmpFile = Files.createTempFile("models", ".zip")
+    Files.write(tmpFile, request.source)
+    tmpFile
+  }.flatMap(tf => loadModel(LoadModelRequest(path = Some(tf.toString))))
 
   def transform(frame: DefaultLeapFrame): Try[DefaultLeapFrame] = synchronized {
     bundle.map {

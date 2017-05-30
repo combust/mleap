@@ -44,6 +44,9 @@ class MleapResource(service: MleapService)
               entity(as[LoadModelRequest]) {
                 request =>
                   complete(service.loadModel(request))
+              } ~ entity(as[LoadModelZipRequest]) {
+                request =>
+                  complete(service.loadModelZip(request))
               }
             } ~ delete {
               complete(service.unloadModel(UnloadModelRequest()))

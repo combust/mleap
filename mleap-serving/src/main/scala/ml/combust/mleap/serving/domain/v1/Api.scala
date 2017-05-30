@@ -8,6 +8,7 @@ import ml.combust.mleap.runtime.DefaultLeapFrame
 case class LoadModelRequest(path: Option[String] = None) {
   def withPath(value: String): LoadModelRequest = copy(path = Some(value))
 }
+case class LoadModelZipRequest(source: Array[Byte])
 case class LoadModelResponse()
 
 case class UnloadModelRequest()

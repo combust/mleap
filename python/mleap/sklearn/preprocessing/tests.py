@@ -365,7 +365,7 @@ class TransformerTests(unittest.TestCase):
 
         labels = ['a', 'b', 'c']
 
-        le = LabelEncoder(input_features='label_feature',
+        le = LabelEncoder(input_features=['label_feature'],
                   output_features='label_feature_le_encoded')
 
         le.fit(labels)
@@ -381,12 +381,20 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(le.op, model['op'])
         self.assertEqual('labels', model['attributes'].keys()[0])
 
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, le.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(le.name, node['name'])
+        self.assertEqual(le.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(le.output_features, node['shape']['outputs'][0]['name'])
+
     def label_encoder_deserializer_test(self):
 
         labels = ['a', 'b', 'c']
 
         le = LabelEncoder(input_features=['label_feature'],
-                          output_features=['label_feature_le_encoded'])
+                          output_features='label_feature_le_encoded')
 
         le.fit(labels)
 
@@ -412,14 +420,14 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(res_a[1], res_b[1])
         self.assertEqual(res_a[2], res_b[2])
         self.assertEqual(le.input_features, label_encoder_tf.input_features)
-        self.assertEqual(le.output_features, label_encoder_tf.output_features)
+        self.assertEqual(le.output_features, label_encoder_tf.output_features[0])
 
     def one_hot_encoder_serializer_test(self):
 
         labels = ['a', 'b', 'c']
 
         le = LabelEncoder(input_features=['label_feature'],
-                          output_features=['label_feature_le_encoded'])
+                          output_features='label_feature_le_encoded')
 
         oh_data = le.fit_transform(labels).reshape(3, 1)
 
@@ -443,7 +451,7 @@ class TransformerTests(unittest.TestCase):
         labels = ['a', 'b', 'c']
 
         le = LabelEncoder(input_features=['label_feature'],
-                          output_features=['label_feature_le_encoded'])
+                          output_features='label_feature_le_encoded')
 
         oh_data = le.fit_transform(labels).reshape(3, 1)
 
@@ -453,10 +461,6 @@ class TransformerTests(unittest.TestCase):
         one_hot_encoder_tf.fit(oh_data)
 
         one_hot_encoder_tf.serialize_to_bundle(self.tmp_dir, one_hot_encoder_tf.name)
-
-        # Test model.json
-        with open("{}/{}.node/model.json".format(self.tmp_dir, one_hot_encoder_tf.name)) as json_data:
-            model = json.load(json_data)
 
         # Deserialize the OneHotEncoder
         node_name = "{}.node".format(one_hot_encoder_tf.name)
@@ -476,7 +480,7 @@ class TransformerTests(unittest.TestCase):
             node = json.load(json_data)
 
         self.assertEqual(one_hot_encoder_tf_ds.name, node['name'])
-        self.assertEqual(one_hot_encoder_tf_ds.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(one_hot_encoder_tf_ds.input_features[0], node['shape']['inputs'][0]['name'])
         self.assertEqual(one_hot_encoder_tf_ds.output_features, node['shape']['outputs'][0]['name'])
 
     def feature_extractor_test(self):
@@ -583,6 +587,14 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(expected_model['attributes']['threshold']['value'],
                          model['attributes']['threshold']['value'])
 
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, binarizer.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(binarizer.name, node['name'])
+        self.assertEqual(binarizer.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(binarizer.output_features, node['shape']['outputs'][0]['name'])
+
     def binarizer_deserializer_test(self):
 
         binarizer = Binarizer(threshold=0.0)
@@ -609,14 +621,6 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(res_a[1][0], res_b[1][0])
         self.assertEqual(res_a[2][0], res_b[2][0])
         self.assertEqual(res_a[3][0], res_b[3][0])
-
-         # Test node.json
-        with open("{}/{}.node/node.json".format(self.tmp_dir, binarizer.name)) as json_data:
-            node = json.load(json_data)
-
-        self.assertEqual(binarizer.name, node['name'])
-        self.assertEqual(binarizer.input_features, node['shape']['inputs'][0]['name'])
-        self.assertEqual(binarizer.output_features, node['shape']['outputs'][0]['name'])
 
     def polynomial_expansion_test(self):
 
@@ -645,6 +649,14 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(expected_model['attributes']['degree']['value'], model['attributes']['degree']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, polynomial_exp.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(polynomial_exp.name, node['name'])
+        self.assertEqual(polynomial_exp.input_features, node['shape']['inputs'][0]['name'])
+        self.assertEqual(polynomial_exp.output_features, node['shape']['outputs'][0]['name'])
 
     def polynomial_expansion_deserializer_test(self):
 
@@ -675,13 +687,6 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(res_a[1][1], res_b[1][1])
         self.assertEqual(res_a[2][1], res_b[2][1])
         self.assertEqual(res_a[3][1], res_b[3][1])
-        # Test node.json
-        with open("{}/{}.node/node.json".format(self.tmp_dir, polynomial_exp.name)) as json_data:
-            node = json.load(json_data)
-
-        self.assertEqual(polynomial_exp.name, node['name'])
-        self.assertEqual(polynomial_exp.input_features, node['shape']['inputs'][0]['name'])
-        self.assertEqual(polynomial_exp.output_features, node['shape']['outputs'][0]['name'])
 
     def math_unary_exp_test(self):
 

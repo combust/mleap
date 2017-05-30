@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.{Attribute, BinaryAttribute, NominalAttribute, NumericAttribute}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.feature.IndexToString
 import org.apache.spark.sql.types.StructField
 
@@ -43,7 +43,7 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
     override def store(model: Model, obj: IndexToString)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val labels = obj.get(obj.labels).getOrElse {
-        assert(context.context.dataset.isDefined, "must supply a transformed data frame to serialize IndexToString if labels parameter is not set")
+        assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
         val df = context.context.dataset.get
         ReverseStringIndexerOp.labelsForField(df.schema(obj.getInputCol))
       }

@@ -3,7 +3,7 @@ package org.apache.spark.ml.bundle.ops.regression
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.ml.regression.IsotonicRegressionModel
 import org.apache.spark.mllib.regression
@@ -20,7 +20,7 @@ class IsotonicRegressionOp extends OpNode[SparkBundleContext, IsotonicRegression
 
     override def store(model: Model, obj: IsotonicRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      assert(context.context.dataset.isDefined, "IsotonicRegressionModel requires a transformed DataFrame to serialize")
+      assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
       var m = model.withAttr("boundaries", Value.doubleList(obj.boundaries.toArray.toSeq)).
         withAttr("predictions", Value.doubleList(obj.predictions.toArray.toSeq)).

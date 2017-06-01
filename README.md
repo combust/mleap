@@ -190,7 +190,7 @@ reshape_le_tf = ReshapeArrayToN1()
 # Vector Assembler for x1 One Hot Encoder
 one_hot_encoder_tf = OneHotEncoder(sparse=False)
 one_hot_encoder_tf.mlinit(input_features = label_encoder_tf.output_features, 
-                          output_features = '{}_label_one_hot_encoded'.format(feature_extractor_tf.output_vector))
+                          output_features = '{}_label_one_hot_encoded'.format(continuous_features[0]))
 
 one_hot_encoder_pipeline_x0 = Pipeline([
                                          (feature_extractor_tf.name, feature_extractor_tf),

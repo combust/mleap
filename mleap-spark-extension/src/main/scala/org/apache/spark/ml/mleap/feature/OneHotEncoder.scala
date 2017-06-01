@@ -46,7 +46,8 @@ class OneHotEncoderModel(override val uid: String, val size: Int) extends Model[
   /** @group setParam */
   def setOutputCol(value: String): this.type = set(outputCol, value)
 
-  override def copy(extra: ParamMap): OneHotEncoderModel = defaultCopy(extra)
+  override def copy(extra: ParamMap): OneHotEncoderModel =
+    copyValues(new OneHotEncoderModel(uid, size), extra)
 
   override def transform(dataset: Dataset[_]): DataFrame = {
     val indexMax = size

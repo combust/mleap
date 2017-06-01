@@ -40,7 +40,8 @@ class MultinomialLabeler(override val uid: String = Identifiable.randomUID("math
       withColumn($(labelsCol), labelsUdf(col($(featuresCol))))
   }
 
-  override def copy(extra: ParamMap): Transformer = defaultCopy(extra)
+  override def copy(extra: ParamMap): Transformer =
+    copyValues(new MultinomialLabeler(uid, model), extra)
 
   @DeveloperApi
   override def transformSchema(schema: StructType): StructType = {

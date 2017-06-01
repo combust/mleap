@@ -200,11 +200,8 @@ one_hot_encoder_pipeline_x0 = Pipeline([
                                         ])
 
 one_hot_encoder_pipeline_x0.mlinit()
-
-one_hot_encoder_pipeline_x0.serialize_to_bundle('/tmp', 'mleap-scikit-test-pipeline', init=True)
-
-
 one_hot_encoder_pipeline_x0.fit_transform(data)
+one_hot_encoder_pipeline_x0.serialize_to_bundle('/tmp', 'mleap-scikit-test-pipeline', init=True)
 
 # array([[ 1.,  0.,  0.],
 #        [ 0.,  1.,  0.],

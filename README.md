@@ -181,8 +181,8 @@ feature_extractor_tf = FeatureExtractor(input_features=continuous_features,
                                          output_vector_items=continuous_features)
 
 # Label Encoder for x1 Label 
-label_encoder_tf = LabelEncoder(input_features=[feature_extractor_tf.output_vector],
-                               output_features='{}_label_le'.format(feature_extractor_tf.output_vector))
+label_encoder_tf = LabelEncoder(input_features=feature_extractor_tf.output_vector_items,
+                               output_features='{}_label_le'.format(continuous_features[0]))
 
 # Reshape the output of the LabelEncoder to N-by-1 array
 reshape_le_tf = ReshapeArrayToN1()

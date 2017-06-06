@@ -29,7 +29,8 @@ class MathUnary(override val uid: String = Identifiable.randomUID("math_unary"),
     dataset.withColumn($(outputCol), unaryUdf(dataset($(inputCol)).cast(DoubleType)))
   }
 
-  override def copy(extra: ParamMap): Transformer = defaultCopy(extra)
+  override def copy(extra: ParamMap): Transformer =
+    copyValues(new MathUnary(uid, model), extra)
 
   @DeveloperApi
   override def transformSchema(schema: StructType): StructType = {

@@ -236,8 +236,7 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
 
     >>> data = pd.DataFrame([['a', 0], ['b', 1], ['b', 3], ['c', 1]], columns=['col_a', 'col_b'])
     >>> # Label Encoder for x1 Label
-    >>> label_encoder_tf = LabelEncoder()
-    >>> label_encoder_tf.mlinit(input_features = ['col_a'] , output_features='col_a_label_le')
+    >>> label_encoder_tf = LabelEncoder(input_features = ['col_a'] , output_features='col_a_label_le')
     >>> # Convert output of Label Encoder to Data Frame instead of 1d-array
     >>> n_dim_array_to_df_tf = NDArrayToDataFrame('col_a_label_le')
     >>> n_dim_array_to_df_tf.fit_transform(label_encoder_tf.fit_transform(data['col_a']))

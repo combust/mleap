@@ -169,7 +169,7 @@ from mleap.sklearn.preprocessing.data import NDArrayToDataFrame
 from mleap.sklearn.preprocessing.data import FeatureExtractor, LabelEncoder, ReshapeArrayToN1
 
 # Load scikit-learn transformers and models
-from sklearn.preprocessing import OneHotEncoder, Binarizer
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 
 data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
@@ -182,7 +182,7 @@ feature_extractor_tf = FeatureExtractor(input_features=continuous_features,
 
 # Label Encoder for x1 Label 
 label_encoder_tf = LabelEncoder(input_features=feature_extractor_tf.output_vector_items,
-                               output_features=['{}_label_le'.format(x) for x in feature_extractor_tf.output_vector_items])
+                               output_features='{}_label_le'.format(continuous_features[0]))
 
 # Reshape the output of the LabelEncoder to N-by-1 array
 reshape_le_tf = ReshapeArrayToN1()
@@ -190,7 +190,7 @@ reshape_le_tf = ReshapeArrayToN1()
 # Vector Assembler for x1 One Hot Encoder
 one_hot_encoder_tf = OneHotEncoder(sparse=False)
 one_hot_encoder_tf.mlinit(input_features = label_encoder_tf.output_features, 
-                          output_features = ['{}_label_one_hot_encoded'.format(x) for x in label_encoder_tf.output_features])
+                          output_features = '{}_label_one_hot_encoded'.format(continuous_features[0]))
 
 one_hot_encoder_pipeline_x0 = Pipeline([
                                          (feature_extractor_tf.name, feature_extractor_tf),
@@ -200,11 +200,8 @@ one_hot_encoder_pipeline_x0 = Pipeline([
                                         ])
 
 one_hot_encoder_pipeline_x0.mlinit()
-
-one_hot_encoder_pipeline_x0.serialize_to_bundle('/tmp', 'mleap-scikit-test-pipeline', init=True)
-
-
 one_hot_encoder_pipeline_x0.fit_transform(data)
+one_hot_encoder_pipeline_x0.serialize_to_bundle('/tmp', 'mleap-scikit-test-pipeline', init=True)
 
 # array([[ 1.,  0.,  0.],
 #        [ 0.,  1.,  0.],

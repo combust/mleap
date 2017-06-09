@@ -10,7 +10,7 @@ import java.io.File;
  * Created by hollinwilkins on 4/21/17.
  */
 public class BundleBuilder {
-    private BundleBuilderSupport support = new BundleBuilderSupport();
+    private final BundleBuilderSupport support = new BundleBuilderSupport();
 
     public BundleBuilder() { }
 

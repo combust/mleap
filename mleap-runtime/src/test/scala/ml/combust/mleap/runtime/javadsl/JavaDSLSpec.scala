@@ -6,6 +6,7 @@ import java.util
 
 import ml.combust.bundle.ByteString
 import ml.combust.mleap.core.feature.StringIndexerModel
+import ml.combust.mleap.runtime.javadsl.json.DefaultFrameReaderSupport
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.mleap.runtime.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.types._

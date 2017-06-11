@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.javadsl
+package ml.combust.mleap.runtime.javadsl.json
 
 import ml.combust.mleap.json.DefaultFrameReader
 import ml.combust.mleap.runtime.{DefaultLeapFrame, MleapContext}

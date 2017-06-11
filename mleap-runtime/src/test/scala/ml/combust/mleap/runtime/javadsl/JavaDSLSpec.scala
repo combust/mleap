@@ -85,13 +85,13 @@ class JavaDSLSpec extends FunSpec {
     val frameReader = new DefaultFrameReaderSupport
     val context = new ContextBuilder().createMleapContext()
 
-    it("read a DefaultLeapFrame from String") {
+    it("is able to read a DefaultLeapFrame from json") {
       val source = Source.fromURL(getClass.getResource("/frame.airbnb.json"))
       val frame = try source.mkString finally source.close()
       val frameBytes = new util.ArrayList[Byte]()
       frame.getBytes.foreach(byte => frameBytes.add(byte))
 
-      val defaultLeapFrame = frameReader.fromBytes(frameBytes, context)
+      val defaultLeapFrame = frameReader.fromBytes(frameBytes, context).get
 
       val schema = defaultLeapFrame.schema
       assert(schema.getField("state").get == StructField("state", StringType()))

@@ -5,13 +5,13 @@ import ml.combust.bundle.dsl.{Model, Node, Shape, _}
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.WordLengthFilterModel
 import org.apache.spark.ml.bundle.SparkBundleContext
-import org.apache.spark.ml.mleap.feature.WordFilter
+import org.apache.spark.ml.mleap.feature.WordLengthFilter
 
 /**
   * Created by mageswarand on 14/2/17.
   */
 
-class WordLengthFilterOp extends OpNode[SparkBundleContext, WordFilter, WordLengthFilterModel] {
+class WordLengthFilterOp extends OpNode[SparkBundleContext, WordLengthFilter, WordLengthFilterModel] {
   override val Model: OpModel[SparkBundleContext, WordLengthFilterModel] = new OpModel[SparkBundleContext, WordLengthFilterModel]  {
     override val klazz: Class[WordLengthFilterModel] = classOf[WordLengthFilterModel]
 
@@ -25,17 +25,17 @@ class WordLengthFilterOp extends OpNode[SparkBundleContext, WordFilter, WordLeng
       new WordLengthFilterModel(model.value("length").getInt)
     }
   }
-  override val klazz: Class[WordFilter] = classOf[WordFilter]
+  override val klazz: Class[WordLengthFilter] = classOf[WordLengthFilter]
 
-  override def name(node: WordFilter): String = node.uid
+  override def name(node: WordLengthFilter): String = node.uid
 
-  override def model(node: WordFilter): WordLengthFilterModel = node.model
+  override def model(node: WordLengthFilter): WordLengthFilterModel = node.model
 
-  override def shape(node: WordFilter): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: WordLengthFilter): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
 
-  override def load(node: Node, model: WordLengthFilterModel)(implicit context: BundleContext[SparkBundleContext]): WordFilter = {
-    new WordFilter(uid = node.name, model = model).
+  override def load(node: Node, model: WordLengthFilterModel)(implicit context: BundleContext[SparkBundleContext]): WordLengthFilter = {
+    new WordLengthFilter(uid = node.name).
       setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+      setOutputCol(node.shape.standardOutput.name).setWordLength(model.length)
   }
 }

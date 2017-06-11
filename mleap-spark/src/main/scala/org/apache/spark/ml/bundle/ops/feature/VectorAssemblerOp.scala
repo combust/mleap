@@ -5,6 +5,8 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.sql.mleap.TypeConverters.mleapType
+import ml.combust.mleap.runtime.types.BundleTypeConverters.mleapTypeToBundleType
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -16,7 +18,12 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
     override def opName: String = Bundle.BuiltinOps.feature.vector_assembler
 
     override def store(model: Model, obj: VectorAssembler)
-                      (implicit context: BundleContext[SparkBundleContext]): Model = { model }
+                      (implicit context: BundleContext[SparkBundleContext]): Model = {
+      context.context.dataset.map(dataset => {
+        val inputDataTypes = obj.getInputCols.map(v => mleapTypeToBundleType(mleapType(dataset.schema(v).dataType))).toSeq
+        model.withAttr("input_types", Value.dataTypeList(inputDataTypes))
+      }).getOrElse(model)
+    }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): VectorAssembler = { new VectorAssembler(uid = "") }

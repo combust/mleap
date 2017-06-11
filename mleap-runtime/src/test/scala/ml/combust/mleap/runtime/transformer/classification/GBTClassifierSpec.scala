@@ -35,4 +35,12 @@ class GBTClassifierSpec extends FunSpec {
       it("returns a Failure") { assert(gbt2.transform(frame).isFailure) }
     }
   }
+
+  describe("#getFields") {
+    it("has the correct inputs and outputs") {
+      assert(gbt.getFields().get ==
+        Seq(StructField("features", TensorType(DoubleType())),
+            StructField("prediction", DoubleType())))
+    }
+  }
 }

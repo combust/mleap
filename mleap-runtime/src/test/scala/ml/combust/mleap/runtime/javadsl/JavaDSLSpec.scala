@@ -81,6 +81,7 @@ class JavaDSLSpec extends FunSpec {
 
   describe("MLeap bundles") {
     val stringIndexer = StringIndexer(inputCol = "string",
+      inputDataType = Some(StringType()),
       outputCol = "string_index",
       model = StringIndexerModel(Seq("hello")))
     val dir = Files.createTempDirectory("mleap")

@@ -31,7 +31,8 @@ class StringMap(override val uid: String,
     dataset.withColumn($(outputCol), stringMapUdf(dataset($(inputCol))))
   }
 
-  override def copy(extra: ParamMap): Transformer = defaultCopy(extra)
+  override def copy(extra: ParamMap): Transformer =
+    copyValues(new StringMap(uid, model), extra)
 
   @DeveloperApi
   override def transformSchema(schema: StructType): StructType = {

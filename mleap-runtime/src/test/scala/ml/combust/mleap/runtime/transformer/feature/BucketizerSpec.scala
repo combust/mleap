@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BucketizerModel
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType}
+import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /**
@@ -38,6 +38,14 @@ class BucketizerSpec extends FunSpec {
       val bucketizer2 = bucketizer.copy(inputCol = "bad_input")
 
       it("returns a Failure") { assert(bucketizer2.transform(frame).isFailure) }
+    }
+  }
+
+  describe("#getFields") {
+    it("has the correct inputs and outputs") {
+      assert(bucketizer.getFields().get ==
+        Seq(StructField("test_double", DoubleType()),
+          StructField("test_bucket", DoubleType())))
     }
   }
 }

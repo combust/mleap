@@ -28,4 +28,12 @@ class PolynomialExpansionSpec extends FunSpec {
       assert(expanded.toArray.sameElements(expectedVector))
     }
   }
+
+  describe("#getFields") {
+    it("has the correct inputs and outputs") {
+      assert(transformer.getFields().get ==
+        Seq(StructField("test_vec", TensorType(DoubleType())),
+          StructField("test_expanded", TensorType(DoubleType()))))
+    }
+  }
 }

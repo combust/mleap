@@ -5,6 +5,8 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.StringIndexerModel
+import org.apache.spark.sql.mleap.TypeConverters.mleapType
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -17,8 +19,11 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("labels", Value.stringList(obj.labels)).
-        withAttr("handle_invalid", Value.string(obj.getHandleInvalid))
+      context.context.dataset.map(dataset => {
+        model.withAttr("input_type", Value.dataType(mleapType(dataset.schema(obj.getInputCol).dataType)))
+      }).getOrElse(model)
+        .withAttr("labels", Value.stringList(obj.labels))
+        .withAttr("handle_invalid", Value.string(obj.getHandleInvalid))
     }
 
     override def load(model: Model)

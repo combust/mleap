@@ -2,6 +2,7 @@ package ml.combust.bundle.serializer.attr
 
 import java.nio.file.{Files, Path}
 
+import com.google.protobuf.CodedInputStream
 import ml.combust.bundle.HasBundleRegistry
 import ml.combust.bundle.json.JsonSupport._
 import ml.combust.bundle.serializer.{SerializationContext, SerializationFormat}
@@ -87,7 +88,9 @@ case class AttributeListSerializer(path: Path) {
   def readProto()
                (implicit context: SerializationContext): Try[AttributeList] = {
     (for(in <- managed(Files.newInputStream(path))) yield {
-      AttributeList.fromBundle(ml.bundle.AttributeList.AttributeList.parseFrom(in))
+      val cis = CodedInputStream.newInstance(in)
+      cis.setSizeLimit(Integer.MAX_VALUE)
+      AttributeList.fromBundle(ml.bundle.AttributeList.AttributeList.parseFrom(cis))
     }).tried
   }
 }

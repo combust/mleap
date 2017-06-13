@@ -107,7 +107,7 @@ object Bundle {
       name = name,
       format = format,
       version = Bundle.version,
-      LocalDateTime.now()), root)
+      LocalDateTime.now().toString), root)
   }
 }
 
@@ -123,7 +123,7 @@ case class BundleInfo(uid: UUID,
                       name: String,
                       format: SerializationFormat,
                       version: String,
-                      timeCreated: LocalDateTime)
+                      timeCreated: String)
 
 /** Root object for serializing Bundle.ML pipelines and graphs.
   *

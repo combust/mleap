@@ -1,7 +1,9 @@
 package ml.combust.bundle.dsl
 
 import java.nio.file.{FileSystem, Path}
+import java.time
 import java.util.UUID
+import java.time.LocalDateTime
 
 import ml.combust.mleap.BuildValues
 import ml.combust.bundle.{BundleContext, BundleRegistry}
@@ -104,7 +106,8 @@ object Bundle {
     apply(BundleInfo(uid = UUID.randomUUID(),
       name = name,
       format = format,
-      version = Bundle.version), root)
+      version = Bundle.version,
+      LocalDateTime.now()), root)
   }
 }
 
@@ -114,11 +117,13 @@ object Bundle {
   * @param name name of the bundle
   * @param format serialization format of the [[Bundle]]
   * @param version Bundle.ML version used for serializing
+  * @param timeCreated LocalDateTime when the model was created
   */
 case class BundleInfo(uid: UUID,
                       name: String,
                       format: SerializationFormat,
-                      version: String)
+                      version: String,
+                      timeCreated: LocalDateTime)
 
 /** Root object for serializing Bundle.ML pipelines and graphs.
   *

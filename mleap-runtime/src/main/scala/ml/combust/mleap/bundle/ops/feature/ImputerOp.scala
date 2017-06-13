@@ -38,8 +38,11 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
         }
       }
 
+      val missingValue = model.getValue("missing_value")
+        .map(value => value.getDouble)
+        .getOrElse(Double.NaN)
       ImputerModel(model.value("surrogate_value").getDouble,
-        model.value("missing_value").getDouble,
+        missingValue,
         model.value("strategy").getString)
     }
 

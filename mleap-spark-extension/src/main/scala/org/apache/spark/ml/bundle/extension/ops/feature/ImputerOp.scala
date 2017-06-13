@@ -28,7 +28,9 @@ class ImputerOp extends OpNode[SparkBundleContext, ImputerModel, ImputerModel] {
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): ImputerModel = {
-      val missingValue = model.value("missing_value").getDouble
+      val missingValue = model.getValue("missing_value")
+        .map(missing_value => missing_value.getDouble)
+        .getOrElse(Double.NaN)
       val surrogateValue = model.value("surrogate_value").getDouble
       val strategy = model.value("strategy").getString
 

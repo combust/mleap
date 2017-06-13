@@ -22,7 +22,7 @@ import json
 import shutil
 import uuid
 import zipfile
-
+import datetime
 
 def serialize_to_bundle(self, path, model_name, init=False):
     serializer = SimpleSerializer()
@@ -126,6 +126,7 @@ class SimpleSerializer(object):
           "name": transformer.name,
           "format": "json",
           "version": __version__,
+          "timeCreated": datetime.datetime.now().isoformat(),
           "uid": "{}".format(uuid.uuid4())
         }
         return js

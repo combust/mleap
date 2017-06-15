@@ -11,7 +11,7 @@ import java.util.List;
  * Created by hollinwilkins on 4/21/17.
  */
 public class LeapFrameBuilder {
-    private LeapFrameBuilderSupport support = new LeapFrameBuilderSupport();
+    private final LeapFrameBuilderSupport support = new LeapFrameBuilderSupport();
 
     public LeapFrameBuilder() { }
 

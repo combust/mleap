@@ -106,7 +106,7 @@ object Bundle {
       name = name,
       format = format,
       version = Bundle.version,
-      LocalDateTime.now().toString), root)
+      timeCreated = LocalDateTime.now().toString), root)
   }
 }
 

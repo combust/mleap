@@ -11,7 +11,7 @@ import org.apache.spark.ml.regression.DecisionTreeRegressionModel
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-class GBTClassifierOp extends OpNode[SparkBundleContext, GBTClassificationModel, GBTClassificationModel] {
+class GBTClassifierOpV20 extends OpNode[SparkBundleContext, GBTClassificationModel, GBTClassificationModel] {
   override val Model: OpModel[SparkBundleContext, GBTClassificationModel] = new OpModel[SparkBundleContext, GBTClassificationModel] {
     override val klazz: Class[GBTClassificationModel] = classOf[GBTClassificationModel]
 
@@ -35,7 +35,7 @@ class GBTClassifierOp extends OpNode[SparkBundleContext, GBTClassificationModel,
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): GBTClassificationModel = {
-      if(model.value("num_classes").getLong != 2) {
+      if (model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("MLeap only supports binary logistic regression")
       }
 

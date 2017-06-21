@@ -31,13 +31,20 @@ class GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierM
       model.withAttr("num_features", Value.long(obj.numFeatures)).
         withAttr("num_classes", Value.long(2)).
         withAttr("tree_weights", Value.doubleList(obj.treeWeights)).
-        withAttr("trees", Value.stringList(trees))
+        withAttr("trees", Value.stringList(trees)).
+        withAttr("thresholds", obj.thresholds.map(Value.doubleList(_)))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): GBTClassifierModel = {
-      if(model.value("num_classes").getLong != 2) {
+      val numClasses = model.value("num_classes").getLong
+      if (numClasses != 2) {
         throw new IllegalArgumentException("MLeap only supports binary logistic regression")
+      }
+
+      model.getValue("lossType").map(_.getString) match {
+        case Some(lt) => require(lt == "logistic", s"MLeap only supports 'logistic' loss_type, $lt was passed to the model")
+        case _ =>
       }
 
       val numFeatures = model.value("num_features").getLong.toInt
@@ -47,9 +54,15 @@ class GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierM
         tree => ModelSerializer(context.bundleContext(tree)).read().get.asInstanceOf[DecisionTreeRegressionModel]
       }
 
+      val thresholds = model.getValue("thresholds").map(_.getDoubleList.toArray)
+      require(thresholds.isEmpty || thresholds.get.length == numClasses,
+        "GBTClassifierModel loaded with non-matching numClasses and thresholds.length. " +
+          s" numClasses=$numClasses, but thresholds has length ${thresholds.get.length}")
+
       GBTClassifierModel(numFeatures = numFeatures,
         trees = models,
-        treeWeights = treeWeights)
+        treeWeights = treeWeights,
+        thresholds = thresholds)
     }
   }
 
@@ -64,9 +77,13 @@ class GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierM
     GBTClassifier(uid = node.name,
       featuresCol = node.shape.input("features").name,
       predictionCol = node.shape.output("prediction").name,
+      rawPredictionCol = node.shape.getOutput("rawPrediction").map(_.name),
+      probabilityCol = node.shape.getOutput("probability").map(_.name),
       model = model)
   }
 
   override def shape(node: GBTClassifier): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction")
+    withOutput(node.predictionCol, "prediction").
+    withOutput(node.rawPredictionCol, "rawPrediction").
+    withOutput(node.probabilityCol, "probability")
 }

@@ -4,7 +4,6 @@ import com.typesafe.sbt.packager.linux.LinuxPlugin.autoImport._
 
 object DockerConfig {
   val baseSettings = Seq(daemonUser in Docker := "root",
-    dockerExposedPorts := Seq(65327),
     dockerRepository := Some("combustml"),
     dockerBuildOptions := Seq("-t", dockerAlias.value.versioned) ++ (
       if (dockerUpdateLatest.value)
@@ -15,5 +14,6 @@ object DockerConfig {
     dockerCommands := dockerCommands.value.filterNot {
       case ExecCmd("RUN", args @ _*) => args.contains("chown")
       case cmd => false
-    })
+    },
+    dockerCmd := Seq("-Dml.combust.mleap.serving.heroku.port=$PORT"))
 }

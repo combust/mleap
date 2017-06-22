@@ -38,6 +38,9 @@ class MleapResource(service: MleapService)
   val routes = handleExceptions(errorHandler(logger)) {
     withLog(logger) {
       logRequestResult(LoggingMagnet(recordLog(_, Logging.InfoLevel))) {
+        path("ping") {
+          complete("PONG")
+        } ~
         cors(corsSettings) {
           path("model") {
             put {

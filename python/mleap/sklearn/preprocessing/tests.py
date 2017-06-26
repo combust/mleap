@@ -990,15 +990,11 @@ class TransformerTests(unittest.TestCase):
 
         df = pd.DataFrame(['test_one', 'test_two', 'test_one', 'test_one', 'test_two'], columns=['a'])
         string_map = StringMap(input_features=['a'], output_features=['a_mapped'], labels={"test_one":1.0, "test_two": 0.0})
-
         string_map.serialize_to_bundle(self.tmp_dir, string_map.name)
 
         # Now deserialize it back
-
         node_name = "{}.node".format(string_map.name)
-
         string_map_tf = StringMap()
-
         string_map_tf = string_map_tf.deserialize_from_bundle(self.tmp_dir, node_name)
 
         # Transform some sample data

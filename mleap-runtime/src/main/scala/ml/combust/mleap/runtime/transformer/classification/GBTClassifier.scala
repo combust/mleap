@@ -22,7 +22,7 @@ case class GBTClassifier(override val uid: String = Transformer.uniqueName("gbt_
   val predictRaw: UserDefinedFunction = (features: Tensor[Double]) => model.predictRaw(features): Tensor[Double]
   val rawToProbability: UserDefinedFunction = (raw: Tensor[Double]) => model.rawToProbability(raw): Tensor[Double]
   val rawToPrediction: UserDefinedFunction = (raw: Tensor[Double]) => model.rawToPrediction(raw)
-  val probabilityToPrediction: UserDefinedFunction = (raw: Tensor[Double]) => model.probabilityToPrediction(raw)
+  val probabilityToPrediction: UserDefinedFunction = (probability: Tensor[Double]) => model.probabilityToPrediction(probability)
   val predictProbabilities: UserDefinedFunction = (features: Tensor[Double]) => model.predictProbabilities(features): Tensor[Double]
   val predict: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 

@@ -39,7 +39,7 @@ object Shape {
     * @param shape bundle shape
     * @return dsl shape
     */
-  def fromBundle(shape: ml.bundle.Shape.Shape): Shape = Shape(inputs = shape.inputs,
+  def fromBundle(shape: ml.bundle.NodeShape.NodeShape): Shape = Shape(inputs = shape.inputs,
     outputs = shape.outputs)
 }
 
@@ -77,7 +77,7 @@ case class Shape private (inputs: Seq[Socket],
     *
     * @return bundle shape
     */
-  def asBundle: ml.bundle.Shape.Shape = ml.bundle.Shape.Shape(inputs = inputs,
+  def asBundle: ml.bundle.NodeShape.NodeShape = ml.bundle.NodeShape.NodeShape(inputs = inputs,
     outputs = outputs)
 
   /** Get the standard input socket.
@@ -147,7 +147,7 @@ case class Shape private (inputs: Seq[Socket],
     *
     * @return bundle protobuf shape
     */
-  def bundleShape: ml.bundle.Shape.Shape = ml.bundle.Shape.Shape(inputs = inputs,
+  def bundleShape: ml.bundle.NodeShape.NodeShape = ml.bundle.NodeShape.NodeShape(inputs = inputs,
     outputs = outputs)
 
   /** Get an input by the port name. 

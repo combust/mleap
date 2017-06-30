@@ -1,6 +1,5 @@
 package ml.combust.bundle.serializer.attr
 
-import ml.combust.bundle.HasBundleRegistry
 import ml.combust.bundle.dsl.{Attribute, AttributeList}
 
 /** Class to separate an [[ml.combust.bundle.dsl.AttributeList]] into two
@@ -16,11 +15,9 @@ case class AttributeListSeparator() {
   /** Separate an attribute list into a small/large list.
     *
     * @param attributes optional list of attributes
-    * @param hr bundle registry for determining small or large for custom attributes
     * @return an optional small and large attribute list
     */
-  def separate(attributes: Option[AttributeList])
-              (implicit hr: HasBundleRegistry): (Option[AttributeList], Option[AttributeList]) = attributes match {
+  def separate(attributes: Option[AttributeList]): (Option[AttributeList], Option[AttributeList]) = attributes match {
     case None => (None, None)
     case Some(list) =>
       val (small, large) = list.lookup.foldLeft((Map[String, Attribute](), Map[String, Attribute]())) {

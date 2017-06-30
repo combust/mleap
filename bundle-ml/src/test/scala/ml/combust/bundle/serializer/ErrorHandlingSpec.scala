@@ -3,7 +3,7 @@ package ml.combust.bundle.serializer
 import java.io.File
 
 import ml.combust.bundle.{BundleFile, BundleRegistry, TestUtil}
-import ml.combust.bundle.test.{MyCustomObject, TestContext}
+import ml.combust.bundle.test.TestContext
 import ml.combust.bundle.test.ops._
 import org.scalatest.FunSpec
 import ml.combust.bundle.test.TestSupport._
@@ -26,12 +26,11 @@ class ErrorHandlingSpec extends FunSpec {
     output = "output_field",
     model = LinearModel(coefficients = randomCoefficients,
       intercept = 44.5))
-  val custom = MyCustomTransformer(MyCustomObject("some_custom"))
   val si = StringIndexer(uid = "string_indexer_example",
     input = "input_string",
     output = "output_index",
     model = StringIndexerModel(strings = Seq("hey", "there", "man")))
-  val pipeline = Pipeline(uid = "my_pipeline", PipelineModel(Seq(si, custom, lr)))
+  val pipeline = Pipeline(uid = "my_pipeline", PipelineModel(Seq(si, lr)))
 
   describe("with unknown op") {
     it("returns a failure") {

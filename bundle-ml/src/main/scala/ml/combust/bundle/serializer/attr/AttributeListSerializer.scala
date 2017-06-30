@@ -3,7 +3,6 @@ package ml.combust.bundle.serializer.attr
 import java.nio.file.{Files, Path}
 
 import com.google.protobuf.CodedInputStream
-import ml.combust.bundle.HasBundleRegistry
 import ml.combust.bundle.json.JsonSupport._
 import ml.combust.bundle.serializer.{SerializationContext, SerializationFormat}
 import ml.combust.bundle.dsl.AttributeList
@@ -35,10 +34,8 @@ case class AttributeListSerializer(path: Path) {
   /** Write attribute list as a JSON file.
     *
     * @param list attribute list to write
-    * @param hr bundle registry for custom types
     */
-  def writeJson(list: AttributeList)
-               (implicit hr: HasBundleRegistry): Try[Any] = {
+  def writeJson(list: AttributeList): Try[Any] = {
     val json = list.toJson.prettyPrint.getBytes
     (for(out <- managed(Files.newOutputStream(path))) yield {
       out.write(json)
@@ -48,10 +45,8 @@ case class AttributeListSerializer(path: Path) {
   /** Write attribute list as a Protobuf file.
     *
     * @param list attribute list to write
-    * @param hr bundle registry for custom types
     */
-  def writeProto(list: AttributeList)
-                (implicit hr: HasBundleRegistry): Try[Any] = {
+  def writeProto(list: AttributeList): Try[Any] = {
     (for(out <- managed(Files.newOutputStream(path))) yield {
       list.asBundle.writeTo(out)
     }).tried

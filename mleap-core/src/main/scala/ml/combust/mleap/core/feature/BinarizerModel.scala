@@ -11,8 +11,7 @@ import scala.collection.mutable
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/feature/Binarizer.scala")
 case class BinarizerModel(threshold: Double,
-                          inputType: DataType,
-                          outputType: DataType) extends Serializable {
+                          dataType: DataType) extends Serializable {
   def apply(value: Double): Double = {
     if (value > threshold) 1.0 else 0.0
   }

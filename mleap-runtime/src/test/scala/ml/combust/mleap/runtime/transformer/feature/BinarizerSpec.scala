@@ -2,7 +2,6 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BinarizerModel
 import ml.combust.mleap.core.types.{DoubleType, StructField, StructType, TensorType}
-import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
@@ -12,10 +11,8 @@ import org.scalatest.FunSpec
   */
 class BinarizerSpec extends FunSpec {
   val binarizer = Binarizer(inputCol = "test_vec",
-    inputDataType = Some(TensorType(DoubleType())),
     outputCol = "test_binarizer",
-    outputDataType = Some(TensorType(DoubleType())),
-    model = BinarizerModel(0.6))
+    model = BinarizerModel(0.6, TensorType(DoubleType())))
 
   describe("with a double tensor input column") {
     describe("#transform") {
@@ -43,9 +40,7 @@ class BinarizerSpec extends FunSpec {
   }
 
   describe("with a double input column") {
-    val binarizer2 = binarizer.copy(inputCol = "test",
-                                    inputDataType = Some(DoubleType()),
-                                    outputDataType = Some(DoubleType()))
+    val binarizer2 = binarizer.copy(inputCol = "test", model = binarizer.model.copy(dataType = DoubleType()))
     describe("#transform") {
       it("thresholds the input column to 0 or 1") {
         val schema = StructType(Seq(StructField("test", DoubleType()))).get

@@ -30,7 +30,7 @@ case class Binarizer(override val uid: String = Transformer.uniqueName("binarize
   }
 
   override def getFields(): Try[Seq[StructField]] = {
-    Success(Seq(StructField(inputCol, model.inputType),
-      StructField(outputCol, model.outputType)))
+    Success(Seq(StructField(inputCol, model.dataType),
+      StructField(outputCol, model.dataType)))
   }
 }

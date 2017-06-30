@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.transformer.builder
 
+import ml.combust.mleap.core.feature.VectorAssemblerModel
 import ml.combust.mleap.core.regression.LinearRegressionModel
 import ml.combust.mleap.core.types.{DoubleType, StructField, StructType}
 import ml.combust.mleap.runtime.transformer.Pipeline
@@ -18,8 +19,8 @@ class RowTransformBuilderSpec extends FunSpec {
     StructField("feature2", DoubleType()),
     StructField("feature3", DoubleType()))).get
   val assembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
-    inputDataTypes = Some(Array(DoubleType(), DoubleType(), DoubleType())),
-    outputCol = "features")
+    outputCol = "features",
+    model = VectorAssemblerModel(Seq(DoubleType(), DoubleType(), DoubleType())))
   val linearRegression = LinearRegression(featuresCol = "features",
     predictionCol = "prediction",
     model = LinearRegressionModel(coefficients = Vectors.dense(Array(1.0, 0.5, 5.0)),

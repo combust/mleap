@@ -27,6 +27,6 @@ case class Interaction(override val uid: String = Transformer.uniqueName("intera
     val inputFields = inputCols.zip(model.inputTypes).map {
       case (name, t) => StructField(name, t)
     }
-    Success(inputFields)
+    Success(inputFields :+ StructField(outputCol, model.outputType))
   }
 }

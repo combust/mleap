@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.annotation.SparkCode
-import ml.combust.mleap.core.types.DataType
+import ml.combust.mleap.core.types.{BasicType, DataType}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
 import org.apache.spark.ml.linalg.{Vector, Vectors}
@@ -13,7 +13,8 @@ import scala.collection.mutable
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/branch-2.1/mllib/src/main/scala/org/apache/spark/ml/feature/Interaction.scala")
 case class InteractionModel(featuresSpec: Array[Array[Int]],
-                            inputTypes: Seq[DataType]) {
+                            inputTypes: Seq[DataType],
+                            dataType: BasicType) {
   val encoders: Array[FeatureEncoder] = featuresSpec.map(FeatureEncoder.apply)
 
   def apply(features: Seq[Any]): Vector = {

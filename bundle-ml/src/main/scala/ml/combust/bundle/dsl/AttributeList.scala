@@ -1,7 +1,5 @@
 package ml.combust.bundle.dsl
 
-import ml.combust.bundle.HasBundleRegistry
-
 /** This trait provides easy access to reading/writing attributes
   * to objects that contain an [[AttributeList]].
   *
@@ -112,11 +110,9 @@ object AttributeList {
   /** Create an attribute list from a bundle attribute list.
     *
     * @param list bundle attribute list
-    * @param hr bundle registry for custom types
     * @return dsl attribute list
     */
-  def fromBundle(list: ml.bundle.AttributeList.AttributeList)
-                (implicit hr: HasBundleRegistry): AttributeList = {
+  def fromBundle(list: ml.bundle.AttributeList.AttributeList): AttributeList = {
     val attrs = list.attributes.map {
       case (key, attr) => (key, Attribute.fromBundle(attr))
     }
@@ -147,10 +143,9 @@ case class AttributeList(lookup: Map[String, Attribute]) {
 
   /** Convert to bundle attribute list.
     *
-    * @param hr bundle registry for custom types
     * @return bundle attribute list
     */
-  def asBundle(implicit hr: HasBundleRegistry): ml.bundle.AttributeList.AttributeList = {
+  def asBundle: ml.bundle.AttributeList.AttributeList = {
     val attrs = lookup.map {
       case (key, attr) => (key, attr.asBundle)
     }

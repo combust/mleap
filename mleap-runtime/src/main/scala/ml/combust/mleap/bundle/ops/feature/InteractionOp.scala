@@ -4,8 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.InteractionModel
-import ml.combust.mleap.core.types.DataType
-import ml.combust.mleap.runtime.{MleapContext, types}
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Interaction
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
@@ -21,6 +20,7 @@ class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] 
     override def store(model: Model, obj: InteractionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       val m = model.withAttr("input_types", Value.dataTypeList(obj.inputTypes.map(mleapTypeToBundleType))).
+        withAttr("data_type", Value.dataType(obj.dataType)).
         withAttr("num_inputs", Value.int(obj.featuresSpec.length))
 
       obj.featuresSpec.zipWithIndex.foldLeft(m) {
@@ -36,8 +36,9 @@ class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] 
       }.toArray
 
       val inputTypes = model.value("input_types").getDataTypeList.map(bundleTypeToMleapType)
+      val outputType = bundleTypeToMleapType(model.value("output_type").getDataType)
 
-      InteractionModel(spec, inputTypes)
+      InteractionModel(spec, inputTypes, outputType)
     }
   }
 

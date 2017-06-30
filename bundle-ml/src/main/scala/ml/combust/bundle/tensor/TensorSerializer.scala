@@ -5,7 +5,6 @@ import java.nio.ByteBuffer
 import com.google.protobuf.ByteString
 import ml.bundle.BasicType.BasicType
 import ml.bundle.Tensor.Tensor
-import ml.bundle.TensorType.TensorType
 import ml.combust.mleap.tensor
 
 import scala.reflect.ClassTag
@@ -57,14 +56,14 @@ object TensorSerializer {
       indices = indices)
   }
 
-  def fromProto(tt: TensorType, t: Tensor): tensor.Tensor[_] = {
+  def fromProto(base: BasicType, t: Tensor): tensor.Tensor[_] = {
     val dimensions = t.dimensions
     val indices = if(!t.indices.isEmpty) {
       Some(readIndices(t.indices.toByteArray, dimensions))
     } else { None }
     val valueBytes = t.value.toByteArray
 
-    tt.base match {
+    base match {
       case BasicType.BOOLEAN =>
         tensor.Tensor.create(BooleanArraySerializer.read(valueBytes), dimensions, indices)
       case BasicType.STRING =>
@@ -81,7 +80,7 @@ object TensorSerializer {
         tensor.Tensor.create(FloatArraySerializer.read(valueBytes), dimensions, indices)
       case BasicType.DOUBLE =>
         tensor.Tensor.create(DoubleArraySerializer.read(valueBytes), dimensions, indices)
-      case _ => throw new IllegalArgumentException(s"unsupported tensor type ${tt.base}")
+      case _ => throw new IllegalArgumentException(s"unsupported tensor type $base")
     }
   }
 

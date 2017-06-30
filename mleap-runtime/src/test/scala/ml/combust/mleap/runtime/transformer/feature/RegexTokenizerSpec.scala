@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.RegexTokenizerModel
+import ml.combust.mleap.core.types.{ListType, StringType, StructField, StructType}
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import org.scalatest.FunSpec

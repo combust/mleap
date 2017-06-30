@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.transformer.builder
 
+import ml.combust.mleap.core.types.{StructField, StructType, TupleType}
 import ml.combust.mleap.runtime.{ArrayRow, Row, RowUtil}
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
-import ml.combust.mleap.runtime.types.{StructField, StructType, TupleType}
 
 import scala.util.Try
 

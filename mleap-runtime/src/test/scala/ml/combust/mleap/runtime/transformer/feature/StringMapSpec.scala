@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.StringMapModel
+import ml.combust.mleap.core.types.{DoubleType, StringType, StructField, StructType}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec

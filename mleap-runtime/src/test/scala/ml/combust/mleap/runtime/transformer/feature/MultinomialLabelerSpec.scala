@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.{MultinomialLabelerModel, ReverseStringIndexerModel}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor

@@ -1,6 +1,7 @@
 package org.apache.spark.sql.mleap
 
-import ml.combust.mleap.runtime.types
+import ml.combust.mleap.runtime
+import ml.combust.mleap.core.types
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.sql.types._
 
@@ -27,8 +28,6 @@ trait TypeConverters {
       Some(StructType(fields))
     case lt: types.ListType => sparkType(lt.base).map(t => ArrayType(t, containsNull = false))
     case _: types.TensorType => Some(new TensorUDT)
-    case ct: types.CustomType => UDTRegistration.getUDTFor(ct.klazz.getCanonicalName).
-      map(_.newInstance().asInstanceOf[UserDefinedType[_]])
     case types.AnyType(_) => None
     case _ => throw new RuntimeException(s"unsupported data type: $dataType")
   }

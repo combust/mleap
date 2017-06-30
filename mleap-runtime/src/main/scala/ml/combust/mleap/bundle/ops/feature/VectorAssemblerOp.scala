@@ -5,8 +5,8 @@ import ml.combust.mleap.core.feature.VectorAssemblerModel
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.core.types.DataType
 import ml.combust.mleap.runtime.{MleapContext, types}
-import ml.combust.mleap.runtime.types.DataType
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
@@ -33,7 +33,7 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
         case None => None
         case Some(attributeList) => attributeList.get("input_types") match {
           case None => None
-          case Some(attribute) => Some(attribute.value.getDataTypeList.map(v => v: types.DataType).toArray)
+          case Some(attribute) => Some(attribute.value.getDataTypeList.map(v => v: DataType).toArray)
         }
       }
       VectorAssemblerModel.default

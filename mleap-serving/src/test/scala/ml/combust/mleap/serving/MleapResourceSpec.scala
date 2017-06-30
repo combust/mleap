@@ -9,7 +9,8 @@ import org.scalatest.{FunSpec, Matchers}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import ml.combust.mleap.runtime.DefaultLeapFrame
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import ml.combust.mleap.runtime.types.{DoubleType, StructType, TensorType}
+import ml.combust.mleap.core.types.{DoubleType, StructType, TensorType}
+import ml.combust.mleap.runtime.types.TensorType
 
 class MleapResourceSpec extends FunSpec with Matchers with ScalatestRouteTest with LeapFrameMarshalling with ApiMarshalling {
 

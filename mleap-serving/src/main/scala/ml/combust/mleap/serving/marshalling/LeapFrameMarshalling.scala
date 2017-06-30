@@ -5,9 +5,9 @@ import akka.http.scaladsl.model
 import akka.http.scaladsl.model.{ContentType, HttpEntity, MediaType}
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
 import akka.util.ByteString
+import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.json.JsonSupport._
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader, FrameWriter}
-import ml.combust.mleap.runtime.types.StructType
 import ml.combust.mleap.runtime.{DefaultLeapFrame, MleapContext}
 import spray.json._
 

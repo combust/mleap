@@ -2,6 +2,7 @@ package ml.combust.mleap.runtime
 
 import java.io.PrintStream
 
+import ml.combust.mleap.core.types.{StructField, StructType, TupleType}
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder

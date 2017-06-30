@@ -7,6 +7,7 @@ import spray.json._
 import JsonSupport.mleapTensorFormat
 import ml.combust.bundle.json.JsonSupport.bundleByteStringFormat
 import ml.combust.bundle.ByteString
+import ml.combust.mleap.core.types._
 
 /**
   * Created by hollinwilkins on 9/10/16.
@@ -52,7 +53,6 @@ object DatasetFormat {
     case ByteStringType(isNullable) => maybeNullableFormat(bundleByteStringFormat, isNullable)
     case lt: ListType => listSerializer(lt)
     case tt: TensorType => tensorSerializer(tt)
-    case ct: CustomType => ct.format
     case AnyType(_) => serializationError("AnyType unsupported for serialization")
     case _: TupleType => serializationError("DataTypeSeq only used for UDFs with multiple outputs")
   }

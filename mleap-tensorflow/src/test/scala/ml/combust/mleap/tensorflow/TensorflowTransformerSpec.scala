@@ -1,8 +1,9 @@
 package ml.combust.mleap.tensorflow
 
 import ml.combust.bundle.dsl.Shape
+import ml.combust.mleap.core.types.{FloatType, StructField, StructType}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{FloatType, StructField, StructType}
+import ml.combust.mleap.runtime.types.StructType
 import org.scalatest.FunSpec
 import resource._
 

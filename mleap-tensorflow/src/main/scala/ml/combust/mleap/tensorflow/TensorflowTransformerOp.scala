@@ -6,6 +6,7 @@ import ml.bundle.DataType.DataType
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.mleap.core
 import ml.combust.mleap.runtime.{MleapContext, types}
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
@@ -38,9 +39,9 @@ class TensorflowTransformerOp extends OpNode[MleapContext, TensorflowTransformer
                      (implicit context: BundleContext[MleapContext]): TensorflowModel = {
       val graphBytes = Files.readAllBytes(context.file("graph.pb"))
       val inputNames = model.value("input_names").getStringList
-      val inputTypes = model.value("input_types").getDataTypeList.map(v => v: types.DataType)
+      val inputTypes = model.value("input_types").getDataTypeList.map(v => v: core.types.DataType)
       val outputNames = model.value("output_names").getStringList
-      val outputTypes = model.value("output_types").getDataTypeList.map(v => v: types.DataType)
+      val outputTypes = model.value("output_types").getDataTypeList.map(v => v: core.types.DataType)
       val nodes = model.getValue("nodes").map(_.getStringList)
 
       val inputs = inputNames.zip(inputTypes)

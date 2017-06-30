@@ -3,9 +3,9 @@ package ml.combust.mleap.binary
 import java.io.{ByteArrayInputStream, DataInputStream}
 import java.nio.charset.Charset
 
+import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime._
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
-import ml.combust.mleap.runtime.types.StructType
 import ml.combust.mleap.json.JsonSupport._
 import spray.json._
 import resource._

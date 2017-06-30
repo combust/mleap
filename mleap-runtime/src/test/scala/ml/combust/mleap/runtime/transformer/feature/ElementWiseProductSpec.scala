@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.ElementwiseProductModel
+import ml.combust.mleap.core.types.{DoubleType, StructField, StructType, TensorType}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor

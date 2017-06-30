@@ -3,6 +3,7 @@ package ml.combust.mleap.tensorflow.converter
 import java.util
 
 import ml.combust.bundle.ByteString
+import ml.combust.mleap.core.types.{BasicType, DataType, TensorType}
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 import org.tensorflow

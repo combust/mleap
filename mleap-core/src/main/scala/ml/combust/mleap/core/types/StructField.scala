@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.types
+package ml.combust.mleap.core.types
 
 /**
  * Created by hwilkins on 10/23/15.

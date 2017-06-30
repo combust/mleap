@@ -5,8 +5,8 @@ import ml.combust.mleap.core.feature.{HandleInvalid, StringIndexerModel}
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.core.types.DataType
 import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.runtime.types.DataType
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**

@@ -1,8 +1,9 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.StopWordsRemoverModel
-import ml.combust.mleap.runtime.{LeapFrame, Row, LocalDataset}
-import ml.combust.mleap.runtime.types.{StringType, ListType, StructField, StructType}
+import ml.combust.mleap.core.types.{ListType, StringType, StructField, StructType}
+import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+
 import org.scalatest.FunSpec
 
 /**

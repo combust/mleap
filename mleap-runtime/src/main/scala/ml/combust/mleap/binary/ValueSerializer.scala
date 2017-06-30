@@ -4,7 +4,8 @@ import java.io.{DataInputStream, DataOutputStream}
 import java.nio.charset.Charset
 
 import ml.combust.bundle.ByteString
-import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.core.types.{BasicType, DataType, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 
 import scala.reflect.ClassTag
@@ -13,7 +14,7 @@ import scala.reflect.ClassTag
   * Created by hollinwilkins on 11/1/16.
   */
 object ValueSerializer {
-  val byteCharset = Charset.forName("UTF-8")
+  val byteCharset: Charset = Charset.forName("UTF-8")
 
   def maybeNullableSerializer[T](serializer: ValueSerializer[T],
                                  isNullable: Boolean): ValueSerializer[Any] = {
@@ -62,7 +63,6 @@ object ValueSerializer {
         case DoubleType(_) => maybeNullableSerializer(TensorSerializer(DoubleSerializer), isNullable)
         case ByteStringType(_) => maybeNullableSerializer(TensorSerializer(ByteStringSerializer), isNullable)
       }
-    case ct: CustomType => maybeNullableSerializer(CustomSerializer(ct), ct.isNullable)
     case _ => throw new IllegalArgumentException(s"invalid data type for serialization: $dataType")
   }
 }
@@ -212,20 +212,5 @@ case class TensorSerializer[T: ClassTag](base: ValueSerializer[T]) extends Value
     } else {
       throw new RuntimeException(s"invalid tensor type: $tpe")
     }
-  }
-}
-
-case class CustomSerializer(ct: CustomType) extends ValueSerializer[Any] {
-  override def write(value: Any, out: DataOutputStream): Unit = {
-    val bytes = ct.toBytes(value)
-    out.writeInt(bytes.length)
-    out.write(bytes)
-  }
-
-  override def read(in: DataInputStream): Any = {
-    val length = in.readInt()
-    val bytes = new Array[Byte](length)
-    in.readFully(bytes)
-    ct.fromBytes(bytes)
   }
 }

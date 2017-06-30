@@ -2,6 +2,7 @@ package ml.combust.mleap.avro
 
 import java.nio.charset.Charset
 
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
@@ -59,8 +60,6 @@ object SchemaConverter {
 
   val bytesCharset = Charset.forName("UTF-8")
 
-  def customSchema(ct: CustomType): Schema = Schema.createRecord("Custom", ct.name, "ml.combust.mleap.avro", false, Seq(new Schema.Field("data", Schema.create(Schema.Type.BYTES), "", null: AnyRef)).asJava)
-
   val tensorSchemaDimensionsIndex = 0
   val tensorSchemaValuesIndex = 1
   val tensorSchemaIndicesIndex = 2
@@ -108,7 +107,6 @@ object SchemaConverter {
         case _ => throw new IllegalArgumentException(s"invalid type ${tt.base}")
       }
       maybeNullableAvroType(ts, tt.isNullable)
-    case ct: CustomType => maybeNullableAvroType(customSchema(ct), ct.isNullable)
     case AnyType(false) => throw new IllegalArgumentException(s"invalid data type: $dataType")
     case _ => throw new IllegalArgumentException(s"invalid data type: $dataType")
   }
@@ -156,7 +154,6 @@ object SchemaConverter {
         case "LongTensor" => TensorType(LongType(false))
         case "FloatTensor" => TensorType(FloatType(false))
         case "DoubleTensor" => TensorType(DoubleType(false))
-        case "Custom" => context.customTypes(schema.getDoc)
         case _ => throw new IllegalArgumentException("invalid avro record")
       }
     case _ => throw new IllegalArgumentException("invalid avro record")

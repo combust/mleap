@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime.types
 
 import ml.bundle
+import ml.combust.mleap.core.types._
 
 import scala.language.implicitConversions
 

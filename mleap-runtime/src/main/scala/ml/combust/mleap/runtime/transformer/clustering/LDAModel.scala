@@ -1,11 +1,11 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.LocalLDAModel
+import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
 import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
 import ml.combust.mleap.tensor.Tensor
 
 import scala.util.{Success, Try}

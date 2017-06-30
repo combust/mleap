@@ -4,10 +4,10 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.BinarizerModel
+import ml.combust.mleap.core.types.DataType
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Binarizer
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
-import ml.combust.mleap.runtime.types.DataType
 
 /**
   * Created by fshabbir on 12/1/16.

@@ -1,9 +1,8 @@
-package ml.combust.mleap.runtime.types
+package ml.combust.mleap.core.types
 
 import java.io.{ByteArrayOutputStream, PrintStream}
 
 import org.scalatest.{FunSuite, GivenWhenThen, TryValues}
-import resource._
 
 import scala.util.Success
 
@@ -123,12 +122,12 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
       StructField("a_list", ListType(FloatType(), isNullable = true)),
       StructField("a_tensor", TensorType(ByteType()))).get
 
-    val schema = (for(out <- managed(new ByteArrayOutputStream())) yield {
-      val print = new PrintStream(out)
-      printStruct.print(print)
-      print.flush()
-      new String(out.toByteArray)
-    }).tried.get
+    val out = new ByteArrayOutputStream()
+    val print = new PrintStream(out)
+    printStruct.print(print)
+    print.flush()
+    val schema = new String(out.toByteArray)
+    print.close()
 
     val expected =
       """

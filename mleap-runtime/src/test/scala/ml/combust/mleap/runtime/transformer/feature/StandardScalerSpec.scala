@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
 import org.scalatest.FunSpec
 
 class StandardScalerSpec extends FunSpec {

@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.ImputerModel
+import ml.combust.mleap.core.types.{DoubleType, StructField, StructType}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType}
 import org.scalatest.FunSpec
 
 /**

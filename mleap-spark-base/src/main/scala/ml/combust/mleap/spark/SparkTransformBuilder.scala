@@ -1,8 +1,8 @@
 package ml.combust.mleap.spark
 
+import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.StructType
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.mleap.TypeConverters
 import org.apache.spark.sql.{Column, DataFrame, expressions}

@@ -1,10 +1,10 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MathBinaryModel
+import ml.combust.mleap.core.types.{DoubleType, StructField}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.{DoubleType, StructField}
 
 import scala.util.{Success, Try}
 

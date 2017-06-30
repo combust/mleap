@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime
 
 import java.io.{ByteArrayOutputStream, PrintStream}
 
-import ml.combust.mleap.runtime.test.MyCustomObject
+import ml.combust.mleap.core.types.{DoubleType, StringType, StructField, StructType}
 import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 import resource._
@@ -14,12 +14,12 @@ import resource._
 trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
   val fields = Seq(StructField("test_string", StringType()),
     StructField("test_double", DoubleType()))
-  val schema = StructType(fields).get
+  val schema: StructType = StructType(fields).get
   val dataset = LocalDataset(Array(
     Row("hello", 42.13),
     Row("there", 13.42)
   ))
-  val frame = create(schema, dataset)
+  val frame: LF = create(schema, dataset)
 
   def create(schema: StructType, dataset: Dataset): LF
 
@@ -60,17 +60,6 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
           assert(frame2.schema.indexOf("test_double_2").get == 2)
           assert(data(0).getDouble(2) == 52.13)
           assert(data(1).getDouble(2) == 23.42)
-        }
-
-        describe("with a custom data type") {
-          val frame2 = frame.withField("test_custom", "test_string") {
-            (v: String) => MyCustomObject(v)
-          }.flatMap(_.select("test_custom")).get
-          val data = frame2.dataset.toArray
-
-          assert(frame2.schema.getField("test_custom").get.dataType == MleapContext.defaultContext.customType[MyCustomObject])
-          assert(data(0).getAs[MyCustomObject](0) == MyCustomObject("hello"))
-          assert(data(1).getAs[MyCustomObject](0) == MyCustomObject("there"))
         }
 
         describe("with non-matching data types") {

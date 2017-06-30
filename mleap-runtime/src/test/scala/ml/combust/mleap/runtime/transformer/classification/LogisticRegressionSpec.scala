@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime.transformer.classification
 
 import ml.combust.mleap.core.classification.{BinaryLogisticRegressionModel, LogisticRegressionModel}
+import ml.combust.mleap.core.types.{DoubleType, StructField, StructType, TensorType}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor

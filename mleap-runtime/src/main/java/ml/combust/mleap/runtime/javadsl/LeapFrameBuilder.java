@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.javadsl;
 
+import ml.combust.mleap.core.types.*;
 import ml.combust.mleap.runtime.*;
-import ml.combust.mleap.runtime.types.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,7 +1,6 @@
-package ml.combust.mleap.runtime.reflection
+package ml.combust.mleap.core.reflection
 
-import ml.combust.mleap.runtime.test.MyCustomObject
-import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -10,7 +9,7 @@ import org.scalatest.FunSpec
   */
 class MleapReflectionSpec extends FunSpec {
   describe("#dataType") {
-    import MleapReflection.dataType
+    import ml.combust.mleap.core.reflection.MleapReflection.dataType
 
     it("returns the Mleap runtime data type from the Scala type") {
       assert(dataType[Boolean] == BooleanType())
@@ -47,16 +46,11 @@ class MleapReflectionSpec extends FunSpec {
   }
 
   describe("#extractConstructorParameters") {
-    import MleapReflection.extractConstructorParameters
+    import ml.combust.mleap.core.reflection.MleapReflection.extractConstructorParameters
 
     it("extracts constructor parameters from simple case class") {
       val params = extractConstructorParameters[DummyData]
       assert(params.map(_._1).toArray sameElements Array("d", "a", "b"))
-    }
-
-    it("extracts constructor parameters from case class with custom type") {
-      val params = extractConstructorParameters[CustomData]
-      assert(params.map(_._1).toArray sameElements Array("t", "b"))
     }
 
     it("extracts constructor parameters from case classes with overloaded constructors") {
@@ -77,16 +71,11 @@ class MleapReflectionSpec extends FunSpec {
   }
 
   describe("#newInstance") {
-    import MleapReflection.newInstance
+    import ml.combust.mleap.core.reflection.MleapReflection.newInstance
 
     it("creates new instance of simple case class") {
       val dummyData = newInstance[DummyData](Seq(1, "hello world", 1.1))
       assert(dummyData.productIterator.toArray sameElements Array(1, "hello world", 1.1))
-    }
-
-    it("creates new instance of case class with custom type") {
-      val customData = newInstance[CustomData](Seq(MyCustomObject("hello"), "world"))
-      assert(customData.productIterator.toArray sameElements Array(MyCustomObject("hello"), "world"))
     }
 
     it("creates new instances of case classes with overloaded constructors") {
@@ -108,7 +97,6 @@ class MleapReflectionSpec extends FunSpec {
 }
 
 case class DummyData(d: Int, a: String, b:Double)
-case class CustomData(t: MyCustomObject, b:String)
 class SimpleData(val d: Int)
 
 case class EmployeeData(n: String, s: Double) {

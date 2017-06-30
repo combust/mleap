@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.TokenizerModel
+import ml.combust.mleap.core.types.{ListType, StringType, StructField}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
-import ml.combust.mleap.runtime.types.{ListType, StringType, StructField}
 
 import scala.util.{Success, Try}
 

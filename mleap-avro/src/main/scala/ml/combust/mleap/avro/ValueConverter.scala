@@ -3,6 +3,7 @@ package ml.combust.mleap.avro
 import java.nio.ByteBuffer
 
 import ml.combust.bundle.ByteString
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 import org.apache.avro.generic.GenericData
@@ -47,11 +48,6 @@ case class ValueConverter() {
         }
         vectorRecord
       }
-    case dataType: CustomType =>
-      val customRecord = new GenericData.Record(customSchema(dataType))
-      (value) =>
-        customRecord.put(customSchemaIndex, new String(dataType.toBytes(value), bytesCharset))
-        customRecord
     case _ => throw new IllegalArgumentException(s"invalid data type: $dataType")
   }
 
@@ -111,10 +107,6 @@ case class ValueConverter() {
             Tensor.create(values.asInstanceOf[java.util.List[Double]].asScala.toArray, dimensions, indices)
           case tpe => throw new IllegalArgumentException(s"invalid base type for tensor $tpe")
         }
-      }
-    case ct: CustomType =>
-      (value) => {
-        ct.fromBytes(value.asInstanceOf[GenericData.Record].get(customSchemaIndex).toString.getBytes(bytesCharset))
       }
     case tpe => throw new IllegalArgumentException(s"invalid data type $tpe")
   }

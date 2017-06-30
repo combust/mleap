@@ -2,9 +2,9 @@ package ml.combust.mleap.runtime.transformer
 
 import java.util.UUID
 
+import ml.combust.mleap.core.types.StructField
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.StructField
 
 import scala.util.Try
 

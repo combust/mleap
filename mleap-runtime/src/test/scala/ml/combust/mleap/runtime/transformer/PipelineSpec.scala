@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer
 
+import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
 import org.scalatest.FunSpec
 
 class PipelineSpec extends FunSpec {

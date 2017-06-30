@@ -4,9 +4,9 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.ImputerModel
+import ml.combust.mleap.core.types.DataType
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Imputer
-import ml.combust.mleap.runtime.types.DataType
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**

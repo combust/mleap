@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MathUnaryModel
+import ml.combust.mleap.core.types.{DoubleType, StructField}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
 
 import scala.util.{Success, Try}
 

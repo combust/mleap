@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.runtime.types.{DoubleType, ListType, StructField, TensorType}
+import ml.combust.mleap.core.types.{DoubleType, ListType, StructField, TensorType}
 import org.scalatest.FunSpec
 
 class BucketedRandomProjectionLSHSpec extends FunSpec {

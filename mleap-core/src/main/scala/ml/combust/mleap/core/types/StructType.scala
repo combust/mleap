@@ -1,8 +1,6 @@
-package ml.combust.mleap.runtime.types
+package ml.combust.mleap.core.types
 
 import java.io.PrintStream
-
-import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader, RowWriter}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -30,7 +28,7 @@ object StructType {
 
 /** Class for storing structured type information.
   *
-  * This class is primarily used to define the schema of a [[ml.combust.mleap.runtime.LeapFrame]].
+  * This class is primarily used to define the schema of a LeapFrame.
   * In the future, it could be used to define the structure of fields stored in the LeapFrame itself.
   *
   * @param fields list of fields in this struct
@@ -187,9 +185,6 @@ case class StructType private(fields: Seq[StructField],
   def indexedField(name: String): Try[(Int, StructField)] = {
     indexOf(name).map(index => (index, fields(index)))
   }
-
-  def rowWriter(format: String = BuiltinFormats.json): RowWriter = RowWriter(this, format)
-  def rowReader(format: String = BuiltinFormats.json): RowReader = RowReader(this, format)
 
   /** Print schema to standard out.
     */

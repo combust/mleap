@@ -1,5 +1,6 @@
 package ml.combust.mleap.json
 
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, MleapContext}
 import ml.combust.mleap.runtime.types._
 import spray.json.DefaultJsonProtocol._
@@ -87,28 +88,11 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     }
   })
 
-  implicit val mleapCustomTypeWriterFormat: JsonWriter[CustomType] = new JsonWriter[CustomType] {
-    override def write(obj: CustomType): JsValue = JsObject("type" -> JsString("custom"),
-      "custom" -> JsString(obj.name))
-  }
-
-  implicit def mleapCustomTypeReaderFormat(implicit context: MleapContext): JsonReader[CustomType] = new JsonReader[CustomType] {
-    override def read(json: JsValue): CustomType = {
-      val obj = json.asJsObject("invalid custom type")
-
-      obj.fields("custom") match {
-        case JsString(custom) => context.customTypeForAlias(custom)
-        case _ => deserializationError("invalid custom type")
-      }
-    }
-  }
-
   implicit val mleapDataTypeWriterFormat: JsonWriter[DataType] = new JsonWriter[DataType] {
     override def write(obj: DataType): JsValue = obj match {
       case bt: BasicType => mleapBasicTypeFormat.write(bt)
       case lt: ListType => mleapListTypeWriterFormat.write(lt)
       case tt: TensorType => mleapTensorTypeFormat.write(tt)
-      case ct: CustomType => mleapCustomTypeWriterFormat.write(ct)
       case _ => serializationError(s"$obj not supported for JSON serialization")
     }
   }
@@ -121,7 +105,6 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
           case Some(JsString("basic")) => mleapBasicTypeFormat.read(obj)
           case Some(JsString("list")) => mleapListTypeReaderFormat.read(obj)
           case Some(JsString("tensor")) => mleapTensorTypeFormat.read(obj)
-          case Some(JsString("custom")) => mleapCustomTypeReaderFormat.read(obj)
           case _ => deserializationError(s"invalid data type: ${obj.fields.get("type")}")
         }
       case _ => throw new Error("Invalid data type") // TODO: better error

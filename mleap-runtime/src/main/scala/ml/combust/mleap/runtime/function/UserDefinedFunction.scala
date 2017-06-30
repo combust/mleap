@@ -1,7 +1,8 @@
 package ml.combust.mleap.runtime.function
 
+import ml.combust.mleap.core.types.DataType
 import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.runtime.reflection.MleapReflection._
+import ml.combust.mleap.core.reflection.MleapReflection._
 import ml.combust.mleap.runtime.types._
 
 import scala.language.implicitConversions

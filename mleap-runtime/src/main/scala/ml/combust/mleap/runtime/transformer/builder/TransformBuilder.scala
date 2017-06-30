@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.builder
 
+import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
-import ml.combust.mleap.runtime.types.StructType
 
 import scala.util.Try
 

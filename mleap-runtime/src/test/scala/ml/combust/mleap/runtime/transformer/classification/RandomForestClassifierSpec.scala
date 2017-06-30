@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.classification
 
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
 import org.scalatest.FunSpec
 
 class RandomForestClassifierSpec extends FunSpec {

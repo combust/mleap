@@ -7,10 +7,11 @@ import java.util.UUID
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.regression.LinearRegressionModel
+import ml.combust.mleap.core.types.{DoubleType, StructField, StructType}
 import ml.combust.mleap.runtime.transformer.Pipeline
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType}
+import ml.combust.mleap.runtime.types.StructType
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, LocalDataset, Row}
 import org.apache.spark.ml.linalg.Vectors
 import resource.managed

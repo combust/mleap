@@ -1,14 +1,6 @@
-package ml.combust.mleap.runtime.types
+package ml.combust.mleap.core.types
 
-import ml.combust.bundle
-import spray.json.RootJsonFormat
 import scala.language.implicitConversions
-
-object DataType {
-  implicit def apply[T](ct: bundle.custom.CustomType[T]): CustomType = {
-    CustomType(ct.asInstanceOf[bundle.custom.CustomType[Any]])
-  }
-}
 
 sealed trait DataType extends Serializable {
   val isNullable: Boolean
@@ -73,33 +65,9 @@ case class ListType(base: DataType,
   override def printString: String = s"$simpleString (base = [${base.printString}], nullable = $isNullable)"
 }
 
-object CustomType {
-  implicit def apply[T](ct: bundle.custom.CustomType[T]): CustomType = {
-    new CustomType(ct.asInstanceOf[bundle.custom.CustomType[Any]])
-  }
-}
-
-case class CustomType private (ct: bundle.custom.CustomType[Any],
-                          override val isNullable: Boolean = false) extends DataType with bundle.custom.CustomType[Any] {
-  override def asNullable: DataType = copy(isNullable = true)
-
-  override val klazz: Class[Any] = ct.klazz
-  override def name: String = ct.name
-  override def format: RootJsonFormat[Any] = ct.format
-  override def simpleString: String = "custom"
-  override def printString: String = s"$simpleString (name = $name, nullable = $isNullable)"
-
-  override def isSmall(obj: Any): Boolean = ct.isSmall(obj)
-  override def isLarge(obj: Any): Boolean = ct.isLarge(obj)
-  override def toJsonBytes(obj: Any): Array[Byte] = ct.toJsonBytes(obj)
-  override def fromJsonBytes(bytes: Array[Byte]): Any = ct.fromJsonBytes(bytes)
-  override def toBytes(obj: Any): Array[Byte] = ct.toBytes(obj)
-  override def fromBytes(bytes: Array[Byte]): Any = ct.fromBytes(bytes)
-}
-
 case class TupleType(dts: DataType *) extends DataType {
   override val isNullable: Boolean = false
-  override def asNullable: DataType = ???
+  override def asNullable: DataType = TupleType(dts.map(_.asNullable): _*)
 
   override def simpleString: String = {
     val sb = StringBuilder.newBuilder

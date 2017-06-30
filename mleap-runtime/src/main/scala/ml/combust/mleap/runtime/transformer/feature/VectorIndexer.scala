@@ -1,11 +1,11 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.VectorIndexerModel
+import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.FeatureTransformer
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
 
 import scala.util.{Success, Try}
 

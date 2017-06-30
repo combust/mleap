@@ -1,13 +1,12 @@
 package org.apache.spark.sql.mleap
 
+import ml.combust.mleap.core
+import ml.combust.mleap.core.types.{AnyType, ListType}
 import ml.combust.mleap.runtime.function.{UserDefinedFunction => MleapUDF}
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import ml.combust.mleap.runtime.types
-import ml.combust.mleap.runtime.types.{AnyType, ListType, TupleType}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.DataType
 
-import scala.collection.mutable
 import scala.language.implicitConversions
 
 /**
@@ -45,12 +44,12 @@ trait UserDefinedFunctionConverters {
     }
   }
 
-  private def converter(dataType: types.DataType): (Any) => Any = dataType match {
-    case lt: ListType if lt.base == AnyType(false) => (row: Any) => row.asInstanceOf[Row].toSeq
+  private def converter(dataType: core.types.DataType): (Any) => Any = dataType match {
+    case lt: ListType if lt.base == AnyType() => (row: Any) => row.asInstanceOf[Row].toSeq
     case _ => identity
   }
 
-  private def sparkInputs(inputs: Seq[types.DataType]): Option[Seq[DataType]] = {
+  private def sparkInputs(inputs: Seq[core.types.DataType]): Option[Seq[DataType]] = {
     inputs.foldLeft(Option(Seq[DataType]())) {
       case (optI, dt) =>
         optI.flatMap { i => sparkType(dt).map { sdt => i :+ sdt } }

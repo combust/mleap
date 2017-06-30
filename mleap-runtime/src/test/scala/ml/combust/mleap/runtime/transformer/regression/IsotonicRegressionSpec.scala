@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.IsotonicRegressionModel
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
 import org.scalatest.FunSpec
 
 class IsotonicRegressionSpec extends FunSpec {

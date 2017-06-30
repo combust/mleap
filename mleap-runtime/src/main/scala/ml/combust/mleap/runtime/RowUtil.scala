@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime
 
 import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector}
-import ml.combust.mleap.runtime.types.{AnyType, DataType, ListType, StructType}
+import ml.combust.mleap.core.types.{AnyType, DataType, ListType, StructType}
 
 import scala.util.{Failure, Try}
 

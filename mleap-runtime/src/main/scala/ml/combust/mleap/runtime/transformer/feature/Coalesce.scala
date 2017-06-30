@@ -1,10 +1,10 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CoalesceModel
+import ml.combust.mleap.core.types.{DataType, DoubleType, StructField}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.{DataType, DoubleType, StructField}
 
 import scala.util.{Failure, Success, Try}
 

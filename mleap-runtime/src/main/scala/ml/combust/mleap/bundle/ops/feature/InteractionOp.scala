@@ -4,9 +4,9 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.InteractionModel
+import ml.combust.mleap.core.types.DataType
 import ml.combust.mleap.runtime.{MleapContext, types}
 import ml.combust.mleap.runtime.transformer.feature.Interaction
-import ml.combust.mleap.runtime.types.DataType
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
@@ -41,7 +41,7 @@ class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] 
         case None => None
         case Some(attributeList) => attributeList.get("input_types") match {
           case None => None
-          case Some(attribute) => Some(attribute.value.getDataTypeList.map(v => v: types.DataType).toArray)
+          case Some(attribute) => Some(attribute.value.getDataTypeList.map(v => v: DataType).toArray)
         }
       }
 

@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BucketizerModel
+import ml.combust.mleap.core.types.{DoubleType, StructField}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
 
 import scala.util.{Success, Try}
 
@@ -22,8 +22,7 @@ case class Bucketizer(override val uid: String = Transformer.uniqueName("bucketi
 }
 
 object BucketizerUtil {
-
-  def restoreSplits(splits : Array[Double]) = {
+  def restoreSplits(splits : Array[Double]): Array[Double] = {
     splits.update(0, update(splits.head, Double.NegativeInfinity))
     splits.update(splits.length - 1, update(splits.last, Double.PositiveInfinity))
     splits

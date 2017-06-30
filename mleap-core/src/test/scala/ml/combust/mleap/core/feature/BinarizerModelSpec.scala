@@ -1,6 +1,6 @@
 package ml.combust.mleap.core.feature
 
-import ml.combust.mleap.core.types.DoubleType
+import ml.combust.mleap.core.types.{DoubleType, ScalarShape}
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 
@@ -10,7 +10,7 @@ import org.scalatest.FunSpec
 class BinarizerModelSpec extends FunSpec {
   describe("#apply"){
     it("Makes a value 0 or 1 based on the threshold") {
-      val binarizer = BinarizerModel(0.3, DoubleType(), DoubleType())
+      val binarizer = BinarizerModel(0.3, DoubleType(), ScalarShape)
       val features = Vectors.dense(Array(0.1, 0.4, 0.3))
       val binFeatures = binarizer(features).toArray
 

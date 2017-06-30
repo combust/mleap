@@ -195,6 +195,8 @@ object Value {
   val doubleDataType: DataType = basicDataType(BasicType.DOUBLE)
   val byteStringDataType: DataType = basicDataType(BasicType.BYTE_STRING)
   val dataTypeDataType: DataType = basicDataType(BasicType.DATA_TYPE)
+  val dataShapeDataType: DataType = basicDataType(BasicType.DATA_SHAPE)
+  val basicTypeDataType: DataType = basicDataType(BasicType.BASIC_TYPE)
 
   val stringListDataType: DataType = listDataType(BasicType.STRING)
   val booleanListDataType: DataType = listDataType(BasicType.BOOLEAN)
@@ -206,6 +208,8 @@ object Value {
   val doubleListDataType: DataType = listDataType(BasicType.DOUBLE)
   val byteStringListDataType: DataType = listDataType(BasicType.BYTE_STRING)
   val listDataTypeDataType: DataType = listDataType(BasicType.DATA_TYPE)
+  val listDataShapeDataType: DataType = listDataType(BasicType.DATA_SHAPE)
+  val listBasicTypeDataType: DataType = listDataType(BasicType.BASIC_TYPE)
 
   /** Create a string value.
     *
@@ -303,6 +307,24 @@ object Value {
     Value(dataTypeDataType, dt)
   }
 
+  /** Create a data shape value.
+    *
+    * @param ds data shape to store
+    * @return value with data type
+    */
+  def dataShape(ds: DataShape): Value = {
+    Value(dataShapeDataType, ds)
+  }
+
+  /** Create a basic type value.
+    *
+    * @param bt basic type to store
+    * @return value with data type
+    */
+  def basicType(bt: BasicType): Value = {
+    Value(basicTypeDataType, bt)
+  }
+
   /** Create a list of booleans value.
     *
     * @param value Scala boolean list
@@ -375,6 +397,24 @@ object Value {
     */
   def dataTypeList(dts: Seq[DataType]): Value = {
     Value(listDataTypeDataType, dts)
+  }
+
+  /** Create a list of data shapes.
+    *
+    * @param dss data shapes
+    * @return value with data shapes
+    */
+  def dataShapeList(dss: Seq[DataShape]): Value = {
+    Value(listDataShapeDataType, dss)
+  }
+
+  /** Create a list of basic types.
+    *
+    * @param bts basic types
+    * @return value with basic types
+    */
+  def basicTypeList(bts: Seq[BasicType]): Value = {
+    Value(listBasicTypeDataType, bts)
   }
 }
 
@@ -476,6 +516,18 @@ case class Value(bundleDataType: DataType, value: Any) {
     */
   def getDataType: DataType = value.asInstanceOf[DataType]
 
+  /** Get value as a data shape.
+    *
+    * @return data shape
+    */
+  def getDataShape: DataShape = value.asInstanceOf[DataShape]
+
+  /** Get value as a basic type.
+    *
+    * @return basic type
+    */
+  def getBasicType: BasicType = value.asInstanceOf[BasicType]
+
   /** Get value as seq of strings.
     *
     * @return string tensor values
@@ -530,6 +582,18 @@ case class Value(bundleDataType: DataType, value: Any) {
     * @return list of data types
     */
   def getDataTypeList: Seq[DataType] = value.asInstanceOf[Seq[DataType]]
+
+  /** Get list of data shapes.
+    *
+    * @return list of data shapes
+    */
+  def getDataShapeList: Seq[DataShape] = value.asInstanceOf[Seq[DataShape]]
+
+  /** Get list of basic types.
+    *
+    * @return list of basic types
+    */
+  def getBasicTypeList: Seq[BasicType] = value.asInstanceOf[Seq[BasicType]]
 
   /** Get nested list of any type.
     *

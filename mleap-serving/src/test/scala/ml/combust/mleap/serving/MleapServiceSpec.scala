@@ -3,7 +3,6 @@ package ml.combust.mleap.serving
 import java.nio.file.NoSuchFileException
 
 import ml.combust.mleap.core.types.{DoubleType, TensorType}
-import ml.combust.mleap.runtime.types.TensorType
 import ml.combust.mleap.serving.domain.v1._
 import org.scalatest.{AsyncFunSpec, Matchers}
 

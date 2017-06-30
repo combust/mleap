@@ -3,7 +3,7 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.sql.mleap.TypeConverters.mleapType
 import ml.combust.mleap.runtime.types.BundleTypeConverters.mleapTypeToBundleType
@@ -19,10 +19,12 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
 
     override def store(model: Model, obj: VectorAssembler)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      context.context.dataset.map(dataset => {
-        val inputDataTypes = obj.getInputCols.map(v => mleapTypeToBundleType(mleapType(dataset.schema(v).dataType))).toSeq
-        model.withAttr("input_types", Value.dataTypeList(inputDataTypes))
-      }).getOrElse(model)
+      assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
+
+      val dataset = context.context.dataset.get
+      val inputTypes = obj.getInputCols.map(i => mleapTypeToBundleType(mleapType(dataset.schema(i).dataType)))
+
+      model.withAttr("input_types", Value.dataTypeList(inputTypes))
     }
 
     override def load(model: Model)

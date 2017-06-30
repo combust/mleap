@@ -28,12 +28,10 @@ class InteractionOp extends OpNode[SparkBundleContext, Interaction, Interaction]
 
       val dataset = context.context.dataset.get
       val spec = buildSpec(obj.getInputCols, dataset)
+      val inputTypes = obj.getInputCols.map(v => mleapTypeToBundleType(mleapType(dataset.schema(v).dataType)))
 
-      val m = model.withAttr("num_inputs", Value.int(spec.length))
-                    .withAttr("input_types",
-                      Value.dataTypeList(obj.getInputCols
-                                      .map(v => mleapTypeToBundleType(
-                                        mleapType(dataset.schema(v).dataType))).toSeq))
+      val m = model.withAttr("num_inputs", Value.int(spec.length)).
+        withAttr("input_types", Value.dataTypeList(inputTypes))
       spec.zipWithIndex.foldLeft(m) {
         case (m2, (numFeatures, index)) => m2.withAttr(s"num_features$index", Value.intList(numFeatures))
       }

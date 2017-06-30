@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BinarizerModel
-import ml.combust.mleap.core.types.{DataType, DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.tensor.Tensor
@@ -15,9 +15,7 @@ import scala.util.{Failure, Success, Try}
   */
 case class Binarizer(override val uid: String = Transformer.uniqueName("binarizer"),
                      inputCol: String,
-                     inputDataType: Option[DataType],
                      outputCol: String,
-                     outputDataType: Option[DataType],
                      model: BinarizerModel) extends Transformer {
   val execTensor: UserDefinedFunction = (value: Tensor[Double]) => model(value): Tensor[Double]
   val execDouble: UserDefinedFunction = (value: Double) => model(value): Double
@@ -32,11 +30,7 @@ case class Binarizer(override val uid: String = Transformer.uniqueName("binarize
   }
 
   override def getFields(): Try[Seq[StructField]] = {
-    if (inputDataType == None || outputDataType == None) {
-      return Failure(new RuntimeException(s"Cannot determine schema for transformer ${this.uid}"))
-    }
-
-    Success(Seq(StructField(inputCol, inputDataType.get),
-                StructField(outputCol, outputDataType.get)))
+    Success(Seq(StructField(inputCol, model.inputType),
+      StructField(outputCol, model.outputType)))
   }
 }

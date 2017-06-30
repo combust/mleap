@@ -3,7 +3,7 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.feature.Binarizer
 import org.apache.spark.sql.mleap.TypeConverters.mleapType
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
@@ -19,10 +19,13 @@ class BinarizerOp extends OpNode[SparkBundleContext, Binarizer, Binarizer] {
 
     override def store(model: Model, obj: Binarizer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      context.context.dataset.map(dataset => {
-        model.withAttr("input_type", Value.dataType(mleapType(dataset.schema(obj.getInputCol).dataType)))
-             .withAttr("output_type", Value.dataType(mleapType(dataset.schema(obj.getOutputCol).dataType)))
-      }).getOrElse(model).withAttr("threshold", Value.double(obj.getThreshold))
+      assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
+
+      val dataset = context.context.dataset.get
+
+      model.withAttr("input_type", Value.dataType(mleapType(dataset.schema(obj.getInputCol).dataType))).
+        withAttr("output_type", Value.dataType(mleapType(dataset.schema(obj.getOutputCol).dataType))).
+        withAttr("threshold", Value.double(obj.getThreshold))
     }
 
     override def load(model: Model)

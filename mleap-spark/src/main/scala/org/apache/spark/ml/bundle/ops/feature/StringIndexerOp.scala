@@ -19,10 +19,7 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      context.context.dataset.map(dataset => {
-        model.withAttr("input_type", Value.dataType(mleapType(dataset.schema(obj.getInputCol).dataType)))
-      }).getOrElse(model)
-        .withAttr("labels", Value.stringList(obj.labels))
+      model.withAttr("labels", Value.stringList(obj.labels))
         .withAttr("handle_invalid", Value.string(obj.getHandleInvalid))
     }
 

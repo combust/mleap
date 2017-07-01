@@ -67,7 +67,7 @@ class RandomForestRegressionOp extends OpNode[SparkBundleContext, RandomForestRe
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: RandomForestRegressionModel): Shape = Shape().
+  override def shape(node: RandomForestRegressionModel): NodeShape = NodeShape().
     withInput(node.getFeaturesCol, "features").
     withOutput(node.getPredictionCol, "prediction")
 }

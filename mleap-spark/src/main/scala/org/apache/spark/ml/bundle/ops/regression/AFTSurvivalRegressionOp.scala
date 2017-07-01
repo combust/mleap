@@ -53,8 +53,8 @@ class AFTSurvivalRegressionOp extends OpNode[SparkBundleContext, AFTSurvivalRegr
     r
   }
 
-  override def shape(node: AFTSurvivalRegressionModel): Shape = {
-    var s = Shape().withInput(node.getFeaturesCol, "features").
+  override def shape(node: AFTSurvivalRegressionModel): NodeShape = {
+    var s = NodeShape().withInput(node.getFeaturesCol, "features").
       withOutput(node.getPredictionCol, "prediction")
     if(node.isSet(node.quantilesCol)) { s = s.withOutput(node.getQuantilesCol, "quantiles") }
 

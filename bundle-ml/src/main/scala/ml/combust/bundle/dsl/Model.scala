@@ -1,17 +1,17 @@
 package ml.combust.bundle.dsl
 
-import ml.bundle.ModelDef.ModelDef
+import ml.bundle
 
 /** Companion object for model.
   */
 object Model {
   /** Create a dsl model from a bunle model.
     *
-    * @param modelDef bundle model definition
+    * @param model bundle model definition
     * @return dsl model
     */
-  def fromBundle(modelDef: ModelDef): Model = Model(op = modelDef.op,
-    attributes = modelDef.attributes.map(AttributeList.fromBundle))
+  def fromBundle(model: bundle.Model): Model = Model(op = model.op,
+    attributes = Attributes.fromBundle(model.attributes.get))
 }
 
 /** Class that encodes all information need to serialize or deserialize
@@ -26,15 +26,15 @@ object Model {
   * @param attributes optional list of attributes for the model
   */
 case class Model(op: String,
-                 attributes: Option[AttributeList] = None) extends HasAttributeList[Model] {
+                 attributes: Attributes = Attributes()) extends HasAttributes[Model] {
   /** Convert to bundle model.
     *
     * @return bundle model definition
     */
-  def asBundle: ModelDef = ModelDef(op = op,
-    attributes = attributes.map(_.asBundle))
+  def asBundle: bundle.Model = bundle.Model(op = op,
+    attributes = Some(attributes.asBundle))
 
-  override def replaceAttrList(list: Option[AttributeList]): Model = {
-    copy(attributes = list)
+  override def withAttributes(attrs: Attributes): Model = {
+    copy(attributes = attrs)
   }
 }

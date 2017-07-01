@@ -43,6 +43,6 @@ class ElementwiseProductOp extends OpNode[MleapContext, ElementwiseProduct, Elem
     )
   }
 
-  override def shape(node: ElementwiseProduct): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: ElementwiseProduct): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 
 }

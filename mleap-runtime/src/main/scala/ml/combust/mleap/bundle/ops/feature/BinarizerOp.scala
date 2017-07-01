@@ -56,5 +56,5 @@ class BinarizerOp extends OpNode[MleapContext, Binarizer, BinarizerModel] {
       model = model)
   }
 
-  override def shape(node: Binarizer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: Binarizer): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

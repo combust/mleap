@@ -56,5 +56,5 @@ class RegexTokenizerOp extends OpNode[SparkBundleContext, RegexTokenizer, RegexT
       .setToLowercase(model.getToLowercase)
   }
 
-  override def shape(node: RegexTokenizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: RegexTokenizer): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

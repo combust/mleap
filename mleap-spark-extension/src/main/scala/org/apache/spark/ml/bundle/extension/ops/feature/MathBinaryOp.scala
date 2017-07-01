@@ -46,8 +46,8 @@ class MathBinaryOp extends OpNode[SparkBundleContext, MathBinary, MathBinaryMode
     mb
   }
 
-  override def shape(node: MathBinary): Shape = {
-    var shape = Shape().withStandardOutput(node.getOutputCol)
+  override def shape(node: MathBinary): NodeShape = {
+    var shape = NodeShape().withStandardOutput(node.getOutputCol)
 
     if(node.isSet(node.inputA)) {
       shape = shape.withInput(node.getInputA, "input_a")

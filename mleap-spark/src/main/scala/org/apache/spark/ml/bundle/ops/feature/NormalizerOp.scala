@@ -40,5 +40,5 @@ class NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
       setP(model.getP)
   }
 
-  override def shape(node: Normalizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: Normalizer): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

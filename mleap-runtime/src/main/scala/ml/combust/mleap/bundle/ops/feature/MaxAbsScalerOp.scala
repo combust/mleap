@@ -42,5 +42,5 @@ class MaxAbsScalerOp extends OpNode[MleapContext, MaxAbsScaler, MaxAbsScalerMode
       model = model)
   }
 
-  override def shape(node: MaxAbsScaler): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: MaxAbsScaler): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

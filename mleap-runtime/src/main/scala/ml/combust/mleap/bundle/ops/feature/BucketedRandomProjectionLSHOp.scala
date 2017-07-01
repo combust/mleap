@@ -46,5 +46,5 @@ class BucketedRandomProjectionLSHOp extends OpNode[MleapContext, BucketedRandomP
       model = model)
   }
 
-  override def shape(node: BucketedRandomProjectionLSH): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: BucketedRandomProjectionLSH): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

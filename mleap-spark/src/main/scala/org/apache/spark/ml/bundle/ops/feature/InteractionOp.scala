@@ -82,8 +82,8 @@ class InteractionOp extends OpNode[SparkBundleContext, Interaction, Interaction]
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: Interaction): Shape = {
-    val s = Shape().withStandardOutput(node.getOutputCol)
+  override def shape(node: Interaction): NodeShape = {
+    val s = NodeShape().withStandardOutput(node.getOutputCol)
     node.getInputCols.zipWithIndex.foldLeft(s) {
       case (s2, (input, index)) => s2.withInput(input, s"input$index")
     }

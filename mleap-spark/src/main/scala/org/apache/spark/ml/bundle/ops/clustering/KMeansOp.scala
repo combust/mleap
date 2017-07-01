@@ -54,6 +54,6 @@ class KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: KMeansModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
+  override def shape(node: KMeansModel): NodeShape = NodeShape().withInput(node.getFeaturesCol, "features").
     withOutput(node.getPredictionCol, "prediction")
 }

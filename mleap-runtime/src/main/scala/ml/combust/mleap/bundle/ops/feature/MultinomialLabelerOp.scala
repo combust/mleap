@@ -44,7 +44,7 @@ class MultinomialLabelerOp extends OpNode[MleapContext, MultinomialLabeler, Mult
       model = model)
   }
 
-  override def shape(node: MultinomialLabeler): Shape = Shape().withInput(node.featuresCol, "features").
+  override def shape(node: MultinomialLabeler): NodeShape = NodeShape().withInput(node.featuresCol, "features").
     withOutput(node.probabilitiesCol, "probabilities").
     withOutput(node.labelsCol, "labels")
 }

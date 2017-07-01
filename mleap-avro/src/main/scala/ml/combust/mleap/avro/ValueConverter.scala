@@ -2,10 +2,9 @@ package ml.combust.mleap.avro
 
 import java.nio.ByteBuffer
 
-import ml.combust.bundle.ByteString
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.types._
-import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
+import ml.combust.mleap.tensor.{ByteString, DenseTensor, SparseTensor, Tensor}
 import org.apache.avro.generic.GenericData
 import org.apache.avro.util.Utf8
 

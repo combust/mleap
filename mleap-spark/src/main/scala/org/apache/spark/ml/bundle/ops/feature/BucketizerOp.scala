@@ -41,5 +41,5 @@ class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
       setSplits(model.getSplits)
   }
 
-  override def shape(node: Bucketizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: Bucketizer): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

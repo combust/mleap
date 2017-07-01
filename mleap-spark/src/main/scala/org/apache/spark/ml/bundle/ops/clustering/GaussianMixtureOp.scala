@@ -64,10 +64,10 @@ class GaussianMixtureOp extends OpNode[SparkBundleContext, GaussianMixtureModel,
     gmm
   }
 
-  override def shape(node: GaussianMixtureModel): Shape = {
+  override def shape(node: GaussianMixtureModel): NodeShape = {
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
 
-    Shape().withInput(node.getFeaturesCol, "features").
+    NodeShape().withInput(node.getFeaturesCol, "features").
       withOutput(node.getPredictionCol, "prediction").
       withOutput(probability, "probability")
   }

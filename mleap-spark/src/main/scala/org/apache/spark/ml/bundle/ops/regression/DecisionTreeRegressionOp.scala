@@ -49,6 +49,6 @@ class DecisionTreeRegressionOp extends OpNode[SparkBundleContext, DecisionTreeRe
       setPredictionCol(node.shape.output("prediction").name)
   }
 
-  override def shape(node: DecisionTreeRegressionModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
+  override def shape(node: DecisionTreeRegressionModel): NodeShape = NodeShape().withInput(node.getFeaturesCol, "features").
     withOutput(node.getPredictionCol, "prediction")
 }

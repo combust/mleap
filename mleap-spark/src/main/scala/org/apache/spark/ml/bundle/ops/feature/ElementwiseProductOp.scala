@@ -42,5 +42,5 @@ class ElementwiseProductOp extends OpNode[SparkBundleContext, ElementwiseProduct
       setScalingVec(model.getScalingVec)
   }
 
-  override def shape(node: ElementwiseProduct): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: ElementwiseProduct): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

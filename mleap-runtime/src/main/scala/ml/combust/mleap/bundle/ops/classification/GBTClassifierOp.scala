@@ -67,6 +67,6 @@ class GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierM
       model = model)
   }
 
-  override def shape(node: GBTClassifier): Shape = Shape().withInput(node.featuresCol, "features").
+  override def shape(node: GBTClassifier): NodeShape = NodeShape().withInput(node.featuresCol, "features").
     withOutput(node.predictionCol, "prediction")
 }

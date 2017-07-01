@@ -41,5 +41,5 @@ class NGramOp extends OpNode[MleapContext, NGram, NGramModel]{
       model = model)
   }
 
-  override def shape(node: NGram): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: NGram): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

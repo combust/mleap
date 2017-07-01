@@ -42,5 +42,5 @@ class HashingTermFrequencyOp extends OpNode[SparkBundleContext, HashingTF, Hashi
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: HashingTF): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: HashingTF): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

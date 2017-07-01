@@ -1,9 +1,8 @@
 package ml.combust.mleap.runtime.serialization
 
-import ml.combust.bundle.ByteString
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, MleapContext, Row}
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, Tensor}
 import ml.combust.mleap.runtime.MleapSupport._
 import org.scalatest.FunSpec
 

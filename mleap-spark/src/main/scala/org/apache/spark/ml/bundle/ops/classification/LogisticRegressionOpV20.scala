@@ -62,11 +62,11 @@ class LogisticRegressionOpV20 extends OpNode[SparkBundleContext, LogisticRegress
     node.shape.getOutput("raw_prediction").map(rp => lr.setRawPredictionCol(rp.name)).getOrElse(lr)
   }
 
-  override def shape(node: LogisticRegressionModel): Shape = {
+  override def shape(node: LogisticRegressionModel): NodeShape = {
     val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
 
-    Shape().withInput(node.getFeaturesCol, "features").
+    NodeShape().withInput(node.getFeaturesCol, "features").
       withOutput(node.getPredictionCol, "prediction").
       withOutput(rawPrediction, "raw_prediction").
       withOutput(probability, "probability")

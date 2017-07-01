@@ -1,12 +1,9 @@
-package ml.combust.bundle
-
-import com.google.protobuf
+package ml.combust.mleap.tensor
 
 /**
   * Created by hollinwilkins on 1/20/17.
   */
 case class ByteString(bytes: Array[Byte]) {
-  def toProto: protobuf.ByteString = protobuf.ByteString.copyFrom(bytes)
   def size: Int = bytes.length
 
   override def equals(obj: scala.Any): Boolean = obj match {

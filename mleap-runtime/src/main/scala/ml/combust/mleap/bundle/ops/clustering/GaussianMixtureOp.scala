@@ -56,7 +56,7 @@ class GaussianMixtureOp extends OpNode[MleapContext, GaussianMixture, GaussianMi
       model = model)
   }
 
-  override def shape(node: GaussianMixture): Shape = Shape().withInput(node.featuresCol, "features").
+  override def shape(node: GaussianMixture): NodeShape = NodeShape().withInput(node.featuresCol, "features").
     withOutput(node.predictionCol, "prediction").
     withOutput(node.probabilityCol, "probability")
 }

@@ -39,5 +39,5 @@ class DCTOp extends OpNode[SparkBundleContext, DCT, DCT] {
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: DCT): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: DCT): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

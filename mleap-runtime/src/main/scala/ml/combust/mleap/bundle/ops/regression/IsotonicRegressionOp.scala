@@ -47,6 +47,6 @@ class IsotonicRegressionOp extends OpNode[MleapContext, IsotonicRegression, Isot
       model = model)
   }
 
-  override def shape(node: IsotonicRegression): Shape = Shape().withInput(node.featuresCol, "features").
+  override def shape(node: IsotonicRegression): NodeShape = NodeShape().withInput(node.featuresCol, "features").
     withOutput(node.predictionCol, "prediction")
 }

@@ -22,13 +22,6 @@ case object DirFS extends FSType
 class BundleSerializationSpec extends FunSpec {
   implicit val testContext = TestContext(BundleRegistry("test-registry"))
 
-  it should behave like bundleSerializer("Serializing/Deserializing mixed a bundle as a dir",
-    SerializationFormat.Mixed,
-    DirFS)
-  it should behave like bundleSerializer("Serializing/Deserializing mixed a bundle as a zip",
-    SerializationFormat.Mixed,
-    ZipFS)
-
   it should behave like bundleSerializer("Serializing/Deserializing json a bundle as a dir",
     SerializationFormat.Json,
     DirFS)

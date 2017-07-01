@@ -56,8 +56,8 @@ class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] 
       model = model)
   }
 
-  override def shape(node: Interaction): Shape = {
-    val s = Shape().withStandardOutput(node.outputCol)
+  override def shape(node: Interaction): NodeShape = {
+    val s = NodeShape().withStandardOutput(node.outputCol)
     node.inputCols.zipWithIndex.foldLeft(s) {
       case (s2, (input, index)) => s2.withInput(input, s"input$index")
     }

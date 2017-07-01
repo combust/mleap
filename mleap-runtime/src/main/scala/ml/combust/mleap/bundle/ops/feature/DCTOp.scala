@@ -41,5 +41,5 @@ class DCTOp extends OpNode[MleapContext, DCT, DCTModel] {
       model = model)
   }
 
-  override def shape(node: DCT): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: DCT): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

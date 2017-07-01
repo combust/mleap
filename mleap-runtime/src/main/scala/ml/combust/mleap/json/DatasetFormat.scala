@@ -6,8 +6,8 @@ import spray.json.DefaultJsonProtocol._
 import spray.json._
 import JsonSupport.mleapTensorFormat
 import ml.combust.bundle.json.JsonSupport.bundleByteStringFormat
-import ml.combust.bundle.ByteString
 import ml.combust.mleap.core.types._
+import ml.combust.mleap.tensor.ByteString
 
 /**
   * Created by hollinwilkins on 9/10/16.

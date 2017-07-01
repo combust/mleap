@@ -41,5 +41,5 @@ class HashingTermFrequencyOp extends OpNode[MleapContext, HashingTermFrequency, 
       model = model)
   }
 
-  override def shape(node: HashingTermFrequency): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: HashingTermFrequency): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

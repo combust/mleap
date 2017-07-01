@@ -6,10 +6,9 @@ import java.nio.file.{FileSystem, FileSystems, Files, Path}
 import java.util.stream.Collectors
 
 import ml.combust.bundle.dsl.{Bundle, BundleInfo}
-import ml.combust.bundle.json.JsonSupport._
 import ml.combust.bundle.serializer.BundleSerializer
+import com.trueaccord.scalapb.json.JsonFormat
 import resource._
-import spray.json._
 
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
@@ -56,7 +55,8 @@ case class BundleFile(fs: FileSystem,
     */
   def readInfo(): Try[BundleInfo] = {
     val bundleJson = fs.getPath(path.toString, Bundle.bundleJson)
-    Try(new String(Files.readAllBytes(bundleJson)).parseJson.convertTo[BundleInfo])
+    Try(JsonFormat.fromJsonString[ml.bundle.Bundle](new String(Files.readAllBytes(bundleJson), "UTF-8"))).
+      map(BundleInfo.fromBundle)
   }
 
   def writeNote(name: String, note: String): Try[String] = {

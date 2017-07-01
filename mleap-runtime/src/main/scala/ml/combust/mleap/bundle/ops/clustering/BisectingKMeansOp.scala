@@ -47,6 +47,6 @@ class BisectingKMeansOp extends OpNode[MleapContext, BisectingKMeans, BisectingK
       model = model)
   }
 
-  override def shape(node: BisectingKMeans): Shape = Shape().withInput(node.featuresCol, "features").
+  override def shape(node: BisectingKMeans): NodeShape = NodeShape().withInput(node.featuresCol, "features").
     withOutput(node.predictionCol, "prediction")
 }

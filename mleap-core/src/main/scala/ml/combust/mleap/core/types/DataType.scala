@@ -52,7 +52,14 @@ case class ByteStringType(override val isNullable: Boolean = false) extends Basi
   override def simpleString: String = "byte_string"
 }
 
+/**
+  * TensorType must have dimensions set before serializing to Bundle.ML.
+  *
+  * Dimensions are not necessary for a LeapFrame, but strongly encouraged
+  * to ensure execution is working as expected.
+ */
 case class TensorType(base: BasicType,
+                      dimensions: Option[Seq[Int]] = None,
                       override val isNullable: Boolean = false) extends DataType {
   override def asNullable: DataType = copy(isNullable = true)
   override def simpleString: String = "tensor"

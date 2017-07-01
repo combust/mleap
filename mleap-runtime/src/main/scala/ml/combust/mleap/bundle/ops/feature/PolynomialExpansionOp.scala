@@ -41,5 +41,5 @@ class PolynomialExpansionOp extends OpNode[MleapContext, PolynomialExpansion, Po
       model = model)
   }
 
-  override def shape(node: PolynomialExpansion): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: PolynomialExpansion): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

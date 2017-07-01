@@ -44,6 +44,6 @@ class MultiLayerPerceptronClassifierOp extends OpNode[MleapContext, MultiLayerPe
       model = model)
   }
 
-  override def shape(node: MultiLayerPerceptronClassifier): Shape = Shape().withInput(node.featuresCol, "features").
+  override def shape(node: MultiLayerPerceptronClassifier): NodeShape = NodeShape().withInput(node.featuresCol, "features").
     withOutput(node.predictionCol, "prediction")
 }

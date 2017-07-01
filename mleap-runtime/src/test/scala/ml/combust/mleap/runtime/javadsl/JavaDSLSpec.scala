@@ -4,13 +4,12 @@ import java.io.File
 import java.nio.file.Files
 import java.util
 
-import ml.combust.bundle.ByteString
 import ml.combust.mleap.core.feature.StringIndexerModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.mleap.runtime.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.types._
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
 
 import scala.collection.JavaConverters._

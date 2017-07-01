@@ -22,7 +22,7 @@ class StringIndexerOp extends OpNode[Any, StringIndexer, StringIndexerModel] {
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[Any]): Model = {
-      model.withAttr("labels", Value.stringList(obj.strings))
+      model.withValue("labels", Value.stringList(obj.strings))
     }
 
 
@@ -47,5 +47,5 @@ class StringIndexerOp extends OpNode[Any, StringIndexer, StringIndexerModel] {
       model = model)
   }
 
-  override def shape(node: StringIndexer): Shape = Shape().withStandardIO(node.input, node.output)
+  override def shape(node: StringIndexer): NodeShape = NodeShape().withStandardIO(node.input, node.output)
 }

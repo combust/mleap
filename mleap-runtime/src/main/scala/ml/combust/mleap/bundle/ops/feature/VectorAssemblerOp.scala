@@ -43,9 +43,9 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
       model = model)
   }
 
-  override def shape(node: VectorAssembler): Shape = {
+  override def shape(node: VectorAssembler): NodeShape = {
     var i = 0
-    node.inputCols.foldLeft(Shape()) {
+    node.inputCols.foldLeft(NodeShape()) {
       case (shape, inputCol) =>
         val shape2 = shape.withInput(inputCol, s"input$i")
         i += 1

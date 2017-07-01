@@ -3,9 +3,6 @@ package ml.combust.bundle
 import java.io.File
 
 /**
-  * Created by hollinwilkins on 8/26/16.
-  */
-/**
   * Created by hollinwilkins on 8/23/16.
   */
 object TestUtil {

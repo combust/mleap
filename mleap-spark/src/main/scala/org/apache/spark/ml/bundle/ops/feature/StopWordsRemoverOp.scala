@@ -44,5 +44,5 @@ class StopWordsRemoverOp extends OpNode[SparkBundleContext, StopWordsRemover, St
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: StopWordsRemover): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: StopWordsRemover): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

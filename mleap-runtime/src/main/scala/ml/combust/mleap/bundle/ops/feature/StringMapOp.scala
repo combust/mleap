@@ -70,5 +70,5 @@ class StringMapOp extends OpNode[MleapContext, StringMap, StringMapModel] {
   // a node. shapes can get fairly complicated and may be confusing at first
   // but all they do is connect fields from a data frame to certain input/output
   // locations of the node itself
-  override def shape(node: StringMap): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: StringMap): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

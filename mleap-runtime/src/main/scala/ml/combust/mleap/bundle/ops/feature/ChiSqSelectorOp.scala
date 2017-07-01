@@ -41,6 +41,6 @@ class ChiSqSelectorOp extends OpNode[MleapContext, ChiSqSelector, ChiSqSelectorM
       model = model)
   }
 
-  override def shape(node: ChiSqSelector): Shape = Shape().withInput(node.featuresCol, "features").
+  override def shape(node: ChiSqSelector): NodeShape = NodeShape().withInput(node.featuresCol, "features").
     withStandardOutput(node.outputCol)
 }

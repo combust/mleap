@@ -1,7 +1,7 @@
 package ml.combust.bundle.op
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.dsl.{Node, Shape}
+import ml.combust.bundle.dsl.{Node, NodeShape}
 
 /** Type class for serializing/deserializing Bundle.ML graph nodes.
   *
@@ -37,7 +37,7 @@ trait OpNode[Context, N, M] {
     * @param node node object
     * @return shape of the node
     */
-  def shape(node: N): Shape
+  def shape(node: N): NodeShape
 
   /** Get the children of the node.
     *

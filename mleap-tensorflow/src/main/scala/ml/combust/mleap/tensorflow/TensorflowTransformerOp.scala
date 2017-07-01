@@ -70,7 +70,7 @@ class TensorflowTransformerOp extends OpNode[MleapContext, TensorflowTransformer
       model = model)
   }
 
-  override def shape(node: TensorflowTransformer): Shape = {
-    Shape(node.inputs, node.outputs)
+  override def shape(node: TensorflowTransformer): NodeShape = {
+    NodeShape(node.inputs, node.outputs)
   }
 }

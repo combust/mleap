@@ -1,9 +1,8 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.bundle.ByteString
 import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, Tensor}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable

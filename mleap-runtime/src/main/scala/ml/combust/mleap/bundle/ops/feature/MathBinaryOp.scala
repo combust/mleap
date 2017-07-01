@@ -46,7 +46,7 @@ class MathBinaryOp extends OpNode[MleapContext, MathBinary, MathBinaryModel] {
       model = model)
   }
 
-  override def shape(node: MathBinary): Shape = Shape().withInput(node.inputA, "input_a").
+  override def shape(node: MathBinary): NodeShape = NodeShape().withInput(node.inputA, "input_a").
     withInput(node.inputB, "input_b").
     withStandardOutput(node.outputCol)
 }

@@ -2,7 +2,7 @@ package org.apache.spark.ml.bundle.ops.clustering
 
 import ml.combust.mleap.tensor.DenseTensor
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.dsl.{Model, Node, Shape}
+import ml.combust.bundle.dsl.{Model, Node, NodeShape}
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.clustering.LocalLDAModel
@@ -54,8 +54,8 @@ class LDAModelOp extends OpNode[SparkBundleContext, LocalLDAModel, LocalLDAModel
 
   override def model(node: LocalLDAModel): LocalLDAModel = node
 
-  override def shape(node: LocalLDAModel): Shape = {
-    Shape().
+  override def shape(node: LocalLDAModel): NodeShape = {
+    NodeShape().
       withInput("features", "features").
       withOutput("topicDistribution", "topicDistribution")
   }

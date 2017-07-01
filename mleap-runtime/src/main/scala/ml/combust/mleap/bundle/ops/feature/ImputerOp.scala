@@ -67,5 +67,5 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
       model = model)
   }
 
-  override def shape(node: Imputer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: Imputer): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

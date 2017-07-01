@@ -47,5 +47,5 @@ class MinHashLSHOp extends OpNode[SparkBundleContext, MinHashLSHModel, MinHashLS
     m
   }
 
-  override def shape(node: MinHashLSHModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: MinHashLSHModel): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

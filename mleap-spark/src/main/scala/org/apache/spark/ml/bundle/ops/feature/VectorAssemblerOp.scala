@@ -44,9 +44,9 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: VectorAssembler): Shape = {
+  override def shape(node: VectorAssembler): NodeShape = {
     var i = 0
-    node.getInputCols.foldLeft(Shape()) {
+    node.getInputCols.foldLeft(NodeShape()) {
       case (shape, inputCol) =>
         val shape2 = shape.withInput(inputCol, s"input$i")
         i += 1

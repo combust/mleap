@@ -44,5 +44,5 @@ class MinMaxScalerOp extends OpNode[MleapContext, MinMaxScaler, MinMaxScalerMode
       model = model)
   }
 
-  override def shape(node: MinMaxScaler): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: MinMaxScaler): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

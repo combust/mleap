@@ -3,10 +3,9 @@ package ml.combust.mleap.binary
 import java.io.{DataInputStream, DataOutputStream}
 import java.nio.charset.Charset
 
-import ml.combust.bundle.ByteString
 import ml.combust.mleap.core.types.{BasicType, DataType, TensorType}
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
+import ml.combust.mleap.tensor.{ByteString, DenseTensor, SparseTensor, Tensor}
 
 import scala.reflect.ClassTag
 

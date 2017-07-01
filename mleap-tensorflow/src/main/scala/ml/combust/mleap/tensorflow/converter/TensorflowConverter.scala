@@ -1,9 +1,8 @@
 package ml.combust.mleap.tensorflow.converter
 
-import ml.combust.bundle.ByteString
 import ml.combust.mleap.core.types.{BasicType, DataType, TensorType}
 import ml.combust.mleap.runtime.types._
-import ml.combust.mleap.tensor.DenseTensor
+import ml.combust.mleap.tensor.{ByteString, DenseTensor}
 import org.tensorflow
 
 import scala.collection.mutable

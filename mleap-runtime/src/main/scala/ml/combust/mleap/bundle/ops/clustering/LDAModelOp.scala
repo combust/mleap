@@ -49,8 +49,8 @@ class LDAModelOp extends OpNode[MleapContext, LDAModel, LocalLDAModel] {
 
   override def model(node: LDAModel): LocalLDAModel = node.model
 
-  override def shape(node: LDAModel): Shape = {
-    Shape().
+  override def shape(node: LDAModel): NodeShape = {
+    NodeShape().
       withInput(node.featureCol, "features").
       withOutput(node.topicDistributionCol, "topicDistribution")
   }

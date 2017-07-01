@@ -1,6 +1,6 @@
 package ml.combust.bundle.tree.decision
 
-import ml.bundle.tree.decision.Node.Node
+import ml.bundle.dtree.dtree.Node
 
 /** Type class for decision-tree node-like objects.
   *

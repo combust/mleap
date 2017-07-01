@@ -1,10 +1,10 @@
 package ml.combust.bundle.dsl
 
-import ml.bundle.Socket.Socket
+import ml.bundle.Socket
 
 /** Companion object for holding constant values.
   */
-object Shape {
+object NodeShape {
   val standardInputPort: String = "input"
   val standardOutputPort: String = "output"
 
@@ -12,7 +12,7 @@ object Shape {
     *
     * @return empty shape
     */
-  def apply(): Shape = new Shape(inputs = Seq(),
+  def apply(): NodeShape = new NodeShape(inputs = Seq(),
     outputs = Seq(),
     inputLookup = Map(),
     outputLookup = Map())
@@ -24,11 +24,11 @@ object Shape {
     * @return shape with inputs/outputs
     */
   def apply(inputs: Seq[Socket],
-            outputs: Seq[Socket]): Shape = {
+            outputs: Seq[Socket]): NodeShape = {
     val inputLookup = inputs.map(s => (s.port, s)).toMap
     val outputLookup = outputs.map(s => (s.port, s)).toMap
 
-    new Shape(inputs = inputs,
+    new NodeShape(inputs = inputs,
       outputs = outputs,
       inputLookup = inputLookup,
       outputLookup = outputLookup)
@@ -39,7 +39,7 @@ object Shape {
     * @param shape bundle shape
     * @return dsl shape
     */
-  def fromBundle(shape: ml.bundle.NodeShape.NodeShape): Shape = Shape(inputs = shape.inputs,
+  def fromBundle(shape: ml.bundle.NodeShape): NodeShape = NodeShape(inputs = shape.inputs,
     outputs = shape.outputs)
 }
 
@@ -47,7 +47,7 @@ object Shape {
   * The shape also holds information for connecting the input/output fields
   * to the underlying ML model.
   *
-  * A [[Shape]] contains input and output sockets. Sockets map field data
+  * A [[NodeShape]] contains input and output sockets. Sockets map field data
   * to certain functionality within a [[Model]]. For instance, say we want
   * to run a "label" field through a string indexer and have the result
   * output to the field "label_name". We could wire up the node like so:
@@ -69,15 +69,15 @@ object Shape {
   * @param inputLookup input sockets lookup by port
   * @param outputLookup output sockets lookup by port
   */
-case class Shape private (inputs: Seq[Socket],
-                          outputs: Seq[Socket],
-                          inputLookup: Map[String, Socket],
-                          outputLookup: Map[String, Socket]) {
+case class NodeShape private(inputs: Seq[Socket],
+                             outputs: Seq[Socket],
+                             inputLookup: Map[String, Socket],
+                             outputLookup: Map[String, Socket]) {
   /** Convert to bundle shape.
     *
     * @return bundle shape
     */
-  def asBundle: ml.bundle.NodeShape.NodeShape = ml.bundle.NodeShape.NodeShape(inputs = inputs,
+  def asBundle: ml.bundle.NodeShape = ml.bundle.NodeShape(inputs = inputs,
     outputs = outputs)
 
   /** Get the standard input socket.
@@ -86,7 +86,7 @@ case class Shape private (inputs: Seq[Socket],
     *
     * @return standard input socket
     */
-  def standardInput: Socket = input(Shape.standardInputPort)
+  def standardInput: Socket = input(NodeShape.standardInputPort)
 
   /** Get the standard output socket.
     *
@@ -94,18 +94,18 @@ case class Shape private (inputs: Seq[Socket],
     *
     * @return standard output socket
     */
-  def standardOutput: Socket = output(Shape.standardOutputPort)
+  def standardOutput: Socket = output(NodeShape.standardOutputPort)
 
   /** Add standard input/output sockets to the shape.
     *
-    * This is the same as calling [[Shape#withStandardInput]] and
-    * [[Shape#withStandardOutput]].
+    * This is the same as calling [[NodeShape#withStandardInput]] and
+    * [[NodeShape#withStandardOutput]].
     *
     * @param nameInput name of the input socket
     * @param nameOutput name of the output socket
     * @return copy of the shape with standard input/output sockets added
     */
-  def withStandardIO(nameInput: String, nameOutput: String): Shape = {
+  def withStandardIO(nameInput: String, nameOutput: String): NodeShape = {
     withStandardInput(nameInput).withStandardOutput(nameOutput)
   }
 
@@ -114,14 +114,14 @@ case class Shape private (inputs: Seq[Socket],
     * @param name name of standard input socket
     * @return copy of the shape with standard input socket added
     */
-  def withStandardInput(name: String): Shape = withInput(name, Shape.standardInputPort)
+  def withStandardInput(name: String): NodeShape = withInput(name, NodeShape.standardInputPort)
 
   /** Add standard output socket to the shape.
     *
     * @param name name of standard output socket
     * @return copy of the shape with standard output socket added
     */
-  def withStandardOutput(name: String): Shape = withOutput(name, Shape.standardOutputPort)
+  def withStandardOutput(name: String): NodeShape = withOutput(name, NodeShape.standardOutputPort)
 
   /** Add an optional input socket to the shape.
     *
@@ -129,7 +129,7 @@ case class Shape private (inputs: Seq[Socket],
     * @param port port of input socket
     * @return copy of the shape with input socket optionally added
     */
-  def withInput(name: Option[String], port: String): Shape = {
+  def withInput(name: Option[String], port: String): NodeShape = {
     name.map(n => withInput(n, port)).getOrElse(this)
   }
 
@@ -139,7 +139,7 @@ case class Shape private (inputs: Seq[Socket],
     * @param port port of output socket
     * @return copy of the shape with output socket optionally added
     */
-  def withOutput(name: Option[String], port: String): Shape = {
+  def withOutput(name: Option[String], port: String): NodeShape = {
     name.map(n => withOutput(n, port)).getOrElse(this)
   }
 
@@ -147,7 +147,7 @@ case class Shape private (inputs: Seq[Socket],
     *
     * @return bundle protobuf shape
     */
-  def bundleShape: ml.bundle.NodeShape.NodeShape = ml.bundle.NodeShape.NodeShape(inputs = inputs,
+  def bundleShape: ml.bundle.NodeShape = ml.bundle.NodeShape(inputs = inputs,
     outputs = outputs)
 
   /** Get an input by the port name. 
@@ -184,7 +184,7 @@ case class Shape private (inputs: Seq[Socket],
     * @param port port of input socket 
     * @return copy of the shape with input socket added 
     */
-  def withInput(name: String, port: String): Shape = {
+  def withInput(name: String, port: String): NodeShape = {
     require(!inputLookup.contains(port), s"input already exists for port: $port")
     val socket = Socket(name, port)
     val inputLookup2 = inputLookup + (port -> socket)
@@ -197,7 +197,7 @@ case class Shape private (inputs: Seq[Socket],
     * @param port port of output socket 
     * @return copy of the shape with output socket added 
     */
-  def withOutput(name: String, port: String): Shape = {
+  def withOutput(name: String, port: String): NodeShape = {
     require(!outputLookup.contains(port), s"output already exists for port: $port")
     val socket = Socket(name, port)
     val outputLookup2 = outputLookup + (port -> socket)

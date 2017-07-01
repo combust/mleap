@@ -68,5 +68,5 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
     new IndexToString(uid = node.name).setLabels(model.getLabels)
   }
 
-  override def shape(node: IndexToString): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: IndexToString): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

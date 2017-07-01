@@ -3,12 +3,11 @@ package ml.combust.bundle.tree.cluster
 import java.io.{BufferedReader, DataInputStream, InputStreamReader, _}
 import java.nio.file.{Files, Path}
 
-import ml.bundle.tree.clustering.Node.Node
+import ml.bundle.ctree.ctree.Node
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.serializer.{SerializationContext, SerializationFormat}
-import ml.combust.bundle.tree.JsonSupport._
+import ml.combust.bundle.serializer.SerializationFormat
+import com.trueaccord.scalapb.json.JsonFormat
 import resource._
-import spray.json._
 
 import scala.util.Try
 
@@ -16,14 +15,14 @@ import scala.util.Try
   * Created by hollinwilkins on 12/26/16.
   */
 object FormatNodeSerializer {
-  def writer(context: SerializationContext,
-             out: OutputStream): FormatNodeWriter = context.concrete match {
+  def writer(format: SerializationFormat,
+             out: OutputStream): FormatNodeWriter = format match {
     case SerializationFormat.Json => JsonFormatNodeWriter(new BufferedWriter(new OutputStreamWriter(out)))
     case SerializationFormat.Protobuf => ProtoFormatNodeWriter(new DataOutputStream(out))
   }
 
-  def reader(context: SerializationContext,
-             in: InputStream): FormatNodeReader = context.concrete match {
+  def reader(format: SerializationFormat,
+             in: InputStream): FormatNodeReader = format match {
     case SerializationFormat.Json => JsonFormatNodeReader(new BufferedReader(new InputStreamReader(in)))
     case SerializationFormat.Protobuf => ProtoFormatNodeReader(new DataInputStream(in))
   }
@@ -39,7 +38,7 @@ trait FormatNodeReader extends Closeable {
 
 case class JsonFormatNodeWriter(out: BufferedWriter) extends FormatNodeWriter {
   override def write(node: Node): Unit = {
-    out.write(node.toJson.compactPrint + "\n")
+    out.write(JsonFormat.toJsonString(node) + "\n")
   }
 
   override def close(): Unit = out.close()
@@ -47,7 +46,7 @@ case class JsonFormatNodeWriter(out: BufferedWriter) extends FormatNodeWriter {
 
 case class JsonFormatNodeReader(in: BufferedReader) extends FormatNodeReader {
   override def read(): Node = {
-    in.readLine().parseJson.convertTo[Node]
+    JsonFormat.fromJsonString[Node](in.readLine())
   }
 
   override def close(): Unit = in.close()
@@ -79,8 +78,7 @@ case class ProtoFormatNodeReader(in: DataInputStream) extends FormatNodeReader {
 
 case class NodeSerializer[N: NodeWrapper](path: Path)
                                          (implicit bundleContext: BundleContext[_]) {
-  implicit val sc = bundleContext.preferredSerializationContext(SerializationFormat.Protobuf)
-  val extension = sc.concrete match {
+  val extension = bundleContext.format match {
     case SerializationFormat.Json => "json"
     case SerializationFormat.Protobuf => "pb"
   }
@@ -88,7 +86,7 @@ case class NodeSerializer[N: NodeWrapper](path: Path)
 
   def write(node: N): Unit = {
     val open = () => Files.newOutputStream(path.getFileSystem.getPath(s"${path.toString}.$extension"))
-    for(writer <- managed(FormatNodeSerializer.writer(sc, open()))) {
+    for(writer <- managed(FormatNodeSerializer.writer(bundleContext.format, open()))) {
       write(node, writer)
     }
   }
@@ -104,7 +102,7 @@ case class NodeSerializer[N: NodeWrapper](path: Path)
 
   def read(): Try[N] = {
     (for(in <- managed(Files.newInputStream(path.getFileSystem.getPath(s"${path.toString}.$extension")))) yield {
-      val reader = FormatNodeSerializer.reader(sc, in)
+      val reader = FormatNodeSerializer.reader(bundleContext.format, in)
       read(reader)
     }).tried
   }

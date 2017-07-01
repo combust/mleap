@@ -22,8 +22,8 @@ class LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
 
     override def store(model: Model, obj: LinearModel)
                       (implicit context: BundleContext[Any]): Model = {
-      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
-        withAttr("intercept", Value.double(obj.intercept))
+      model.withValue("coefficients", Value.vector(obj.coefficients.toArray)).
+        withValue("intercept", Value.double(obj.intercept))
     }
 
 
@@ -49,5 +49,5 @@ class LinearRegressionOp extends OpNode[Any, LinearRegression, LinearModel] {
       model = model)
   }
 
-  override def shape(node: LinearRegression): Shape = Shape().withStandardIO(node.input, node.output)
+  override def shape(node: LinearRegression): NodeShape = NodeShape().withStandardIO(node.input, node.output)
 }

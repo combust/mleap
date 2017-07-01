@@ -50,7 +50,7 @@ class WordToVectorOp extends OpNode[SparkBundleContext, Word2VecModel, Word2VecM
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: Word2VecModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: Word2VecModel): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 
   private def getWordVectors(obj: Word2VecModel): feature.Word2VecModel = {
     // UGLY: have to use reflection to get this private field :(

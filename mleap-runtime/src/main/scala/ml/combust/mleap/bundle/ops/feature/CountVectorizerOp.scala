@@ -45,5 +45,5 @@ class CountVectorizerOp extends OpNode[MleapContext, CountVectorizer, CountVecto
       model = model)
   }
 
-  override def shape(node: CountVectorizer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: CountVectorizer): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

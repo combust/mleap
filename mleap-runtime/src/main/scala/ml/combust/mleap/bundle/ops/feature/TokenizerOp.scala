@@ -1,7 +1,7 @@
 package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.dsl.{Bundle, Model, Node, Shape}
+import ml.combust.bundle.dsl.{Bundle, Model, Node, NodeShape}
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.TokenizerModel
 import ml.combust.mleap.runtime.MleapContext
@@ -36,5 +36,5 @@ class TokenizerOp extends OpNode[MleapContext, Tokenizer, TokenizerModel] {
       outputCol = node.shape.standardOutput.name)
   }
 
-  override def shape(node: Tokenizer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: Tokenizer): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

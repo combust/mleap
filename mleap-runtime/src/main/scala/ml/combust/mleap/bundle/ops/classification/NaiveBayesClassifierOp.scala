@@ -1,7 +1,7 @@
 package ml.combust.mleap.bundle.ops.classification
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.dsl.{Model, Node, Shape}
+import ml.combust.bundle.dsl.{Model, Node, NodeShape}
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.classification.NaiveBayesClassifier
@@ -53,7 +53,7 @@ class NaiveBayesClassifierOp extends OpNode[MleapContext, NaiveBayesClassifier, 
       probabilityCol = node.shape.getOutput("probability").map(_.name),
       model = model)
   }
-  override def shape(node: NaiveBayesClassifier): Shape = Shape().withInput(node.featuresCol, "features").
+  override def shape(node: NaiveBayesClassifier): NodeShape = NodeShape().withInput(node.featuresCol, "features").
     withOutput(node.predictionCol, "prediction").
     withOutput(node.rawPredictionCol, "raw_prediction").
     withOutput(node.probabilityCol, "probability")

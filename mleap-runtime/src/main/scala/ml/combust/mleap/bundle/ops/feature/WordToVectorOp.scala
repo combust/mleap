@@ -49,7 +49,7 @@ class WordToVectorOp extends OpNode[MleapContext, WordToVector, WordToVectorMode
       model = model)
   }
 
-  override def shape(node: WordToVector): Shape = {
-    Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: WordToVector): NodeShape = {
+    NodeShape().withStandardIO(node.inputCol, node.outputCol)
   }
 }

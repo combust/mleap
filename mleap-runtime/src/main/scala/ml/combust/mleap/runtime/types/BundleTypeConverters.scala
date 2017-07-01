@@ -32,13 +32,12 @@ trait BundleTypeConverters {
   }
 
   implicit def bundleTypeToMleapType(bt: bundle.DataType.DataType): DataType = {
-    val u = bt.underlying
-    if(u.isBasic) {
-      bundleBasicTypeToMleapBasicType(bt.getBasic)
-    } else if(u.isList) {
-      ListType(base = bundleTypeToMleapType(bt.getList.getBase))
-    } else if(u.isTensor) {
-      TensorType(bundleBasicTypeToMleapBasicType(bt.getTensor.base))
+    if(bt.shape.get.base.isScalar) {
+      bundleBasicTypeToMleapBasicType(bt.base)
+    } else if(bt.shape.get.base.isList) {
+      ListType(base = bundleBasicTypeToMleapBasicType(bt.base))
+    } else if(bt.shape.get.base.isTensor) {
+      TensorType(bundleBasicTypeToMleapBasicType(bt.base), dimensions = Some(bt.shape.get.dimensions))
     } else { throw new IllegalArgumentException(s"unsupported data type $bt") }
   }
 
@@ -57,6 +56,7 @@ trait BundleTypeConverters {
 
   implicit def mleapTypeToBundleType(bt: DataType): bundle.DataType.DataType = bt match {
     case basic: BasicType =>
+      bundle.DataType
       bundle.DataType.DataType(bundle.DataType.DataType.Underlying.Basic(mleapBasicTypeToBundleBasicType(basic)))
     case lt: ListType =>
       bundle.DataType.DataType(

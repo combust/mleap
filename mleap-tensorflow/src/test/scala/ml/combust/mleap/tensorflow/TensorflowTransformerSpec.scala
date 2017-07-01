@@ -1,6 +1,6 @@
 package ml.combust.mleap.tensorflow
 
-import ml.combust.bundle.dsl.Shape
+import ml.combust.bundle.dsl.NodeShape
 import ml.combust.mleap.core.types.{FloatType, StructField, StructType}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.runtime.types.StructType
@@ -16,7 +16,7 @@ class TensorflowTransformerSpec extends FunSpec {
       val model = TensorflowModel(TestUtil.createAddGraph(),
         inputs = Seq(("InputA", FloatType(false)), ("InputB", FloatType(false))),
         outputs = Seq(("MyResult", FloatType(false))))
-      val shape = Shape().withInput("input_a", "InputA").
+      val shape = NodeShape().withInput("input_a", "InputA").
         withInput("input_b", "InputB").
         withOutput("my_result", "MyResult")
       val transformer = TensorflowTransformer(inputs = shape.inputs,

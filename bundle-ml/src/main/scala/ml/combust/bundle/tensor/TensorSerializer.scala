@@ -1,105 +1,84 @@
 package ml.combust.bundle.tensor
 
-import java.nio.ByteBuffer
-
-import com.google.protobuf.ByteString
-import ml.bundle.BasicType.BasicType
-import ml.bundle.Tensor.Tensor
+import com.google.protobuf
+import ml.bundle.{DataType, Tensor, TensorDimension, TensorShape}
 import ml.combust.mleap.tensor
+import ml.combust.mleap.tensor.ByteString
 
-import scala.reflect.ClassTag
+import scala.reflect.{ClassTag, classTag}
 
 /**
   * Created by hollinwilkins on 1/15/17.
   */
 object TensorSerializer {
-  def toBundleType[T](base: ClassTag[T]): BasicType = base.runtimeClass match {
-    case tensor.Tensor.BooleanClass => BasicType.BOOLEAN
-    case tensor.Tensor.StringClass => BasicType.STRING
-    case tensor.Tensor.ByteClass => BasicType.BYTE
-    case tensor.Tensor.ShortClass => BasicType.SHORT
-    case tensor.Tensor.IntClass => BasicType.INT
-    case tensor.Tensor.LongClass => BasicType.LONG
-    case tensor.Tensor.FloatClass => BasicType.FLOAT
-    case tensor.Tensor.DoubleClass => BasicType.DOUBLE
-    case _ => throw new RuntimeException(s"unsupported base type ${base.runtimeClass.getName}")
+  def toBundleType[T: ClassTag]: DataType = classTag[T].runtimeClass match {
+    case tensor.Tensor.BooleanClass => DataType.BOOLEAN
+    case tensor.Tensor.ByteClass => DataType.BYTE
+    case tensor.Tensor.ShortClass => DataType.SHORT
+    case tensor.Tensor.IntClass => DataType.INT
+    case tensor.Tensor.LongClass => DataType.LONG
+    case tensor.Tensor.FloatClass => DataType.FLOAT
+    case tensor.Tensor.DoubleClass => DataType.DOUBLE
+    case tensor.Tensor.StringClass => DataType.STRING
+    case tensor.Tensor.ByteStringClass => DataType.BYTE_STRING
+    case _ => throw new RuntimeException(s"unsupported base type ${classTag[T].runtimeClass.getName}")
   }
 
-  def toProto(t: tensor.Tensor[_]): Tensor = {
-    val indices = t match {
-      case t: tensor.SparseTensor[_] =>
-        ByteString.copyFrom(writeIndices(t.indices, t.dimensions))
-      case t: tensor.DenseTensor[_] => ByteString.EMPTY
-    }
-
+  def toProto[T](t: tensor.Tensor[T]): Tensor = {
     val (tpe, values) = t.base.runtimeClass match {
       case tensor.Tensor.BooleanClass =>
-        (BasicType.BOOLEAN, BooleanArraySerializer.write(t.rawValues.asInstanceOf[Array[Boolean]]))
+        (DataType.BOOLEAN, BooleanArraySerializer.write(t.rawValues.asInstanceOf[Array[Boolean]]))
       case tensor.Tensor.ByteClass =>
-        (BasicType.BYTE, ByteArraySerializer.write(t.rawValues.asInstanceOf[Array[Byte]]))
+        (DataType.BYTE, ByteArraySerializer.write(t.rawValues.asInstanceOf[Array[Byte]]))
       case tensor.Tensor.ShortClass =>
-        (BasicType.SHORT, ShortArraySerializer.write(t.rawValues.asInstanceOf[Array[Short]]))
+        (DataType.SHORT, ShortArraySerializer.write(t.rawValues.asInstanceOf[Array[Short]]))
       case tensor.Tensor.IntClass =>
-        (BasicType.INT, IntArraySerializer.write(t.rawValues.asInstanceOf[Array[Int]]))
+        (DataType.INT, IntArraySerializer.write(t.rawValues.asInstanceOf[Array[Int]]))
       case tensor.Tensor.LongClass =>
-        (BasicType.LONG, LongArraySerializer.write(t.rawValues.asInstanceOf[Array[Long]]))
+        (DataType.LONG, LongArraySerializer.write(t.rawValues.asInstanceOf[Array[Long]]))
       case tensor.Tensor.FloatClass =>
-        (BasicType.FLOAT, FloatArraySerializer.write(t.rawValues.asInstanceOf[Array[Float]]))
+        (DataType.FLOAT, FloatArraySerializer.write(t.rawValues.asInstanceOf[Array[Float]]))
       case tensor.Tensor.DoubleClass =>
-        (BasicType.DOUBLE, DoubleArraySerializer.write(t.rawValues.asInstanceOf[Array[Double]]))
+        (DataType.DOUBLE, DoubleArraySerializer.write(t.rawValues.asInstanceOf[Array[Double]]))
+      case tensor.Tensor.StringClass =>
+        (DataType.DOUBLE, StringArraySerializer.write(t.rawValues.asInstanceOf[Array[String]]))
+      case tensor.Tensor.ByteStringClass =>
+        (DataType.DOUBLE, ByteStringArraySerializer.write(t.rawValues.asInstanceOf[Array[ByteString]]))
       case _ => throw new IllegalArgumentException(s"unsupported tensor type ${t.base}")
     }
 
+    val dimensions = t.dimensions.map(i => TensorDimension(size = i))
     Tensor(base = tpe,
-      dimensions = t.dimensions,
-      value = ByteString.copyFrom(values),
-      indices = indices)
+      shape = Some(TensorShape(dimensions)),
+      value = protobuf.ByteString.copyFrom(values))
   }
 
-  def fromProto(base: BasicType, t: Tensor): tensor.Tensor[_] = {
-    val dimensions = t.dimensions
-    val indices = if(!t.indices.isEmpty) {
-      Some(readIndices(t.indices.toByteArray, dimensions))
-    } else { None }
+  def fromProto[T](t: Tensor): tensor.Tensor[T] = {
+    val dimensions = t.shape.get.dimensions.map(_.size)
     val valueBytes = t.value.toByteArray
 
-    base match {
-      case BasicType.BOOLEAN =>
-        tensor.Tensor.create(BooleanArraySerializer.read(valueBytes), dimensions, indices)
-      case BasicType.STRING =>
-        tensor.Tensor.create(StringArraySerializer.read(valueBytes), dimensions, indices)
-      case BasicType.BYTE =>
-        tensor.Tensor.create(ByteArraySerializer.read(valueBytes), dimensions, indices)
-      case BasicType.SHORT =>
-        tensor.Tensor.create(ShortArraySerializer.read(valueBytes), dimensions, indices)
-      case BasicType.INT =>
-        tensor.Tensor.create(IntArraySerializer.read(valueBytes), dimensions, indices)
-      case BasicType.LONG =>
-        tensor.Tensor.create(LongArraySerializer.read(valueBytes), dimensions, indices)
-      case BasicType.FLOAT =>
-        tensor.Tensor.create(FloatArraySerializer.read(valueBytes), dimensions, indices)
-      case BasicType.DOUBLE =>
-        tensor.Tensor.create(DoubleArraySerializer.read(valueBytes), dimensions, indices)
-      case _ => throw new IllegalArgumentException(s"unsupported tensor type $base")
-    }
-  }
-
-  def writeIndices(indices: Seq[Seq[Int]], dims: Seq[Int]): Array[Byte] = {
-    val b = ByteBuffer.allocate(dims.product)
-    indices.foreach(_.foreach(b.putInt))
-    b.array()
-  }
-
-  def readIndices(bytes: Array[Byte], dims: Seq[Int]): Seq[Seq[Int]] = {
-    val b = ByteBuffer.wrap(bytes)
-    val indices = new Array[Seq[Int]](dims.product)
-
-    var i = 0
-    while(b.hasRemaining) {
-      indices(i) = dims.indices.map(_ => b.getInt())
-      i += 1
+    val tn = t.base match {
+      case DataType.BOOLEAN =>
+        tensor.Tensor.create(BooleanArraySerializer.read(valueBytes), dimensions)
+      case DataType.BYTE =>
+        tensor.Tensor.create(ByteArraySerializer.read(valueBytes), dimensions)
+      case DataType.SHORT =>
+        tensor.Tensor.create(ShortArraySerializer.read(valueBytes), dimensions)
+      case DataType.INT =>
+        tensor.Tensor.create(IntArraySerializer.read(valueBytes), dimensions)
+      case DataType.LONG =>
+        tensor.Tensor.create(LongArraySerializer.read(valueBytes), dimensions)
+      case DataType.FLOAT =>
+        tensor.Tensor.create(FloatArraySerializer.read(valueBytes), dimensions)
+      case DataType.DOUBLE =>
+        tensor.Tensor.create(DoubleArraySerializer.read(valueBytes), dimensions)
+      case DataType.STRING =>
+        tensor.Tensor.create(StringArraySerializer.read(valueBytes), dimensions)
+      case DataType.BYTE_STRING =>
+        tensor.Tensor.create(ByteStringArraySerializer.read(valueBytes), dimensions)
+      case _ => throw new IllegalArgumentException(s"unsupported tensor type ${t.base}")
     }
 
-    indices
+    tn.asInstanceOf[tensor.Tensor[T]]
   }
 }

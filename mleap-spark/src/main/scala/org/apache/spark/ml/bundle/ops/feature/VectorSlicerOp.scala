@@ -72,5 +72,5 @@ class VectorSlicerOp extends OpNode[SparkBundleContext, VectorSlicer, VectorSlic
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: VectorSlicer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: VectorSlicer): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

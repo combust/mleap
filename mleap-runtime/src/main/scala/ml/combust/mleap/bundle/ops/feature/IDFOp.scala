@@ -42,5 +42,5 @@ class IDFOp extends OpNode[MleapContext, IDF, IDFModel] {
       model = model)
   }
 
-  override def shape(node: IDF): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: IDF): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

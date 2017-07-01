@@ -41,7 +41,7 @@ class PipelineOp extends OpNode[SparkBundleContext, PipelineModel, PipelineModel
     new PipelineModel(uid = node.name, stages = model.stages)
   }
 
-  override def shape(node: PipelineModel): Shape = Shape()
+  override def shape(node: PipelineModel): NodeShape = NodeShape()
 
   override def children(node: PipelineModel): Option[Array[Any]] = Some(node.stages.toArray)
 }

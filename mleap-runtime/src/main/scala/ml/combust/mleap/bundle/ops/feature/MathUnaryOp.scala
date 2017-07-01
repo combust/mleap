@@ -41,5 +41,5 @@ class MathUnaryOp extends OpNode[MleapContext, MathUnary, MathUnaryModel] {
       model = model)
   }
 
-  override def shape(node: MathUnary): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def shape(node: MathUnary): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

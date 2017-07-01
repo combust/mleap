@@ -3,12 +3,11 @@ package ml.combust.bundle.tree.decision
 import java.io._
 import java.nio.file.{Files, Path}
 
-import ml.bundle.tree.decision.Node.Node
+import ml.bundle.dtree.dtree.Node
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.serializer.{SerializationContext, SerializationFormat}
-import ml.combust.bundle.tree.JsonSupport._
+import ml.combust.bundle.serializer.SerializationFormat
+import com.trueaccord.scalapb.json.JsonFormat
 import resource._
-import spray.json._
 
 import scala.util.Try
 
@@ -16,14 +15,14 @@ import scala.util.Try
   * Created by hollinwilkins on 8/22/16.
   */
 object FormatTreeSerializer {
-  def writer(context: SerializationContext,
-             out: OutputStream): FormatTreeWriter = context.concrete match {
+  def writer(format: SerializationFormat,
+             out: OutputStream): FormatTreeWriter = format match {
     case SerializationFormat.Json => JsonFormatTreeWriter(new BufferedWriter(new OutputStreamWriter(out)))
     case SerializationFormat.Protobuf => ProtoFormatTreeWriter(new DataOutputStream(out))
   }
 
-  def reader(context: SerializationContext,
-             in: InputStream): FormatTreeReader = context.concrete match {
+  def reader(format: SerializationFormat,
+             in: InputStream): FormatTreeReader = format match {
     case SerializationFormat.Json => JsonFormatTreeReader(new BufferedReader(new InputStreamReader(in)))
     case SerializationFormat.Protobuf => ProtoFormatTreeReader(new DataInputStream(in))
   }
@@ -39,7 +38,7 @@ trait FormatTreeReader extends Closeable {
 
 case class JsonFormatTreeWriter(out: BufferedWriter) extends FormatTreeWriter {
   override def write(node: Node): Unit = {
-    out.write(node.toJson.compactPrint + "\n")
+    out.write(JsonFormat.toJsonString(node) + "\n")
   }
 
   override def close(): Unit = out.close()
@@ -47,7 +46,7 @@ case class JsonFormatTreeWriter(out: BufferedWriter) extends FormatTreeWriter {
 
 case class JsonFormatTreeReader(in: BufferedReader) extends FormatTreeReader {
   override def read(): Node = {
-    in.readLine().parseJson.convertTo[Node]
+    JsonFormat.fromJsonString[Node](in.readLine())
   }
 
   override def close(): Unit = in.close()
@@ -80,8 +79,7 @@ case class ProtoFormatTreeReader(in: DataInputStream) extends FormatTreeReader {
 case class TreeSerializer[N: NodeWrapper](path: Path,
                                           withImpurities: Boolean)
                                          (implicit bundleContext: BundleContext[_]) {
-  implicit val sc = bundleContext.preferredSerializationContext(SerializationFormat.Protobuf)
-  val extension = sc.concrete match {
+  val extension = bundleContext.format match {
     case SerializationFormat.Json => "json"
     case SerializationFormat.Protobuf => "pb"
   }
@@ -89,7 +87,7 @@ case class TreeSerializer[N: NodeWrapper](path: Path,
 
   def write(node: N): Unit = {
     val open = () => Files.newOutputStream(path.getFileSystem.getPath(s"${path.toString}.$extension"))
-    for(writer <- managed(FormatTreeSerializer.writer(sc, open()))) {
+    for(writer <- managed(FormatTreeSerializer.writer(bundleContext.format, open()))) {
       write(node, writer)
     }
   }
@@ -106,7 +104,7 @@ case class TreeSerializer[N: NodeWrapper](path: Path,
 
   def read(): Try[N] = {
     (for(in <- managed(Files.newInputStream(path.getFileSystem.getPath(s"${path.toString}.$extension")))) yield {
-      val reader = FormatTreeSerializer.reader(sc, in)
+      val reader = FormatTreeSerializer.reader(bundleContext.format, in)
       read(reader)
     }).tried
   }

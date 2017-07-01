@@ -71,7 +71,7 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
       model = model)
   }
 
-  override def shape(node: LogisticRegression): Shape = Shape().
+  override def shape(node: LogisticRegression): NodeShape = NodeShape().
     withInput(node.featuresCol, "features").
     withOutput(node.predictionCol, "prediction").
     withOutput(node.rawPredictionCol, "raw_prediction").

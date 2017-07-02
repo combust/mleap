@@ -1,10 +1,8 @@
 package org.apache.spark.sql.mleap
 
-import ml.combust.mleap.core
-import ml.combust.mleap.core.types.{AnyType, ListType}
+import ml.combust.mleap.core.types
 import ml.combust.mleap.runtime.function.{UserDefinedFunction => MleapUDF}
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.DataType
 
 import scala.language.implicitConversions
@@ -17,8 +15,8 @@ trait UserDefinedFunctionConverters {
 
   implicit def udfToSpark(udf: MleapUDF): UserDefinedFunction = {
     UserDefinedFunction(f = convertFunction(udf),
-      dataType = sparkType(udf.returnType).get,
-      inputTypes = sparkInputs(udf.inputs))
+      dataType = mleapToSparkType(udf.returnType),
+      inputTypes = Some(sparkInputs(udf.inputs)))
   }
 
   private def convertFunction(udf: MleapUDF): AnyRef = {
@@ -44,16 +42,27 @@ trait UserDefinedFunctionConverters {
     }
   }
 
-  private def converter(dataType: core.types.DataType): (Any) => Any = dataType match {
-    case lt: ListType if lt.base == AnyType() => (row: Any) => row.asInstanceOf[Row].toSeq
-    case _ => identity
-  }
+  private def converter(dataType: types.DataType): (Any) => Any = if(dataType.isNullable) {
+    (v) => Option[Any](v)
+//    dataType match {
+//      case types.ScalarType(base, _) =>
+//        base match {
+//          case BasicType.Boolean => (v) => Option(v.asInstanceOf[Boolean])
+//          case BasicType.Byte => (v) => Option(v.asInstanceOf[Byte])
+//          case BasicType.Short => (v) => Option(v.asInstanceOf[Short])
+//          case BasicType.Int => (v) => Option(v.asInstanceOf[Int])
+//          case BasicType.Long => (v) => Option(v.asInstanceOf[Long])
+//          case BasicType.Float => (v) => Option(v.asInstanceOf[Float])
+//          case BasicType.Double => (v) => Option(v.asInstanceOf[Double])
+//          case BasicType.String => (v) => Option(v.asInstanceOf[String])
+//          case BasicType.ByteString => (v) => Option(v.asInstanceOf[ByteString])
+//        }
+//      case _ => (v) => Option[Any](v)
+//    }
+  } else { identity }
 
-  private def sparkInputs(inputs: Seq[core.types.DataType]): Option[Seq[DataType]] = {
-    inputs.foldLeft(Option(Seq[DataType]())) {
-      case (optI, dt) =>
-        optI.flatMap { i => sparkType(dt).map { sdt => i :+ sdt } }
-    }
+  private def sparkInputs(inputs: Seq[types.DataType]): Seq[DataType] = {
+    inputs.map(mleapToSparkType)
   }
 }
 object UserDefinedFunctionConverters extends UserDefinedFunctionConverters

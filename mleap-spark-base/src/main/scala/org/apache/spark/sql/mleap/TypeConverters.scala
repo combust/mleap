@@ -1,8 +1,7 @@
 package org.apache.spark.sql.mleap
 
-import ml.combust.mleap.runtime
 import ml.combust.mleap.core.types
-import org.apache.spark.ml.linalg.VectorUDT
+import ml.combust.mleap.core.types.{BasicType, ScalarType}
 import org.apache.spark.sql.types._
 
 import scala.language.implicitConversions
@@ -11,50 +10,64 @@ import scala.language.implicitConversions
   * Created by hollinwilkins on 10/22/16.
   */
 trait TypeConverters {
-  implicit def sparkType(dataType: types.DataType): Option[DataType] = dataType match {
-    case types.BooleanType(_) => Some(BooleanType)
-    case types.StringType(_) => Some(StringType)
-    case types.ByteType(_) => Some(ByteType)
-    case types.ShortType(_) => Some(ShortType)
-    case types.IntegerType(_) => Some(IntegerType)
-    case types.LongType(_) => Some(LongType)
-    case types.FloatType(_) => Some(FloatType)
-    case types.DoubleType(_) => Some(DoubleType)
-    case tt: types.TupleType =>
-      val fields = tt.dts.zipWithIndex.map {
-        case (dt, index) =>
-          sparkType(dt).map(d => StructField(s"_$index", d)).get
-      }
-      Some(StructType(fields))
-    case lt: types.ListType => sparkType(lt.base).map(t => ArrayType(t, containsNull = false))
-    case _: types.TensorType => Some(new TensorUDT)
-    case types.AnyType(_) => None
-    case _ => throw new RuntimeException(s"unsupported data type: $dataType")
+  implicit def mleapToSparkBasicType(base: BasicType): DataType = base match {
+    case BasicType.Boolean => BooleanType
+    case BasicType.Byte => ByteType
+    case BasicType.Short => ShortType
+    case BasicType.Int => IntegerType
+    case BasicType.Long => LongType
+    case BasicType.Float => FloatType
+    case BasicType.Double => DoubleType
+    case BasicType.String => StringType
+    case BasicType.ByteString => ArrayType(ByteType, containsNull = false)
   }
 
-  implicit def mleapType(dataType: DataType): types.DataType = dataType match {
-    case BooleanType => types.BooleanType()
-    case StringType => types.StringType()
-    case ByteType => types.ByteType()
-    case ShortType => types.ShortType()
-    case IntegerType => types.IntegerType()
-    case LongType => types.LongType()
-    case FloatType => types.FloatType()
-    case DoubleType => types.DoubleType()
-    case at: ArrayType => types.ListType(base = mleapType(at.elementType))
-    case _: VectorUDT => types.TensorType(base = types.DoubleType())
-    case tt: TensorUDT =>
-      // This is not correct to assume it has a Double base type
-      // But this is the best we can do for now
-      types.TensorType(base = types.DoubleType())
-    case _ => throw new RuntimeException(s"unsupported data type: $dataType")
+  implicit def mleapToSparkType(dataType: types.DataType): DataType = dataType match {
+    case types.ScalarType(base, _) => base
+    case types.ListType(base, _) => ArrayType(base, containsNull = false)
+    case types.TensorType(base, _, _) => new TensorUDT(base)
+    case types.TupleType(dts @ _*) =>
+      val fields = dts.zipWithIndex.map {
+        case (dt, index) => StructField(s"_$index", mleapToSparkType(dt))
+      }
+
+      StructType(fields)
+  }
+
+  implicit def sparkToMleapBasicType(dataType: DataType): BasicType = dataType match {
+    case BooleanType => BasicType.Boolean
+    case ByteType => BasicType.Byte
+    case ShortType => BasicType.Short
+    case IntegerType => BasicType.Int
+    case LongType => BasicType.Long
+    case FloatType => BasicType.Float
+    case DoubleType => BasicType.Double
+    case StringType => BasicType.String
+    case ArrayType(ByteType, false) => BasicType.Boolean
+    case _ => throw new IllegalArgumentException(s"invalid basic Spark type $dataType")
+  }
+
+  implicit def sparkToMleapStructField(field: StructField): types.StructField = {
+    val dt = field.dataType match {
+      case BooleanType => ScalarType.Boolean
+      case ByteType => ScalarType.Byte
+      case ShortType => ScalarType.Short
+      case IntegerType => ScalarType.Int
+      case LongType => ScalarType.Long
+      case FloatType => ScalarType.Float
+      case DoubleType => ScalarType.Double
+      case StringType => ScalarType.String
+      case ArrayType(ByteType, false) => ScalarType.ByteString // TODO: make a custom type for byte string
+      case ArrayType(base, _) => types.ListType(base)
+      case tu: TensorUDT => types.TensorType(tu.base)
+    }
+
+    types.StructField(field.name, dt.setNullable(field.nullable))
   }
 
   implicit def mleapStructType(schema: StructType): types.StructType = {
     val fields = schema.fields.map {
-      field =>
-        val dt = mleapType(field.dataType)
-        types.StructField(field.name, dt)
+      field => field: types.StructField
     }.toSeq
 
     types.StructType(fields).get

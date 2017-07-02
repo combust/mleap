@@ -37,7 +37,7 @@ object HandleInvalid {
   *                      or 'keep' (put invalid data in a special bucket at index labels.size
   */
 case class StringIndexerModel(labels: Seq[String],
-                              inputNullable: Boolean = false,
+                              nullableInput: Boolean = false,
                               handleInvalid: HandleInvalid = HandleInvalid.Error) extends Serializable {
   private val stringToIndex: Map[String, Int] = labels.zipWithIndex.toMap
   private val keepInvalid = handleInvalid == HandleInvalid.Keep

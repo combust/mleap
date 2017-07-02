@@ -1,12 +1,9 @@
 package ml.combust.mleap.core.feature
 
-import ml.combust.mleap.core.types.{DataShape, BasicType}
-
 /**
   * Created by hollinwilkins on 1/5/17.
   */
-case class CoalesceModel(base: BasicType,
-                         inputShapes: Seq[DataShape]) {
+case class CoalesceModel(nullableInputs: Seq[Boolean]) {
   def apply(values: Any *): Option[Double] = {
     var i = 0
     while(i < values.size) {

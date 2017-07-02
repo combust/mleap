@@ -11,7 +11,6 @@ import scala.collection.mutable
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/feature/Binarizer.scala")
 case class BinarizerModel(threshold: Double,
-                          base: BasicType,
                           inputShape: DataShape) extends Serializable {
   assert(inputShape.isScalar || inputShape.isTensor, "Must provide a tensor or scalar shape")
 

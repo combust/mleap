@@ -19,7 +19,7 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
         model.withValue("labels", Value.stringList(obj.labels)).
-          withValue("input_nullable", Value.boolean(obj.inputNullable)).
+          withValue("nullable_input", Value.boolean(obj.nullableInput)).
           withValue("handle_invalid", Value.string(obj.handleInvalid.asParamString))
 
     }
@@ -29,7 +29,7 @@ class StringIndexerOp extends OpNode[MleapContext, StringIndexer, StringIndexerM
       val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString).getOrElse(HandleInvalid.default)
 
       StringIndexerModel(labels = model.value("labels").getStringList,
-        model.value("input_nullable").getBoolean,
+        model.value("nullable_input").getBoolean,
         handleInvalid = handleInvalid)
     }
   }

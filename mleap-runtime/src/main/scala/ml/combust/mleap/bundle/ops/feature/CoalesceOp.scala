@@ -19,16 +19,12 @@ class CoalesceOp extends OpNode[MleapContext, Coalesce, CoalesceModel] {
 
     override def store(model: Model, obj: CoalesceModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      val inputShapes = obj.inputShapes.map(mleapToBundleShape)
-
-      model.withValue("base", Value.basicType(obj.base)).
-        withValue("input_shapes", Value.dataShapeList(inputShapes))
+      model.withValue("input_shapes", Value.booleanList(obj.nullableInputs))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): CoalesceModel = {
-      val inputShapes = model.value("input_shapes").getDataShapeList.map(bundleToMleapShape)
-      CoalesceModel(model.value("base").getBasicType, inputShapes)
+      CoalesceModel(model.value("nullable_inputs").getBooleanList)
     }
   }
 

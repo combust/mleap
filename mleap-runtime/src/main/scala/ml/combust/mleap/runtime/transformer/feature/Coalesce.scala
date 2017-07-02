@@ -17,18 +17,18 @@ case class Coalesce(override val uid: String = Transformer.uniqueName("coalesce"
                     model: CoalesceModel) extends Transformer {
   private val f = (values: TupleData) => model(values.values: _*)
   val exec: UserDefinedFunction = UserDefinedFunction(f,
-    TensorType(model.base),
-    Seq(TupleType(model.inputShapes.map(s => DataType(model.base, s)): _*)))
+    ScalarType.Double,
+    Seq(TupleType(model.nullableInputs.map(n => DataType(BasicType.Double, ScalarShape(n))): _*)))
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(outputCol, inputCols)(exec)
   }
 
   override def getFields(): Try[Seq[StructField]] = {
-    val inputFields = inputCols.zip(model.inputShapes).map {
-      case (name, shape) => StructField(name, DataType(model.base, shape))
+    val inputFields = inputCols.zip(model.nullableInputs).map {
+      case (name, isNullable) => StructField(name, DataType(BasicType.Double, ScalarShape(isNullable)))
     }
 
-    Success(inputFields :+ StructField(outputCol, ScalarType(model.base, isNullable = true)))
+    Success(inputFields :+ StructField(outputCol, ScalarType(BasicType.Double, isNullable = true)))
   }
 }

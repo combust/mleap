@@ -19,8 +19,8 @@ case class Interaction(override val uid: String = Transformer.uniqueName("intera
                        model: InteractionModel) extends Transformer {
   private val f = (values: TupleData) => model(values.values): Tensor[Double]
   val exec: UserDefinedFunction = UserDefinedFunction(f,
-    TensorType(model.base),
-    Seq(TupleType(model.inputShapes.map(s => DataType(model.base, s)): _*)))
+    TensorType(BasicType.Double),
+    Seq(TupleType(model.inputShapes.map(s => DataType(BasicType.Double, s)): _*)))
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(outputCol, inputCols)(exec)
@@ -28,10 +28,10 @@ case class Interaction(override val uid: String = Transformer.uniqueName("intera
 
   override def getFields(): Try[Seq[StructField]] = {
     val inputFields = inputCols.zip(model.inputShapes).map {
-      case (name, shape) => StructField(name, DataType(model.base, shape))
+      case (name, shape) => StructField(name, DataType(BasicType.Double, shape))
     }
     val outputSize = model.featuresSpec.map(_.sum).product
 
-    Success(inputFields :+ StructField(outputCol, DataType(model.base, TensorShape(outputSize))))
+    Success(inputFields :+ StructField(outputCol, DataType(BasicType.Double, TensorShape(outputSize))))
   }
 }

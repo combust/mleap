@@ -17,7 +17,7 @@ class StringIndexerModelSpec extends FunSpec with TableDrivenPropertyChecks {
     }
 
     it("returns the index of Optional string") {
-      val indexer = StringIndexerModel(Array("hello", "there", "dude"), inputNullable = true)
+      val indexer = StringIndexerModel(Array("hello", "there", "dude"), nullableInput = true)
 
       assert(indexer(Some("hello")) == 0.0)
       assert(indexer(Some("there")) == 1.0)

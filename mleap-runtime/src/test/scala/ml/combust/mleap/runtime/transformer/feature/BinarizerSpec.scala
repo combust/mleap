@@ -12,7 +12,7 @@ import org.scalatest.FunSpec
 class BinarizerSpec extends FunSpec {
   val binarizer = Binarizer(inputCol = "test_vec",
     outputCol = "test_binarizer",
-    model = BinarizerModel(0.6, BasicType.Double, TensorShape(3)))
+    model = BinarizerModel(0.6, TensorShape(3)))
 
   describe("with a double tensor input column") {
     describe("#transform") {

@@ -21,7 +21,7 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
         model.withValue("surrogate_value", Value.double(obj.surrogateValue)).
           withValue("missing_value", Value.double(obj.missingValue)).
           withValue("strategy", Value.string(obj.strategy)).
-          withValue("input_nullable", Value.boolean(obj.inputNullable))
+          withValue("nullable_input", Value.boolean(obj.nullableInput))
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): ImputerModel = {
@@ -32,7 +32,7 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
       ImputerModel(model.value("surrogate_value").getDouble,
         missingValue,
         model.value("strategy").getString,
-        inputNullable = model.value("input_nullable").getBoolean)
+        nullableInput = model.value("nullable_input").getBoolean)
     }
 
   }

@@ -21,14 +21,12 @@ class BinarizerOp extends OpNode[MleapContext, Binarizer, BinarizerModel] {
     override def store(model: Model, obj: BinarizerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
         model.withValue("threshold", Value.double(obj.threshold)).
-          withValue("base", Value.basicType(obj.base)).
           withValue("input_shape", Value.dataShape(obj.inputShape))
       }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): BinarizerModel = {
       BinarizerModel(model.value("threshold").getDouble,
-        model.value("base").getBasicType,
         model.value("input_shape").getDataShape)
     }
   }

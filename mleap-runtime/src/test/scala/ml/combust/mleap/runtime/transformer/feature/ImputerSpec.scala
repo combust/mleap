@@ -12,7 +12,7 @@ class ImputerSpec extends FunSpec {
   describe("#transform") {
     val transformer = Imputer(inputCol = "test_a",
       outputCol = "test_out",
-      model = ImputerModel(45.7, 23.6, "", inputNullable = true))
+      model = ImputerModel(45.7, 23.6, "", nullableInput = true))
 
     describe("null values") {
       val schema = StructType(StructField("test_a", ScalarType.Double.asNullable)).get
@@ -38,7 +38,7 @@ class ImputerSpec extends FunSpec {
       val schema = StructType(StructField("test_a", ScalarType.Double)).get
       val dataset = LocalDataset(Seq(Row(42.0), Row(23.6), Row(Double.NaN)))
       val frame = LeapFrame(schema, dataset)
-      val transformer2 = transformer.copy(model = transformer.model.copy(inputNullable = false))
+      val transformer2 = transformer.copy(model = transformer.model.copy(nullableInput = false))
 
       it("transforms the leap frame using the given input and operation") {
         val data = transformer2.transform(frame).get.dataset

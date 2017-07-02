@@ -14,14 +14,14 @@ case class Imputer(override val uid: String = Transformer.uniqueName("imputer"),
                    override val inputCol: String,
                    override val outputCol: String,
                    model: ImputerModel) extends FeatureTransformer {
-  override val exec: UserDefinedFunction = if(model.inputNullable) {
+  override val exec: UserDefinedFunction = if(model.nullableInput) {
     (value: Option[Double]) => model(value)
   } else {
     (value: Double) => model(value)
   }
 
   override def getFields(): Try[Seq[StructField]] = {
-    Success(Seq(StructField(inputCol, ScalarType(BasicType.Double, model.inputNullable)),
+    Success(Seq(StructField(inputCol, ScalarType(BasicType.Double, model.nullableInput)),
       StructField(outputCol, ScalarType.Double)))
   }
 }

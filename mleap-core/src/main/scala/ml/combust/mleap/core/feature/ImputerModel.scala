@@ -6,7 +6,7 @@ package ml.combust.mleap.core.feature
 case class ImputerModel(surrogateValue: Double,
                         missingValue: Double,
                         strategy: String,
-                        inputNullable: Boolean = false) extends Serializable {
+                        nullableInput: Boolean = false) extends Serializable {
   def predictAny(value: Any): Double = value match {
     case value: Double => apply(value)
     case value: Option[_] => apply(value.asInstanceOf[Option[Double]])

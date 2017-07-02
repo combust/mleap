@@ -20,7 +20,7 @@ class CoalesceSpec extends FunSpec {
   describe("with all optional doubles") {
     val coalesce = Coalesce(inputCols = Array("test1", "test2", "test3"),
       outputCol = "test_bucket",
-      model = CoalesceModel(BasicType.Double, Seq(ScalarShape(true), ScalarShape(true), ScalarShape(true))))
+      model = CoalesceModel(Seq(true, true, true)))
 
     describe("#transform") {
       it("returns the non-null value or null if no value exists") {
@@ -45,7 +45,7 @@ class CoalesceSpec extends FunSpec {
   describe("with a non-optional double") {
     val coalesce = Coalesce(inputCols = Array("test1", "test3", "test4"),
       outputCol = "test_bucket",
-      model = CoalesceModel(BasicType.Double, Seq(ScalarShape(true), ScalarShape(true), ScalarShape())))
+      model = CoalesceModel(Seq(true, true, false)))
 
     describe("#transform") {
       it("returns the first non-null value") {

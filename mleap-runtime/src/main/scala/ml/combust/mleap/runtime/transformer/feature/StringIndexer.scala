@@ -14,7 +14,7 @@ case class StringIndexer(override val uid: String = Transformer.uniqueName("stri
                          override val inputCol: String,
                          override val outputCol: String,
                          model: StringIndexerModel) extends FeatureTransformer {
-  val exec: UserDefinedFunction = if(model.inputNullable) {
+  val exec: UserDefinedFunction = if(model.nullableInput) {
     (value: Option[String]) => model(value).toDouble
   } else {
     (value: String) => model(value).toDouble
@@ -30,7 +30,7 @@ case class StringIndexer(override val uid: String = Transformer.uniqueName("stri
     model = model.toReverse)
 
   override def getFields(): Try[Seq[StructField]] = {
-    Success(Seq(StructField(inputCol, ScalarType(BasicType.String, model.inputNullable)),
+    Success(Seq(StructField(inputCol, ScalarType(BasicType.String, model.nullableInput)),
       StructField(outputCol, ScalarType.Double)))
   }
 }

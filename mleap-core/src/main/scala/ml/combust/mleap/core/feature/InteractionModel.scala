@@ -13,7 +13,6 @@ import scala.collection.mutable
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/branch-2.1/mllib/src/main/scala/org/apache/spark/ml/feature/Interaction.scala")
 case class InteractionModel(featuresSpec: Array[Array[Int]],
-                            base: BasicType,
                             inputShapes: Seq[DataShape]) {
   assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and tensor shapes as inputs")
 

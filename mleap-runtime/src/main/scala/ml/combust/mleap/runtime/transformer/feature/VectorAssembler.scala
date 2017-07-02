@@ -19,8 +19,8 @@ case class VectorAssembler(override val uid: String = Transformer.uniqueName("ve
                            model: VectorAssemblerModel) extends Transformer {
   private val f = (values: TupleData) => model(values.values): Tensor[Double]
   val exec: UserDefinedFunction = UserDefinedFunction(f,
-    DataType(model.base, TensorShape(Seq(model.outputSize))),
-    Seq(TupleType(model.inputShapes.map(s => DataType(model.base, s)): _*)))
+    DataType(BasicType.Double, TensorShape(Seq(model.outputSize))),
+    Seq(TupleType(model.inputShapes.map(s => DataType(BasicType.Double, s)): _*)))
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(outputCol, inputCols)(exec)
@@ -28,7 +28,7 @@ case class VectorAssembler(override val uid: String = Transformer.uniqueName("ve
 
   override def getFields(): Try[Seq[StructField]] = {
     val inputFields = inputCols.zip(model.inputShapes).map {
-      case (name, shape) => StructField(name, DataType(model.base, shape))
+      case (name, shape) => StructField(name, DataType(BasicType.Double, shape))
     }
     val outputSize = model.inputShapes.foldLeft(0) {
       (acc, shape) => shape match {
@@ -38,6 +38,6 @@ case class VectorAssembler(override val uid: String = Transformer.uniqueName("ve
       }
     }
 
-    Success(inputFields :+ StructField(outputCol, DataType(model.base, TensorShape(outputSize))))
+    Success(inputFields :+ StructField(outputCol, DataType(BasicType.Double, TensorShape(outputSize))))
   }
 }

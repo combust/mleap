@@ -10,6 +10,7 @@ import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.MleapSupport._
 import com.databricks.spark.avro._
 import ml.combust.bundle.BundleFile
+import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.bundle.SparkBundleContext
@@ -87,7 +88,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       file.delete()
 
       for(bf <- managed(BundleFile(file))) {
-        transformer.writeBundle.save(bf).get
+        transformer.writeBundle.format(SerializationFormat.Protobuf).save(bf).get
       }
 
       bundleCache = Some(file)

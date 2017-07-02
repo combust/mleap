@@ -40,6 +40,10 @@ case class SparkTransformBuilder(dataset: DataFrame) extends TransformBuilder[Sp
 
   private def sparkSelector(selector: Selector): Column = selector match {
     case FieldSelector(name) => dataset.col(name)
-    case TupleSelector(names @ _*) => struct(names.map(dataset.col): _*)
+    case TupleSelector(names @ _*) =>
+      val cols = names.zipWithIndex.map {
+        case (name, index) => dataset.col(name).as(s"_$index")
+      }
+      struct(cols: _*)
   }
 }

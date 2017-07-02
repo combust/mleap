@@ -1,7 +1,7 @@
 package org.apache.spark.sql.mleap
 
 import ml.combust.mleap.core.types
-import ml.combust.mleap.core.types.{DataType => _, StructField => _, StructType => _, _}
+import ml.combust.mleap.core.types.{BasicType, ScalarType, ScalarShape, ListShape, TensorShape}
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types._

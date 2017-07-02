@@ -7,7 +7,6 @@ import java.util.stream.Collectors
 
 import ml.combust.bundle.dsl.{Bundle, BundleInfo}
 import ml.combust.bundle.serializer.BundleSerializer
-import com.trueaccord.scalapb.json.JsonFormat
 import resource._
 
 import scala.collection.JavaConverters._
@@ -55,7 +54,7 @@ case class BundleFile(fs: FileSystem,
     */
   def readInfo(): Try[BundleInfo] = {
     val bundleJson = fs.getPath(path.toString, Bundle.bundleJson)
-    Try(JsonFormat.fromJsonString[ml.bundle.Bundle](new String(Files.readAllBytes(bundleJson), "UTF-8"))).
+    Try(ml.bundle.Bundle.fromAscii(new String(Files.readAllBytes(bundleJson), "UTF-8"))).
       map(BundleInfo.fromBundle)
   }
 

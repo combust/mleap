@@ -19,6 +19,8 @@ object TensorUDT {
 }
 
 class TensorUDT(val base: BasicType, val dimensions: Seq[Int]) extends UserDefinedType[Tensor[_]] {
+  def this() = this(BasicType.Double, Seq())
+
   val BOOLEAN: Byte = 0
   val STRING: Byte = 1
   val BYTE: Byte = 2

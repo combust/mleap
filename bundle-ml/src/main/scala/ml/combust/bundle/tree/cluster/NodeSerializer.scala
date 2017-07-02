@@ -6,7 +6,6 @@ import java.nio.file.{Files, Path}
 import ml.bundle.ctree.ctree.Node
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.serializer.SerializationFormat
-import com.trueaccord.scalapb.json.JsonFormat
 import resource._
 
 import scala.util.Try
@@ -38,7 +37,7 @@ trait FormatNodeReader extends Closeable {
 
 case class JsonFormatNodeWriter(out: BufferedWriter) extends FormatNodeWriter {
   override def write(node: Node): Unit = {
-    out.write(JsonFormat.toJsonString(node) + "\n")
+    out.write(node.toString + "\n")
   }
 
   override def close(): Unit = out.close()
@@ -46,7 +45,7 @@ case class JsonFormatNodeWriter(out: BufferedWriter) extends FormatNodeWriter {
 
 case class JsonFormatNodeReader(in: BufferedReader) extends FormatNodeReader {
   override def read(): Node = {
-    JsonFormat.fromJsonString[Node](in.readLine())
+    Node.fromAscii(in.readLine())
   }
 
   override def close(): Unit = in.close()

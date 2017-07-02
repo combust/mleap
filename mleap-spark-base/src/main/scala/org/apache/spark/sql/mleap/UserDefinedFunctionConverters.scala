@@ -1,7 +1,9 @@
 package org.apache.spark.sql.mleap
 
 import ml.combust.mleap.core.types
+import ml.combust.mleap.core.types.{TupleData, TupleType}
 import ml.combust.mleap.runtime.function.{UserDefinedFunction => MleapUDF}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.types.DataType
 
@@ -59,7 +61,12 @@ trait UserDefinedFunctionConverters {
 //        }
 //      case _ => (v) => Option[Any](v)
 //    }
-  } else { identity }
+  } else {
+    dataType match {
+      case _: TupleType => (v: Any) => TupleData(v.asInstanceOf[Row].toSeq)
+      case _ => identity
+    }
+  }
 
   private def sparkInputs(inputs: Seq[types.DataType]): Seq[DataType] = {
     inputs.map(mleapToSparkType)

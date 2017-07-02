@@ -45,22 +45,10 @@ trait UserDefinedFunctionConverters {
   }
 
   private def converter(dataType: types.DataType): (Any) => Any = if(dataType.isNullable) {
-    (v) => Option[Any](v)
-//    dataType match {
-//      case types.ScalarType(base, _) =>
-//        base match {
-//          case BasicType.Boolean => (v) => Option(v.asInstanceOf[Boolean])
-//          case BasicType.Byte => (v) => Option(v.asInstanceOf[Byte])
-//          case BasicType.Short => (v) => Option(v.asInstanceOf[Short])
-//          case BasicType.Int => (v) => Option(v.asInstanceOf[Int])
-//          case BasicType.Long => (v) => Option(v.asInstanceOf[Long])
-//          case BasicType.Float => (v) => Option(v.asInstanceOf[Float])
-//          case BasicType.Double => (v) => Option(v.asInstanceOf[Double])
-//          case BasicType.String => (v) => Option(v.asInstanceOf[String])
-//          case BasicType.ByteString => (v) => Option(v.asInstanceOf[ByteString])
-//        }
-//      case _ => (v) => Option[Any](v)
-//    }
+    dataType match {
+      case _: TupleType => (v: Any) => Option(v).map(_.asInstanceOf[Row]).map(r => TupleData(r.toSeq))
+      case _ => (v) => Option[Any](v)
+    }
   } else {
     dataType match {
       case _: TupleType => (v: Any) => TupleData(v.asInstanceOf[Row].toSeq)

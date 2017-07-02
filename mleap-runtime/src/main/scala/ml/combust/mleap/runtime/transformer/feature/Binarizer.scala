@@ -22,9 +22,9 @@ case class Binarizer(override val uid: String = Transformer.uniqueName("binarize
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.schema.getField(inputCol).map(_.dataType).map {
-      case ScalarType(BasicType.Double, false) =>
+      case ScalarType(BasicType.Double, _) =>
         builder.withOutput(outputCol, inputCol)(execDouble)
-      case TensorType(BasicType.Double, _, false) =>
+      case TensorType(BasicType.Double, _, _) =>
         builder.withOutput(outputCol, inputCol)(execTensor)
       case dt => Failure(new IllegalArgumentException(s"invalid input column type $dt"))
     }.getOrElse(Failure(new IllegalArgumentException("Input column must be double or double tensor")))

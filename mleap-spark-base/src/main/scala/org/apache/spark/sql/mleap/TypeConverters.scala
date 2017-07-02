@@ -60,7 +60,7 @@ trait TypeConverters {
     case tu: TensorUDT => TensorShape(tu.dimensions, field.nullable)
     case vu: VectorUDT =>
       // TODO: calculate dimensions
-      TensorShape(Seq(), field.nullable)
+      TensorShape(Seq(2), field.nullable)
     case _ => throw new IllegalArgumentException("invalid struct field for shape")
   }
 

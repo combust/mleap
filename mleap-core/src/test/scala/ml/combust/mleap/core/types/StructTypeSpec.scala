@@ -10,11 +10,11 @@ import scala.util.Success
   * Created by pahsan on 3/8/16.
   */
 class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
-  val fields = Seq(StructField("first", StringType()),
-                   StructField("second", StringType()),
-                   StructField("third", StringType()),
-                   StructField("fourth", StringType()),
-                   StructField("fifth", StringType())
+  val fields = Seq(StructField("first", ScalarType.String),
+                   StructField("second", ScalarType.String),
+                   StructField("third", ScalarType.String),
+                   StructField("fourth", ScalarType.String),
+                   StructField("fifth", ScalarType.String)
   )
 
   val testStruct = StructType(fields).get
@@ -32,19 +32,19 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
   }
 
   test("contains should return false when a field doesn't exist") {
-    val fieldsPrime = fields:+StructField("sixth", StringType())
+    val fieldsPrime = fields:+StructField("sixth", ScalarType.String)
 
     assert(!fieldsPrime.map(f => testStruct.hasField(f.name)).forall(identity))
   }
 
   test("withField should return a StructType with the field added") {
-    val field = StructField("sixth", StringType())
+    val field = StructField("sixth", ScalarType.String)
 
     assert(testStruct.withField(field).get.hasField(field.name))
   }
 
   test("withFields should return a StructType with the fields added") {
-    val fields = Seq(StructField("sixth", StringType()), StructField("seventh", DoubleType()))
+    val fields = Seq(StructField("sixth", ScalarType.String), StructField("seventh", ScalarType.Double))
 
     assert(testStruct.withFields(fields).get.hasField("sixth"))
     assert(testStruct.withFields(fields).get.hasField("seventh"))
@@ -118,9 +118,9 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
   }
 
   test("prints the schema to a PrintStream") {
-    val printStruct = StructType(StructField("a_double", DoubleType()),
-      StructField("a_list", ListType(FloatType(), isNullable = true)),
-      StructField("a_tensor", TensorType(ByteType()))).get
+    val printStruct = StructType(StructField("a_double", ScalarType.Double),
+      StructField("a_list", ListType(BasicType.Float, isNullable = true)),
+      StructField("a_tensor", TensorType(BasicType.Byte))).get
 
     val out = new ByteArrayOutputStream()
     val print = new PrintStream(out)
@@ -132,9 +132,9 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
     val expected =
       """
         |root
-        | |-- a_double: double (nullable = false)
-        | |-- a_list: list (base = [float (nullable = false)], nullable = true)
-        | |-- a_tensor: tensor (base = byte, nullable = false)
+        | |-- a_double: scalar(base=double,nullable=false)
+        | |-- a_list: list(base=float,nullable=true)
+        | |-- a_tensor: tensor(base=byte,nullable=false)
       """.stripMargin
 
     assert(schema.trim == expected.trim)

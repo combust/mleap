@@ -5,9 +5,9 @@ import scala.language.implicitConversions
 object DataType {
   def apply(base: BasicType, shape: DataShape): DataType = {
     shape match {
-      case ScalarShape(isNullable) => base.setNullable(isNullable)
-      case ListShape(isNullable) => ListType(base).setNullable(isNullable)
-      case TensorShape(dimensions, isNullable) => TensorType(base, Some(dimensions)).setNullable(isNullable)
+      case ScalarShape(isNullable) => ScalarType(base, isNullable = isNullable)
+      case ListShape(isNullable) => ListType(base, isNullable = isNullable)
+      case TensorShape(dimensions, isNullable) => TensorType(base, Some(dimensions), isNullable = isNullable)
     }
   }
 }
@@ -20,47 +20,59 @@ sealed trait DataType extends Serializable {
   def simpleString: String
   def printString: String = s"$simpleString (nullable = $isNullable)"
 }
-sealed trait BasicType extends DataType with Serializable
+sealed trait BasicType extends Serializable
+
+object BasicType {
+  case object Boolean extends BasicType {
+    override def toString: String = "boolean"
+  }
+  case object Byte extends BasicType {
+    override def toString: String = "byte"
+  }
+  case object Short extends BasicType {
+    override def toString: String = "short"
+  }
+  case object Int extends BasicType {
+    override def toString: String = "int"
+  }
+  case object Long extends BasicType {
+    override def toString: String = "long"
+  }
+  case object Float extends BasicType {
+    override def toString: String = "float"
+  }
+  case object Double extends BasicType {
+    override def toString: String = "double"
+  }
+  case object String extends BasicType {
+    override def toString: String = "string"
+  }
+  case object ByteString extends BasicType {
+    override def toString: String = "byte_string"
+  }
+}
 
 case class AnyType(override val isNullable: Boolean = false) extends DataType {
   override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
   override def simpleString: String = "any"
 }
-case class StringType(override val isNullable: Boolean = false) extends BasicType {
-  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
-  override def simpleString: String = "string"
+
+object ScalarType {
+  val Boolean = ScalarType(BasicType.Boolean)
+  val Byte = ScalarType(BasicType.Byte)
+  val Short = ScalarType(BasicType.Short)
+  val Int = ScalarType(BasicType.Int)
+  val Long = ScalarType(BasicType.Long)
+  val Float = ScalarType(BasicType.Float)
+  val Double = ScalarType(BasicType.Double)
+  val String = ScalarType(BasicType.String)
+  val ByteString = ScalarType(BasicType.ByteString)
 }
-case class BooleanType(override val isNullable: Boolean = false) extends BasicType {
-  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
-  override def simpleString: String = "boolean"
-}
-case class ByteType(override val isNullable: Boolean = false) extends BasicType {
-  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
-  override def simpleString: String = "byte"
-}
-case class ShortType(override val isNullable: Boolean = false) extends BasicType {
-  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
-  override def simpleString: String = "short"
-}
-case class IntegerType(override val isNullable: Boolean = false) extends BasicType {
-  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
-  override def simpleString: String = "int"
-}
-case class LongType(override val isNullable: Boolean = false) extends BasicType {
-  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
-  override def simpleString: String = "long"
-}
-case class FloatType(override val isNullable: Boolean = false) extends BasicType {
-  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
-  override def simpleString: String = "float"
-}
-case class DoubleType(override val isNullable: Boolean = false) extends BasicType {
-  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
-  override def simpleString: String = "double"
-}
-case class ByteStringType(override val isNullable: Boolean = false) extends BasicType {
-  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
-  override def simpleString: String = "byte_string"
+
+case class ScalarType(base: BasicType, override val isNullable: Boolean = false) extends DataType {
+  override def setNullable(isNullable: Boolean): ScalarType = copy(isNullable = isNullable)
+  override def simpleString: String = "scalar"
+  override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"
 }
 
 /**
@@ -76,13 +88,13 @@ case class TensorType(base: BasicType,
 
   override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
   override def simpleString: String = "tensor"
-  override def printString: String = s"$simpleString (base = ${base.simpleString}, nullable = $isNullable)"
+  override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"
 }
-case class ListType(base: DataType,
+case class ListType(base: BasicType,
                     override val isNullable: Boolean = false) extends DataType {
   override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
   override def simpleString: String = "list"
-  override def printString: String = s"$simpleString (base = [${base.printString}], nullable = $isNullable)"
+  override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"
 }
 
 case class TupleType(dts: DataType *) extends DataType {

@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.classification
 
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
 class DecisionTreeClassifierSpec extends FunSpec {
@@ -9,33 +9,33 @@ class DecisionTreeClassifierSpec extends FunSpec {
     it("has the correct inputs and outputs with only prediction column") {
       val transformer = new DecisionTreeClassifier("transformer", "features", "prediction", None, None, null)
       assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+        Seq(StructField("features", TensorType(BasicType.Double)),
+          StructField("prediction", ScalarType.Double)))
     }
 
     it("has the correct inputs and outputs with prediction column as well as probabilityCol") {
       val transformer = new DecisionTreeClassifier("transformer", "features", "prediction", None, Some("probability"), null)
       assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", DoubleType()),
-          StructField("probability", TensorType(DoubleType()))))
+        Seq(StructField("features", TensorType(BasicType.Double)),
+          StructField("probability", TensorType(BasicType.Double)),
+          StructField("prediction", ScalarType.Double)))
     }
 
     it("has the correct inputs and outputs with prediction column as well as rawPredictionCol") {
       val transformer = new DecisionTreeClassifier("transformer", "features", "prediction", Some("rawPrediction"), None, null)
       assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", DoubleType()),
-          StructField("rawPrediction", TensorType(DoubleType()))))
+        Seq(StructField("features", TensorType(BasicType.Double)),
+          StructField("rawPrediction", TensorType(BasicType.Double)),
+          StructField("prediction", ScalarType.Double)))
     }
 
     it("has the correct inputs and outputs with prediction column as well as both rawPredictionCol and probabilityCol") {
       val transformer = new DecisionTreeClassifier("transformer", "features", "prediction", Some("rawPrediction"), Some("probability"), null)
       assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", DoubleType()),
-          StructField("rawPrediction", TensorType(DoubleType())),
-          StructField("probability", TensorType(DoubleType()))))
+        Seq(StructField("features", TensorType(BasicType.Double)),
+          StructField("rawPrediction", TensorType(BasicType.Double)),
+          StructField("probability", TensorType(BasicType.Double)),
+          StructField("prediction", ScalarType.Double)))
     }
   }
 }

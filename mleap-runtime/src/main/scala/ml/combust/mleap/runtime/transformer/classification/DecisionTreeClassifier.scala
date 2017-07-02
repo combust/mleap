@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.classification
 
 import ml.combust.mleap.core.classification.DecisionTreeClassifierModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -46,21 +46,21 @@ case class DecisionTreeClassifier(override val uid: String = Transformer.uniqueN
   override def getFields(): Try[Seq[StructField]] = {
     (rawPredictionCol, probabilityCol) match {
       case ((Some(rp), Some(p))) => Success(Seq(
-        StructField(featuresCol, TensorType(DoubleType())),
-        StructField(predictionCol, DoubleType()),
-        StructField(rp, TensorType(DoubleType())),
-        StructField(p, TensorType(DoubleType()))))
+        StructField(featuresCol, TensorType(BasicType.Double)),
+        StructField(rp, TensorType(BasicType.Double)),
+        StructField(p, TensorType(BasicType.Double)),
+        StructField(predictionCol, ScalarType.Double)))
       case ((Some(rp), None)) => Success(Seq(
-        StructField(featuresCol, TensorType(DoubleType())),
-        StructField(predictionCol, DoubleType()),
-        StructField(rp, TensorType(DoubleType()))))
+        StructField(featuresCol, TensorType(BasicType.Double)),
+        StructField(rp, TensorType(BasicType.Double)),
+        StructField(predictionCol, ScalarType.Double)))
       case (None, Some(p)) => Success(Seq(
-        StructField(featuresCol, TensorType(DoubleType())),
-        StructField(predictionCol, DoubleType()),
-        StructField(p, TensorType(DoubleType()))))
+        StructField(featuresCol, TensorType(BasicType.Double)),
+        StructField(p, TensorType(BasicType.Double)),
+        StructField(predictionCol, ScalarType.Double)))
       case (None, None) => Success(Seq(
-        StructField(featuresCol, TensorType(DoubleType())),
-        StructField(predictionCol, DoubleType())))
+        StructField(featuresCol, TensorType(BasicType.Double)),
+        StructField(predictionCol, ScalarType.Double)))
     }
   }
 }

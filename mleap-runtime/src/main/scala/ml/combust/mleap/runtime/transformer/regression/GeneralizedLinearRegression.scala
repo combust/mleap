@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.GeneralizedLinearRegressionModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -33,12 +33,12 @@ case class GeneralizedLinearRegression(override val uid: String = Transformer.un
   override def getFields(): Try[Seq[StructField]] = {
     linkPredictionCol match {
       case Some(col) => Success(Seq(
-        StructField(featuresCol, TensorType(DoubleType())),
-        StructField(predictionCol, DoubleType()),
-        StructField(col, DoubleType())))
+        StructField(featuresCol, TensorType(BasicType.Double)),
+        StructField(predictionCol, ScalarType.Double),
+        StructField(col, ScalarType.Double)))
       case None => Success(Seq(
-        StructField(featuresCol, TensorType(DoubleType())),
-        StructField(predictionCol, DoubleType())))
+        StructField(featuresCol, TensorType(BasicType.Double)),
+        StructField(predictionCol, ScalarType.Double)))
     }
   }
 }

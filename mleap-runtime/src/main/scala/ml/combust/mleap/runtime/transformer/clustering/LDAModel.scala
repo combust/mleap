@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.LocalLDAModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types.{BasicType, StructField, TensorType}
 import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
@@ -25,6 +25,6 @@ case class LDAModel(override val uid: String = Transformer.uniqueName("lda"),
   }
 
   override def getFields(): Try[Seq[StructField]] = Success(
-    Seq(StructField(featureCol, TensorType(DoubleType())),
-      StructField(topicDistributionCol, TensorType(DoubleType()))))
+    Seq(StructField(featureCol, TensorType(BasicType.Double)),
+      StructField(topicDistributionCol, TensorType(BasicType.Double))))
 }

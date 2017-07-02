@@ -12,12 +12,12 @@ import org.scalatest.FunSpec
 class BinarizerSpec extends FunSpec {
   val binarizer = Binarizer(inputCol = "test_vec",
     outputCol = "test_binarizer",
-    model = BinarizerModel(0.6, DoubleType(), TensorShape(3)))
+    model = BinarizerModel(0.6, BasicType.Double, TensorShape(3)))
 
   describe("with a double tensor input column") {
     describe("#transform") {
       it("thresholds the input column to 0 or 1") {
-        val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
+        val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
         val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.1, 0.6, 0.7)))))
         val frame = LeapFrame(schema, dataset)
 
@@ -33,8 +33,8 @@ class BinarizerSpec extends FunSpec {
     describe("#getFields") {
       it("has the correct inputs and outputs") {
         assert(binarizer.getFields().get ==
-          Seq(StructField("test_vec", TensorType(DoubleType(), Some(Seq(3)))),
-            StructField("test_binarizer", TensorType(DoubleType(), Some(Seq(3))))))
+          Seq(StructField("test_vec", TensorType(BasicType.Double, Some(Seq(3)))),
+            StructField("test_binarizer", TensorType(BasicType.Double, Some(Seq(3))))))
       }
     }
   }
@@ -43,7 +43,7 @@ class BinarizerSpec extends FunSpec {
     val binarizer2 = binarizer.copy(inputCol = "test", model = binarizer.model.copy(inputShape = ScalarShape()))
     describe("#transform") {
       it("thresholds the input column to 0 or 1") {
-        val schema = StructType(Seq(StructField("test", DoubleType()))).get
+        val schema = StructType(Seq(StructField("test", ScalarType.Double))).get
         val dataset = LocalDataset(Seq(Row(0.7), Row(0.1)))
         val frame = LeapFrame(schema, dataset)
 
@@ -58,8 +58,8 @@ class BinarizerSpec extends FunSpec {
     describe("#getFields") {
       it("has the correct inputs and outputs") {
         assert(binarizer2.getFields().get ==
-          Seq(StructField("test", DoubleType()),
-            StructField("test_binarizer", DoubleType())))
+          Seq(StructField("test", ScalarType.Double),
+            StructField("test_binarizer", ScalarType.Double)))
       }
     }
   }

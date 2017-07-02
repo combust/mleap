@@ -1,16 +1,15 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.StringMapModel
-import ml.combust.mleap.core.types.{DoubleType, StringType, StructField, StructType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 1/5/17.
   */
 class StringMapSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("test_string", StringType()))).get
+  val schema = StructType(Seq(StructField("test_string", ScalarType.String))).get
   val dataset = LocalDataset(Seq(Row("index1"), Row("index2"), Row("index3")))
   val frame = LeapFrame(schema, dataset)
 
@@ -37,8 +36,8 @@ class StringMapSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(stringMap.getFields().get ==
-        Seq(StructField("test_string", StringType()),
-          StructField("test_index", DoubleType())))
+        Seq(StructField("test_string", ScalarType.String),
+          StructField("test_index", ScalarType.Double)))
     }
   }
 }

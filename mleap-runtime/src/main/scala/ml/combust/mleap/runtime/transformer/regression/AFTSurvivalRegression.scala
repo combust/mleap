@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.AFTSurvivalRegressionModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -33,12 +33,12 @@ case class AFTSurvivalRegression(override val uid: String = Transformer.uniqueNa
   override def getFields(): Try[Seq[StructField]] = {
     quantilesCol match {
       case Some(col) =>
-        Success(Seq(StructField(featuresCol, TensorType(DoubleType())),
-          StructField(predictionCol, DoubleType()),
-          StructField(col, TensorType(DoubleType()))))
+        Success(Seq(StructField(featuresCol, TensorType(BasicType.Double)),
+          StructField(predictionCol, ScalarType.Double),
+          StructField(col, TensorType(BasicType.Double))))
       case None => Success(
-        Seq(StructField(featuresCol, TensorType(DoubleType())),
-        StructField(predictionCol, DoubleType())))
+        Seq(StructField(featuresCol, TensorType(BasicType.Double)),
+        StructField(predictionCol, ScalarType.Double)))
     }
   }
 }

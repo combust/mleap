@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.ImputerModel
-import ml.combust.mleap.core.types.{DoubleType, ScalarShape, StructField, StructType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import org.scalatest.FunSpec
 
@@ -15,7 +15,7 @@ class ImputerSpec extends FunSpec {
       model = ImputerModel(45.7, 23.6, "", inputNullable = true))
 
     describe("null values") {
-      val schema = StructType(StructField("test_a", DoubleType(true))).get
+      val schema = StructType(StructField("test_a", ScalarType.Double.asNullable)).get
       val dataset = LocalDataset(Seq(Row(Option(42.0)), Row(None), Row(Option(23.6))))
       val frame = LeapFrame(schema, dataset)
 
@@ -29,13 +29,13 @@ class ImputerSpec extends FunSpec {
 
       it("has the correct inputs and outputs") {
         assert(transformer.getFields().get ==
-          Seq(StructField("test_a", DoubleType(true)),
-            StructField("test_out", DoubleType())))
+          Seq(StructField("test_a", ScalarType.Double.asNullable),
+            StructField("test_out", ScalarType.Double)))
       }
     }
 
     describe("non-nullable columns") {
-      val schema = StructType(StructField("test_a", DoubleType())).get
+      val schema = StructType(StructField("test_a", ScalarType.Double)).get
       val dataset = LocalDataset(Seq(Row(42.0), Row(23.6), Row(Double.NaN)))
       val frame = LeapFrame(schema, dataset)
       val transformer2 = transformer.copy(model = transformer.model.copy(inputNullable = false))
@@ -50,8 +50,8 @@ class ImputerSpec extends FunSpec {
 
       it("has the correct inputs and outputs") {
         assert(transformer2.getFields().get ==
-          Seq(StructField("test_a", DoubleType()),
-            StructField("test_out", DoubleType())))
+          Seq(StructField("test_a", ScalarType.Double),
+            StructField("test_out", ScalarType.Double)))
       }
     }
   }

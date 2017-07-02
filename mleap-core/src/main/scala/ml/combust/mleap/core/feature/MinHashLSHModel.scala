@@ -1,4 +1,5 @@
 package ml.combust.mleap.core.feature
+import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 /**
@@ -9,9 +10,9 @@ object MinHashLSHModel {
 }
 
 case class MinHashLSHModel(randomCoefficients: Seq[(Int, Int)]) extends LSHModel{
-  def apply(features: Vector): Seq[Vector] = predict(features)
+  def apply(features: Vector): Tensor[Double] = predict(features)
 
-  def predict(features: Vector): Seq[Vector] = {
+  def predict(features: Vector): Tensor[Double] = {
     require(features.numNonzeros > 0, "Must have at least 1 non zero entry.")
     val elemsList = features.toSparse.indices.toList
     val hashValues = randomCoefficients.map { case (a, b) =>
@@ -19,8 +20,9 @@ case class MinHashLSHModel(randomCoefficients: Seq[(Int, Int)]) extends LSHModel
         ((1 + elem) * a + b) % MinHashLSHModel.HASH_PRIME
       }.min.toDouble
     }
+
     // TODO: Output vectors of dimension numHashFunctions in SPARK-18450
-    hashValues.map(Vectors.dense(_))
+    DenseTensor(hashValues.toArray, Seq(hashValues.length, 1))
   }
 
   override def keyDistance(x: Vector, y: Vector): Double = {

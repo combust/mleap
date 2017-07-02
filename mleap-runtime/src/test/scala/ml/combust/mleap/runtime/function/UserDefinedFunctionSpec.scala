@@ -17,12 +17,12 @@ class UserDefinedFunctionSpec extends FunSpec {
       val udf4: UserDefinedFunction = (_: Seq[Boolean], _: Option[Seq[String]], _: Seq[Double]) => "hello"
       val udf5: UserDefinedFunction = (_: Double, _: Float, _: Double, _: Double, _: String) => 55d
 
-      assertUdfForm(udf0, StringType())
-      assertUdfForm(udf1, ListType(StringType()), DoubleType())
-      assertUdfForm(udf2, LongType(), LongType(), IntegerType())
-      assertUdfForm(udf3, AnyType(), BooleanType(), TensorType(base = DoubleType()))
-      assertUdfForm(udf4, StringType(), ListType(BooleanType()), ListType(StringType(), isNullable = true), ListType(DoubleType()))
-      assertUdfForm(udf5, DoubleType(), DoubleType(), FloatType(), DoubleType(), DoubleType(), StringType())
+      assertUdfForm(udf0, ScalarType.String)
+      assertUdfForm(udf1, ListType(BasicType.String), ScalarType.Double)
+      assertUdfForm(udf2, ScalarType.Long, ScalarType.Long, ScalarType.Int)
+      assertUdfForm(udf3, AnyType(), ScalarType.Boolean, TensorType(base = BasicType.Double))
+      assertUdfForm(udf4, ScalarType.String, ListType(BasicType.Boolean), ListType(BasicType.String, isNullable = true), ListType(BasicType.Double))
+      assertUdfForm(udf5, ScalarType.Double, ScalarType.Double, ScalarType.Float, ScalarType.Double, ScalarType.Double, ScalarType.String)
     }
   }
 

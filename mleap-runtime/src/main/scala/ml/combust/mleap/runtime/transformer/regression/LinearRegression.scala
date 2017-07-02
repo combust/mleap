@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.LinearRegressionModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -28,6 +28,6 @@ case class LinearRegression(uid: String = Transformer.uniqueName("linear_regress
   }
 
   override def getFields(): Try[Seq[StructField]] = Success(
-    Seq(StructField(featuresCol, TensorType(DoubleType(), Some(Seq(model.coefficients.size)))),
-      StructField(predictionCol, DoubleType())))
+    Seq(StructField(featuresCol, TensorType(BasicType.Double, Some(Seq(model.coefficients.size)))),
+      StructField(predictionCol, ScalarType.Double)))
 }

@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import org.apache.spark.ml.linalg.mleap.BLAS
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
@@ -8,13 +9,14 @@ import org.apache.spark.ml.linalg.{Vector, Vectors}
   */
 case class BucketedRandomProjectionLSHModel(randomUnitVectors: Seq[Vector],
                                             bucketLength: Double) extends LSHModel {
-  def apply(features: Vector): Seq[Vector] = predict(features)
-  def predict(features: Vector): Seq[Vector] = {
+  def apply(features: Vector): Tensor[Double] = predict(features)
+  def predict(features: Vector): Tensor[Double] = {
     val hashValues: Seq[Double] = randomUnitVectors.map({
       randUnitVector => Math.floor(BLAS.dot(features, randUnitVector) / bucketLength)
     })
+
     // TODO: Output vectors of dimension numHashFunctions in SPARK-18450
-    hashValues.map(Vectors.dense(_))
+    DenseTensor(hashValues.toArray, Seq(hashValues.length, 1))
   }
 
   override def keyDistance(x: Vector, y: Vector): Double = {

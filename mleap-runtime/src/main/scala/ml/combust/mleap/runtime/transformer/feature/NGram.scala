@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.NGramModel
-import ml.combust.mleap.core.types.{ListType, StringType, StructField}
+import ml.combust.mleap.core.types.{BasicType, ListType, StructField}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 
@@ -17,7 +17,7 @@ case class NGram(override val uid: String = Transformer.uniqueName("ngram"),
   override val exec: UserDefinedFunction = (value: Seq[String]) => model(value)
 
   override def getFields(): Try[Seq[StructField]] = Success(Seq(
-    StructField(inputCol, ListType(StringType())),
-    StructField(outputCol, ListType(StringType()))
+    StructField(inputCol, ListType(BasicType.String)),
+    StructField(outputCol, ListType(BasicType.String))
   ))
 }

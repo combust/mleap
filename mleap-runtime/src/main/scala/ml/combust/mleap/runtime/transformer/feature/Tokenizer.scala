@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.TokenizerModel
-import ml.combust.mleap.core.types.{ListType, StringType, StructField}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 
@@ -16,7 +16,7 @@ case class Tokenizer(override val uid: String = Transformer.uniqueName("tokenize
   override val exec: UserDefinedFunction = (value: String) => TokenizerModel.defaultTokenizer(value)
 
   override def getFields(): Try[Seq[StructField]] = Success(Seq(
-    StructField(inputCol, StringType()),
-    StructField(outputCol, ListType(StringType()))
+    StructField(inputCol, ScalarType.String),
+    StructField(outputCol, ListType(BasicType.String))
   ))
 }

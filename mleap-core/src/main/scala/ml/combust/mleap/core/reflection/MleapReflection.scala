@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.reflection
 
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, Tensor}
 
 /**
   * Created by hollinwilkins on 10/21/16.
@@ -15,22 +15,39 @@ trait MleapReflection {
   import universe._
 
   def dataType[T: TypeTag]: DataType = dataTypeFor(mirrorType[T])
+
+  private def basicTypeFor(tpe: `Type`): BasicType = MleapReflectionLock.synchronized {
+    tpe match {
+      case t if t <:< mirrorType[Boolean] => BasicType.Boolean
+      case t if t <:< mirrorType[Byte] => BasicType.Byte
+      case t if t <:< mirrorType[Short] => BasicType.Short
+      case t if t <:< mirrorType[Int] => BasicType.Int
+      case t if t <:< mirrorType[Long] => BasicType.Long
+      case t if t <:< mirrorType[Float] => BasicType.Float
+      case t if t <:< mirrorType[Double] => BasicType.Double
+      case t if t <:< mirrorType[String] => BasicType.String
+      case t if t <:< mirrorType[ByteString] => BasicType.ByteString
+      case _ => throw new IllegalArgumentException(s"invalid basic type: $tpe")
+    }
+  }
+
   private def dataTypeFor(tpe: `Type`): DataType = MleapReflectionLock.synchronized {
     tpe match {
-      case t if t <:< mirrorType[Boolean] => BooleanType()
-      case t if t <:< mirrorType[String] => StringType()
-      case t if t <:< mirrorType[Int] => IntegerType()
-      case t if t <:< mirrorType[Long] => LongType()
-      case t if t <:< mirrorType[Float] => FloatType()
-      case t if t <:< mirrorType[Double] => DoubleType()
+      case t if t <:< mirrorType[Boolean] => ScalarType(BasicType.Boolean)
+      case t if t <:< mirrorType[Byte] => ScalarType(BasicType.Byte)
+      case t if t <:< mirrorType[Short] => ScalarType(BasicType.Short)
+      case t if t <:< mirrorType[Int] => ScalarType(BasicType.Int)
+      case t if t <:< mirrorType[Long] => ScalarType(BasicType.Long)
+      case t if t <:< mirrorType[Float] => ScalarType(BasicType.Float)
+      case t if t <:< mirrorType[Double] => ScalarType(BasicType.Double)
+      case t if t <:< mirrorType[String] => ScalarType(BasicType.String)
+      case t if t <:< mirrorType[ByteString] => ScalarType(BasicType.ByteString)
       case t if t <:< mirrorType[Seq[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t
-        val baseType = dataTypeFor(elementType)
-        ListType(baseType)
+        ListType(basicTypeFor(elementType))
       case t if t <:< mirrorType[Tensor[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t
-        val baseType = dataTypeFor(elementType)
-        TensorType(baseType.asInstanceOf[BasicType])
+        TensorType(basicTypeFor(elementType))
       case t if t =:= mirrorType[Any] => AnyType()
       case t if t <:< mirrorType[Option[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t

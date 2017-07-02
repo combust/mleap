@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.GaussianMixtureModel
-import ml.combust.mleap.core.types.{DoubleType, IntegerType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -34,12 +34,12 @@ case class GaussianMixture(override val uid: String = Transformer.uniqueName("gm
   override def getFields(): Try[Seq[StructField]] = {
     probabilityCol match {
       case Some(probability) => Success(Seq(
-        StructField(featuresCol, TensorType(DoubleType())),
-        StructField(predictionCol, IntegerType()),
-        StructField(probability, TensorType(DoubleType()))))
+        StructField(featuresCol, TensorType(BasicType.Double)),
+        StructField(predictionCol, ScalarType.Int),
+        StructField(probability, TensorType(BasicType.Double))))
       case None => Success(Seq(
-        StructField(featuresCol, TensorType(DoubleType())),
-        StructField(predictionCol, IntegerType())))
+        StructField(featuresCol, TensorType(BasicType.Double)),
+        StructField(predictionCol, ScalarType.Int)))
     }
   }
 }

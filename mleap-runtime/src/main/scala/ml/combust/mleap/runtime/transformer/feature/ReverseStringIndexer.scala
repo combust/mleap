@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.ReverseStringIndexerModel
-import ml.combust.mleap.core.types.{DoubleType, StringType, StructField}
+import ml.combust.mleap.core.types.{ScalarType, StructField}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 
@@ -17,6 +17,6 @@ case class ReverseStringIndexer(override val uid: String = Transformer.uniqueNam
   override val exec: UserDefinedFunction = (value: Double) => model(value.toInt)
 
   override def getFields(): Try[Seq[StructField]] = Success(Seq(
-    StructField(inputCol, DoubleType()),
-    StructField(outputCol, StringType())))
+    StructField(inputCol, ScalarType.Double),
+    StructField(outputCol, ScalarType.String)))
 }

@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.VectorIndexerModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types.{BasicType, StructField, TensorType}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.FeatureTransformer
 import ml.combust.mleap.tensor.Tensor
@@ -19,6 +19,6 @@ case class VectorIndexer(override val uid: String,
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features): Tensor[Double]
 
   override def getFields(): Try[Seq[StructField]] = Success(
-    Seq(StructField(inputCol, TensorType(DoubleType())),
-      StructField(outputCol, TensorType(DoubleType()))))
+    Seq(StructField(inputCol, TensorType(BasicType.Double)),
+      StructField(outputCol, TensorType(BasicType.Double))))
 }

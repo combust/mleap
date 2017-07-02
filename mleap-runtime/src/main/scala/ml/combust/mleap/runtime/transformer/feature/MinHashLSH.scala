@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MinHashLSHModel
-import ml.combust.mleap.core.types.{DoubleType, ListType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.FeatureTransformer
 import ml.combust.mleap.tensor.Tensor
@@ -16,10 +16,10 @@ case class MinHashLSH(override val uid: String,
                       override val inputCol: String,
                       override val outputCol: String,
                       model: MinHashLSHModel) extends FeatureTransformer {
-  override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features).map(v => v: Tensor[Double])
+  override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 
   override def getFields(): Try[Seq[StructField]] = Success(Seq(
-    StructField(inputCol, TensorType(DoubleType())),
-    StructField(outputCol, ListType(TensorType(DoubleType())))
+    StructField(inputCol, TensorType(BasicType.Double)),
+    StructField(outputCol, TensorType(BasicType.Double))
   ))
 }

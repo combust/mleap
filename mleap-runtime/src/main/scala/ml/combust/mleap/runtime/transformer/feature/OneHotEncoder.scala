@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.OneHotEncoderModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
@@ -19,6 +19,6 @@ case class OneHotEncoder(override val uid: String = Transformer.uniqueName("one_
   override val exec: UserDefinedFunction = (value: Double) => model(value): Tensor[Double]
 
   override def getFields(): Try[Seq[StructField]] = Success(Seq(
-    StructField(inputCol, DoubleType()),
-    StructField(outputCol, TensorType(DoubleType()))))
+    StructField(inputCol, ScalarType.Double),
+    StructField(outputCol, TensorType(BasicType.Double))))
 }

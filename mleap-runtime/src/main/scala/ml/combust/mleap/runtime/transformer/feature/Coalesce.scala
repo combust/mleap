@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CoalesceModel
-import ml.combust.mleap.core.types.{DataType, DoubleType, StructField}
+import ml.combust.mleap.core.types.{DataType, ScalarType, StructField}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -26,6 +26,6 @@ case class Coalesce(override val uid: String = Transformer.uniqueName("coalesce"
       case (name, shape) => StructField(name, DataType(model.base, shape))
     }
 
-    Success(inputFields :+ StructField(outputCol, model.base.asNullable))
+    Success(inputFields :+ StructField(outputCol, ScalarType(model.base, isNullable = true)))
   }
 }

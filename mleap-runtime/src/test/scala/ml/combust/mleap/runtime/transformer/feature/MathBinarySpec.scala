@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BinaryOperation._
 import ml.combust.mleap.core.feature.MathBinaryModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, StructType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import org.scalatest.FunSpec
 
@@ -10,7 +10,7 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 12/27/16.
   */
 class MathBinarySpec extends FunSpec {
-  val schema = StructType(StructField("test_a", DoubleType()), StructField("test_b", DoubleType())).get
+  val schema = StructType(StructField("test_a", ScalarType.Double), StructField("test_b", ScalarType.Double)).get
   val dataset = LocalDataset(Seq(Row(5.6, 7.9)))
   val frame = LeapFrame(schema, dataset)
 
@@ -27,9 +27,9 @@ class MathBinarySpec extends FunSpec {
 
     it("has correct inputs and outputs with a and b inputs") {
       assert(transformer.getFields().get ==
-        Seq(StructField("test_a", DoubleType()),
-          StructField("test_b", DoubleType()),
-          StructField("test_out", DoubleType())))
+        Seq(StructField("test_a", ScalarType.Double),
+          StructField("test_b", ScalarType.Double),
+          StructField("test_out", ScalarType.Double)))
     }
   }
 
@@ -45,8 +45,8 @@ class MathBinarySpec extends FunSpec {
 
     it("has correct inputs and outputs using the default b") {
       assert(transformer.getFields().get ==
-        Seq(StructField("test_a", DoubleType()),
-          StructField("test_out", DoubleType())))
+        Seq(StructField("test_a", ScalarType.Double),
+          StructField("test_out", ScalarType.Double)))
     }
   }
 
@@ -62,8 +62,8 @@ class MathBinarySpec extends FunSpec {
 
     it("has correct inputs and outputs using the default a") {
       assert(transformer.getFields().get ==
-        Seq(StructField("test_b", DoubleType()),
-          StructField("test_out", DoubleType())))
+        Seq(StructField("test_b", ScalarType.Double),
+          StructField("test_out", ScalarType.Double)))
     }
   }
 
@@ -77,7 +77,7 @@ class MathBinarySpec extends FunSpec {
     }
 
     it("has correct inputs and outputs using both defaults") {
-      assert(transformer.getFields().get == Seq(StructField("test_out", DoubleType())))
+      assert(transformer.getFields().get == Seq(StructField("test_out", ScalarType.Double)))
     }
   }
 }

@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.converter
 
-import ml.combust.mleap.core.types.{DoubleType, StringType, StructField, StructType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LocalDataset, Row}
 import org.scalatest.FunSpec
 import ml.combust.mleap.runtime.MleapSupport._
@@ -8,8 +8,8 @@ import ml.combust.mleap.runtime.MleapSupport._
 class LeapFrameConverterSpec extends FunSpec {
 
   describe("LeapFrameConverter") {
-    val expectedSchema = StructType(Seq(StructField("test_string", StringType()),
-      StructField("test_double", DoubleType()))).get
+    val expectedSchema = StructType(Seq(StructField("test_string", ScalarType.String),
+      StructField("test_double", ScalarType.Double))).get
 
     val frameWith1Row = DefaultLeapFrame(expectedSchema,
       LocalDataset(Array(Row("hello", 42.13))))

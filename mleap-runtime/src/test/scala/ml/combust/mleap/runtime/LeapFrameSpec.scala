@@ -2,8 +2,7 @@ package ml.combust.mleap.runtime
 
 import java.io.{ByteArrayOutputStream, PrintStream}
 
-import ml.combust.mleap.core.types.{DoubleType, StringType, StructField, StructType}
-import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 import resource._
 
@@ -12,8 +11,8 @@ import resource._
   * @tparam LF LeapFrame type
   */
 trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
-  val fields = Seq(StructField("test_string", StringType()),
-    StructField("test_double", DoubleType()))
+  val fields = Seq(StructField("test_string", ScalarType.String),
+    StructField("test_double", ScalarType.Double))
   val schema: StructType = StructType(fields).get
   val dataset = LocalDataset(Array(
     Row("hello", 42.13),

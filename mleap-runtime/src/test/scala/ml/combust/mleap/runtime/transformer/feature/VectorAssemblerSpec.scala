@@ -10,14 +10,14 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 9/15/16.
   */
 class VectorAssemblerSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("feature1", TensorType(DoubleType())),
-    StructField("feature2", DoubleType()),
-    StructField("feature3", DoubleType()))).get
+  val schema = StructType(Seq(StructField("feature1", TensorType(BasicType.Double)),
+    StructField("feature2", ScalarType.Double),
+    StructField("feature3", ScalarType.Double))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.5, -0.5, 1.0)), 42.0, 13.0)))
   val frame = LeapFrame(schema, dataset)
   val vectorAssembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
     outputCol = "features",
-    model = VectorAssemblerModel(DoubleType(), Seq(TensorShape(3), ScalarShape(), ScalarShape())))
+    model = VectorAssemblerModel(BasicType.Double, Seq(TensorShape(3), ScalarShape(), ScalarShape())))
 
   describe("#transform") {
     it("assembles its inputs into a new vector") {
@@ -37,10 +37,10 @@ class VectorAssemblerSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(vectorAssembler.getFields().get ==
-        Seq(StructField("feature1", TensorType(DoubleType(), Some(Seq(3)))),
-          StructField("feature2", DoubleType()),
-          StructField("feature3", DoubleType()),
-          StructField("features", TensorType(DoubleType(), Some(Seq(5))))))
+        Seq(StructField("feature1", TensorType(BasicType.Double, Some(Seq(3)))),
+          StructField("feature2", ScalarType.Double),
+          StructField("feature3", ScalarType.Double),
+          StructField("features", TensorType(BasicType.Double, Some(Seq(5))))))
     }
   }
 }

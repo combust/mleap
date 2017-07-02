@@ -1,16 +1,15 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.NGramModel
-import ml.combust.mleap.core.types.{ListType, StringType, StructField, StructType}
+import ml.combust.mleap.core.types.{BasicType, ListType, StructField, StructType}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /**
   * Created by mikhail on 10/16/16.
   */
 class NGramSpec extends FunSpec{
-  val schema = StructType(Seq(StructField("test_string_seq", ListType(StringType())))).get
+  val schema = StructType(Seq(StructField("test_string_seq", ListType(BasicType.String)))).get
   val dataset = LocalDataset(Seq(Row("a b c".split(" ").toSeq), Row("d e f".split(" ").toSeq), Row("g h i".split(" ").toSeq)))
   val frame = LeapFrame(schema,dataset)
 
@@ -38,8 +37,8 @@ class NGramSpec extends FunSpec{
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(ngram.getFields().get ==
-        Seq(StructField("test_string_seq", ListType(StringType())),
-          StructField("output_ngram", ListType(StringType()))))
+        Seq(StructField("test_string_seq", ListType(BasicType.String)),
+          StructField("output_ngram", ListType(BasicType.String))))
     }
   }
 }

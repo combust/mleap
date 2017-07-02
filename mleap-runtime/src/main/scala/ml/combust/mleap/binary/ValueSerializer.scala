@@ -22,45 +22,44 @@ object ValueSerializer {
     } else { serializer.asInstanceOf[ValueSerializer[Any]] }
   }
 
-  def serializerForBasicType(basicType: BasicType): ValueSerializer[Any] = basicType match {
-    case BooleanType(isNullable) => maybeNullableSerializer(BooleanSerializer, isNullable)
-    case StringType(isNullable) => maybeNullableSerializer(StringSerializer, isNullable)
-    case ByteType(isNullable) => maybeNullableSerializer(ByteSerializer, isNullable)
-    case ShortType(isNullable) => maybeNullableSerializer(ShortSerializer, isNullable)
-    case IntegerType(isNullable) => maybeNullableSerializer(IntegerSerializer, isNullable)
-    case LongType(isNullable) => maybeNullableSerializer(LongSerializer, isNullable)
-    case FloatType(isNullable) => maybeNullableSerializer(FloatSerializer, isNullable)
-    case DoubleType(isNullable) => maybeNullableSerializer(DoubleSerializer, isNullable)
-    case ByteStringType(isNullable) => maybeNullableSerializer(ByteStringSerializer, isNullable)
+  def serializerForBasicType(basicType: BasicType, isNullable: Boolean): ValueSerializer[Any] = basicType match {
+    case BasicType.Boolean => maybeNullableSerializer(BooleanSerializer, isNullable)
+    case BasicType.Byte => maybeNullableSerializer(ByteSerializer, isNullable)
+    case BasicType.Short => maybeNullableSerializer(ShortSerializer, isNullable)
+    case BasicType.Int => maybeNullableSerializer(IntegerSerializer, isNullable)
+    case BasicType.Long => maybeNullableSerializer(LongSerializer, isNullable)
+    case BasicType.Float => maybeNullableSerializer(FloatSerializer, isNullable)
+    case BasicType.Double => maybeNullableSerializer(DoubleSerializer, isNullable)
+    case BasicType.String => maybeNullableSerializer(StringSerializer, isNullable)
+    case BasicType.ByteString => maybeNullableSerializer(ByteStringSerializer, isNullable)
   }
 
   def serializerForDataType(dataType: DataType): ValueSerializer[Any] = dataType match {
-    case basicType: BasicType => serializerForBasicType(basicType)
+    case ScalarType(base, isNullable) => serializerForBasicType(base, isNullable)
     case ListType(base, isNullable) =>
       base match {
-        case BooleanType(_) => maybeNullableSerializer(ListSerializer(BooleanSerializer), isNullable)
-        case StringType(_) => maybeNullableSerializer(ListSerializer(StringSerializer), isNullable)
-        case ByteType(_) => maybeNullableSerializer(ListSerializer(ByteSerializer), isNullable)
-        case ShortType(_) => maybeNullableSerializer(ListSerializer(ShortSerializer), isNullable)
-        case IntegerType(_) => maybeNullableSerializer(ListSerializer(IntegerSerializer), isNullable)
-        case LongType(_) => maybeNullableSerializer(ListSerializer(LongSerializer), isNullable)
-        case FloatType(_) => maybeNullableSerializer(ListSerializer(FloatSerializer), isNullable)
-        case DoubleType(_) => maybeNullableSerializer(ListSerializer(DoubleSerializer), isNullable)
-        case ByteStringType(_) => maybeNullableSerializer(ListSerializer(ByteStringSerializer), isNullable)
-        case _ => maybeNullableSerializer(ListSerializer(serializerForDataType(base)), isNullable)
+        case BasicType.Boolean => maybeNullableSerializer(ListSerializer(BooleanSerializer), isNullable)
+        case BasicType.Byte => maybeNullableSerializer(ListSerializer(ByteSerializer), isNullable)
+        case BasicType.Short => maybeNullableSerializer(ListSerializer(ShortSerializer), isNullable)
+        case BasicType.Int => maybeNullableSerializer(ListSerializer(IntegerSerializer), isNullable)
+        case BasicType.Long => maybeNullableSerializer(ListSerializer(LongSerializer), isNullable)
+        case BasicType.Float => maybeNullableSerializer(ListSerializer(FloatSerializer), isNullable)
+        case BasicType.Double => maybeNullableSerializer(ListSerializer(DoubleSerializer), isNullable)
+        case BasicType.String => maybeNullableSerializer(ListSerializer(StringSerializer), isNullable)
+        case BasicType.ByteString => maybeNullableSerializer(ListSerializer(ByteStringSerializer), isNullable)
       }
     case tt: TensorType =>
       val isNullable = tt.isNullable
       tt.base match {
-        case BooleanType(_) => maybeNullableSerializer(TensorSerializer(BooleanSerializer), isNullable)
-        case StringType(_) => maybeNullableSerializer(TensorSerializer(StringSerializer), isNullable)
-        case ByteType(_) => maybeNullableSerializer(TensorSerializer(ByteSerializer), isNullable)
-        case ShortType(_) => maybeNullableSerializer(TensorSerializer(ShortSerializer), isNullable)
-        case IntegerType(_) => maybeNullableSerializer(TensorSerializer(IntegerSerializer), isNullable)
-        case LongType(_) => maybeNullableSerializer(TensorSerializer(LongSerializer), isNullable)
-        case FloatType(_) => maybeNullableSerializer(TensorSerializer(FloatSerializer), isNullable)
-        case DoubleType(_) => maybeNullableSerializer(TensorSerializer(DoubleSerializer), isNullable)
-        case ByteStringType(_) => maybeNullableSerializer(TensorSerializer(ByteStringSerializer), isNullable)
+        case BasicType.Boolean => maybeNullableSerializer(TensorSerializer(BooleanSerializer), isNullable)
+        case BasicType.Byte => maybeNullableSerializer(TensorSerializer(ByteSerializer), isNullable)
+        case BasicType.Short => maybeNullableSerializer(TensorSerializer(ShortSerializer), isNullable)
+        case BasicType.Int => maybeNullableSerializer(TensorSerializer(IntegerSerializer), isNullable)
+        case BasicType.Long => maybeNullableSerializer(TensorSerializer(LongSerializer), isNullable)
+        case BasicType.Float => maybeNullableSerializer(TensorSerializer(FloatSerializer), isNullable)
+        case BasicType.Double => maybeNullableSerializer(TensorSerializer(DoubleSerializer), isNullable)
+        case BasicType.String => maybeNullableSerializer(TensorSerializer(StringSerializer), isNullable)
+        case BasicType.ByteString => maybeNullableSerializer(TensorSerializer(ByteStringSerializer), isNullable)
       }
     case _ => throw new IllegalArgumentException(s"invalid data type for serialization: $dataType")
   }

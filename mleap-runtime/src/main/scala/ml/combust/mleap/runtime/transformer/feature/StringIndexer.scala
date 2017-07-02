@@ -26,7 +26,7 @@ case class StringIndexer(override val uid: String = Transformer.uniqueName("stri
     model = model.toReverse)
 
   override def getFields(): Try[Seq[StructField]] = {
-    Success(Seq(StructField(inputCol, StringType(model.inputNullable)),
-      StructField(outputCol, DoubleType())))
+    Success(Seq(StructField(inputCol, ScalarType(BasicType.String, model.inputNullable)),
+      StructField(outputCol, ScalarType.Double)))
   }
 }

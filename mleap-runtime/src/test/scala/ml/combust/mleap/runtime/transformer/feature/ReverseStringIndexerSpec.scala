@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.types.{DoubleType, StringType, StructField}
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
 class ReverseStringIndexerSpec extends FunSpec {
@@ -9,8 +9,8 @@ class ReverseStringIndexerSpec extends FunSpec {
     it("has the correct inputs and outputs") {
       val transformer = ReverseStringIndexer("transformer", "input", "output", null)
       assert(transformer.getFields().get ==
-        Seq(StructField("input", DoubleType()),
-          StructField("output", StringType())))
+        Seq(StructField("input", ScalarType.Double),
+          StructField("output", ScalarType.String)))
     }
   }
 }

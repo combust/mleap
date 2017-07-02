@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MinMaxScalerModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 
 import ml.combust.mleap.tensor.Tensor
@@ -12,7 +12,7 @@ import org.scalatest.FunSpec
   * Created by mikhail on 9/25/16.
   */
 class MinMaxScalerSpec extends FunSpec{
-  val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
+  val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 20.0)))))
   val frame = LeapFrame(schema, dataset)
 
@@ -42,8 +42,8 @@ class MinMaxScalerSpec extends FunSpec{
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(minMaxScaler.getFields().get ==
-        Seq(StructField("test_vec", TensorType(DoubleType())),
-          StructField("test_normalized", TensorType(DoubleType()))))
+        Seq(StructField("test_vec", TensorType(BasicType.Double)),
+          StructField("test_normalized", TensorType(BasicType.Double))))
     }
   }
 }

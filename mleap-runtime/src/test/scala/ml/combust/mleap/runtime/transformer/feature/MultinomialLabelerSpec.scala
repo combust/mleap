@@ -3,7 +3,6 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.{MultinomialLabelerModel, ReverseStringIndexerModel}
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -12,7 +11,7 @@ import org.scalatest.FunSpec
   */
 class MultinomialLabelerSpec extends FunSpec {
 
-  val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
+  val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 10.0, 20.0)))))
   val frame = LeapFrame(schema, dataset)
   val transformer = MultinomialLabeler(featuresCol = "test_vec",
@@ -37,9 +36,9 @@ class MultinomialLabelerSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(transformer.getFields().get ==
-        Seq(StructField("test_vec", TensorType(DoubleType())),
-          StructField("probs", ListType(DoubleType())),
-          StructField("labels", ListType(StringType()))))
+        Seq(StructField("test_vec", TensorType(BasicType.Double)),
+          StructField("probs", ListType(BasicType.Double)),
+          StructField("labels", ListType(BasicType.String))))
     }
   }
 }

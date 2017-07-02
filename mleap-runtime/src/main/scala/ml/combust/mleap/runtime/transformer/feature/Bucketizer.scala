@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BucketizerModel
-import ml.combust.mleap.core.types.{DoubleType, StructField}
+import ml.combust.mleap.core.types.{ScalarType, StructField}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 
@@ -17,8 +17,8 @@ case class Bucketizer(override val uid: String = Transformer.uniqueName("bucketi
   override val exec: UserDefinedFunction = (value: Double) => model(value)
 
   override def getFields(): Try[Seq[StructField]] = Success(
-    Seq(StructField(inputCol, DoubleType()),
-      StructField(outputCol, DoubleType())))
+    Seq(StructField(inputCol, ScalarType.Double),
+      StructField(outputCol, ScalarType.Double)))
 }
 
 object BucketizerUtil {

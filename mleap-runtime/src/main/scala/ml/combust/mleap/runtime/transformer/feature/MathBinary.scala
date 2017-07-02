@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MathBinaryModel
-import ml.combust.mleap.core.types.{DoubleType, StructField}
+import ml.combust.mleap.core.types.{ScalarType, StructField}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -32,17 +32,17 @@ case class MathBinary(override val uid: String = Transformer.uniqueName("math_bi
 
   override def getFields(): Try[Seq[StructField]] = {
     (inputA, inputB) match {
-      case (Some(a), Some(b)) => Success(Seq(StructField(a, DoubleType()),
-                                              StructField(b, DoubleType()),
-                                              StructField(outputCol, DoubleType())))
+      case (Some(a), Some(b)) => Success(Seq(StructField(a, ScalarType.Double),
+                                              StructField(b, ScalarType.Double),
+                                              StructField(outputCol, ScalarType.Double)))
       case (Some(a), None) => Success(Seq(
-        StructField(a, DoubleType()),
-        StructField(outputCol, DoubleType())))
+        StructField(a, ScalarType.Double),
+        StructField(outputCol, ScalarType.Double)))
       case (None, Some(b)) => Success(Seq(
-        StructField(b, DoubleType()),
-        StructField(outputCol, DoubleType())))
+        StructField(b, ScalarType.Double),
+        StructField(outputCol, ScalarType.Double)))
       case (None, None) => Success(Seq(
-        StructField(outputCol, DoubleType())))
+        StructField(outputCol, ScalarType.Double)))
     }
   }
 }

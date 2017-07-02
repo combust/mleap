@@ -5,7 +5,6 @@ import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 
 import scala.util.{Success, Try}
@@ -27,8 +26,8 @@ case class MultinomialLabeler(override val uid: String = Transformer.uniqueName(
   }
 
   override def getFields(): Try[Seq[StructField]] = {
-    Success(Seq(StructField(featuresCol, TensorType(DoubleType())),
-          StructField(probabilitiesCol, ListType(DoubleType())),
-          StructField(labelsCol, ListType(StringType()))))
+    Success(Seq(StructField(featuresCol, TensorType(BasicType.Double)),
+          StructField(probabilitiesCol, ListType(BasicType.Double)),
+          StructField(labelsCol, ListType(BasicType.String))))
   }
 }

@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.types.{DoubleType, ListType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
 class BucketedRandomProjectionLSHSpec extends FunSpec {
@@ -9,8 +9,8 @@ class BucketedRandomProjectionLSHSpec extends FunSpec {
     it("has the correct inputs and outputs") {
       val transformer = new BucketedRandomProjectionLSH("transformer", "input", "output", null)
       assert(transformer.getFields().get ==
-        Seq(StructField("input", TensorType(DoubleType())),
-          StructField("output", ListType(TensorType(DoubleType())))))
+        Seq(StructField("input", TensorType(BasicType.Double)),
+          StructField("output", TensorType(BasicType.Double))))
     }
   }
 }

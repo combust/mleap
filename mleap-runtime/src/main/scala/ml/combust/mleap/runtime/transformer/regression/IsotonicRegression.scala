@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.IsotonicRegressionModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -30,11 +30,11 @@ case class IsotonicRegression(override val uid: String = Transformer.uniqueName(
   override def getFields(): Try[Seq[StructField]] = {
     model.featureIndex match {
       case Some(index) => Success(Seq(
-        StructField(featuresCol, TensorType(DoubleType())),
-        StructField(predictionCol, DoubleType())))
+        StructField(featuresCol, TensorType(BasicType.Double)),
+        StructField(predictionCol, ScalarType.Double)))
       case None => Success(Seq(
-        StructField(featuresCol, DoubleType()),
-        StructField(predictionCol, DoubleType())))
+        StructField(featuresCol, ScalarType.Double),
+        StructField(predictionCol, ScalarType.Double)))
     }
   }
 }

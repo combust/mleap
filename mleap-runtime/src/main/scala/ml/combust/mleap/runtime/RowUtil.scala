@@ -51,14 +51,10 @@ object RowUtil {
           }
       }
     case ArraySelector(fields@_*) =>
-      if (dataType == ListType(AnyType(false))) {
-        schema.indicesOf(fields: _*).map {
-          indices =>
-            val indicesArr = indices
-            r => indicesArr.map(r.get)
-        }
-      } else {
-        Failure(new IllegalArgumentException(s"multiple field selector must be an Array[Any], found $dataType"))
+      schema.indicesOf(fields: _*).map {
+        indices =>
+          val indicesArr = indices
+          r => indicesArr.map(r.get)
       }
   }
 }

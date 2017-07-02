@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
 class StandardScalerSpec extends FunSpec {
@@ -9,8 +9,8 @@ class StandardScalerSpec extends FunSpec {
     it("has the correct inputs and outputs") {
       val transformer = new StandardScaler("transformer", "input", "output", null)
       assert(transformer.getFields().get ==
-        Seq(StructField("input", TensorType(DoubleType())),
-          StructField("output", TensorType(DoubleType()))))
+        Seq(StructField("input", TensorType(BasicType.Double)),
+          StructField("output", TensorType(BasicType.Double))))
     }
   }
 }

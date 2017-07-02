@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.LinearRegressionModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
@@ -11,7 +11,7 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 9/15/16.
   */
 class LinearRegressionSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("features", TensorType(DoubleType())))).get
+  val schema = StructType(Seq(StructField("features", TensorType(BasicType.Double)))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)))))
   val frame = LeapFrame(schema, dataset)
   val linearRegression = LinearRegression(featuresCol = "features",
@@ -41,8 +41,8 @@ class LinearRegressionSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(linearRegression.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+        Seq(StructField("features", TensorType(BasicType.Double, Some(Seq(3)))),
+          StructField("prediction", ScalarType.Double)))
     }
   }
 }

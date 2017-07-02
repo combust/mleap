@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.PcaModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 
 import ml.combust.mleap.tensor.Tensor
@@ -12,7 +12,7 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 10/12/16.
   */
 class PcaSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
+  val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(2.0, 1.0, 0.0)))))
   val frame = LeapFrame(schema, dataset)
 
@@ -41,8 +41,8 @@ class PcaSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(pca.getFields().get ==
-        Seq(StructField("test_vec", TensorType(DoubleType())),
-          StructField("test_pca", TensorType(DoubleType()))))
+        Seq(StructField("test_vec", TensorType(BasicType.Double)),
+          StructField("test_pca", TensorType(BasicType.Double))))
     }
   }
 }

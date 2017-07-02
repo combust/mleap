@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.KMeansModel
-import ml.combust.mleap.core.types.{DoubleType, IntegerType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -24,6 +24,6 @@ case class KMeans(override val uid: String = Transformer.uniqueName("k_means"),
   }
 
   override def getFields(): Try[Seq[StructField]] = Success(
-    Seq(StructField(featuresCol, TensorType(DoubleType())),
-      StructField(predictionCol, IntegerType())))
+    Seq(StructField(featuresCol, TensorType(BasicType.Double)),
+      StructField(predictionCol, ScalarType.Int)))
 }

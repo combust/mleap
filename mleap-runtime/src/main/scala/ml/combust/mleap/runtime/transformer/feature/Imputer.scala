@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.ImputerModel
-import ml.combust.mleap.core.types.{DataType, DoubleType, StructField}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
 
@@ -17,7 +17,7 @@ case class Imputer(override val uid: String = Transformer.uniqueName("imputer"),
   override val exec: UserDefinedFunction = (value: Any) => model.predictAny(value)
 
   override def getFields(): Try[Seq[StructField]] = {
-    Success(Seq(StructField(inputCol, DoubleType(model.inputNullable)),
-      StructField(outputCol, DoubleType())))
+    Success(Seq(StructField(inputCol, ScalarType(BasicType.Double, model.inputNullable)),
+      StructField(outputCol, ScalarType.Double)))
   }
 }

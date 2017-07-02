@@ -1,13 +1,12 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.RegexTokenizerModel
-import ml.combust.mleap.core.types.{ListType, StringType, StructField, StructType}
-import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import org.scalatest.FunSpec
 
 class RegexTokenizerSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("test_string", StringType()))).get
+  val schema = StructType(Seq(StructField("test_string", ScalarType.String))).get
   val dataset = LocalDataset(Seq(Row("dies isT Ein TEST text te")))
   val frame = LeapFrame(schema, dataset)
 
@@ -52,8 +51,8 @@ class RegexTokenizerSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(wordRegexTokenizer.getFields().get ==
-        Seq(StructField("test_string", StringType()),
-          StructField("test_tokens", ListType(StringType()))))
+        Seq(StructField("test_string", ScalarType.String),
+          StructField("test_tokens", ListType(BasicType.String))))
     }
   }
 }

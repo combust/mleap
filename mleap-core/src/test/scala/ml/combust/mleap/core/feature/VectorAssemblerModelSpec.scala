@@ -2,7 +2,7 @@ package ml.combust.mleap.core.feature
 
 import java.math.BigDecimal
 
-import ml.combust.mleap.core.types.{DoubleType, ScalarShape, TensorShape, TensorType}
+import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 
@@ -12,7 +12,7 @@ import org.scalatest.FunSpec
 class VectorAssemblerModelSpec extends FunSpec {
   describe("#apply") {
     it("assembles doubles and vectors into a new vector") {
-      val assembler = VectorAssemblerModel(DoubleType(), Seq(
+      val assembler = VectorAssemblerModel(BasicType.Double, Seq(
         ScalarShape(), ScalarShape(),
         TensorShape(2),
         TensorShape(5)))

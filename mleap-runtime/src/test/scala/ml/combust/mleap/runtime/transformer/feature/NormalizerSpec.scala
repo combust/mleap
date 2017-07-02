@@ -1,9 +1,8 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.NormalizerModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -11,7 +10,7 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 9/24/16.
   */
 class NormalizerSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
+  val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 40.0)))))
   val frame = LeapFrame(schema, dataset)
 
@@ -40,8 +39,8 @@ class NormalizerSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(normalizer.getFields().get ==
-        Seq(StructField("test_vec", TensorType(DoubleType())),
-          StructField("test_norm", TensorType(DoubleType()))))
+        Seq(StructField("test_vec", TensorType(BasicType.Double)),
+          StructField("test_norm", TensorType(BasicType.Double))))
     }
   }
 }

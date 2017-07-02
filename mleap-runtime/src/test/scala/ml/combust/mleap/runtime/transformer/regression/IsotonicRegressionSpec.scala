@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.IsotonicRegressionModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
 class IsotonicRegressionSpec extends FunSpec {
@@ -14,8 +14,8 @@ class IsotonicRegressionSpec extends FunSpec {
         isotonic = true,
         featureIndex = None))
       assert(transformer.getFields().get ==
-        Seq(StructField("features", DoubleType()),
-          StructField("prediction", DoubleType())))
+        Seq(StructField("features", ScalarType.Double),
+          StructField("prediction", ScalarType.Double)))
     }
 
     it("has the correct inputs and outputs with feature index") {
@@ -25,8 +25,8 @@ class IsotonicRegressionSpec extends FunSpec {
           isotonic = true,
           featureIndex = Some(2)))
       assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+        Seq(StructField("features", TensorType(BasicType.Double)),
+          StructField("prediction", ScalarType.Double)))
     }
   }
 }

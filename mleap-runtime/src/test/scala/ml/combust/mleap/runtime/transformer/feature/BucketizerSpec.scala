@@ -1,16 +1,15 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BucketizerModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, StructType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 9/28/16.
   */
 class BucketizerSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("test_double", DoubleType()))).get
+  val schema = StructType(Seq(StructField("test_double", ScalarType.Double))).get
   val dataset = LocalDataset(Seq(Row(11.0), Row(0.0), Row(55.0)))
   val frame = LeapFrame(schema, dataset)
 
@@ -45,8 +44,8 @@ class BucketizerSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(bucketizer.getFields().get ==
-        Seq(StructField("test_double", DoubleType()),
-          StructField("test_bucket", DoubleType())))
+        Seq(StructField("test_double", ScalarType.Double),
+          StructField("test_bucket", ScalarType.Double)))
     }
   }
 }

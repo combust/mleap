@@ -2,16 +2,15 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MathUnaryModel
 import ml.combust.mleap.core.feature.UnaryOperation.Sin
-import ml.combust.mleap.core.types.{DoubleType, StructField, StructType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 12/27/16.
   */
 class MathUnarySpec extends FunSpec {
-  val schema = StructType(StructField("test_a", DoubleType())).get
+  val schema = StructType(StructField("test_a", ScalarType.Double)).get
   val dataset = LocalDataset(Seq(Row(42.0)))
   val frame = LeapFrame(schema, dataset)
 
@@ -29,8 +28,8 @@ class MathUnarySpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(transformer.getFields().get ==
-        Seq(StructField("test_a", DoubleType()),
-          StructField("test_out", DoubleType())))
+        Seq(StructField("test_a", ScalarType.Double),
+          StructField("test_out", ScalarType.Double)))
     }
   }
 }

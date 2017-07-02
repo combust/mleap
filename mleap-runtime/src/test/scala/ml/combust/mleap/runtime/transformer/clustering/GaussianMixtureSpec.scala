@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
-import ml.combust.mleap.core.types.{DoubleType, IntegerType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
 class GaussianMixtureSpec extends FunSpec {
@@ -9,16 +9,16 @@ class GaussianMixtureSpec extends FunSpec {
     it("has the correct inputs and outputs with only prediction column") {
       val transformer = GaussianMixture("transformer", "features", "prediction", None, null)
       assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", IntegerType())))
+        Seq(StructField("features", TensorType(BasicType.Double)),
+          StructField("prediction", ScalarType.Int)))
     }
 
     it("has the correct inputs and outputs with only prediction column as well as probability column") {
       val transformer = GaussianMixture("transformer", "features", "prediction", Some("probability"), null)
       assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", IntegerType()),
-          StructField("probability", TensorType(DoubleType()))))
+        Seq(StructField("features", TensorType(BasicType.Double)),
+          StructField("prediction", ScalarType.Int),
+          StructField("probability", TensorType(BasicType.Double))))
     }
   }
 }

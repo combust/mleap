@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.ChiSqSelectorModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types.{BasicType, StructField, TensorType}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -24,7 +24,7 @@ case class ChiSqSelector(override val uid: String = Transformer.uniqueName("chi_
   }
 
   override def getFields(): Try[Seq[StructField]] = Success(Seq(
-    StructField(featuresCol, TensorType(DoubleType())),
-    StructField(outputCol, TensorType(DoubleType())))
+    StructField(featuresCol, TensorType(BasicType.Double)),
+    StructField(outputCol, TensorType(BasicType.Double)))
   )
 }

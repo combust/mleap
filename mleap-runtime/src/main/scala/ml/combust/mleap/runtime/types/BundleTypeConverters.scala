@@ -12,29 +12,29 @@ import scala.language.implicitConversions
 trait BundleTypeConverters {
   implicit def bundleToMleapBasicType(b: bundle.BasicType): BasicType = {
     b match {
-      case bundle.BasicType.BOOLEAN => BooleanType()
-      case bundle.BasicType.BYTE => ByteType()
-      case bundle.BasicType.SHORT => ShortType()
-      case bundle.BasicType.INT => IntegerType()
-      case bundle.BasicType.LONG => LongType()
-      case bundle.BasicType.FLOAT => FloatType()
-      case bundle.BasicType.DOUBLE => DoubleType()
-      case bundle.BasicType.STRING => StringType()
-      case bundle.BasicType.BYTE_STRING => ByteStringType()
+      case bundle.BasicType.BOOLEAN => BasicType.Boolean
+      case bundle.BasicType.BYTE => BasicType.Byte
+      case bundle.BasicType.SHORT => BasicType.Short
+      case bundle.BasicType.INT => BasicType.Int
+      case bundle.BasicType.LONG => BasicType.Long
+      case bundle.BasicType.FLOAT => BasicType.Float
+      case bundle.BasicType.DOUBLE => BasicType.Double
+      case bundle.BasicType.STRING => BasicType.String
+      case bundle.BasicType.BYTE_STRING => BasicType.ByteString
       case _ => throw new IllegalArgumentException(s"unsupported data type $b")
     }
   }
 
   implicit def mleapToBundleBasicType(b: BasicType): bundle.BasicType = b match {
-    case BooleanType(false) => bundle.BasicType.BOOLEAN
-    case ByteType(false) => bundle.BasicType.BYTE
-    case ShortType(false) => bundle.BasicType.SHORT
-    case IntegerType(false) => bundle.BasicType.INT
-    case LongType(false) => bundle.BasicType.LONG
-    case FloatType(false) => bundle.BasicType.FLOAT
-    case DoubleType(false) => bundle.BasicType.DOUBLE
-    case StringType(false) => bundle.BasicType.STRING
-    case ByteStringType(false) => bundle.BasicType.BYTE_STRING
+    case BasicType.Boolean => bundle.BasicType.BOOLEAN
+    case BasicType.Byte => bundle.BasicType.BYTE
+    case BasicType.Short => bundle.BasicType.SHORT
+    case BasicType.Int => bundle.BasicType.INT
+    case BasicType.Long => bundle.BasicType.LONG
+    case BasicType.Float => bundle.BasicType.FLOAT
+    case BasicType.Double => bundle.BasicType.DOUBLE
+    case BasicType.String => bundle.BasicType.STRING
+    case BasicType.ByteString => bundle.BasicType.BYTE_STRING
     case _ => throw new IllegalArgumentException(s"unsupported type $b")
   }
 

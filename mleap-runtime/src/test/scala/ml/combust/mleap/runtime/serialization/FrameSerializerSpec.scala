@@ -10,15 +10,15 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 11/1/16.
   */
 class FrameSerializerSpec extends FunSpec {
-  val schema = StructType(StructField("features", TensorType(DoubleType())),
-    StructField("name", StringType()),
-    StructField("list_data", ListType(StringType())),
-    StructField("nullable_double", DoubleType(true)),
-    StructField("float", FloatType()),
-    StructField("byte_tensor", TensorType(ByteType())),
-    StructField("short_list", ListType(ShortType())),
-    StructField("byte_string", ByteStringType()),
-    StructField("nullable_string", StringType(true))).get
+  val schema = StructType(StructField("features", TensorType(BasicType.Double)),
+    StructField("name", ScalarType.String),
+    StructField("list_data", ListType(BasicType.String)),
+    StructField("nullable_double", ScalarType.Double.asNullable),
+    StructField("float", ScalarType.Float),
+    StructField("byte_tensor", TensorType(BasicType.Byte)),
+    StructField("short_list", ListType(BasicType.Short)),
+    StructField("byte_string", ScalarType.ByteString),
+    StructField("nullable_string", ScalarType.String.asNullable)).get
   val dataset = LocalDataset(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)),
     "hello", Seq("hello", "there"),
     Option(56.7d), 32.4f,

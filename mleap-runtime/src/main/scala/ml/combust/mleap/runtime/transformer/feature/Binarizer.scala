@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BinarizerModel
-import ml.combust.mleap.core.types.{DataType, DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.tensor.Tensor
@@ -22,9 +22,9 @@ case class Binarizer(override val uid: String = Transformer.uniqueName("binarize
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.schema.getField(inputCol).map(_.dataType).map {
-      case DoubleType(false) =>
+      case ScalarType(BasicType.Double, false) =>
         builder.withOutput(outputCol, inputCol)(execDouble)
-      case tt: TensorType if tt.base == DoubleType() && !tt.isNullable =>
+      case TensorType(BasicType.Double, _, false) =>
         builder.withOutput(outputCol, inputCol)(execTensor)
     }.getOrElse(Failure(new IllegalArgumentException("Input column must be double or double tensor")))
   }

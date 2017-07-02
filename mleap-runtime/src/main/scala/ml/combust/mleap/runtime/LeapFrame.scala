@@ -6,7 +6,6 @@ import ml.combust.mleap.core.types.{StructField, StructType, TupleType}
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.runtime.util.LeapFrameShow
 
 import scala.reflect.ClassTag
@@ -166,7 +165,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     * @param out stream to print to
     * @param n number of rows to show
     */
-  def show(out: PrintStream, n: Int) = {
+  def show(out: PrintStream, n: Int): Unit = {
     out.print(LeapFrameShow(this.lf, n))
   }
 }

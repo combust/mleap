@@ -20,7 +20,7 @@ class RowTransformBuilderSpec extends FunSpec {
     StructField("feature3", ScalarType.Double))).get
   val assembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
     outputCol = "features",
-    model = VectorAssemblerModel(BasicType.Double, Seq(ScalarShape(), ScalarShape(), ScalarShape())))
+    model = VectorAssemblerModel(BasicType.Double, Seq(ScalarShape(), ScalarShape(), ScalarShape()), 3))
   val linearRegression = LinearRegression(featuresCol = "features",
     predictionCol = "prediction",
     model = LinearRegressionModel(coefficients = Vectors.dense(Array(1.0, 0.5, 5.0)),

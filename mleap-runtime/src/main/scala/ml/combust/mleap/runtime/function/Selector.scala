@@ -13,7 +13,7 @@ import scala.language.implicitConversions
   * and array selector.
   *
   * [[FieldSelector]] selects the value of a given field.
-  * [[ArraySelector]] creates an array from the values of a given set of fields.
+  * [[TupleSelector]] creates an array from the values of a given set of fields.
   */
 sealed trait Selector
 
@@ -29,12 +29,12 @@ object Selector {
     */
   implicit def apply(name: String): FieldSelector = FieldSelector(name)
 
-  /** Create an [[ArraySelector]] for a given list of names.
+  /** Create an [[TupleSelector]] for a given list of names.
     *
     * @param names fields names used to construct the array
     * @return array selector
     */
-  implicit def apply(names: Array[String]): ArraySelector = ArraySelector(names: _*)
+  implicit def apply(names: Array[String]): TupleSelector = TupleSelector(names: _*)
 }
 
 /** Class for a selector that extracts the value of a field from a [[ml.combust.mleap.runtime.Row]].
@@ -47,4 +47,4 @@ case class FieldSelector(field: String) extends Selector
   *
   * @param fields names of fields used to construct array
   */
-case class ArraySelector(fields: String *) extends Selector
+case class TupleSelector(fields: String *) extends Selector

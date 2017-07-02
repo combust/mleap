@@ -26,6 +26,7 @@ case class Binarizer(override val uid: String = Transformer.uniqueName("binarize
         builder.withOutput(outputCol, inputCol)(execDouble)
       case TensorType(BasicType.Double, _, false) =>
         builder.withOutput(outputCol, inputCol)(execTensor)
+      case dt => Failure(new IllegalArgumentException(s"invalid input column type $dt"))
     }.getOrElse(Failure(new IllegalArgumentException("Input column must be double or double tensor")))
   }
 

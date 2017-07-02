@@ -1,10 +1,10 @@
 package ml.combust.mleap.runtime
 
 import ml.combust.mleap.runtime.Row.RowSelector
-import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector}
-import ml.combust.mleap.core.types.{AnyType, DataType, ListType, StructType}
+import ml.combust.mleap.runtime.function.{FieldSelector, Selector, TupleSelector}
+import ml.combust.mleap.core.types.{DataType, StructType, TupleData}
 
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 10/30/16.
@@ -42,19 +42,12 @@ object RowUtil {
                         selector: Selector,
                         dataType: DataType): Try[RowSelector] = selector match {
     case FieldSelector(name) =>
-      schema.indexedField(name).flatMap {
-        case (index, field) =>
-          if(dataType == field.dataType || dataType.isInstanceOf[AnyType]) {
-            Try(r => r.get(index))
-          } else {
-            Failure(new IllegalArgumentException(s"field $name data type ${field.dataType} does not match $dataType"))
-          }
-      }
-    case ArraySelector(fields@_*) =>
+      schema.indexOf(name).flatMap(index => Try(r => r.get(index)))
+    case TupleSelector(fields@_*) =>
       schema.indicesOf(fields: _*).map {
         indices =>
           val indicesArr = indices
-          r => indicesArr.map(r.get)
+          r => TupleData(indicesArr.map(r.get))
       }
   }
 }

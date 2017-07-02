@@ -15,7 +15,9 @@ import scala.collection.mutable
   * a model.
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/VectorAssembler.scala")
-case class VectorAssemblerModel(base: BasicType, inputShapes: Seq[DataShape]) extends Serializable {
+case class VectorAssemblerModel(base: BasicType,
+                                inputShapes: Seq[DataShape],
+                                outputSize: Int) extends Serializable {
   assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and tensor shapes as inputs")
 
   /** Assemble a feature vector from a set of input features.

@@ -48,7 +48,6 @@ trait MleapReflection {
       case t if t <:< mirrorType[Tensor[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t
         TensorType(basicTypeFor(elementType))
-      case t if t =:= mirrorType[Any] => AnyType()
       case t if t <:< mirrorType[Option[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t
         val baseType = dataTypeFor(elementType)

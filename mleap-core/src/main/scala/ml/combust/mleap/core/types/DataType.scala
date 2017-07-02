@@ -52,11 +52,6 @@ object BasicType {
   }
 }
 
-case class AnyType(override val isNullable: Boolean = false) extends DataType {
-  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
-  override def simpleString: String = "any"
-}
-
 object ScalarType {
   val Boolean = ScalarType(BasicType.Boolean)
   val Byte = ScalarType(BasicType.Byte)

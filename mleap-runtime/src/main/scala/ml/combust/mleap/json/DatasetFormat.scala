@@ -57,7 +57,6 @@ object DatasetFormat {
     case st: ScalarType => scalarSerializer(st)
     case lt: ListType => listSerializer(lt)
     case tt: TensorType => tensorSerializer(tt)
-    case AnyType(_) => serializationError("AnyType unsupported for serialization")
     case _: TupleType => serializationError("DataTypeSeq only used for UDFs with multiple outputs")
   }
 }

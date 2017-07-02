@@ -1,12 +1,12 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CoalesceModel
-import ml.combust.mleap.core.types.{DataType, ScalarType, StructField}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 1/5/17.
@@ -15,7 +15,10 @@ case class Coalesce(override val uid: String = Transformer.uniqueName("coalesce"
                     inputCols: Array[String],
                     outputCol: String,
                     model: CoalesceModel) extends Transformer {
-  val exec: UserDefinedFunction = (values: Seq[Any]) => model(values: _*)
+  private val f = (values: TupleData) => model(values.values: _*)
+  val exec: UserDefinedFunction = UserDefinedFunction(f,
+    TensorType(model.base),
+    Seq(TupleType(model.inputShapes.map(s => DataType(model.base, s)): _*)))
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(outputCol, inputCols)(exec)

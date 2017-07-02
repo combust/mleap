@@ -14,7 +14,11 @@ case class StringIndexer(override val uid: String = Transformer.uniqueName("stri
                          override val inputCol: String,
                          override val outputCol: String,
                          model: StringIndexerModel) extends FeatureTransformer {
-  val exec: UserDefinedFunction = (value: Any) => model(value).toDouble
+  val exec: UserDefinedFunction = if(model.inputNullable) {
+    (value: Option[String]) => model(value).toDouble
+  } else {
+    (value: String) => model(value).toDouble
+  }
 
   def toReverse: ReverseStringIndexer = ReverseStringIndexer(inputCol = inputCol,
     outputCol = outputCol,

@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.VectorAssemblerModel
-import ml.combust.mleap.core.types.{DataType, ScalarShape, StructField, TensorShape}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
@@ -17,7 +17,10 @@ case class VectorAssembler(override val uid: String = Transformer.uniqueName("ve
                            inputCols: Array[String],
                            outputCol: String,
                            model: VectorAssemblerModel) extends Transformer {
-  val exec: UserDefinedFunction = (values: Seq[Any]) => model(values): Tensor[Double]
+  private val f = (values: TupleData) => model(values.values): Tensor[Double]
+  val exec: UserDefinedFunction = UserDefinedFunction(f,
+    DataType(model.base, TensorShape(Seq(model.outputSize))),
+    Seq(TupleType(model.inputShapes.map(s => DataType(model.base, s)): _*)))
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     builder.withOutput(outputCol, inputCols)(exec)

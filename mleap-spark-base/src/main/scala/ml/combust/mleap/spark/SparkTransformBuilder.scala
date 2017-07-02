@@ -1,7 +1,7 @@
 package ml.combust.mleap.spark
 
 import ml.combust.mleap.core.types.StructType
-import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector, UserDefinedFunction}
+import ml.combust.mleap.runtime.function.{TupleSelector, FieldSelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.mleap.TypeConverters
@@ -40,6 +40,6 @@ case class SparkTransformBuilder(dataset: DataFrame) extends TransformBuilder[Sp
 
   private def sparkSelector(selector: Selector): Column = selector match {
     case FieldSelector(name) => dataset.col(name)
-    case ArraySelector(names @ _*) => struct(names.map(dataset.col): _*)
+    case TupleSelector(names @ _*) => struct(names.map(dataset.col): _*)
   }
 }

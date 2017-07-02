@@ -44,14 +44,23 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
 
   implicit val mleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
     override def write(obj: TensorType): JsValue = {
-      JsObject("type" -> JsString("tensor"),
+      var map = Map("type" -> JsString("tensor"),
         "base" -> mleapBasicTypeFormat.write(obj.base))
+
+      obj.dimensions.foreach {
+        dims => map = map + ("dimensions" -> dims.toJson)
+      }
+
+      JsObject(map)
     }
 
     override def read(json: JsValue): TensorType = {
       val obj = json.asJsObject("invalid tensor type")
 
-      TensorType(base = mleapBasicTypeFormat.read(obj.fields("base")))
+      val dimensions = obj.fields.get("dimensions").map {
+        dims => dims.convertTo[Seq[Int]]
+      }
+      TensorType(base = mleapBasicTypeFormat.read(obj.fields("base")), dimensions = dimensions)
     }
   })
 
@@ -73,25 +82,25 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
 
     def forName(name: String, isNullable: Boolean = false): BasicType = name match {
       case "boolean" => BooleanType(isNullable)
-      case "string" => StringType(isNullable)
       case "byte" => ByteType(isNullable)
       case "short" => ShortType(isNullable)
       case "integer" => IntegerType(isNullable)
       case "long" => LongType(isNullable)
       case "float" => FloatType(isNullable)
       case "double" => DoubleType(isNullable)
+      case "string" => StringType(isNullable)
       case "byte_string" => ByteStringType(isNullable)
     }
 
     override def write(obj: BasicType): JsValue = obj match {
       case BooleanType(isNullable) => writeMaybeNullable(JsString("boolean"), isNullable)
-      case StringType(isNullable) => writeMaybeNullable(JsString("string"), isNullable)
       case ByteType(isNullable) => writeMaybeNullable(JsString("byte"), isNullable)
       case ShortType(isNullable) => writeMaybeNullable(JsString("short"), isNullable)
       case IntegerType(isNullable) => writeMaybeNullable(JsString("integer"), isNullable)
       case LongType(isNullable) => writeMaybeNullable(JsString("long"), isNullable)
       case FloatType(isNullable) => writeMaybeNullable(JsString("float"), isNullable)
       case DoubleType(isNullable) => writeMaybeNullable(JsString("double"), isNullable)
+      case StringType(isNullable) => writeMaybeNullable(JsString("string"), isNullable)
       case ByteStringType(isNullable) => writeMaybeNullable(JsString("byte_string"), isNullable)
     }
 

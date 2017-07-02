@@ -28,6 +28,6 @@ case class LinearRegression(uid: String = Transformer.uniqueName("linear_regress
   }
 
   override def getFields(): Try[Seq[StructField]] = Success(
-    Seq(StructField(featuresCol, TensorType(DoubleType())),
+    Seq(StructField(featuresCol, TensorType(DoubleType(), Some(Seq(model.coefficients.size)))),
       StructField(predictionCol, DoubleType())))
 }

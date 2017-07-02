@@ -59,7 +59,7 @@ class MleapResourceSpec extends FunSpec with Matchers with ScalatestRouteTest wi
         assert(schema.getField("first_double").get.dataType == DoubleType())
         assert(schema.getField("second_double").get.dataType == DoubleType())
         assert(schema.getField("third_double").get.dataType == DoubleType())
-        assert(schema.getField("features").get.dataType == TensorType(DoubleType()))
+        assert(schema.getField("features").get.dataType == TensorType(DoubleType(), Some(Seq(3))))
         assert(schema.getField("prediction").get.dataType == DoubleType())
       }
     }

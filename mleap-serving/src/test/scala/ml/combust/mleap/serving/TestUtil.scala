@@ -8,7 +8,7 @@ import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.feature.VectorAssemblerModel
 import ml.combust.mleap.core.regression.LinearRegressionModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, StructType}
+import ml.combust.mleap.core.types.{DoubleType, ScalarShape, StructField, StructType}
 import ml.combust.mleap.runtime.transformer.Pipeline
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
@@ -38,7 +38,7 @@ object TestUtil {
   def serializeModelInJsonFormatToZipFile : String = {
     val bundleName = UUID.randomUUID().toString
 
-    val model = VectorAssemblerModel(Seq(DoubleType(), DoubleType(), DoubleType()))
+    val model = VectorAssemblerModel(DoubleType(), Seq(ScalarShape(), ScalarShape(), ScalarShape()))
     val featureAssembler = VectorAssembler(inputCols = Array("first_double", "second_double", "third_double"),
       outputCol = "features",
       model = model)

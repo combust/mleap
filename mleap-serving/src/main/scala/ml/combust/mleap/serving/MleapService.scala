@@ -46,7 +46,9 @@ class MleapService()
   def getSchema(): Try[StructType] = synchronized {
     bundle.map {
       _.root.getFields() match {
-        case Success(fields) => StructType(fields.toSet.toSeq)
+        case Success(fields) =>
+          val uniqueFields = fields.groupBy(_.name).map(_._2.head)
+          StructType(uniqueFields.toSeq)
         case Failure(ex) => return Failure(ex)
       }
     }.getOrElse(Failure(new IllegalStateException("no transformer loaded")))

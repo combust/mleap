@@ -1,12 +1,13 @@
 package org.apache.spark.ml.bundle.ops.feature
 
+import ml.bundle.DataShape
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.sql.mleap.TypeConverters.mleapType
-import ml.combust.mleap.runtime.types.BundleTypeConverters.mleapTypeToBundleType
+import org.apache.spark.sql.mleap.TypeConverters._
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -22,9 +23,9 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
       assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
       val dataset = context.context.dataset.get
-      val inputTypes = obj.getInputCols.map(i => mleapTypeToBundleType(mleapType(dataset.schema(i).dataType)))
+      val inputShapes = obj.getInputCols.map(i => sparkToMleapDataShape(dataset.schema(i)): DataShape)
 
-      model.withValue("input_types", Value.dataTypeList(inputTypes))
+      model.withValue("input_shapes", Value.dataShapeList(inputShapes))
     }
 
     override def load(model: Model)

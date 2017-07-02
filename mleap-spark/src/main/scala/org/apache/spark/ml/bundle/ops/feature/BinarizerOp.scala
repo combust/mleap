@@ -5,7 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.feature.Binarizer
-import org.apache.spark.sql.mleap.TypeConverters.mleapType
+import org.apache.spark.sql.mleap.TypeConverters._
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
@@ -23,8 +23,8 @@ class BinarizerOp extends OpNode[SparkBundleContext, Binarizer, Binarizer] {
 
       val dataset = context.context.dataset.get
 
-      model.withValue("data_type", Value.basicType(mleapType(dataset.schema(obj.getInputCol).dataType))).
-        withValue("threshold", Value.double(obj.getThreshold))
+      model.withValue("threshold", Value.double(obj.getThreshold)).
+        withValue("input_shape", Value.dataShape(sparkToMleapDataShape(dataset.schema(obj.getInputCol), Some(dataset))))
     }
 
     override def load(model: Model)

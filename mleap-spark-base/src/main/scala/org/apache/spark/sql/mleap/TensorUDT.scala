@@ -18,7 +18,7 @@ object TensorUDT {
   UDTRegistration.register(classOf[Tensor[_]].getName, classOf[TensorUDT].getName)
 }
 
-class TensorUDT(val base: BasicType) extends UserDefinedType[Tensor[_]] {
+class TensorUDT(val base: BasicType, val dimensions: Seq[Int]) extends UserDefinedType[Tensor[_]] {
   val BOOLEAN: Byte = 0
   val STRING: Byte = 1
   val BYTE: Byte = 2

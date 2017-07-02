@@ -1,6 +1,6 @@
 package org.apache.spark.mllib.clustering.bundle.tree.clustering
 
-import ml.bundle.tree.clustering.Node.Node
+import ml.bundle.ctree.ctree.Node
 import ml.combust.bundle.tree.cluster.NodeWrapper
 import org.apache.spark.mllib.clustering.{ClusteringTreeNode, VectorWithNorm}
 import org.apache.spark.mllib.linalg.Vectors

@@ -3,10 +3,8 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.feature.StringIndexerModel
-import org.apache.spark.sql.mleap.TypeConverters.mleapType
-import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -19,8 +17,13 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withValue("labels", Value.stringList(obj.labels))
-        .withValue("handle_invalid", Value.string(obj.getHandleInvalid))
+      assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
+
+      val dataset = context.context.dataset.get
+
+      model.withValue("labels", Value.stringList(obj.labels)).
+        withValue("nullable_input", Value.boolean(dataset.schema(obj.getInputCol).nullable)).
+        withValue("handle_invalid", Value.string(obj.getHandleInvalid))
     }
 
     override def load(model: Model)

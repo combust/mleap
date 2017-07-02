@@ -1,7 +1,9 @@
 package org.apache.spark.sql.mleap
 
 import ml.combust.mleap.core.types
-import ml.combust.mleap.core.types.{BasicType, ScalarType}
+import ml.combust.mleap.core.types.{DataType => _, StructField => _, StructType => _, _}
+import org.apache.spark.ml.linalg.VectorUDT
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types._
 
 import scala.language.implicitConversions
@@ -25,7 +27,9 @@ trait TypeConverters {
   implicit def mleapToSparkType(dataType: types.DataType): DataType = dataType match {
     case types.ScalarType(base, _) => base
     case types.ListType(base, _) => ArrayType(base, containsNull = false)
-    case types.TensorType(base, _, _) => new TensorUDT(base)
+    case types.TensorType(base, dimensions, _) =>
+      // TODO: eventually dimensions will not be optional
+      new TensorUDT(base, dimensions.getOrElse(Seq()))
     case types.TupleType(dts @ _*) =>
       val fields = dts.zipWithIndex.map {
         case (dt, index) => StructField(s"_$index", mleapToSparkType(dt))
@@ -47,6 +51,19 @@ trait TypeConverters {
     case _ => throw new IllegalArgumentException(s"invalid basic Spark type $dataType")
   }
 
+  def sparkToMleapDataShape(field: StructField,
+                            td: Option[DataFrame] = None): types.DataShape = field.dataType match {
+    case BooleanType | ByteType | ShortType
+         | IntegerType | LongType | FloatType
+         | DoubleType | StringType | ArrayType(ByteType, false) => ScalarShape(field.nullable)
+    case ArrayType(_, false) => ListShape(field.nullable)
+    case tu: TensorUDT => TensorShape(tu.dimensions, field.nullable)
+    case vu: VectorUDT =>
+      // TODO: calculate dimensions
+      TensorShape(Seq(), field.nullable)
+    case _ => throw new IllegalArgumentException("invalid struct field for shape")
+  }
+
   implicit def sparkToMleapStructField(field: StructField): types.StructField = {
     val dt = field.dataType match {
       case BooleanType => ScalarType.Boolean
@@ -58,8 +75,9 @@ trait TypeConverters {
       case DoubleType => ScalarType.Double
       case StringType => ScalarType.String
       case ArrayType(ByteType, false) => ScalarType.ByteString // TODO: make a custom type for byte string
-      case ArrayType(base, _) => types.ListType(base)
+      case ArrayType(base, false) => types.ListType(base)
       case tu: TensorUDT => types.TensorType(tu.base)
+      case _ => throw new IllegalArgumentException(s"invalid struct field $field")
     }
 
     types.StructField(field.name, dt.setNullable(field.nullable))

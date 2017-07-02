@@ -1,16 +1,17 @@
 package org.apache.spark.ml.bundle.ops.feature
 
+import ml.bundle.DataShape
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.annotation.SparkCode
-import ml.combust.mleap.runtime.types.BundleTypeConverters.mleapTypeToBundleType
 import org.apache.spark.ml.attribute.{Attribute, AttributeGroup, NominalAttribute}
 import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.feature.Interaction
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.mleap.TypeConverters.mleapType
+import org.apache.spark.sql.mleap.TypeConverters._
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 import org.apache.spark.sql.types.{BooleanType, NumericType}
 
 /**
@@ -28,11 +29,11 @@ class InteractionOp extends OpNode[SparkBundleContext, Interaction, Interaction]
 
       val dataset = context.context.dataset.get
       val spec = buildSpec(obj.getInputCols, dataset)
-      val inputTypes = obj.getInputCols.map(v => mleapTypeToBundleType(mleapType(dataset.schema(v).dataType)))
+      val inputShapes = obj.getInputCols.map(v => sparkToMleapDataShape(dataset.schema(v), Some(dataset)): DataShape)
 
       val m = model.withValue("num_inputs", Value.int(spec.length)).
-        withValue("input_types", Value.dataTypeList(inputTypes)).
-        withAttr("data_type", Value.basicType(mleapTypeToBundleType(dataset.schema(obj.getOutputCol).dataType)))
+        withValue("input_shapes", Value.dataShapeList(inputShapes))
+
       spec.zipWithIndex.foldLeft(m) {
         case (m2, (numFeatures, index)) => m2.withValue(s"num_features$index", Value.intList(numFeatures))
       }

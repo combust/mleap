@@ -17,7 +17,7 @@ class VectorAssemblerSpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
   val vectorAssembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
     outputCol = "features",
-    model = VectorAssemblerModel(BasicType.Double, Seq(TensorShape(3), ScalarShape(), ScalarShape()), 5))
+    model = VectorAssemblerModel(BasicType.Double, Seq(TensorShape(3), ScalarShape(), ScalarShape())))
 
   describe("#transform") {
     it("assembles its inputs into a new vector") {

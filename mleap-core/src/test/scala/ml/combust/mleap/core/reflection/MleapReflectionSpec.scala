@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.reflection
 
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
 
 /**
@@ -13,11 +13,12 @@ class MleapReflectionSpec extends FunSpec {
 
     it("returns the Mleap runtime data type from the Scala type") {
       assert(dataType[Boolean] == ScalarType.Boolean)
-      assert(dataType[String] == ScalarType.String)
       assert(dataType[Int] == ScalarType.Int)
       assert(dataType[Long] == ScalarType.Long)
       assert(dataType[Float] == ScalarType.Float)
       assert(dataType[Double] == ScalarType.Double)
+      assert(dataType[String] == ScalarType.String)
+      assert(dataType[ByteString] == ScalarType.ByteString)
       assert(dataType[Seq[Boolean]] == ListType(BasicType.Boolean))
       assert(dataType[Seq[String]] == ListType(BasicType.String))
       assert(dataType[Seq[Int]] == ListType(BasicType.Int))
@@ -29,7 +30,6 @@ class MleapReflectionSpec extends FunSpec {
       assert(dataType[Option[Long]] == ScalarType.Long.asNullable)
       assert(dataType[Option[Double]] == ScalarType.Double.asNullable)
       assert(dataType[Tensor[Double]] == TensorType(BasicType.Double))
-      assert(dataType[Any] == AnyType())
       assert(dataType[(String, Double)] == TupleType(ScalarType.String, ScalarType.Double))
     }
 

@@ -2,7 +2,7 @@ package ml.combust.mleap.serving
 
 import java.nio.file.NoSuchFileException
 
-import ml.combust.mleap.core.types.{DoubleType, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.serving.domain.v1._
 import org.scalatest.{AsyncFunSpec, Matchers}
 
@@ -86,11 +86,11 @@ class MleapServiceSpec extends AsyncFunSpec with Matchers {
         assert(result.isSuccess)
         val schema = result.get
         assert(schema.fields.size == 5)
-        assert(schema.getField("first_double").get.dataType == DoubleType())
-        assert(schema.getField("second_double").get.dataType == DoubleType())
-        assert(schema.getField("third_double").get.dataType == DoubleType())
-        assert(schema.getField("features").get.dataType == TensorType(DoubleType(), Some(Seq(3))))
-        assert(schema.getField("prediction").get.dataType == DoubleType())
+        assert(schema.getField("first_double").get.dataType == ScalarType.Double)
+        assert(schema.getField("second_double").get.dataType == ScalarType.Double)
+        assert(schema.getField("third_double").get.dataType == ScalarType.Double)
+        assert(schema.getField("features").get.dataType == TensorType(BasicType.Double, Some(Seq(3))))
+        assert(schema.getField("prediction").get.dataType == ScalarType.Double)
       })
     }
 

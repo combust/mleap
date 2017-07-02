@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.annotation.SparkCode
-import ml.combust.mleap.core.types.{BasicType, DataShape, DataType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
@@ -16,9 +16,14 @@ import scala.collection.mutable
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/VectorAssembler.scala")
 case class VectorAssemblerModel(base: BasicType,
-                                inputShapes: Seq[DataShape],
-                                outputSize: Int) extends Serializable {
-  assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and tensor shapes as inputs")
+                                inputShapes: Seq[DataShape]) extends Serializable {
+  assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and vector shapes as inputs")
+
+  val outputSize: Int = inputShapes.map {
+    case ScalarShape(_) => 1
+    case TensorShape(Seq(size), _) => size
+    case _ => throw new IllegalArgumentException("must provide scalar and vector shapes as inputs")
+  }.sum
 
   /** Assemble a feature vector from a set of input features.
     *

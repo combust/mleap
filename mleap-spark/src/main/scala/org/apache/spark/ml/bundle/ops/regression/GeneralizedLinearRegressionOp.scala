@@ -18,10 +18,10 @@ class GeneralizedLinearRegressionOp extends OpNode[SparkBundleContext, Generaliz
 
     override def store(model: Model, obj: GeneralizedLinearRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
-        withAttr("intercept", Value.double(obj.intercept)).
-        withAttr("family", Value.string(obj.getFamily)).
-        withAttr("link", Value.string(obj.getLink))
+      model.withValue("coefficients", Value.vector(obj.coefficients.toArray)).
+        withValue("intercept", Value.double(obj.intercept)).
+        withValue("family", Value.string(obj.getFamily)).
+        withValue("link", Value.string(obj.getLink))
     }
 
     override def load(model: Model)

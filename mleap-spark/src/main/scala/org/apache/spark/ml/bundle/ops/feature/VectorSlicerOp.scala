@@ -28,9 +28,9 @@ class VectorSlicerOp extends OpNode[SparkBundleContext, VectorSlicer, VectorSlic
       } else { Array() }
       val (names, namedIndices) = namedIndicesMap.unzip
 
-      model.withAttr("indices", Value.longList(obj.getIndices.map(_.toLong).toSeq)).
-        withAttr("names", Value.stringList(names)).
-        withAttr("named_indices", Value.intList(namedIndices))
+      model.withValue("indices", Value.longList(obj.getIndices.map(_.toLong).toSeq)).
+        withValue("names", Value.stringList(names)).
+        withValue("named_indices", Value.intList(namedIndices))
     }
 
     override def load(model: Model)

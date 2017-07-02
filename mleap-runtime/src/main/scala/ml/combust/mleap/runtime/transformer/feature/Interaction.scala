@@ -1,14 +1,14 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.InteractionModel
-import ml.combust.mleap.core.types.StructField
+import ml.combust.mleap.core.types.{DataType, StructField, TensorShape}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.tensor.Tensor
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 4/26/17.
@@ -24,9 +24,11 @@ case class Interaction(override val uid: String = Transformer.uniqueName("intera
   }
 
   override def getFields(): Try[Seq[StructField]] = {
-    val inputFields = inputCols.zip(model.inputTypes).map {
-      case (name, t) => StructField(name, t)
+    val inputFields = inputCols.zip(model.inputShapes).map {
+      case (name, shape) => StructField(name, DataType(model.base, shape))
     }
-    Success(inputFields :+ StructField(outputCol, model.outputType))
+    val outputSize = model.featuresSpec.map(_.sum).product
+
+    Success(inputFields :+ StructField(outputCol, DataType(model.base, TensorShape(outputSize))))
   }
 }

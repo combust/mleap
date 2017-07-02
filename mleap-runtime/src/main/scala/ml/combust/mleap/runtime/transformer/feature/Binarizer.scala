@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BinarizerModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.types.{DataType, DoubleType, StructField, TensorType}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.tensor.Tensor
@@ -30,7 +30,7 @@ case class Binarizer(override val uid: String = Transformer.uniqueName("binarize
   }
 
   override def getFields(): Try[Seq[StructField]] = {
-    Success(Seq(StructField(inputCol, model.dataType),
-      StructField(outputCol, model.dataType)))
+    Success(Seq(StructField(inputCol, DataType(model.base, model.inputShape)),
+      StructField(outputCol, DataType(model.base, model.inputShape))))
   }
 }

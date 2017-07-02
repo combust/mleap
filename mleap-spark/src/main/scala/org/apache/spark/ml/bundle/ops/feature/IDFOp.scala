@@ -19,7 +19,7 @@ class IDFOp extends OpNode[SparkBundleContext, IDFModel, IDFModel] {
 
     override def store(model: Model, obj: IDFModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("idf", Value.vector(obj.idf.toArray))
+      model.withValue("idf", Value.vector(obj.idf.toArray))
     }
 
     override def load(model: Model)

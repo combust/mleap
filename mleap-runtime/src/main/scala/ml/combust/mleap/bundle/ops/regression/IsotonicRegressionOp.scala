@@ -18,10 +18,10 @@ class IsotonicRegressionOp extends OpNode[MleapContext, IsotonicRegression, Isot
 
     override def store(model: Model, obj: IsotonicRegressionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("boundaries", Value.doubleList(obj.boundaries.toSeq)).
-        withAttr("predictions", Value.doubleList(obj.predictions)).
-        withAttr("isotonic", Value.boolean(obj.isotonic)).
-        withAttr("feature_index", obj.featureIndex.map(v => Value.long(v)))
+      model.withValue("boundaries", Value.doubleList(obj.boundaries.toSeq)).
+        withValue("predictions", Value.doubleList(obj.predictions)).
+        withValue("isotonic", Value.boolean(obj.isotonic)).
+        withValue("feature_index", obj.featureIndex.map(v => Value.long(v)))
     }
 
     override def load(model: Model)

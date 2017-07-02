@@ -26,10 +26,10 @@ class VectorIndexerOp extends OpNode[SparkBundleContext, VectorIndexerModel, Vec
 
       mapValues.foldLeft(model) {
         case (m, (key, vKeys, vValues)) =>
-          m.withAttr(s"${key}_keys", Value.doubleList(vKeys)).
-            withAttr(s"${key}_values", Value.longList(vValues.map(_.toLong)))
-      }.withAttr("keys", Value.longList(keys.map(_.toLong).toSeq)).
-        withAttr("num_features", Value.long(obj.numFeatures))
+          m.withValue(s"${key}_keys", Value.doubleList(vKeys)).
+            withValue(s"${key}_values", Value.longList(vValues.map(_.toLong)))
+      }.withValue("keys", Value.longList(keys.map(_.toLong).toSeq)).
+        withValue("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(model: Model)

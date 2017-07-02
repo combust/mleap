@@ -1,7 +1,7 @@
 package ml.combust.bundle.dsl
 
 import com.google.protobuf
-import ml.bundle.{List, DataShape, DataType, Scalar, Tensor}
+import ml.bundle.{List, DataShape, BasicType, Scalar, Tensor}
 import ml.combust.bundle.tensor.TensorSerializer
 import ml.combust.mleap.tensor.ByteString
 import ml.combust.mleap
@@ -111,11 +111,11 @@ object Value {
 
   /** Create a data type value.
     *
-    * @param dt data type to store
+    * @param bt data type to store
     * @return value with data type
     */
-  def dataType(dt: DataType): Value = {
-    scalarValue(Scalar(dt = dt))
+  def basicType(bt: BasicType): Value = {
+    scalarValue(Scalar(bt = bt))
   }
 
   /** Create a data shape value.
@@ -229,7 +229,7 @@ object Value {
     * @param value data types
     * @return value with data types
     */
-  def basicTypeList(value: Seq[DataType]): Value = listValue(List(dt = value))
+  def basicTypeList(value: Seq[BasicType]): Value = listValue(List(bt = value))
 
   /** Create a list of data shapes.
     *
@@ -320,7 +320,7 @@ case class Value(value: ml.bundle.Value) {
     *
     * @return data type
     */
-  def getDataType: DataType = value.getS.dt
+  def getBasicType: BasicType = value.getS.bt
 
   /** Get value as a data shape.
     *
@@ -399,7 +399,7 @@ case class Value(value: ml.bundle.Value) {
     *
     * @return list of data types
     */
-  def getDataTypeList: Seq[DataType] = value.getL.dt
+  def getBasicTypeList: Seq[BasicType] = value.getL.bt
 
   /** Get list of data shapes.
     *

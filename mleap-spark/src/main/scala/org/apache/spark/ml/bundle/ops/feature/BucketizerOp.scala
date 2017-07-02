@@ -18,7 +18,7 @@ class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
 
     override def store(model: Model, obj: Bucketizer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("splits", Value.doubleList(obj.getSplits))
+      model.withValue("splits", Value.doubleList(obj.getSplits))
     }
 
     override def load(model: Model)

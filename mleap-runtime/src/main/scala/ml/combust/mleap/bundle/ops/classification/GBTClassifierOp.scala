@@ -28,10 +28,10 @@ class GBTClassifierOp extends OpNode[MleapContext, GBTClassifier, GBTClassifierM
           i = i + 1
           name
       }
-      model.withAttr("num_features", Value.long(obj.numFeatures)).
-        withAttr("num_classes", Value.long(2)).
-        withAttr("tree_weights", Value.doubleList(obj.treeWeights)).
-        withAttr("trees", Value.stringList(trees))
+      model.withValue("num_features", Value.long(obj.numFeatures)).
+        withValue("num_classes", Value.long(2)).
+        withValue("tree_weights", Value.doubleList(obj.treeWeights)).
+        withValue("trees", Value.stringList(trees))
     }
 
     override def load(model: Model)

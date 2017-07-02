@@ -48,7 +48,7 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
         ReverseStringIndexerOp.labelsForField(df.schema(obj.getInputCol))
       }
 
-      model.withAttr("labels", Value.stringList(labels))
+      model.withValue("labels", Value.stringList(labels))
     }
 
     override def load(model: Model)

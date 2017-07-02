@@ -13,7 +13,7 @@ class VectorAssemblerModelSpec extends FunSpec {
   describe("#apply") {
     it("assembles doubles and vectors into a new vector") {
       val assembler = VectorAssemblerModel(DoubleType(), Seq(
-        ScalarShape, ScalarShape,
+        ScalarShape(), ScalarShape(),
         TensorShape(2),
         TensorShape(5)))
       val expectedArray = Array(45.0, 76.8, 23.0, 45.6, 0.0, 22.3, 45.6, 0.0, 99.3)

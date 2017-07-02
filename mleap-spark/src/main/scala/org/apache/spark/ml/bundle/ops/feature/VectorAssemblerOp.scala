@@ -24,7 +24,7 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
       val dataset = context.context.dataset.get
       val inputTypes = obj.getInputCols.map(i => mleapTypeToBundleType(mleapType(dataset.schema(i).dataType)))
 
-      model.withAttr("input_types", Value.dataTypeList(inputTypes))
+      model.withValue("input_types", Value.dataTypeList(inputTypes))
     }
 
     override def load(model: Model)

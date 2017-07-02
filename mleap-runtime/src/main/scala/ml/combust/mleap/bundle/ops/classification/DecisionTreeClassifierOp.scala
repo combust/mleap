@@ -24,8 +24,8 @@ class DecisionTreeClassifierOp extends OpNode[MleapContext, DecisionTreeClassifi
     override def store(model: Model, obj: DecisionTreeClassifierModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).write(obj.rootNode)
-      model.withAttr("num_features", Value.long(obj.numFeatures)).
-        withAttr("num_classes", Value.long(obj.numClasses))
+      model.withValue("num_features", Value.long(obj.numFeatures)).
+        withValue("num_classes", Value.long(obj.numClasses))
     }
 
     override def load(model: Model)

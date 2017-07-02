@@ -20,9 +20,9 @@ class WordToVectorOp extends OpNode[SparkBundleContext, Word2VecModel, Word2VecM
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val wv = getWordVectors(obj)
       val (words, indices) = wv.wordIndex.toSeq.unzip
-      model.withAttr("words", Value.stringList(words)).
-        withAttr("indices", Value.longList(indices.map(_.toLong))).
-        withAttr("word_vectors", Value.doubleList(wv.wordVectors.map(_.toDouble)))
+      model.withValue("words", Value.stringList(words)).
+        withValue("indices", Value.longList(indices.map(_.toLong))).
+        withValue("word_vectors", Value.doubleList(wv.wordVectors.map(_.toDouble)))
     }
 
     override def load(model: Model)

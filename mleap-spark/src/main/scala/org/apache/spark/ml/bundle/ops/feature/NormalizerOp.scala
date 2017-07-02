@@ -17,7 +17,7 @@ class NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
 
     override def store(model: Model, obj: Normalizer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("p_norm", Value.double(obj.getP))
+      model.withValue("p_norm", Value.double(obj.getP))
     }
 
     override def load(model: Model)

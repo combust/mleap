@@ -2,7 +2,7 @@ package ml.combust.mleap.tensorflow
 
 import java.nio.file.Files
 
-import ml.bundle.DataType.DataType
+import ml.bundle.BasicType.DataType
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
@@ -28,8 +28,8 @@ class TensorflowTransformerOp extends OpNode[MleapContext, TensorflowTransformer
       val inputDataTypes = inputMleapDataTypes.map(v => v: DataType)
       val outputDataTypes = outputMleapDataTypes.map(v => v: DataType)
 
-      model.withAttr("input_names", Value.stringList(inputNames)).
-        withAttr("input_types", Value.dataTypeList(inputDataTypes)).
+      model.withValue("input_names", Value.stringList(inputNames)).
+        withValue("input_types", Value.dataTypeList(inputDataTypes)).
         withAttr("output_names", Value.stringList(outputNames)).
         withAttr("output_types", Value.dataTypeList(outputDataTypes)).
         withAttr("nodes", obj.nodes.map(Value.stringList))
@@ -39,9 +39,9 @@ class TensorflowTransformerOp extends OpNode[MleapContext, TensorflowTransformer
                      (implicit context: BundleContext[MleapContext]): TensorflowModel = {
       val graphBytes = Files.readAllBytes(context.file("graph.pb"))
       val inputNames = model.value("input_names").getStringList
-      val inputTypes = model.value("input_types").getDataTypeList.map(v => v: core.types.DataType)
+      val inputTypes = model.value("input_types").getBasicTypeList.map(v => v: core.types.DataType)
       val outputNames = model.value("output_names").getStringList
-      val outputTypes = model.value("output_types").getDataTypeList.map(v => v: core.types.DataType)
+      val outputTypes = model.value("output_types").getBasicTypeList.map(v => v: core.types.DataType)
       val nodes = model.getValue("nodes").map(_.getStringList)
 
       val inputs = inputNames.zip(inputTypes)

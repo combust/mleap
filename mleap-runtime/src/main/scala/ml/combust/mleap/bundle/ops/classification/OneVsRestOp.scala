@@ -27,7 +27,7 @@ class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
         name
       }
 
-      model.withAttr("num_classes", Value.long(obj.classifiers.length))
+      model.withValue("num_classes", Value.long(obj.classifiers.length))
     }
 
     override def load(model: Model)

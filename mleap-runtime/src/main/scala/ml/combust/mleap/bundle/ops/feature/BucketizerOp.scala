@@ -19,7 +19,7 @@ class BucketizerOp extends OpNode[MleapContext, Bucketizer, BucketizerModel]{
 
     override def store(model: Model, obj: BucketizerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("splits", Value.doubleList(obj.splits))
+      model.withValue("splits", Value.doubleList(obj.splits))
     }
 
     override def load(model: Model)

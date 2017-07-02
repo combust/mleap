@@ -23,8 +23,8 @@ class BinarizerOp extends OpNode[SparkBundleContext, Binarizer, Binarizer] {
 
       val dataset = context.context.dataset.get
 
-      model.withAttr("data_type", Value.dataType(mleapType(dataset.schema(obj.getInputCol).dataType))).
-        withAttr("threshold", Value.double(obj.getThreshold))
+      model.withValue("data_type", Value.basicType(mleapType(dataset.schema(obj.getInputCol).dataType))).
+        withValue("threshold", Value.double(obj.getThreshold))
     }
 
     override def load(model: Model)

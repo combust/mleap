@@ -18,7 +18,7 @@ class DCTOp extends OpNode[MleapContext, DCT, DCTModel] {
 
     override def store(model: Model, obj: DCTModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("inverse", Value.boolean(obj.inverse))
+      model.withValue("inverse", Value.boolean(obj.inverse))
     }
 
     override def load(model: Model)

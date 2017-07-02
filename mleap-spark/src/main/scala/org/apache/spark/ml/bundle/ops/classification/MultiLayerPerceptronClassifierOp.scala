@@ -18,8 +18,8 @@ class MultiLayerPerceptronClassifierOp extends OpNode[SparkBundleContext, Multil
 
     override def store(model: Model, obj: MultilayerPerceptronClassificationModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("layers", Value.longList(obj.layers.map(_.toLong))).
-        withAttr("weights", Value.vector(obj.weights.toArray))
+      model.withValue("layers", Value.longList(obj.layers.map(_.toLong))).
+        withValue("weights", Value.vector(obj.weights.toArray))
     }
 
     override def load(model: Model)

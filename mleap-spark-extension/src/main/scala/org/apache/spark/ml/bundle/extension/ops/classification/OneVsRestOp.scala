@@ -28,7 +28,7 @@ class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestMo
         name
       }
 
-      model.withAttr("num_classes", Value.long(obj.models.length))
+      model.withValue("num_classes", Value.long(obj.models.length))
     }
 
     override def load(model: Model)

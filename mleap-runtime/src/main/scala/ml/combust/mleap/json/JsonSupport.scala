@@ -1,8 +1,11 @@
 package ml.combust.mleap.json
 
+import java.util.Base64
+
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, MleapContext}
 import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.tensor.ByteString
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 import spray.json.{JsValue, JsonFormat}
@@ -13,6 +16,17 @@ import scala.language.implicitConversions
   * Created by hollinwilkins on 8/23/16.
   */
 trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
+  implicit val BundleByteStringFormat: JsonFormat[ByteString] = new JsonFormat[ByteString] {
+    override def write(obj: ByteString) = {
+      JsString(Base64.getEncoder.encodeToString(obj.bytes))
+    }
+
+    override def read(json: JsValue) = json match {
+      case JsString(b64) => ByteString(Base64.getDecoder.decode(b64))
+      case _ => deserializationError("invalid byte string")
+    }
+  }
+
   implicit val mleapListTypeWriterFormat: JsonWriter[ListType] = new JsonWriter[ListType] {
     override def write(obj: ListType): JsValue = {
       JsObject("type" -> JsString("list"),

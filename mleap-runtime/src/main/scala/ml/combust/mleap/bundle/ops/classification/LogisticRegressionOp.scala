@@ -20,17 +20,17 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
 
     override def store(model: Model, obj: LogisticRegressionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      val m = model.withAttr("num_classes", Value.long(obj.numClasses))
+      val m = model.withValue("num_classes", Value.long(obj.numClasses))
       if(obj.isMultinomial) {
         val mm = obj.multinomialModel
         val cm = mm.coefficientMatrix
-        m.withAttr("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
-          withAttr("intercept_vector", Value.vector(mm.interceptVector.toArray)).
-          withAttr("thresholds", mm.thresholds.map(_.toSeq).map(Value.doubleList))
+        m.withValue("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
+          withValue("intercept_vector", Value.vector(mm.interceptVector.toArray)).
+          withValue("thresholds", mm.thresholds.map(_.toSeq).map(Value.doubleList))
       } else {
-        m.withAttr("coefficients", Value.vector(obj.binaryModel.coefficients.toArray)).
-          withAttr("intercept", Value.double(obj.binaryModel.intercept)).
-          withAttr("threshold", Value.double(obj.binaryModel.threshold))
+        m.withValue("coefficients", Value.vector(obj.binaryModel.coefficients.toArray)).
+          withValue("intercept", Value.double(obj.binaryModel.intercept)).
+          withValue("threshold", Value.double(obj.binaryModel.threshold))
       }
     }
 

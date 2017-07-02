@@ -18,10 +18,10 @@ class AFTSurvivalRegressionOp extends OpNode[SparkBundleContext, AFTSurvivalRegr
 
     override def store(model: Model, obj: AFTSurvivalRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
-        withAttr("intercept", Value.double(obj.intercept)).
-        withAttr("quantile_probabilities", Value.doubleList(obj.getQuantileProbabilities)).
-        withAttr("scale", Value.double(obj.scale))
+      model.withValue("coefficients", Value.vector(obj.coefficients.toArray)).
+        withValue("intercept", Value.double(obj.intercept)).
+        withValue("quantile_probabilities", Value.doubleList(obj.getQuantileProbabilities)).
+        withValue("scale", Value.double(obj.scale))
     }
 
     override def load(model: Model)

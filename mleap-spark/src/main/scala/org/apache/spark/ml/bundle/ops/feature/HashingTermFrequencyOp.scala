@@ -17,8 +17,8 @@ class HashingTermFrequencyOp extends OpNode[SparkBundleContext, HashingTF, Hashi
 
     override def store(model: Model, obj: HashingTF)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("num_features", Value.long(obj.getNumFeatures)).
-        withAttr("binary", Value.boolean(obj.getBinary))
+      model.withValue("num_features", Value.long(obj.getNumFeatures)).
+        withValue("binary", Value.boolean(obj.getBinary))
     }
 
     override def load(model: Model)

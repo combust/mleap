@@ -24,10 +24,10 @@ class LDAModelOp extends OpNode[MleapContext, LDAModel, LocalLDAModel] {
       val topicMatrixRows = obj.topicsMatrix.rows
       val topicMatrixCols = obj.topicsMatrix.cols
 
-      model.withAttr("vocabSize", Value.int(obj.vocabSize)).
-        withAttr("docConcentration", Value.doubleList(obj.docConcentration.toArray)).
-        withAttr("topicConcentration", Value.double(obj.topicConcentration)).
-        withAttr("topicMatrix", Value.tensor[Double](DenseTensor(topicMatrixArray, Seq(topicMatrixRows, topicMatrixCols))))
+      model.withValue("vocabSize", Value.int(obj.vocabSize)).
+        withValue("docConcentration", Value.doubleList(obj.docConcentration.toArray)).
+        withValue("topicConcentration", Value.double(obj.topicConcentration)).
+        withValue("topicMatrix", Value.tensor[Double](DenseTensor(topicMatrixArray, Seq(topicMatrixRows, topicMatrixCols))))
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): LocalLDAModel = {

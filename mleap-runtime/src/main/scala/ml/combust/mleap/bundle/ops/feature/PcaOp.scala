@@ -20,7 +20,7 @@ class PcaOp extends OpNode[MleapContext, Pca, PcaModel] {
 
     override def store(model: Model, obj: PcaModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("principal_components", Value.tensor[Double](DenseTensor(obj.principalComponents.values,
+      model.withValue("principal_components", Value.tensor[Double](DenseTensor(obj.principalComponents.values,
         Seq(obj.principalComponents.numRows, obj.principalComponents.numCols))))
     }
 

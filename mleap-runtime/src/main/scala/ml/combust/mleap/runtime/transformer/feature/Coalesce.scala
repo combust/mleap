@@ -13,7 +13,6 @@ import scala.util.{Failure, Success, Try}
   */
 case class Coalesce(override val uid: String = Transformer.uniqueName("coalesce"),
                     inputCols: Array[String],
-                    inputDataTypes: Option[Array[DataType]],
                     outputCol: String,
                     model: CoalesceModel) extends Transformer {
   val exec: UserDefinedFunction = (values: Seq[Any]) => model(values: _*)
@@ -23,10 +22,10 @@ case class Coalesce(override val uid: String = Transformer.uniqueName("coalesce"
   }
 
   override def getFields(): Try[Seq[StructField]] = {
-    inputDataTypes match {
-      case None => Failure(new RuntimeException(s"Cannot determine schema for transformer ${this.uid}"))
-      case Some(inputTypes) => val inputs : Seq[StructField] = (0 until inputCols.length).map(index => StructField(inputCols(index), inputTypes(index)))
-                                Success(inputs :+ StructField(outputCol, DoubleType(true)))
+    val inputFields = inputCols.zip(model.inputShapes).map {
+      case (name, shape) => StructField(name, DataType(model.base, shape))
     }
+
+    Success(inputFields :+ StructField(outputCol, model.base.asNullable))
   }
 }

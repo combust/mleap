@@ -23,8 +23,8 @@ class DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeCl
     override def store(model: Model, obj: DecisionTreeClassificationModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       TreeSerializer[tree.Node](context.file("tree"), withImpurities = true).write(obj.rootNode)
-      model.withAttr("num_features", Value.long(obj.numFeatures)).
-        withAttr("num_classes", Value.long(obj.numClasses))
+      model.withValue("num_features", Value.long(obj.numFeatures)).
+        withValue("num_classes", Value.long(obj.numClasses))
     }
 
     override def load(model: Model)

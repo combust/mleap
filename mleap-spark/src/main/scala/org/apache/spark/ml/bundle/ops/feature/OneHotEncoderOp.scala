@@ -51,8 +51,8 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoder, OneHotEn
       val dropLast = obj.getDropLast
       val arrSize = if(dropLast) { size - 1 } else { size }
 
-      model.withAttr("size", Value.long(arrSize)).
-        withAttr("drop_last", Value.boolean(dropLast))
+      model.withValue("size", Value.long(arrSize)).
+        withValue("drop_last", Value.boolean(dropLast))
     }
 
     override def load(model: Model)

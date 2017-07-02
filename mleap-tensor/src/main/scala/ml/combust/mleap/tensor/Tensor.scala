@@ -44,7 +44,7 @@ sealed trait Tensor[T] {
   def rawValues: Array[T]
   def rawValuesIterator: Iterator[T]
 
-  def apply(indices: Int *): Option[T] = get(indices: _*)
+  def apply(indices: Int *): T = get(indices: _*).get
   def get(indices: Int *): Option[T]
 }
 

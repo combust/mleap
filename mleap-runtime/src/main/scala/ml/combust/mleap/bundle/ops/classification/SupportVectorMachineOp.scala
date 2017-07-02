@@ -19,10 +19,10 @@ class SupportVectorMachineOp extends OpNode[MleapContext, SupportVectorMachine, 
 
     override def store(model: Model, obj: SupportVectorMachineModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
-        withAttr("intercept", Value.double(obj.intercept)).
-        withAttr("num_classes", Value.long(2)).
-        withAttr("thresholds", obj.thresholds.map(_.toSeq).map(Value.doubleList))
+      model.withValue("coefficients", Value.vector(obj.coefficients.toArray)).
+        withValue("intercept", Value.double(obj.intercept)).
+        withValue("num_classes", Value.long(2)).
+        withValue("thresholds", obj.thresholds.map(_.toSeq).map(Value.doubleList))
     }
 
     override def load(model: Model)

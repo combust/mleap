@@ -22,10 +22,10 @@ class LogisticRegressionOpV20 extends OpNode[SparkBundleContext, LogisticRegress
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       assert(obj.numClasses == 2, "This op only supports binary logistic regression")
 
-      val m = model.withAttr("num_classes", Value.long(obj.numClasses))
-      m.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
-        withAttr("intercept", Value.double(obj.intercept)).
-        withAttr("threshold", Value.double(obj.getThreshold))
+      val m = model.withValue("num_classes", Value.long(obj.numClasses))
+      m.withValue("coefficients", Value.vector(obj.coefficients.toArray)).
+        withValue("intercept", Value.double(obj.intercept)).
+        withValue("threshold", Value.double(obj.getThreshold))
     }
 
     override def load(model: Model)

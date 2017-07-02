@@ -18,7 +18,7 @@ class ChiSqSelectorOp extends OpNode[MleapContext, ChiSqSelector, ChiSqSelectorM
 
     override def store(model: Model, obj: ChiSqSelectorModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("filter_indices", Value.longList(obj.filterIndices.map(_.toLong)))
+      model.withValue("filter_indices", Value.longList(obj.filterIndices.map(_.toLong)))
     }
 
     override def load(model: Model)

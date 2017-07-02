@@ -8,7 +8,6 @@ import ml.combust.mleap.core.feature.StringIndexerModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.mleap.runtime.{DefaultLeapFrame, Row}
-import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
 
@@ -81,7 +80,6 @@ class JavaDSLSpec extends FunSpec {
 
   describe("MLeap bundles") {
     val stringIndexer = StringIndexer(inputCol = "string",
-      inputDataType = Some(StringType()),
       outputCol = "string_index",
       model = StringIndexerModel(Seq("hello")))
     val dir = Files.createTempDirectory("mleap")

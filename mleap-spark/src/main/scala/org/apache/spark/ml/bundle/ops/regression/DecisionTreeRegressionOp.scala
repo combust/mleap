@@ -22,7 +22,7 @@ class DecisionTreeRegressionOp extends OpNode[SparkBundleContext, DecisionTreeRe
     override def store(model: Model, obj: DecisionTreeRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       TreeSerializer[org.apache.spark.ml.tree.Node](context.file("tree"), withImpurities = false).write(obj.rootNode)
-      model.withAttr("num_features", Value.long(obj.numFeatures))
+      model.withValue("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(model: Model)

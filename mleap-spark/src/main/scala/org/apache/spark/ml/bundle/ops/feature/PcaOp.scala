@@ -19,7 +19,7 @@ class PcaOp extends OpNode[SparkBundleContext, PCAModel, PCAModel] {
 
     override def store(model: Model, obj: PCAModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("principal_components", Value.tensor[Double](DenseTensor(obj.pc.values,
+      model.withValue("principal_components", Value.tensor[Double](DenseTensor(obj.pc.values,
         Seq(obj.pc.numRows, obj.pc.numCols))))
     }
 

@@ -18,7 +18,7 @@ class ChiSqSelectorOp extends OpNode[SparkBundleContext, ChiSqSelectorModel, Chi
 
     override def store(model: Model, obj: ChiSqSelectorModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("filter_indices", Value.longList(obj.selectedFeatures.map(_.toLong).toSeq))
+      model.withValue("filter_indices", Value.longList(obj.selectedFeatures.map(_.toLong).toSeq))
     }
 
     override def load(model: Model)

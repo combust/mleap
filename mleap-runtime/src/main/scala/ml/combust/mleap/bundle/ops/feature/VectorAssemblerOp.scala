@@ -19,13 +19,14 @@ class VectorAssemblerOp extends OpNode[MleapContext, VectorAssembler, VectorAsse
 
     override def store(model: Model, obj: VectorAssemblerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("input_types", Value.dataTypeList(obj.inputTypes.map(mleapTypeToBundleType)))
+      model.withValue("base", Value.basicType(obj.base)).
+        withValue("input_shapes", Value.dataShapeList(obj.inputShapes.map(mleapToBundleShape)))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): VectorAssemblerModel = {
-      val inputTypes = model.value("input_types").getDataTypeList.map(bundleTypeToMleapType)
-      VectorAssemblerModel(inputTypes)
+      val inputShapes = model.value("input_shapes").getDataShapeList.map(bundleToMleapShape)
+      VectorAssemblerModel(model.value("base").getBasicType, inputShapes)
     }
   }
 

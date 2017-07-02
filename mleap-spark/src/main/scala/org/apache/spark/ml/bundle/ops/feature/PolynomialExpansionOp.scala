@@ -17,7 +17,7 @@ class PolynomialExpansionOp extends OpNode[SparkBundleContext, PolynomialExpansi
 
     override def store(model: Model, obj: PolynomialExpansion)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("degree", Value.long(obj.getDegree))
+      model.withValue("degree", Value.long(obj.getDegree))
     }
 
     override def load(model: Model)

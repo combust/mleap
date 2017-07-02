@@ -18,7 +18,7 @@ class MathUnaryOp extends OpNode[SparkBundleContext, MathUnary, MathUnaryModel] 
 
     override def store(model: Model, obj: MathUnaryModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("operation", Value.string(obj.operation.name))
+      model.withValue("operation", Value.string(obj.operation.name))
     }
 
     override def load(model: Model)

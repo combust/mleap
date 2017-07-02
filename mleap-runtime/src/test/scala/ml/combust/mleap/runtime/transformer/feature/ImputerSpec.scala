@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.ImputerModel
-import ml.combust.mleap.core.types.{DoubleType, StructField, StructType}
+import ml.combust.mleap.core.types.{DoubleType, ScalarShape, StructField, StructType}
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import org.scalatest.FunSpec
 
@@ -11,9 +11,8 @@ import org.scalatest.FunSpec
 class ImputerSpec extends FunSpec {
   describe("#transform") {
     val transformer = Imputer(inputCol = "test_a",
-      inputDataType = Some(DoubleType(true)),
       outputCol = "test_out",
-      model = ImputerModel(45.7, 23.6, ""))
+      model = ImputerModel(45.7, 23.6, "", inputNullable = true))
 
     describe("null values") {
       val schema = StructType(StructField("test_a", DoubleType(true))).get
@@ -39,7 +38,7 @@ class ImputerSpec extends FunSpec {
       val schema = StructType(StructField("test_a", DoubleType())).get
       val dataset = LocalDataset(Seq(Row(42.0), Row(23.6), Row(Double.NaN)))
       val frame = LeapFrame(schema, dataset)
-      val transformer2 = transformer.copy(inputDataType = Some(DoubleType()))
+      val transformer2 = transformer.copy(model = transformer.model.copy(inputNullable = false))
 
       it("transforms the leap frame using the given input and operation") {
         val data = transformer2.transform(frame).get.dataset

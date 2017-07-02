@@ -26,9 +26,9 @@ class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBT
           i = i + 1
           name
       }
-      model.withAttr("num_features", Value.long(obj.numFeatures)).
-        withAttr("tree_weights", Value.doubleList(obj.treeWeights)).
-        withAttr("trees", Value.stringList(trees))
+      model.withValue("num_features", Value.long(obj.numFeatures)).
+        withValue("tree_weights", Value.doubleList(obj.treeWeights)).
+        withValue("trees", Value.stringList(trees))
     }
 
     override def load(model: Model)

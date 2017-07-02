@@ -19,11 +19,11 @@ class NaiveBayesClassifierOp extends OpNode[SparkBundleContext, NaiveBayesModel,
 
     override def store(model: Model, obj: NaiveBayesModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("num_features", Value.long(obj.numFeatures)).
-        withAttr("num_classes", Value.long(obj.numClasses)).
-        withAttr("pi", Value.vector(obj.pi.toArray)).
-        withAttr("theta", Value.tensor(DenseTensor(obj.theta.toArray, Seq(obj.theta.numRows, obj.theta.numCols)))).
-        withAttr("model_type", Value.string(obj.getModelType))
+      model.withValue("num_features", Value.long(obj.numFeatures)).
+        withValue("num_classes", Value.long(obj.numClasses)).
+        withValue("pi", Value.vector(obj.pi.toArray)).
+        withValue("theta", Value.tensor(DenseTensor(obj.theta.toArray, Seq(obj.theta.numRows, obj.theta.numCols)))).
+        withValue("model_type", Value.string(obj.getModelType))
     }
 
     override def load(model: Model)

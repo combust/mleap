@@ -17,7 +17,7 @@ class StringIndexerModelSpec extends FunSpec with TableDrivenPropertyChecks {
     }
 
     it("returns the index of Optional string") {
-      val indexer = StringIndexerModel(Array("hello", "there", "dude"))
+      val indexer = StringIndexerModel(Array("hello", "there", "dude"), inputNullable = true)
 
       assert(indexer(Some("hello")) == 0.0)
       assert(indexer(Some("there")) == 1.0)
@@ -47,7 +47,7 @@ class StringIndexerModelSpec extends FunSpec with TableDrivenPropertyChecks {
     }
 
     it("returns default index for HandleInvalid.keep mode") {
-      val indexer = StringIndexerModel(Array("hello", "there", "dude"), HandleInvalid.Keep)
+      val indexer = StringIndexerModel(Array("hello", "there", "dude"), handleInvalid = HandleInvalid.Keep)
       val invalidLabels = Table("unknown", Some("other unknown"), null, None)
 
       forAll(invalidLabels) { (label: Any) =>

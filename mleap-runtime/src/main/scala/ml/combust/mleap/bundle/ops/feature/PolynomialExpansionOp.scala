@@ -18,7 +18,7 @@ class PolynomialExpansionOp extends OpNode[MleapContext, PolynomialExpansion, Po
 
     override def store(model: Model, obj: PolynomialExpansionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("degree", Value.long(obj.degree))
+      model.withValue("degree", Value.long(obj.degree))
     }
 
     override def load(model: Model)

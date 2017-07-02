@@ -18,8 +18,8 @@ class MultinomialLabelerOp extends OpNode[MleapContext, MultinomialLabeler, Mult
 
     override def store(model: Model, obj: MultinomialLabelerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("threshold", Value.double(obj.threshold)).
-        withAttr("labels", Value.stringList(obj.indexer.labels))
+      model.withValue("threshold", Value.double(obj.threshold)).
+        withValue("labels", Value.stringList(obj.indexer.labels))
     }
 
     override def load(model: Model)

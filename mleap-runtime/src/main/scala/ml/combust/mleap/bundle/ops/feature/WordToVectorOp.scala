@@ -19,9 +19,9 @@ class WordToVectorOp extends OpNode[MleapContext, WordToVector, WordToVectorMode
     override def store(model: Model, obj: WordToVectorModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       val (words, indices) = obj.wordIndex.toSeq.unzip
-      model.withAttr("words", Value.stringList(words)).
-        withAttr("indices", Value.longList(indices.map(_.toLong))).
-        withAttr("word_vectors", Value.doubleList(obj.wordVectors))
+      model.withValue("words", Value.stringList(words)).
+        withValue("indices", Value.longList(indices.map(_.toLong))).
+        withValue("word_vectors", Value.doubleList(obj.wordVectors))
     }
 
     override def load(model: Model)

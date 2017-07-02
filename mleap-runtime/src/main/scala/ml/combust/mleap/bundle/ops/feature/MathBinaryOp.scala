@@ -18,9 +18,9 @@ class MathBinaryOp extends OpNode[MleapContext, MathBinary, MathBinaryModel] {
 
     override def store(model: Model, obj: MathBinaryModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("operation", Value.string(obj.operation.name)).
-        withAttr("da", obj.da.map(Value.double)).
-        withAttr("db", obj.db.map(Value.double))
+      model.withValue("operation", Value.string(obj.operation.name)).
+        withValue("da", obj.da.map(Value.double)).
+        withValue("db", obj.db.map(Value.double))
     }
 
     override def load(model: Model)

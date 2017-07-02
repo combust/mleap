@@ -21,11 +21,11 @@ class NaiveBayesClassifierOp extends OpNode[MleapContext, NaiveBayesClassifier, 
     override def opName: String = Bundle.BuiltinOps.classification.naive_bayes
 
     override def store(model: Model, obj: NaiveBayesModel)(implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("num_features", Value.long(obj.numFeatures)).
-        withAttr("num_classes", Value.long(obj.numClasses)).
-        withAttr("pi", Value.vector(obj.pi.toArray)).
-        withAttr("theta", Value.tensor(DenseTensor(obj.theta.toArray, Seq(obj.theta.numRows, obj.theta.numCols)))).
-        withAttr("model_type", Value.string(obj.modelType.toString))
+      model.withValue("num_features", Value.long(obj.numFeatures)).
+        withValue("num_classes", Value.long(obj.numClasses)).
+        withValue("pi", Value.vector(obj.pi.toArray)).
+        withValue("theta", Value.tensor(DenseTensor(obj.theta.toArray, Seq(obj.theta.numRows, obj.theta.numCols)))).
+        withValue("model_type", Value.string(obj.modelType.toString))
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): NaiveBayesModel = {

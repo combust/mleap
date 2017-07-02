@@ -19,7 +19,7 @@ class PipelineOp extends OpNode[SparkBundleContext, PipelineModel, PipelineModel
     override def store(model: Model, obj: PipelineModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val nodes = GraphSerializer(context).write(obj.stages).get
-      model.withAttr("nodes", Value.stringList(nodes))
+      model.withValue("nodes", Value.stringList(nodes))
     }
 
     override def load(model: Model)

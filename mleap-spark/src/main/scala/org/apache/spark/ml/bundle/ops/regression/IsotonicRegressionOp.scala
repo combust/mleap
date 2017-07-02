@@ -22,12 +22,12 @@ class IsotonicRegressionOp extends OpNode[SparkBundleContext, IsotonicRegression
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
-      var m = model.withAttr("boundaries", Value.doubleList(obj.boundaries.toArray.toSeq)).
-        withAttr("predictions", Value.doubleList(obj.predictions.toArray.toSeq)).
-        withAttr("isotonic", Value.boolean(obj.getIsotonic))
+      var m = model.withValue("boundaries", Value.doubleList(obj.boundaries.toArray.toSeq)).
+        withValue("predictions", Value.doubleList(obj.predictions.toArray.toSeq)).
+        withValue("isotonic", Value.boolean(obj.getIsotonic))
 
       if(context.context.dataset.get.schema(obj.getFeaturesCol).dataType.isInstanceOf[VectorUDT]) {
-        m = m.withAttr("feature_index", Value.long(obj.getFeatureIndex))
+        m = m.withValue("feature_index", Value.long(obj.getFeatureIndex))
       }
 
       m

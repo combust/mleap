@@ -18,9 +18,9 @@ class CountVectorizerOp extends OpNode[MleapContext, CountVectorizer, CountVecto
 
     override def store(model: Model, obj: CountVectorizerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("vocabulary", Value.stringList(obj.vocabulary)).
-        withAttr("binary", Value.boolean(obj.binary)).
-        withAttr("min_tf", Value.double(obj.minTf))
+      model.withValue("vocabulary", Value.stringList(obj.vocabulary)).
+        withValue("binary", Value.boolean(obj.binary)).
+        withValue("min_tf", Value.double(obj.minTf))
     }
 
     override def load(model: Model)

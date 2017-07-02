@@ -20,7 +20,7 @@ class WordLengthFilterOp extends OpNode[MleapContext, WordLengthFilter, WordLeng
     override def opName: String = Bundle.BuiltinOps.feature.word_filter
 
     override def store(model: Model, obj: WordLengthFilterModel)(implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("length", Value.int(obj.length))
+      model.withValue("length", Value.int(obj.length))
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): WordLengthFilterModel = {

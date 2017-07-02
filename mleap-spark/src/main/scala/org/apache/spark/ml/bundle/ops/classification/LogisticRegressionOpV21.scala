@@ -20,19 +20,19 @@ class LogisticRegressionOpV21 extends OpNode[SparkBundleContext, LogisticRegress
 
     override def store(model: Model, obj: LogisticRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      val m = model.withAttr("num_classes", Value.long(obj.numClasses))
+      val m = model.withValue("num_classes", Value.long(obj.numClasses))
       if(obj.numClasses > 2) {
         val cm = obj.coefficientMatrix
         val thresholds = if(obj.isSet(obj.thresholds)) {
           Some(obj.getThresholds)
         } else None
-        m.withAttr("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
-          withAttr("intercept_vector", Value.vector(obj.interceptVector.toArray)).
-          withAttr("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
+        m.withValue("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
+          withValue("intercept_vector", Value.vector(obj.interceptVector.toArray)).
+          withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
       } else {
-        m.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
-          withAttr("intercept", Value.double(obj.intercept)).
-          withAttr("threshold", Value.double(obj.getThreshold))
+        m.withValue("coefficients", Value.vector(obj.coefficients.toArray)).
+          withValue("intercept", Value.double(obj.intercept)).
+          withValue("threshold", Value.double(obj.getThreshold))
       }
     }
 

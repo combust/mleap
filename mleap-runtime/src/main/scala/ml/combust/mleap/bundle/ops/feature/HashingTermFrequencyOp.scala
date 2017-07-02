@@ -18,7 +18,7 @@ class HashingTermFrequencyOp extends OpNode[MleapContext, HashingTermFrequency, 
 
     override def store(model: Model, obj: HashingTermFrequencyModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("num_features", Value.long(obj.numFeatures))
+      model.withValue("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(model: Model)

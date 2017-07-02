@@ -17,9 +17,9 @@ class CountVectorizerOp extends OpNode[SparkBundleContext, CountVectorizerModel,
 
     override def store(model: Model, obj: CountVectorizerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("vocabulary", Value.stringList(obj.vocabulary)).
-        withAttr("binary", Value.boolean(obj.getBinary)).
-        withAttr("min_tf", Value.double(obj.getMinTF))
+      model.withValue("vocabulary", Value.stringList(obj.vocabulary)).
+        withValue("binary", Value.boolean(obj.getBinary)).
+        withValue("min_tf", Value.double(obj.getMinTF))
     }
 
     override def load(model: Model)

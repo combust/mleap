@@ -19,12 +19,12 @@ class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] 
 
     override def store(model: Model, obj: InteractionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      val m = model.withAttr("input_types", Value.dataTypeList(obj.inputTypes.map(mleapTypeToBundleType))).
-        withAttr("data_type", Value.dataType(obj.dataType)).
-        withAttr("num_inputs", Value.int(obj.featuresSpec.length))
+      val m = model.withValue("base", Value.basicType(obj.base)).
+        withValue("input_shapes", Value.dataShapeList(obj.inputShapes.map(mleapToBundleShape))).
+        withValue("num_inputs", Value.int(obj.featuresSpec.length))
 
       obj.featuresSpec.zipWithIndex.foldLeft(m) {
-        case (m2, (numFeatures, index)) => m2.withAttr(s"num_features$index", Value.intList(numFeatures))
+        case (m2, (numFeatures, index)) => m2.withValue(s"num_features$index", Value.intList(numFeatures))
       }
     }
 
@@ -35,10 +35,10 @@ class InteractionOp extends OpNode[MleapContext, Interaction, InteractionModel] 
         index => model.value(s"num_features$index").getIntList.toArray
       }.toArray
 
-      val inputTypes = model.value("input_types").getDataTypeList.map(bundleTypeToMleapType)
-      val outputType = bundleTypeToMleapType(model.value("output_type").getDataType)
+      val base = model.value("base").getBasicType
+      val inputShapes = model.value("input_shapes").getDataShapeList.map(bundleToMleapShape)
 
-      InteractionModel(spec, inputTypes, outputType)
+      InteractionModel(spec, base, inputShapes)
     }
   }
 

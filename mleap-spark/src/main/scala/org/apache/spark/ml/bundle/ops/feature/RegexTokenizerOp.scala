@@ -22,10 +22,10 @@ class RegexTokenizerOp extends OpNode[SparkBundleContext, RegexTokenizer, RegexT
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
 
       model
-        .withAttr(RegexIdentifier, Value.string(obj.getPattern))
-        .withAttr(MatchGapsIdentifier, Value.boolean(obj.getGaps))
-        .withAttr(MinTokenLengthIdentifer, Value.int(obj.getMinTokenLength))
-        .withAttr(LowercaseText, Value.boolean(obj.getToLowercase))
+        .withValue(RegexIdentifier, Value.string(obj.getPattern))
+        .withValue(MatchGapsIdentifier, Value.boolean(obj.getGaps))
+        .withValue(MinTokenLengthIdentifer, Value.int(obj.getMinTokenLength))
+        .withValue(LowercaseText, Value.boolean(obj.getToLowercase))
     }
 
     override def load(model: Model)

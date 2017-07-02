@@ -20,7 +20,7 @@ class KMeansOp extends OpNode[MleapContext, KMeans, KMeansModel] {
 
     override def store(model: Model, obj: KMeansModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("cluster_centers",
+      model.withValue("cluster_centers",
         Value.tensorList(obj.clusterCenters.map(cc => Tensor.denseVector(cc.vector.toArray))))
     }
 

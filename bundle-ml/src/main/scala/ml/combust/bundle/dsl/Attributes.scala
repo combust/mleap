@@ -39,7 +39,7 @@ trait HasAttributes[T] {
     * @param value optional value
     * @return a copy of T with the attribute optionally added
     */
-  def withAttr(name: String, value: Option[Value]): T = value.map {
+  def withValue(name: String, value: Option[Value]): T = value.map {
     v => withAttributes(attributes.withValue(name, v))
   }.getOrElse(withAttributes(attributes))
 

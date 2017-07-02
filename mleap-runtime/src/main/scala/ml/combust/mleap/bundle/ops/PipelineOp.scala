@@ -19,7 +19,7 @@ class PipelineOp extends OpNode[MleapContext, Pipeline, Pipeline] {
     override def store(model: Model, obj: Pipeline)
                       (implicit context: BundleContext[MleapContext]): Model = {
       val nodes = GraphSerializer(context).write(obj.transformers).get
-      model.withAttr("nodes", Value.stringList(nodes))
+      model.withValue("nodes", Value.stringList(nodes))
     }
 
     override def load(model: Model)

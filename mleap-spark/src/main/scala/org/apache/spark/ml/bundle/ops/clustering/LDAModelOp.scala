@@ -27,10 +27,10 @@ class LDAModelOp extends OpNode[SparkBundleContext, LocalLDAModel, LocalLDAModel
       val topicMatrixRows = obj.topicsMatrix.numRows
       val topicMatrixCols = obj.topicsMatrix.numCols
 
-      model.withAttr("vocabSize", Value.int(obj.vocabSize)).
-        withAttr("docConcentration", Value.doubleList(obj.getEffectiveDocConcentration)).
-        withAttr("topicConcentration", Value.double(obj.getEffectiveTopicConcentration)).
-        withAttr("topicMatrix", Value.tensor[Double](DenseTensor[Double](topicMatrixArray, Seq(topicMatrixRows, topicMatrixCols))))
+      model.withValue("vocabSize", Value.int(obj.vocabSize)).
+        withValue("docConcentration", Value.doubleList(obj.getEffectiveDocConcentration)).
+        withValue("topicConcentration", Value.double(obj.getEffectiveTopicConcentration)).
+        withValue("topicMatrix", Value.tensor[Double](DenseTensor[Double](topicMatrixArray, Seq(topicMatrixRows, topicMatrixCols))))
     }
 
     override def load(model: Model)(implicit context: BundleContext[SparkBundleContext]): LocalLDAModel  = {

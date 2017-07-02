@@ -17,7 +17,7 @@ class DCTOp extends OpNode[SparkBundleContext, DCT, DCT] {
 
     override def store(model: Model, obj: DCT)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("inverse", Value.boolean(obj.getInverse))
+      model.withValue("inverse", Value.boolean(obj.getInverse))
     }
 
     override def load(model: Model)

@@ -19,8 +19,8 @@ class MinHashLSHOp extends OpNode[SparkBundleContext, MinHashLSHModel, MinHashLS
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val (ca, cb) = obj.randCoefficients.unzip
 
-      model.withAttr("random_coefficients_a", Value.longList(ca.map(_.toLong))).
-        withAttr("random_coefficients_b", Value.longList(cb.map(_.toLong)))
+      model.withValue("random_coefficients_a", Value.longList(ca.map(_.toLong))).
+        withValue("random_coefficients_b", Value.longList(cb.map(_.toLong)))
     }
 
     override def load(model: Model)

@@ -21,7 +21,7 @@ class KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
 
     override def store(model: Model, obj: KMeansModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("cluster_centers", Value.tensorList(obj.clusterCenters.map(_.toArray).map(Tensor.denseVector)))
+      model.withValue("cluster_centers", Value.tensorList(obj.clusterCenters.map(_.toArray).map(Tensor.denseVector)))
     }
 
     override def load(model: Model)

@@ -20,8 +20,8 @@ class MinHashLSHOp extends OpNode[MleapContext, MinHashLSH, MinHashLSHModel] {
                       (implicit context: BundleContext[MleapContext]): Model = {
       val (ca, cb) = obj.randomCoefficients.unzip
 
-      model.withAttr("random_coefficients_a", Value.longList(ca.map(_.toLong))).
-        withAttr("random_coefficients_b", Value.longList(cb.map(_.toLong)))
+      model.withValue("random_coefficients_a", Value.longList(ca.map(_.toLong))).
+        withValue("random_coefficients_b", Value.longList(cb.map(_.toLong)))
     }
 
     override def load(model: Model)

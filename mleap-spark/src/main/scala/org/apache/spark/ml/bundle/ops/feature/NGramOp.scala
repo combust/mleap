@@ -17,7 +17,7 @@ class NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
 
     override def store(model: Model, obj: NGram)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("n", Value.long(obj.getN))
+      model.withValue("n", Value.long(obj.getN))
     }
 
     override def load(model: Model)

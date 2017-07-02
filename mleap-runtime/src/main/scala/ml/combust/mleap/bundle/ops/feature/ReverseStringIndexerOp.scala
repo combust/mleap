@@ -18,7 +18,7 @@ class ReverseStringIndexerOp extends OpNode[MleapContext, ReverseStringIndexer, 
 
     override def store(model: Model, obj: ReverseStringIndexerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("labels", Value.stringList(obj.labels))
+      model.withValue("labels", Value.stringList(obj.labels))
     }
 
     override def load(model: Model)

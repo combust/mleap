@@ -21,7 +21,7 @@ class StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, S
       val mean = if(obj.getWithMean) Some(obj.mean.toArray) else None
       val std = if(obj.getWithStd) Some(obj.std.toArray) else None
 
-      model.withAttr("mean", mean.map(Value.vector)).
+      model.withValue("mean", mean.map(Value.vector)).
         withAttr("std", std.map(Value.vector))
     }
 

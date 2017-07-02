@@ -23,10 +23,10 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
         Some(obj.getThresholds)
       } else None
 
-      model.withAttr("coefficients", Value.vector(obj.model.weights.toArray)).
-        withAttr("intercept", Value.double(obj.model.intercept)).
-        withAttr("num_classes", Value.long(2)).
-        withAttr("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
+      model.withValue("coefficients", Value.vector(obj.model.weights.toArray)).
+        withValue("intercept", Value.double(obj.model.intercept)).
+        withValue("num_classes", Value.long(2)).
+        withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
     }
 
     override def load(model: Model)

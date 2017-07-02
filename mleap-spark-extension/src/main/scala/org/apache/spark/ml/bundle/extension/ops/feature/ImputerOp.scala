@@ -19,11 +19,11 @@ class ImputerOp extends OpNode[SparkBundleContext, ImputerModel, ImputerModel] {
 
     override def store(model: Model, obj: ImputerModel)(implicit context: BundleContext[SparkBundleContext]): Model = {
       context.context.dataset.map(dataset => {
-        model.withAttr("input_type", Value.dataType(mleapType(dataset.schema(obj.getInputCol).dataType)))
+        model.withValue("input_type", Value.basicType(mleapType(dataset.schema(obj.getInputCol).dataType)))
       }).getOrElse(model)
-        .withAttr("surrogate_value", Value.double(obj.surrogateValue))
-        .withAttr("missing_value", Value.double(obj.getMissingValue))
-        .withAttr("strategy", Value.string(obj.getStrategy))
+        .withValue("surrogate_value", Value.double(obj.surrogateValue))
+        .withValue("missing_value", Value.double(obj.getMissingValue))
+        .withValue("strategy", Value.string(obj.getStrategy))
     }
 
     override def load(model: Model)

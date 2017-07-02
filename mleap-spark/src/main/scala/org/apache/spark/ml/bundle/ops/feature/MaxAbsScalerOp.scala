@@ -18,7 +18,7 @@ class MaxAbsScalerOp extends OpNode[SparkBundleContext, MaxAbsScalerModel, MaxAb
 
     override def store(model: Model, obj: MaxAbsScalerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("maxAbs", Value.vector(obj.maxAbs.toArray))
+      model.withValue("maxAbs", Value.vector(obj.maxAbs.toArray))
   }
 
     override def load(model: Model)

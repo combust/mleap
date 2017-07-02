@@ -25,9 +25,9 @@ class GaussianMixtureOp extends OpNode[SparkBundleContext, GaussianMixtureModel,
         getOrElse((-1, -1))
       val (means, covs) = obj.gaussians.map(g => (g.mean, g.cov)).unzip
 
-      model.withAttr("means", Value.tensorList(means.map(_.toArray).map(Tensor.denseVector))).
-        withAttr("covs", Value.tensorList(covs.map(m => DenseTensor(m.toArray, Seq(m.numRows, m.numCols))))).
-        withAttr("weights", Value.doubleList(obj.weights.toSeq))
+      model.withValue("means", Value.tensorList(means.map(_.toArray).map(Tensor.denseVector))).
+        withValue("covs", Value.tensorList(covs.map(m => DenseTensor(m.toArray, Seq(m.numRows, m.numCols))))).
+        withValue("weights", Value.doubleList(obj.weights.toSeq))
     }
 
     override def load(model: Model)

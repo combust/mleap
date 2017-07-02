@@ -22,9 +22,9 @@ class GaussianMixtureOp extends OpNode[MleapContext, GaussianMixture, GaussianMi
     override def store(model: Model, obj: GaussianMixtureModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       val (means, covs) = obj.gaussians.map(g => (g.mean, g.cov)).unzip
-      model.withAttr("means", Value.tensorList(means.map(m => Tensor.denseVector(m.toArray)))).
-        withAttr("covs", Value.tensorList(covs.map(c => DenseTensor(c.toArray, Seq(c.numRows, c.numCols))))).
-        withAttr("weights", Value.doubleList(obj.weights.toSeq))
+      model.withValue("means", Value.tensorList(means.map(m => Tensor.denseVector(m.toArray)))).
+        withValue("covs", Value.tensorList(covs.map(c => DenseTensor(c.toArray, Seq(c.numRows, c.numCols))))).
+        withValue("weights", Value.doubleList(obj.weights.toSeq))
     }
 
     override def load(model: Model)

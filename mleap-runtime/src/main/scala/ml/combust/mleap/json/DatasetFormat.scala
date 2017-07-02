@@ -1,11 +1,9 @@
 package ml.combust.mleap.json
 
-import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.runtime.{Dataset, LocalDataset}
 import spray.json.DefaultJsonProtocol._
 import spray.json._
-import JsonSupport.mleapTensorFormat
-import ml.combust.bundle.json.JsonSupport.bundleByteStringFormat
+import JsonSupport.{mleapTensorFormat, BundleByteStringFormat}
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.ByteString
 
@@ -29,13 +27,13 @@ object DatasetFormat {
 
     tt.base match {
       case BooleanType(false) => maybeNullableFormat(mleapTensorFormat[Boolean], isNullable)
-      case StringType(false) => maybeNullableFormat(mleapTensorFormat[String], isNullable)
       case ByteType(false) => maybeNullableFormat(mleapTensorFormat[Byte], isNullable)
       case ShortType(false) => maybeNullableFormat(mleapTensorFormat[Short], isNullable)
       case IntegerType(false) => maybeNullableFormat(mleapTensorFormat[Int], isNullable)
       case LongType(false) => maybeNullableFormat(mleapTensorFormat[Long], isNullable)
       case FloatType(false) => maybeNullableFormat(mleapTensorFormat[Float], isNullable)
       case DoubleType(false) => maybeNullableFormat(mleapTensorFormat[Double], isNullable)
+      case StringType(false) => maybeNullableFormat(mleapTensorFormat[String], isNullable)
       case ByteStringType(false) => maybeNullableFormat(mleapTensorFormat[ByteString], isNullable)
       case _ => serializationError(s"invalid tensor base type: ${tt.base}")
     }
@@ -50,7 +48,7 @@ object DatasetFormat {
     case LongType(isNullable) => maybeNullableFormat(LongJsonFormat, isNullable)
     case FloatType(isNullable) => maybeNullableFormat(FloatJsonFormat, isNullable)
     case DoubleType(isNullable) => maybeNullableFormat(DoubleJsonFormat, isNullable)
-    case ByteStringType(isNullable) => maybeNullableFormat(bundleByteStringFormat, isNullable)
+    case ByteStringType(isNullable) => maybeNullableFormat(BundleByteStringFormat, isNullable)
     case lt: ListType => listSerializer(lt)
     case tt: TensorType => tensorSerializer(tt)
     case AnyType(_) => serializationError("AnyType unsupported for serialization")

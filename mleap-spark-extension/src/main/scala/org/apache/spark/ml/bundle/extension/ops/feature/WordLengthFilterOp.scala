@@ -18,7 +18,7 @@ class WordLengthFilterOp extends OpNode[SparkBundleContext, WordLengthFilter, Wo
     override def opName: String = Bundle.BuiltinOps.feature.word_filter
 
     override def store(model: Model, obj: WordLengthFilterModel)(implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("length", Value.int(obj.length))
+      model.withValue("length", Value.int(obj.length))
     }
 
     override def load(model: Model)(implicit context: BundleContext[SparkBundleContext]): WordLengthFilterModel = {

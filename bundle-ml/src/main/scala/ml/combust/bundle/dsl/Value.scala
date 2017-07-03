@@ -1,7 +1,7 @@
 package ml.combust.bundle.dsl
 
 import com.google.protobuf
-import ml.bundle.{List, DataShape, BasicType, Scalar, Tensor}
+import ml.bundle.bundle.{List, DataShape, BasicType, Scalar, Tensor}
 import ml.combust.bundle.tensor.TensorSerializer
 import ml.combust.mleap.tensor.ByteString
 import ml.combust.mleap
@@ -21,7 +21,7 @@ import scala.reflect.ClassTag
   * Scala objects.
   */
 object Value {
-  /** Convert [[ml.combust.mleap.tensor.Tensor]] to [[ml.bundle.Tensor]].
+  /** Convert [[ml.combust.mleap.tensor.Tensor]] to [[ml.bundle.bundle.Tensor]].
     *
     * @param tensor mleap tensor
     * @return bundle tensor
@@ -31,7 +31,7 @@ object Value {
   }
 
   def scalarValue(scalar: Scalar): Value = {
-    Value(ml.bundle.Value(ml.bundle.Value.V.S(scalar)))
+    Value(ml.bundle.bundle.Value(ml.bundle.bundle.Value.V.S(scalar)))
   }
 
   /** Create a boolean value.
@@ -106,7 +106,7 @@ object Value {
     * @return tensor value
     */
   def tensor[T](tensor: mleap.tensor.Tensor[T]): Value = {
-    Value(ml.bundle.Value(ml.bundle.Value.V.T(TensorSerializer.toProto(tensor))))
+    Value(ml.bundle.bundle.Value(ml.bundle.bundle.Value.V.T(TensorSerializer.toProto(tensor))))
   }
 
   /** Create a data type value.
@@ -147,7 +147,7 @@ object Value {
   }
 
   def listValue(list: List): Value = {
-    Value(ml.bundle.Value(ml.bundle.Value.V.L(list)))
+    Value(ml.bundle.bundle.Value(ml.bundle.bundle.Value.V.L(list)))
   }
 
   /** Create a list of booleans value.
@@ -252,7 +252,7 @@ object Value {
   *
   * @param value bundle protobuf value
   */
-case class Value(value: ml.bundle.Value) {
+case class Value(value: ml.bundle.bundle.Value) {
   /** Get value as a boolean.
     *
     * @return boolean value

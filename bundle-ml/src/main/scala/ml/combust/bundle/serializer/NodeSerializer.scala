@@ -47,7 +47,7 @@ object JsonFormatNodeSerializer extends FormatNodeSerializer {
   }
 
   override def read(path: Path): Node = {
-    Node.fromBundle(ml.bundle.Node.fromAscii(new String(Files.readAllBytes(path), "UTF-8")))
+    Node.fromBundle(ml.bundle.bundle.Node.fromAscii(new String(Files.readAllBytes(path), "UTF-8")))
   }
 }
 
@@ -60,7 +60,7 @@ object ProtoFormatNodeSerializer extends FormatNodeSerializer {
 
   override def read(path: Path): Node = {
     val bytes = Files.readAllBytes(path)
-    Node.fromBundle(ml.bundle.Node.parseFrom(bytes))
+    Node.fromBundle(ml.bundle.bundle.Node.parseFrom(bytes))
   }
 }
 

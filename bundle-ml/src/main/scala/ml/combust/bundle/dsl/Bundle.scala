@@ -111,7 +111,7 @@ object Bundle {
 }
 
 object BundleInfo {
-  def fromBundle(bundle: ml.bundle.Bundle): BundleInfo = {
+  def fromBundle(bundle: ml.bundle.bundle.Bundle): BundleInfo = {
     BundleInfo(uid = UUID.fromString(bundle.uid),
       name = bundle.name,
       format = SerializationFormat.fromBundle(bundle.format),
@@ -133,8 +133,8 @@ case class BundleInfo(uid: UUID,
                       format: SerializationFormat,
                       version: String,
                       timestamp: String) {
-  def asBundle: ml.bundle.Bundle = {
-    ml.bundle.Bundle(uid = uid.toString,
+  def asBundle: ml.bundle.bundle.Bundle = {
+    ml.bundle.bundle.Bundle(uid = uid.toString,
       name = name,
       format = format.asBundle,
       version = version,

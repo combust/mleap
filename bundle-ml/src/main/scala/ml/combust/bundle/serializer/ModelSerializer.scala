@@ -4,6 +4,7 @@ import java.nio.file.{Files, Path}
 
 import ml.combust.bundle.{BundleContext, HasBundleRegistry}
 import ml.combust.bundle.dsl.{Bundle, Model}
+import ml.bundle.bundle
 
 import scala.util.Try
 
@@ -47,7 +48,7 @@ case class JsonFormatModelSerializer(implicit hr: HasBundleRegistry) extends For
   }
 
   override def read(path: Path): Model = {
-    Model.fromBundle(ml.bundle.Model.fromAscii(new String(Files.readAllBytes(path), "UTF-8")))
+    Model.fromBundle(ml.bundle.bundle.Model.fromAscii(new String(Files.readAllBytes(path), "UTF-8")))
   }
 }
 
@@ -59,7 +60,7 @@ case class ProtoFormatModelSerializer(implicit hr: HasBundleRegistry) extends Fo
   }
 
   override def read(path: Path): Model = {
-    Model.fromBundle(ml.bundle.Model.parseFrom(Files.readAllBytes(path)))
+    Model.fromBundle(ml.bundle.bundle.Model.parseFrom(Files.readAllBytes(path)))
   }
 }
 

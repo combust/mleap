@@ -1,6 +1,6 @@
 package ml.combust.bundle.dsl
 
-import ml.bundle
+import ml.bundle.bundle
 
 /** Companion object for model.
   */

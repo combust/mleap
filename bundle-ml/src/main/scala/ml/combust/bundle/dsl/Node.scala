@@ -8,7 +8,7 @@ object Node {
     * @param node bundle node definition
     * @return dsl node
     */
-  def fromBundle(node: ml.bundle.Node): Node = {
+  def fromBundle(node: ml.bundle.bundle.Node): Node = {
     Node(name = node.name,
       shape = NodeShape.fromBundle(node.shape.get))
   }
@@ -32,6 +32,6 @@ case class Node(name: String,
     *
     * @return bundle node definition
     */
-  def asBundle: ml.bundle.Node = ml.bundle.Node(name = name,
+  def asBundle: ml.bundle.bundle.Node = ml.bundle.bundle.Node(name = name,
     shape = Some(shape.asBundle))
 }

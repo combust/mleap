@@ -54,7 +54,7 @@ case class BundleFile(fs: FileSystem,
     */
   def readInfo(): Try[BundleInfo] = {
     val bundleJson = fs.getPath(path.toString, Bundle.bundleJson)
-    Try(ml.bundle.Bundle.fromAscii(new String(Files.readAllBytes(bundleJson), "UTF-8"))).
+    Try(ml.bundle.bundle.Bundle.fromAscii(new String(Files.readAllBytes(bundleJson), "UTF-8"))).
       map(BundleInfo.fromBundle)
   }
 

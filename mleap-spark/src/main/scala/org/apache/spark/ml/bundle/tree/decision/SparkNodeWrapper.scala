@@ -1,9 +1,9 @@
 package org.apache.spark.ml.bundle.tree.decision
 
-import ml.bundle.dtree.dtree.Node
-import ml.bundle.dtree.dtree.Node.{InternalNode, LeafNode}
-import ml.bundle.dtree.dtree.Split
-import ml.bundle.dtree.dtree.Split.{CategoricalSplit, ContinuousSplit}
+import ml.bundle.dtree.Node
+import ml.bundle.dtree.Node.{InternalNode, LeafNode}
+import ml.bundle.dtree.Split
+import ml.bundle.dtree.Split.{CategoricalSplit, ContinuousSplit}
 import ml.combust.bundle.tree.decision.NodeWrapper
 import org.apache.spark.ml.tree
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator

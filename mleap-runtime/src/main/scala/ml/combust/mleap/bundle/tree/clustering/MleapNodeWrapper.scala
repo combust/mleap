@@ -1,6 +1,6 @@
 package ml.combust.mleap.bundle.tree.clustering
 
-import ml.bundle.ctree.ctree.Node
+import ml.bundle.ctree.Node
 import ml.combust.bundle.tree.cluster.NodeWrapper
 import ml.combust.mleap.core.clustering.ClusteringTreeNode
 import org.apache.spark.ml.linalg.Vectors

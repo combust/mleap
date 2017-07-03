@@ -7,6 +7,8 @@ import ml.bundle._
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
+import scala.collection.mutable
+
 /** spray.json.JsonFormat formats for protobuf objects in Bundle.ML.
   *
   * Includes many spray.json.JsonFormat format implicits as well as several
@@ -52,6 +54,7 @@ trait JsonSupport {
       case JsString("double") => BasicType.DOUBLE
       case JsString("string") => BasicType.STRING
       case JsString("byte_string") => BasicType.BYTE_STRING
+      case JsString("unknown") => BasicType.Unrecognized(100)
       case _ => deserializationError("invalid basic type")
     }
 
@@ -99,9 +102,79 @@ trait JsonSupport {
   }
   implicit val bundleDataShapeFormat: JsonFormat[DataShape] = jsonFormat3(DataShape.apply)
 
-  implicit val bundleScalarFormat: JsonFormat[Scalar] = jsonFormat11(Scalar.apply)
+  implicit val bundleScalarFormat: JsonFormat[Scalar] = new JsonFormat[Scalar] {
+    override def write(obj: Scalar): JsValue = {
+      val fb = mutable.Seq.newBuilder[(String, JsValue)]
+
+      if(obj.b) { fb += ("boolean" -> obj.b.toJson) }
+      if(obj.i != 0) { fb += ("int" -> obj.i.toJson) }
+      if(obj.l != 0) { fb += ("long" -> obj.l.toJson) }
+      if(obj.f != 0) { fb += ("float" -> obj.f.toJson) }
+      if(obj.d != 0) { fb += ("double" -> obj.d.toJson) }
+      if(obj.s != "") { fb += ("string" -> obj.s.toJson) }
+      if(obj.bs != ByteString.EMPTY) { fb += ("byte_string" -> obj.bs.toJson) }
+      obj.t.foreach(t => fb += ("tensor" -> t.toJson))
+      if(obj.bt != BasicType.BOOLEAN) { fb += ("byte_string" -> obj.bt.toJson) }
+      obj.ds.foreach(ds => fb += ("data_shape" -> ds.toJson))
+      obj.m.foreach(m => fb += ("model" -> m.toJson))
+
+      JsObject(fb.result(): _*)
+    }
+
+    override def read(json: JsValue): Scalar = json match {
+      case JsObject(fields) => Scalar(
+        b = fields.getOrElse("boolean", JsBoolean(false)).convertTo[Boolean],
+        i = fields.getOrElse("int", JsNumber(0)).convertTo[Int],
+        l = fields.getOrElse("long", JsNumber(0)).convertTo[Long],
+        f = fields.getOrElse("float", JsNumber(0)).convertTo[Float],
+        d = fields.getOrElse("double", JsNumber(0)).convertTo[Double],
+        s = fields.getOrElse("string", JsString("")).convertTo[String],
+        bs = fields.getOrElse("byte_string", JsString("")).convertTo[ByteString],
+        t = fields.getOrElse("tensor", JsNull).convertTo[Option[Tensor]],
+        bt = fields.getOrElse("basic_type", JsString("unknown")).convertTo[BasicType],
+        ds = fields.getOrElse("data_shape", JsNull).convertTo[Option[DataShape]],
+        m = fields.getOrElse("model", JsNull).convertTo[Option[Model]]
+      )
+      case _ => deserializationError(s"invalid scalar value $json")
+    }
+  }
   implicit val bundleTensorFormat: JsonFormat[Tensor] = jsonFormat3(Tensor.apply)
-  implicit val bundleListFormat: JsonFormat[List] = jsonFormat11(List.apply)
+  implicit val bundleListFormat: JsonFormat[List] = new JsonFormat[List] {
+    override def write(obj: List): JsValue = {
+      val fb = mutable.Seq.newBuilder[(String, JsValue)]
+
+      if(obj.b.nonEmpty) { fb += ("boolean" -> obj.b.toJson) }
+      if(obj.i.nonEmpty) { fb += ("int" -> obj.i.toJson) }
+      if(obj.l.nonEmpty) { fb += ("long" -> obj.l.toJson) }
+      if(obj.f.nonEmpty) { fb += ("float" -> obj.f.toJson) }
+      if(obj.d.nonEmpty) { fb += ("double" -> obj.d.toJson) }
+      if(obj.s.nonEmpty) { fb += ("string" -> obj.s.toJson) }
+      if(obj.bs.nonEmpty) { fb += ("byte_string" -> obj.bs.toJson) }
+      if(obj.t.nonEmpty) { fb += ("tensor" -> obj.t.toJson) }
+      if(obj.bt.nonEmpty) { fb += ("byte_string" -> obj.bt.toJson) }
+      if(obj.ds.nonEmpty) { fb += ("data_shape" -> obj.ds.toJson) }
+      if(obj.m.nonEmpty) { fb += ("model" -> obj.m.toJson) }
+
+      JsObject(fb.result(): _*)
+    }
+
+    override def read(json: JsValue): List = json match {
+      case JsObject(fields) => List(
+        b = fields.getOrElse("boolean", JsArray()).convertTo[Seq[Boolean]],
+        i = fields.getOrElse("int", JsArray()).convertTo[Seq[Int]],
+        l = fields.getOrElse("long", JsArray()).convertTo[Seq[Long]],
+        f = fields.getOrElse("float", JsArray()).convertTo[Seq[Float]],
+        d = fields.getOrElse("double", JsArray()).convertTo[Seq[Double]],
+        s = fields.getOrElse("string", JsArray()).convertTo[Seq[String]],
+        bs = fields.getOrElse("byte_string", JsArray()).convertTo[Seq[ByteString]],
+        t = fields.getOrElse("tensor", JsArray()).convertTo[Seq[Tensor]],
+        bt = fields.getOrElse("basic_type", JsArray()).convertTo[Seq[BasicType]],
+        ds = fields.getOrElse("data_shape", JsArray()).convertTo[Seq[DataShape]],
+        m = fields.getOrElse("model", JsArray()).convertTo[Seq[Model]]
+      )
+      case _ => deserializationError(s"invalid scalar value $json")
+    }
+  }
 
   implicit val bundleValueFormat: JsonFormat[Value] = new JsonFormat[Value] {
     override def write(obj: Value) = {

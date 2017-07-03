@@ -1,7 +1,7 @@
 package ml.combust.bundle.tensor
 
 import com.google.protobuf
-import ml.bundle.bundle.{BasicType, Tensor, TensorDimension, TensorShape}
+import ml.bundle.{BasicType, Tensor, TensorDimension, TensorShape}
 import ml.combust.mleap.tensor
 import ml.combust.mleap.tensor.ByteString
 

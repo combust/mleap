@@ -1,6 +1,6 @@
 package ml.combust.bundle.dsl
 
-import ml.bundle.bundle.Socket
+import ml.bundle.Socket
 
 /** Companion object for holding constant values.
   */
@@ -39,7 +39,7 @@ object NodeShape {
     * @param shape bundle shape
     * @return dsl shape
     */
-  def fromBundle(shape: ml.bundle.bundle.NodeShape): NodeShape = NodeShape(inputs = shape.inputs,
+  def fromBundle(shape: ml.bundle.NodeShape): NodeShape = NodeShape(inputs = shape.inputs,
     outputs = shape.outputs)
 }
 
@@ -77,7 +77,7 @@ case class NodeShape private(inputs: Seq[Socket],
     *
     * @return bundle shape
     */
-  def asBundle: ml.bundle.bundle.NodeShape = ml.bundle.bundle.NodeShape(inputs = inputs,
+  def asBundle: ml.bundle.NodeShape = ml.bundle.NodeShape(inputs = inputs,
     outputs = outputs)
 
   /** Get the standard input socket.
@@ -147,7 +147,7 @@ case class NodeShape private(inputs: Seq[Socket],
     *
     * @return bundle protobuf shape
     */
-  def bundleShape: ml.bundle.bundle.NodeShape = ml.bundle.bundle.NodeShape(inputs = inputs,
+  def bundleShape: ml.bundle.NodeShape = ml.bundle.NodeShape(inputs = inputs,
     outputs = outputs)
 
   /** Get an input by the port name. 

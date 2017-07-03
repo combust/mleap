@@ -48,7 +48,7 @@ object Dependencies {
 
   val tensor = l ++= Seq(sprayJson, Test.scalaTest)
 
-  val bundleMl = l ++= Seq(arm, config, Test.scalaTest)
+  val bundleMl = l ++= Seq(arm, config, sprayJson, Test.scalaTest)
 
   val base = l ++= Seq()
 

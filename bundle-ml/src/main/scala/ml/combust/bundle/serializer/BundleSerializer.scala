@@ -5,6 +5,8 @@ import java.nio.file.Files
 
 import ml.combust.bundle.{BundleContext, BundleFile, HasBundleRegistry}
 import ml.combust.bundle.dsl.Bundle
+import ml.combust.bundle.json.JsonSupport._
+import spray.json._
 import resource._
 
 import scala.util.Try
@@ -32,7 +34,7 @@ case class BundleSerializer[Context](context: Context,
     NodeSerializer(bundleContext.bundleContext("root")).write(bundle.root).flatMap {
       _ =>
         (for (out <- managed(Files.newOutputStream(bundleContext.file(Bundle.bundleJson)))) yield {
-          val json = bundle.info.asBundle.toString.getBytes("UTF-8")
+          val json = bundle.info.asBundle.toJson.prettyPrint.getBytes("UTF-8")
           out.write(json)
           bundle
         }).tried

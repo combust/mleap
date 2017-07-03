@@ -1,6 +1,6 @@
 package ml.combust.bundle.serializer
 
-import ml.bundle.bundle.Format
+import ml.bundle.Format
 
 /** Trait for defining which serialization format was used
   * to write a Bundle.ML model.

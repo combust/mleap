@@ -84,7 +84,7 @@ object Attributes {
     * @param attrs bundle attributes
     * @return dsl attribute list
     */
-  def fromBundle(attrs: ml.bundle.bundle.Attributes): Attributes = {
+  def fromBundle(attrs: ml.bundle.Attributes): Attributes = {
     val a = attrs.list.map {
       case (key, value) => (key, Value(value))
     }
@@ -103,12 +103,12 @@ case class Attributes(lookup: Map[String, Value]) {
     *
     * @return bundle attribute list
     */
-  def asBundle: ml.bundle.bundle.Attributes = {
+  def asBundle: ml.bundle.Attributes = {
     val attrs = lookup.map {
       case (key, value) => (key, value.value)
     }
 
-    ml.bundle.bundle.Attributes(attrs)
+    ml.bundle.Attributes(attrs)
   }
 
   /** Get an attribute.

@@ -4,7 +4,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.tree.decision.{NodeWrapper, TreeSerializer}
 import ml.combust.bundle.{BundleContext, dsl}
-import ml.bundle.dtree.dtree
+import ml.bundle.dtree
 
 /**
   * Created by hollinwilkins on 8/22/16.
@@ -40,7 +40,7 @@ object MyNodeWrapper extends NodeWrapper[Node] {
           val s = dtree.Split.ContinuousSplit(split.featureIndex, split.threshold)
           dtree.Split(dtree.Split.S.Continuous(s))
       }
-      dtree.Node(ml.bundle.dtree.dtree.Node.N.Internal(dtree.Node.InternalNode(Some(split))))
+      dtree.Node(ml.bundle.dtree.Node.N.Internal(dtree.Node.InternalNode(Some(split))))
     case node: LeafNode =>
       dtree.Node(dtree.Node.N.Leaf(dtree.Node.LeafNode(values = node.values)))
   }

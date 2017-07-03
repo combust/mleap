@@ -4,6 +4,8 @@ import java.nio.file.{Files, Path}
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.{Bundle, Node}
+import ml.combust.bundle.json.JsonSupport._
+import spray.json._
 
 import scala.util.Try
 
@@ -43,11 +45,11 @@ object FormatNodeSerializer {
   */
 object JsonFormatNodeSerializer extends FormatNodeSerializer {
   override def write(path: Path, node: Node): Unit = {
-    Files.write(path, node.asBundle.toString.getBytes("UTF-8"))
+    Files.write(path, node.asBundle.toJson.prettyPrint.getBytes("UTF-8"))
   }
 
   override def read(path: Path): Node = {
-    Node.fromBundle(ml.bundle.bundle.Node.fromAscii(new String(Files.readAllBytes(path), "UTF-8")))
+    Node.fromBundle(new String(Files.readAllBytes(path), "UTF-8").parseJson.convertTo[ml.bundle.Node])
   }
 }
 
@@ -60,7 +62,7 @@ object ProtoFormatNodeSerializer extends FormatNodeSerializer {
 
   override def read(path: Path): Node = {
     val bytes = Files.readAllBytes(path)
-    Node.fromBundle(ml.bundle.bundle.Node.parseFrom(bytes))
+    Node.fromBundle(ml.bundle.Node.parseFrom(bytes))
   }
 }
 

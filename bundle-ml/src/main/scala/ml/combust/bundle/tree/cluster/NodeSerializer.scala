@@ -3,9 +3,11 @@ package ml.combust.bundle.tree.cluster
 import java.io.{BufferedReader, DataInputStream, InputStreamReader, _}
 import java.nio.file.{Files, Path}
 
-import ml.bundle.ctree.ctree.Node
+import ml.bundle.ctree.Node
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.serializer.SerializationFormat
+import ml.combust.bundle.tree.JsonSupport._
+import spray.json._
 import resource._
 
 import scala.util.Try
@@ -37,7 +39,7 @@ trait FormatNodeReader extends Closeable {
 
 case class JsonFormatNodeWriter(out: BufferedWriter) extends FormatNodeWriter {
   override def write(node: Node): Unit = {
-    out.write(node.toString + "\n")
+    out.write(node.toJson.compactPrint + "\n")
   }
 
   override def close(): Unit = out.close()
@@ -45,7 +47,7 @@ case class JsonFormatNodeWriter(out: BufferedWriter) extends FormatNodeWriter {
 
 case class JsonFormatNodeReader(in: BufferedReader) extends FormatNodeReader {
   override def read(): Node = {
-    Node.fromAscii(in.readLine())
+    in.readLine().parseJson.convertTo[Node]
   }
 
   override def close(): Unit = in.close()

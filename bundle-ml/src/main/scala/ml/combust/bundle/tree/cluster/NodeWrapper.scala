@@ -1,6 +1,6 @@
 package ml.combust.bundle.tree.cluster
 
-import ml.bundle.ctree.ctree.Node
+import ml.bundle.ctree.Node
 
 /**
   * Created by hollinwilkins on 12/26/16.

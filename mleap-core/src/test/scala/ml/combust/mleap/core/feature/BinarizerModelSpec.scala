@@ -10,7 +10,7 @@ import org.scalatest.FunSpec
 class BinarizerModelSpec extends FunSpec {
   describe("#apply"){
     it("Makes a value 0 or 1 based on the threshold") {
-      val binarizer = BinarizerModel(0.3, BasicType.Double, ScalarShape())
+      val binarizer = BinarizerModel(0.3, ScalarShape())
       val features = Vectors.dense(Array(0.1, 0.4, 0.3))
       val binFeatures = binarizer(features).toArray
 

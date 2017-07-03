@@ -12,7 +12,7 @@ import org.scalatest.FunSpec
 class VectorAssemblerModelSpec extends FunSpec {
   describe("#apply") {
     it("assembles doubles and vectors into a new vector") {
-      val assembler = VectorAssemblerModel(BasicType.Double, Seq(
+      val assembler = VectorAssemblerModel(Seq(
         ScalarShape(), ScalarShape(),
         TensorShape(2),
         TensorShape(5)))

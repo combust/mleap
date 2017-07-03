@@ -7,9 +7,8 @@ import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.types.{DoubleType, StructType}
 import SparkSupport._
-import ml.combust.mleap.core
-import ml.combust.mleap.core.types.{StringType, StructField}
-import ml.combust.mleap.runtime.types
+import ml.combust.mleap.core.types
+import ml.combust.mleap.core.types.StructField
 import org.scalatest.FunSpec
 
 import scala.collection.JavaConverters._
@@ -28,9 +27,9 @@ case class MyTransformer() extends Transformer {
   }
 
   override def getFields(): Try[Seq[StructField]] = {
-    Success(Seq(core.types.StructField("input", core.types.DoubleType()),
-      core.types.StructField("output1", core.types.DoubleType()),
-      core.types.StructField("output2", StringType())))
+    Success(Seq(types.StructField("input", types.ScalarType.Double),
+      types.StructField("output1", types.ScalarType.Double),
+      types.StructField("output2", types.ScalarType.String)))
   }
 }
 
@@ -57,9 +56,9 @@ class SparkTransformBuilderSpec extends FunSpec {
     it("has the correct inputs and outputs") {
       val transformer = MyTransformer()
       assert(transformer.getFields().get ==
-        Seq(StructField("input", core.types.DoubleType()),
-          StructField("output1", core.types.DoubleType()),
-          StructField("output2", core.types.StringType())))
+        Seq(StructField("input", types.ScalarType.Double),
+          StructField("output1", types.ScalarType.Double),
+          StructField("output2", types.ScalarType.String)))
     }
   }
 }

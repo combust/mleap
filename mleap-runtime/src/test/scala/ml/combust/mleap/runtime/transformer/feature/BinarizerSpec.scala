@@ -33,8 +33,8 @@ class BinarizerSpec extends FunSpec {
     describe("#getFields") {
       it("has the correct inputs and outputs") {
         assert(binarizer.getFields().get ==
-          Seq(StructField("test_vec", TensorType(BasicType.Double, Some(Seq(3)))),
-            StructField("test_binarizer", TensorType(BasicType.Double, Some(Seq(3))))))
+          Seq(StructField("test_vec", TensorType(BasicType.Double)),
+            StructField("test_binarizer", TensorType(BasicType.Double))))
       }
     }
   }

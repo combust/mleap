@@ -2,7 +2,8 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.{MathUnaryModel, UnaryOperation}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.MathUnary
@@ -10,7 +11,7 @@ import ml.combust.mleap.runtime.transformer.feature.MathUnary
 /**
   * Created by hollinwilkins on 12/27/16.
   */
-class MathUnaryOp extends OpNode[MleapContext, MathUnary, MathUnaryModel] {
+class MathUnaryOp extends MleapOp[MathUnary, MathUnaryModel] {
   override val Model: OpModel[MleapContext, MathUnaryModel] = new OpModel[MleapContext, MathUnaryModel] {
     override val klazz: Class[MathUnaryModel] = classOf[MathUnaryModel]
 
@@ -27,19 +28,5 @@ class MathUnaryOp extends OpNode[MleapContext, MathUnary, MathUnaryModel] {
     }
   }
 
-  override val klazz: Class[MathUnary] = classOf[MathUnary]
-
-  override def name(node: MathUnary): String = node.uid
-
   override def model(node: MathUnary): MathUnaryModel = node.model
-
-  override def load(node: Node, model: MathUnaryModel)
-                   (implicit context: BundleContext[MleapContext]): MathUnary = {
-    MathUnary(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: MathUnary): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

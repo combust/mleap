@@ -2,7 +2,7 @@ package ml.combust.mleap.bundle.ops
 
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.runtime.transformer.{Pipeline, Transformer}
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.GraphSerializer
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.runtime.MleapContext
@@ -10,7 +10,7 @@ import ml.combust.mleap.runtime.MleapContext
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class PipelineOp extends OpNode[MleapContext, Pipeline, Pipeline] {
+class PipelineOp extends MleapOp[Pipeline, Pipeline] {
   override val Model: OpModel[MleapContext, Pipeline] = new OpModel[MleapContext, Pipeline] {
     override val klazz: Class[Pipeline] = classOf[Pipeline]
 
@@ -30,16 +30,5 @@ class PipelineOp extends OpNode[MleapContext, Pipeline, Pipeline] {
     }
   }
 
-  override val klazz: Class[Pipeline] = classOf[Pipeline]
-
-  override def name(node: Pipeline): String = node.uid
-
   override def model(node: Pipeline): Pipeline = node
-
-  override def load(node: Node, model: Pipeline)
-                   (implicit context: BundleContext[MleapContext]): Pipeline = {
-    model.copy(uid = node.name)
-  }
-
-  override def shape(node: Pipeline): NodeShape = NodeShape()
 }

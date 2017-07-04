@@ -13,7 +13,7 @@ class PipelineSpec extends FunSpec {
       val pipeline = new Pipeline(uid = "pipeline", Seq(
                       LinearRegression("transformer", "features", "prediction", LinearRegressionModel(Vectors.dense(1.0, 2.0, 3.0), 4.0))))
       assert(pipeline.getFields().get == Seq(
-          StructField("features", TensorType(BasicType.Double, Some(Seq(3)))),
+          StructField("features", TensorType(BasicType.Double)),
           StructField("prediction", ScalarType.Double)
       ))
     }

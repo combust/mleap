@@ -3,16 +3,17 @@ package ml.combust.mleap.bundle.ops.classification
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.classification.{DecisionTreeClassifierModel, RandomForestClassifierModel}
 import ml.combust.mleap.runtime.transformer.classification.RandomForestClassifier
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.bundle.tree.decision.MleapNodeWrapper
 import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class RandomForestClassifierOp extends OpNode[MleapContext, RandomForestClassifier, RandomForestClassifierModel] {
+class RandomForestClassifierOp extends MleapOp[RandomForestClassifier, RandomForestClassifierModel] {
   implicit val nodeWrapper = MleapNodeWrapper
 
   override val Model: OpModel[MleapContext, RandomForestClassifierModel] = new OpModel[MleapContext, RandomForestClassifierModel] {
@@ -53,24 +54,5 @@ class RandomForestClassifierOp extends OpNode[MleapContext, RandomForestClassifi
     }
   }
 
-  override val klazz: Class[RandomForestClassifier] = classOf[RandomForestClassifier]
-
-  override def name(node: RandomForestClassifier): String = node.uid
-
   override def model(node: RandomForestClassifier): RandomForestClassifierModel = node.model
-
-  override def load(node: Node, model: RandomForestClassifierModel)
-                   (implicit context: BundleContext[MleapContext]): RandomForestClassifier = {
-    RandomForestClassifier(uid = node.name,
-      featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.output("prediction").name,
-      rawPredictionCol = node.shape.getOutput("raw_prediction").map(_.name),
-      probabilityCol = node.shape.getOutput("probability").map(_.name),
-      model = model)
-  }
-
-  override def shape(node: RandomForestClassifier): NodeShape = NodeShape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.rawPredictionCol, "raw_prediction").
-    withOutput(node.probabilityCol, "probability")
 }

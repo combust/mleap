@@ -2,7 +2,8 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.BucketedRandomProjectionLSHModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.BucketedRandomProjectionLSH
@@ -12,7 +13,7 @@ import org.apache.spark.ml.linalg.Vectors
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class BucketedRandomProjectionLSHOp extends OpNode[MleapContext, BucketedRandomProjectionLSH, BucketedRandomProjectionLSHModel] {
+class BucketedRandomProjectionLSHOp extends MleapOp[BucketedRandomProjectionLSH, BucketedRandomProjectionLSHModel] {
   override val Model: OpModel[MleapContext, BucketedRandomProjectionLSHModel] = new OpModel[MleapContext, BucketedRandomProjectionLSHModel] {
     override val klazz: Class[BucketedRandomProjectionLSHModel] = classOf[BucketedRandomProjectionLSHModel]
 
@@ -32,19 +33,5 @@ class BucketedRandomProjectionLSHOp extends OpNode[MleapContext, BucketedRandomP
     }
   }
 
-  override val klazz: Class[BucketedRandomProjectionLSH] = classOf[BucketedRandomProjectionLSH]
-
-  override def name(node: BucketedRandomProjectionLSH): String = node.uid
-
   override def model(node: BucketedRandomProjectionLSH): BucketedRandomProjectionLSHModel = node.model
-
-  override def load(node: Node, model: BucketedRandomProjectionLSHModel)
-                   (implicit context: BundleContext[MleapContext]): BucketedRandomProjectionLSH = {
-    BucketedRandomProjectionLSH(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: BucketedRandomProjectionLSH): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

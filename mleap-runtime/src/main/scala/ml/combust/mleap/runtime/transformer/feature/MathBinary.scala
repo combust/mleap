@@ -1,48 +1,27 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MathBinaryModel
-import ml.combust.mleap.core.types.{ScalarType, StructField}
+import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.Transformer
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-
-import scala.util.{Success, Try}
+import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 
 /**
   * Created by hollinwilkins on 12/27/16.
   */
 case class MathBinary(override val uid: String = Transformer.uniqueName("math_binary"),
-                      inputA: Option[String] = None,
-                      inputB: Option[String] = None,
-                      outputCol: String,
-                      model: MathBinaryModel) extends Transformer {
+                      override val shape: NodeShape,
+                      model: MathBinaryModel) extends SimpleTransformer {
   val execAB: UserDefinedFunction = (a: Double, b: Double) => model(Some(a), Some(b))
   val execA: UserDefinedFunction = (a: Double) => model(Some(a), None)
   val execB: UserDefinedFunction = (b: Double) => model(None, Some(b))
   val execNone: UserDefinedFunction = () => model(None, None)
 
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    (inputA, inputB) match {
-      case (Some(a), Some(b)) => builder.withOutput(outputCol, a, b)(execAB)
-      case (Some(a), None) => builder.withOutput(outputCol, a)(execA)
-      case (None, Some(b)) => builder.withOutput(outputCol, b)(execB)
-      case (None, None) => builder.withOutput(outputCol)(execNone)
-    }
-  }
-
-  override def getFields(): Try[Seq[StructField]] = {
-    (inputA, inputB) match {
-      case (Some(a), Some(b)) => Success(Seq(StructField(a, ScalarType.Double),
-                                              StructField(b, ScalarType.Double),
-                                              StructField(outputCol, ScalarType.Double)))
-      case (Some(a), None) => Success(Seq(
-        StructField(a, ScalarType.Double),
-        StructField(outputCol, ScalarType.Double)))
-      case (None, Some(b)) => Success(Seq(
-        StructField(b, ScalarType.Double),
-        StructField(outputCol, ScalarType.Double)))
-      case (None, None) => Success(Seq(
-        StructField(outputCol, ScalarType.Double)))
+  override val exec: UserDefinedFunction = {
+    (shape.inputSchema.getField("input_a"), shape.inputSchema.getField("input_b")) match {
+      case (Some(_), Some(_)) => execAB
+      case (Some(_), None) => execA
+      case (None, Some(_)) => execB
+      case (None, None) => execNone
     }
   }
 }

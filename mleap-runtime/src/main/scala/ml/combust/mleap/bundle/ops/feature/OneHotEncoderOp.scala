@@ -2,7 +2,8 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.OneHotEncoderModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.OneHotEncoder
@@ -10,7 +11,7 @@ import ml.combust.mleap.runtime.transformer.feature.OneHotEncoder
 /**
   * Created by hollinwilkins on 10/24/16.
   */
-class OneHotEncoderOp extends OpNode[MleapContext, OneHotEncoder, OneHotEncoderModel] {
+class OneHotEncoderOp extends MleapOp[OneHotEncoder, OneHotEncoderModel] {
   override val Model: OpModel[MleapContext, OneHotEncoderModel] = new OpModel[MleapContext, OneHotEncoderModel] {
     override val klazz: Class[OneHotEncoderModel] = classOf[OneHotEncoderModel]
 
@@ -29,19 +30,5 @@ class OneHotEncoderOp extends OpNode[MleapContext, OneHotEncoder, OneHotEncoderM
     }
   }
 
-  override val klazz: Class[OneHotEncoder] = classOf[OneHotEncoder]
-
-  override def name(node: OneHotEncoder): String = node.uid
-
   override def model(node: OneHotEncoder): OneHotEncoderModel = node.model
-
-  override def load(node: Node, model: OneHotEncoderModel)
-                   (implicit context: BundleContext[MleapContext]): OneHotEncoder = {
-    OneHotEncoder(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: OneHotEncoder): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

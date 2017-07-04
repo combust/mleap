@@ -3,43 +3,24 @@ package ml.combust.mleap.runtime.transformer.classification
 import ml.combust.mleap.core.classification.OneVsRestModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.Transformer
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.runtime.transformer.{MultiTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-
-import scala.util.{Success, Try}
+import ml.combust.mleap.runtime.Row
 
 /**
   * Created by hwilkins on 10/22/15.
   */
 case class OneVsRest(override val uid: String = Transformer.uniqueName("one_vs_rest"),
-                     featuresCol: String,
-                     predictionCol: String,
-                     probabilityCol: Option[String] = None,
-                     model: OneVsRestModel) extends Transformer {
-  val predictProbability: UserDefinedFunction = (features: Tensor[Double]) => model.predictProbability(features)
-  val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
-
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    probabilityCol match {
-      case Some(p) =>
-        for(b <- builder.withOutput(p, featuresCol)(predictProbability);
-            b2 <- b.withOutput(predictionCol, featuresCol)(exec)) yield b2
-      case None =>
-        builder.withOutput(predictionCol, featuresCol)(exec)
-    }
-  }
-
-  override def getFields(): Try[Seq[StructField]] = {
-    probabilityCol match {
-      case Some(p) => Success(Seq(
-        StructField(featuresCol, TensorType(BasicType.Double)),
-        StructField(p, ScalarType.Double),
-        StructField(predictionCol, ScalarType.Double)))
-      case None => Success(Seq(
-        StructField(featuresCol, TensorType(BasicType.Double)),
-        StructField(predictionCol, ScalarType.Double)))
-    }
+                     override val shape: NodeShape,
+                     model: OneVsRestModel) extends MultiTransformer {
+  override val exec: UserDefinedFunction = shape.getOutput("probability") match {
+    case Some(_) =>
+      (features: Tensor[Double]) => {
+        val (prediction, probability) = model.predictWithProbability(features)
+        Row(prediction, probability)
+      }
+    case None =>
+      (features: Tensor[Double]) => Row(model(features))
   }
 }

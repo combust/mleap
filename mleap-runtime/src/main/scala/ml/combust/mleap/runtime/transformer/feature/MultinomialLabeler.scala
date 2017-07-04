@@ -1,33 +1,26 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MultinomialLabelerModel
-import ml.combust.mleap.core.types._
+import ml.combust.mleap.core.types.NodeShape
+import ml.combust.mleap.runtime.Row
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.Transformer
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.runtime.transformer.{MultiTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
-
-import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 1/18/17.
   */
 case class MultinomialLabeler(override val uid: String = Transformer.uniqueName("multinomial_labeler"),
-                              featuresCol: String,
-                              probabilitiesCol: String,
-                              labelsCol: String,
-                              model: MultinomialLabelerModel) extends Transformer {
-  val probabilitiesExec: UserDefinedFunction = (t: Tensor[Double]) => model.top(t).map(_._1)
-  val labelsExec: UserDefinedFunction = (t: Tensor[Double]) => model.topLabels(t)
+                              override val shape: NodeShape,
+                              model: MultinomialLabelerModel) extends MultiTransformer {
+  private val f = (t: Tensor[Double]) => {
+    val outs = model(t)
+    val probabilities = outs.map(_._1)
+    val labels = outs.map(_._3)
 
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    for(b <- builder.withOutput(probabilitiesCol, featuresCol)(probabilitiesExec);
-        b2 <- b.withOutput(labelsCol, featuresCol)(labelsExec)) yield b2
+    Row(probabilities, labels)
   }
-
-  override def getFields(): Try[Seq[StructField]] = {
-    Success(Seq(StructField(featuresCol, TensorType(BasicType.Double)),
-          StructField(probabilitiesCol, ListType(BasicType.Double)),
-          StructField(labelsCol, ListType(BasicType.String))))
-  }
+  override val exec: UserDefinedFunction = UserDefinedFunction(f,
+    shape.outputSchema.fields.map(_.dataType),
+    shape.inputSchema.fields.head.dataType)
 }

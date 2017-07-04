@@ -3,8 +3,9 @@ package ml.combust.mleap.bundle.ops.classification
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.classification.{BinaryLogisticRegressionModel, LogisticRegressionModel, ProbabilisticLogisticsRegressionModel}
 import ml.combust.mleap.runtime.transformer.classification.LogisticRegression
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
@@ -12,7 +13,7 @@ import org.apache.spark.ml.linalg.{Matrices, Vectors}
 /**
   * Created by hollinwilkins on 8/24/16.
   */
-class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, LogisticRegressionModel] {
+class LogisticRegressionOp extends MleapOp[LogisticRegression, LogisticRegressionModel] {
   override val Model: OpModel[MleapContext, LogisticRegressionModel] = new OpModel[MleapContext, LogisticRegressionModel] {
     override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 
@@ -55,25 +56,5 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
     }
   }
 
-  override val klazz: Class[LogisticRegression] = classOf[LogisticRegression]
-
-  override def name(node: LogisticRegression): String = node.uid
-
   override def model(node: LogisticRegression): LogisticRegressionModel = node.model
-
-  override def load(node: Node, model: LogisticRegressionModel)
-                   (implicit context: BundleContext[MleapContext]): LogisticRegression = {
-    LogisticRegression(uid = node.name,
-      featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.output("prediction").name,
-      rawPredictionCol = node.shape.getOutput("raw_prediction").map(_.name),
-      probabilityCol = node.shape.getOutput("probability").map(_.name),
-      model = model)
-  }
-
-  override def shape(node: LogisticRegression): NodeShape = NodeShape().
-    withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.rawPredictionCol, "raw_prediction").
-    withOutput(node.probabilityCol, "probability")
 }

@@ -2,33 +2,25 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CoalesceModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.runtime.Row
+import ml.combust.mleap.runtime.function.{SchemaSpec, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 
-import scala.util.{Success, Try}
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 1/5/17.
   */
 case class Coalesce(override val uid: String = Transformer.uniqueName("coalesce"),
-                    inputCols: Array[String],
-                    outputCol: String,
+                    override val shape: NodeShape,
                     model: CoalesceModel) extends Transformer {
-  private val f = (values: TupleData) => model(values.values: _*)
+  private val f = (values: Row) => model(values.toSeq: _*)
   val exec: UserDefinedFunction = UserDefinedFunction(f,
     ScalarType.Double,
-    Seq(TupleType(model.nullableInputs.map(n => DataType(BasicType.Double, ScalarShape(n))): _*)))
+    Seq(SchemaSpec(inputSchema)))
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(outputCol, inputCols)(exec)
-  }
-
-  override def getFields(): Try[Seq[StructField]] = {
-    val inputFields = inputCols.zip(model.nullableInputs).map {
-      case (name, isNullable) => StructField(name, DataType(BasicType.Double, ScalarShape(isNullable)))
-    }
-
-    Success(inputFields :+ StructField(outputCol, ScalarType(BasicType.Double, isNullable = true)))
+    builder.withOutput(shape.outputSchema.fields.head.name, shape.inputSchema.fields.map(_.name))(exec)
   }
 }

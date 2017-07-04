@@ -2,7 +2,8 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.StopWordsRemoverModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.StopWordsRemover
@@ -10,7 +11,7 @@ import ml.combust.mleap.runtime.transformer.feature.StopWordsRemover
 /**
   * Created by mikhail on 10/16/16.
   */
-class StopWordsRemoverOp extends OpNode[MleapContext, StopWordsRemover, StopWordsRemoverModel] {
+class StopWordsRemoverOp extends MleapOp[StopWordsRemover, StopWordsRemoverModel] {
   override val Model: OpModel[MleapContext, StopWordsRemoverModel] = new OpModel[MleapContext, StopWordsRemoverModel] {
     override val klazz: Class[StopWordsRemoverModel] = classOf[StopWordsRemoverModel]
 
@@ -30,20 +31,5 @@ class StopWordsRemoverOp extends OpNode[MleapContext, StopWordsRemover, StopWord
 
   }
 
-  override val klazz: Class[StopWordsRemover] = classOf[StopWordsRemover]
-
-  override def name(node: StopWordsRemover): String = node.uid
-
   override def model(node: StopWordsRemover): StopWordsRemoverModel = node.model
-
-  override def load(node: Node, model: StopWordsRemoverModel)
-                   (implicit context: BundleContext[MleapContext]): StopWordsRemover = {
-    StopWordsRemover(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model
-    )
-  }
-
-  override def shape(node: StopWordsRemover): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

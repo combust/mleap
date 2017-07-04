@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime
 
 import java.io.PrintStream
 
-import ml.combust.mleap.core.types.{StructField, StructType, TupleType}
+import ml.combust.mleap.core.types.{StructField, StructType}
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
@@ -24,7 +24,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     *
     * @return schema
     */
-  override def schema: StructType
+  def schema: StructType
 
   /** Get the dataset.
     *
@@ -67,9 +67,9 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     */
   def withField(name: String, selectors: Selector *)
                (udf: UserDefinedFunction): Try[LF] = {
-    RowUtil.createRowSelectors(schema, udf.inputs, selectors: _*).flatMap {
+    RowUtil.createRowSelectors(schema, selectors: _*).flatMap {
       rowSelectors =>
-        schema.withField(name, udf.returnType).map {
+        schema.withField(name, udf.outputs.head).map {
           schema2 =>
             val dataset2 = dataset.withValue(rowSelectors: _*)(udf)
             withSchemaAndDataset(schema2, dataset2)
@@ -79,9 +79,9 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
 
   def withFields(names: Seq[String], selectors: Selector *)
                 (udf: UserDefinedFunction): Try[LF] = {
-    RowUtil.createRowSelectors(schema, udf.inputs, selectors: _*).flatMap {
+    RowUtil.createRowSelectors(schema, selectors: _*).flatMap {
       rowSelectors =>
-        val fields = names.zip(udf.returnType.asInstanceOf[TupleType].dts).map {
+        val fields = names.zip(udf.outputs).map {
           case (name, dt) => StructField(name, dt)
         }
 
@@ -121,11 +121,6 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     * @return new leap frame with schema and dataset
     */
   protected def withSchemaAndDataset(schema: StructType, dataset: Dataset): LF
-
-  override def withOutput(name: String, selectors: Selector *)
-                         (udf: UserDefinedFunction): Try[LF] = {
-    withField(name, selectors: _*)(udf)
-  }
 
   override def withOutputs(outputs: Seq[String], inputs: Selector *)
                           (udf: UserDefinedFunction): Try[LF] = {

@@ -1,8 +1,8 @@
 package ml.combust.mleap.core.types
 
 import java.io.PrintStream
-
 import scala.collection.JavaConverters._
+
 import scala.util.{Failure, Success, Try}
 
 /**  Structured container (schema) for fields.
@@ -39,7 +39,6 @@ case class StructType private(fields: Seq[StructField],
                               private val nameToIndex: Map[String, Int],
                               private val nameToField: Map[String, StructField])
   extends Serializable {
-
   /** Get optional field by name.
     *
     * @param name name of field

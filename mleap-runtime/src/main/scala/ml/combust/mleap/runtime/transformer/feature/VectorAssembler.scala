@@ -6,38 +6,23 @@ import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.runtime.Row
+import ml.combust.mleap.runtime.function.{SchemaSpec, UserDefinedFunction}
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 /**
   * Created by hwilkins on 10/23/15.
   */
 case class VectorAssembler(override val uid: String = Transformer.uniqueName("vector_assembler"),
-                           inputCols: Array[String],
-                           outputCol: String,
+                           override val shape: NodeShape,
                            model: VectorAssemblerModel) extends Transformer {
-  private val f = (values: TupleData) => model(values.values): Tensor[Double]
+  private val f = (values: Row) => model(values.toSeq): Tensor[Double]
   val exec: UserDefinedFunction = UserDefinedFunction(f,
-    DataType(BasicType.Double, TensorShape(Seq(model.outputSize))),
-    Seq(TupleType(model.inputShapes.map(s => DataType(BasicType.Double, s)): _*)))
+    outputSchema.fields.head.dataType,
+    Seq(SchemaSpec(inputSchema)))
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(outputCol, inputCols)(exec)
-  }
-
-  override def getFields(): Try[Seq[StructField]] = {
-    val inputFields = inputCols.zip(model.inputShapes).map {
-      case (name, shape) => StructField(name, DataType(BasicType.Double, shape))
-    }
-    val outputSize = model.inputShapes.foldLeft(0) {
-      (acc, shape) => shape match {
-        case ScalarShape(false) => acc + 1
-        case TensorShape(Seq(size), false) => acc + size
-        case _ => return Failure(new IllegalArgumentException(s"invalid shape for vector assembler $shape"))
-      }
-    }
-
-    Success(inputFields :+ StructField(outputCol, DataType(BasicType.Double, TensorShape(outputSize))))
+    builder.withOutput(outputSchema.fields.head.name, inputSchema.fields.map(_.name))(exec)
   }
 }

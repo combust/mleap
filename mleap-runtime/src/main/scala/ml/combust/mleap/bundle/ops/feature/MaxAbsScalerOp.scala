@@ -2,7 +2,8 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.MaxAbsScalerModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.MaxAbsScaler
@@ -11,7 +12,7 @@ import org.apache.spark.ml.linalg.Vectors
 /**
   * Created by mikhail on 9/19/16.
   */
-class MaxAbsScalerOp extends OpNode[MleapContext, MaxAbsScaler, MaxAbsScalerModel]{
+class MaxAbsScalerOp extends MleapOp[MaxAbsScaler, MaxAbsScalerModel]{
   override val Model: OpModel[MleapContext, MaxAbsScalerModel] = new OpModel[MleapContext, MaxAbsScalerModel] {
     override val klazz: Class[MaxAbsScalerModel] = classOf[MaxAbsScalerModel]
 
@@ -28,19 +29,5 @@ class MaxAbsScalerOp extends OpNode[MleapContext, MaxAbsScaler, MaxAbsScalerMode
     }
   }
 
-  override val klazz: Class[MaxAbsScaler] = classOf[MaxAbsScaler]
-
-  override def name(node: MaxAbsScaler): String = node.uid
-
   override def model(node: MaxAbsScaler): MaxAbsScalerModel = node.model
-
-  override def load(node: Node, model: MaxAbsScalerModel)
-                   (implicit context: BundleContext[MleapContext]): MaxAbsScaler = {
-    MaxAbsScaler(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: MaxAbsScaler): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

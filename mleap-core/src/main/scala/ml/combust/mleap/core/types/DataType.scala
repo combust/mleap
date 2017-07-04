@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.types
 
+import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 
 object DataType {
@@ -7,7 +8,7 @@ object DataType {
     shape match {
       case ScalarShape(isNullable) => ScalarType(base, isNullable = isNullable)
       case ListShape(isNullable) => ListType(base, isNullable = isNullable)
-      case TensorShape(dimensions, isNullable) => TensorType(base, Some(dimensions), isNullable = isNullable)
+      case TensorShape(dimensions, isNullable) => TensorType(base, dimensions, isNullable = isNullable)
     }
   }
 }
@@ -16,6 +17,9 @@ sealed trait DataType extends Serializable {
   val isNullable: Boolean
   def asNullable: DataType = setNullable(true)
   def setNullable(isNullable: Boolean): DataType
+
+  def base: BasicType
+  def shape: DataShape
 
   def simpleString: String
   def printString: String = s"$simpleString (nullable = $isNullable)"
@@ -64,10 +68,12 @@ object ScalarType {
   val ByteString = ScalarType(BasicType.ByteString)
 }
 
-case class ScalarType(base: BasicType, override val isNullable: Boolean = false) extends DataType {
+case class ScalarType(override val base: BasicType, override val isNullable: Boolean = false) extends DataType {
   override def setNullable(isNullable: Boolean): ScalarType = copy(isNullable = isNullable)
   override def simpleString: String = "scalar"
   override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"
+
+  override def shape: ScalarShape = ScalarShape(isNullable)
 }
 
 /**
@@ -76,7 +82,7 @@ case class ScalarType(base: BasicType, override val isNullable: Boolean = false)
   * Dimensions are not necessary for a LeapFrame, but strongly encouraged
   * to ensure execution is working as expected.
  */
-case class TensorType(base: BasicType,
+case class TensorType(override val base: BasicType,
                       dimensions: Option[Seq[Int]] = None,
                       override val isNullable: Boolean = false) extends DataType {
   def this(base: BasicType, isNullable: Boolean) = this(base, None, isNullable)
@@ -84,23 +90,14 @@ case class TensorType(base: BasicType,
   override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
   override def simpleString: String = "tensor"
   override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"
+
+  override def shape: TensorShape = TensorShape(dimensions, isNullable)
 }
-case class ListType(base: BasicType,
+case class ListType(override val base: BasicType,
                     override val isNullable: Boolean = false) extends DataType {
   override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
   override def simpleString: String = "list"
   override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"
-}
 
-case class TupleType(dts: DataType *) extends DataType {
-  override val isNullable: Boolean = false
-  override def setNullable(isNullable: Boolean): DataType = TupleType(dts.map(_.setNullable(isNullable)): _*)
-
-  override def simpleString: String = {
-    val sb = StringBuilder.newBuilder
-    sb.append("TupleDataType(")
-    sb.append(dts.map(_.simpleString).mkString(","))
-    sb.append(")")
-    sb.toString
-  }
+  override def shape: ListShape = ListShape(isNullable)
 }

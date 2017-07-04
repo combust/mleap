@@ -2,8 +2,9 @@ package ml.combust.mleap.bundle.ops.regression
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.ModelSerializer
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.regression.{DecisionTreeRegressionModel, GBTRegressionModel}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.regression.GBTRegression
@@ -11,7 +12,7 @@ import ml.combust.mleap.runtime.transformer.regression.GBTRegression
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-class GBTRegressionOp extends OpNode[MleapContext, GBTRegression, GBTRegressionModel] {
+class GBTRegressionOp extends MleapOp[GBTRegression, GBTRegressionModel] {
   override val Model: OpModel[MleapContext, GBTRegressionModel] = new OpModel[MleapContext, GBTRegressionModel] {
     override val klazz: Class[GBTRegressionModel] = classOf[GBTRegressionModel]
 
@@ -47,25 +48,5 @@ class GBTRegressionOp extends OpNode[MleapContext, GBTRegression, GBTRegressionM
     }
   }
 
-  override val klazz: Class[GBTRegression] = classOf[GBTRegression]
-
-  override def name(node: GBTRegression): String = node.uid
-
   override def model(node: GBTRegression): GBTRegressionModel = node.model
-
-  override def load(node: Node, model: GBTRegressionModel)
-                   (implicit context: BundleContext[MleapContext]): GBTRegression = {
-    GBTRegression(uid = node.name,
-      featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.output("prediction").name,
-      model = model)
-  }
-
-  /** Get the shape of the node.
-    *
-    * @param node node object
-    * @return shape of the node
-    */
-  override def shape(node: GBTRegression): NodeShape = NodeShape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction")
 }

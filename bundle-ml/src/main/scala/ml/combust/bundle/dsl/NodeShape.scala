@@ -1,6 +1,6 @@
 package ml.combust.bundle.dsl
 
-import ml.bundle.Socket
+import ml.bundle.{Field, Socket}
 
 /** Companion object for holding constant values.
   */
@@ -101,46 +101,46 @@ case class NodeShape private(inputs: Seq[Socket],
     * This is the same as calling [[NodeShape#withStandardInput]] and
     * [[NodeShape#withStandardOutput]].
     *
-    * @param nameInput name of the input socket
-    * @param nameOutput name of the output socket
+    * @param inputField field of the input socket
+    * @param outputField field of the output socket
     * @return copy of the shape with standard input/output sockets added
     */
-  def withStandardIO(nameInput: String, nameOutput: String): NodeShape = {
-    withStandardInput(nameInput).withStandardOutput(nameOutput)
+  def withStandardIO(inputField: Field, outputField: Field): NodeShape = {
+    withStandardInput(inputField).withStandardOutput(outputField)
   }
 
   /** Add standard input socket to the shape.
     *
-    * @param name name of standard input socket
+    * @param field field of standard input socket
     * @return copy of the shape with standard input socket added
     */
-  def withStandardInput(name: String): NodeShape = withInput(name, NodeShape.standardInputPort)
+  def withStandardInput(field: Field): NodeShape = withInput(NodeShape.standardInputPort, field)
 
   /** Add standard output socket to the shape.
     *
-    * @param name name of standard output socket
+    * @param field field of standard output socket
     * @return copy of the shape with standard output socket added
     */
-  def withStandardOutput(name: String): NodeShape = withOutput(name, NodeShape.standardOutputPort)
+  def withStandardOutput(field: Field): NodeShape = withOutput(NodeShape.standardOutputPort, field)
 
   /** Add an optional input socket to the shape.
     *
-    * @param name optional name of input socket
+    * @param field optional field of input socket
     * @param port port of input socket
     * @return copy of the shape with input socket optionally added
     */
-  def withInput(name: Option[String], port: String): NodeShape = {
-    name.map(n => withInput(n, port)).getOrElse(this)
+  def withInput(field: Option[Field], port: String): NodeShape = {
+    field.map(n => withInput(port, n)).getOrElse(this)
   }
 
   /** Add an optional output socket to the shape.
     *
-    * @param name name of optional output socket
+    * @param field field of optional output socket
     * @param port port of output socket
     * @return copy of the shape with output socket optionally added
     */
-  def withOutput(name: Option[String], port: String): NodeShape = {
-    name.map(n => withOutput(n, port)).getOrElse(this)
+  def withOutput(field: Option[Field], port: String): NodeShape = {
+    field.map(n => withOutput(port, n)).getOrElse(this)
   }
 
   /** Get the bundle protobuf shape.
@@ -180,27 +180,31 @@ case class NodeShape private(inputs: Seq[Socket],
 
   /** Add an input socket to the shape. 
     *
-    * @param name name of input socket 
+    * @param field field of input socket 
     * @param port port of input socket 
     * @return copy of the shape with input socket added 
     */
-  def withInput(name: String, port: String): NodeShape = {
+  def withInput(port: String, field: Field): NodeShape = {
     require(!inputLookup.contains(port), s"input already exists for port: $port")
-    val socket = Socket(name, port)
+
+    val socket = Socket(port, Some(field))
     val inputLookup2 = inputLookup + (port -> socket)
+
     copy(inputs = inputs :+ socket, inputLookup = inputLookup2)
   }
 
   /** Add an output socket to the shape. 
     *
-    * @param name name of output socket 
+    * @param field field of output socket 
     * @param port port of output socket 
     * @return copy of the shape with output socket added 
     */
-  def withOutput(name: String, port: String): NodeShape = {
+  def withOutput(port: String, field: Field): NodeShape = {
     require(!outputLookup.contains(port), s"output already exists for port: $port")
-    val socket = Socket(name, port)
+
+    val socket = Socket(port, Some(field))
     val outputLookup2 = outputLookup + (port -> socket)
+
     copy(outputs = outputs :+ socket, outputLookup = outputLookup2)
   }
 }

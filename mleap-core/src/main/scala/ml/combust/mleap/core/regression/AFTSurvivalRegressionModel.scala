@@ -14,6 +14,11 @@ case class AFTSurvivalRegressionModel(coefficients: Vector,
                                       scale: Double) {
   def apply(features: Vector): Double = predict(features)
 
+  def predictWithQuantiles(features: Vector): (Double, Vector) = {
+    val quantiles = predictQuantiles(features)
+    (predict(features), quantiles)
+  }
+
   def predictQuantiles(features: Vector): Vector = {
     // scale parameter for the Weibull distribution of lifetime
     val lambda = math.exp(BLAS.dot(coefficients, features) + intercept)

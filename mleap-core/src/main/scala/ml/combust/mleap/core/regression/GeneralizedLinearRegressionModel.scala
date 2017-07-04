@@ -306,6 +306,11 @@ case class GeneralizedLinearRegressionModel(coefficients: Vector,
                                             fal: FamilyAndLink) {
   def apply(features: Vector): Double = predict(features)
 
+  def predictWithLink(features: Vector): (Double, Double) = {
+    val eta = predictLink(features)
+    (fal.fitted(eta), eta)
+  }
+
   def predictLink(features: Vector): Double = {
     BLAS.dot(features, coefficients) + intercept
   }

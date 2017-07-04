@@ -19,11 +19,11 @@ case class ListShape(override val isNullable: Boolean = false) extends DataShape
 }
 
 object TensorShape {
-  def apply(dim0: Int, dims: Int *): TensorShape = TensorShape(dim0 +: dims)
-  def nullable(dim0: Int, dims: Int *): TensorShape = TensorShape(dim0 +: dims, isNullable = true)
+  def apply(dim0: Int, dims: Int *): TensorShape = TensorShape(Some(dim0 +: dims))
+  def nullable(dim0: Int, dims: Int *): TensorShape = TensorShape(Some(dim0 +: dims), isNullable = true)
 }
 
-case class TensorShape(dimensions: Seq[Int],
+case class TensorShape(dimensions: Option[Seq[Int]] = None,
                        override val isNullable: Boolean = false) extends DataShape {
   override def isTensor: Boolean = true
 }

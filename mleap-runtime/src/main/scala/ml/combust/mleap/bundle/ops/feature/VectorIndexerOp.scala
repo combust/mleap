@@ -2,7 +2,8 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.VectorIndexerModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.VectorIndexer
@@ -10,7 +11,7 @@ import ml.combust.mleap.runtime.transformer.feature.VectorIndexer
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class VectorIndexerOp extends OpNode[MleapContext, VectorIndexer, VectorIndexerModel] {
+class VectorIndexerOp extends MleapOp[VectorIndexer, VectorIndexerModel] {
   override val Model: OpModel[MleapContext, VectorIndexerModel] = new OpModel[MleapContext, VectorIndexerModel] {
     override val klazz: Class[VectorIndexerModel] = classOf[VectorIndexerModel]
 
@@ -48,19 +49,5 @@ class VectorIndexerOp extends OpNode[MleapContext, VectorIndexer, VectorIndexerM
     }
   }
 
-  override val klazz: Class[VectorIndexer] = classOf[VectorIndexer]
-
-  override def name(node: VectorIndexer): String = node.uid
-
   override def model(node: VectorIndexer): VectorIndexerModel = node.model
-
-  override def load(node: Node, model: VectorIndexerModel)
-                   (implicit context: BundleContext[MleapContext]): VectorIndexer = {
-    VectorIndexer(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: VectorIndexer): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

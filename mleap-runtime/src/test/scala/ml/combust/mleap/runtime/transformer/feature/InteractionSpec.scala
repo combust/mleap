@@ -12,8 +12,8 @@ class InteractionSpec extends FunSpec {
         InteractionModel(Array(Array(1), Array(2)), Seq(ScalarShape(), TensorShape(2), TensorShape(2))))
       assert(transformer.getFields().get ==
         Seq(StructField("feature1", ScalarType.Double),
-          StructField("feature2", TensorType(BasicType.Double, Some(Seq(2)))),
-          StructField("features", TensorType(BasicType.Double, Some(Seq(2))))))
+          StructField("feature2", TensorType(BasicType.Double)),
+          StructField("features", TensorType(BasicType.Double))))
     }
   }
 }

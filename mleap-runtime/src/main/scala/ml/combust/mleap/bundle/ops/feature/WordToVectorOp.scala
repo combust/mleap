@@ -2,7 +2,8 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.WordToVectorModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.WordToVector
@@ -10,7 +11,7 @@ import ml.combust.mleap.runtime.transformer.feature.WordToVector
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class WordToVectorOp extends OpNode[MleapContext, WordToVector, WordToVectorModel] {
+class WordToVectorOp extends MleapOp[WordToVector, WordToVectorModel] {
   override val Model: OpModel[MleapContext, WordToVectorModel] = new OpModel[MleapContext, WordToVectorModel] {
     override val klazz: Class[WordToVectorModel] = classOf[WordToVectorModel]
 
@@ -35,21 +36,5 @@ class WordToVectorOp extends OpNode[MleapContext, WordToVector, WordToVectorMode
     }
   }
 
-  override val klazz: Class[WordToVector] = classOf[WordToVector]
-
-  override def name(node: WordToVector): String = node.uid
-
   override def model(node: WordToVector): WordToVectorModel = node.model
-
-  override def load(node: Node, model: WordToVectorModel)
-                   (implicit context: BundleContext[MleapContext]): WordToVector = {
-    WordToVector(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: WordToVector): NodeShape = {
-    NodeShape().withStandardIO(node.inputCol, node.outputCol)
-  }
 }

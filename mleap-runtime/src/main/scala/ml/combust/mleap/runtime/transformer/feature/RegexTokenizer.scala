@@ -3,20 +3,10 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.RegexTokenizerModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
-
-import scala.util.{Success, Try}
+import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 
 case class RegexTokenizer(override val uid: String = Transformer.uniqueName("regex_tokenizer"),
-                          override val inputCol: String,
-                          override val outputCol: String,
-                          model: RegexTokenizerModel
-                         ) extends FeatureTransformer {
-
+                          override val shape: NodeShape,
+                          model: RegexTokenizerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: String) => model(value)
-
-  override def getFields(): Try[Seq[StructField]] = Success(Seq(
-    StructField(inputCol, ScalarType.String),
-    StructField(outputCol, ListType(BasicType.String))
-  ))
 }

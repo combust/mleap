@@ -3,16 +3,17 @@ package ml.combust.mleap.bundle.ops.regression
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.regression.{DecisionTreeRegressionModel, RandomForestRegressionModel}
 import ml.combust.mleap.runtime.transformer.regression.RandomForestRegression
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.bundle.tree.decision.MleapNodeWrapper
 import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class RandomForestRegressionOp extends OpNode[MleapContext, RandomForestRegression, RandomForestRegressionModel] {
+class RandomForestRegressionOp extends MleapOp[RandomForestRegression, RandomForestRegressionModel] {
   implicit val nodeWrapper = MleapNodeWrapper
 
   override val Model: OpModel[MleapContext, RandomForestRegressionModel] = new OpModel[MleapContext, RandomForestRegressionModel] {
@@ -50,20 +51,5 @@ class RandomForestRegressionOp extends OpNode[MleapContext, RandomForestRegressi
     }
   }
 
-  override val klazz: Class[RandomForestRegression] = classOf[RandomForestRegression]
-
-  override def name(node: RandomForestRegression): String = node.uid
-
   override def model(node: RandomForestRegression): RandomForestRegressionModel = node.model
-
-  override def load(node: Node, model: RandomForestRegressionModel)
-                   (implicit context: BundleContext[MleapContext]): RandomForestRegression = {
-    RandomForestRegression(uid = node.name,
-      featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.output("prediction").name,
-      model = model)
-  }
-
-  override def shape(node: RandomForestRegression): NodeShape = NodeShape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction")
 }

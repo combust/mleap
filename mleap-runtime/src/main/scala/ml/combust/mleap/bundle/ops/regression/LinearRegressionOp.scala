@@ -3,15 +3,16 @@ package ml.combust.mleap.bundle.ops.regression
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.regression.LinearRegressionModel
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
 import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class LinearRegressionOp extends OpNode[MleapContext, LinearRegression, LinearRegressionModel] {
+class LinearRegressionOp extends MleapOp[LinearRegression, LinearRegressionModel] {
   override val Model: OpModel[MleapContext, LinearRegressionModel] = new OpModel[MleapContext, LinearRegressionModel] {
     override val klazz: Class[LinearRegressionModel] = classOf[LinearRegressionModel]
 
@@ -30,20 +31,5 @@ class LinearRegressionOp extends OpNode[MleapContext, LinearRegression, LinearRe
     }
   }
 
-  override val klazz: Class[LinearRegression] = classOf[LinearRegression]
-
-  override def name(node: LinearRegression): String = node.uid
-
   override def model(node: LinearRegression): LinearRegressionModel = node.model
-
-  override def load(node: Node, model: LinearRegressionModel)
-                   (implicit context: BundleContext[MleapContext]): LinearRegression = {
-    LinearRegression(uid = node.name,
-      featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.output("prediction").name,
-      model = model)
-  }
-
-  override def shape(node: LinearRegression): NodeShape = NodeShape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction")
 }

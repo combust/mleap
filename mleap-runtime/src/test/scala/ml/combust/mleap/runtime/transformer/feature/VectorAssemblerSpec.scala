@@ -37,10 +37,10 @@ class VectorAssemblerSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       assert(vectorAssembler.getFields().get ==
-        Seq(StructField("feature1", TensorType(BasicType.Double, Some(Seq(3)))),
+        Seq(StructField("feature1", TensorType(BasicType.Double)),
           StructField("feature2", ScalarType.Double),
           StructField("feature3", ScalarType.Double),
-          StructField("features", TensorType(BasicType.Double, Some(Seq(5))))))
+          StructField("features", TensorType(BasicType.Double))))
     }
   }
 }

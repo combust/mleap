@@ -1,25 +1,16 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.WordLengthFilterModel
-import ml.combust.mleap.core.types.{BasicType, ListType, StructField}
+import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
-import ml.combust.mleap.runtime.types._
-
-import scala.util.{Success, Try}
+import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 
 /**
   * Created by mageswarand on 14/2/17.
   */
 
 case class WordLengthFilter(override val uid: String = Transformer.uniqueName("word_filter"),
-                            override val inputCol: String,
-                            override val outputCol: String,
-                            model: WordLengthFilterModel) extends FeatureTransformer {
+                            override val shape: NodeShape,
+                            model: WordLengthFilterModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (label: Seq[String]) => model(label)
-
-  override def getFields(): Try[Seq[StructField]] = Success(Seq(
-    StructField(inputCol, ListType(BasicType.String)),
-    StructField(outputCol, ListType(BasicType.String))
-  ))
 }

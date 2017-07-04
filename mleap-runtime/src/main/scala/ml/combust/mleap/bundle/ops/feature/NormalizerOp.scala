@@ -2,7 +2,8 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.NormalizerModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Normalizer
@@ -10,7 +11,7 @@ import ml.combust.mleap.runtime.transformer.feature.Normalizer
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-class NormalizerOp extends OpNode[MleapContext, Normalizer, NormalizerModel] {
+class NormalizerOp extends MleapOp[Normalizer, NormalizerModel] {
   override val Model: OpModel[MleapContext, NormalizerModel] = new OpModel[MleapContext, NormalizerModel] {
     override val klazz: Class[NormalizerModel] = classOf[NormalizerModel]
 
@@ -27,19 +28,5 @@ class NormalizerOp extends OpNode[MleapContext, Normalizer, NormalizerModel] {
     }
   }
 
-  override val klazz: Class[Normalizer] = classOf[Normalizer]
-
-  override def name(node: Normalizer): String = node.uid
-
   override def model(node: Normalizer): NormalizerModel = node.model
-
-  override def load(node: Node, model: NormalizerModel)
-                   (implicit context: BundleContext[MleapContext]): Normalizer = {
-    Normalizer(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: Normalizer): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

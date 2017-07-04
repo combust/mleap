@@ -3,23 +3,15 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.MinHashLSHModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.FeatureTransformer
+import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-
-import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-case class MinHashLSH(override val uid: String,
-                      override val inputCol: String,
-                      override val outputCol: String,
-                      model: MinHashLSHModel) extends FeatureTransformer {
+case class MinHashLSH(override val uid: String = Transformer.uniqueName("min_hash_lsh"),
+                      override val shape: NodeShape,
+                      model: MinHashLSHModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
-
-  override def getFields(): Try[Seq[StructField]] = Success(Seq(
-    StructField(inputCol, TensorType(BasicType.Double)),
-    StructField(outputCol, TensorType(BasicType.Double))
-  ))
 }

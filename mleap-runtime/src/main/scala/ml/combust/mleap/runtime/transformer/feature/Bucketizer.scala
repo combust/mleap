@@ -1,24 +1,17 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BucketizerModel
-import ml.combust.mleap.core.types.{ScalarType, StructField}
+import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.{FeatureTransformer, Transformer}
-
-import scala.util.{Success, Try}
+import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 
 /**
   * Created by mikhail on 9/19/16.
   */
 case class Bucketizer(override val uid: String = Transformer.uniqueName("bucketizer"),
-                      override val inputCol: String,
-                      override val outputCol: String,
-                      model: BucketizerModel) extends FeatureTransformer {
+                      override val shape: NodeShape,
+                      model: BucketizerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Double) => model(value)
-
-  override def getFields(): Try[Seq[StructField]] = Success(
-    Seq(StructField(inputCol, ScalarType.Double),
-      StructField(outputCol, ScalarType.Double)))
 }
 
 object BucketizerUtil {

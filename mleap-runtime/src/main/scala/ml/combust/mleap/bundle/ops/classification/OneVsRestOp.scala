@@ -3,15 +3,16 @@ package ml.combust.mleap.bundle.ops.classification
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.classification.{OneVsRestModel, ProbabilisticClassificationModel}
 import ml.combust.mleap.runtime.transformer.classification.OneVsRest
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
+class OneVsRestOp extends MleapOp[OneVsRest, OneVsRestModel] {
   override val Model: OpModel[MleapContext, OneVsRestModel] = new OpModel[MleapContext, OneVsRestModel] {
     override val klazz: Class[OneVsRestModel] = classOf[OneVsRestModel]
 
@@ -42,22 +43,5 @@ class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
     }
   }
 
-  override val klazz: Class[OneVsRest] = classOf[OneVsRest]
-
-  override def name(node: OneVsRest): String = node.uid
-
   override def model(node: OneVsRest): OneVsRestModel = node.model
-
-  override def load(node: Node, model: OneVsRestModel)
-                   (implicit context: BundleContext[MleapContext]): OneVsRest = {
-    OneVsRest(uid = node.name,
-      featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.output("prediction").name,
-      probabilityCol = node.shape.getOutput("probability").map(_.name),
-      model = model)
-  }
-
-  override def shape(node: OneVsRest): NodeShape = NodeShape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.probabilityCol, "probability"  )
 }

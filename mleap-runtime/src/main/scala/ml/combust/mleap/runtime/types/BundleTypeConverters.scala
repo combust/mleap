@@ -42,7 +42,8 @@ trait BundleTypeConverters {
     s.base match {
       case DataShapeType.SCALAR => ScalarShape(isNullable = s.isNullable)
       case DataShapeType.LIST => ListShape(isNullable = s.isNullable)
-      case DataShapeType.TENSOR => TensorShape(s.tensorShape.get.dimensions.map(_.size), isNullable = s.isNullable)
+      case DataShapeType.TENSOR => TensorShape(dimensions = s.tensorShape.map(_.dimensions.map(_.size)),
+        isNullable = s.isNullable)
       case _ => throw new IllegalArgumentException(s"unsupported shape $s")
     }
   }
@@ -54,8 +55,22 @@ trait BundleTypeConverters {
       case TensorShape(dimensions, isNullable) =>
         bundle.DataShape(base = DataShapeType.TENSOR,
           isNullable = isNullable,
-          tensorShape = Some(ml.bundle.TensorShape(dimensions.map(s => TensorDimension(s)))))
+          tensorShape = dimensions.map(_.map(s => TensorDimension(s))).map(ml.bundle.TensorShape.apply))
     }
   }
+
+  implicit def mleapToBundleDataType(dt: DataType): bundle.DataType = bundle.DataType(dt.base, Some(dt.shape))
+  implicit def bundleToMleapDataType(dt: bundle.DataType): DataType = DataType(dt.base, dt.shape.get)
+
+  implicit def mleapToBundleField(field: StructField): bundle.Field = bundle.Field(field.name, Some(field.dataType))
+  implicit def bundleToMleapField(field: bundle.Field): StructField = StructField(field.name, field.dataType.get)
+
+  implicit def mleapToBundleSocket(socket: Socket): bundle.Socket = bundle.Socket(socket.port, Some(socket.field))
+  implicit def bundleToMleapSocket(socket: bundle.Socket): Socket = Socket(socket.port, socket.field.get)
+
+  implicit def mleapToBundleNodeShape(shape: NodeShape): bundle.NodeShape = bundle.NodeShape(shape.inputs.map(mleapToBundleSocket),
+    shape.outputs.map(mleapToBundleSocket))
+  implicit def bundleToMleapNodeShape(shape: bundle.NodeShape): NodeShape = NodeShape(shape.inputs.map(bundleToMleapSocket),
+    shape.outputs.map(bundleToMleapSocket))
 }
 object BundleTypeConverters extends BundleTypeConverters

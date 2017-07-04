@@ -2,7 +2,8 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.ImputerModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Imputer
@@ -10,7 +11,7 @@ import ml.combust.mleap.runtime.transformer.feature.Imputer
 /**
   * Created by mikhail on 12/18/16.
   */
-class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
+class ImputerOp extends MleapOp[Imputer, ImputerModel] {
   override val Model: OpModel[MleapContext, ImputerModel] = new OpModel[MleapContext, ImputerModel] {
     override val klazz: Class[ImputerModel] = classOf[ImputerModel]
 
@@ -37,19 +38,5 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
 
   }
 
-  override val klazz: Class[Imputer] = classOf[Imputer]
-
-  override def name(node: Imputer): String = node.uid
-
   override def model(node: Imputer): ImputerModel = node.model
-
-  override def load(node: Node, model: ImputerModel)
-                   (implicit context: BundleContext[MleapContext]): Imputer = {
-    Imputer(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: Imputer): NodeShape = NodeShape().withStandardIO(node.inputCol, node.outputCol)
 }

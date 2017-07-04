@@ -20,7 +20,7 @@ case class VectorAssemblerModel(inputShapes: Seq[DataShape]) extends Serializabl
 
   val outputSize: Int = inputShapes.map {
     case ScalarShape(_) => 1
-    case TensorShape(Seq(size), _) => size
+    case TensorShape(Some(Seq(size)), _) => size
     case _ => throw new IllegalArgumentException("must provide scalar and vector shapes as inputs")
   }.sum
 

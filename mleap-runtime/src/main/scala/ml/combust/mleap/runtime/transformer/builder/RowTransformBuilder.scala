@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.builder
 
-import ml.combust.mleap.core.types.{StructField, StructType, TupleType}
+import ml.combust.mleap.core.types.{StructField, StructType}
 import ml.combust.mleap.runtime.{ArrayRow, Row, RowUtil}
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 
@@ -18,17 +18,15 @@ case class RowTransformBuilder private (inputSchema: StructType,
                                         transforms: Array[(ArrayRow) => ArrayRow]) extends TransformBuilder[RowTransformBuilder] {
   def arraySize: Int = outputSchema.fields.length
 
-  override def schema: StructType = outputSchema
-
   override def withOutputs(outputs: Seq[String], inputs: Selector *)
                           (udf: UserDefinedFunction): Try[RowTransformBuilder] = {
-    val count = udf.returnType.asInstanceOf[TupleType].dts.size
+    val count = udf.outputs.size
     val indices = outputSchema.fields.length until outputSchema.fields.length + count
-    val fields = outputs.zip(udf.returnType.asInstanceOf[TupleType].dts).map {
+    val fields = outputs.zip(udf.outputs).map {
       case (name, dt) => StructField(name, dt)
     }
 
-    RowUtil.createRowSelectors(outputSchema, udf.inputs, inputs: _*).flatMap {
+    RowUtil.createRowSelectors(outputSchema, inputs: _*).flatMap {
       rowSelectors =>
         outputSchema.withFields(fields).map {
           schema2 =>
@@ -50,9 +48,9 @@ case class RowTransformBuilder private (inputSchema: StructType,
                          (udf: UserDefinedFunction): Try[RowTransformBuilder] = {
     val index = outputSchema.fields.length
 
-    RowUtil.createRowSelectors(outputSchema, udf.inputs, selectors: _*).flatMap {
+    RowUtil.createRowSelectors(outputSchema, selectors: _*).flatMap {
       rowSelectors =>
-        outputSchema.withField(name, udf.returnType).map {
+        outputSchema.withField(name, udf.outputs.head).map {
           schema2 =>
             val transform = (row: ArrayRow) => row.set(index, row.udfValue(rowSelectors: _*)(udf))
             copy(outputSchema = schema2, transforms = transforms :+ transform)

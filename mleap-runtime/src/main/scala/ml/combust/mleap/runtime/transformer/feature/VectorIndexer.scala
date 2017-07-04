@@ -1,24 +1,17 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.VectorIndexerModel
-import ml.combust.mleap.core.types.{BasicType, StructField, TensorType}
+import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.FeatureTransformer
+import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-
-import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-case class VectorIndexer(override val uid: String,
-                         override val inputCol: String,
-                         override val outputCol: String,
-                         model: VectorIndexerModel) extends FeatureTransformer {
+case class VectorIndexer(override val uid: String = Transformer.uniqueName("vector_indexer"),
+                         override val shape: NodeShape,
+                         model: VectorIndexerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features): Tensor[Double]
-
-  override def getFields(): Try[Seq[StructField]] = Success(
-    Seq(StructField(inputCol, TensorType(BasicType.Double)),
-      StructField(outputCol, TensorType(BasicType.Double))))
 }

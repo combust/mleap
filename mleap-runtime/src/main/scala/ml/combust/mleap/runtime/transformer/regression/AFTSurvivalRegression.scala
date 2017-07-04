@@ -3,42 +3,24 @@ package ml.combust.mleap.runtime.transformer.regression
 import ml.combust.mleap.core.regression.AFTSurvivalRegressionModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.Transformer
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.runtime.transformer.{MultiTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-
-import scala.util.{Success, Try}
+import ml.combust.mleap.runtime.Row
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
 case class AFTSurvivalRegression(override val uid: String = Transformer.uniqueName("aft_survival_regression"),
-                                 featuresCol: String,
-                                 predictionCol: String,
-                                 quantilesCol: Option[String] = None,
-                                 model: AFTSurvivalRegressionModel) extends Transformer {
-  val exec: UserDefinedFunction = (features: Tensor[Double]) => model.predict(features)
-  val execQuantiles: UserDefinedFunction = (features: Tensor[Double]) => model.predictQuantiles(features): Tensor[Double]
-
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    quantilesCol match {
-      case Some(col) =>
-        for(b1 <- builder.withOutput(predictionCol, featuresCol)(exec);
-            b2 <- b1.withOutput(col, featuresCol)(execQuantiles)) yield b2
-      case None => builder.withOutput(predictionCol, featuresCol)(exec)
-    }
-  }
-
-  override def getFields(): Try[Seq[StructField]] = {
-    quantilesCol match {
-      case Some(col) =>
-        Success(Seq(StructField(featuresCol, TensorType(BasicType.Double)),
-          StructField(predictionCol, ScalarType.Double),
-          StructField(col, TensorType(BasicType.Double))))
-      case None => Success(
-        Seq(StructField(featuresCol, TensorType(BasicType.Double)),
-        StructField(predictionCol, ScalarType.Double)))
-    }
+                                 override val shape: NodeShape,
+                                 model: AFTSurvivalRegressionModel) extends MultiTransformer {
+  override val exec: UserDefinedFunction = shape.getOutput("quantiles") match {
+    case Some(_) =>
+      (features: Tensor[Double]) => {
+        val (prediction, quantiles) = model.predictWithQuantiles(features)
+        Row(prediction, quantiles: Tensor[Double])
+      }
+    case None =>
+      (features: Tensor[Double]) => Row(model(features))
   }
 }

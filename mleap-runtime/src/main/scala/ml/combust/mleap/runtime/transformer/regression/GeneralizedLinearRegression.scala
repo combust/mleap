@@ -13,19 +13,20 @@ import ml.combust.mleap.runtime.Row
   */
 case class GeneralizedLinearRegression(override val uid: String = Transformer.uniqueName("generalized_lr"),
                                        override val shape: NodeShape,
-                                       featuresCol: String,
-                                       predictionCol: String,
-                                       linkPredictionCol: Option[String] = None,
                                        model: GeneralizedLinearRegressionModel) extends MultiTransformer {
 
 
-  override val exec: UserDefinedFunction = shape.getOutput("link_prediction") match {
-    case Some(_) =>
-      (features: Tensor[Double]) => {
-        val (prediction, link) = model.predictWithLink(features)
-        Row(prediction, link)
-      }
-    case None =>
-      (features: Tensor[Double]) => Row(model(features))
+  override val exec: UserDefinedFunction = {
+    val f = shape.getOutput("link_prediction") match {
+      case Some(_) =>
+        (features: Tensor[Double]) => {
+          val (prediction, link) = model.predictWithLink(features)
+          Row(prediction, link)
+        }
+      case None =>
+        (features: Tensor[Double]) => Row(model(features))
+    }
+
+    UserDefinedFunction(f, outputSchema, inputSchema)
   }
 }

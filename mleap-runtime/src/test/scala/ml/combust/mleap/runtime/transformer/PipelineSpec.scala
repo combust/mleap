@@ -10,10 +10,12 @@ class PipelineSpec extends FunSpec {
 
   describe("#getFields") {
     it("has inputs or outputs of its transformers") {
-      val pipeline = new Pipeline(uid = "pipeline", Seq(
-                      LinearRegression("transformer", "features", "prediction", LinearRegressionModel(Vectors.dense(1.0, 2.0, 3.0), 4.0))))
-      assert(pipeline.getFields().get == Seq(
-          StructField("features", TensorType(BasicType.Double)),
+      val pipeline = Pipeline(uid = "pipeline", Seq(
+                      LinearRegression(shape = NodeShape().withInput("features", "features", TensorType(BasicType.Double, Seq(3))).
+                        withOutput("prediction", "prediction", ScalarType.Double),
+                        model = LinearRegressionModel(Vectors.dense(1.0, 2.0, 3.0), 4.0))))
+      assert(pipeline.schema.fields == Seq(
+          StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("prediction", ScalarType.Double)
       ))
     }

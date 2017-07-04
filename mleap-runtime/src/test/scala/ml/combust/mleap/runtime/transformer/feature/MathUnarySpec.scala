@@ -14,8 +14,9 @@ class MathUnarySpec extends FunSpec {
   val dataset = LocalDataset(Seq(Row(42.0)))
   val frame = LeapFrame(schema, dataset)
 
-  val transformer = MathUnary(inputCol = "test_a",
-    outputCol = "test_out",
+  val transformer = MathUnary(
+    shape = NodeShape.scalar(inputCol = "test_a",
+      outputCol = "test_out"),
     model = MathUnaryModel(Sin))
 
   describe("#transform") {
@@ -27,7 +28,7 @@ class MathUnarySpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(transformer.getFields().get ==
+      assert(transformer.schema.fields ==
         Seq(StructField("test_a", ScalarType.Double),
           StructField("test_out", ScalarType.Double)))
     }

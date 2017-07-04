@@ -13,8 +13,8 @@ class BucketizerSpec extends FunSpec {
   val dataset = LocalDataset(Seq(Row(11.0), Row(0.0), Row(55.0)))
   val frame = LeapFrame(schema, dataset)
 
-  val bucketizer = Bucketizer(inputCol = "test_double",
-    outputCol = "test_bucket",
+  val bucketizer = Bucketizer(
+    shape = NodeShape.scalar(inputCol = "test_double", outputCol = "test_bucket"),
     model = BucketizerModel(Array(0.0, 10.0, 20.0, 100.0)))
 
   describe("#transform") {
@@ -35,7 +35,7 @@ class BucketizerSpec extends FunSpec {
     }
 
     describe("with invalid input column") {
-      val bucketizer2 = bucketizer.copy(inputCol = "bad_input")
+      val bucketizer2 = bucketizer.copy(shape = NodeShape.scalar(inputCol = "bad_double", outputCol = "test_bucket"))
 
       it("returns a Failure") { assert(bucketizer2.transform(frame).isFailure) }
     }
@@ -43,7 +43,7 @@ class BucketizerSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(bucketizer.getFields().get ==
+      assert(bucketizer.schema.fields ==
         Seq(StructField("test_double", ScalarType.Double),
           StructField("test_bucket", ScalarType.Double)))
     }

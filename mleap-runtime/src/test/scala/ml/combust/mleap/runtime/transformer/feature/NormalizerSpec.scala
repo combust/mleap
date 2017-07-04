@@ -14,8 +14,8 @@ class NormalizerSpec extends FunSpec {
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 40.0)))))
   val frame = LeapFrame(schema, dataset)
 
-  val normalizer = Normalizer(inputCol = "test_vec",
-    outputCol = "test_norm",
+  val normalizer = Normalizer(
+    shape = NodeShape.vector(3, 3, inputCol = "test_vec", outputCol = "test_norm"),
     model = NormalizerModel(20.0))
 
   describe("#transform") {
@@ -30,7 +30,7 @@ class NormalizerSpec extends FunSpec {
     }
 
     describe("with invalid input column") {
-      val normalizer2 = normalizer.copy(inputCol = "bad_input")
+      val normalizer2 = normalizer.copy(shape = NodeShape.vector(3, 3, inputCol = "bad_input"))
 
       it("returns a Failure") { assert(normalizer2.transform(frame).isFailure) }
     }
@@ -38,9 +38,9 @@ class NormalizerSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(normalizer.getFields().get ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double)),
-          StructField("test_norm", TensorType(BasicType.Double))))
+      assert(normalizer.schema.fields ==
+        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
+          StructField("test_norm", TensorType(BasicType.Double, Seq(3)))))
     }
   }
 }

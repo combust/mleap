@@ -10,8 +10,9 @@ import org.scalatest.FunSpec
   * Created by fshabbir on 12/1/16.
   */
 class BinarizerSpec extends FunSpec {
-  val binarizer = Binarizer(inputCol = "test_vec",
-    outputCol = "test_binarizer",
+  val binarizer = Binarizer(shape = NodeShape.vector(3, 3,
+    inputCol = "test_vec",
+    outputCol = "test_binarizer"),
     model = BinarizerModel(0.6, TensorShape(3)))
 
   describe("with a double tensor input column") {
@@ -32,15 +33,17 @@ class BinarizerSpec extends FunSpec {
 
     describe("#getFields") {
       it("has the correct inputs and outputs") {
-        assert(binarizer.getFields().get ==
-          Seq(StructField("test_vec", TensorType(BasicType.Double)),
-            StructField("test_binarizer", TensorType(BasicType.Double))))
+        assert(binarizer.schema.fields ==
+          Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
+            StructField("test_binarizer", TensorType(BasicType.Double, Seq(3)))))
       }
     }
   }
 
   describe("with a double input column") {
-    val binarizer2 = binarizer.copy(inputCol = "test", model = binarizer.model.copy(inputShape = ScalarShape()))
+    val binarizer2 = binarizer.copy(shape = NodeShape.scalar(
+      inputCol = "test",
+      outputCol = "test_binarizer"), model = binarizer.model.copy(inputShape = ScalarShape()))
     describe("#transform") {
       it("thresholds the input column to 0 or 1") {
         val schema = StructType(Seq(StructField("test", ScalarType.Double))).get
@@ -57,7 +60,7 @@ class BinarizerSpec extends FunSpec {
 
     describe("#getFields") {
       it("has the correct inputs and outputs") {
-        assert(binarizer2.getFields().get ==
+        assert(binarizer2.schema.fields ==
           Seq(StructField("test", ScalarType.Double),
             StructField("test_binarizer", ScalarType.Double)))
       }

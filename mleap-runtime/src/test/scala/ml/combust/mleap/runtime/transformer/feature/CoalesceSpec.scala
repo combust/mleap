@@ -18,8 +18,10 @@ class CoalesceSpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   describe("with all optional doubles") {
-    val coalesce = Coalesce(inputCols = Array("test1", "test2", "test3"),
-      outputCol = "test_bucket",
+    val coalesce = Coalesce(shape = NodeShape().withInput("input0", "test1", ScalarType.Double.asNullable).
+      withInput("input1", "test2", ScalarType.Double.asNullable).
+      withInput("input2", "test3", ScalarType.Double.asNullable).
+      withStandardOutput("test_bucket", ScalarType.Double.asNullable),
       model = CoalesceModel(Seq(true, true, true)))
 
     describe("#transform") {
@@ -33,7 +35,7 @@ class CoalesceSpec extends FunSpec {
 
     describe("#getFields") {
       it("has the correct inputs and outputs") {
-        assert(coalesce.getFields().get ==
+        assert(coalesce.schema.fields ==
           Seq(StructField("test1", ScalarType.Double.asNullable),
             StructField("test2", ScalarType.Double.asNullable),
             StructField("test3", ScalarType.Double.asNullable),
@@ -43,8 +45,10 @@ class CoalesceSpec extends FunSpec {
   }
 
   describe("with a non-optional double") {
-    val coalesce = Coalesce(inputCols = Array("test1", "test3", "test4"),
-      outputCol = "test_bucket",
+    val coalesce = Coalesce(shape = NodeShape().withInput("input0", "test1", ScalarType.Double.asNullable).
+      withInput("input1", "test3", ScalarType.Double.asNullable).
+      withInput("input2", "test4", ScalarType.Double).
+      withStandardOutput("test_bucket", ScalarType.Double.asNullable),
       model = CoalesceModel(Seq(true, true, false)))
 
     describe("#transform") {
@@ -58,7 +62,7 @@ class CoalesceSpec extends FunSpec {
 
     describe("#getFields") {
       it("has the correct inputs and outputs") {
-        assert(coalesce.getFields().get ==
+        assert(coalesce.schema.fields ==
           Seq(StructField("test1", ScalarType.Double.asNullable),
             StructField("test3", ScalarType.Double.asNullable),
             StructField("test4", ScalarType.Double),

@@ -15,28 +15,30 @@ case class SupportVectorMachine(override val uid: String = Transformer.uniqueNam
                                 override val shape: NodeShape,
                                 model: SupportVectorMachineModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = {
-    (shape.getOutput("raw_prediction"), shape.getOutput("probability")) match {
+    val f = (shape.getOutput("raw_prediction"), shape.getOutput("probability")) match {
       case (Some(_), Some(_)) =>
         (features: Tensor[Double]) => {
           val rawPrediction = model.predictRaw(features)
           val probability = model.rawToProbability(rawPrediction)
           val prediction = model.predictWithProbability(probability)
-          Row(prediction, rawPrediction: Tensor[Double], probability: Tensor[Double])
+          Row(rawPrediction: Tensor[Double], probability: Tensor[Double], prediction)
         }
       case (Some(_), None) =>
         (features: Tensor[Double]) => {
           val rawPrediction = model.predictRaw(features)
           val prediction = model.rawToPrediction(rawPrediction)
-          Row(prediction, rawPrediction: Tensor[Double])
+          Row(rawPrediction: Tensor[Double], prediction)
         }
       case (None, Some(_)) =>
         (features: Tensor[Double]) => {
           val probability = model.predictProbabilities(features)
           val prediction = model.probabilityToPrediction(probability)
-          Row(prediction, probability: Tensor[Double])
+          Row(probability: Tensor[Double], prediction)
         }
       case (None, None) =>
         (features: Tensor[Double]) => Row(model(features))
     }
+
+    UserDefinedFunction(f, outputSchema, inputSchema)
   }
 }

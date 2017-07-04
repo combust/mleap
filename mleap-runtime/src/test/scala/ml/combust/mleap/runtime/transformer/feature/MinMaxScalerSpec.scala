@@ -16,8 +16,8 @@ class MinMaxScalerSpec extends FunSpec{
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 20.0)))))
   val frame = LeapFrame(schema, dataset)
 
-  val minMaxScaler = MinMaxScaler(inputCol = "test_vec",
-    outputCol = "test_normalized",
+  val minMaxScaler = MinMaxScaler(
+    shape = NodeShape.vector(3, 3, inputCol = "test_vec", outputCol = "test_normalized"),
     model = MinMaxScalerModel(Vectors.dense(Array(0.0, 0.0, 0.0)), Vectors.dense(Array(10.0, 20.0, 40.0))))
 
   describe("#transform") {
@@ -31,7 +31,7 @@ class MinMaxScalerSpec extends FunSpec{
       assert(norm(2) == 0.5)
     }
     describe("with invalid input column") {
-      val minMaxScaler2 = minMaxScaler.copy(inputCol = "bad_input")
+      val minMaxScaler2 = minMaxScaler.copy(shape = NodeShape.vector(3, 3, inputCol = "bad_feature"))
 
       it("returns a Failure") {
         assert(minMaxScaler2.transform(frame).isFailure)
@@ -41,9 +41,9 @@ class MinMaxScalerSpec extends FunSpec{
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(minMaxScaler.getFields().get ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double)),
-          StructField("test_normalized", TensorType(BasicType.Double))))
+      assert(minMaxScaler.schema.fields ==
+        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
+          StructField("test_normalized", TensorType(BasicType.Double, Seq(3)))))
     }
   }
 }

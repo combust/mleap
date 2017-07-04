@@ -22,6 +22,12 @@ case class SchemaSpec(dts: Seq[DataType]) extends TypeSpec
 /** Companion object for creating user defined functions. */
 object UserDefinedFunction {
   def apply(f: AnyRef,
+            output: StructType,
+            input: StructType): UserDefinedFunction = {
+    UserDefinedFunction(f, output.fields.map(_.dataType), input.fields.map(_.dataType: TypeSpec))
+  }
+
+  def apply(f: AnyRef,
             output: DataType,
             inputs: Seq[TypeSpec]): UserDefinedFunction = {
     UserDefinedFunction(f, Seq(output), inputs)

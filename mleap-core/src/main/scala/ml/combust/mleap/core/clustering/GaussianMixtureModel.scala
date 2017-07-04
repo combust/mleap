@@ -34,9 +34,10 @@ case class GaussianMixtureModel(gaussians: Array[MultivariateGaussian],
     predictionFromProbability(predictProbability(features))
   }
 
-  def predictWithProbability(features: Vector): (Int, Vector) = {
+  def predictWithProbability(features: Vector): (Int, Double) = {
     val probability = predictProbability(features)
-    (predictionFromProbability(probability), probability)
+    val index = probability.argmax
+    (index, probability(index))
   }
 
   def predictionFromProbability(probabilities: Vector): Int = {

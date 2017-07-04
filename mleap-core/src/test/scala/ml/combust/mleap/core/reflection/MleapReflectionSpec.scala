@@ -30,7 +30,6 @@ class MleapReflectionSpec extends FunSpec {
       assert(dataType[Option[Long]] == ScalarType.Long.asNullable)
       assert(dataType[Option[Double]] == ScalarType.Double.asNullable)
       assert(dataType[Tensor[Double]] == TensorType(BasicType.Double))
-      assert(dataType[(String, Double)] == TupleType(ScalarType.String, ScalarType.Double))
     }
 
     describe("#with an invalid Scala type") {

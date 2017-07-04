@@ -15,8 +15,7 @@ class ElementWiseProductSpec extends FunSpec {
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 20.0)))))
   val frame = LeapFrame(schema, dataset)
 
-  val ewp = ElementwiseProduct(inputCol = "test_vec",
-    outputCol = "test_norm",
+  val ewp = ElementwiseProduct(shape = NodeShape.vector(3, 3, inputCol = "test_vec", outputCol = "test_norm"),
     model = ElementwiseProductModel(Vectors.dense(Array(0.5, 1.0, 0.5))))
 
   describe("#transform") {
@@ -28,7 +27,7 @@ class ElementWiseProductSpec extends FunSpec {
     }
 
     describe("with invalid input column") {
-      val ewp2 = ewp.copy(inputCol = "bad_input")
+      val ewp2 = ewp.copy(shape = NodeShape.vector(3, 3, inputCol = "bad_input"))
 
       it("returns a Failure") { assert(ewp2.transform(frame).isFailure) }
     }
@@ -36,9 +35,9 @@ class ElementWiseProductSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(ewp.getFields().get ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double)),
-          StructField("test_norm", TensorType(BasicType.Double))))
+      assert(ewp.schema.fields ==
+        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
+          StructField("test_norm", TensorType(BasicType.Double, Seq(3)))))
     }
   }
 }

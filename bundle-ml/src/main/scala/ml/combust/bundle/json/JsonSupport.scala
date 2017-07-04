@@ -26,25 +26,6 @@ trait JsonSupport {
     override def write(obj: UUID): JsValue = JsString(obj.toString)
   }
 
-  implicit val bundleDataTypeFormat: JsonFormat[DataType] = jsonFormat2(DataType.apply)
-  implicit val bundleFieldFormat: JsonFormat[Field] = jsonFormat2(Field.apply)
-  implicit val bundleSocketFormat: JsonFormat[Socket] = jsonFormat2(Socket.apply)
-
-  implicit val bundleNodeShapeFormat: JsonFormat[NodeShape] = new JsonFormat[NodeShape] {
-    override def write(obj: NodeShape): JsValue = {
-      JsObject("inputs" -> obj.inputs.toJson,
-        "outputs" -> obj.outputs.toJson)
-    }
-
-    override def read(json: JsValue): NodeShape = json match {
-      case json: JsObject =>
-        val inputs = json.fields("inputs").convertTo[Seq[Socket]]
-        val outputs = json.fields("outputs").convertTo[Seq[Socket]]
-        NodeShape(inputs, outputs)
-      case _ => deserializationError("invalid shape")
-    }
-  }
-
   implicit val bundleBasicTypeFormat: JsonFormat[BasicType] = new JsonFormat[BasicType] {
     override def read(json: JsValue): BasicType = json match {
       case JsString("boolean") => BasicType.BOOLEAN
@@ -103,6 +84,25 @@ trait JsonSupport {
     }
   }
   implicit val bundleDataShapeFormat: JsonFormat[DataShape] = jsonFormat3(DataShape.apply)
+
+  implicit val bundleDataTypeFormat: JsonFormat[DataType] = jsonFormat2(DataType.apply)
+  implicit val bundleFieldFormat: JsonFormat[Field] = jsonFormat2(Field.apply)
+  implicit val bundleSocketFormat: JsonFormat[Socket] = jsonFormat2(Socket.apply)
+
+  implicit val bundleNodeShapeFormat: JsonFormat[NodeShape] = new JsonFormat[NodeShape] {
+    override def write(obj: NodeShape): JsValue = {
+      JsObject("inputs" -> obj.inputs.toJson,
+        "outputs" -> obj.outputs.toJson)
+    }
+
+    override def read(json: JsValue): NodeShape = json match {
+      case json: JsObject =>
+        val inputs = json.fields("inputs").convertTo[Seq[Socket]]
+        val outputs = json.fields("outputs").convertTo[Seq[Socket]]
+        NodeShape(inputs, outputs)
+      case _ => deserializationError("invalid shape")
+    }
+  }
 
   implicit val bundleScalarFormat: JsonFormat[Scalar] = new JsonFormat[Scalar] {
     override def write(obj: Scalar): JsValue = {

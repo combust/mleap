@@ -76,6 +76,11 @@ case class ScalarType(override val base: BasicType, override val isNullable: Boo
   override def shape: ScalarShape = ScalarShape(isNullable)
 }
 
+object TensorType {
+  def apply(base: BasicType,
+            dimensions: Seq[Int]): TensorType = TensorType(base, Some(dimensions))
+}
+
 /**
   * TensorType must have dimensions set before serializing to Bundle.ML.
   *

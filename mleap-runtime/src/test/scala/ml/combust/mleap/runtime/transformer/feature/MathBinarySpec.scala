@@ -15,9 +15,10 @@ class MathBinarySpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   describe("with a and b inputs") {
-    val transformer = MathBinary(inputA = Some("test_a"),
-      inputB = Some("test_b"),
-      outputCol = "test_out",
+    val transformer = MathBinary(
+      shape = NodeShape().withInput("input_a", "test_a", ScalarType.Double).
+        withInput("input_b", "test_b", ScalarType.Double).
+        withStandardOutput("test_out", ScalarType.Double),
       model = MathBinaryModel(Divide, None, None))
 
     it("calculates the correct value") {
@@ -26,7 +27,7 @@ class MathBinarySpec extends FunSpec {
     }
 
     it("has correct inputs and outputs with a and b inputs") {
-      assert(transformer.getFields().get ==
+      assert(transformer.schema.fields ==
         Seq(StructField("test_a", ScalarType.Double),
           StructField("test_b", ScalarType.Double),
           StructField("test_out", ScalarType.Double)))
@@ -34,8 +35,9 @@ class MathBinarySpec extends FunSpec {
   }
 
   describe("with a input") {
-    val transformer = MathBinary(inputA = Some("test_a"),
-      outputCol = "test_out",
+    val transformer = MathBinary(
+      shape = NodeShape().withInput("input_a", "test_a", ScalarType.Double).
+        withStandardOutput("test_out", ScalarType.Double),
       model = MathBinaryModel(Multiply, None, Some(3.333)))
 
     it("calculates the value using the b default") {
@@ -44,15 +46,16 @@ class MathBinarySpec extends FunSpec {
     }
 
     it("has correct inputs and outputs using the default b") {
-      assert(transformer.getFields().get ==
+      assert(transformer.schema.fields ==
         Seq(StructField("test_a", ScalarType.Double),
           StructField("test_out", ScalarType.Double)))
     }
   }
 
   describe("with b input") {
-    val transformer = MathBinary(inputB = Some("test_b"),
-      outputCol = "test_out",
+    val transformer = MathBinary(
+      shape = NodeShape().withInput("input_b", "test_b", ScalarType.Double).
+        withStandardOutput("test_out", ScalarType.Double),
       model = MathBinaryModel(Multiply, Some(3.333), None))
 
     it("calculates the value using the a default") {
@@ -61,14 +64,14 @@ class MathBinarySpec extends FunSpec {
     }
 
     it("has correct inputs and outputs using the default a") {
-      assert(transformer.getFields().get ==
+      assert(transformer.schema.fields ==
         Seq(StructField("test_b", ScalarType.Double),
           StructField("test_out", ScalarType.Double)))
     }
   }
 
   describe("with no inputs") {
-    val transformer = MathBinary(outputCol = "test_out",
+    val transformer = MathBinary(shape = NodeShape().withStandardOutput("test_out", ScalarType.Double),
       model = MathBinaryModel(Multiply, Some(3.333), Some(5.223)))
 
     it("calculates the value using both defaults") {
@@ -77,7 +80,7 @@ class MathBinarySpec extends FunSpec {
     }
 
     it("has correct inputs and outputs using both defaults") {
-      assert(transformer.getFields().get == Seq(StructField("test_out", ScalarType.Double)))
+      assert(transformer.schema.fields == Seq(StructField("test_out", ScalarType.Double)))
     }
   }
 }

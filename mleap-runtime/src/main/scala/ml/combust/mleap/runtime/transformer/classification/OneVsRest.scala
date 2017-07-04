@@ -14,13 +14,17 @@ import ml.combust.mleap.runtime.Row
 case class OneVsRest(override val uid: String = Transformer.uniqueName("one_vs_rest"),
                      override val shape: NodeShape,
                      model: OneVsRestModel) extends MultiTransformer {
-  override val exec: UserDefinedFunction = shape.getOutput("probability") match {
-    case Some(_) =>
-      (features: Tensor[Double]) => {
-        val (prediction, probability) = model.predictWithProbability(features)
-        Row(prediction, probability)
-      }
-    case None =>
-      (features: Tensor[Double]) => Row(model(features))
+  override val exec: UserDefinedFunction = {
+    val f = shape.getOutput("probability") match {
+      case Some(_) =>
+        (features: Tensor[Double]) => {
+          val (prediction, probability) = model.predictWithProbability(features)
+          Row(probability, prediction)
+        }
+      case None =>
+        (features: Tensor[Double]) => Row(model(features))
+    }
+
+    UserDefinedFunction(f, outputSchema, inputSchema)
   }
 }

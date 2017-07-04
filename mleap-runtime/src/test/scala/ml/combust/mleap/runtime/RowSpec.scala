@@ -1,5 +1,7 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.core.types.{BasicType, ListType, ScalarType}
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -185,9 +187,10 @@ trait RowSpec[R <: Row] extends FunSpec {
     describe("#withValues") {
       describe("user defined function") {
         it("adds a value using a user defined function") {
-          val r2 = row.withValues(r => r.get(1), r => r.get(2)) {
-            (v1: Int, v2: Seq[Int]) => (v1 + v2.head, v1 - v2.head)
-          }
+          val f = (v1: Int, v2: Seq[Int]) => Row(v1 + v2.head, v1 - v2.head)
+          val udf = UserDefinedFunction(f, Seq(ScalarType.Int, ScalarType.Int), ScalarType.Int, ListType(BasicType.Int))
+
+          val r2 = row.withValues(r => r.get(1), r => r.get(2))(udf)
 
           assert(r2.getInt(6) == 98)
           assert(r2.getInt(7) == -14)

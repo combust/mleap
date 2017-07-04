@@ -14,13 +14,17 @@ import ml.combust.mleap.runtime.Row
 case class GaussianMixture(override val uid: String = Transformer.uniqueName("gmm"),
                            override val shape: NodeShape,
                            model: GaussianMixtureModel) extends SimpleTransformer {
-  override val exec: UserDefinedFunction = shape.getOutput("probability") match {
-    case Some(_) =>
-      (features: Tensor[Double]) => {
-        val (prediction, probability) = model.predictWithProbability(features)
-        Row(prediction, probability: Tensor[Double])
-      }
-    case None =>
-      (features: Tensor[Double]) => Row(model(features))
+  override val exec: UserDefinedFunction = {
+    val f = shape.getOutput("probability") match {
+      case Some(_) =>
+        (features: Tensor[Double]) => {
+          val (prediction, probability) = model.predictWithProbability(features)
+          Row(probability, prediction)
+        }
+      case None =>
+        (features: Tensor[Double]) => Row(model(features))
+    }
+
+    UserDefinedFunction(f, outputSchema, inputSchema)
   }
 }

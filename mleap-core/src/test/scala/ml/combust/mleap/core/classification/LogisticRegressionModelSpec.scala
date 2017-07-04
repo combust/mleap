@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 /**
   * Created by hollinwilkins on 5/23/17.
   */
-class LogisticRegressionSpec extends FunSpec {
+class LogisticRegressionModelSpec extends FunSpec {
   describe("BinaryLogisticRegression") {
     describe("issue210: Logistic function not being applied") {
       it("applies the logit function for prediction") {

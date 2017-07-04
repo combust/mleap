@@ -7,8 +7,12 @@ class ReverseStringIndexerSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      val transformer = ReverseStringIndexer("transformer", "input", "output", null)
-      assert(transformer.getFields().get ==
+      val transformer = ReverseStringIndexer(shape = NodeShape.scalar(
+        inputBase = BasicType.Double,
+        outputBase = BasicType.String
+      ), model = null)
+
+      assert(transformer.schema.fields ==
         Seq(StructField("input", ScalarType.Double),
           StructField("output", ScalarType.String)))
     }

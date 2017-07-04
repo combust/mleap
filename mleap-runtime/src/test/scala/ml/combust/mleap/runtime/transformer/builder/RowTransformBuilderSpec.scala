@@ -18,11 +18,13 @@ class RowTransformBuilderSpec extends FunSpec {
   val schema = StructType(Seq(StructField("feature1", ScalarType.Double),
     StructField("feature2", ScalarType.Double),
     StructField("feature3", ScalarType.Double))).get
-  val assembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
-    outputCol = "features",
+  val assembler = VectorAssembler(shape = NodeShape().withInput("input0", "feature1", ScalarType.Double).
+    withInput("input1", "feature2", ScalarType.Double).
+    withInput("input2", "feature3", ScalarType.Double).
+    withStandardOutput("features", TensorType(BasicType.Double, Seq(3))),
     model = VectorAssemblerModel(Seq(ScalarShape(), ScalarShape(), ScalarShape())))
-  val linearRegression = LinearRegression(featuresCol = "features",
-    predictionCol = "prediction",
+  val linearRegression = LinearRegression(shape = NodeShape().withInput("features", "features", TensorType(BasicType.Double, Seq(3))).
+    withOutput("prediction", "prediction", ScalarType.Double),
     model = LinearRegressionModel(coefficients = Vectors.dense(Array(1.0, 0.5, 5.0)),
       intercept = 73.0))
   val pipeline = Pipeline(transformers = Seq(assembler, linearRegression))

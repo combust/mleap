@@ -14,9 +14,10 @@ class MultinomialLabelerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 10.0, 20.0)))))
   val frame = LeapFrame(schema, dataset)
-  val transformer = MultinomialLabeler(featuresCol = "test_vec",
-    probabilitiesCol = "probs",
-    labelsCol = "labels",
+  val transformer = MultinomialLabeler(
+    shape = NodeShape().withStandardInput("test_vec", TensorType(BasicType.Double, Seq(3))).
+      withOutput("probability", "probs", ListType(BasicType.Double)).
+      withOutput("labels", "labels", ListType(BasicType.String)),
     model = MultinomialLabelerModel(9.0, ReverseStringIndexerModel(Seq("hello1", "world2", "!3"))))
 
 
@@ -35,8 +36,8 @@ class MultinomialLabelerSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(transformer.getFields().get ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double)),
+      assert(transformer.schema.fields ==
+        Seq(StructField("test_vec", TensorType(BasicType.Double, Some(Seq(3)))),
           StructField("probs", ListType(BasicType.Double)),
           StructField("labels", ListType(BasicType.String))))
     }

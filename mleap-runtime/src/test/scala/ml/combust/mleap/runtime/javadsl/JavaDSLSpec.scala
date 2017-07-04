@@ -79,8 +79,9 @@ class JavaDSLSpec extends FunSpec {
   }
 
   describe("MLeap bundles") {
-    val stringIndexer = StringIndexer(inputCol = "string",
-      outputCol = "string_index",
+    val stringIndexer = StringIndexer(shape = NodeShape().
+      withStandardInput("string", ScalarType.String).
+      withStandardOutput("string_index", ScalarType.Double),
       model = StringIndexerModel(Seq("hello")))
     val dir = Files.createTempDirectory("mleap")
     val file = new File(dir.toFile, "model.zip")
@@ -91,6 +92,7 @@ class JavaDSLSpec extends FunSpec {
         val bundleBuilder = new BundleBuilder()
 
         bundleBuilder.save(stringIndexer, file, context)
+
         val transformer = bundleBuilder.load(file, context).root
         val frame = buildFrame()
 

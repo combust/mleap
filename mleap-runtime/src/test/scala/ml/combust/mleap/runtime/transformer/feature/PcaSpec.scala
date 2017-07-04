@@ -19,8 +19,8 @@ class PcaSpec extends FunSpec {
   val pc = new DenseMatrix(3, 2, Array(1d, -1, 2,
     0, -3, 1))
   val input = Vectors.dense(Array(2d, 1, 0))
-  val pca = Pca(inputCol = "test_vec",
-    outputCol = "test_pca",
+  val pca = Pca(
+    shape = NodeShape.vector(3, 2, inputCol = "test_vec", outputCol = "test_pca"),
     model = PcaModel(pc))
 
   describe("#transform") {
@@ -32,7 +32,7 @@ class PcaSpec extends FunSpec {
     }
 
     describe("with invalid input column") {
-      val pca2 = pca.copy(inputCol = "bad_input")
+      val pca2 = pca.copy(shape = NodeShape.vector(3, 2, inputCol = "bad_input"))
 
       it("returns a Failure") { assert(pca2.transform(frame).isFailure) }
     }
@@ -40,9 +40,9 @@ class PcaSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(pca.getFields().get ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double)),
-          StructField("test_pca", TensorType(BasicType.Double))))
+      assert(pca.schema.fields ==
+        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
+          StructField("test_pca", TensorType(BasicType.Double, Seq(2)))))
     }
   }
 }

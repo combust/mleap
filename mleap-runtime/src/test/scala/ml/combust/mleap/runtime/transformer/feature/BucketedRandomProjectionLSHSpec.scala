@@ -7,10 +7,10 @@ class BucketedRandomProjectionLSHSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      val transformer = new BucketedRandomProjectionLSH("transformer", "input", "output", null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("input", TensorType(BasicType.Double)),
-          StructField("output", TensorType(BasicType.Double))))
+      val transformer = BucketedRandomProjectionLSH(shape = NodeShape.vector(3, 3), model = null)
+      assert(transformer.schema.fields ==
+        Seq(StructField("input", TensorType(BasicType.Double, Seq(3))),
+          StructField("output", TensorType(BasicType.Double, Seq(3)))))
     }
   }
 }

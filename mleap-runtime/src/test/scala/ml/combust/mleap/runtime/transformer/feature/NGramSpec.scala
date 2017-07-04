@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.NGramModel
-import ml.combust.mleap.core.types.{BasicType, ListType, StructField, StructType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import org.scalatest.FunSpec
 
@@ -13,8 +13,9 @@ class NGramSpec extends FunSpec{
   val dataset = LocalDataset(Seq(Row("a b c".split(" ").toSeq), Row("d e f".split(" ").toSeq), Row("g h i".split(" ").toSeq)))
   val frame = LeapFrame(schema,dataset)
 
-  val ngram = NGram(inputCol = "test_string_seq",
-    outputCol = "output_ngram",
+  val ngram = NGram(
+    shape = NodeShape().withStandardInput("test_string_seq", ListType(BasicType.String)).
+      withStandardOutput("output_ngram", ListType(BasicType.String)),
     model = NGramModel(2)
   )
 
@@ -29,14 +30,15 @@ class NGramSpec extends FunSpec{
   }
 
   describe("with invalid input column") {
-    val ngram2 = ngram.copy(inputCol = "invalid_column")
+    val ngram2 = ngram.copy(shape = NodeShape().withStandardInput("bad_input", ListType(BasicType.String)).
+      withStandardOutput("output", ListType(BasicType.String)))
 
     it("returns a failure") {assert(ngram2.transform(frame).isFailure)}
   }
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(ngram.getFields().get ==
+      assert(ngram.schema.fields ==
         Seq(StructField("test_string_seq", ListType(BasicType.String)),
           StructField("output_ngram", ListType(BasicType.String))))
     }

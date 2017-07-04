@@ -7,8 +7,9 @@ class TokenizerSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      val transformer = new Tokenizer("transformer", "input", "output")
-      assert(transformer.getFields().get ==
+      val transformer = Tokenizer(shape = NodeShape().withStandardInput("input", ScalarType.String).
+        withStandardOutput("output", ListType(BasicType.String)))
+      assert(transformer.schema.fields ==
         Seq(StructField("input", ScalarType.String),
           StructField("output", ListType(BasicType.String))))
     }

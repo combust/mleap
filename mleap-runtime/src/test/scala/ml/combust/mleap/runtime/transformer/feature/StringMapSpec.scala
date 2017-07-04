@@ -13,8 +13,11 @@ class StringMapSpec extends FunSpec {
   val dataset = LocalDataset(Seq(Row("index1"), Row("index2"), Row("index3")))
   val frame = LeapFrame(schema, dataset)
 
-  val stringMap = StringMap(inputCol = "test_string",
-    outputCol = "test_index",
+  val stringMap = StringMap(
+    shape = NodeShape.scalar(inputBase = BasicType.String,
+      outputBase = BasicType.Double,
+      inputCol = "test_string",
+      outputCol = "test_index"),
     model = StringMapModel(Map("index1" -> 1.0, "index2" -> 1.0, "index3" -> 2.0)))
 
   describe("#transform") {
@@ -35,7 +38,7 @@ class StringMapSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(stringMap.getFields().get ==
+      assert(stringMap.schema.fields ==
         Seq(StructField("test_string", ScalarType.String),
           StructField("test_index", ScalarType.Double)))
     }

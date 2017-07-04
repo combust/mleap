@@ -13,8 +13,11 @@ class StringIndexerSpec extends FunSpec {
   val dataset = LocalDataset(Seq(Row("index1"), Row("index2"), Row("index3")))
   val frame = LeapFrame(schema, dataset)
 
-  val stringIndexer = StringIndexer(inputCol = "test_string",
-    outputCol = "test_index",
+  val stringIndexer = StringIndexer(
+    shape = NodeShape.scalar(inputBase = BasicType.String,
+      outputBase = BasicType.Double,
+      inputCol = "test_string",
+      outputCol = "test_index"),
     model = StringIndexerModel(Seq("index1", "index2", "index3")))
 
   describe("#transform") {
@@ -28,7 +31,8 @@ class StringIndexerSpec extends FunSpec {
     }
 
     describe("with invalid input column") {
-      val stringIndexer2 = stringIndexer.copy(inputCol = "bad_input")
+      val stringIndexer2 = stringIndexer.copy(shape = NodeShape().withStandardInput("bad_input", ScalarType.String).
+        withStandardOutput("output", ScalarType.Double))
 
       it("returns a Failure") { assert(stringIndexer2.transform(frame).isFailure) }
     }
@@ -42,7 +46,7 @@ class StringIndexerSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(stringIndexer.getFields().get ==
+      assert(stringIndexer.schema.fields ==
         Seq(StructField("test_string", ScalarType.String),
           StructField("test_index", ScalarType.Double)))
     }

@@ -7,13 +7,13 @@ import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.clustering.LocalLDAModel
 import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.runtime.transformer.clustering.LDAModel
+import ml.combust.mleap.runtime.transformer.clustering.LDA
 import ml.combust.mleap.tensor.DenseTensor
 
 /**
   * Created by mageswarand on 3/3/17.
   */
-class LDAModelOp extends MleapOp[LDAModel, LocalLDAModel] {
+class LDAModelOp extends MleapOp[LDA, LocalLDAModel] {
   override val Model: OpModel[MleapContext, LocalLDAModel] = new OpModel[MleapContext, LocalLDAModel] {
     override val klazz: Class[LocalLDAModel] = classOf[LocalLDAModel]
 
@@ -43,5 +43,5 @@ class LDAModelOp extends MleapOp[LDAModel, LocalLDAModel] {
     }
   }
 
-  override def model(node: LDAModel): LocalLDAModel = node.model
+  override def model(node: LDA): LocalLDAModel = node.model
 }

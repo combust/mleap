@@ -16,13 +16,11 @@ class KMeansSpec extends FunSpec {
   val v3 = Vectors.dense(Array(100.0, 22.0, 55.0))
 
   val schema = StructType(Seq(StructField("features", TensorType(BasicType.Double)))).get
-  val dataset = LocalDataset(Seq(Row(DenseTensor(Array(2.0, 5.0, 34.0), Seq(-1))),
-    Row(DenseTensor(Array(20.0, 230.0, 34.0), Seq(-1))),
-    Row(DenseTensor(Array(111.0, 20.0, 56.0), Seq(-1)))))
+  val dataset = LocalDataset(Seq(Row(DenseTensor(Array(2.0, 5.0, 34.0), Seq(3))),
+    Row(DenseTensor(Array(20.0, 230.0, 34.0), Seq(3))),
+    Row(DenseTensor(Array(111.0, 20.0, 56.0), Seq(3)))))
   val frame = LeapFrame(schema, dataset)
-  val km = KMeans(featuresCol = "features",
-    predictionCol = "prediction",
-    model = KMeansModel(Seq(v1, v2, v3)))
+  val km = KMeans(shape = NodeShape.basicCluster(3), model = KMeansModel(Seq(v1, v2, v3)))
 
   describe("#transform") {
     it("uses the k-means to find closest cluster") {
@@ -35,7 +33,7 @@ class KMeansSpec extends FunSpec {
     }
 
     describe("with invalid features column") {
-      val km2 = km.copy(featuresCol = "bad_features")
+      val km2 = km.copy(shape = NodeShape.basicCluster(3, featuresCol = "bad_features"))
 
       it("returns a Failure") { assert(km2.transform(frame).isFailure) }
     }
@@ -43,8 +41,8 @@ class KMeansSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(km.getFields().get ==
-        Seq(StructField("features", TensorType(BasicType.Double)),
+      assert(km.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("prediction", ScalarType.Int)))
     }
   }

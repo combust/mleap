@@ -15,8 +15,8 @@ class MaxAbsScalerSpec extends FunSpec{
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 20.0)))))
   val frame = LeapFrame(schema, dataset)
 
-  val maxAbsScaler = MaxAbsScaler(inputCol = "test_vec",
-    outputCol = "test_normalized",
+  val maxAbsScaler = MaxAbsScaler(
+    shape = NodeShape.vector(3, 3, inputCol = "test_vec", outputCol = "test_normalized"),
     model = MaxAbsScalerModel(Vectors.dense(Array(10.0, 20.0, 40.0))))
 
   describe("#transform") {
@@ -31,7 +31,7 @@ class MaxAbsScalerSpec extends FunSpec{
     }
 
     describe("with invalid input column") {
-      val maxAbsScaler2 = maxAbsScaler.copy(inputCol = "bad_input")
+      val maxAbsScaler2 = maxAbsScaler.copy(shape = NodeShape.vector(3, 3, inputCol = "bad_input"))
 
       it("returns a Failure") { assert(maxAbsScaler2.transform(frame).isFailure) }
     }
@@ -39,9 +39,9 @@ class MaxAbsScalerSpec extends FunSpec{
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(maxAbsScaler.getFields().get ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double)),
-          StructField("test_normalized", TensorType(BasicType.Double))))
+      assert(maxAbsScaler.schema.fields ==
+        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
+          StructField("test_normalized", TensorType(BasicType.Double, Seq(3)))))
     }
   }
 }

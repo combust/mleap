@@ -7,18 +7,19 @@ class GeneralizedLinearRegressionSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs with prediction column only") {
-      val transformer = new GeneralizedLinearRegression("transformer", "features", "prediction", None, null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(BasicType.Double)),
+      val transformer = GeneralizedLinearRegression(shape = NodeShape.regression(3), model = null)
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("prediction", ScalarType.Double)))
     }
 
     it("has the correct inputs and outputs with prediction column as well as linkPrediction column") {
-      val transformer = new GeneralizedLinearRegression("transformer", "features", "prediction", Some("linkPrediction"), null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(BasicType.Double)),
+      val transformer = GeneralizedLinearRegression(shape = NodeShape.regression(3).
+        withOutput("link_prediction", "lp", ScalarType.Double), model = null)
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("prediction", ScalarType.Double),
-          StructField("linkPrediction", ScalarType.Double)))
+          StructField("lp", ScalarType.Double)))
     }
   }
 }

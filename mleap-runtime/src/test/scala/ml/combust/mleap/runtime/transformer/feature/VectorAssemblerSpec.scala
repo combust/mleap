@@ -15,8 +15,11 @@ class VectorAssemblerSpec extends FunSpec {
     StructField("feature3", ScalarType.Double))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.5, -0.5, 1.0)), 42.0, 13.0)))
   val frame = LeapFrame(schema, dataset)
-  val vectorAssembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
-    outputCol = "features",
+  val vectorAssembler = VectorAssembler(
+    shape = NodeShape().withInput("input0", "feature1", TensorType(BasicType.Double, Seq(3))).
+      withInput("input1", "feature2", ScalarType.Double).
+      withInput("input2", "feature3", ScalarType.Double).
+      withStandardOutput("features", TensorType(BasicType.Double, Seq(5))),
     model = VectorAssemblerModel(Seq(TensorShape(3), ScalarShape(), ScalarShape())))
 
   describe("#transform") {
@@ -28,7 +31,8 @@ class VectorAssemblerSpec extends FunSpec {
     }
 
     describe("with invalid input") {
-      val vectorAssembler2 = vectorAssembler.copy(inputCols = vectorAssembler.inputCols :+ "bad_feature")
+      val vectorAssembler2 = vectorAssembler.copy(shape = NodeShape().withInput("input0", "bad_input", ScalarType.Double).
+        withStandardOutput("features", TensorType(BasicType.Double, Seq(2))))
 
       it("returns a Failure") { assert(vectorAssembler2.transform(frame).isFailure) }
     }
@@ -36,11 +40,11 @@ class VectorAssemblerSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(vectorAssembler.getFields().get ==
-        Seq(StructField("feature1", TensorType(BasicType.Double)),
+      assert(vectorAssembler.schema.fields ==
+        Seq(StructField("feature1", TensorType(BasicType.Double, Seq(3))),
           StructField("feature2", ScalarType.Double),
           StructField("feature3", ScalarType.Double),
-          StructField("features", TensorType(BasicType.Double))))
+          StructField("features", TensorType(BasicType.Double, Seq(5)))))
     }
   }
 }

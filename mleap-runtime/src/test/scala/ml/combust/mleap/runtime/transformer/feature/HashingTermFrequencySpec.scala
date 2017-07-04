@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.transformer.feature
 
+import ml.combust.mleap.core.feature.HashingTermFrequencyModel
 import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
@@ -7,10 +8,12 @@ class HashingTermFrequencySpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      val transformer = new HashingTermFrequency("transformer", "input", "output", null)
-      assert(transformer.getFields().get ==
+      val transformer = HashingTermFrequency(shape = NodeShape().
+        withStandardInput("input", ListType(BasicType.String)).
+        withStandardOutput("output", TensorType(BasicType.Double, Seq(3))), model = HashingTermFrequencyModel())
+      assert(transformer.schema.fields ==
         Seq(StructField("input", ListType(BasicType.String)),
-          StructField("output", TensorType(BasicType.Double))))
+          StructField("output", TensorType(BasicType.Double, Seq(3)))))
     }
   }
 }

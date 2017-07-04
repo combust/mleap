@@ -8,9 +8,9 @@ class MultiLayerPerceptronClassifierSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       val transformer =
-        new MultiLayerPerceptronClassifier("transformer", "features", "prediction", null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(BasicType.Double)),
+        MultiLayerPerceptronClassifier(shape = NodeShape.basicClassifier(3), model = null)
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("prediction", ScalarType.Double)))
     }
   }

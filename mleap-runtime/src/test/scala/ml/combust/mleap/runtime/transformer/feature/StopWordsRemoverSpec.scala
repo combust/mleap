@@ -14,8 +14,9 @@ class StopWordsRemoverSpec extends FunSpec{
   val dataset = LocalDataset(Seq(Row("I used MLeap transformer".split(" ").toSeq), Row("You use Mleap transformer".split(" ").toSeq)))
   val frame = LeapFrame(schema,dataset)
 
-  val stopWordsTransformer = StopWordsRemover(inputCol = "test_string_seq",
-    outputCol = "output_seq",
+  val stopWordsTransformer = StopWordsRemover(
+    shape = NodeShape().withStandardInput("test_string_seq", ListType(BasicType.String)).
+      withStandardOutput("output_seq", ListType(BasicType.String)),
     model = StopWordsRemoverModel(Seq("I", "You", "the"), caseSensitive = true)
   )
 
@@ -31,7 +32,7 @@ class StopWordsRemoverSpec extends FunSpec{
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(stopWordsTransformer.getFields().get ==
+      assert(stopWordsTransformer.schema.fields ==
         Seq(StructField("test_string_seq", ListType(BasicType.String)),
           StructField("output_seq", ListType(BasicType.String))))
     }

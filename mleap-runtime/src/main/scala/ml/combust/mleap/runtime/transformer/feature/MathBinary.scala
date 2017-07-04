@@ -17,7 +17,7 @@ case class MathBinary(override val uid: String = Transformer.uniqueName("math_bi
   val execNone: UserDefinedFunction = () => model(None, None)
 
   override val exec: UserDefinedFunction = {
-    (shape.inputSchema.getField("input_a"), shape.inputSchema.getField("input_b")) match {
+    (shape.getInput("input_a"), shape.getInput("input_b")) match {
       case (Some(_), Some(_)) => execAB
       case (Some(_), None) => execA
       case (None, Some(_)) => execB

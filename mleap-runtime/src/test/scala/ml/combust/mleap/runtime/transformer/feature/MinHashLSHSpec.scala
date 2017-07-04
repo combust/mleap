@@ -7,10 +7,13 @@ class MinHashLSHSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      val transformer = MinHashLSH("transformer", "input", "output", null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("input", TensorType(BasicType.Double)),
-          StructField("output", TensorType(BasicType.Double))))
+      val transformer = MinHashLSH(shape = NodeShape().
+        withStandardInput("input", TensorType(BasicType.Double, Seq(3))).
+        withStandardOutput("output", TensorType(BasicType.Double, Seq(3, 1))), model = null)
+
+      assert(transformer.schema.fields ==
+        Seq(StructField("input", TensorType(BasicType.Double, Seq(3))),
+          StructField("output", TensorType(BasicType.Double, Seq(3, 1)))))
     }
   }
 }

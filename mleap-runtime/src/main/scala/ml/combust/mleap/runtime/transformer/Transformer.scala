@@ -29,8 +29,8 @@ trait Transformer extends AutoCloseable {
   /** Shape of inputs/outputs */
   val shape: NodeShape
 
-  lazy val inputSchema: StructType = StructType(shape.inputs.map(_.field)).get
-  lazy val outputSchema: StructType = StructType(shape.outputs.map(_.field)).get
+  lazy val inputSchema: StructType = StructType(shape.inputs.values.map(_.field).toSeq).get
+  lazy val outputSchema: StructType = StructType(shape.outputs.values.map(_.field).toSeq).get
 
   /** Transform a builder using this MLeap transformer.
     *
@@ -59,7 +59,7 @@ trait BaseTransformer extends Transformer {
 }
 
 trait SimpleTransformer extends BaseTransformer {
-  val typedExec: UserDefinedFunction = {
+  lazy val typedExec: UserDefinedFunction = {
     exec.withInputs(inputSchema).
       withOutput(outputSchema.fields.head.dataType)
   }
@@ -71,7 +71,7 @@ trait SimpleTransformer extends BaseTransformer {
 }
 
 trait MultiTransformer extends BaseTransformer {
-  val typedExec: UserDefinedFunction = {
+  lazy val typedExec: UserDefinedFunction = {
     exec.withInputs(inputSchema).
       withOutput(outputSchema)
   }

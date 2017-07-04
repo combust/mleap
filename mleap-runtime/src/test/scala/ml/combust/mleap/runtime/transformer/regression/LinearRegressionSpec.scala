@@ -14,8 +14,7 @@ class LinearRegressionSpec extends FunSpec {
   val schema = StructType(Seq(StructField("features", TensorType(BasicType.Double)))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)))))
   val frame = LeapFrame(schema, dataset)
-  val linearRegression = LinearRegression(featuresCol = "features",
-    predictionCol = "prediction",
+  val linearRegression = LinearRegression(shape = NodeShape.regression(3),
     model = LinearRegressionModel(coefficients = Vectors.dense(Array(1.0, 0.5, 5.0)),
       intercept = 73.0))
 
@@ -30,7 +29,7 @@ class LinearRegressionSpec extends FunSpec {
 
       describe("with invalid features input") {
         it("returns a Failure") {
-          val frame2 = linearRegression.copy(featuresCol = "bad_features").transform(frame)
+          val frame2 = linearRegression.copy(shape = NodeShape.regression(3, featuresCol = "bad_features")).transform(frame)
 
           assert(frame2.isFailure)
         }
@@ -40,8 +39,8 @@ class LinearRegressionSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(linearRegression.getFields().get ==
-        Seq(StructField("features", TensorType(BasicType.Double)),
+      assert(linearRegression.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("prediction", ScalarType.Double)))
     }
   }

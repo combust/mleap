@@ -7,8 +7,10 @@ class WordLengthFilterSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      val transformer = new WordLengthFilter("transformer", "input", "output", null)
-      assert(transformer.getFields().get ==
+      val transformer = WordLengthFilter(shape = NodeShape().withStandardInput("input", ListType(BasicType.String)).
+        withStandardOutput("output", ListType(BasicType.String)), model = null)
+
+      assert(transformer.schema.fields ==
         Seq(StructField("input", ListType(BasicType.String)),
           StructField("output", ListType(BasicType.String))))
     }

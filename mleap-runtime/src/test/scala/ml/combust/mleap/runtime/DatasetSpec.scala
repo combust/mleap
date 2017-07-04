@@ -1,5 +1,7 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.core.types.ScalarType
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.scalatest.FunSpec
 
 /** Base trait for testing implementations of Dataset.
@@ -40,9 +42,10 @@ trait DatasetSpec[D <: Dataset] extends FunSpec {
       describe("#withValues") {
         describe("with a user defined function") {
           it("created a new dataset with the calculated value from the user defined function") {
-            val dataset2 = dataset.withValues(r => r.get(1), r => r.get(0)) {
-              (v1: String, v2: Int) => (s"$v1:$v2", v2 + 10)
-            }
+            val f = (v1: String, v2: Int) => Row(s"$v1:$v2", v2 + 10)
+            val udf = UserDefinedFunction(f, Seq(ScalarType.String, ScalarType.Int), ScalarType.String, ScalarType.Int)
+
+            val dataset2 = dataset.withValues(r => r.get(1), r => r.get(0))(udf)
             val data = dataset2.toSeq.map(r => r.getString(2))
             val dataDoubles = dataset2.toSeq.map(r => r.getInt(3))
 

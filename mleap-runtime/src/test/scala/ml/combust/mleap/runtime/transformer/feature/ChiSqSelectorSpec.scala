@@ -7,10 +7,10 @@ class ChiSqSelectorSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      val transformer = new ChiSqSelector("transformer", "features", "output", null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(BasicType.Double)),
-          StructField("output", TensorType(BasicType.Double))))
+      val transformer = ChiSqSelector(shape = NodeShape.vector(3, 3, inputCol = "features"), model = null)
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
+          StructField("output", TensorType(BasicType.Double, Seq(3)))))
     }
   }
 }

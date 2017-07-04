@@ -17,8 +17,7 @@ class GBTRegressionSpec extends FunSpec {
   val tree1 = TestUtil.buildDecisionTreeRegression(0.5, 0, goLeft = true)
   val tree2 = TestUtil.buildDecisionTreeRegression(0.75, 1, goLeft = false)
   val tree3 = TestUtil.buildDecisionTreeRegression(0.1, 2, goLeft = true)
-  val gbt = GBTRegression(featuresCol = "features",
-    predictionCol = "prediction",
+  val gbt = GBTRegression(shape = NodeShape.regression(3),
     model = GBTRegressionModel(Seq(tree1, tree2, tree3), Seq(0.5, 2.0, 1.0), 5))
 
   describe("#transform") {
@@ -30,7 +29,7 @@ class GBTRegressionSpec extends FunSpec {
     }
 
     describe("with invalid features column") {
-      val gbt2 = gbt.copy(featuresCol = "bad_features")
+      val gbt2 = gbt.copy(shape = NodeShape.regression(3, featuresCol = "bad_features"))
 
       it("returns a Failure") { assert(gbt2.transform(frame).isFailure) }
     }
@@ -38,8 +37,8 @@ class GBTRegressionSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(gbt.getFields().get ==
-        Seq(StructField("features", TensorType(BasicType.Double)),
+      assert(gbt.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("prediction", ScalarType.Double)))
     }
   }

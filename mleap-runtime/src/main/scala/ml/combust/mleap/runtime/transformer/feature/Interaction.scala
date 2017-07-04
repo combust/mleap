@@ -25,6 +25,6 @@ case class Interaction(override val uid: String = Transformer.uniqueName("intera
   }
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(shape.outputs.head.field.name, inputs)(exec)
+    builder.withOutput(shape.standardOutput.name, inputs)(exec)
   }
 }

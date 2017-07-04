@@ -10,9 +10,9 @@ import ml.combust.mleap.tensor.Tensor
 /**
   * Created by mageswarand on 3/3/17.
   */
-case class LDAModel(override val uid: String = Transformer.uniqueName("lda"),
-                    override val shape: NodeShape,
-                    model: LocalLDAModel) extends SimpleTransformer {
+case class LDA(override val uid: String = Transformer.uniqueName("lda"),
+               override val shape: NodeShape,
+               model: LocalLDAModel) extends SimpleTransformer {
 
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model.topicDistribution(features): Tensor[Double]
 }

@@ -15,8 +15,8 @@ class PolynomialExpansionSpec extends FunSpec {
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(2.0, 3.0)))))
   val frame = LeapFrame(schema, dataset)
 
-  val transformer = PolynomialExpansion(inputCol = "test_vec",
-    outputCol = "test_expanded",
+  val transformer = PolynomialExpansion(
+    shape = NodeShape.vector(2, 5, inputCol = "test_vec", outputCol = "test_expanded"),
     model = PolynomialExpansionModel(2))
 
   describe("#transform") {
@@ -32,9 +32,9 @@ class PolynomialExpansionSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      assert(transformer.getFields().get ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double)),
-          StructField("test_expanded", TensorType(BasicType.Double))))
+      assert(transformer.schema.fields ==
+        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(2))),
+          StructField("test_expanded", TensorType(BasicType.Double, Seq(5)))))
     }
   }
 }

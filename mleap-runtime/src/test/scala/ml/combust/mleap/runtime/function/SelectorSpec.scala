@@ -9,10 +9,10 @@ class SelectorSpec extends FunSpec {
   describe("#applye") {
     it("creates selectors implicitly") {
       val fieldSelector: Selector = "hey"
-      val arraySelector: Selector = Array("hey", "there")
+      val arraySelector: Selector = Seq("hey", "there")
 
       assert(fieldSelector == FieldSelector("hey"))
-      assert(arraySelector == StructSelector("hey", "there"))
+      assert(arraySelector == StructSelector(Seq("hey", "there")))
     }
   }
 }

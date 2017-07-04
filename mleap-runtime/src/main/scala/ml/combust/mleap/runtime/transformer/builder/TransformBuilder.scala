@@ -9,7 +9,7 @@ import scala.util.Try
   */
 trait TransformBuilder[B <: TransformBuilder[B]] extends Serializable {
   def withOutput(output: String, inputs: Selector *)
-                 (udf: UserDefinedFunction): Try[B] = withOutputs(Seq(output), inputs: _*)(udf)
+                 (udf: UserDefinedFunction): Try[B]
 
   def withOutputs(outputs: Seq[String], inputs: Selector *)
                  (udf: UserDefinedFunction): Try[B]

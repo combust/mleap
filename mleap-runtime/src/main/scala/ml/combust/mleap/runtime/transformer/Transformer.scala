@@ -40,6 +40,14 @@ trait Transformer extends AutoCloseable {
     */
   def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB]
 
+  /** Get the full schema of this transformer (inputs ++ outputs).
+    *
+    * @return full schema of this transformer
+    */
+  def schema: StructType = {
+    StructType(inputSchema.fields ++ outputSchema.fields).get
+  }
+
   override def close(): Unit = { /* do nothing by default */ }
 }
 

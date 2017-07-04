@@ -122,6 +122,11 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
     */
   protected def withSchemaAndDataset(schema: StructType, dataset: Dataset): LF
 
+  override def withOutput(output: String, inputs: Selector*)
+                         (udf: UserDefinedFunction): Try[LF] = {
+    withField(output, inputs: _*)(udf)
+  }
+
   override def withOutputs(outputs: Seq[String], inputs: Selector *)
                           (udf: UserDefinedFunction): Try[LF] = {
     withFields(outputs, inputs: _*)(udf)

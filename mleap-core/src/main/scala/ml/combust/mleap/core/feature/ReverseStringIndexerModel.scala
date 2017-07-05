@@ -1,5 +1,7 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+
 /** Class for a reverse string indexer model.
   *
   * This model reverses the [[StringIndexerModel]] model.
@@ -7,7 +9,7 @@ package ml.combust.mleap.core.feature
   *
   * @param labels labels for reverse string indexing
   */
-case class ReverseStringIndexerModel(labels: Seq[String]) {
+case class ReverseStringIndexerModel(labels: Seq[String]) extends Model {
   private val indexToString: Map[Int, String] = labels.zipWithIndex.map(v => (v._2, v._1)).toMap
 
   /** Map an index to its string representation.

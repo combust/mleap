@@ -4,13 +4,14 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.ModelSerializer
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
+import org.apache.spark.ml.param.Param
 import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, GBTRegressionModel}
 
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBTRegressionModel] {
+class GBTRegressionOp extends SimpleSparkOp[GBTRegressionModel] {
   override val Model: OpModel[SparkBundleContext, GBTRegressionModel] = new OpModel[SparkBundleContext, GBTRegressionModel] {
     override val klazz: Class[GBTRegressionModel] = classOf[GBTRegressionModel]
 
@@ -47,22 +48,18 @@ class GBTRegressionOp extends OpNode[SparkBundleContext, GBTRegressionModel, GBT
     }
   }
 
-  override val klazz: Class[GBTRegressionModel] = classOf[GBTRegressionModel]
-
-  override def name(node: GBTRegressionModel): String = node.uid
-
-  override def model(node: GBTRegressionModel): GBTRegressionModel = node
-
-  override def load(node: Node, model: GBTRegressionModel)
-                   (implicit context: BundleContext[SparkBundleContext]): GBTRegressionModel = {
-    new GBTRegressionModel(uid = node.name,
+  override def sparkLoad(uid: String, shape: NodeShape, model: GBTRegressionModel): GBTRegressionModel = {
+    new GBTRegressionModel(uid = uid,
       _trees = model.trees,
       _treeWeights = model.treeWeights,
-      numFeatures = model.numFeatures).
-      setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.output("prediction").name)
+      numFeatures = model.numFeatures)
   }
 
-  override def shape(node: GBTRegressionModel): NodeShape = NodeShape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def sparkInputs(obj: GBTRegressionModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
+
+  override def sparkOutputs(obj: GBTRegressionModel): Seq[SimpleParamSpec] = {
+    Seq("prediction" -> obj.predictionCol)
+  }
 }

@@ -1,5 +1,7 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+
 /**
   * Created by hollinwilkins on 12/27/16.
   */
@@ -35,7 +37,7 @@ object BinaryOperation {
 
 case class MathBinaryModel(operation: BinaryOperation,
                            da: Option[Double] = None,
-                           db: Option[Double] = None) extends Serializable {
+                           db: Option[Double] = None) extends Model {
   import BinaryOperation._
 
   def apply(ma: Option[Double], mb: Option[Double]): Double = {

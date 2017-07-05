@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class Normalizer(override val uid: String = Transformer.uniqueName("normalizer"),
                       override val shape: NodeShape,
-                      model: NormalizerModel) extends SimpleTransformer {
+                      override val model: NormalizerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Tensor[Double]) => model(value): Tensor[Double]
 }

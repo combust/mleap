@@ -4,7 +4,7 @@ import ml.bundle.DataShape
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
-import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
+import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.sql.mleap.TypeConverters._
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
@@ -12,7 +12,7 @@ import ml.combust.mleap.runtime.types.BundleTypeConverters._
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, VectorAssembler] {
+class VectorAssemblerOp extends SimpleSparkOp[VectorAssembler] {
   override val Model: OpModel[SparkBundleContext, VectorAssembler] = new OpModel[SparkBundleContext, VectorAssembler] {
     override val klazz: Class[VectorAssembler] = classOf[VectorAssembler]
 
@@ -32,26 +32,15 @@ class VectorAssemblerOp extends OpNode[SparkBundleContext, VectorAssembler, Vect
                      (implicit context: BundleContext[SparkBundleContext]): VectorAssembler = { new VectorAssembler(uid = "") }
   }
 
-  override val klazz: Class[VectorAssembler] = classOf[VectorAssembler]
-
-  override def name(node: VectorAssembler): String = node.uid
-
-  override def model(node: VectorAssembler): VectorAssembler = node
-
-  override def load(node: Node, model: VectorAssembler)
-                   (implicit context: BundleContext[SparkBundleContext]): VectorAssembler = {
-    new VectorAssembler(uid = node.name).
-      setInputCols(node.shape.inputs.map(_.name).toArray).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: VectorAssembler): VectorAssembler = {
+    new VectorAssembler(uid = uid)
   }
 
-  override def shape(node: VectorAssembler): NodeShape = {
-    var i = 0
-    node.getInputCols.foldLeft(NodeShape()) {
-      case (shape, inputCol) =>
-        val shape2 = shape.withInput(inputCol, s"input$i")
-        i += 1
-        shape2
-    }.withStandardOutput(node.getOutputCol)
+  override def sparkInputs(obj: VectorAssembler): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCols)
+  }
+
+  override def sparkOutputs(obj: VectorAssembler): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
   }
 }

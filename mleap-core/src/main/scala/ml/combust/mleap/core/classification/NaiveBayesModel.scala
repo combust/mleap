@@ -1,9 +1,10 @@
 package ml.combust.mleap.core.classification
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
-import ml.combust.mleap.core.classification.NaiveBayesModel.{ModelType, Multinomial, Bernoulli}
-import org.apache.spark.ml.linalg.mleap.{Matrices, BLAS}
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Matrix}
+import ml.combust.mleap.core.classification.NaiveBayesModel.{Bernoulli, ModelType, Multinomial}
+import org.apache.spark.ml.linalg.mleap.{BLAS, Matrices}
+import org.apache.spark.ml.linalg.{DenseVector, Matrix, SparseVector, Vector}
 
 
 /**
@@ -39,7 +40,7 @@ case class NaiveBayesModel(numFeatures: Int,
                            pi: Vector,
                            theta: Matrix,
                            modelType: NaiveBayesModel.ModelType)
-  extends ProbabilisticClassificationModel with Serializable {
+  extends ProbabilisticClassificationModel with Model {
 
   private def multinomialCalculation(raw: Vector) = {
     val prob = theta.multiply(raw)

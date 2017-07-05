@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.attribute.AttributeGroup
-import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
+import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.VectorSlicer
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.sql.DataFrame
@@ -13,7 +13,7 @@ import org.apache.spark.sql.types.StructField
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class VectorSlicerOp extends OpNode[SparkBundleContext, VectorSlicer, VectorSlicer] {
+class VectorSlicerOp extends SimpleSparkOp[VectorSlicer] {
   override val Model: OpModel[SparkBundleContext, VectorSlicer] = new OpModel[SparkBundleContext, VectorSlicer] {
     override val klazz: Class[VectorSlicer] = classOf[VectorSlicer]
 
@@ -58,19 +58,15 @@ class VectorSlicerOp extends OpNode[SparkBundleContext, VectorSlicer, VectorSlic
     }
   }
 
-  override val klazz: Class[VectorSlicer] = classOf[VectorSlicer]
-
-  override def name(node: VectorSlicer): String = node.uid
-
-  override def model(node: VectorSlicer): VectorSlicer = node
-
-  override def load(node: Node, model: VectorSlicer)
-                   (implicit context: BundleContext[SparkBundleContext]): VectorSlicer = {
-    new VectorSlicer(uid = node.name).setIndices(model.getIndices).
-      setNames(model.getNames).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: VectorSlicer): VectorSlicer = {
+    new VectorSlicer(uid = uid)
   }
 
-  override def shape(node: VectorSlicer): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: VectorSlicer): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: VectorSlicer): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

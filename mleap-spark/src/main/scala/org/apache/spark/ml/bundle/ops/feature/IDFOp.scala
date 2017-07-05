@@ -3,15 +3,16 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.IDFModel
+import org.apache.spark.ml.param.Param
 import org.apache.spark.mllib.feature
 import org.apache.spark.mllib.linalg.Vectors
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class IDFOp extends OpNode[SparkBundleContext, IDFModel, IDFModel] {
+class IDFOp extends SimpleSparkOp[IDFModel] {
   override val Model: OpModel[SparkBundleContext, IDFModel] = new OpModel[SparkBundleContext, IDFModel] {
     override val klazz: Class[IDFModel] = classOf[IDFModel]
 
@@ -29,19 +30,15 @@ class IDFOp extends OpNode[SparkBundleContext, IDFModel, IDFModel] {
     }
   }
 
-  override val klazz: Class[IDFModel] = classOf[IDFModel]
-
-  override def name(node: IDFModel): String = node.uid
-
-  override def model(node: IDFModel): IDFModel = node
-
-  override def load(node: Node, model: IDFModel)
-                   (implicit context: BundleContext[SparkBundleContext]): IDFModel = {
-    new IDFModel(uid = node.name,
-      idfModel = new feature.IDFModel(Vectors.dense(model.idf.toArray))).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: IDFModel): IDFModel = {
+    new IDFModel(uid = uid, idfModel = new feature.IDFModel(Vectors.dense(model.idf.toArray)))
   }
 
-  override def shape(node: IDFModel): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: IDFModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: IDFModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

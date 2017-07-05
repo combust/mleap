@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class RandomForestRegression(override val uid: String = Transformer.uniqueName("random_forest_regression"),
                                   override val shape: NodeShape,
-                                  model: RandomForestRegressionModel) extends SimpleTransformer {
+                                  override val model: RandomForestRegressionModel) extends SimpleTransformer {
   val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

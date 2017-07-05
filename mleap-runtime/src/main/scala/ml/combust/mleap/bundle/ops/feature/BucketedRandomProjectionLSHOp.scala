@@ -22,14 +22,16 @@ class BucketedRandomProjectionLSHOp extends MleapOp[BucketedRandomProjectionLSH,
     override def store(model: Model, obj: BucketedRandomProjectionLSHModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       model.withValue("random_unit_vectors", Value.tensorList[Double](obj.randomUnitVectors.map(v => Tensor.denseVector(v.toArray)))).
-        withValue("bucket_length", Value.double(obj.bucketLength))
+        withValue("bucket_length", Value.double(obj.bucketLength)).
+        withValue("input_size", Value.int(obj.inputSize))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): BucketedRandomProjectionLSHModel = {
       val ruv = model.value("random_unit_vectors").getTensorList[Double].map(_.toArray).map(Vectors.dense)
       BucketedRandomProjectionLSHModel(randomUnitVectors = ruv,
-        bucketLength = model.value("bucket_length").getDouble)
+        bucketLength = model.value("bucket_length").getDouble,
+        inputSize = model.value("input_size").getInt)
     }
   }
 

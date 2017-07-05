@@ -13,7 +13,7 @@ import ml.combust.mleap.runtime.Row
   */
 case class GaussianMixture(override val uid: String = Transformer.uniqueName("gmm"),
                            override val shape: NodeShape,
-                           model: GaussianMixtureModel) extends SimpleTransformer {
+                           override val model: GaussianMixtureModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = {
     val f = shape.getOutput("probability") match {
       case Some(_) =>

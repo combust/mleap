@@ -13,7 +13,7 @@ import ml.combust.mleap.runtime.Row
   */
 case class OneVsRest(override val uid: String = Transformer.uniqueName("one_vs_rest"),
                      override val shape: NodeShape,
-                     model: OneVsRestModel) extends MultiTransformer {
+                     override val model: OneVsRestModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = {
     val f = shape.getOutput("probability") match {
       case Some(_) =>

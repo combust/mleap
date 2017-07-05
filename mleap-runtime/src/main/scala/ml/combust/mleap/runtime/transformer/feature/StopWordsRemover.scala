@@ -10,6 +10,6 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
   */
 case class StopWordsRemover(override val uid:String = Transformer.uniqueName("stop_words_remover"),
                             override val shape: NodeShape,
-                            model: StopWordsRemoverModel) extends SimpleTransformer {
+                            override val model: StopWordsRemoverModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Seq[String]) => model(value)
 }

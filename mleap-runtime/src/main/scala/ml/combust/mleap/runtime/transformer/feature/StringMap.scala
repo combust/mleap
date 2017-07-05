@@ -10,6 +10,6 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
   */
 case class StringMap(override val uid: String = Transformer.uniqueName("string_map"),
                      override val shape: NodeShape,
-                     model: StringMapModel) extends SimpleTransformer {
+                     override val model: StringMapModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (label: String) => model(label)
 }

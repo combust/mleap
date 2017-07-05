@@ -12,7 +12,7 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class ElementwiseProduct(override val uid: String = Transformer.uniqueName("elmentwise_product"),
                               override val shape: NodeShape,
-                              model: ElementwiseProductModel) extends SimpleTransformer {
+                              override val model: ElementwiseProductModel) extends SimpleTransformer {
 
   override val exec: UserDefinedFunction = (value: Tensor[Double]) => model(value): Tensor[Double]
 }

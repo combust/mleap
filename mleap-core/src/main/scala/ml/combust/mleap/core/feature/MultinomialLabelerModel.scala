@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.tensor.Tensor
 
 /**
@@ -13,7 +14,7 @@ object MultinomialLabelerModel {
 }
 
 case class MultinomialLabelerModel(threshold: Double,
-                                   indexer: ReverseStringIndexerModel) {
+                                   indexer: ReverseStringIndexerModel) extends Model {
   def apply(tensor: Tensor[Double]): Seq[(Double, Int, String)] = {
     top(tensor).map(v => (v._1, v._2, indexer(v._2)))
   }

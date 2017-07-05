@@ -10,7 +10,7 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
   */
 case class Imputer(override val uid: String = Transformer.uniqueName("imputer"),
                    override val shape: NodeShape,
-                   model: ImputerModel) extends SimpleTransformer {
+                   override val model: ImputerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = if(model.nullableInput) {
     (value: Option[Double]) => model(value)
   } else {

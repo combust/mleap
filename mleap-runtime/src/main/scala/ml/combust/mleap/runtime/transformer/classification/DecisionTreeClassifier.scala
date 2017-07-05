@@ -13,7 +13,7 @@ import ml.combust.mleap.runtime.Row
   */
 case class DecisionTreeClassifier(override val uid: String = Transformer.uniqueName("decision_tree_classification"),
                                   override val shape: NodeShape,
-                                  model: DecisionTreeClassifierModel) extends MultiTransformer {
+                                  override val model: DecisionTreeClassifierModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = {
     val f = (shape.getOutput("raw_prediction"), shape.getOutput("probability")) match {
       case (Some(_), Some(_)) =>

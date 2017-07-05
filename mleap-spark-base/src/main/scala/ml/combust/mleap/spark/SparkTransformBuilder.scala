@@ -14,7 +14,7 @@ import scala.util.{Random, Try}
   * Created by hollinwilkins on 10/22/16.
   */
 case class SparkTransformBuilder(dataset: DataFrame) extends TransformBuilder[SparkTransformBuilder] {
-  override def schema: StructType = {
+  def schema: StructType = {
     TypeConverters.mleapStructType(dataset.schema)
   }
 
@@ -40,7 +40,7 @@ case class SparkTransformBuilder(dataset: DataFrame) extends TransformBuilder[Sp
 
   private def sparkSelector(selector: Selector): Column = selector match {
     case FieldSelector(name) => dataset.col(name)
-    case StructSelector(names @ _*) =>
+    case StructSelector(names) =>
       val cols = names.zipWithIndex.map {
         case (name, index) => dataset.col(name).as(s"_$index")
       }

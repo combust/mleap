@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.mleap.{VectorUtil => MleapVectors}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
@@ -11,7 +12,7 @@ import scala.math.{max, min}
   * @param maxAbs max absolute value
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/MaxAbsScaler.scala")
-case class MaxAbsScalerModel(maxAbs: Vector)  extends Serializable {
+case class MaxAbsScalerModel(maxAbs: Vector) extends Model {
   def apply(vector: Vector): Vector = {
     val maxAbsUnzero = Vectors.dense(maxAbs.toArray.map(x => if (x == 0) 1 else x))
 

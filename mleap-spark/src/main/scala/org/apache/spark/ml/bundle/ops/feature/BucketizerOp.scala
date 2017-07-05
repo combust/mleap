@@ -4,13 +4,14 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.runtime.transformer.feature.BucketizerUtil._
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.Bucketizer
+import org.apache.spark.ml.param.Param
 
 /**
   * Created by mikhail on 9/22/16.
   */
-class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
+class BucketizerOp extends SimpleSparkOp[Bucketizer] {
   override val Model: OpModel[SparkBundleContext, Bucketizer] = new OpModel[SparkBundleContext, Bucketizer] {
     override val klazz: Class[Bucketizer] = classOf[Bucketizer]
 
@@ -27,19 +28,15 @@ class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
     }
   }
 
-  override val klazz: Class[Bucketizer] = classOf[Bucketizer]
-
-  override def name(node: Bucketizer): String = node.uid
-
-  override def model(node: Bucketizer): Bucketizer = node
-
-  override def load(node: Node, model: Bucketizer)
-                   (implicit context: BundleContext[SparkBundleContext]): Bucketizer = {
-    new Bucketizer(uid = node.name).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name).
-      setSplits(model.getSplits)
+  override def sparkLoad(uid: String, shape: NodeShape, model: Bucketizer): Bucketizer = {
+    new Bucketizer(uid = uid)
   }
 
-  override def shape(node: Bucketizer): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: Bucketizer): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: Bucketizer): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

@@ -2,7 +2,8 @@ package ml.combust.mleap.runtime.transformer
 
 import java.util.UUID
 
-import ml.combust.mleap.core.types.{NodeShape, StructType}
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{NodeShape, StructField, StructType}
 import ml.combust.mleap.runtime.function.{FieldSelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 
@@ -29,8 +30,25 @@ trait Transformer extends AutoCloseable {
   /** Shape of inputs/outputs */
   val shape: NodeShape
 
-  lazy val inputSchema: StructType = shape.inputSchema
-  lazy val outputSchema: StructType = shape.outputSchema
+  /** Model for this transformer */
+  val model: Model
+
+  def inputSchema: StructType = {
+    val fields = model.inputSchema.fields.map {
+      case StructField(port, dataType) => StructField(shape.input(port).name, dataType)
+    }
+
+    StructType(fields).get
+  }
+
+  // TODO: filter optional outputs using shape
+  def outputSchema: StructType = {
+    val outputs = shape.outputs.values.map(_.port).toSet
+    val fields = model.outputSchema.fields.filter(f => outputs.contains(f.name)).map {
+      case StructField(port, dataType) => StructField(shape.output(port).name, dataType)
+    }
+    StructType(fields).get
+  }
 
   /** Transform a builder using this MLeap transformer.
     *
@@ -59,25 +77,17 @@ trait BaseTransformer extends Transformer {
 }
 
 trait SimpleTransformer extends BaseTransformer {
-  lazy val typedExec: UserDefinedFunction = {
-    exec.withInputs(inputSchema).
-      withOutput(outputSchema.fields.head.dataType)
-  }
   val output: String = outputSchema.fields.head.name
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(output, selectors: _*)(typedExec)
+    builder.withOutput(output, selectors: _*)(exec)
   }
 }
 
 trait MultiTransformer extends BaseTransformer {
-  lazy val typedExec: UserDefinedFunction = {
-    exec.withInputs(inputSchema).
-      withOutput(outputSchema)
-  }
   val outputs: Seq[String] = outputSchema.fields.map(_.name)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutputs(outputs, selectors: _*)(typedExec)
+    builder.withOutputs(outputs, selectors: _*)(exec)
   }
 }

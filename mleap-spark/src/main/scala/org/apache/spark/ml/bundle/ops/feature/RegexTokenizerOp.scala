@@ -3,10 +3,10 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.RegexTokenizer
 
-class RegexTokenizerOp extends OpNode[SparkBundleContext, RegexTokenizer, RegexTokenizer] {
+class RegexTokenizerOp extends SimpleSparkOp[RegexTokenizer] {
   override val Model: OpModel[SparkBundleContext, RegexTokenizer] = new OpModel[SparkBundleContext, RegexTokenizer] {
 
     val RegexIdentifier = "regex"
@@ -39,22 +39,15 @@ class RegexTokenizerOp extends OpNode[SparkBundleContext, RegexTokenizer, RegexT
     }
   }
 
-  override val klazz: Class[RegexTokenizer] = classOf[RegexTokenizer]
-
-  override def name(node: RegexTokenizer): String = node.uid
-
-  override def model(node: RegexTokenizer): RegexTokenizer = node
-
-  override def load(node: Node, model: RegexTokenizer)
-                   (implicit context: BundleContext[SparkBundleContext]): RegexTokenizer = {
-    new RegexTokenizer(uid = node.name)
-      .setInputCol(node.shape.standardInput.name)
-      .setOutputCol(node.shape.standardOutput.name)
-      .setPattern(model.getPattern)
-      .setGaps(model.getGaps)
-      .setMinTokenLength(model.getMinTokenLength)
-      .setToLowercase(model.getToLowercase)
+  override def sparkLoad(uid: String, shape: NodeShape, model: RegexTokenizer): RegexTokenizer = {
+    new RegexTokenizer(uid = uid)
   }
 
-  override def shape(node: RegexTokenizer): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: RegexTokenizer): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: RegexTokenizer): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

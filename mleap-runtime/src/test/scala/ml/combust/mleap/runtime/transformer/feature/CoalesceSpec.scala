@@ -18,10 +18,10 @@ class CoalesceSpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   describe("with all optional doubles") {
-    val coalesce = Coalesce(shape = NodeShape().withInput("input0", "test1", ScalarType.Double.asNullable).
-      withInput("input1", "test2", ScalarType.Double.asNullable).
-      withInput("input2", "test3", ScalarType.Double.asNullable).
-      withStandardOutput("test_bucket", ScalarType.Double.asNullable),
+    val coalesce = Coalesce(shape = NodeShape().withInput("input0", "test1").
+              withInput("input1", "test2").
+              withInput("input2", "test3").
+          withStandardOutput("test_bucket"),
       model = CoalesceModel(Seq(true, true, true)))
 
     describe("#transform") {
@@ -45,10 +45,10 @@ class CoalesceSpec extends FunSpec {
   }
 
   describe("with a non-optional double") {
-    val coalesce = Coalesce(shape = NodeShape().withInput("input0", "test1", ScalarType.Double.asNullable).
-      withInput("input1", "test3", ScalarType.Double.asNullable).
-      withInput("input2", "test4", ScalarType.Double).
-      withStandardOutput("test_bucket", ScalarType.Double.asNullable),
+    val coalesce = Coalesce(shape = NodeShape().withInput("input0", "test1").
+              withInput("input1", "test3").
+              withInput("input2", "test4").
+          withStandardOutput("test_bucket"),
       model = CoalesceModel(Seq(true, true, false)))
 
     describe("#transform") {

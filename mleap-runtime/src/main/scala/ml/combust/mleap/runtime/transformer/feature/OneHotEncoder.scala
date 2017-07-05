@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class OneHotEncoder(override val uid: String = Transformer.uniqueName("one_hot_encoder"),
                          override val shape: NodeShape,
-                         model: OneHotEncoderModel) extends SimpleTransformer {
+                         override val model: OneHotEncoderModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Double) => model(value): Tensor[Double]
 }

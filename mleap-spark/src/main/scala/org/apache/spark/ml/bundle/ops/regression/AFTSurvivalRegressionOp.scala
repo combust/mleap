@@ -3,14 +3,15 @@ package org.apache.spark.ml.bundle.ops.regression
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.ml.param.Param
 import org.apache.spark.ml.regression.AFTSurvivalRegressionModel
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class AFTSurvivalRegressionOp extends OpNode[SparkBundleContext, AFTSurvivalRegressionModel, AFTSurvivalRegressionModel] {
+class AFTSurvivalRegressionOp extends SimpleSparkOp[AFTSurvivalRegressionModel] {
   override val Model: OpModel[SparkBundleContext, AFTSurvivalRegressionModel] = new OpModel[SparkBundleContext, AFTSurvivalRegressionModel] {
     override val klazz: Class[AFTSurvivalRegressionModel] = classOf[AFTSurvivalRegressionModel]
 
@@ -34,30 +35,19 @@ class AFTSurvivalRegressionOp extends OpNode[SparkBundleContext, AFTSurvivalRegr
     }
   }
 
-  override val klazz: Class[AFTSurvivalRegressionModel] = classOf[AFTSurvivalRegressionModel]
-
-  override def name(node: AFTSurvivalRegressionModel): String = node.uid
-
-  override def model(node: AFTSurvivalRegressionModel): AFTSurvivalRegressionModel = node
-
-  override def load(node: Node, model: AFTSurvivalRegressionModel)
-                   (implicit context: BundleContext[SparkBundleContext]): AFTSurvivalRegressionModel = {
-    val r = new AFTSurvivalRegressionModel(uid = node.name,
+  override def sparkLoad(uid: String, shape: NodeShape, model: AFTSurvivalRegressionModel): AFTSurvivalRegressionModel = {
+    new AFTSurvivalRegressionModel(uid = uid,
       coefficients = model.coefficients,
       intercept = model.intercept,
-      scale = model.scale).setQuantileProbabilities(model.getQuantileProbabilities).
-      setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.output("prediction").name)
-    node.shape.getOutput("quantiles").foreach(q => r.setQuantilesCol(q.name))
-
-    r
+      scale = model.scale)
   }
 
-  override def shape(node: AFTSurvivalRegressionModel): NodeShape = {
-    var s = NodeShape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction")
-    if(node.isSet(node.quantilesCol)) { s = s.withOutput(node.getQuantilesCol, "quantiles") }
+  override def sparkInputs(obj: AFTSurvivalRegressionModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
 
-    s
+  override def sparkOutputs(obj: AFTSurvivalRegressionModel): Seq[SimpleParamSpec] = {
+    Seq("quantiles" -> obj.quantilesCol,
+      "prediction" -> obj.predictionCol)
   }
 }

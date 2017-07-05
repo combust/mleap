@@ -19,12 +19,14 @@ class ChiSqSelectorOp extends MleapOp[ChiSqSelector, ChiSqSelectorModel] {
 
     override def store(model: Model, obj: ChiSqSelectorModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withValue("filter_indices", Value.longList(obj.filterIndices.map(_.toLong)))
+      model.withValue("filter_indices", Value.longList(obj.filterIndices.map(_.toLong))).
+        withValue("input_size", Value.int(obj.inputSize))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): ChiSqSelectorModel = {
-      ChiSqSelectorModel(filterIndices = model.value("filter_indices").getLongList.map(_.toInt))
+      ChiSqSelectorModel(filterIndices = model.value("filter_indices").getLongList.map(_.toInt),
+        inputSize = model.value("input_size").getInt)
     }
   }
 

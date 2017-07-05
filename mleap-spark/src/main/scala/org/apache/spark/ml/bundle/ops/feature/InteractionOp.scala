@@ -6,7 +6,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.attribute.{Attribute, AttributeGroup, NominalAttribute}
-import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
+import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.Interaction
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.sql.DataFrame
@@ -17,7 +17,7 @@ import org.apache.spark.sql.types.{BooleanType, NumericType}
 /**
   * Created by hollinwilkins on 4/26/17.
   */
-class InteractionOp extends OpNode[SparkBundleContext, Interaction, Interaction] {
+class InteractionOp extends SimpleSparkOp[Interaction] {
   override val Model: OpModel[SparkBundleContext, Interaction] = new OpModel[SparkBundleContext, Interaction] {
     override val klazz: Class[Interaction] = classOf[Interaction]
 
@@ -70,23 +70,15 @@ class InteractionOp extends OpNode[SparkBundleContext, Interaction, Interaction]
     }
   }
 
-  override val klazz: Class[Interaction] = classOf[Interaction]
-
-  override def name(node: Interaction): String = node.uid
-
-  override def model(node: Interaction): Interaction = node
-
-  override def load(node: Node, model: Interaction)
-                   (implicit context: BundleContext[SparkBundleContext]): Interaction = {
-    new Interaction().
-      setInputCols(node.shape.inputs.map(_.name).toArray).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: Interaction): Interaction = {
+    new Interaction(uid = uid)
   }
 
-  override def shape(node: Interaction): NodeShape = {
-    val s = NodeShape().withStandardOutput(node.getOutputCol)
-    node.getInputCols.zipWithIndex.foldLeft(s) {
-      case (s2, (input, index)) => s2.withInput(input, s"input$index")
-    }
+  override def sparkInputs(obj: Interaction): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCols)
+  }
+
+  override def sparkOutputs(obj: Interaction): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
   }
 }

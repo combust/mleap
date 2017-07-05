@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class DCT(override val uid: String = Transformer.uniqueName("dct"),
                override val shape: NodeShape,
-               model: DCTModel) extends SimpleTransformer {
+               override val model: DCTModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features): Tensor[Double]
 }

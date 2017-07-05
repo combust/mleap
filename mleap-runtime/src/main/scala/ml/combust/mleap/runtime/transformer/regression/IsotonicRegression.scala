@@ -12,7 +12,7 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class IsotonicRegression(override val uid: String = Transformer.uniqueName("isotonic_regression"),
                               override val shape: NodeShape,
-                              model: IsotonicRegressionModel) extends SimpleTransformer {
+                              override val model: IsotonicRegressionModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = model.featureIndex match {
     case Some(_) => (features: Tensor[Double]) => model(features)
     case None => (feature: Double) => model(feature)

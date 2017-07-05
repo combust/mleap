@@ -30,7 +30,7 @@ class GBTClassifierSpec extends FunSpec {
 
     describe("with invalid features column") {
       val gbt2 = gbt.copy(shape = NodeShape.probabilisticClassifier(3, 2, featuresCol = "bad_features").
-        withOutput("prediction", "prediction", ScalarType.Double))
+              withOutput("prediction", "prediction"))
 
       it("returns a Failure") { assert(gbt2.transform(frame).isFailure) }
     }

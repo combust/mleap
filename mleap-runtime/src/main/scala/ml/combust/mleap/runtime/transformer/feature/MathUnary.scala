@@ -10,6 +10,6 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
   */
 case class MathUnary(override val uid: String = Transformer.uniqueName("math_unary"),
                      override val shape: NodeShape,
-                     model: MathUnaryModel) extends SimpleTransformer {
+                     override val model: MathUnaryModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (a: Double) => model(a)
 }

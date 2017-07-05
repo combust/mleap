@@ -1,12 +1,14 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+
 /**
   * Created by mikhail on 12/18/16.
   */
 case class ImputerModel(surrogateValue: Double,
                         missingValue: Double,
                         strategy: String,
-                        nullableInput: Boolean = false) extends Serializable {
+                        nullableInput: Boolean = false) extends Model {
   def predictAny(value: Any): Double = value match {
     case value: Double => apply(value)
     case value: Option[_] => apply(value.asInstanceOf[Option[Double]])

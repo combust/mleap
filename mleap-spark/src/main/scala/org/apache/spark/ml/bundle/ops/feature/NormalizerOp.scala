@@ -3,13 +3,13 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.Normalizer
 
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-class NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
+class NormalizerOp extends SimpleSparkOp[Normalizer] {
   override val Model: OpModel[SparkBundleContext, Normalizer] = new OpModel[SparkBundleContext, Normalizer] {
     override val klazz: Class[Normalizer] = classOf[Normalizer]
 
@@ -26,19 +26,15 @@ class NormalizerOp extends OpNode[SparkBundleContext, Normalizer, Normalizer] {
     }
   }
 
-  override val klazz: Class[Normalizer] = classOf[Normalizer]
-
-  override def name(node: Normalizer): String = node.uid
-
-  override def model(node: Normalizer): Normalizer = node
-
-  override def load(node: Node, model: Normalizer)
-                   (implicit context: BundleContext[SparkBundleContext]): Normalizer = {
-    new Normalizer(uid = node.name).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name).
-      setP(model.getP)
+  override def sparkLoad(uid: String, shape: NodeShape, model: Normalizer): Normalizer = {
+    new Normalizer(uid = uid)
   }
 
-  override def shape(node: Normalizer): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: Normalizer): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: Normalizer): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

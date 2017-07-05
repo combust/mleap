@@ -5,9 +5,7 @@ import scala.collection.immutable.ListMap
 /**
   * Created by hollinwilkins on 7/3/17.
   */
-case class Socket(port: String, name: String, dataType: DataType) {
-  def asField: StructField = StructField(name, dataType)
-}
+case class Socket(port: String, name: String)
 
 object NodeShape {
   def apply(inputs: Seq[Socket], outputs: Seq[Socket]): NodeShape = {
@@ -25,8 +23,8 @@ object NodeShape {
              outputPort: String = "output",
              inputCol: String = "input",
              outputCol: String = "output"): NodeShape = {
-    NodeShape().withInput(inputPort, inputCol, TensorType(inputBase, Seq(inputSize))).
-      withOutput(outputPort, outputCol, TensorType(outputBase, Seq(outputSize)))
+    NodeShape().withInput(inputPort, inputCol).
+          withOutput(outputPort, outputCol)
   }
 
   def scalar(inputBase: BasicType = BasicType.Double,
@@ -35,24 +33,24 @@ object NodeShape {
              outputPort: String = "output",
              inputCol: String = "input",
              outputCol: String = "output"): NodeShape = {
-    NodeShape().withInput(inputPort, inputCol, ScalarType(inputBase)).
-      withOutput(outputPort, outputCol, ScalarType(outputBase))
+    NodeShape().withInput(inputPort, inputCol).
+          withOutput(outputPort, outputCol)
   }
 
   def regression(featuresSize: Int,
                  base: BasicType = BasicType.Double,
                  featuresCol: String = "features",
                  predictionCol: String = "prediction"): NodeShape = {
-    NodeShape().withInput("features", featuresCol, TensorType(base, Seq(featuresSize))).
-      withOutput("prediction", predictionCol, ScalarType(base))
+    NodeShape().withInput("features", featuresCol).
+          withOutput("prediction", predictionCol)
   }
 
   def basicClassifier(featuresSize: Int,
                       base: BasicType = BasicType.Double,
                       featuresCol: String = "features",
                       predictionCol: String = "prediction"): NodeShape = {
-    NodeShape().withInput("features", featuresCol, TensorType(base, Seq(featuresSize))).
-      withOutput("prediction", predictionCol, ScalarType(base))
+    NodeShape().withInput("features", featuresCol).
+          withOutput("prediction", predictionCol)
   }
 
   def probabilisticClassifier(featuresSize: Int,
@@ -62,12 +60,12 @@ object NodeShape {
                               predictionCol: String = "prediction",
                               rawPredictionCol: Option[String] = None,
                               probabilityCol: Option[String] = None): NodeShape = {
-    var ns = NodeShape().withInput("features", featuresCol, TensorType(base, Seq(featuresSize)))
+    var ns = NodeShape().withInput("features", featuresCol)
 
-    for(rp <- rawPredictionCol) { ns = ns.withOutput("raw_prediction", rp, TensorType(base, Seq(numClasses))) }
-    for(p <- probabilityCol) { ns = ns.withOutput("probability", p, TensorType(base, Seq(numClasses))) }
+    for(rp <- rawPredictionCol) { ns = ns.withOutput("raw_prediction", rp) }
+    for(p <- probabilityCol) { ns = ns.withOutput("probability", p) }
 
-    ns.withOutput("prediction", predictionCol, ScalarType(base))
+    ns.withOutput("prediction", predictionCol)
   }
 
   def basicCluster(featuresSize: Int,
@@ -75,8 +73,8 @@ object NodeShape {
                    outputType: DataType = ScalarType.Int,
                    featuresCol: String = "features",
                    predictionCol: String = "prediction"): NodeShape = {
-    NodeShape().withInput("features", featuresCol, TensorType(base, Seq(featuresSize))).
-      withOutput("prediction", predictionCol, outputType)
+    NodeShape().withInput("features", featuresCol).
+          withOutput("prediction", predictionCol)
   }
 
   def probabilisticCluster(featuresSize: Int,
@@ -85,41 +83,38 @@ object NodeShape {
                            featuresCol: String = "features",
                            predictionCol: String = "prediction",
                            probabilityCol: Option[String] = None): NodeShape = {
-    var ns = NodeShape().withInput("features", featuresCol, TensorType(base, Seq(featuresSize)))
+    var ns = NodeShape().withInput("features", featuresCol)
 
-    for(p <- probabilityCol) { ns = ns.withOutput("probability", p, ScalarType(base)) }
+    for(p <- probabilityCol) { ns = ns.withOutput("probability", p) }
 
-    ns.withOutput("prediction", predictionCol, outputType)
+    ns.withOutput("prediction", predictionCol)
   }
 }
 
 case class NodeShape(inputs: ListMap[String, Socket] = ListMap(),
                      outputs: ListMap[String, Socket] = ListMap()) {
-  def inputSchema: StructType = StructType(inputs.map(_._2.asField).toSeq).get
-  def outputSchema: StructType = StructType(outputs.map(_._2.asField).toSeq).get
+  def getInput(port: String): Option[Socket] = inputs.find(_._1 == port).map(_._2)
+  def getOutput(port: String): Option[Socket] = outputs.find(_._1 == port).map(_._2)
 
-  def getInput(port: String): Option[StructField] = inputs.find(_._1 == port).map(_._2.asField)
-  def getOutput(port: String): Option[StructField] = outputs.find(_._1 == port).map(_._2.asField)
+  def input(port: String): Socket = getInput(port).get
+  def output(port: String): Socket = getOutput(port).get
 
-  def input(port: String): StructField = getInput(port).get
-  def output(port: String): StructField = getOutput(port).get
+  def standardInput: Socket = input("input")
+  def standardOutput: Socket = output("output")
 
-  def standardInput: StructField = input("input")
-  def standardOutput: StructField = output("output")
-
-  def withInput(port: String, name: String, dataType: DataType): NodeShape = {
-    copy(inputs = inputs + (port -> Socket(port, name, dataType)))
+  def withInput(port: String, name: String): NodeShape = {
+    copy(inputs = inputs + (port -> Socket(port, name)))
   }
 
-  def withOutput(port: String, name: String, dataType: DataType): NodeShape = {
-    copy(outputs = outputs + (port -> Socket(port, name, dataType)))
+  def withOutput(port: String, name: String): NodeShape = {
+    copy(outputs = outputs + (port -> Socket(port, name)))
   }
 
-  def withStandardInput(name: String, dataType: DataType): NodeShape = {
-    withInput("input", name, dataType)
+  def withStandardInput(name: String): NodeShape = {
+    withInput("input", name)
   }
 
-  def withStandardOutput(name: String, dataType: DataType): NodeShape = {
-    withOutput("output", name, dataType)
+  def withStandardOutput(name: String): NodeShape = {
+    withOutput("output", name)
   }
 }

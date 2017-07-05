@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class BisectingKMeans(override val uid: String = Transformer.uniqueName("bisecting_k_means"),
                            override val shape: NodeShape,
-                           model: BisectingKMeansModel) extends SimpleTransformer {
+                           override val model: BisectingKMeansModel) extends SimpleTransformer {
   val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

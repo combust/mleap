@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class Pca(override val uid: String = Transformer.uniqueName("pca"),
                override val shape: NodeShape,
-               model: PcaModel) extends SimpleTransformer {
+               override val model: PcaModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Tensor[Double]) => model(value): Tensor[Double]
 }

@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class MinMaxScaler(override val uid: String = Transformer.uniqueName("min_max_scaler"),
                         override val shape: NodeShape,
-                        model: MinMaxScalerModel) extends SimpleTransformer {
+                        override val model: MinMaxScalerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Tensor[Double]) => model(value): Tensor[Double]
 }

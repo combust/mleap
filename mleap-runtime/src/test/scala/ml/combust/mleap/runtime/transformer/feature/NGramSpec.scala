@@ -14,8 +14,8 @@ class NGramSpec extends FunSpec{
   val frame = LeapFrame(schema,dataset)
 
   val ngram = NGram(
-    shape = NodeShape().withStandardInput("test_string_seq", ListType(BasicType.String)).
-      withStandardOutput("output_ngram", ListType(BasicType.String)),
+    shape = NodeShape().withStandardInput("test_string_seq").
+          withStandardOutput("output_ngram"),
     model = NGramModel(2)
   )
 
@@ -30,8 +30,8 @@ class NGramSpec extends FunSpec{
   }
 
   describe("with invalid input column") {
-    val ngram2 = ngram.copy(shape = NodeShape().withStandardInput("bad_input", ListType(BasicType.String)).
-      withStandardOutput("output", ListType(BasicType.String)))
+    val ngram2 = ngram.copy(shape = NodeShape().withStandardInput("bad_input").
+          withStandardOutput("output"))
 
     it("returns a failure") {assert(ngram2.transform(frame).isFailure)}
   }

@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class GBTClassifier(override val uid: String = Transformer.uniqueName("gbt_classifier"),
                          override val shape: NodeShape,
-                         model: GBTClassifierModel) extends SimpleTransformer {
+                         override val model: GBTClassifierModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

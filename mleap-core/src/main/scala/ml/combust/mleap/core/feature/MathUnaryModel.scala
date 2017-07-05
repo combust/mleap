@@ -1,5 +1,7 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+
 /**
   * Created by hollinwilkins on 12/27/16.
   */
@@ -30,7 +32,7 @@ object UnaryOperation {
   val forName: Map[String, UnaryOperation] = all.map(o => (o.name, o)).toMap
 }
 
-case class MathUnaryModel(operation: UnaryOperation) {
+case class MathUnaryModel(operation: UnaryOperation) extends Model {
   import UnaryOperation._
 
   def apply(a: Double): Double = operation match {

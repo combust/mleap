@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
@@ -8,7 +9,7 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
   * @param pNorm p normalization param
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/Normalizer.scala")
-case class NormalizerModel(pNorm: Double) extends Serializable {
+case class NormalizerModel(pNorm: Double) extends Model {
   /** Normalizes a feature vector.
     *
     * @param features features to normalize

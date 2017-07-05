@@ -2,6 +2,7 @@ package ml.combust.mleap.core.regression
 
 import java.util.Arrays.binarySearch
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.Vector
 
@@ -12,7 +13,7 @@ import org.apache.spark.ml.linalg.Vector
 case class IsotonicRegressionModel(boundaries: Array[Double],
                                    predictions: Seq[Double],
                                    isotonic: Boolean,
-                                   featureIndex: Option[Int]) {
+                                   featureIndex: Option[Int]) extends Model {
   def apply(features: Vector): Double = apply(features(featureIndex.get))
 
   def apply(feature: Double): Double = {

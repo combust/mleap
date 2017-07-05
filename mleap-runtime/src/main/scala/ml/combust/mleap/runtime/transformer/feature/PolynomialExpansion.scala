@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class PolynomialExpansion(override val uid: String = Transformer.uniqueName("polynomial_expansion"),
                                override val shape: NodeShape,
-                               model: PolynomialExpansionModel) extends SimpleTransformer {
+                               override val model: PolynomialExpansionModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Tensor[Double]) => model(value): Tensor[Double]
 }

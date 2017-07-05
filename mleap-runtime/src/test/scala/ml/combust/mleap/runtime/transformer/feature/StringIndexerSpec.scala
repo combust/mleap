@@ -31,8 +31,8 @@ class StringIndexerSpec extends FunSpec {
     }
 
     describe("with invalid input column") {
-      val stringIndexer2 = stringIndexer.copy(shape = NodeShape().withStandardInput("bad_input", ScalarType.String).
-        withStandardOutput("output", ScalarType.Double))
+      val stringIndexer2 = stringIndexer.copy(shape = NodeShape().withStandardInput("bad_input").
+              withStandardOutput("output"))
 
       it("returns a Failure") { assert(stringIndexer2.transform(frame).isFailure) }
     }

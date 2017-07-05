@@ -1,5 +1,7 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+
 sealed trait HandleInvalid {
   def asParamString: String
 }
@@ -38,7 +40,7 @@ object HandleInvalid {
   */
 case class StringIndexerModel(labels: Seq[String],
                               nullableInput: Boolean = false,
-                              handleInvalid: HandleInvalid = HandleInvalid.Error) extends Serializable {
+                              handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
   private val stringToIndex: Map[String, Int] = labels.zipWithIndex.toMap
   private val keepInvalid = handleInvalid == HandleInvalid.Keep
 

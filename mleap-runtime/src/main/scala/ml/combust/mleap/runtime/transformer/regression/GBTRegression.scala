@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class GBTRegression(override val uid: String = Transformer.uniqueName("gbt_regression"),
                          override val shape: NodeShape,
-                         model: GBTRegressionModel) extends SimpleTransformer {
+                         override val model: GBTRegressionModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

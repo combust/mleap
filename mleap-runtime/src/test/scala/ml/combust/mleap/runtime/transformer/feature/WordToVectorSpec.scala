@@ -7,8 +7,8 @@ class WordToVectorSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs") {
-      val transformer = WordToVector(shape = NodeShape().withStandardInput("input", ListType(BasicType.String)).
-        withStandardOutput("output", TensorType(BasicType.Double, Seq(4))), model = null)
+      val transformer = WordToVector(shape = NodeShape().withStandardInput("input").
+              withStandardOutput("output"), model = null)
 
       assert(transformer.schema.fields ==
         Seq(StructField("input", ListType(BasicType.String)),

@@ -13,7 +13,7 @@ import ml.combust.mleap.runtime.Row
   */
 case class AFTSurvivalRegression(override val uid: String = Transformer.uniqueName("aft_survival_regression"),
                                  override val shape: NodeShape,
-                                 model: AFTSurvivalRegressionModel) extends MultiTransformer {
+                                 override val model: AFTSurvivalRegressionModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = {
     val f = shape.getOutput("quantiles") match {
       case Some(_) =>

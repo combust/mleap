@@ -11,8 +11,8 @@ class RegexTokenizerSpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   val gapRegexTokenizer = RegexTokenizer(
-    shape = NodeShape().withStandardInput("test_string", ScalarType.String).
-      withStandardOutput("test_tokens", ListType(BasicType.String)),
+    shape = NodeShape().withStandardInput("test_string").
+          withStandardOutput("test_tokens"),
     model = RegexTokenizerModel(
       regex = """\s""".r,
       matchGaps = true,
@@ -22,8 +22,8 @@ class RegexTokenizerSpec extends FunSpec {
   )
 
   val wordRegexTokenizer = RegexTokenizer(
-    shape = NodeShape().withStandardInput("test_string", ScalarType.String).
-      withStandardOutput("test_tokens", ListType(BasicType.String)),
+    shape = NodeShape().withStandardInput("test_string").
+          withStandardOutput("test_tokens"),
     model = RegexTokenizerModel(
       regex = """\w+""".r,
       matchGaps = false,

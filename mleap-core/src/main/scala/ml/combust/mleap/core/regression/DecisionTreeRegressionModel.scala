@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.regression
 
+import ml.combust.mleap.core.Model
 import org.apache.spark.ml.linalg.Vector
 import ml.combust.mleap.core.tree.{DecisionTree, Node}
 
@@ -8,7 +9,7 @@ import ml.combust.mleap.core.tree.{DecisionTree, Node}
   * @param rootNode root decision tree node
   * @param numFeatures number of features used in prediction
   */
-case class DecisionTreeRegressionModel(rootNode: Node, numFeatures: Int) extends DecisionTree {
+case class DecisionTreeRegressionModel(rootNode: Node, numFeatures: Int) extends DecisionTree with Model {
   /** Alias for [[ml.combust.mleap.core.regression.DecisionTreeRegressionModel#predict]]
     *
     * @param features features for prediction

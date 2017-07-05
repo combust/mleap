@@ -10,6 +10,6 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
   */
 case class ReverseStringIndexer(override val uid: String = Transformer.uniqueName("reverse_string_indexer"),
                                 override val shape: NodeShape,
-                                model: ReverseStringIndexerModel) extends SimpleTransformer {
+                                override val model: ReverseStringIndexerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Double) => model(value.toInt)
 }

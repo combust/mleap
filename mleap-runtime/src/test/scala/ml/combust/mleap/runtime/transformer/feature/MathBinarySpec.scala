@@ -16,9 +16,9 @@ class MathBinarySpec extends FunSpec {
 
   describe("with a and b inputs") {
     val transformer = MathBinary(
-      shape = NodeShape().withInput("input_a", "test_a", ScalarType.Double).
-        withInput("input_b", "test_b", ScalarType.Double).
-        withStandardOutput("test_out", ScalarType.Double),
+      shape = NodeShape().withInput("input_a", "test_a").
+                    withInput("input_b", "test_b").
+              withStandardOutput("test_out"),
       model = MathBinaryModel(Divide, None, None))
 
     it("calculates the correct value") {
@@ -36,8 +36,8 @@ class MathBinarySpec extends FunSpec {
 
   describe("with a input") {
     val transformer = MathBinary(
-      shape = NodeShape().withInput("input_a", "test_a", ScalarType.Double).
-        withStandardOutput("test_out", ScalarType.Double),
+      shape = NodeShape().withInput("input_a", "test_a").
+              withStandardOutput("test_out"),
       model = MathBinaryModel(Multiply, None, Some(3.333)))
 
     it("calculates the value using the b default") {
@@ -54,8 +54,8 @@ class MathBinarySpec extends FunSpec {
 
   describe("with b input") {
     val transformer = MathBinary(
-      shape = NodeShape().withInput("input_b", "test_b", ScalarType.Double).
-        withStandardOutput("test_out", ScalarType.Double),
+      shape = NodeShape().withInput("input_b", "test_b").
+              withStandardOutput("test_out"),
       model = MathBinaryModel(Multiply, Some(3.333), None))
 
     it("calculates the value using the a default") {
@@ -71,7 +71,7 @@ class MathBinarySpec extends FunSpec {
   }
 
   describe("with no inputs") {
-    val transformer = MathBinary(shape = NodeShape().withStandardOutput("test_out", ScalarType.Double),
+    val transformer = MathBinary(shape = NodeShape().withStandardOutput("test_out"),
       model = MathBinaryModel(Multiply, Some(3.333), Some(5.223)))
 
     it("calculates the value using both defaults") {

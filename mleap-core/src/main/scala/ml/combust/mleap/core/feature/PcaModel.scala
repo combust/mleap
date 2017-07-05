@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg._
 
@@ -8,7 +9,7 @@ import org.apache.spark.ml.linalg._
   * @param k number of elements in output vector
   * @param principalComponents matrix of principal components
   */
-case class PcaModel(principalComponents: DenseMatrix) {
+case class PcaModel(principalComponents: DenseMatrix) extends Model {
   /** Convert input vector to its principal components.
     *
     * @param vector vector to transform

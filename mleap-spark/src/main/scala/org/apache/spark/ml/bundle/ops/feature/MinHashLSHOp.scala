@@ -3,13 +3,13 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.MinHashLSHModel
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class MinHashLSHOp extends OpNode[SparkBundleContext, MinHashLSHModel, MinHashLSHModel] {
+class MinHashLSHOp extends SimpleSparkOp[MinHashLSHModel] {
   override val Model: OpModel[SparkBundleContext, MinHashLSHModel] = new OpModel[SparkBundleContext, MinHashLSHModel] {
     override val klazz: Class[MinHashLSHModel] = classOf[MinHashLSHModel]
 
@@ -32,20 +32,16 @@ class MinHashLSHOp extends OpNode[SparkBundleContext, MinHashLSHModel, MinHashLS
     }
   }
 
-  override val klazz: Class[MinHashLSHModel] = classOf[MinHashLSHModel]
-
-  override def name(node: MinHashLSHModel): String = node.uid
-
-  override def model(node: MinHashLSHModel): MinHashLSHModel = node
-
-  override def load(node: Node, model: MinHashLSHModel)
-                   (implicit context: BundleContext[SparkBundleContext]): MinHashLSHModel = {
-    val m = new MinHashLSHModel(uid = node.name, randCoefficients = model.randCoefficients)
-    m.set(m.inputCol, node.shape.standardInput.name)
-    m.set(m.outputCol, node.shape.standardOutput.name)
-
-    m
+  override def sparkLoad(uid: String, shape: NodeShape, model: MinHashLSHModel): MinHashLSHModel = {
+    new MinHashLSHModel(uid = uid,
+      randCoefficients = model.randCoefficients)
   }
 
-  override def shape(node: MinHashLSHModel): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: MinHashLSHModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: MinHashLSHModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

@@ -3,13 +3,14 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.DCT
+import org.apache.spark.ml.param.Param
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class DCTOp extends OpNode[SparkBundleContext, DCT, DCT] {
+class DCTOp extends SimpleSparkOp[DCT] {
   override val Model: OpModel[SparkBundleContext, DCT] = new OpModel[SparkBundleContext, DCT] {
     override val klazz: Class[DCT] = classOf[DCT]
 
@@ -26,18 +27,15 @@ class DCTOp extends OpNode[SparkBundleContext, DCT, DCT] {
     }
   }
 
-  override val klazz: Class[DCT] = classOf[DCT]
-
-  override def name(node: DCT): String = node.uid
-
-  override def model(node: DCT): DCT = node
-
-  override def load(node: Node, model: DCT)
-                   (implicit context: BundleContext[SparkBundleContext]): DCT = {
-    new DCT(uid = node.name).setInverse(model.getInverse).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: DCT): DCT = {
+    new DCT(uid = uid)
   }
 
-  override def shape(node: DCT): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: DCT): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: DCT): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

@@ -13,7 +13,7 @@ import ml.combust.mleap.runtime.Row
   */
 case class GeneralizedLinearRegression(override val uid: String = Transformer.uniqueName("generalized_lr"),
                                        override val shape: NodeShape,
-                                       model: GeneralizedLinearRegressionModel) extends MultiTransformer {
+                                       override val model: GeneralizedLinearRegressionModel) extends MultiTransformer {
 
 
   override val exec: UserDefinedFunction = {

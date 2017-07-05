@@ -10,7 +10,7 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
   */
 case class Bucketizer(override val uid: String = Transformer.uniqueName("bucketizer"),
                       override val shape: NodeShape,
-                      model: BucketizerModel) extends SimpleTransformer {
+                      override val model: BucketizerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Double) => model(value)
 }
 

@@ -11,6 +11,6 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 
 case class WordLengthFilter(override val uid: String = Transformer.uniqueName("word_filter"),
                             override val shape: NodeShape,
-                            model: WordLengthFilterModel) extends SimpleTransformer {
+                            override val model: WordLengthFilterModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (label: Seq[String]) => model(label)
 }

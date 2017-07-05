@@ -37,7 +37,8 @@ trait OpNode[Context, N, M] {
     * @param node node object
     * @return shape of the node
     */
-  def shape(node: N): NodeShape
+  def shape(node: N)
+           (implicit context: BundleContext[Context]): NodeShape
 
   /** Get the children of the node.
     *

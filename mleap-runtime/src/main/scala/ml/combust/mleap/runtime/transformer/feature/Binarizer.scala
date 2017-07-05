@@ -12,7 +12,7 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class Binarizer(override val uid: String = Transformer.uniqueName("binarizer"),
                      override val shape: NodeShape,
-                     model: BinarizerModel) extends SimpleTransformer {
+                     override val model: BinarizerModel) extends SimpleTransformer {
   val execTensor: UserDefinedFunction = (value: Tensor[Double]) => model(value): Tensor[Double]
   val execDouble: UserDefinedFunction = (value: Double) => model(value): Double
 

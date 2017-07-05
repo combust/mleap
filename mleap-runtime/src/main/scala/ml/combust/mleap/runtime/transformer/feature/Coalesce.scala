@@ -14,13 +14,16 @@ import scala.util.Try
   */
 case class Coalesce(override val uid: String = Transformer.uniqueName("coalesce"),
                     override val shape: NodeShape,
-                    model: CoalesceModel) extends Transformer {
+                    override val model: CoalesceModel) extends Transformer {
+  val inputs: Seq[String] = shape.inputs.values.map(_.name).toSeq
+  val outputCol: String = shape.standardOutput.name
+
   private val f = (values: Row) => model(values.toSeq: _*)
   val exec: UserDefinedFunction = UserDefinedFunction(f,
     ScalarType.Double,
     Seq(SchemaSpec(inputSchema)))
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(shape.outputSchema.fields.head.name, shape.inputSchema.fields.map(_.name))(exec)
+    builder.withOutput(outputCol, inputs)(exec)
   }
 }

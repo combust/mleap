@@ -10,7 +10,7 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
   */
 case class MathBinary(override val uid: String = Transformer.uniqueName("math_binary"),
                       override val shape: NodeShape,
-                      model: MathBinaryModel) extends SimpleTransformer {
+                      override val model: MathBinaryModel) extends SimpleTransformer {
   val execAB: UserDefinedFunction = (a: Double, b: Double) => model(Some(a), Some(b))
   val execA: UserDefinedFunction = (a: Double) => model(Some(a), None)
   val execB: UserDefinedFunction = (b: Double) => model(None, Some(b))

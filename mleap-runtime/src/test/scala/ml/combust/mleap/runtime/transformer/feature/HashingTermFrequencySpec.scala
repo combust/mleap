@@ -9,8 +9,8 @@ class HashingTermFrequencySpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       val transformer = HashingTermFrequency(shape = NodeShape().
-        withStandardInput("input", ListType(BasicType.String)).
-        withStandardOutput("output", TensorType(BasicType.Double, Seq(3))), model = HashingTermFrequencyModel())
+                    withStandardInput("input").
+              withStandardOutput("output"), model = HashingTermFrequencyModel())
       assert(transformer.schema.fields ==
         Seq(StructField("input", ListType(BasicType.String)),
           StructField("output", TensorType(BasicType.Double, Seq(3)))))

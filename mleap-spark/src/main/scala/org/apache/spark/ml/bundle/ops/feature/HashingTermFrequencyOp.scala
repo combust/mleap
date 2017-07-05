@@ -3,13 +3,14 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.HashingTF
+import org.apache.spark.ml.param.Param
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class HashingTermFrequencyOp extends OpNode[SparkBundleContext, HashingTF, HashingTF] {
+class HashingTermFrequencyOp extends SimpleSparkOp[HashingTF] {
   override val Model: OpModel[SparkBundleContext, HashingTF] = new OpModel[SparkBundleContext, HashingTF] {
     override val klazz: Class[HashingTF] = classOf[HashingTF]
 
@@ -28,19 +29,15 @@ class HashingTermFrequencyOp extends OpNode[SparkBundleContext, HashingTF, Hashi
     }
   }
 
-  override val klazz: Class[HashingTF] = classOf[HashingTF]
-
-  override def name(node: HashingTF): String = node.uid
-
-  override def model(node: HashingTF): HashingTF = node
-
-  override def load(node: Node, model: HashingTF)
-                   (implicit context: BundleContext[SparkBundleContext]): HashingTF = {
-    new HashingTF(uid = node.name).setNumFeatures(model.getNumFeatures).
-      setBinary(model.getBinary).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: HashingTF): HashingTF = {
+    new HashingTF(uid = uid)
   }
 
-  override def shape(node: HashingTF): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: HashingTF): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: HashingTF): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

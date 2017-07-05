@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class BucketedRandomProjectionLSH(override val uid: String = Transformer.uniqueName("bucketed_rp_lsh"),
                                        override val shape: NodeShape,
-                                       model: BucketedRandomProjectionLSHModel) extends SimpleTransformer {
+                                       override val model: BucketedRandomProjectionLSHModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

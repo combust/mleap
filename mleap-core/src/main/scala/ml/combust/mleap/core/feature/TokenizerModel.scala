@@ -1,5 +1,7 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+
 /** Companion object for defaults.
   */
 object TokenizerModel {
@@ -8,12 +10,9 @@ object TokenizerModel {
 
 /** Class for a tokenizer model.
   *
-  * Default regular expression for tokenizing strings is defined by
-  * [[TokenizerModel.defaultTokenizer]]
-  *
   * @param regex regular expression used for tokenizing strings
   */
-case class TokenizerModel(regex: String = "\\s") {
+case class TokenizerModel(regex: String = "\\s") extends Model {
   /** Tokenize a document string.
     *
     * Uses regex to split the document into an array.

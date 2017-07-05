@@ -8,8 +8,8 @@ class IsotonicRegressionSpec extends FunSpec {
 
   describe("#getFields") {
     it("has the correct inputs and outputs without feature index") {
-      val transformer = IsotonicRegression(shape = NodeShape().withInput("features", "features", ScalarType.Double).
-        withOutput("prediction", "prediction", ScalarType.Double),
+      val transformer = IsotonicRegression(shape = NodeShape().withInput("features", "features").
+              withOutput("prediction", "prediction"),
       model = IsotonicRegressionModel(boundaries = Array(0.0, 4.0, 5.0, 7.0, 8.0),
         predictions = Seq(100.0, 200.0, 300.0, 400.0, 500.0),
         isotonic = true,

@@ -3,14 +3,14 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.Word2VecModel
 import org.apache.spark.mllib.feature
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class WordToVectorOp extends OpNode[SparkBundleContext, Word2VecModel, Word2VecModel] {
+class WordToVectorOp extends SimpleSparkOp[Word2VecModel] {
   override val Model: OpModel[SparkBundleContext, Word2VecModel] = new OpModel[SparkBundleContext, Word2VecModel] {
     override val klazz: Class[Word2VecModel] = classOf[Word2VecModel]
 
@@ -37,20 +37,17 @@ class WordToVectorOp extends OpNode[SparkBundleContext, Word2VecModel, Word2VecM
     }
   }
 
-  override val klazz: Class[Word2VecModel] = classOf[Word2VecModel]
-
-  override def name(node: Word2VecModel): String = node.uid
-
-  override def model(node: Word2VecModel): Word2VecModel = node
-
-  override def load(node: Node, model: Word2VecModel)
-                   (implicit context: BundleContext[SparkBundleContext]): Word2VecModel = {
-    new Word2VecModel(uid = node.name, wordVectors = getWordVectors(model)).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: Word2VecModel): Word2VecModel = {
+    new Word2VecModel(uid = uid, wordVectors = getWordVectors(model))
   }
 
-  override def shape(node: Word2VecModel): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: Word2VecModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: Word2VecModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 
   private def getWordVectors(obj: Word2VecModel): feature.Word2VecModel = {
     // UGLY: have to use reflection to get this private field :(

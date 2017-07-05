@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class MultiLayerPerceptronClassifier(override val uid: String = Transformer.uniqueName("multi_layer_perceptron"),
                                           override val shape: NodeShape,
-                                          model: MultiLayerPerceptronClassifierModel) extends SimpleTransformer {
+                                          override val model: MultiLayerPerceptronClassifierModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

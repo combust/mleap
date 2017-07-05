@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class VectorIndexer(override val uid: String = Transformer.uniqueName("vector_indexer"),
                          override val shape: NodeShape,
-                         model: VectorIndexerModel) extends SimpleTransformer {
+                         override val model: VectorIndexerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features): Tensor[Double]
 }

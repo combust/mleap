@@ -1,7 +1,8 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
-import ml.combust.mleap.core.types.{BasicType, DataShape}
+import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 import scala.collection.mutable
@@ -11,7 +12,7 @@ import scala.collection.mutable
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/feature/Binarizer.scala")
 case class BinarizerModel(threshold: Double,
-                          inputShape: DataShape) extends Serializable {
+                          inputShape: DataShape) extends Model {
   assert(inputShape.isScalar || inputShape.isTensor, "Must provide a tensor or scalar shape")
 
   def apply(value: Double): Double = {
@@ -29,5 +30,13 @@ case class BinarizerModel(threshold: Double,
       }
     }
     Vectors.sparse(value.size, indices.result(), values.result()).compressed
+  }
+
+  override def inputSchema: StructType = {
+    StructType("input" -> DataType(BasicType.Double, inputShape)).get
+  }
+
+  override def outputSchema: StructType = {
+    StructType("output" -> ScalarType.Double).get
   }
 }

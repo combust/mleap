@@ -10,6 +10,6 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
   */
 case class NGram(override val uid: String = Transformer.uniqueName("ngram"),
                  override val shape: NodeShape,
-                 model: NGramModel) extends SimpleTransformer {
+                 override val model: NGramModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Seq[String]) => model(value)
 }

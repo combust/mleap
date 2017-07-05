@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class CountVectorizer(override val uid: String = Transformer.uniqueName("count_vectorizer"),
                            override val shape: NodeShape,
-                           model: CountVectorizerModel) extends SimpleTransformer {
+                           override val model: CountVectorizerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (document: Seq[String]) => model(document): Tensor[Double]
 }

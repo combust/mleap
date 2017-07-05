@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class IDF(override val uid: String = Transformer.uniqueName("idf"),
                override val shape: NodeShape,
-               model: IDFModel) extends SimpleTransformer {
+               override val model: IDFModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features): Tensor[Double]
 }

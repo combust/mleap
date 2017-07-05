@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class ChiSqSelector(override val uid: String = Transformer.uniqueName("chi_sq_selector"),
                          override val shape: NodeShape,
-                         model: ChiSqSelectorModel) extends SimpleTransformer {
+                         override val model: ChiSqSelectorModel) extends SimpleTransformer {
   val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features): Tensor[Double]
 }

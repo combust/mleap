@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class StandardScaler(override val uid: String = Transformer.uniqueName("standard_scaler"),
                           override val shape: NodeShape,
-                          model: StandardScalerModel) extends SimpleTransformer {
+                          override val model: StandardScalerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Tensor[Double]) => model(value): Tensor[Double]
 }

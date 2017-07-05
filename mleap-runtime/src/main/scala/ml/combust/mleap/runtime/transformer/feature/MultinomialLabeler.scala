@@ -12,7 +12,7 @@ import ml.combust.mleap.tensor.Tensor
   */
 case class MultinomialLabeler(override val uid: String = Transformer.uniqueName("multinomial_labeler"),
                               override val shape: NodeShape,
-                              model: MultinomialLabelerModel) extends MultiTransformer {
+                              override val model: MultinomialLabelerModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = (t: Tensor[Double]) => {
     val outs = model(t)
     val probabilities = outs.map(_._1)

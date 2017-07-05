@@ -79,6 +79,8 @@ case class ScalarType(override val base: BasicType, override val isNullable: Boo
 object TensorType {
   def apply(base: BasicType,
             dimensions: Seq[Int]): TensorType = TensorType(base, Some(dimensions))
+
+  def Double(dims: Int *): TensorType = TensorType(BasicType.Double, Some(dims))
 }
 
 /**

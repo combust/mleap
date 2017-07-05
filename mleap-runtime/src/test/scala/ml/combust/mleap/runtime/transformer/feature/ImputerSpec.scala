@@ -11,8 +11,8 @@ import org.scalatest.FunSpec
 class ImputerSpec extends FunSpec {
   describe("#transform") {
     val transformer = Imputer(
-      shape = NodeShape().withStandardInput("test_a", ScalarType.Double.asNullable).
-        withStandardOutput("test_out", ScalarType.Double),
+      shape = NodeShape().withStandardInput("test_a").
+              withStandardOutput("test_out"),
       model = ImputerModel(45.7, 23.6, "", nullableInput = true))
 
     describe("null values") {
@@ -40,7 +40,7 @@ class ImputerSpec extends FunSpec {
       val dataset = LocalDataset(Seq(Row(42.0), Row(23.6), Row(Double.NaN)))
       val frame = LeapFrame(schema, dataset)
       val transformer2 = transformer.copy(shape = NodeShape().
-        withStandardInput("test_a", ScalarType.Double).
+              withStandardInput("test_a").
         withStandardOutput("test_out", ScalarType.Double),
         model = transformer.model.copy(nullableInput = false))
 

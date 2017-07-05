@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.regression
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.tree.TreeEnsemble
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import org.apache.spark.ml.linalg.mleap.BLAS
@@ -23,7 +24,7 @@ object GBTRegressionModel {
   */
 case class GBTRegressionModel(override val trees: Seq[DecisionTreeRegressionModel],
                               override val treeWeights: Seq[Double],
-                              numFeatures: Int) extends TreeEnsemble with Serializable {
+                              numFeatures: Int) extends TreeEnsemble with Model {
   private val treeWeightsVector = Vectors.dense(treeWeights.toArray)
 
   /** Alias for [[ml.combust.mleap.core.regression.GBTRegressionModel#predict]]

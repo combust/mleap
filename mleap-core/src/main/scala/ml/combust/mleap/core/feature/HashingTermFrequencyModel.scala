@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import ml.combust.mleap.core.util.Murmur3_x86_32._
@@ -37,7 +38,7 @@ object HashingTermFrequencyModel {
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/HashingTF.scala")
 case class HashingTermFrequencyModel(numFeatures: Int = 1 << 18,
-                                     binary: Boolean = false) {
+                                     binary: Boolean = false) extends Model {
   def indexOf(term: Any): Int = nonNegativeMod(term.##, numFeatures)
 
   def apply(document: Iterable[_]): Vector = {

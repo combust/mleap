@@ -4,14 +4,14 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.bundle.tree.decision.SparkNodeWrapper
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, RandomForestClassificationModel}
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class RandomForestClassifierOp extends OpNode[SparkBundleContext, RandomForestClassificationModel, RandomForestClassificationModel] {
+class RandomForestClassifierOp extends SimpleSparkOp[RandomForestClassificationModel] {
   implicit val nodeWrapper = SparkNodeWrapper
 
   override val Model: OpModel[SparkBundleContext, RandomForestClassificationModel] = new OpModel[SparkBundleContext, RandomForestClassificationModel] {
@@ -55,31 +55,20 @@ class RandomForestClassifierOp extends OpNode[SparkBundleContext, RandomForestCl
     }
   }
 
-  override val klazz: Class[RandomForestClassificationModel] = classOf[RandomForestClassificationModel]
-
-  override def name(node: RandomForestClassificationModel): String = node.uid
-
-  override def model(node: RandomForestClassificationModel): RandomForestClassificationModel = node
-
-  override def load(node: Node, model: RandomForestClassificationModel)
-                   (implicit context: BundleContext[SparkBundleContext]): RandomForestClassificationModel = {
-    var rf = new RandomForestClassificationModel(uid = node.name,
-      numClasses = model.numClasses,
+  override def sparkLoad(uid: String, shape: NodeShape, model: RandomForestClassificationModel): RandomForestClassificationModel = {
+    new RandomForestClassificationModel(uid = uid,
+      _trees = model.trees,
       numFeatures = model.numFeatures,
-      _trees = model.trees).
-      setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.output("prediction").name)
-    rf = node.shape.getOutput("probability").map(p => rf.setProbabilityCol(p.name)).getOrElse(rf)
-    node.shape.getOutput("raw_prediction").map(rp => rf.setRawPredictionCol(rp.name)).getOrElse(rf)
+      numClasses = model.numClasses)
   }
 
-  override def shape(node: RandomForestClassificationModel): NodeShape = {
-    val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
-    val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+  override def sparkInputs(obj: RandomForestClassificationModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
 
-    NodeShape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction").
-      withOutput(rawPrediction, "raw_prediction").
-      withOutput(probability, "probability")
+  override def sparkOutputs(obj: RandomForestClassificationModel): Seq[SimpleParamSpec] = {
+    Seq("raw_prediction" -> obj.rawPredictionCol,
+      "probability" -> obj.probabilityCol,
+      "prediction" -> obj.predictionCol)
   }
 }

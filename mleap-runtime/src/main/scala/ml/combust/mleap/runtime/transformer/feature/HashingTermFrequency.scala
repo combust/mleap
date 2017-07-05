@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class HashingTermFrequency(override val uid: String = Transformer.uniqueName("hashing_term_frequency"),
                                 override val shape: NodeShape,
-                                model: HashingTermFrequencyModel) extends SimpleTransformer {
+                                override val model: HashingTermFrequencyModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (value: Seq[String]) => model(value): Tensor[Double]
 }

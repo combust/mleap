@@ -9,9 +9,9 @@ class InteractionSpec extends FunSpec {
   describe("#getFields") {
     it("has the correct inputs and outputs") {
       val transformer = Interaction(shape = NodeShape().
-        withInput("input0", "feature1", ScalarType.Double).
-        withInput("input1", "feature2", TensorType(BasicType.Double, Seq(2))).
-        withStandardOutput("features", TensorType(BasicType.Double, Seq(2))),
+                    withInput("input0", "feature1").
+                    withInput("input1", "feature2").
+              withStandardOutput("features"),
         model = InteractionModel(Array(Array(1), Array(1, 1), Array(2, 2)),
           Seq(ScalarShape(), TensorShape(2), TensorShape(2))))
 

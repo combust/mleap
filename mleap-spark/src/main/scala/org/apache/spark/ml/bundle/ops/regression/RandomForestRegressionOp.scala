@@ -4,14 +4,15 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.bundle.tree.decision.SparkNodeWrapper
+import org.apache.spark.ml.param.Param
 import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, RandomForestRegressionModel}
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class RandomForestRegressionOp extends OpNode[SparkBundleContext, RandomForestRegressionModel, RandomForestRegressionModel] {
+class RandomForestRegressionOp extends SimpleSparkOp[RandomForestRegressionModel] {
   implicit val nodeWrapper = SparkNodeWrapper
 
   override val Model: OpModel[SparkBundleContext, RandomForestRegressionModel] = new OpModel[SparkBundleContext, RandomForestRegressionModel] {
@@ -52,22 +53,17 @@ class RandomForestRegressionOp extends OpNode[SparkBundleContext, RandomForestRe
     }
   }
 
-  override val klazz: Class[RandomForestRegressionModel] = classOf[RandomForestRegressionModel]
-
-  override def name(node: RandomForestRegressionModel): String = node.uid
-
-  override def model(node: RandomForestRegressionModel): RandomForestRegressionModel = node
-
-  override def load(node: Node, model: RandomForestRegressionModel)
-                   (implicit context: BundleContext[SparkBundleContext]): RandomForestRegressionModel = {
-    new RandomForestRegressionModel(uid = node.name,
-      numFeatures = model.numFeatures,
-      _trees = model.trees).
-      setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.output("prediction").name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: RandomForestRegressionModel): RandomForestRegressionModel = {
+    new RandomForestRegressionModel(uid = uid,
+      _trees = model.trees,
+      numFeatures = model.numFeatures)
   }
 
-  override def shape(node: RandomForestRegressionModel): NodeShape = NodeShape().
-    withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def sparkInputs(obj: RandomForestRegressionModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
+
+  override def sparkOutputs(obj: RandomForestRegressionModel): Seq[SimpleParamSpec] = {
+    Seq("prediction" -> obj.predictionCol)
+  }
 }

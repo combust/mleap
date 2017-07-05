@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.regression
 
 import breeze.stats.{distributions => dist}
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.regression.GeneralizedLinearRegressionModel.FamilyAndLink
 import org.apache.spark.ml.linalg.Vector
@@ -303,7 +304,7 @@ object GeneralizedLinearRegressionModel {
 
 case class GeneralizedLinearRegressionModel(coefficients: Vector,
                                             intercept: Double,
-                                            fal: FamilyAndLink) {
+                                            fal: FamilyAndLink) extends Model {
   def apply(features: Vector): Double = predict(features)
 
   def predictWithLink(features: Vector): (Double, Double) = {

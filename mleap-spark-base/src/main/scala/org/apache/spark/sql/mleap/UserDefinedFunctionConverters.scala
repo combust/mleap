@@ -1,7 +1,8 @@
 package org.apache.spark.sql.mleap
 
 import ml.combust.mleap.core.types
-import ml.combust.mleap.core.types.{TupleData, TupleType}
+import ml.combust.mleap.core.types.{DataTypeSpec, SchemaSpec}
+import ml.combust.mleap.runtime
 import ml.combust.mleap.runtime.function.{UserDefinedFunction => MleapUDF}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.UserDefinedFunction
@@ -17,7 +18,7 @@ trait UserDefinedFunctionConverters {
 
   implicit def udfToSpark(udf: MleapUDF): UserDefinedFunction = {
     UserDefinedFunction(f = convertFunction(udf),
-      dataType = mleapToSparkType(udf.outputs),
+      dataType = mleapToSparkTypeSpec(udf.output),
       inputTypes = Some(sparkInputs(udf.inputs)))
   }
 
@@ -44,20 +45,32 @@ trait UserDefinedFunctionConverters {
     }
   }
 
-  private def converter(dataType: types.DataType): (Any) => Any = if(dataType.isNullable) {
-    dataType match {
-      case _: TupleType => (v: Any) => Option(v).map(_.asInstanceOf[Row]).map(r => TupleData(r.toSeq))
-      case _ => (v) => Option[Any](v)
-    }
-  } else {
-    dataType match {
-      case _: TupleType => (v: Any) => TupleData(v.asInstanceOf[Row].toSeq)
-      case _ => identity
-    }
+  private def converter(spec: types.TypeSpec): (Any) => Any = spec match {
+    case DataTypeSpec(dt) =>
+      if(dt.isNullable) {
+        (v) => Option[Any](v)
+      } else { identity }
+    case SchemaSpec(dts) =>
+      val converters: Seq[(Any) => Any] = dts.map {
+        dt =>
+          if (dt.isNullable) {
+            (v: Any) => Option[Any](v)
+          } else {
+            (v: Any) => v
+          }
+      }
+
+      (v: Any) => {
+        val values = converters.zip(v.asInstanceOf[Row].toSeq).map {
+          case (c, value) => c(value)
+        }
+
+        runtime.Row(values: _*)
+      }
   }
 
-  private def sparkInputs(inputs: Seq[types.DataType]): Seq[DataType] = {
-    inputs.map(mleapToSparkType)
+  private def sparkInputs(inputs: Seq[types.TypeSpec]): Seq[DataType] = {
+    inputs.map(mleapToSparkTypeSpec)
   }
 }
 object UserDefinedFunctionConverters extends UserDefinedFunctionConverters

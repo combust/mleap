@@ -15,7 +15,7 @@ class GeneralizedLinearRegressionSpec extends FunSpec {
 
     it("has the correct inputs and outputs with prediction column as well as linkPrediction column") {
       val transformer = GeneralizedLinearRegression(shape = NodeShape.regression(3).
-        withOutput("link_prediction", "lp", ScalarType.Double), model = null)
+              withOutput("link_prediction", "lp"), model = null)
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("prediction", ScalarType.Double),

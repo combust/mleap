@@ -13,7 +13,7 @@ import ml.combust.mleap.runtime.Row
   */
 case class SupportVectorMachine(override val uid: String = Transformer.uniqueName("support_vector_machine"),
                                 override val shape: NodeShape,
-                                model: SupportVectorMachineModel) extends MultiTransformer {
+                                override val model: SupportVectorMachineModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = {
     val f = (shape.getOutput("raw_prediction"), shape.getOutput("probability")) match {
       case (Some(_), Some(_)) =>

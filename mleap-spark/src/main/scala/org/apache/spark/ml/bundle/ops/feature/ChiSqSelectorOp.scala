@@ -3,14 +3,15 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.ChiSqSelectorModel
+import org.apache.spark.ml.param.Param
 import org.apache.spark.mllib.feature
 
 /**
   * Created by hollinwilkins on 12/27/16.
   */
-class ChiSqSelectorOp extends OpNode[SparkBundleContext, ChiSqSelectorModel, ChiSqSelectorModel] {
+class ChiSqSelectorOp extends SimpleSparkOp[ChiSqSelectorModel] {
   override val Model: OpModel[SparkBundleContext, ChiSqSelectorModel] = new OpModel[SparkBundleContext, ChiSqSelectorModel] {
     override val klazz: Class[ChiSqSelectorModel] = classOf[ChiSqSelectorModel]
 
@@ -28,20 +29,16 @@ class ChiSqSelectorOp extends OpNode[SparkBundleContext, ChiSqSelectorModel, Chi
     }
   }
 
-  override val klazz: Class[ChiSqSelectorModel] = classOf[ChiSqSelectorModel]
-
-  override def name(node: ChiSqSelectorModel): String = node.uid
-
-  override def model(node: ChiSqSelectorModel): ChiSqSelectorModel = node
-
-  override def load(node: Node, model: ChiSqSelectorModel)
-                   (implicit context: BundleContext[SparkBundleContext]): ChiSqSelectorModel = {
-    new ChiSqSelectorModel(uid = node.name,
-      chiSqSelector = new feature.ChiSqSelectorModel(model.selectedFeatures)).
-      setFeaturesCol(node.shape.input("features").name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: ChiSqSelectorModel): ChiSqSelectorModel = {
+    new ChiSqSelectorModel(uid = uid,
+      chiSqSelector = new feature.ChiSqSelectorModel(model.selectedFeatures))
   }
 
-  override def shape(node: ChiSqSelectorModel): NodeShape = NodeShape().withInput(node.getFeaturesCol, "features").
-    withStandardOutput(node.getOutputCol)
+  override def sparkInputs(obj: ChiSqSelectorModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.featuresCol)
+  }
+
+  override def sparkOutputs(obj: ChiSqSelectorModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

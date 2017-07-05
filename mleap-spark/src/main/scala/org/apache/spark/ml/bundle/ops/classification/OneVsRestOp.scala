@@ -5,13 +5,13 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.NominalAttribute
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.classification.{ClassificationModel, OneVsRestModel}
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestModel] {
+class OneVsRestOp extends SimpleSparkOp[OneVsRestModel] {
   override val Model: OpModel[SparkBundleContext, OneVsRestModel] = new OpModel[SparkBundleContext, OneVsRestModel] {
     override val klazz: Class[OneVsRestModel] = classOf[OneVsRestModel]
 
@@ -46,26 +46,22 @@ class OneVsRestOp extends OpNode[SparkBundleContext, OneVsRestModel, OneVsRestMo
     }
   }
 
-  override val klazz: Class[OneVsRestModel] = classOf[OneVsRestModel]
-
-  override def name(node: OneVsRestModel): String = node.uid
-
-  override def model(node: OneVsRestModel): OneVsRestModel = node
-
-  override def load(node: Node, model: OneVsRestModel)
-                   (implicit context: BundleContext[SparkBundleContext]): OneVsRestModel = {
-    assert(node.shape.getOutput("probability").isEmpty, "default OneVsRestModel does not support probability columns, use mleap-spark-extension library")
-
+  override def sparkLoad(uid: String, shape: NodeShape, model: OneVsRestModel): OneVsRestModel = {
     val labelMetadata = NominalAttribute.defaultAttr.
-      withName(node.shape.output("prediction").name).
+      withName(shape.output("prediction").name).
       withNumValues(model.models.length).
       toMetadata
-    val m = new OneVsRestModel(uid = node.name, models = model.models, labelMetadata = labelMetadata)
-    m.set(m.featuresCol, node.shape.input("features").name)
-    m.set(m.predictionCol, node.shape.output("prediction").name)
-    m
+
+    new OneVsRestModel(uid = uid,
+      labelMetadata = labelMetadata,
+      models = model.models)
   }
 
-  override def shape(node: OneVsRestModel): NodeShape = NodeShape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def sparkInputs(obj: OneVsRestModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
+
+  override def sparkOutputs(obj: OneVsRestModel): Seq[SimpleParamSpec] = {
+    Seq("prediction" -> obj.predictionCol)
+  }
 }

@@ -16,7 +16,7 @@ import scala.util.Try
   */
 case class VectorAssembler(override val uid: String = Transformer.uniqueName("vector_assembler"),
                            override val shape: NodeShape,
-                           model: VectorAssemblerModel) extends Transformer {
+                           override val model: VectorAssemblerModel) extends Transformer {
   private val f = (values: Row) => model(values.toSeq): Tensor[Double]
   val exec: UserDefinedFunction = UserDefinedFunction(f,
     outputSchema.fields.head.dataType,

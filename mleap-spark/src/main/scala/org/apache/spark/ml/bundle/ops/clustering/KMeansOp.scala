@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.tensor.Tensor
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.clustering.KMeansModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.mllib.clustering
@@ -13,7 +13,7 @@ import org.apache.spark.mllib.linalg.Vectors
 /**
   * Created by hollinwilkins on 9/30/16.
   */
-class KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
+class KMeansOp extends SimpleSparkOp[KMeansModel] {
   override val Model: OpModel[SparkBundleContext, KMeansModel] = new OpModel[SparkBundleContext, KMeansModel] {
     override val klazz: Class[KMeansModel] = classOf[KMeansModel]
 
@@ -35,25 +35,19 @@ class KMeansOp extends OpNode[SparkBundleContext, KMeansModel, KMeansModel] {
     }
   }
 
-  override val klazz: Class[KMeansModel] = classOf[KMeansModel]
-
-  override def name(node: KMeansModel): String = node.uid
-
-  override def model(node: KMeansModel): KMeansModel = node
-
-  override def load(node: Node, model: KMeansModel)
-                   (implicit context: BundleContext[SparkBundleContext]): KMeansModel = {
+  override def sparkLoad(uid: String, shape: NodeShape, model: KMeansModel): KMeansModel = {
     val clusterCenters = model.clusterCenters.map {
       case DenseVector(values) => Vectors.dense(values)
       case SparseVector(size, indices, values) => Vectors.sparse(size, indices, values)
     }
-
-    new KMeansModel(uid = node.name,
-      parentModel = new clustering.KMeansModel(clusterCenters)).
-      setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.output("prediction").name)
+    new KMeansModel(uid = uid, parentModel = new clustering.KMeansModel(clusterCenters))
   }
 
-  override def shape(node: KMeansModel): NodeShape = NodeShape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def sparkInputs(obj: KMeansModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
+
+  override def sparkOutputs(obj: KMeansModel): Seq[SimpleParamSpec] = {
+    Seq("prediction" -> obj.predictionCol)
+  }
 }

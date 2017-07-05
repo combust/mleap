@@ -16,7 +16,7 @@ import scala.util.{Success, Try}
   */
 case class NaiveBayesClassifier(override val uid: String = Transformer.uniqueName("random_forest_classification"),
                                 override val shape: NodeShape,
-                                model: NaiveBayesModel) extends MultiTransformer {
+                                override val model: NaiveBayesModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = {
     val f = (shape.getOutput("raw_prediction"), shape.getOutput("probability")) match {
       case (Some(_), Some(_)) =>

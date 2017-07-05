@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class VectorSlicer(override val uid: String = Transformer.uniqueName("vector_slicer"),
                         override val shape: NodeShape,
-                        model: VectorSlicerModel) extends SimpleTransformer {
+                        override val model: VectorSlicerModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features): Tensor[Double]
 }

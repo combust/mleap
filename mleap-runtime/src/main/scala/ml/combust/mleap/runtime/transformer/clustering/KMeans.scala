@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class KMeans(override val uid: String = Transformer.uniqueName("k_means"),
                   override val shape: NodeShape,
-                  model: KMeansModel) extends SimpleTransformer {
+                  override val model: KMeansModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

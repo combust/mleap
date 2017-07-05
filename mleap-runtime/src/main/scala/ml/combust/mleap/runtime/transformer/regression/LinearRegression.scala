@@ -9,6 +9,6 @@ import ml.combust.mleap.core.util.VectorConverters._
 
 case class LinearRegression(override val uid: String = Transformer.uniqueName("linear_regression"),
                             override val shape: NodeShape,
-                            model: LinearRegressionModel) extends SimpleTransformer {
+                            override val model: LinearRegressionModel) extends SimpleTransformer {
   val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

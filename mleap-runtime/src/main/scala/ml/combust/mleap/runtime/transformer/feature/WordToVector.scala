@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class WordToVector(override val uid: String = Transformer.uniqueName("word_to_vector"),
                         override val shape: NodeShape,
-                        model: WordToVectorModel) extends SimpleTransformer {
+                        override val model: WordToVectorModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (sentence: Seq[String]) => model(sentence): Tensor[Double]
 }

@@ -3,14 +3,14 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.StandardScalerModel
 import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, StandardScalerModel] {
+class StandardScalerOp extends SimpleSparkOp[StandardScalerModel] {
   override val Model: OpModel[SparkBundleContext, StandardScalerModel] = new OpModel[SparkBundleContext, StandardScalerModel] {
     override val klazz: Class[StandardScalerModel] = classOf[StandardScalerModel]
 
@@ -40,18 +40,15 @@ class StandardScalerOp extends OpNode[SparkBundleContext, StandardScalerModel, S
     }
   }
 
-  override val klazz: Class[StandardScalerModel] = classOf[StandardScalerModel]
-
-  override def name(node: StandardScalerModel): String = node.uid
-
-  override def model(node: StandardScalerModel): StandardScalerModel = node
-
-  override def load(node: Node, model: StandardScalerModel)
-                   (implicit context: BundleContext[SparkBundleContext]): StandardScalerModel = {
-    new StandardScalerModel(uid = node.name, std = model.std, mean = model.mean).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: StandardScalerModel): StandardScalerModel = {
+    new StandardScalerModel(uid = uid, std = model.std, mean = model.mean)
   }
 
-  override def shape(node: StandardScalerModel): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: StandardScalerModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: StandardScalerModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

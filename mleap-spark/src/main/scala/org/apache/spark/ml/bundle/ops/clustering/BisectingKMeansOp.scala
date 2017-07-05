@@ -3,7 +3,7 @@ package org.apache.spark.ml.bundle.ops.clustering
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.clustering.BisectingKMeansModel
 import org.apache.spark.mllib.clustering
 import org.apache.spark.mllib.clustering.bundle.tree.clustering.{ClusteringTreeNodeUtil, SparkNodeWrapper}
@@ -13,7 +13,7 @@ import scala.util.Try
 /**
   * Created by hollinwilkins on 12/26/16.
   */
-class BisectingKMeansOp extends OpNode[SparkBundleContext, BisectingKMeansModel, BisectingKMeansModel] {
+class BisectingKMeansOp extends SimpleSparkOp[BisectingKMeansModel] {
   implicit val nodeWrapper = SparkNodeWrapper
 
   override val Model: OpModel[SparkBundleContext, BisectingKMeansModel] = new OpModel[SparkBundleContext, BisectingKMeansModel] {
@@ -34,19 +34,17 @@ class BisectingKMeansOp extends OpNode[SparkBundleContext, BisectingKMeansModel,
     }
   }
 
-  override val klazz: Class[BisectingKMeansModel] = classOf[BisectingKMeansModel]
-
-  override def name(node: BisectingKMeansModel): String = node.uid
-
-  override def model(node: BisectingKMeansModel): BisectingKMeansModel = node
-
-  override def load(node: Node, model: BisectingKMeansModel)
-                   (implicit context: BundleContext[SparkBundleContext]): BisectingKMeansModel = {
-    new BisectingKMeansModel(node.name, getParentModel(model))
+  override def sparkLoad(uid: String, shape: NodeShape, model: BisectingKMeansModel): BisectingKMeansModel = {
+    new BisectingKMeansModel(uid = uid, parentModel = getParentModel(model))
   }
 
-  override def shape(node: BisectingKMeansModel): NodeShape = NodeShape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def sparkInputs(obj: BisectingKMeansModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
+
+  override def sparkOutputs(obj: BisectingKMeansModel): Seq[SimpleParamSpec] = {
+    Seq("prediction" -> obj.predictionCol)
+  }
 
   private def getParentModel(obj: BisectingKMeansModel): clustering.BisectingKMeansModel = {
     // UGLY: have to use reflection to get this private field :(

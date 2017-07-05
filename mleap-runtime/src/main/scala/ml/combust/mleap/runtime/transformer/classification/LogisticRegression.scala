@@ -13,7 +13,7 @@ import ml.combust.mleap.runtime.Row
   */
 case class LogisticRegression(override val uid: String = Transformer.uniqueName("logistic_regression"),
                               override val shape: NodeShape,
-                              model: LogisticRegressionModel) extends MultiTransformer {
+                              override val model: LogisticRegressionModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = {
     val f = (shape.getOutput("raw_prediction"), shape.getOutput("probability")) match {
       case (Some(_), Some(_)) =>

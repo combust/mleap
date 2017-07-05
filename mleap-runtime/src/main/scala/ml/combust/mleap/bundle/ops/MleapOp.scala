@@ -24,5 +24,6 @@ abstract class MleapOp[N <: Transformer, M <: AnyRef](implicit ct: ClassTag[N]) 
       newInstance(node.name, node.shape.asBundle: types.NodeShape, model)
   }
 
-  override def shape(node: N): NodeShape = NodeShape.fromBundle(node.shape)
+  override def shape(node: N)
+                    (implicit context: BundleContext[MleapContext]): NodeShape = NodeShape.fromBundle(node.shape)
 }

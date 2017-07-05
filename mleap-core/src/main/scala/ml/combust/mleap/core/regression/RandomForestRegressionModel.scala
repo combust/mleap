@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.regression
 
+import ml.combust.mleap.core.Model
 import org.apache.spark.ml.linalg.Vector
 import ml.combust.mleap.core.tree.TreeEnsemble
 
@@ -22,7 +23,7 @@ object RandomForestRegressionModel {
 case class RandomForestRegressionModel(override val trees: Seq[DecisionTreeRegressionModel],
                                        override val treeWeights: Seq[Double],
                                        numFeatures: Int)
-  extends TreeEnsemble with Serializable {
+  extends TreeEnsemble with Model {
   /** Alias for [[ml.combust.mleap.core.regression.RandomForestRegressionModel#predict]].
     *
     * @param features feature for prediction

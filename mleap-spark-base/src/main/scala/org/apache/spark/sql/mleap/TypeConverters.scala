@@ -1,7 +1,7 @@
 package org.apache.spark.sql.mleap
 
 import ml.combust.mleap.core.types
-import ml.combust.mleap.core.types.{BasicType, ScalarType, ScalarShape, ListShape, TensorShape}
+import ml.combust.mleap.core.types.{DataType => _, StructField => _, StructType => _, _}
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types._
@@ -30,11 +30,14 @@ trait TypeConverters {
     case types.TensorType(base, dimensions, _) =>
       // TODO: eventually dimensions will not be optional
       new TensorUDT(base, dimensions.getOrElse(Seq()))
-    case types.TupleType(dts @ _*) =>
-      val fields = dts.zipWithIndex.map {
-        case (dt, index) => StructField(s"_$index", mleapToSparkType(dt))
-      }
+  }
 
+  implicit def mleapToSparkTypeSpec(spec: types.TypeSpec): DataType = spec match {
+    case DataTypeSpec(dataType) => dataType
+    case SchemaSpec(dts) =>
+      val fields = dts.zipWithIndex.map {
+        case (dt, i) => StructField(s"_$i", dt)
+      }
       StructType(fields)
   }
 
@@ -57,10 +60,10 @@ trait TypeConverters {
          | IntegerType | LongType | FloatType
          | DoubleType | StringType | ArrayType(ByteType, false) => ScalarShape(field.nullable)
     case ArrayType(_, false) => ListShape(field.nullable)
-    case tu: TensorUDT => TensorShape(tu.dimensions, field.nullable)
+    case tu: TensorUDT => TensorShape(Some(tu.dimensions), field.nullable)
     case vu: VectorUDT =>
       // TODO: calculate dimensions
-      TensorShape(Seq(2), field.nullable)
+      TensorShape(Some(Seq(2)), field.nullable)
     case _ => throw new IllegalArgumentException("invalid struct field for shape")
   }
 

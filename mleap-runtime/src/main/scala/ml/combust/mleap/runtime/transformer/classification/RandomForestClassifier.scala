@@ -14,7 +14,7 @@ import ml.combust.mleap.runtime.Row
   */
 case class RandomForestClassifier(override val uid: String = Transformer.uniqueName("random_forest_classification"),
                                   override val shape: NodeShape,
-                                  model: RandomForestClassifierModel) extends MultiTransformer {
+                                  override val model: RandomForestClassifierModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = {
     val f = (shape.getOutput("raw_prediction"), shape.getOutput("probability")) match {
       case (Some(_), Some(_)) =>

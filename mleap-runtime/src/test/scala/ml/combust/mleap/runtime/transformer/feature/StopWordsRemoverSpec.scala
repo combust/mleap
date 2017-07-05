@@ -15,8 +15,8 @@ class StopWordsRemoverSpec extends FunSpec{
   val frame = LeapFrame(schema,dataset)
 
   val stopWordsTransformer = StopWordsRemover(
-    shape = NodeShape().withStandardInput("test_string_seq", ListType(BasicType.String)).
-      withStandardOutput("output_seq", ListType(BasicType.String)),
+    shape = NodeShape().withStandardInput("test_string_seq").
+          withStandardOutput("output_seq"),
     model = StopWordsRemoverModel(Seq("I", "You", "the"), caseSensitive = true)
   )
 

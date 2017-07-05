@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class DecisionTreeRegression(override val uid: String = Transformer.uniqueName("decision_tree_regression"),
                                   override val shape: NodeShape,
-                                  model: DecisionTreeRegressionModel) extends SimpleTransformer {
+                                  override val model: DecisionTreeRegressionModel) extends SimpleTransformer {
   val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

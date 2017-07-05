@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.regression
 
+import ml.combust.mleap.core.Model
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.linalg.mleap.BLAS
 
@@ -9,7 +10,7 @@ import org.apache.spark.ml.linalg.mleap.BLAS
   * @param intercept intercept for regression
   */
 case class LinearRegressionModel(coefficients: Vector,
-                                 intercept: Double) extends Serializable {
+                                 intercept: Double) extends Model {
   /** Alias for [[ml.combust.mleap.core.regression.LinearRegressionModel#predict]]
     *
     * @param features features for prediction

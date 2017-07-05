@@ -12,6 +12,6 @@ import ml.combust.mleap.core.util.VectorConverters._
   */
 case class MinHashLSH(override val uid: String = Transformer.uniqueName("min_hash_lsh"),
                       override val shape: NodeShape,
-                      model: MinHashLSHModel) extends SimpleTransformer {
+                      override val model: MinHashLSHModel) extends SimpleTransformer {
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

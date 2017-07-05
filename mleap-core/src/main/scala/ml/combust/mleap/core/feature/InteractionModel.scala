@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.types.{BasicType, DataShape}
 import ml.combust.mleap.tensor.Tensor
@@ -13,7 +14,7 @@ import scala.collection.mutable
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/branch-2.1/mllib/src/main/scala/org/apache/spark/ml/feature/Interaction.scala")
 case class InteractionModel(featuresSpec: Array[Array[Int]],
-                            inputShapes: Seq[DataShape]) {
+                            inputShapes: Seq[DataShape]) extends Model {
   assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and tensor shapes as inputs")
 
   val encoders: Array[FeatureEncoder] = featuresSpec.map(FeatureEncoder.apply)

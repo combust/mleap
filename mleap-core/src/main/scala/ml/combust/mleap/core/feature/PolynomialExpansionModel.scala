@@ -1,9 +1,10 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import org.apache.commons.math3.util.CombinatoricsUtils
 import org.apache.spark.ml.linalg.Vector
-import org.apache.spark.ml.linalg.{SparseVector, DenseVector}
+import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 
 import scala.collection.mutable
 
@@ -11,7 +12,7 @@ import scala.collection.mutable
   * Created by mikhail on 10/16/16.
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/feature/PolynomialExpansion.scala")
-case class PolynomialExpansionModel(degree: Int) extends Serializable {
+case class PolynomialExpansionModel(degree: Int) extends Model {
   def apply(vector: Vector): Vector = {
     vector match {
       case dense: DenseVector => expand(dense, degree)

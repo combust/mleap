@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor}
@@ -15,7 +16,7 @@ import scala.collection.mutable
   * a model.
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/VectorAssembler.scala")
-case class VectorAssemblerModel(inputShapes: Seq[DataShape]) extends Serializable {
+case class VectorAssemblerModel(inputShapes: Seq[DataShape]) extends Model {
   assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and vector shapes as inputs")
 
   val outputSize: Int = inputShapes.map {

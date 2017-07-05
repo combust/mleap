@@ -14,9 +14,9 @@ class OneVsRestSpec extends FunSpec {
   }
 
   it("has the correct inputs and outputs with probability column") {
-    val transformer = OneVsRest(shape = NodeShape().withInput("features", "features", TensorType(BasicType.Double, Seq(3))).
-      withOutput("probability", "prob", ScalarType.Double).
-      withOutput("prediction", "prediction", ScalarType.Double), model = null)
+    val transformer = OneVsRest(shape = NodeShape().withInput("features", "features").
+          withOutput("probability", "prob").
+          withOutput("prediction", "prediction"), model = null)
     assert(transformer.schema.fields ==
       Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
         StructField("prob", ScalarType.Double),

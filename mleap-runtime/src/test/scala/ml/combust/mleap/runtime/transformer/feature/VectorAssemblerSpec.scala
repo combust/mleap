@@ -16,10 +16,10 @@ class VectorAssemblerSpec extends FunSpec {
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.5, -0.5, 1.0)), 42.0, 13.0)))
   val frame = LeapFrame(schema, dataset)
   val vectorAssembler = VectorAssembler(
-    shape = NodeShape().withInput("input0", "feature1", TensorType(BasicType.Double, Seq(3))).
-      withInput("input1", "feature2", ScalarType.Double).
-      withInput("input2", "feature3", ScalarType.Double).
-      withStandardOutput("features", TensorType(BasicType.Double, Seq(5))),
+    shape = NodeShape().withInput("input0", "feature1").
+              withInput("input1", "feature2").
+              withInput("input2", "feature3").
+          withStandardOutput("features"),
     model = VectorAssemblerModel(Seq(TensorShape(3), ScalarShape(), ScalarShape())))
 
   describe("#transform") {
@@ -31,8 +31,8 @@ class VectorAssemblerSpec extends FunSpec {
     }
 
     describe("with invalid input") {
-      val vectorAssembler2 = vectorAssembler.copy(shape = NodeShape().withInput("input0", "bad_input", ScalarType.Double).
-        withStandardOutput("features", TensorType(BasicType.Double, Seq(2))))
+      val vectorAssembler2 = vectorAssembler.copy(shape = NodeShape().withInput("input0", "bad_input").
+              withStandardOutput("features"))
 
       it("returns a Failure") { assert(vectorAssembler2.transform(frame).isFailure) }
     }

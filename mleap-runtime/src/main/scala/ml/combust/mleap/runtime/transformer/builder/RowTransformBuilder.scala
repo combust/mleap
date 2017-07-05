@@ -20,9 +20,9 @@ case class RowTransformBuilder private (inputSchema: StructType,
 
   override def withOutputs(outputs: Seq[String], inputs: Selector *)
                           (udf: UserDefinedFunction): Try[RowTransformBuilder] = {
-    val count = udf.outputs.size
+    val count = udf.outputTypes.size
     val indices = outputSchema.fields.length until outputSchema.fields.length + count
-    val fields = outputs.zip(udf.outputs).map {
+    val fields = outputs.zip(udf.outputTypes).map {
       case (name, dt) => StructField(name, dt)
     }
 
@@ -50,7 +50,7 @@ case class RowTransformBuilder private (inputSchema: StructType,
 
     RowUtil.createRowSelectors(outputSchema, selectors: _*).flatMap {
       rowSelectors =>
-        outputSchema.withField(name, udf.outputs.head).map {
+        outputSchema.withField(name, udf.outputTypes.head).map {
           schema2 =>
             val transform = (row: ArrayRow) => row.set(index, row.udfValue(rowSelectors: _*)(udf))
             copy(outputSchema = schema2, transforms = transforms :+ transform)

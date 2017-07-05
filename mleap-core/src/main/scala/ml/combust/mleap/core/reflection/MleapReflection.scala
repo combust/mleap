@@ -14,6 +14,16 @@ trait MleapReflection {
 
   import universe._
 
+  def typeSpec[T: TypeTag]: TypeSpec = {
+    mirrorType[T] match {
+      case t if t <:< mirrorType[Product] =>
+        val TypeRef(_, _, sdts) = t
+        val dts = sdts.map(dataTypeFor)
+        SchemaSpec(dts)
+      case t => DataTypeSpec(dataTypeFor(t))
+    }
+  }
+
   def dataType[T: TypeTag]: DataType = dataTypeFor(mirrorType[T])
 
   private def basicTypeFor(tpe: `Type`): BasicType = MleapReflectionLock.synchronized {

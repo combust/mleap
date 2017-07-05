@@ -83,12 +83,9 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
 
       describe("#withFields") {
         it("creates a new LeapFrame with fields added") {
-          val f = (r: Double) => Row(r + 10, r.toString)
-          val udf = UserDefinedFunction(f,
-            Seq(ScalarType.Double, ScalarType.String),
-            ScalarType.Double)
-
-          val frame2 = frame.withFields(Seq("test_double_2", "test_double_string"), "test_double")(udf).get
+          val frame2 = frame.withFields(Seq("test_double_2", "test_double_string"), "test_double"){
+            (r: Double) => (r + 10, r.toString)
+          }.get
           val data = frame2.dataset.toArray
 
           assert(frame2.schema.fields.length == 4)

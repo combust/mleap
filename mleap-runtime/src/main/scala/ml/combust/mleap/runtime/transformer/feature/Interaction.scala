@@ -3,7 +3,7 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.InteractionModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.Row
-import ml.combust.mleap.runtime.function.{SchemaSpec, UserDefinedFunction}
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{BaseTransformer, Transformer}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.tensor.Tensor

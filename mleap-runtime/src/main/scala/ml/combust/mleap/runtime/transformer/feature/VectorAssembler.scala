@@ -7,7 +7,7 @@ import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.runtime.Row
-import ml.combust.mleap.runtime.function.{SchemaSpec, UserDefinedFunction}
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 
 import scala.util.Try
 

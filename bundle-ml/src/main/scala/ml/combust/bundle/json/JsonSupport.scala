@@ -87,7 +87,7 @@ trait JsonSupport {
 
   implicit val bundleDataTypeFormat: JsonFormat[DataType] = jsonFormat2(DataType.apply)
   implicit val bundleFieldFormat: JsonFormat[Field] = jsonFormat2(Field.apply)
-  implicit val bundleSocketFormat: JsonFormat[Socket] = jsonFormat2(Socket.apply)
+  implicit val bundleSocketFormat: JsonFormat[Socket] = jsonFormat3(Socket.apply)
 
   implicit val bundleNodeShapeFormat: JsonFormat[NodeShape] = new JsonFormat[NodeShape] {
     override def write(obj: NodeShape): JsValue = {

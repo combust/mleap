@@ -49,10 +49,10 @@ class DecisionTreeClassifierOp extends OpNode[SparkBundleContext, DecisionTreeCl
       rootNode = model.rootNode,
       numClasses = model.numClasses,
       numFeatures = model.numFeatures).
-      setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.output("prediction").name)
-    dt = node.shape.getOutput("probability").map(p => dt.setProbabilityCol(p.name)).getOrElse(dt)
-    node.shape.getOutput("raw_prediction").map(rp => dt.setRawPredictionCol(rp.name)).getOrElse(dt)
+      setFeaturesCol(node.shape.inputName("features")).
+      setPredictionCol(node.shape.outputName("prediction"))
+    dt = node.shape.getOutput("probability").map(p => dt.setProbabilityCol(p.field.get.name)).getOrElse(dt)
+    node.shape.getOutput("raw_prediction").map(rp => dt.setRawPredictionCol(rp.field.get.name)).getOrElse(dt)
   }
 
   override def shape(node: DecisionTreeClassificationModel): NodeShape = {

@@ -29,8 +29,8 @@ trait Transformer extends AutoCloseable {
   /** Shape of inputs/outputs */
   val shape: NodeShape
 
-  lazy val inputSchema: StructType = StructType(shape.inputs.values.map(_.field).toSeq).get
-  lazy val outputSchema: StructType = StructType(shape.outputs.values.map(_.field).toSeq).get
+  lazy val inputSchema: StructType = shape.inputSchema
+  lazy val outputSchema: StructType = shape.outputSchema
 
   /** Transform a builder using this MLeap transformer.
     *

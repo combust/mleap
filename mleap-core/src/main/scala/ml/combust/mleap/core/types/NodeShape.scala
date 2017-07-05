@@ -5,7 +5,9 @@ import scala.collection.immutable.ListMap
 /**
   * Created by hollinwilkins on 7/3/17.
   */
-case class Socket(port: String, field: StructField)
+case class Socket(port: String, name: String, dataType: DataType) {
+  def asField: StructField = StructField(name, dataType)
+}
 
 object NodeShape {
   def apply(inputs: Seq[Socket], outputs: Seq[Socket]): NodeShape = {
@@ -93,11 +95,11 @@ object NodeShape {
 
 case class NodeShape(inputs: ListMap[String, Socket] = ListMap(),
                      outputs: ListMap[String, Socket] = ListMap()) {
-  def inputSchema: StructType = StructType(inputs.map(_._2.field).toSeq).get
-  def outputSchema: StructType = StructType(outputs.map(_._2.field).toSeq).get
+  def inputSchema: StructType = StructType(inputs.map(_._2.asField).toSeq).get
+  def outputSchema: StructType = StructType(outputs.map(_._2.asField).toSeq).get
 
-  def getInput(port: String): Option[StructField] = inputs.find(_._1 == port).map(_._2.field)
-  def getOutput(port: String): Option[StructField] = outputs.find(_._1 == port).map(_._2.field)
+  def getInput(port: String): Option[StructField] = inputs.find(_._1 == port).map(_._2.asField)
+  def getOutput(port: String): Option[StructField] = outputs.find(_._1 == port).map(_._2.asField)
 
   def input(port: String): StructField = getInput(port).get
   def output(port: String): StructField = getOutput(port).get
@@ -106,11 +108,11 @@ case class NodeShape(inputs: ListMap[String, Socket] = ListMap(),
   def standardOutput: StructField = output("output")
 
   def withInput(port: String, name: String, dataType: DataType): NodeShape = {
-    copy(inputs = inputs + (port -> Socket(port, StructField(name, dataType))))
+    copy(inputs = inputs + (port -> Socket(port, name, dataType)))
   }
 
   def withOutput(port: String, name: String, dataType: DataType): NodeShape = {
-    copy(outputs = outputs + (port -> Socket(port, StructField(name, dataType))))
+    copy(outputs = outputs + (port -> Socket(port, name, dataType)))
   }
 
   def withStandardInput(name: String, dataType: DataType): NodeShape = {

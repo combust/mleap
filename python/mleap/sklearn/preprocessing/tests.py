@@ -25,7 +25,7 @@ import json
 import uuid
 
 import mleap.sklearn.preprocessing.data
-from mleap.sklearn.preprocessing.data import FeatureExtractor, MathUnary, MathBinary
+from mleap.sklearn.preprocessing.data import FeatureExtractor, MathUnary, MathBinary, StringMap
 from mleap.sklearn.preprocessing.data import StandardScaler, MinMaxScaler, LabelEncoder, Imputer, Binarizer, PolynomialFeatures
 from mleap.sklearn.preprocessing.data import OneHotEncoder
 
@@ -936,3 +936,76 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
         self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
         self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
+
+    def string_map_test(self):
+
+        df = pd.DataFrame(['test_one', 'test_two', 'test_one', 'test_one', 'test_two'], columns=['a'])
+        string_map_tf = StringMap(input_features=['a'], output_features=['a_mapped'], labels={"test_one":1.0, "test_two": 0.0})
+
+        Xres = string_map_tf.fit_transform(df)
+        self.assertEqual(1.0, Xres[0])
+        self.assertEqual(0.0, Xres[1])
+        self.assertEqual(1.0, Xres[2])
+        self.assertEqual(1.0, Xres[3])
+        self.assertEqual(0.0, Xres[4])
+
+        string_map_tf.serialize_to_bundle(self.tmp_dir, string_map_tf.name)
+
+        expected_model = {
+            "op": "string_map",
+            "attributes": {
+                "labels": {
+                    "type": {
+                        "type": "list",
+                        "base": "string"
+                    },
+                    "value": ["test_one", "test_two"]
+                },
+                "values": {
+                    "type": {
+                        "type": "list",
+                        "base": "double"
+                    },
+                    "value": [1.0, 0.0]
+                }
+            }
+        }
+        #
+        # Test model.json
+        with open("{}/{}.node/model.json".format(self.tmp_dir, string_map_tf.name)) as json_data:
+            model = json.load(json_data)
+
+        self.assertEqual(expected_model['attributes']['labels']['value'], model['attributes']['labels']['value'])
+        self.assertEqual(expected_model['attributes']['values']['value'], model['attributes']['values']['value'])
+
+        # Test node.json
+        with open("{}/{}.node/node.json".format(self.tmp_dir, string_map_tf.name)) as json_data:
+            node = json.load(json_data)
+
+        self.assertEqual(string_map_tf.name, node['name'])
+        self.assertEqual(string_map_tf.input_features[0], node['shape']['inputs'][0]['name'])
+        self.assertEqual(string_map_tf.output_features[0], node['shape']['outputs'][0]['name'])
+
+    def string_map_deserializer_test(self):
+
+        df = pd.DataFrame(['test_one', 'test_two', 'test_one', 'test_one', 'test_two'], columns=['a'])
+        string_map = StringMap(input_features=['a'], output_features=['a_mapped'], labels={"test_one":1.0, "test_two": 0.0})
+        string_map.serialize_to_bundle(self.tmp_dir, string_map.name)
+
+        # Now deserialize it back
+        node_name = "{}.node".format(string_map.name)
+        string_map_tf = StringMap()
+        string_map_tf = string_map_tf.deserialize_from_bundle(self.tmp_dir, node_name)
+
+        # Transform some sample data
+        res_a = string_map.fit_transform(df)
+        res_b = string_map_tf.fit_transform(df)
+
+        self.assertEqual(res_a[0], res_b[0])
+        self.assertEqual(res_a[1], res_b[1])
+        self.assertEqual(res_a[2], res_b[2])
+        self.assertEqual(res_a[3], res_b[3])
+        self.assertEqual(res_a[4], res_b[4])
+        self.assertEqual(string_map.name, string_map_tf.name)
+        self.assertEqual(string_map.op, string_map_tf.op)
+        self.assertEqual(string_map.labels, string_map_tf.labels)

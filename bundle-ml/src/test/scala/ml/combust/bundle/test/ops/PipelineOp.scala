@@ -43,7 +43,7 @@ class PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
     Pipeline(node.name, model)
   }
 
-  override def shape(node: Pipeline): NodeShape = NodeShape()
+  override def shape(node: Pipeline)(implicit context: BundleContext[Any]): NodeShape = NodeShape()
 
   override def children(node: Pipeline): Option[Array[Any]] = Some(node.model.stages.toArray)
 }

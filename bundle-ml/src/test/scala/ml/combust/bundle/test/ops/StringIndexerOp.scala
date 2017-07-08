@@ -47,5 +47,6 @@ class StringIndexerOp extends OpNode[Any, StringIndexer, StringIndexerModel] {
       model = model)
   }
 
-  override def shape(node: StringIndexer): NodeShape = NodeShape().withStandardIO(node.input, node.output)
+  override def shape(node: StringIndexer)(implicit context: BundleContext[Any]): NodeShape =
+    NodeShape().withStandardIO(node.input, node.output)
 }

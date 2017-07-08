@@ -31,7 +31,8 @@ class WordLengthFilterOp extends OpNode[SparkBundleContext, WordLengthFilter, Wo
 
   override def model(node: WordLengthFilter): WordLengthFilterModel = node.model
 
-  override def shape(node: WordLengthFilter): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: WordLengthFilter)(implicit context: BundleContext[SparkBundleContext]): NodeShape =
+    NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 
   override def load(node: Node, model: WordLengthFilterModel)(implicit context: BundleContext[SparkBundleContext]): WordLengthFilter = {
     new WordLengthFilter(uid = node.name).

@@ -20,7 +20,7 @@ class KMeansSpec extends FunSpec {
     Row(DenseTensor(Array(20.0, 230.0, 34.0), Seq(3))),
     Row(DenseTensor(Array(111.0, 20.0, 56.0), Seq(3)))))
   val frame = LeapFrame(schema, dataset)
-  val km = KMeans(shape = NodeShape.basicCluster(3), model = KMeansModel(Seq(v1, v2, v3)))
+  val km = KMeans(shape = NodeShape.basicCluster(3), model = KMeansModel(Seq(v1, v2, v3), 3))
 
   describe("#transform") {
     it("uses the k-means to find closest cluster") {

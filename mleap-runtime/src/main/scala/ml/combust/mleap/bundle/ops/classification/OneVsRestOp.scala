@@ -29,17 +29,19 @@ class OneVsRestOp extends MleapOp[OneVsRest, OneVsRestModel] {
       }
 
       model.withValue("num_classes", Value.long(obj.classifiers.length))
+        .withValue("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): OneVsRestModel = {
       val numClasses = model.value("num_classes").getLong.toInt
+      val numFeatures = model.value("num_features").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
         i => ModelSerializer(context.bundleContext(s"model$i")).read().get.asInstanceOf[ProbabilisticClassificationModel]
       }
 
-      OneVsRestModel(classifiers = models)
+      OneVsRestModel(classifiers = models, numFeatures = numFeatures)
     }
   }
 

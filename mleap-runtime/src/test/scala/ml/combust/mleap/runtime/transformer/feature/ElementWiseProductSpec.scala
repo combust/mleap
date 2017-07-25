@@ -33,11 +33,11 @@ class ElementWiseProductSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(ewp.schema.fields ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
-          StructField("test_norm", TensorType(BasicType.Double, Seq(3)))))
+        Seq(StructField("test_vec", TensorType.Double(3)),
+          StructField("test_norm", TensorType.Double(3))))
     }
   }
 }

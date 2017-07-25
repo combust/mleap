@@ -2,9 +2,8 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{StructField, StructType, TensorType}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
-
-import scala.math._
 
 /** Class for an element wise product model.
   *
@@ -35,4 +34,8 @@ case class ElementwiseProductModel(scalingVec: Vector) extends Model {
         Vectors.sparse(size, indices, vs)
     }
   }
+
+  override def inputSchema: StructType = StructType(StructField("input" -> TensorType.Double(scalingVec.size))).get
+
+  override def outputSchema: StructType = StructType(StructField("output" -> TensorType.Double(scalingVec.size))).get
 }

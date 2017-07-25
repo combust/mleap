@@ -37,6 +37,6 @@ case class BinarizerModel(threshold: Double,
   }
 
   override def outputSchema: StructType = {
-    StructType("output" -> ScalarType.Double).get
+    StructType("output" -> DataType(BasicType.Double, inputShape)).get
   }
 }

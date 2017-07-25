@@ -20,11 +20,13 @@ class DCTOp extends MleapOp[DCT, DCTModel] {
     override def store(model: Model, obj: DCTModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       model.withValue("inverse", Value.boolean(obj.inverse))
+      .withValue("input_size", Value.int(obj.inputSize))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): DCTModel = {
-      DCTModel(inverse = model.value("inverse").getBoolean)
+      DCTModel(inverse = model.value("inverse").getBoolean,
+        inputSize = model.value("input_size").getInt)
     }
   }
 

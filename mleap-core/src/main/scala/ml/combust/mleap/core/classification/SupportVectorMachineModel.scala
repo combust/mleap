@@ -22,6 +22,7 @@ case class SupportVectorMachineModel(coefficients: Vector,
   private def margin(features: Vector): Double = BLAS.dot(coefficients, features) + intercept
 
   override val numClasses: Int = 2
+  override val numFeatures: Int = coefficients.size
 
   override def predictRaw(features: Vector): Vector = {
     val m = margin(features)

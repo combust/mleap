@@ -9,7 +9,7 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 1/4/17.
   */
 class ImputerSpec extends FunSpec {
-  describe("#transform") {
+  describe("imputer") {
     val transformer = Imputer(
       shape = NodeShape().withStandardInput("test_a").
               withStandardOutput("test_out"),

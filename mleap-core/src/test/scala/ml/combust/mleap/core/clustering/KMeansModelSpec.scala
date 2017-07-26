@@ -10,7 +10,7 @@ class KMeansModelSpec extends FunSpec {
   val v1 = Vectors.dense(Array(1.0, 2.0, 55.0))
   val v2 = Vectors.dense(Array(11.0, 200.0, 55.0))
   val v3 = Vectors.dense(Array(100.0, 22.0, 55.0))
-  val km = KMeansModel(Array(v1, v2, v3), 3)
+  val km = KMeansModel(Array(v1, v2, v3))
 
   describe("#apply") {
     it("finds the closest cluster") {

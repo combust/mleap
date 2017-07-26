@@ -11,12 +11,12 @@ import org.apache.spark.ml.linalg.Vector
   * Created by hollinwilkins on 9/30/16.
   */
 object KMeansModel {
-  def apply(clusterCenters: Seq[Vector], numFeatures: Int): KMeansModel = {
-    KMeansModel(clusterCenters.map(VectorWithNorm.apply).toArray, numFeatures)
+  def apply(clusterCenters: Seq[Vector]): KMeansModel = {
+    KMeansModel(clusterCenters.map(VectorWithNorm.apply).toArray)
   }
 }
 
-case class KMeansModel(clusterCenters: Array[VectorWithNorm], numFeatures: Int) extends Model {
+case class KMeansModel(clusterCenters: Array[VectorWithNorm]) extends Model {
   def clusterCount: Int = clusterCenters.length
 
   def apply(features: Vector): Int = predict(features)
@@ -48,7 +48,7 @@ case class KMeansModel(clusterCenters: Array[VectorWithNorm], numFeatures: Int) 
     (bestIndex, bestDistance)
   }
 
-  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
 
   override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int).get
 }

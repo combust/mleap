@@ -8,7 +8,7 @@ import org.apache.spark.ml.linalg.{Vector, Vectors}
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-case class DCTModel(inverse: Boolean, inputSize: Int) extends Model {
+case class DCTModel(inverse: Boolean) extends Model {
 
   def apply(features: Vector): Vector = {
     val result = features.toArray.clone()
@@ -17,7 +17,7 @@ case class DCTModel(inverse: Boolean, inputSize: Int) extends Model {
     Vectors.dense(result)
   }
 
-  override def inputSchema: StructType = StructType("input" -> TensorType.Double(inputSize)).get
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
 
-  override def outputSchema: StructType = StructType("output" -> TensorType.Double(inputSize)).get
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
 }

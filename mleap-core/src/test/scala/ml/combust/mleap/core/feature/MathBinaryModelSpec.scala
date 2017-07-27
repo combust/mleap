@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.feature.BinaryOperation._
+import ml.combust.mleap.core.types.{ScalarType, StructField}
 import org.scalatest.FunSpec
 
 /**
@@ -16,6 +17,13 @@ class MathBinaryModelSpec extends FunSpec {
       val model = MathBinaryModel(operation, None, None)
       it(s"has the name: $name") { assert(operation.name == name) }
       it("calculated the value properly") { assert(model(Some(a), Some(b)) == expected) }
+      it("has the right input schema") {
+        assert(model.inputSchema.fields == Seq(StructField("input_a" -> ScalarType.Double),
+          StructField("input_b" -> ScalarType.Double)))
+      }
+      it("has the right output schema") {
+        assert(model.outputSchema.fields == Seq(StructField("output" -> ScalarType.Double)))
+      }
     }
   }
 

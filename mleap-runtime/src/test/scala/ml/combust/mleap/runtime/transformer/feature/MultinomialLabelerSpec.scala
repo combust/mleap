@@ -34,10 +34,10 @@ class MultinomialLabelerSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(transformer.schema.fields ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double, Some(Seq(3)))),
+        Seq(StructField("test_vec", TensorType.Double()),
           StructField("probs", ListType(BasicType.Double)),
           StructField("labels", ListType(BasicType.String))))
     }

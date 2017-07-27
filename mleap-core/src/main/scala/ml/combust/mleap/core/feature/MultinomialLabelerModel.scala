@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{BasicType, ListType, StructType, TensorType}
 import ml.combust.mleap.tensor.Tensor
 
 /**
@@ -30,4 +31,9 @@ case class MultinomialLabelerModel(threshold: Double,
   def topLabels(tensor: Tensor[Double]): Seq[String] = {
     top(tensor).map(_._2).map(indexer.apply)
   }
+
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+
+  override def outputSchema: StructType = StructType("probability" -> ListType(BasicType.Double),
+  "labels" -> ListType(BasicType.String)).get
 }

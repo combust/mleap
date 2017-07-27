@@ -10,12 +10,12 @@ class HashingTermFrequencyModelSpec extends FunSpec {
 
     it("Has the right input schema") {
       assert(binarizer.inputSchema.fields ==
-        Seq(StructField("input", ScalarType(BasicType.Double))))
+        Seq(StructField("input", ScalarType.Double)))
     }
 
     it("Has the right output schema") {
       assert(binarizer.outputSchema.fields ==
-        Seq(StructField("output", ScalarType(BasicType.Double))))
+        Seq(StructField("output", ScalarType.Double)))
     }
   }
 }

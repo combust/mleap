@@ -24,11 +24,11 @@ class DCTModelSpec extends FunSpec {
 
     describe("input/output schema") {
       it("has the right input schema") {
-        assert(model.inputSchema.fields == Seq(StructField("input" -> TensorType.Double())))
+        assert(model.inputSchema.fields == Seq(StructField("input", TensorType.Double())))
       }
 
       it("has the right output schema") {
-        assert(model.outputSchema.fields == Seq(StructField("output" -> TensorType.Double())))
+        assert(model.outputSchema.fields == Seq(StructField("output", TensorType.Double())))
       }
     }
   }

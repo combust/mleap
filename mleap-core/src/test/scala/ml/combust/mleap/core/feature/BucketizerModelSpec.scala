@@ -19,12 +19,12 @@ class BucketizerModelSpec extends FunSpec {
 
     it("has the right input schema") {
       assert(bucketizer.inputSchema.fields ==
-        Seq(StructField("input", ScalarType(BasicType.Double))))
+        Seq(StructField("input", ScalarType.Double)))
     }
 
     it("has the right output schema") {
       assert(bucketizer.outputSchema.fields ==
-        Seq(StructField("output", ScalarType(BasicType.Double))))
+        Seq(StructField("output", ScalarType.Double)))
     }
 
     describe("with invalid feature") {

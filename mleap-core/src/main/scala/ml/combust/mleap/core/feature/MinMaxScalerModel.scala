@@ -2,6 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import org.apache.spark.ml.linalg.mleap.VectorUtil._
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
@@ -59,4 +60,9 @@ case class MinMaxScalerModel(originalMin: Vector,
         Vectors.sparse(size, indices, vs)
     }
   }
+
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+
 }

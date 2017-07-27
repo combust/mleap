@@ -2,7 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
-import org.apache.spark.ml.linalg.mleap.{VectorUtil => MleapVectors}
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 import scala.math.{max, min}
@@ -43,4 +43,9 @@ case class MaxAbsScalerModel(maxAbs: Vector) extends Model {
         Vectors.sparse(size, indices, vs)
     }
   }
+
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+
 }

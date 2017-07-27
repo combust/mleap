@@ -39,11 +39,11 @@ class MinMaxScalerSpec extends FunSpec{
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(minMaxScaler.schema.fields ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
-          StructField("test_normalized", TensorType(BasicType.Double, Seq(3)))))
+        Seq(StructField("test_vec", TensorType.Double()),
+          StructField("test_normalized", TensorType.Double())))
     }
   }
 }

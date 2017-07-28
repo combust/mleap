@@ -30,11 +30,11 @@ class PolynomialExpansionSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(transformer.schema.fields ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(2))),
-          StructField("test_expanded", TensorType(BasicType.Double, Seq(5)))))
+        Seq(StructField("test_vec", TensorType.Double()),
+          StructField("test_expanded", TensorType.Double())))
     }
   }
 }

@@ -2,6 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import org.apache.commons.math3.util.CombinatoricsUtils
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
@@ -108,4 +109,9 @@ case class PolynomialExpansionModel(degree: Int) extends Model {
     }
     curPolyIdx + getPolySize(lastFeatureIdx + 1, degree)
   }
+
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+
 }

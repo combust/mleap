@@ -38,11 +38,11 @@ class PcaSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(pca.schema.fields ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
-          StructField("test_pca", TensorType(BasicType.Double, Seq(2)))))
+        Seq(StructField("test_vec", TensorType.Double()),
+          StructField("test_pca", TensorType.Double())))
     }
   }
 }

@@ -2,6 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 import org.apache.spark.ml.linalg.mleap.VectorUtil._
 
@@ -17,4 +18,9 @@ case class VectorSlicerModel(indices: Array[Int],
     case features: DenseVector => Vectors.dense(allIndices.map(features.apply))
     case features: SparseVector => features.slice(allIndices)
   }
+
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+
 }

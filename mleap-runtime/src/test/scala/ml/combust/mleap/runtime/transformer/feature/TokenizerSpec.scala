@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 
 class TokenizerSpec extends FunSpec {
 
-  describe("#getFields") {
+  describe("input") {
     it("has the correct inputs and outputs") {
       val transformer = Tokenizer(shape = NodeShape().withStandardInput("input").
               withStandardOutput("output"), model = TokenizerModel.defaultTokenizer)

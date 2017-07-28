@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 /** Class for a one hot encoder model.
@@ -36,4 +37,8 @@ case class OneHotEncoderModel(size: Int,
       Vectors.sparse(size, emptyIndices, emptyValues)
     }
   }
+
+  override def inputSchema: StructType = StructType("input" -> ScalarType.Double).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
 }

@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.types.{ScalarType, StructField}
 import org.scalatest.FunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks
 
@@ -53,6 +54,18 @@ class StringIndexerModelSpec extends FunSpec with TableDrivenPropertyChecks {
       forAll(invalidLabels) { (label: Any) =>
         assert(indexer(label) == 3.0)
       }
+    }
+  }
+
+  describe("input/output schema") {
+    val indexer = StringIndexerModel(Array("hello", "there", "dude"))
+
+    it("has the right input schema") {
+      assert(indexer.inputSchema.fields == Seq(StructField("input", ScalarType.String)))
+    }
+
+    it("has the right output schema") {
+      assert(indexer.outputSchema.fields == Seq(StructField("output", ScalarType.Double)))
     }
   }
 }

@@ -4,6 +4,7 @@ import java.util.Arrays.binarySearch
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.Vector
 
 /**
@@ -41,4 +42,13 @@ case class IsotonicRegressionModel(boundaries: Array[Double],
   private def linearInterpolation(x1: Double, y1: Double, x2: Double, y2: Double, x: Double): Double = {
     y1 + (y2 - y1) * (x - x1) / (x2 - x1)
   }
+
+  override def inputSchema: StructType = {
+    this.featureIndex match {
+      case Some(_) => StructType("features" -> TensorType.Double()).get
+      case None => StructType("features" -> ScalarType.Double).get
+    }
+  }
+
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
 }

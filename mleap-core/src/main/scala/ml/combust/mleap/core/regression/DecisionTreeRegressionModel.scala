@@ -3,6 +3,7 @@ package ml.combust.mleap.core.regression
 import ml.combust.mleap.core.Model
 import org.apache.spark.ml.linalg.Vector
 import ml.combust.mleap.core.tree.{DecisionTree, Node}
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 
 /** Class for a decision tree regression model.
   *
@@ -25,4 +26,9 @@ case class DecisionTreeRegressionModel(rootNode: Node, numFeatures: Int) extends
   def predict(features: Vector): Double = {
     rootNode.predictImpl(features).prediction
   }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
+
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
+
 }

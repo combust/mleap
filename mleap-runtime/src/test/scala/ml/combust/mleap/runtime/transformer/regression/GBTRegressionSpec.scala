@@ -35,10 +35,10 @@ class GBTRegressionSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(gbt.schema.fields ==
-        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
+        Seq(StructField("features", TensorType.Double()),
           StructField("prediction", ScalarType.Double)))
     }
   }

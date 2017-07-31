@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.regression
 
 import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.linalg.mleap.BLAS
 
@@ -26,4 +27,8 @@ case class LinearRegressionModel(coefficients: Vector,
   def predict(features: Vector): Double = {
     BLAS.dot(features, coefficients) + intercept
   }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
+
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
 }

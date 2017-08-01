@@ -89,4 +89,14 @@ case class VectorAssemblerModel(inputShapes: Seq[DataShape]) extends Model {
     }
     Vectors.sparse(cur, indices.result(), values.result()).compressed
   }
+
+  override def inputSchema: StructType = {
+    val inputFields = inputShapes.zipWithIndex.map {
+      case (shape, i) => StructField(s"input$i", DataType(BasicType.Double, shape))
+    }
+
+    StructType(inputFields).get
+  }
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(outputSize)).get
 }

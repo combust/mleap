@@ -32,13 +32,14 @@ class VectorAssemblerSpec extends FunSpec {
 
     describe("with invalid input") {
       val vectorAssembler2 = vectorAssembler.copy(shape = NodeShape().withInput("input0", "bad_input").
-              withStandardOutput("features"))
+              withStandardOutput("features"),
+      model = VectorAssemblerModel(Seq(ScalarShape())))
 
       it("returns a Failure") { assert(vectorAssembler2.transform(frame).isFailure) }
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(vectorAssembler.schema.fields ==
         Seq(StructField("feature1", TensorType(BasicType.Double, Seq(3))),

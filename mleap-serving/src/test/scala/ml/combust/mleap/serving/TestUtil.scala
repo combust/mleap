@@ -9,7 +9,7 @@ import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.feature.VectorAssemblerModel
 import ml.combust.mleap.core.regression.LinearRegressionModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.transformer.Pipeline
+import ml.combust.mleap.runtime.transformer.{Pipeline, PipelineModel}
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, LocalDataset, Row}
@@ -38,13 +38,25 @@ object TestUtil {
   def serializeModelInJsonFormatToZipFile : String = {
     val bundleName = UUID.randomUUID().toString
 
-    val model = VectorAssemblerModel(BasicType.Double, Seq(ScalarShape(), ScalarShape(), ScalarShape()))
-    val featureAssembler = VectorAssembler(inputCols = Array("first_double", "second_double", "third_double"),
-      outputCol = "features",
+    val vectorAssembler = VectorAssembler(
+      shape = NodeShape().withInput("input0", "feature1").
+        withInput("input1", "feature2").
+        withInput("input2", "feature3").
+        withStandardOutput("features"),
+      model = VectorAssemblerModel(Seq(TensorShape(3), ScalarShape(), ScalarShape())))
+
+
+    val model = VectorAssemblerModel(Seq(ScalarShape(), ScalarShape(), ScalarShape()))
+    val featureAssembler = VectorAssembler(
+      shape = NodeShape().withInput("input0", "first_double").
+      withInput("input1", "second_double").
+      withInput("input2", "third_double").
+      withStandardOutput("features"),
       model = model)
-    val linearRegression = LinearRegression(featuresCol = "features", predictionCol = "prediction",
+    val linearRegression = LinearRegression(shape = NodeShape.regression(1),
       model = LinearRegressionModel(Vectors.dense(2.0, 1.0, 2.0), 5d))
-    val pipeline = Pipeline("pipeline", Seq(featureAssembler, linearRegression))
+    val pipeline = Pipeline("pipeline", NodeShape(),
+      new PipelineModel(Seq(featureAssembler, linearRegression)))
 
     val uri = new URI(s"jar:file:${TestUtil.baseDir}/$bundleName.json.zip")
     for (file <- managed(BundleFile(uri))) {

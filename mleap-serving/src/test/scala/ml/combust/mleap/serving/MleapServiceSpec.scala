@@ -82,7 +82,7 @@ class MleapServiceSpec extends AsyncFunSpec with Matchers {
       modelLoaded.map(response => {
         response shouldBe a [LoadModelResponse]
 
-        val result = service.getSchema()
+        val result = service.getSchema
         assert(result.isSuccess)
         val schema = result.get
         assert(schema.fields.size == 5)
@@ -95,7 +95,7 @@ class MleapServiceSpec extends AsyncFunSpec with Matchers {
     }
 
     it("returns a failure if no model has been loaded when schema request is received") {
-      val result = new MleapService().getSchema()
+      val result = new MleapService().getSchema
       assert(result.isFailure)
       result match {
         case Failure(error) =>

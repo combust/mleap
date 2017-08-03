@@ -36,10 +36,10 @@ class GBTClassifierSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(gbt.schema.fields ==
-        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(5))),
             StructField("prediction", ScalarType.Double)))
     }
   }

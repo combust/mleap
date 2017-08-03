@@ -7,7 +7,6 @@ import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.regression.AFTSurvivalRegressionModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.regression.AFTSurvivalRegression
-import ml.combust.mleap.runtime.types.BundleTypeConverters.{bundleToMleapShape, mleapToBundleShape}
 import org.apache.spark.ml.linalg.Vectors
 
 /**
@@ -24,18 +23,16 @@ class AFTSurvivalRegressionOp extends MleapOp[AFTSurvivalRegression, AFTSurvival
       model.withValue("coefficients", Value.vector(obj.coefficients.toArray)).
         withValue("intercept", Value.double(obj.intercept)).
         withValue("quantile_probabilities", Value.doubleList(obj.quantileProbabilities)).
-        withValue("scale", Value.double(obj.scale)).
-        withValue("output_shapes", Value.dataShapeList(obj.outputShapes.map(mleapToBundleShape)))
+        withValue("scale", Value.double(obj.scale))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): AFTSurvivalRegressionModel = {
-      val outputShapes = model.value("output_shapes").getDataShapeList.map(bundleToMleapShape)
 
       AFTSurvivalRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble,
         quantileProbabilities = model.value("quantile_probabilities").getDoubleList.toArray,
-        scale = model.value("scale").getDouble, outputShapes)
+        scale = model.value("scale").getDouble)
     }
   }
 

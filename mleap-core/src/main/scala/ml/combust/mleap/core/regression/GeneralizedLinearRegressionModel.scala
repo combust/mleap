@@ -305,8 +305,7 @@ object GeneralizedLinearRegressionModel {
 
 case class GeneralizedLinearRegressionModel(coefficients: Vector,
                                             intercept: Double,
-                                            fal: FamilyAndLink,
-                                            outputShapes: Seq[DataShape]) extends Model {
+                                            fal: FamilyAndLink) extends Model {
   def apply(features: Vector): Double = predict(features)
 
   def predictWithLink(features: Vector): (Double, Double) = {
@@ -326,11 +325,7 @@ case class GeneralizedLinearRegressionModel(coefficients: Vector,
   override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
 
   override def outputSchema: StructType = {
-    outputShapes match {
-      case Seq(prediction, link) => StructType("prediction" -> DataType(BasicType.Double, prediction),
-                        "link_prediction" -> DataType(BasicType.Double, link)).get
-      case Seq(prediction) => StructType("prediction" -> DataType(BasicType.Double, prediction)).get
-    }
-
+    StructType("prediction" -> ScalarType.Double,
+      "link_prediction" -> ScalarType.Double).get
   }
 }

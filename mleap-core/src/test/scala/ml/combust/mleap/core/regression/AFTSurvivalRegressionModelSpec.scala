@@ -1,12 +1,12 @@
 package ml.combust.mleap.core.regression
 
-import ml.combust.mleap.core.types.{ScalarShape, ScalarType, StructField, TensorType}
+import ml.combust.mleap.core.types.{ScalarType, StructField, TensorType}
 import org.scalatest.FunSpec
 
-class GeneralizedLinearRegressionModelSpec extends FunSpec {
+class AFTSurvivalRegressionModelSpec extends FunSpec {
 
-  describe("generalized linear regression model") {
-    val model = new GeneralizedLinearRegressionModel(null, 23, null)
+  describe("aft survival regression model") {
+    val model = new AFTSurvivalRegressionModel(null, 2, null, 3)
 
     it("has the right input schema") {
       assert(model.inputSchema.fields ==
@@ -16,7 +16,7 @@ class GeneralizedLinearRegressionModelSpec extends FunSpec {
     it("has the right output schema") {
       assert(model.outputSchema.fields ==
         Seq(StructField("prediction", ScalarType.Double),
-           StructField("link_prediction", ScalarType.Double)))
+          StructField("quantiles", TensorType.Double())))
     }
   }
 }

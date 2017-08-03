@@ -13,8 +13,7 @@ import org.apache.spark.ml.linalg.mleap.BLAS
 case class AFTSurvivalRegressionModel(coefficients: Vector,
                                       intercept: Double,
                                       quantileProbabilities: Array[Double],
-                                      scale: Double,
-                                     outputShapes: Seq[DataShape]) extends Model {
+                                      scale: Double) extends Model {
   def apply(features: Vector): Double = predict(features)
 
   def predictWithQuantiles(features: Vector): (Double, Vector) = {
@@ -41,10 +40,7 @@ case class AFTSurvivalRegressionModel(coefficients: Vector,
   override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
 
   override def outputSchema: StructType = {
-    outputShapes match {
-      case Seq(prediction, quantiles) => StructType("prediction" -> DataType(BasicType.Double, prediction),
-        "quantiles" -> DataType(BasicType.Double, quantiles)).get
-      case Seq(prediction) => StructType("prediction" -> DataType(BasicType.Double, prediction)).get
-    }
+    StructType("prediction" -> ScalarType.Double,
+      "quantiles" -> TensorType.Double()).get
   }
 }

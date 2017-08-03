@@ -50,26 +50,26 @@ class LogisticRegressionSpec extends FunSpec {
       }
     }
 
-    describe("#getFields") {
+    describe("input/output schema") {
       it("has the correct inputs and outputs") {
         assert(logisticRegression.schema.fields ==
-          Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
+          Seq(StructField("features", TensorType.Double(3)),
             StructField("prediction", ScalarType.Double)))
       }
 
       it("has the correct inputs and outputs with probability column") {
         val logisticRegression2 = logisticRegression.copy(shape = NodeShape.probabilisticClassifier(3, 2, probabilityCol = Some("probability")))
         assert(logisticRegression2.schema.fields ==
-          Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
-            StructField("probability", TensorType(BasicType.Double, Seq(2))),
+          Seq(StructField("features", TensorType.Double(3)),
+            StructField("probability", TensorType.Double(2)),
             StructField("prediction", ScalarType.Double)))
       }
 
       it("has the correct inputs and outputs with rawPrediction column") {
         val logisticRegression2 = logisticRegression.copy(shape = NodeShape.probabilisticClassifier(3, 2, rawPredictionCol = Some("rp")))
         assert(logisticRegression2.schema.fields ==
-          Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
-            StructField("rp", TensorType(BasicType.Double, Seq(2))),
+          Seq(StructField("features", TensorType.Double(3)),
+            StructField("rp", TensorType.Double(2)),
             StructField("prediction", ScalarType.Double)))
       }
 
@@ -78,9 +78,9 @@ class LogisticRegressionSpec extends FunSpec {
           rawPredictionCol = Some("rp"),
           probabilityCol = Some("p")))
         assert(logisticRegression2.schema.fields ==
-          Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
-            StructField("rp", TensorType(BasicType.Double, Seq(2))),
-            StructField("p", TensorType(BasicType.Double, Seq(2))),
+          Seq(StructField("features", TensorType.Double(3)),
+            StructField("rp", TensorType.Double(2)),
+            StructField("p", TensorType.Double(2)),
             StructField("prediction", ScalarType.Double)))
       }
     }

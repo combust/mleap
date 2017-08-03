@@ -56,7 +56,7 @@ class SparkTransformBuilderSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       val transformer = MyTransformer()
       assert(transformer.schema.fields ==

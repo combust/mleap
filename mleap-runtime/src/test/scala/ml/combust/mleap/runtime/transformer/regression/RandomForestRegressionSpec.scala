@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.RandomForestRegressionModel
-import ml.combust.mleap.core.test.TestUtil
 import ml.combust.mleap.core.types._
+import ml.combust.mleap.runtime.test.TestUtil
 import org.scalatest.FunSpec
 
 class RandomForestRegressionSpec extends FunSpec {

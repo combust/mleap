@@ -41,6 +41,10 @@ class RegexTokenizerOp extends SimpleSparkOp[RegexTokenizer] {
 
   override def sparkLoad(uid: String, shape: NodeShape, model: RegexTokenizer): RegexTokenizer = {
     new RegexTokenizer(uid = uid)
+    .setPattern(model.getPattern)
+    .setGaps(model.getGaps)
+    .setMinTokenLength(model.getMinTokenLength)
+    .setToLowercase(model.getToLowercase)
   }
 
   override def sparkInputs(obj: RegexTokenizer): Seq[ParamSpec] = {

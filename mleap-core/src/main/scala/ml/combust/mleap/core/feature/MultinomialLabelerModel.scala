@@ -32,8 +32,8 @@ case class MultinomialLabelerModel(threshold: Double,
     top(tensor).map(_._2).map(indexer.apply)
   }
 
-  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
 
-  override def outputSchema: StructType = StructType("probability" -> ListType(BasicType.Double),
+  override def outputSchema: StructType = StructType("probabilities" -> ListType(BasicType.Double),
   "labels" -> ListType(BasicType.String)).get
 }

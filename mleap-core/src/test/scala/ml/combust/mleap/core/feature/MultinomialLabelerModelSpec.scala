@@ -3,9 +3,6 @@ package ml.combust.mleap.core.feature
 import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
-/**
-  * Created by asarb on 7/27/17.
-  */
 class MultinomialLabelerModelSpec extends FunSpec {
 
   describe("multinomal labeler model") {
@@ -14,12 +11,12 @@ class MultinomialLabelerModelSpec extends FunSpec {
 
     it("has the right input schema") {
       assert(model.inputSchema.fields ==
-        Seq(StructField("input", TensorType.Double())))
+        Seq(StructField("features", TensorType.Double())))
     }
 
     it("has the right output schema") {
       assert(model.outputSchema.fields ==
-        Seq(StructField("probability", ListType(BasicType.Double)),
+        Seq(StructField("probabilities", ListType(BasicType.Double)),
         StructField("labels", ListType(BasicType.String))))
     }
   }

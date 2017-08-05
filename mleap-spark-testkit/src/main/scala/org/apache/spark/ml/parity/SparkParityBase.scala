@@ -88,7 +88,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       file.delete()
 
       for(bf <- managed(BundleFile(file))) {
-        transformer.writeBundle.format(SerializationFormat.Protobuf).save(bf).get
+        transformer.writeBundle.format(SerializationFormat.Json).save(bf).get
       }
 
       bundleCache = Some(file)

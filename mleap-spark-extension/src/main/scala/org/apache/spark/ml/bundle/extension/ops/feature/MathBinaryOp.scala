@@ -50,11 +50,11 @@ class MathBinaryOp extends OpNode[SparkBundleContext, MathBinary, MathBinaryMode
     var shape = NodeShape().withStandardOutput(node.getOutputCol)
 
     if(node.isSet(node.inputA)) {
-      shape = shape.withInput(node.getInputA, "input_a")
+      shape = shape.withInput("input_a", node.getInputA)
     }
 
     if(node.isSet(node.inputB)) {
-      shape = shape.withInput(node.getInputB, "input_b")
+      shape = shape.withInput("input_b", node.getInputB)
     }
 
     shape

@@ -67,4 +67,9 @@ class GBTClassifierOp extends SimpleSparkOp[GBTClassificationModel] {
   override def sparkOutputs(obj: GBTClassificationModel): Seq[SimpleParamSpec] = {
     Seq("prediction" -> obj.predictionCol)
   }
+
+  override def shape(node: GBTClassificationModel)(implicit context: BundleContext[SparkBundleContext]): NodeShape = {
+    NodeShape().withInput("features", node.getFeaturesCol)
+    .withOutput("prediction", node.getPredictionCol)
+  }
 }

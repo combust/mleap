@@ -43,13 +43,13 @@ case class SparkShapeSaver(dataset: DataFrame,
   def asNodeShape: NodeShape = {
     val is = inputs.flatMap {
       case SimpleParamSpec(port, param) =>
-        if(params.isSet(param)) {
+        if(params.isDefined(param)) {
           val field = dataset.schema(params.get(param).get)
           Seq(Socket(port, field.name))
         }
         else { Seq() }
       case ArrayParamSpec(portPrefix, param) =>
-        if(params.isSet(param)) {
+        if(params.isDefined(param)) {
           params.get(param).get.zipWithIndex.map {
             case (name, i) =>
               val field = dataset.schema(name)
@@ -58,9 +58,9 @@ case class SparkShapeSaver(dataset: DataFrame,
         } else { Seq() }
     }
 
-    val os = outputs.filter(pp => params.isSet(pp.param)).map {
+    val os = outputs.filter(pp => params.isDefined(pp.param)).map {
       case SimpleParamSpec(port, param) =>
-        val field = dataset.schema(params.get(param).get)
+        val field = dataset.schema(params.getOrDefault(param))
         Socket(port, field.name)
     }
 

@@ -28,8 +28,8 @@ class OneVsRestOp extends MleapOp[OneVsRest, OneVsRestModel] {
         name
       }
 
-      model.withValue("num_classes", Value.long(obj.classifiers.length))
-        .withValue("num_features", Value.long(obj.numFeatures))
+      model.withValue("num_classes", Value.long(obj.classifiers.length)).
+        withValue("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(model: Model)

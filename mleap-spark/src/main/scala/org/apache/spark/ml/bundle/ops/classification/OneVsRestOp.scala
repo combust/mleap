@@ -27,7 +27,8 @@ class OneVsRestOp extends SimpleSparkOp[OneVsRestModel] {
         name
       }
 
-      model.withValue("num_classes", Value.long(obj.models.length))
+      model.withValue("num_classes", Value.long(obj.models.length)).
+        withValue("num_features", Value.long(obj.models.head.numFeatures))
     }
 
     override def load(model: Model)

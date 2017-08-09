@@ -58,12 +58,12 @@ trait TypeConverters {
                             td: Option[DataFrame] = None): types.DataShape = field.dataType match {
     case BooleanType | ByteType | ShortType
          | IntegerType | LongType | FloatType
-         | DoubleType | StringType | ArrayType(ByteType, false) => ScalarShape(field.nullable)
-    case ArrayType(_, false) => ListShape(field.nullable)
-    case tu: TensorUDT => TensorShape(Some(tu.dimensions), field.nullable)
+         | DoubleType | StringType | ArrayType(ByteType, false) => ScalarShape()
+    case ArrayType(_, false) => ListShape()
+    case tu: TensorUDT => TensorShape(Some(tu.dimensions))
     case vu: VectorUDT =>
       // TODO: calculate dimensions
-      TensorShape(Some(Seq(2)), field.nullable)
+      TensorShape(Some(Seq(2)))
     case _ => throw new IllegalArgumentException("invalid struct field for shape")
   }
 
@@ -83,7 +83,7 @@ trait TypeConverters {
       case _ => throw new IllegalArgumentException(s"invalid struct field $field")
     }
 
-    types.StructField(field.name, dt.setNullable(field.nullable))
+    types.StructField(field.name, dt)
   }
 
   implicit def mleapStructType(schema: StructType): types.StructType = {

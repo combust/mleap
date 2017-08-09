@@ -50,7 +50,11 @@ trait UserDefinedFunctionConverters {
     case DataTypeSpec(_) => (a: Any) => a
     case SchemaSpec(_) =>
         (a: Any) => {
-          val values = a.asInstanceOf[runtime.Row].toSeq
+          val values = a match {
+            case row: runtime.Row => row.toSeq
+            case pr: Product => pr.productIterator.toSeq
+          }
+
           Row(values: _*)
         }
   }

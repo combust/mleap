@@ -27,7 +27,7 @@ case class MyTransformer() extends Transformer {
       (input: Double) => runtime.Row(input + 23, input.toString)
     }
     val udf = UserDefinedFunction(f, outputSchema, inputSchema)
-    
+
     builder.withOutputs(Seq("output1", "output2"), "input")(udf)
   }
 

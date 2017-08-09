@@ -44,8 +44,12 @@ object SparkParityBase extends FunSpec {
     v: Vector => v: Tensor[Double]
   }
 
-  val toTensorArray = udf {
-    v: mutable.WrappedArray[Vector] => v.map(vv => vv: Tensor[Double])
+  val toTensorFromArray = udf {
+    (v: mutable.WrappedArray[Vector]) =>
+      val t = v.map(vv => vv: Tensor[Double]).head
+      val values = t.toArray
+      val dimensions = t.dimensions :+ 1
+      Tensor.create(values = values, dimensions = dimensions)
   }
 }
 
@@ -62,7 +66,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
           case _: VectorUDT =>
             SparkParityBase.toTensor(dataset.col(field.name))
           case at: ArrayType if at.elementType.isInstanceOf[VectorUDT] =>
-            SparkParityBase.toTensorArray(dataset.col(field.name))
+            SparkParityBase.toTensorFromArray(dataset.col(field.name))
           case _ => dataset.col(field.name)
         }
     }

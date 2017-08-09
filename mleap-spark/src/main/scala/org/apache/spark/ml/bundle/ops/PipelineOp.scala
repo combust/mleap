@@ -1,11 +1,10 @@
 package org.apache.spark.ml.bundle.ops
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.GraphSerializer
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
-import org.apache.spark.ml.param.Param
 import org.apache.spark.ml.{PipelineModel, Transformer}
 
 /**
@@ -38,4 +37,8 @@ class PipelineOp extends SimpleSparkOp[PipelineModel] {
   override def sparkInputs(obj: PipelineModel): Seq[ParamSpec] = Seq()
 
   override def sparkOutputs(obj: PipelineModel): Seq[SimpleParamSpec] = Seq()
+
+  override def load(node: Node, model: PipelineModel)(implicit context: BundleContext[SparkBundleContext]): PipelineModel = {
+    new PipelineModel(uid = node.name, stages = model.stages)
+  }
 }

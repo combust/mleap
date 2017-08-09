@@ -2,12 +2,13 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.core.types.TensorShape
 import ml.combust.mleap.tensor.Tensor
-import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
-import org.apache.spark.ml.feature.{Binarizer, BucketedRandomProjectionLSHModel}
+import org.apache.spark.ml.bundle._
+import org.apache.spark.ml.feature.BucketedRandomProjectionLSHModel
 import org.apache.spark.ml.linalg.Vectors
-import org.apache.spark.ml.param.Param
+import org.apache.spark.sql.mleap.TypeConverters.sparkToMleapDataShape
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -20,8 +21,13 @@ class BucketedRandomProjectionLSHOp extends SimpleSparkOp[BucketedRandomProjecti
 
     override def store(model: Model, obj: BucketedRandomProjectionLSHModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      val dataset = context.context.dataset.get
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
+
       model.withValue("random_unit_vectors", Value.tensorList[Double](obj.randUnitVectors.map(_.toArray).map(Tensor.denseVector))).
         withValue("bucket_length", Value.double(obj.getBucketLength))
+        .withValue("input_size", Value.int(inputShape.dimensions.get(0)))
+
     }
 
     override def load(model: Model)
@@ -46,6 +52,15 @@ class BucketedRandomProjectionLSHOp extends SimpleSparkOp[BucketedRandomProjecti
 
   override def sparkOutputs(obj: BucketedRandomProjectionLSHModel): Seq[SimpleParamSpec] = {
     Seq("output" -> obj.outputCol)
+  }
+
+  override def load(node: Node, model: BucketedRandomProjectionLSHModel)(implicit context: BundleContext[SparkBundleContext]): BucketedRandomProjectionLSHModel = {
+    val n = new BucketedRandomProjectionLSHModel(uid = node.name,
+      randUnitVectors = model.randUnitVectors)
+    n.set(n.bucketLength, model.getBucketLength)
+
+    SparkShapeLoader(node.shape, n, sparkInputs(n), sparkOutputs(n)).loadShape()
+    n
   }
 }
 

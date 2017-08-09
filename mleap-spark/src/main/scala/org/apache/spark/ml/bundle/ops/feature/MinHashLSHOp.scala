@@ -2,7 +2,7 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.MinHashLSHModel
 
@@ -43,5 +43,9 @@ class MinHashLSHOp extends SimpleSparkOp[MinHashLSHModel] {
 
   override def sparkOutputs(obj: MinHashLSHModel): Seq[SimpleParamSpec] = {
     Seq("output" -> obj.outputCol)
+  }
+
+  override def load(node: Node, model: MinHashLSHModel)(implicit context: BundleContext[SparkBundleContext]): MinHashLSHModel = {
+    new MinHashLSHModel(uid = node.name, randCoefficients = model.randCoefficients)
   }
 }

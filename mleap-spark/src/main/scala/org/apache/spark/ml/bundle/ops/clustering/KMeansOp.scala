@@ -21,7 +21,8 @@ class KMeansOp extends SimpleSparkOp[KMeansModel] {
 
     override def store(model: Model, obj: KMeansModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withValue("cluster_centers", Value.tensorList(obj.clusterCenters.map(cc => Tensor.denseVector(cc.toArray))))
+      model.withValue("cluster_centers", Value.tensorList(obj.clusterCenters.map(cc => Tensor.denseVector(cc.toArray)))).
+        withValue("num_features", Value.long(obj.clusterCenters.head.size))
     }
 
     override def load(model: Model)

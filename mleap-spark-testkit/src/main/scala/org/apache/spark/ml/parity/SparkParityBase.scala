@@ -46,10 +46,9 @@ object SparkParityBase extends FunSpec {
 
   val toTensorFromArray = udf {
     (v: mutable.WrappedArray[Vector]) =>
-      val t = v.map(vv => vv: Tensor[Double]).head
-      val values = t.toArray
-      val dimensions = t.dimensions :+ 1
-      Tensor.create(values = values, dimensions = dimensions)
+      val values = v.flatMap(_.toArray).toArray
+      val dim1 = v.head.size
+      Tensor.create(values = values, dimensions = Seq(v.length, dim1))
   }
 }
 

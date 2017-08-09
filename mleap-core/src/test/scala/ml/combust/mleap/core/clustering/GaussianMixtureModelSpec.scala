@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 class GaussianMixtureModelSpec extends FunSpec {
 
   describe("gaussian mixture model") {
-    val model = new GaussianMixtureModel(null, Array(1, 2, 3))
+    val model = new GaussianMixtureModel(Array(null, null, null), Array(1, 2, 3))
 
     it("has the right input schema") {
       assert(model.inputSchema.fields ==
@@ -16,7 +16,7 @@ class GaussianMixtureModelSpec extends FunSpec {
     it("has the right output schema") {
       assert(model.outputSchema.fields ==
         Seq(StructField("prediction", ScalarType.Int),
-          StructField("probability", ScalarType.Double)))
+          StructField("probability", TensorType.Double(3))))
     }
   }
 }

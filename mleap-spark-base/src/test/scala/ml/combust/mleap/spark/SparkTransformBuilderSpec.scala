@@ -9,6 +9,8 @@ import org.apache.spark.sql.types.{DoubleType, StructType}
 import SparkSupport._
 import ml.combust.mleap.core.{Model, types}
 import ml.combust.mleap.core.types.{NodeShape, ScalarType, StructField}
+import ml.combust.mleap.runtime
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.scalatest.FunSpec
 
 import scala.collection.JavaConverters._
@@ -21,9 +23,12 @@ case class MyTransformer() extends Transformer {
   override val uid: String = UUID.randomUUID().toString
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutputs(Seq("output1", "output2"), "input") {
-      (input: Double) => (input + 23, input.toString)
+    val f = {
+      (input: Double) => runtime.Row(input + 23, input.toString)
     }
+    val udf = UserDefinedFunction(f, outputSchema, inputSchema)
+    
+    builder.withOutputs(Seq("output1", "output2"), "input")(udf)
   }
 
   override val shape: NodeShape = NodeShape().withStandardInput("input").

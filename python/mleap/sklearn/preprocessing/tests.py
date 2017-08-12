@@ -63,32 +63,26 @@ class TransformerTests(unittest.TestCase):
             "op": "standard_scaler",
             "attributes": {
                 "mean": {
-                    "type": {
-                        "type": "tensor",
-                        "tensor": {
-                           "base": "double"
-                        }
-                     },
-                     "value": {
-                         "values": [expected_mean],
-                         "dimensions": [
-                             1
-                         ]
-                     }
+                    "base": "double",
+                    "shape": {
+                        "dimensions": [{
+                            "size": 1,
+                            "name": ""
+                        }]
+                    },
+                    "value": [expected_mean],
+                    "type": "tensor"
                 },
                 "std": {
-                    "type": {
-                        "type": "tensor",
-                        "tensor": {
-                           "base": "double"
-                        }
-                     },
-                     "value": {
-                         "values": [expected_std],
-                         "dimensions": [
-                             1
-                         ]
-                     }
+                    "base": "double",
+                    "shape": {
+                        "dimensions": [{
+                            "size": 1,
+                            "name": ""
+                        }]
+                    },
+                    "value": [expected_std],
+                    "type": "tensor"
                 }
             }
         }
@@ -101,10 +95,10 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(standard_scaler.op, expected_model['op'])
-        self.assertEqual(expected_model['attributes']['mean']['value']['dimensions'][0], model['attributes']['mean']['value']['dimensions'][0])
-        self.assertEqual(expected_model['attributes']['std']['value']['dimensions'][0], model['attributes']['std']['value']['dimensions'][0])
-        self.assertAlmostEqual(expected_model['attributes']['mean']['value']['values'][0], model['attributes']['mean']['value']['values'][0], places = 7)
-        self.assertAlmostEqual(expected_model['attributes']['std']['value']['values'][0], model['attributes']['std']['value']['values'][0], places = 7)
+        self.assertEqual(expected_model['attributes']['mean']['shape']['dimensions'][0]['size'], model['attributes']['mean']['shape']['dimensions'][0]['size'])
+        self.assertEqual(expected_model['attributes']['std']['shape']['dimensions'][0]['size'], model['attributes']['std']['shape']['dimensions'][0]['size'])
+        self.assertAlmostEqual(expected_model['attributes']['mean']['value'], model['attributes']['mean']['value'], places = 7)
+        self.assertAlmostEqual(expected_model['attributes']['std']['value'], model['attributes']['std']['value'], places = 7)
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, standard_scaler.name)) as json_data:
@@ -198,29 +192,27 @@ class TransformerTests(unittest.TestCase):
            "op": "min_max_scaler",
             "attributes": {
                 "min": {
-                         "type": {
-                            "type": "tensor",
-                            "tensor": {
-                               "base": "double",
-                               "dimensions": [
-                                  -1
-                               ]
-                            }
-                         },
-                         "value": [expected_min]
-                      },
+                    "base": "double",
+                    "shape": {
+                        "dimensions": [{
+                            "size": -1,
+                            "name": ""
+                        }]
+                    },
+                    "value": [expected_min],
+                    "type": "tensor"
+                },
                 "max": {
-                         "type": {
-                            "type": "tensor",
-                            "tensor": {
-                               "base": "double",
-                               "dimensions": [
-                                  -1
-                               ]
-                            }
-                         },
-                         "value": [expected_max]
-                      }
+                    "base": "double",
+                    "shape": {
+                        "dimensions": [{
+                            "size": -1,
+                            "name": ""
+                        }]
+                    },
+                    "value": [expected_max],
+                    "type": "tensor"
+                }
             }
         }
 
@@ -232,77 +224,10 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(scaler.op, expected_model['op'])
-        self.assertEqual(expected_model['attributes']['min']['type']['tensor']['dimensions'][0], model['attributes']['min']['type']['tensor']['dimensions'][0])
+        self.assertEqual(expected_model['attributes']['min']['shape']['dimensions'][0]['size'], model['attributes']['min']['shape']['dimensions'][0]['size'])
+        self.assertEqual(expected_model['attributes']['max']['shape']['dimensions'][0]['size'], model['attributes']['max']['shape']['dimensions'][0]['size'])
         self.assertEqual(expected_model['attributes']['min']['value'][0], model['attributes']['min']['value'][0])
         self.assertEqual(expected_model['attributes']['max']['value'][0], model['attributes']['max']['value'][0])
-
-        # Test node.json
-        with open("{}/{}.node/node.json".format(self.tmp_dir, scaler.name)) as json_data:
-            node = json.load(json_data)
-
-        self.assertEqual(scaler.name, node['name'])
-        self.assertEqual(scaler.input_features, node['shape']['inputs'][0]['name'])
-        self.assertEqual(scaler.output_features, node['shape']['outputs'][0]['name'])
-
-    def test_min_max_scaler_serializer(self):
-
-        scaler = MinMaxScaler()
-        scaler.mlinit(input_features='a',
-                      output_features='a_scaled')
-
-        scaler.fit(self.df[['a']])
-
-        scaler.serialize_to_bundle(self.tmp_dir, scaler.name)
-
-        expected_min = self.df.a.min()
-        expected_max = self.df.a.max()
-
-        expected_model = {
-           "op": "min_max_scaler",
-            "attributes": {
-                "min": {
-                         "type": {
-                            "type": "tensor",
-                            "tensor": {
-                               "base": "double"
-                            }
-                         },
-                         "value": {
-                             "values": [expected_min],
-                             "dimensions": [
-                                 1
-                             ]
-                         }
-                      },
-                "max": {
-                         "type": {
-                            "type": "tensor",
-                            "tensor": {
-                               "base": "double"
-                            }
-                         },
-                         "value": {
-                             "values": [expected_max],
-                             "dimensions": [
-                                 1
-                             ]
-                         }
-                      }
-            }
-        }
-
-        self.assertAlmostEqual(expected_min, scaler.data_min_.tolist()[0], places = 7)
-        self.assertAlmostEqual(expected_max, scaler.data_max_.tolist()[0], places = 7)
-
-        # Test model.json
-        with open("{}/{}.node/model.json".format(self.tmp_dir, scaler.name)) as json_data:
-            model = json.load(json_data)
-
-        self.assertEqual(scaler.op, expected_model['op'])
-        self.assertEqual(expected_model['attributes']['min']['value']['dimensions'][0], model['attributes']['min']['value']['dimensions'][0])
-        self.assertEqual(expected_model['attributes']['max']['value']['dimensions'][0], model['attributes']['max']['value']['dimensions'][0])
-        self.assertAlmostEqual(expected_model['attributes']['min']['value']['values'][0], model['attributes']['min']['value']['values'][0])
-        self.assertAlmostEqual(expected_model['attributes']['max']['value']['values'][0], model['attributes']['max']['value']['values'][0])
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, scaler.name)) as json_data:

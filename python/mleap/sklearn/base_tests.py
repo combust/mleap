@@ -48,10 +48,10 @@ class TransformerTests(unittest.TestCase):
     def test_linear_regression_serializer(self):
 
         linear_regression = LinearRegression(fit_intercept=True, normalize=False)
-        linear_regression.mlinit(input_features=['a', 'b', 'c'],
-                                 prediction_column=['e'])
+        linear_regression.mlinit(input_features='a',
+                                 prediction_column='e')
 
-        linear_regression.fit(self.df[linear_regression.input_features], self.df[linear_regression.prediction_column])
+        linear_regression.fit(self.df[['a']], self.df[['e']])
 
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
 
@@ -61,15 +61,15 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(model['op'], 'linear_regression')
-        self.assertTrue(model['attributes']['intercept']['value'] is not None)
+        self.assertTrue(model['attributes']['intercept']['double'] is not None)
 
     def test_linear_regression_deserializer(self):
 
         linear_regression = LinearRegression(fit_intercept=True, normalize=False)
-        linear_regression.mlinit(input_features=['a', 'b', 'c'],
-                                 prediction_column=['e'])
+        linear_regression.mlinit(input_features='a',
+                                 prediction_column='e')
 
-        linear_regression.fit(self.df[linear_regression.input_features], self.df[linear_regression.prediction_column])
+        linear_regression.fit(self.df[['a']], self.df[['e']])
 
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
 
@@ -82,8 +82,8 @@ class TransformerTests(unittest.TestCase):
         linear_regression_tf = LinearRegression()
         linear_regression_tf = linear_regression_tf.deserialize_from_bundle(self.tmp_dir, node_name)
 
-        res_a = linear_regression.predict(self.df[linear_regression.input_features])
-        res_b = linear_regression_tf.predict(self.df[linear_regression_tf.input_features])
+        res_a = linear_regression.predict(self.df[['a']])
+        res_b = linear_regression_tf.predict(self.df[['a']])
 
         self.assertEqual(res_a[0], res_b[0])
         self.assertEqual(res_a[1], res_b[1])
@@ -92,16 +92,16 @@ class TransformerTests(unittest.TestCase):
     def test_logistic_regression_serializer(self):
 
         logistic_regression = LogisticRegression(fit_intercept=True)
-        logistic_regression.mlinit(input_features=['a', 'b', 'c'],
-                                 prediction_column=['e_binary'])
+        logistic_regression.mlinit(input_features='a',
+                                 prediction_column='e_binary')
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features=['e'],
-                         output_features=['e_binary'])
+        binarizer.mlinit(input_features='e',
+                         output_features='e_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
-        logistic_regression.fit(self.df[logistic_regression.input_features], Xres)
+        logistic_regression.fit(self.df[['a']], Xres)
 
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)
 
@@ -111,21 +111,21 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(model['op'], 'logistic_regression')
-        self.assertTrue(model['attributes']['intercept']['value'] is not None)
+        self.assertTrue(model['attributes']['intercept']['double'] is not None)
 
     def test_logistic_regression_deserializer(self):
 
         logistic_regression = LogisticRegression(fit_intercept=True)
-        logistic_regression.mlinit(input_features=['a', 'b', 'c'],
-                                   prediction_column=['e_binary'])
+        logistic_regression.mlinit(input_features='a',
+                                   prediction_column='e_binary')
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features=['e'],
-                         output_features=['e_binary'])
+        binarizer.mlinit(input_features='e',
+                         output_features='e_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
-        logistic_regression.fit(self.df[logistic_regression.input_features], Xres)
+        logistic_regression.fit(self.df[['a']], Xres)
 
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)
 
@@ -138,8 +138,8 @@ class TransformerTests(unittest.TestCase):
         logistic_regression_tf = LogisticRegression()
         logistic_regression_tf = logistic_regression_tf.deserialize_from_bundle(self.tmp_dir, node_name)
 
-        res_a = logistic_regression.predict(self.df[logistic_regression.input_features])
-        res_b = logistic_regression_tf.predict(self.df[logistic_regression_tf.input_features])
+        res_a = logistic_regression.predict(self.df[['a']])
+        res_b = logistic_regression_tf.predict(self.df[['a']])
 
         self.assertEqual(res_a[0], res_b[0])
         self.assertEqual(res_a[1], res_b[1])
@@ -148,16 +148,16 @@ class TransformerTests(unittest.TestCase):
     def test_logistic_regression_cv_serializer(self):
 
         logistic_regression = LogisticRegressionCV(fit_intercept=True)
-        logistic_regression.mlinit(input_features=['a', 'b', 'c'],
-                                 prediction_column=['e_binary'])
+        logistic_regression.mlinit(input_features='a',
+                                 prediction_column='e_binary')
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features=['e'],
-                         output_features=['e_binary'])
+        binarizer.mlinit(input_features='e',
+                         output_features='e_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
-        logistic_regression.fit(self.df[logistic_regression.input_features], Xres)
+        logistic_regression.fit(self.df[['a']], Xres)
 
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)
 
@@ -167,21 +167,21 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(model['op'], 'logistic_regression')
-        self.assertTrue(model['attributes']['intercept']['value'] is not None)
+        self.assertTrue(model['attributes']['intercept']['double'] is not None)
 
     def test_logistic_regression_cv_deserializer(self):
 
         logistic_regression = LogisticRegressionCV(fit_intercept=True)
-        logistic_regression.mlinit(input_features=['a', 'b', 'c'],
-                                   prediction_column=['e_binary'])
+        logistic_regression.mlinit(input_features='a',
+                                   prediction_column='e_binary')
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features=['e'],
-                         output_features=['e_binary'])
+        binarizer.mlinit(input_features='e',
+                         output_features='e_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
-        logistic_regression.fit(self.df[logistic_regression.input_features], Xres)
+        logistic_regression.fit(self.df[['a']], Xres)
 
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)
 
@@ -194,8 +194,8 @@ class TransformerTests(unittest.TestCase):
         logistic_regression_tf = LogisticRegressionCV()
         logistic_regression_tf = logistic_regression_tf.deserialize_from_bundle(self.tmp_dir, node_name)
 
-        res_a = logistic_regression.predict(self.df[logistic_regression.input_features])
-        res_b = logistic_regression_tf.predict(self.df[logistic_regression_tf.input_features])
+        res_a = logistic_regression.predict(self.df[['a']])
+        res_b = logistic_regression_tf.predict(self.df[['a']])
 
         self.assertEqual(res_a[0], res_b[0])
         self.assertEqual(res_a[1], res_b[1])

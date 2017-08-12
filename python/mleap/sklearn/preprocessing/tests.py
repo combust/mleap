@@ -97,8 +97,8 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(standard_scaler.op, expected_model['op'])
         self.assertEqual(expected_model['attributes']['mean']['shape']['dimensions'][0]['size'], model['attributes']['mean']['shape']['dimensions'][0]['size'])
         self.assertEqual(expected_model['attributes']['std']['shape']['dimensions'][0]['size'], model['attributes']['std']['shape']['dimensions'][0]['size'])
-        self.assertAlmostEqual(expected_model['attributes']['mean']['value'], model['attributes']['mean']['value'], places = 7)
-        self.assertAlmostEqual(expected_model['attributes']['std']['value'], model['attributes']['std']['value'], places = 7)
+        self.assertAlmostEqual(expected_model['attributes']['mean']['value'][0], model['attributes']['mean']['value'][0], places = 7)
+        self.assertAlmostEqual(expected_model['attributes']['std']['value'][0], model['attributes']['std']['value'][0], places = 7)
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, standard_scaler.name)) as json_data:
@@ -195,7 +195,7 @@ class TransformerTests(unittest.TestCase):
                     "base": "double",
                     "shape": {
                         "dimensions": [{
-                            "size": -1,
+                            "size": 1,
                             "name": ""
                         }]
                     },
@@ -206,7 +206,7 @@ class TransformerTests(unittest.TestCase):
                     "base": "double",
                     "shape": {
                         "dimensions": [{
-                            "size": -1,
+                            "size": 1,
                             "name": ""
                         }]
                     },

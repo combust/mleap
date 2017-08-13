@@ -304,7 +304,8 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(le.op, model['op'])
-        self.assertEqual('labels', model['attributes'].keys()[0])
+        self.assertEqual('nullable_input', model['attributes'].keys()[0])
+        self.assertEqual('labels', model['attributes'].keys()[1])
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, le.name)) as json_data:

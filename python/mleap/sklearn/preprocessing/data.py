@@ -368,6 +368,7 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
         # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('labels', self.classes_.tolist()))
+        attributes.append(('nullable_input', False))
 
         # define node inputs and outputs
         inputs = [{

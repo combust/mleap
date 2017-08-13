@@ -147,11 +147,8 @@ class SimpleSerializer(object):
           "op": transformer.op,
             "attributes": {
                 "nodes": {
-                    "type": {
-                        "type": "list",
-                        "base": "string"
-                    },
-                    "value": self._extract_nodes(transformer.steps)
+                    "type": "list",
+                    "string": self._extract_nodes(transformer.steps)
                 }
             }
         }

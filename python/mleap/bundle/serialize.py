@@ -88,14 +88,15 @@ class MLeapSerializer(object):
 
             elif isinstance(value, np.ndarray):
                 attributes[name] = {
-                    "type": {
-                        "type": "tensor",
-                        "tensor": {
-                            "base": "double",
-                            "dimension": list(value.shape)
-                        }
+                    "base":  _type_map[base],
+                    "shape": {
+                        "dimensions": [{
+                            "size": list(value.shape),
+                            "name": ""
+                        }]
                     },
-                    "value": list(value.flatten())
+                    "value": list(value.flatten()),
+                    "type": "tensor"
                 }
 
             elif isinstance(value, str):

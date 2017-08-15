@@ -211,7 +211,8 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
     def serialize_to_bundle(self, path, model_name):
 
         # compile tuples of model attributes to serialize
-        attributes = None
+        attributes = list()
+        attributes.append(("input_shapes", self.dtypes))
 
         # define node inputs and outputs
         inputs = [{'name': x, 'port': 'input{}'.format(self.input_features.index(x))} for x in self.input_features]

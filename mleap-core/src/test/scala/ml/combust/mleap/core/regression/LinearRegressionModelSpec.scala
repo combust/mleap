@@ -18,7 +18,7 @@ class LinearRegressionModelSpec extends FunSpec {
 
   describe("input/output schema") {
     it("has the right input schema") {
-      assert(linearRegression.inputSchema.fields == Seq(StructField("features", TensorType.Double())))
+      assert(linearRegression.inputSchema.fields == Seq(StructField("features", TensorType.Double(3))))
     }
 
     it("has the right output schema") {

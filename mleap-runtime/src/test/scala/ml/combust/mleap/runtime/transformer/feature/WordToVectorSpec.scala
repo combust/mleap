@@ -14,7 +14,7 @@ class WordToVectorSpec extends FunSpec {
 
       assert(transformer.schema.fields ==
         Seq(StructField("input", ListType(BasicType.String)),
-          StructField("output", TensorType.Double())))
+          StructField("output", TensorType.Double(1))))
     }
   }
 }

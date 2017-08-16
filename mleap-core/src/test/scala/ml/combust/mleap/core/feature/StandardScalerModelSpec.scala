@@ -19,11 +19,11 @@ class StandardScalerModelSpec extends FunSpec {
       }
 
       it("has the right input schema") {
-        assert(scaler.inputSchema.fields == Seq(StructField("input", TensorType.Double())))
+        assert(scaler.inputSchema.fields == Seq(StructField("input", TensorType.Double(3))))
       }
 
       it("has the right output schema") {
-        assert(scaler.outputSchema.fields == Seq(StructField("output", TensorType.Double())))
+        assert(scaler.outputSchema.fields == Seq(StructField("output", TensorType.Double(3))))
       }
     }
 
@@ -37,11 +37,11 @@ class StandardScalerModelSpec extends FunSpec {
       }
 
       it("has the right input schema") {
-        assert(scaler.inputSchema.fields == Seq(StructField("input", TensorType.Double())))
+        assert(scaler.inputSchema.fields == Seq(StructField("input", TensorType.Double(3))))
       }
 
       it("has the right output schema") {
-        assert(scaler.outputSchema.fields == Seq(StructField("output", TensorType.Double())))
+        assert(scaler.outputSchema.fields == Seq(StructField("output", TensorType.Double(3))))
       }
     }
 
@@ -56,11 +56,11 @@ class StandardScalerModelSpec extends FunSpec {
       }
 
       it("has the right input schema") {
-        assert(scaler.inputSchema.fields == Seq(StructField("input", TensorType.Double())))
+        assert(scaler.inputSchema.fields == Seq(StructField("input", TensorType.Double(3))))
       }
 
       it("has the right output schema") {
-        assert(scaler.outputSchema.fields == Seq(StructField("output", TensorType.Double())))
+        assert(scaler.outputSchema.fields == Seq(StructField("output", TensorType.Double(3))))
       }
     }
   }

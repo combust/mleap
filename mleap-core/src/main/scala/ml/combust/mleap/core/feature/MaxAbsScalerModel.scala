@@ -44,8 +44,8 @@ case class MaxAbsScalerModel(maxAbs: Vector) extends Model {
     }
   }
 
-  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(maxAbs.size)).get
 
-  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(maxAbs.size)).get
 
 }

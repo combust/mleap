@@ -17,7 +17,7 @@ class GBTRegressionSpec extends FunSpec {
   val tree1 = TestUtil.buildDecisionTreeRegression(0.5, 0, goLeft = true)
   val tree2 = TestUtil.buildDecisionTreeRegression(0.75, 1, goLeft = false)
   val tree3 = TestUtil.buildDecisionTreeRegression(0.1, 2, goLeft = true)
-  val gbt = GBTRegression(shape = NodeShape.regression(3),
+  val gbt = GBTRegression(shape = NodeShape.regression(5),
     model = GBTRegressionModel(Seq(tree1, tree2, tree3), Seq(0.5, 2.0, 1.0), 5))
 
   describe("#transform") {
@@ -38,7 +38,7 @@ class GBTRegressionSpec extends FunSpec {
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(gbt.schema.fields ==
-        Seq(StructField("features", TensorType.Double()),
+        Seq(StructField("features", TensorType.Double(5)),
           StructField("prediction", ScalarType.Double)))
     }
   }

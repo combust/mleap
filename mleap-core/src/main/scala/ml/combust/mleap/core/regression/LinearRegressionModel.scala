@@ -28,7 +28,7 @@ case class LinearRegressionModel(coefficients: Vector,
     BLAS.dot(features, coefficients) + intercept
   }
 
-  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(coefficients.size)).get
 
   override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
 }

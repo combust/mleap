@@ -18,6 +18,13 @@ case class StandardScalerModel(std: Option[Vector],
                                mean: Option[Vector]) extends Model {
   require(std.nonEmpty || mean.nonEmpty, "need to scale with mean and/or with stdev")
 
+  val size = (std, mean) match {
+    case (None, None) => throw new IllegalStateException("need to scale with mean and/or with stdev")
+    case (Some(stdV), None) => stdV.size
+    case (None, Some(meanV)) => meanV.size
+    case (Some(stdV), Some(meanV)) => stdV.size
+  }
+
   /** Scale a feature vector using stddev, mean, or both.
     *
     * @param vector feature vector
@@ -75,8 +82,10 @@ case class StandardScalerModel(std: Option[Vector],
     }
   }
 
-  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+  override def inputSchema: StructType = {
+    StructType("input" -> TensorType.Double(size)).get
+  }
 
-  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(size)).get
 
 }

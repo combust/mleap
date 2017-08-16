@@ -13,7 +13,7 @@ class HashingTermFrequencySpec extends FunSpec {
               withStandardOutput("output"), model = HashingTermFrequencyModel())
       assert(transformer.schema.fields ==
         Seq(StructField("input", ListType(BasicType.String)),
-          StructField("output", TensorType.Double())))
+          StructField("output", TensorType.Double(262144))))
     }
   }
 }

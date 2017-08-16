@@ -61,8 +61,8 @@ case class MinMaxScalerModel(originalMin: Vector,
     }
   }
 
-  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(originalRange.length)).get
 
-  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(originalRange.length)).get
 
 }

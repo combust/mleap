@@ -41,7 +41,7 @@ case class RandomForestRegressionModel(override val trees: Seq[DecisionTreeRegre
     trees.map(_.predict(features)).sum / numTrees
   }
 
-  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 
   override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
 

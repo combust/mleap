@@ -12,8 +12,8 @@ class VectorIndexerSpec extends FunSpec {
         model = VectorIndexerModel(3, Map()))
 
       assert(transformer.schema.fields ==
-        Seq(StructField("input", TensorType.Double()),
-          StructField("output", TensorType.Double())))
+        Seq(StructField("input", TensorType.Double(3)),
+          StructField("output", TensorType.Double(3))))
     }
   }
 }

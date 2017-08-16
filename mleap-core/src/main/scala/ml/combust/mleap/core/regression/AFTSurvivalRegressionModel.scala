@@ -37,10 +37,10 @@ case class AFTSurvivalRegressionModel(coefficients: Vector,
     math.exp(BLAS.dot(coefficients, features) + intercept)
   }
 
-  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(coefficients.size)).get
 
   override def outputSchema: StructType = {
     StructType("prediction" -> ScalarType.Double,
-      "quantiles" -> TensorType.Double()).get
+      "quantiles" -> TensorType.Double(quantileProbabilities.length)).get
   }
 }

@@ -10,12 +10,12 @@ class VectorIndexerModelSpec extends FunSpec {
 
     it("has the right input schema") {
       assert(model.inputSchema.fields ==
-        Seq(StructField("input", TensorType.Double())))
+        Seq(StructField("input", TensorType.Double(3))))
     }
 
     it("has the right output schema") {
       assert(model.outputSchema.fields ==
-        Seq(StructField("output", TensorType.Double())))
+        Seq(StructField("output", TensorType.Double(3))))
     }
   }
 }

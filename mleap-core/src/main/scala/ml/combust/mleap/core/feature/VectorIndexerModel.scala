@@ -47,8 +47,8 @@ case class VectorIndexerModel(numFeatures: Int,
     }
   }
 
-  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(localNumFeatures)).get
 
-  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(localNumFeatures)).get
 
 }

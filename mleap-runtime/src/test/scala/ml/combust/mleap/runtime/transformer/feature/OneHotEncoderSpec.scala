@@ -12,7 +12,7 @@ class OneHotEncoderSpec extends FunSpec {
               withStandardOutput("output"), model = OneHotEncoderModel(5))
       assert(transformer.schema.fields ==
         Seq(StructField("input", ScalarType.Double),
-          StructField("output", TensorType.Double())))
+          StructField("output", TensorType.Double(5))))
     }
   }
 }

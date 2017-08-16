@@ -22,7 +22,7 @@ class OneHotEncoderModelSpec extends FunSpec {
     }
 
     it("has the right output schema") {
-      assert(encoder.outputSchema.fields == Seq(StructField("output", TensorType.Double())))
+      assert(encoder.outputSchema.fields == Seq(StructField("output", TensorType.Double(5))))
     }
   }
 }

@@ -15,7 +15,7 @@ class WordToVectorModelSpec extends FunSpec {
 
     it("has the right output schema") {
       assert(model.outputSchema.fields ==
-        Seq(StructField("output", TensorType.Double())))
+        Seq(StructField("output", TensorType.Double(1))))
     }
   }
 }

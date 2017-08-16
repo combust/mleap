@@ -36,5 +36,5 @@ case class WordToVectorModel(wordIndex: Map[String, Int],
 
   override def inputSchema: StructType = StructType("input" -> ListType(BasicType.String)).get
 
-  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(vectorSize)).get
 }

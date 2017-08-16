@@ -322,7 +322,7 @@ case class GeneralizedLinearRegressionModel(coefficients: Vector,
     fal.fitted(eta)
   }
 
-  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(coefficients.size)).get
 
   override def outputSchema: StructType = {
     StructType("prediction" -> ScalarType.Double,

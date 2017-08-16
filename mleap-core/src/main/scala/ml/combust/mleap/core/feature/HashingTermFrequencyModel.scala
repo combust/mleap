@@ -67,6 +67,6 @@ case class HashingTermFrequencyModel(numFeatures: Int = 1 << 18,
   }
 
   override def outputSchema: StructType = {
-    StructType(StructField("output" -> TensorType.Double())).get
+    StructType(StructField("output" -> TensorType.Double(numFeatures))).get
   }
 }

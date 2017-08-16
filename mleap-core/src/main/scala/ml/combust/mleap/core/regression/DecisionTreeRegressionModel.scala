@@ -27,7 +27,7 @@ case class DecisionTreeRegressionModel(rootNode: Node, numFeatures: Int) extends
     rootNode.predictImpl(features).prediction
   }
 
-  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 
   override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
 

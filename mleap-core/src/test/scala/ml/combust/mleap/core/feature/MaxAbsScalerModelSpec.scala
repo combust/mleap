@@ -19,11 +19,11 @@ class MaxAbsScalerModelSpec extends FunSpec {
     }
 
     it("Has the right input schema") {
-      assert(scaler.inputSchema.fields == Seq(StructField("input", TensorType.Double())))
+      assert(scaler.inputSchema.fields == Seq(StructField("input", TensorType.Double(4))))
     }
 
     it("Has the right output schema") {
-      assert(scaler.outputSchema.fields == Seq(StructField("output", TensorType.Double())))
+      assert(scaler.outputSchema.fields == Seq(StructField("output", TensorType.Double(4))))
     }
   }
 }

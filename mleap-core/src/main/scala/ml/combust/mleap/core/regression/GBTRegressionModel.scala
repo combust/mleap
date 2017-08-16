@@ -45,7 +45,7 @@ case class GBTRegressionModel(override val trees: Seq[DecisionTreeRegressionMode
     BLAS.dot(predictions, treeWeightsVector)
   }
 
-  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 
   override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
 

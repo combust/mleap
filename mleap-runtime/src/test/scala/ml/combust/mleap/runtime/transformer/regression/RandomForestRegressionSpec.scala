@@ -18,7 +18,7 @@ class RandomForestRegressionSpec extends FunSpec {
       val transformer = RandomForestRegression(shape = NodeShape.regression(5),
         model = regression)
       assert(transformer.schema.fields ==
-        Seq(StructField("features", TensorType.Double()),
+        Seq(StructField("features", TensorType.Double(5)),
           StructField("prediction", ScalarType.Double)))
     }
   }

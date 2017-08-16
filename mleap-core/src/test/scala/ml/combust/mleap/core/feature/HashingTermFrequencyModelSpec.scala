@@ -1,21 +1,21 @@
 package ml.combust.mleap.core.feature
 
-import ml.combust.mleap.core.types.{BasicType, ScalarShape, ScalarType, StructField}
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
 class HashingTermFrequencyModelSpec extends FunSpec {
 
   describe("Hashing Term Frequency Model") {
-    val binarizer = BinarizerModel(0.3, ScalarShape())
+    val model = HashingTermFrequencyModel()
 
     it("Has the right input schema") {
-      assert(binarizer.inputSchema.fields ==
-        Seq(StructField("input", ScalarType.Double)))
+      assert(model.inputSchema.fields ==
+        Seq(StructField("input", ListType(BasicType.String))))
     }
 
     it("Has the right output schema") {
-      assert(binarizer.outputSchema.fields ==
-        Seq(StructField("output", ScalarType.Double)))
+      assert(model.outputSchema.fields ==
+        Seq(StructField("output", TensorType.Double(262144))))
     }
   }
 }

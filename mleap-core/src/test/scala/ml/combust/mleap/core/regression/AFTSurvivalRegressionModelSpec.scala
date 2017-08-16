@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 
 class AFTSurvivalRegressionModelSpec extends FunSpec {
 
-  describe("aft survival regression model") {
+  describe("AFT survival regression model") {
     val model = new AFTSurvivalRegressionModel(Vectors.dense(1, 2, 3), 2, Array(4, 5, 6, 7), 3)
 
     it("has the right input schema") {

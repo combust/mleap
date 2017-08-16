@@ -15,7 +15,7 @@ class PipelineSpec extends FunSpec {
                                               withOutput("prediction", "prediction"),
                         model = LinearRegressionModel(Vectors.dense(1.0, 2.0, 3.0), 4.0)))))
       assert(pipeline.schema.fields == Seq(
-          StructField("features", TensorType.Double()),
+          StructField("features", TensorType.Double(3)),
           StructField("prediction", ScalarType.Double)
       ))
     }

@@ -6,16 +6,16 @@ import org.scalatest.FunSpec
 class MinHashLSHModelSpec extends FunSpec {
 
   describe("min has lsh model") {
-    val model = MinHashLSHModel(Seq())
+    val model = MinHashLSHModel(Seq(), 3)
 
     it("has the right input schema") {
       assert(model.inputSchema.fields ==
-        Seq(StructField("input", TensorType.Double())))
+        Seq(StructField("input", TensorType.Double(3))))
     }
 
     it("has the right output schema") {
       assert(model.outputSchema.fields ==
-        Seq(StructField("output", TensorType.Double())))
+        Seq(StructField("output", TensorType.Double(3, 1))))
     }
   }
 }

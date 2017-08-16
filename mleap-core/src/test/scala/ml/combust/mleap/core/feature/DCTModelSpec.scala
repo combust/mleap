@@ -9,7 +9,7 @@ import org.scalatest.FunSpec
   */
 class DCTModelSpec extends FunSpec {
   describe("dct model") {
-    val model = DCTModel(false)
+    val model = DCTModel(false, 3)
     describe("issue167") {
       it("should not modify input features") {
         val expected = Array(123.4, 23.4, 56.7)
@@ -24,11 +24,11 @@ class DCTModelSpec extends FunSpec {
 
     describe("input/output schema") {
       it("has the right input schema") {
-        assert(model.inputSchema.fields == Seq(StructField("input", TensorType.Double())))
+        assert(model.inputSchema.fields == Seq(StructField("input", TensorType.Double(3))))
       }
 
       it("has the right output schema") {
-        assert(model.outputSchema.fields == Seq(StructField("output", TensorType.Double())))
+        assert(model.outputSchema.fields == Seq(StructField("output", TensorType.Double(3))))
       }
     }
   }

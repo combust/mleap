@@ -10,7 +10,7 @@ object MinHashLSHModel {
   val HASH_PRIME = 2038074743
 }
 
-case class MinHashLSHModel(randomCoefficients: Seq[(Int, Int)]) extends LSHModel{
+case class MinHashLSHModel(randomCoefficients: Seq[(Int, Int)], inputSize: Int) extends LSHModel{
   def apply(features: Vector): Tensor[Double] = predict(features)
 
   def predict(features: Vector): Tensor[Double] = {
@@ -43,7 +43,7 @@ case class MinHashLSHModel(randomCoefficients: Seq[(Int, Int)]) extends LSHModel
     ).min
   }
 
-  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(inputSize)).get
 
-  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(inputSize, 1)).get
 }

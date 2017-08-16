@@ -3,8 +3,10 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.core.types.TensorShape
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.MinHashLSHModel
+import org.apache.spark.sql.mleap.TypeConverters.sparkToMleapDataShape
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -19,8 +21,12 @@ class MinHashLSHOp extends SimpleSparkOp[MinHashLSHModel] {
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val (ca, cb) = obj.randCoefficients.unzip
 
+      val dataset = context.context.dataset.get
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
+
       model.withValue("random_coefficients_a", Value.longList(ca.map(_.toLong))).
         withValue("random_coefficients_b", Value.longList(cb.map(_.toLong)))
+        .withValue("input_size", Value.int(inputShape.dimensions.get(0)))
     }
 
     override def load(model: Model)

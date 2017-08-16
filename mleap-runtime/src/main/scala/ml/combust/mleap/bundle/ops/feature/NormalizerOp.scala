@@ -19,12 +19,14 @@ class NormalizerOp extends MleapOp[Normalizer, NormalizerModel] {
 
     override def store(model: Model, obj: NormalizerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withValue("p_norm", Value.double(obj.pNorm))
+      model.withValue("p_norm", Value.double(obj.pNorm)).
+      withValue("input_size", Value.int(obj.inputSize))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): NormalizerModel = {
-      NormalizerModel(pNorm = model.value("p_norm").getDouble)
+      NormalizerModel(pNorm = model.value("p_norm").getDouble,
+        inputSize = model.value("input_size").getInt)
     }
   }
 

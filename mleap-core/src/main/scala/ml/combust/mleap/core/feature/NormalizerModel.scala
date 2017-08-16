@@ -10,7 +10,7 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
   * @param pNorm p normalization param
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/Normalizer.scala")
-case class NormalizerModel(pNorm: Double) extends Model {
+case class NormalizerModel(pNorm: Double, inputSize: Int) extends Model {
   /** Normalizes a feature vector.
     *
     * @param features features to normalize
@@ -52,7 +52,7 @@ case class NormalizerModel(pNorm: Double) extends Model {
     }
   }
 
-  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(inputSize)).get
 
-  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(inputSize)).get
 }

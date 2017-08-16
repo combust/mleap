@@ -10,7 +10,7 @@ import org.scalatest.FunSpec
 class NormalizerModelSpec extends FunSpec {
   describe("normalizer model") {
 
-    val normalizer = NormalizerModel(20.0)
+    val normalizer = NormalizerModel(20.0, 3)
 
     it("normalizes the feature vector using the p normalization value") {
       val features = Vectors.dense(Array(0.0, 20.0, 40.0))
@@ -22,11 +22,11 @@ class NormalizerModelSpec extends FunSpec {
     }
 
     it("has the right input schema") {
-      assert(normalizer.inputSchema.fields == Seq(StructField("input", TensorType.Double())))
+      assert(normalizer.inputSchema.fields == Seq(StructField("input", TensorType.Double(3))))
     }
 
     it("has the right output schema") {
-      assert(normalizer.outputSchema.fields == Seq(StructField("output", TensorType.Double())))
+      assert(normalizer.outputSchema.fields == Seq(StructField("output", TensorType.Double(3))))
     }
   }
 }

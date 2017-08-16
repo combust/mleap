@@ -3,8 +3,10 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.mleap.core.types.TensorShape
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.Normalizer
+import org.apache.spark.sql.mleap.TypeConverters.sparkToMleapDataShape
 
 /**
   * Created by hollinwilkins on 9/24/16.
@@ -17,7 +19,11 @@ class NormalizerOp extends SimpleSparkOp[Normalizer] {
 
     override def store(model: Model, obj: Normalizer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      val dataset = context.context.dataset.get
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
+
       model.withValue("p_norm", Value.double(obj.getP))
+      .withValue("input_size", Value.int(inputShape.dimensions.get(0)))
     }
 
     override def load(model: Model)

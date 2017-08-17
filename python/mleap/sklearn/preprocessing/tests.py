@@ -115,8 +115,8 @@ class TransformerTests(unittest.TestCase):
                                          with_std=True
                                          )
 
-        standard_scaler.mlinit(input_features=['a'],
-                               output_features=['a_scaled'])
+        standard_scaler.mlinit(input_features='a',
+                               output_features='a_scaled')
 
         standard_scaler.fit(self.df[['a']])
 
@@ -178,8 +178,8 @@ class TransformerTests(unittest.TestCase):
     def test_min_max_scaler_serializer(self):
 
         scaler = MinMaxScaler()
-        scaler.mlinit(input_features=['a'],
-                      output_features=['a_scaled'])
+        scaler.mlinit(input_features='a',
+                      output_features='a_scaled')
 
         scaler.fit(self.df[['a']])
 
@@ -240,8 +240,8 @@ class TransformerTests(unittest.TestCase):
     def test_min_max_scaler_deserializer(self):
 
         scaler = MinMaxScaler()
-        scaler.mlinit(input_features=['a'],
-                      output_features=['a_scaled'])
+        scaler.mlinit(input_features='a',
+                      output_features='a_scaled')
 
         scaler.fit(self.df[['a']])
 
@@ -521,8 +521,8 @@ class TransformerTests(unittest.TestCase):
     def binarizer_deserializer_test(self):
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features=['a'],
-                         output_features=['a_binary'])
+        binarizer.mlinit(input_features='a',
+                         output_features='a_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 

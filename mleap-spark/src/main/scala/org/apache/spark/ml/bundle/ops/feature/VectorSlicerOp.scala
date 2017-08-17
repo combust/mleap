@@ -3,11 +3,13 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.mleap.core.types.TensorShape
 import org.apache.spark.ml.attribute.AttributeGroup
 import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.VectorSlicer
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.mleap.TypeConverters.sparkToMleapDataShape
 import org.apache.spark.sql.types.StructField
 
 /**
@@ -21,16 +23,19 @@ class VectorSlicerOp extends SimpleSparkOp[VectorSlicer] {
 
     override def store(model: Model, obj: VectorSlicer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
+      val dataset = context.context.dataset.get
+
       val namedIndicesMap: Array[(String, Int)] = if(obj.getNames.nonEmpty) {
-        assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
-        val dataset = context.context.dataset.get
         extractNamedIndices(obj.getInputCol, obj.getNames, dataset)
       } else { Array() }
       val (names, namedIndices) = namedIndicesMap.unzip
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
 
       model.withValue("indices", Value.longList(obj.getIndices.map(_.toLong).toSeq)).
         withValue("names", Value.stringList(names)).
-        withValue("named_indices", Value.intList(namedIndices))
+        withValue("named_indices", Value.intList(namedIndices)).
+        withValue("input_size", Value.int(inputShape.dimensions.get(0)))
     }
 
     override def load(model: Model)

@@ -22,7 +22,8 @@ class VectorSlicerOp extends MleapOp[VectorSlicer, VectorSlicerModel] {
       val (names, namedIndices) = obj.namedIndices.unzip
       model.withValue("indices", Value.longList(obj.indices.map(_.toLong).toSeq)).
         withValue("names", Value.stringList(names)).
-        withValue("named_indices", Value.intList(namedIndices))
+        withValue("named_indices", Value.intList(namedIndices)).
+        withValue("input_size", Value.int(obj.inputSize))
     }
 
     override def load(model: Model)
@@ -31,7 +32,7 @@ class VectorSlicerOp extends MleapOp[VectorSlicer, VectorSlicerModel] {
       val namedIndices = model.value("named_indices").getIntList
       val namedIndicesMap = names.zip(namedIndices)
       VectorSlicerModel(indices = model.value("indices").getLongList.map(_.toInt).toArray,
-        namedIndices = namedIndicesMap.toArray)
+        namedIndices = namedIndicesMap.toArray, inputSize = model.value("input_size").getInt)
     }
   }
 

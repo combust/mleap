@@ -8,8 +8,8 @@ import org.scalatest.FunSpec
   * Created by mikhail on 10/16/16.
   */
 class PolynomialExpansionModelSpec extends FunSpec {
-  describe("polynomial expansion mode;") {
-    val model = PolynomialExpansionModel(2)
+  describe("polynomial expansion model") {
+    val model = PolynomialExpansionModel(2, 2)
 
     it("performs polynomial expansion on an input vector") {
       val inputArray = Array(2.0,3.0)
@@ -19,11 +19,11 @@ class PolynomialExpansionModelSpec extends FunSpec {
     }
 
     it("has the right input schema") {
-      assert(model.inputSchema.fields == Seq(StructField("input", TensorType.Double())))
+      assert(model.inputSchema.fields == Seq(StructField("input", TensorType.Double(2))))
     }
 
     it("has the right output schema") {
-      assert(model.outputSchema.fields == Seq(StructField("output", TensorType.Double())))
+      assert(model.outputSchema.fields == Seq(StructField("output", TensorType.Double(5))))
     }
   }
 }

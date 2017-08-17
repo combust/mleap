@@ -13,7 +13,9 @@ import scala.collection.mutable
   * Created by mikhail on 10/16/16.
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/feature/PolynomialExpansion.scala")
-case class PolynomialExpansionModel(degree: Int) extends Model {
+case class PolynomialExpansionModel(degree: Int, inputSize: Int) extends Model {
+  val polySize = getPolySize(inputSize, degree)
+
   def apply(vector: Vector): Vector = {
     vector match {
       case dense: DenseVector => expand(dense, degree)
@@ -24,7 +26,6 @@ case class PolynomialExpansionModel(degree: Int) extends Model {
 
   def expand(denseVector: DenseVector, degree: Int): DenseVector = {
     val n = denseVector.size
-    val polySize = getPolySize(n, degree)
     val polyValues = new Array[Double](polySize - 1)
     expandDense(denseVector.values, n - 1, degree, 1.0, polyValues, -1)
     new DenseVector(polyValues)
@@ -110,8 +111,8 @@ case class PolynomialExpansionModel(degree: Int) extends Model {
     curPolyIdx + getPolySize(lastFeatureIdx + 1, degree)
   }
 
-  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(inputSize)).get
 
-  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(polySize - 1)).get
 
 }

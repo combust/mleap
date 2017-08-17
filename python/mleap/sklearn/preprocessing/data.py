@@ -76,6 +76,11 @@ def mleap_init(self, input_features, output_features):
     self.output_features = output_features
     self.name = "{}_{}".format(self.op, uuid.uuid1())
 
+def mleap_init_with_input_size(self, input_features, output_features, input_size):
+    self.input_features = input_features
+    self.output_features = output_features
+    self.input_size = input_size
+    self.name = "{}_{}".format(self.op, uuid.uuid1())
 
 setattr(StandardScaler, 'op', ops.STANDARD_SCALER)
 setattr(StandardScaler, 'serialize_to_bundle', serialize_to_bundle)
@@ -107,7 +112,7 @@ setattr(Binarizer, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(Binarizer, 'serializable', True)
 
 setattr(PolynomialFeatures, 'op', ops.POLYNOMIALEXPANSION)
-setattr(PolynomialFeatures, 'mlinit', mleap_init)
+setattr(PolynomialFeatures, 'mlinit', mleap_init_with_input_size)
 setattr(PolynomialFeatures, 'serialize_to_bundle', serialize_to_bundle)
 setattr(PolynomialFeatures, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(PolynomialFeatures, 'serializable', True)
@@ -633,6 +638,7 @@ class PolynomialExpansionSerializer(MLeapSerializer, MLeapDeserializer):
         # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('degree', transformer.degree))
+        attributes.append(('input_size', transformer.input_size))
 
         # define node inputs and outputs
         inputs = [{

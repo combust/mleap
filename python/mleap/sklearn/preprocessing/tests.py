@@ -549,7 +549,8 @@ class TransformerTests(unittest.TestCase):
 
         polynomial_exp = PolynomialFeatures(degree=2, include_bias=False)
         polynomial_exp.mlinit(input_features='a',
-                              output_features='poly')
+                              output_features='poly',
+                              input_size=1)
 
         Xres = polynomial_exp.fit_transform(self.df[['a']])
 
@@ -584,7 +585,8 @@ class TransformerTests(unittest.TestCase):
 
         polynomial_exp = PolynomialFeatures(degree=2, include_bias=False)
         polynomial_exp.mlinit(input_features=['a', 'b'],
-                              output_features=['a', 'b', 'a_sqd', 'a_mult_b', 'b_sqd'])
+                              output_features=['a', 'b', 'a_sqd', 'a_mult_b', 'b_sqd'],
+                              input_size=2)
 
         Xres = polynomial_exp.fit_transform(self.df[['a', 'b']])
 

@@ -20,11 +20,13 @@ class PolynomialExpansionOp extends MleapOp[PolynomialExpansion, PolynomialExpan
     override def store(model: Model, obj: PolynomialExpansionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       model.withValue("degree", Value.long(obj.degree))
+      .withValue("input_size", Value.long(obj.inputSize))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): PolynomialExpansionModel = {
-      PolynomialExpansionModel(degree = model.value("degree").getLong.toInt)
+      PolynomialExpansionModel(degree = model.value("degree").getLong.toInt,
+        inputSize = model.value("input_size").getLong.toInt)
     }
   }
 

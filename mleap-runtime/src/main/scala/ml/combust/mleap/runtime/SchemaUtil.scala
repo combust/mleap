@@ -6,10 +6,10 @@ import ml.combust.mleap.runtime.function.UserDefinedFunction
 
 object SchemaUtil {
 
-  def asssertModelTypesMatchTransformerTypes(model: Model, exec: UserDefinedFunction): Unit = {
-    SchemaUtil.checkTypes(model.inputSchema.fields.map(field => field.dataType),
+  def asssertModelTypesMatchTransformerTypes(model: Model, exec: UserDefinedFunction) = {
+    checkTypes(model.inputSchema.fields.map(field => field.dataType),
       exec.inputs.map(in => in.dataTypes).flatten)
-    SchemaUtil.checkTypes(model.outputSchema.fields.map(field => field.dataType),
+    checkTypes(model.outputSchema.fields.map(field => field.dataType),
       exec.output.dataTypes)
   }
 

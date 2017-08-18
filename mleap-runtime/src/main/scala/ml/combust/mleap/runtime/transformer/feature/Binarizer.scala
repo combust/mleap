@@ -6,7 +6,6 @@ import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-import ml.combust.mleap.runtime.SchemaUtil
 
 /**
   * Created by fshabbir on 12/1/16.
@@ -22,6 +21,4 @@ case class Binarizer(override val uid: String = Transformer.uniqueName("binarize
   } else {
     execTensor
   }
-
-  SchemaUtil.asssertModelTypesMatchTransformerTypes(model, exec)
 }

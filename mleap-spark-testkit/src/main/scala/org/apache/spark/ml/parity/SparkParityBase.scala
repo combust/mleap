@@ -11,6 +11,8 @@ import ml.combust.mleap.runtime.MleapSupport._
 import com.databricks.spark.avro._
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{DataType, TensorType}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.bundle.SparkBundleContext
@@ -19,6 +21,8 @@ import org.apache.spark.sql.mleap.TensorUDT
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.types.ArrayType
 import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.runtime.transformer.{BaseTransformer, Pipeline}
 import resource._
 
 import scala.collection.mutable
@@ -112,6 +116,27 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }).tried.get
   }
 
+  def asssertModelTypesMatchTransformerTypes(model: Model, exec: UserDefinedFunction) = {
+    checkTypes(model.inputSchema.fields.map(field => field.dataType),
+      exec.inputs.map(in => in.dataTypes).flatten)
+    checkTypes(model.outputSchema.fields.map(field => field.dataType),
+      exec.output.dataTypes)
+  }
+
+  def checkTypes(modelTypes: Seq[DataType], transformerTypes: Seq[DataType]) = {
+    assert(modelTypes.size == modelTypes.size)
+    modelTypes.zip(transformerTypes).foreach {
+      case (modelType, transformerType) => {
+        if (modelType.isInstanceOf[TensorType]) {
+          assert(transformerType.isInstanceOf[TensorType] &&
+            modelType.base == transformerType.base)
+        } else {
+          assert(modelType == transformerType)
+        }
+      }
+    }
+  }
+
   def parityTransformer(): Unit = {
     it("has parity between Spark/MLeap") {
       val sparkTransformed = sparkTransformer.transform(dataset)
@@ -147,6 +172,25 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
           }
       }
     }
+
+    it("model input/output schema matches transformer UDF") {
+      val mTransformer = mleapTransformer(sparkTransformer)
+
+      mTransformer match {
+        case transformer: BaseTransformer => {
+          asssertModelTypesMatchTransformerTypes(transformer.model, transformer.exec)
+        }
+        case pipeline: Pipeline => {
+          pipeline.transformers.foreach(tran => tran match {
+            case stage: BaseTransformer => {
+              asssertModelTypesMatchTransformerTypes(stage.model, stage.exec)
+            }
+            case _ => assert(true) // no udf to check against
+          })
+        }
+        case _ => assert(true) // no udf to check against
+      }
+   }
   }
 
   it should behave like parityTransformer()

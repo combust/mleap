@@ -70,14 +70,13 @@ class MLeapSerializer(object):
             elif isinstance(value, list) and (isinstance(value[0], np.float64) or isinstance(value[0], float)):
                 base = type(value[0])
                 attributes[name] = {
-                    "base":  _type_map[base],
+                    _type_map[base]: value,
                     "shape": {
                         "dimensions": [{
                             "size": len(value),
                             "name": ""
                         }]
                     },
-                    "value": value,
                     "type": "tensor"
                 }
             elif isinstance(value, list) and isinstance(value[0], str):
@@ -88,14 +87,13 @@ class MLeapSerializer(object):
 
             elif isinstance(value, np.ndarray):
                 attributes[name] = {
-                    "base":  _type_map[base],
+                    "double":  list(value.flatten()),
                     "shape": {
                         "dimensions": [{
                             "size": list(value.shape),
                             "name": ""
                         }]
                     },
-                    "value": list(value.flatten()),
                     "type": "tensor"
                 }
 
@@ -194,17 +192,12 @@ class MLeapDeserializer(object):
         # Set Transformer Attributes
         attributes = model_j['attributes']
         for attribute in attributes.keys():
-            value_key = attributes[attribute].keys()[-1]
+            value_key = [key for key in attributes[attribute].keys()
+                         if key in ['string', 'boolean','long', 'double']][0]
             if attributes_map is not None and attribute in attributes_map.keys():
-                if isinstance(attributes[attribute][value_key], dict):
-                    setattr(transformer, attributes_map[attribute], attributes[attribute][value_key])
-                else:
-                    setattr(transformer, attributes_map[attribute], attributes[attribute][value_key])
+                setattr(transformer, attributes_map[attribute], attributes[attribute][value_key])
             else:
-                if isinstance(attributes[attribute][value_key], dict):
-                    setattr(transformer, attribute, attributes[attribute][value_key])
-                else:
-                    setattr(transformer, attribute, attributes[attribute][value_key])
+                setattr(transformer, attribute, attributes[attribute][value_key])
 
         transformer.op = model_j['op']
 

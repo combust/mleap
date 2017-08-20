@@ -63,25 +63,23 @@ class TransformerTests(unittest.TestCase):
             "op": "standard_scaler",
             "attributes": {
                 "mean": {
-                    "base": "double",
+                    "double": [expected_mean],
                     "shape": {
                         "dimensions": [{
                             "size": 1,
                             "name": ""
                         }]
                     },
-                    "value": [expected_mean],
                     "type": "tensor"
                 },
                 "std": {
-                    "base": "double",
+                    "double": [expected_std],
                     "shape": {
                         "dimensions": [{
                             "size": 1,
                             "name": ""
                         }]
                     },
-                    "value": [expected_std],
                     "type": "tensor"
                 }
             }
@@ -97,8 +95,8 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(standard_scaler.op, expected_model['op'])
         self.assertEqual(expected_model['attributes']['mean']['shape']['dimensions'][0]['size'], model['attributes']['mean']['shape']['dimensions'][0]['size'])
         self.assertEqual(expected_model['attributes']['std']['shape']['dimensions'][0]['size'], model['attributes']['std']['shape']['dimensions'][0]['size'])
-        self.assertAlmostEqual(expected_model['attributes']['mean']['value'][0], model['attributes']['mean']['value'][0], places = 7)
-        self.assertAlmostEqual(expected_model['attributes']['std']['value'][0], model['attributes']['std']['value'][0], places = 7)
+        self.assertAlmostEqual(expected_model['attributes']['mean']['double'][0], model['attributes']['mean']['double'][0], places = 7)
+        self.assertAlmostEqual(expected_model['attributes']['std']['double'][0], model['attributes']['std']['double'][0], places = 7)
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, standard_scaler.name)) as json_data:
@@ -192,25 +190,23 @@ class TransformerTests(unittest.TestCase):
            "op": "min_max_scaler",
             "attributes": {
                 "min": {
-                    "base": "double",
+                    "double": [expected_min],
                     "shape": {
                         "dimensions": [{
                             "size": 1,
                             "name": ""
                         }]
                     },
-                    "value": [expected_min],
                     "type": "tensor"
                 },
                 "max": {
-                    "base": "double",
+                    "double": [expected_max],
                     "shape": {
                         "dimensions": [{
                             "size": 1,
                             "name": ""
                         }]
                     },
-                    "value": [expected_max],
                     "type": "tensor"
                 }
             }
@@ -226,8 +222,8 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(scaler.op, expected_model['op'])
         self.assertEqual(expected_model['attributes']['min']['shape']['dimensions'][0]['size'], model['attributes']['min']['shape']['dimensions'][0]['size'])
         self.assertEqual(expected_model['attributes']['max']['shape']['dimensions'][0]['size'], model['attributes']['max']['shape']['dimensions'][0]['size'])
-        self.assertEqual(expected_model['attributes']['min']['value'][0], model['attributes']['min']['value'][0])
-        self.assertEqual(expected_model['attributes']['max']['value'][0], model['attributes']['max']['value'][0])
+        self.assertEqual(expected_model['attributes']['min']['double'][0], model['attributes']['min']['double'][0])
+        self.assertEqual(expected_model['attributes']['max']['double'][0], model['attributes']['max']['double'][0])
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, scaler.name)) as json_data:

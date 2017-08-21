@@ -198,7 +198,7 @@ class MLeapDeserializer(object):
         attributes = model_j['attributes']
         for attribute in attributes.keys():
             value_key = [key for key in attributes[attribute].keys()
-                         if key in ['string', 'boolean','long', 'double']][0]
+                         if key in ['string', 'boolean','long', 'double', 'data_shape']][0]
             if attributes_map is not None and attribute in attributes_map.keys():
                 setattr(transformer, attributes_map[attribute], attributes[attribute][value_key])
             else:

@@ -97,7 +97,8 @@ class TransformerTests(unittest.TestCase):
 
         binarizer = Binarizer(threshold=0.0)
         binarizer.mlinit(input_features='e',
-                         output_features='e_binary')
+                         output_features='e_binary',
+                         input_shapes={'data_shape':[{'shape':'scalar'}]})
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
@@ -121,7 +122,8 @@ class TransformerTests(unittest.TestCase):
 
         binarizer = Binarizer(threshold=0.0)
         binarizer.mlinit(input_features='e',
-                         output_features='e_binary')
+                         output_features='e_binary',
+                         input_shapes={'data_shape':[{'shape':'scalar'}]})
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
@@ -153,7 +155,8 @@ class TransformerTests(unittest.TestCase):
 
         binarizer = Binarizer(threshold=0.0)
         binarizer.mlinit(input_features='e',
-                         output_features='e_binary')
+                         output_features='e_binary',
+                         input_shapes={'data_shape':[{'shape':'scalar'}]})
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
@@ -177,7 +180,8 @@ class TransformerTests(unittest.TestCase):
 
         binarizer = Binarizer(threshold=0.0)
         binarizer.mlinit(input_features='e',
-                         output_features='e_binary')
+                         output_features='e_binary',
+                         input_shapes={'data_shape':[{'shape':'scalar'}]})
 
         Xres = binarizer.fit_transform(self.df[['a']])
 

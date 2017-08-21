@@ -16,7 +16,7 @@ class MathUnaryParitySpec extends SparkParityBase {
   override val sparkTransformer: Transformer = new Pipeline().setStages(Array(new StringIndexer().
     setInputCol("fico_score_group_fnl").
     setOutputCol("fico_index"),
-    new MathUnary(uid = "math_bin", model = MathUnaryModel(Tan)).
+    new MathUnary(uid = "math_unary", model = MathUnaryModel(Tan)).
       setInputCol("dti").
       setOutputCol("dti_tan")
   )).fit(dataset)

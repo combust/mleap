@@ -176,9 +176,12 @@ data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
 
 continuous_features = ['col_a']
 
+input_shapes = {'data_shape': [{'shape':'scalar'}, {'shape':'scalar'}]}
+
 feature_extractor_tf = FeatureExtractor(input_features=continuous_features, 
                                          output_vector='imputed_features', 
-                                         output_vector_items=continuous_features)
+                                         output_vector_items=continuous_features,
+                                         input_shapes=input_shapes)
 
 # Label Encoder for x1 Label 
 label_encoder_tf = LabelEncoder(input_features=feature_extractor_tf.output_vector_items,

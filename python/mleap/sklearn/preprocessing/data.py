@@ -171,13 +171,14 @@ def _to_list(x):
 
 
 class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
-    def __init__(self, input_features, output_vector, output_vector_items):
+    def __init__(self, input_features, output_vector, output_vector_items, input_shapes):
         """
         Selects a subset of features from a pandas dataframe that are then passed into a subsequent transformer.
         MLeap treats this transformer like a VectorAssembler equivalent in spark.
         >>> data = pd.DataFrame([['a', 0, 1], ['b', 1, 2], ['c', 3, 4]], columns=['col_a', 'col_b', 'col_c'])
         >>> vector_items = ['col_b', 'col_c']
-        >>> feature_extractor2_tf = FeatureExtractor(vector_items, 'continuous_features', vector_items)
+        >>> input_shapes = {'data_shape': [{'shape':'scalar'}, {'shape':'scalar'}]}
+        >>> feature_extractor2_tf = FeatureExtractor(vector_items, 'continuous_features', vector_items, input_shapes)
         >>> feature_extractor2_tf.fit_transform(data).head(1).values
         >>> array([[0, 1]])
         :param input_features: List of features to extracts from a pandas data frame
@@ -193,6 +194,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         self.dtypes = None
         self.serializable = True
         self.skip_fit_transform = False
+        self.input_shapes = input_shapes
 
     def transform(self, df, **params):
         if not self.skip_fit_transform:
@@ -217,7 +219,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(("input_shapes", self.dtypes))
+        attributes.append(("input_shapes", self.input_shapes))
 
         # define node inputs and outputs
         inputs = [{'name': x, 'port': 'input{}'.format(self.input_features.index(x))} for x in self.input_features]

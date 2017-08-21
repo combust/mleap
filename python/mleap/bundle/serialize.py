@@ -103,19 +103,24 @@ class MLeapSerializer(object):
                 }
 
             elif isinstance(value, dict):
-                if transformer.serializable:
-                    shapes = list()
-                    for x in value:
-                        shape_type = value[x]
-                        if (shape_type == np.dtype(int)) or (shape_type == np.dtype(float)):
-                            shapes.append(({"base": "scalar", "isNullable": False}))
-                        else:
-                            raise ValueError("Not implemented shape type: %s" % str(shape_type))
-
-                    attributes[name] = {
-                        'type': 'list',
-                        'data_shape': shapes
-                    }
+                shapes = list()
+                for shape in value['data_shape']:
+                    if shape['shape'] == 'scalar':
+                        shapes.append(({"base": "scalar", "isNullable": False}))
+                    elif shape['shape'] == 'tensor':
+                        shapes.append(({"base": "tensor", "isNullable": False,
+                                        "tensorShape": {
+                                            "dimensions": [{
+                                                "size": shape['dimensions'][0],
+                                                "name": ""
+                                                }]
+                                            }
+                                        }
+                                       ))
+                attributes[name] = {
+                    'type': 'list',
+                    'data_shape': shapes
+                }
 
         js['attributes'] = attributes
 

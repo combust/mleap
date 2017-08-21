@@ -411,7 +411,8 @@ class TransformerTests(unittest.TestCase):
 
         feature_extractor = FeatureExtractor(input_features=extract_features,
                                              output_vector='extract_features_output',
-                                             output_vector_items=["{}_out".format(x) for x in extract_features])
+                                             output_vector_items=["{}_out".format(x) for x in extract_features],
+                                             input_shapes={'data_shape': [{'shape':'scalar'}, {'shape':'scalar'}]})
 
         res = feature_extractor.fit_transform(self.df)
 
@@ -427,6 +428,38 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(feature_extractor.input_features[0], node['shape']['inputs'][0]['name'])
         self.assertEqual(feature_extractor.input_features[1], node['shape']['inputs'][1]['name'])
         self.assertEqual(feature_extractor.output_vector, node['shape']['outputs'][0]['name'])
+
+        # Test model.json
+        with open("{}/{}.node/model.json".format(self.tmp_dir, feature_extractor.name)) as json_data:
+            model = json.load(json_data)
+
+        expected_model = {
+            "op": "vector_assembler",
+            "attributes": {
+                "input_shapes": {
+                    "data_shape": [
+                        {
+                        "base": "scalar",
+                        "isNullable": False
+                        },
+                        {
+                        "base": "scalar",
+                        "isNullable": False
+                        }],
+                    "type": "list"
+                }
+            }
+        }
+
+        self.assertEqual(expected_model['op'], model['op'])
+        self.assertEqual(expected_model['attributes']['input_shapes']['data_shape'][0]['base'],
+                         model['attributes']['input_shapes']['data_shape'][0]['base'])
+        self.assertEqual(expected_model['attributes']['input_shapes']['data_shape'][0]['isNullable'],
+                         model['attributes']['input_shapes']['data_shape'][0]['isNullable'])
+        self.assertEqual(expected_model['attributes']['input_shapes']['data_shape'][1]['base'],
+                         model['attributes']['input_shapes']['data_shape'][1]['base'])
+        self.assertEqual(expected_model['attributes']['input_shapes']['data_shape'][1]['isNullable'],
+                     model['attributes']['input_shapes']['data_shape'][1]['isNullable'])
 
     def imputer_test(self):
 

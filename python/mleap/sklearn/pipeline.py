@@ -126,7 +126,7 @@ class SimpleSerializer(object):
           "name": transformer.name,
           "format": "json",
           "version": __version__,
-          "timeCreated": datetime.datetime.now().isoformat(),
+          "timestamp": datetime.datetime.now().isoformat(),
           "uid": "{}".format(uuid.uuid4())
         }
         return js

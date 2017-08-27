@@ -184,12 +184,15 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         >>> data = pd.DataFrame([['a', 0, 1], ['b', 1, 2], ['c', 3, 4]], columns=['col_a', 'col_b', 'col_c'])
         >>> vector_items = ['col_b', 'col_c']
         >>> input_shapes = {'data_shape': [{'shape':'scalar'}, {'shape':'scalar'}]}
+        >>> input_shapes = {'data_shape': [{'shape':'tensor', "tensor_shape": {"dimensions": [{"size": 23}]}}]}
         >>> feature_extractor2_tf = FeatureExtractor(vector_items, 'continuous_features', vector_items, input_shapes)
         >>> feature_extractor2_tf.fit_transform(data).head(1).values
         >>> array([[0, 1]])
         :param input_features: List of features to extracts from a pandas data frame
         :param output_vector: Name of the output vector, only used for serialization
         :param output_vector_items: List of output feature names
+        :param input_shapes: the shape of each input feature, whether it is scalar or a vector
+        if it's a vector, then we include size information of the vector
         :return:
         """
         self.input_features = input_features

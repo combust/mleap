@@ -201,7 +201,8 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         >>> feature_extractor2_tf = FeatureExtractor(input_scalars=vector_items, output_vector='continuous_features', output_vector_items=vector_items)
         >>> feature_extractor2_tf.fit_transform(data).head(1).values
         >>> array([[0, 1]])
-        :param input_features: List of features to extracts from a pandas data frame
+        :param input_scalars: List of scalar feature names that are being extracted from a DataFrame
+        :param input_vectors: List of FeatureExtractors that were used to generate the input vectors
         :param output_vector: Name of the output vector, only used for serialization
         :param output_vector_items: List of output feature names
         :return:
@@ -227,7 +228,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
                     features.append(x.output_vector)
                 elif 'output_features' in x.__dict__:
                     features.append(x.output_features)
-                return features
+            return features
         else:
             raise BaseException("Unable To Define Input Features")
 

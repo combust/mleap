@@ -106,12 +106,14 @@ class MLeapSerializer(object):
                 shapes = list()
                 for shape in value['data_shape']:
                     if shape['shape'] == 'scalar':
-                        shapes.append(({"base": "scalar", "isNullable": False}))
+                        shapes.append(({"base": "scalar",
+                                        "isNullable": False}))
                     elif shape['shape'] == 'tensor':
-                        shapes.append(({"base": "tensor", "isNullable": False,
+                        shapes.append(({"base": "tensor",
+                                        "isNullable": False,
                                         "tensorShape": {
                                             "dimensions": [{
-                                                "size": shape['dimensions'][0],
+                                                "size": shape['tensor_shape']['dimensions'][0]['size'],
                                                 "name": ""
                                                 }]
                                             }

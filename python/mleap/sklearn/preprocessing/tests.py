@@ -49,7 +49,12 @@ class TransformerTests(unittest.TestCase):
                                          with_std=True
                                          )
 
-        standard_scaler.mlinit(input_features='a',
+        extract_features = ['a']
+        feature_extractor = FeatureExtractor(input_scalars=['a'],
+                                             output_vector='extracted_a_output',
+                                             output_vector_items=["{}_out".format(x) for x in extract_features])
+
+        standard_scaler.mlinit(prior_tf=feature_extractor,
                                output_features='a_scaled')
 
         standard_scaler.fit(self.df[['a']])
@@ -108,12 +113,17 @@ class TransformerTests(unittest.TestCase):
 
     def test_standard_scaler_deserializer(self):
 
+        extract_features = ['a']
+        feature_extractor = FeatureExtractor(input_scalars=['a'],
+                                         output_vector='extracted_a_output',
+                                         output_vector_items=["{}_out".format(x) for x in extract_features])
+
         # Serialize a standard scaler to a bundle
         standard_scaler = StandardScaler(with_mean=True,
                                          with_std=True
                                          )
 
-        standard_scaler.mlinit(input_features='a',
+        standard_scaler.mlinit(prior_tf=feature_extractor,
                                output_features='a_scaled')
 
         standard_scaler.fit(self.df[['a']])
@@ -140,12 +150,17 @@ class TransformerTests(unittest.TestCase):
 
     def test_standard_scaler_multi_deserializer(self):
 
+        extract_features = ['a', 'b']
+        feature_extractor = FeatureExtractor(input_scalars=['a', 'b'],
+                                             output_vector='extracted_multi_outputs',
+                                             output_vector_items=["{}_out".format(x) for x in extract_features])
+
         # Serialize a standard scaler to a bundle
         standard_scaler = StandardScaler(with_mean=True,
                                          with_std=True
                                          )
 
-        standard_scaler.mlinit(input_features=['a', 'b'],
+        standard_scaler.mlinit(prior_tf=feature_extractor,
                                output_features=['a_scaled', 'b_scaled'])
 
         standard_scaler.fit(self.df[['a', 'b']])
@@ -175,8 +190,13 @@ class TransformerTests(unittest.TestCase):
 
     def test_min_max_scaler_serializer(self):
 
+        extract_features = ['a']
+        feature_extractor = FeatureExtractor(input_scalars=['a'],
+                                         output_vector='extracted_a_output',
+                                         output_vector_items=["{}_out".format(x) for x in extract_features])
+
         scaler = MinMaxScaler()
-        scaler.mlinit(input_features='a',
+        scaler.mlinit(prior_tf = feature_extractor,
                       output_features='a_scaled')
 
         scaler.fit(self.df[['a']])
@@ -235,8 +255,13 @@ class TransformerTests(unittest.TestCase):
 
     def test_min_max_scaler_deserializer(self):
 
+        extract_features = ['a']
+        feature_extractor = FeatureExtractor(input_scalars=['a'],
+                                             output_vector='extracted_a_output',
+                                             output_vector_items=["{}_out".format(x) for x in extract_features])
+
         scaler = MinMaxScaler()
-        scaler.mlinit(input_features='a',
+        scaler.mlinit(prior_tf=feature_extractor,
                       output_features='a_scaled')
 
         scaler.fit(self.df[['a']])
@@ -259,8 +284,13 @@ class TransformerTests(unittest.TestCase):
 
     def test_min_max_scaler_multi_deserializer(self):
 
+        extract_features = ['a', 'b']
+        feature_extractor = FeatureExtractor(input_scalars=['a', 'b'],
+                                             output_vector='extracted_multi_outputs',
+                                             output_vector_items=["{}_out".format(x) for x in extract_features])
+
         scaler = MinMaxScaler()
-        scaler.mlinit(input_features=['a', 'b'],
+        scaler.mlinit(prior_tf=feature_extractor,
                       output_features=['a_scaled', 'b_scaled'])
 
         scaler.fit(self.df[['a']])
@@ -354,8 +384,8 @@ class TransformerTests(unittest.TestCase):
         oh_data = le.fit_transform(labels).reshape(3, 1)
 
         one_hot_encoder_tf = OneHotEncoder(sparse=False)
-        one_hot_encoder_tf.mlinit(input_features = le.output_features,
-                                  output_features = '{}_one_hot_encoded'.format(le.output_features))
+        one_hot_encoder_tf.mlinit(prior_tf=le,
+                                  output_features='{}_one_hot_encoded'.format(le.output_features))
         one_hot_encoder_tf.fit(oh_data)
 
         one_hot_encoder_tf.serialize_to_bundle(self.tmp_dir, one_hot_encoder_tf.name)
@@ -378,8 +408,8 @@ class TransformerTests(unittest.TestCase):
         oh_data = le.fit_transform(labels).reshape(3, 1)
 
         one_hot_encoder_tf = OneHotEncoder(sparse=False)
-        one_hot_encoder_tf.mlinit(input_features = le.output_features,
-                                  output_features=['{}_one_hot_encoded'.format(le.output_features[0])])
+        one_hot_encoder_tf.mlinit(prior_tf = le,
+                                  output_features='{}_one_hot_encoded'.format(le.output_features))
         one_hot_encoder_tf.fit(oh_data)
 
         one_hot_encoder_tf.serialize_to_bundle(self.tmp_dir, one_hot_encoder_tf.name)
@@ -403,16 +433,15 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(one_hot_encoder_tf_ds.name, node['name'])
         self.assertEqual(one_hot_encoder_tf_ds.input_features[0], node['shape']['inputs'][0]['name'])
-        self.assertEqual(one_hot_encoder_tf_ds.output_features, node['shape']['outputs'][0]['name'])
+        self.assertEqual(one_hot_encoder_tf_ds.output_features[0], node['shape']['outputs'][0]['name'])
 
     def feature_extractor_test(self):
 
         extract_features = ['a', 'd']
 
-        feature_extractor = FeatureExtractor(input_features=extract_features,
+        feature_extractor = FeatureExtractor(input_scalars=extract_features,
                                              output_vector='extract_features_output',
-                                             output_vector_items=["{}_out".format(x) for x in extract_features],
-                                             input_shapes={'data_shape': [{'shape':'scalar'}, {'shape':'scalar'}]})
+                                             output_vector_items=["{}_out".format(x) for x in extract_features])
 
         res = feature_extractor.fit_transform(self.df)
 
@@ -469,8 +498,13 @@ class TransformerTests(unittest.TestCase):
                 return np.NaN
             return df.a
 
+        extract_features = ['a']
+        feature_extractor = FeatureExtractor(input_scalars=['a'],
+                                         output_vector='extracted_a_output',
+                                         output_vector_items=["{}_out".format(x) for x in extract_features])
+
         imputer = Imputer(strategy='mean')
-        imputer.mlinit(input_features='a',
+        imputer.mlinit(prior_tf=feature_extractor,
                        output_features='a_imputed')
 
         df2 = self.df
@@ -512,10 +546,14 @@ class TransformerTests(unittest.TestCase):
 
     def binarizer_test(self):
 
+        extract_features = ['a']
+        feature_extractor = FeatureExtractor(input_scalars=['a'],
+                                         output_vector='extracted_a_output',
+                                         output_vector_items=["{}_out".format(x) for x in extract_features])
+
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features='a',
-                         output_features='a_binary',
-                         input_shapes={'data_shape':[{'shape':'scalar'}]})
+        binarizer.mlinit(prior_tf=feature_extractor,
+                         output_features='a_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
@@ -550,10 +588,14 @@ class TransformerTests(unittest.TestCase):
 
     def binarizer_deserializer_test(self):
 
+        extract_features = ['a']
+        feature_extractor = FeatureExtractor(input_scalars=['a'],
+                                         output_vector='extracted_a_output',
+                                         output_vector_items=["{}_out".format(x) for x in extract_features])
+
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features='a',
-                         output_features='a_binary',
-                         input_shapes={'data_shape':[{'shape':'scalar'}]})
+        binarizer.mlinit(prior_tf=feature_extractor,
+                         output_features='a_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
@@ -578,10 +620,14 @@ class TransformerTests(unittest.TestCase):
 
     def polynomial_expansion_test(self):
 
+        extract_features = ['a']
+        feature_extractor = FeatureExtractor(input_scalars=['a'],
+                                         output_vector='extracted_a_output',
+                                         output_vector_items=["{}_out".format(x) for x in extract_features])
+
         polynomial_exp = PolynomialFeatures(degree=2, include_bias=False)
-        polynomial_exp.mlinit(input_features='a',
-                              output_features='poly',
-                              input_size=1)
+        polynomial_exp.mlinit(prior_tf=feature_extractor,
+                              output_features='poly')
 
         Xres = polynomial_exp.fit_transform(self.df[['a']])
 
@@ -594,6 +640,9 @@ class TransformerTests(unittest.TestCase):
           "attributes": {
             "degree": {
               "long": 2
+            },
+            "input_size": {
+                  "long": 1
             }
           }
         }
@@ -603,6 +652,7 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(expected_model['attributes']['degree']['long'], model['attributes']['degree']['long'])
+        self.assertEqual(expected_model['attributes']['input_size']['long'], model['attributes']['input_size']['long'])
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, polynomial_exp.name)) as json_data:
@@ -611,37 +661,6 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(polynomial_exp.name, node['name'])
         self.assertEqual(polynomial_exp.input_features, node['shape']['inputs'][0]['name'])
         self.assertEqual(polynomial_exp.output_features, node['shape']['outputs'][0]['name'])
-
-    def polynomial_expansion_deserializer_test(self):
-
-        polynomial_exp = PolynomialFeatures(degree=2, include_bias=False)
-        polynomial_exp.mlinit(input_features=['a', 'b'],
-                              output_features=['a', 'b', 'a_sqd', 'a_mult_b', 'b_sqd'],
-                              input_size=2)
-
-        Xres = polynomial_exp.fit_transform(self.df[['a', 'b']])
-
-        self.assertEqual(Xres[0][2], Xres[0][0] * Xres[0][0])
-
-        polynomial_exp.serialize_to_bundle(self.tmp_dir, polynomial_exp.name)
-
-        # Deserialize the PolynomialExpansion
-        node_name = "{}.node".format(polynomial_exp.name)
-        poly_tf_ds = PolynomialFeatures()
-        poly_tf_ds.deserialize_from_bundle(self.tmp_dir, node_name)
-
-        # Transform some sample data
-        res_a = polynomial_exp.transform(self.df[['a', 'b']])
-        res_b = poly_tf_ds.transform(self.df[['a', 'b']])
-
-        self.assertEqual(res_a[0][0], res_b[0][0])
-        self.assertEqual(res_a[1][0], res_b[1][0])
-        self.assertEqual(res_a[2][0], res_b[2][0])
-        self.assertEqual(res_a[3][0], res_b[3][0])
-        self.assertEqual(res_a[0][1], res_b[0][1])
-        self.assertEqual(res_a[1][1], res_b[1][1])
-        self.assertEqual(res_a[2][1], res_b[2][1])
-        self.assertEqual(res_a[3][1], res_b[3][1])
 
     def math_unary_exp_test(self):
 

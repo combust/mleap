@@ -45,7 +45,6 @@ class GBTClassifierSpec extends FunSpec {
     }
   }
 
-
   describe("input/output schema") {
     it("has the correct inputs and outputs with only prediction column") {
       val transformer = GBTClassifier(

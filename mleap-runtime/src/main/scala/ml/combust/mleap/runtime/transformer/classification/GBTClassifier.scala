@@ -40,4 +40,5 @@ case class GBTClassifier(override val uid: String = Transformer.uniqueName("gbt_
     }
 
     UserDefinedFunction(f, outputSchema, inputSchema)
-  }}
+  }
+}

@@ -2,7 +2,6 @@ package ml.combust.mleap.core.classification
 
 import ml.combust.mleap.core.regression.DecisionTreeRegressionModel
 import ml.combust.mleap.core.tree.TreeEnsemble
-import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import ml.combust.mleap.core.tree.loss.LogLoss
 import org.apache.spark.ml.linalg.mleap.BLAS
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
@@ -50,10 +49,6 @@ case class GBTClassifierModel(override val trees: Seq[DecisionTreeRegressionMode
     val treePredictions = Vectors.dense(trees.map(_.predict(features)).toArray)
     BLAS.dot(treePredictions, treeWeightsVector)
   }
-
-  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
-
-  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
 
   override def rawToProbabilityInPlace(raw: Vector): Vector = {
     raw match {

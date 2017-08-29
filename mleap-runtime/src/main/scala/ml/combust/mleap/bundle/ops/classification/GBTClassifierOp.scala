@@ -68,19 +68,4 @@ class GBTClassifierOp extends MleapOp[GBTClassifier, GBTClassifierModel] {
   }
 
   override def model(node: GBTClassifier): GBTClassifierModel = node.model
-
-  override def load(node: Node, model: GBTClassifierModel)
-                   (implicit context: BundleContext[MleapContext]): GBTClassifier = {
-    GBTClassifier(uid = node.name,
-      featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.output("prediction").name,
-      rawPredictionCol = node.shape.getOutput("rawPrediction").map(_.name),
-      probabilityCol = node.shape.getOutput("probability").map(_.name),
-      model = model)
-  }
-
-  override def shape(node: GBTClassifier): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.rawPredictionCol, "rawPrediction").
-    withOutput(node.probabilityCol, "probability")
 }

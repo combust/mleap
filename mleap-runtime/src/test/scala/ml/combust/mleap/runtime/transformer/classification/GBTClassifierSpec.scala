@@ -50,7 +50,7 @@ class GBTClassifierSpec extends FunSpec {
     it("has the correct inputs and outputs with only prediction column") {
       val transformer = GBTClassifier(
         shape = NodeShape.probabilisticClassifier(3, 2),
-        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 2))
+        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 3))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("prediction", ScalarType.Double)))
@@ -58,7 +58,7 @@ class GBTClassifierSpec extends FunSpec {
 
     it("has the correct inputs and outputs with prediction column as well as probabilityCol") {
       val transformer = GBTClassifier(shape = NodeShape.probabilisticClassifier(3, 2, probabilityCol = Some("probability")),
-        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 2))
+        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 3))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("probability", TensorType(BasicType.Double, Seq(2))),
@@ -67,7 +67,7 @@ class GBTClassifierSpec extends FunSpec {
 
     it("has the correct inputs and outputs with prediction column as well as rawPredictionCol") {
       val transformer = GBTClassifier(shape = NodeShape.probabilisticClassifier(3, 2, rawPredictionCol = Some("rp")),
-        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 2))
+        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 3))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("rp", TensorType(BasicType.Double, Seq(2))),
@@ -78,7 +78,7 @@ class GBTClassifierSpec extends FunSpec {
       val transformer = GBTClassifier(shape = NodeShape.probabilisticClassifier(3, 2,
         rawPredictionCol = Some("rp"),
         probabilityCol = Some("probability")),
-        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 2))
+        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 3))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("rp", TensorType(BasicType.Double, Seq(2))),

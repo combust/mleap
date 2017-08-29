@@ -1,5 +1,7 @@
 package ml.combust.bundle.serializer
 
+import ml.bundle.Format
+
 /** Trait for defining which serialization format was used
   * to write a Bundle.ML model.
   *
@@ -10,38 +12,29 @@ package ml.combust.bundle.serializer
   *   <li>protobuf - use protobuf for all attributes, models and nodes</li>
   * </ol>
   */
-sealed trait SerializationFormat
-
-/** Trait for defining the actual serialization format being
-  * used in a given context. This must be either JSON or Protobuf.
-  */
-sealed trait ConcreteSerializationFormat extends SerializationFormat with HasConcreteSerializationFormat
-
-/** Trait inherited when a class has access to a concrete serialization format.
-  */
-trait HasConcreteSerializationFormat {
-  /** Get the concrete serialization format.
-    *
-    * @return concrete serialization format contained by the object
-    */
-  def concrete: ConcreteSerializationFormat
+sealed trait SerializationFormat {
+  def asBundle: Format
 }
 
 /** Companion object for holding the three [[ml.combust.bundle.serializer.SerializationFormat]] objects
   * as well as a helper method to convert to the protobuf serialization format enum.
   */
 object SerializationFormat {
-  object Json extends ConcreteSerializationFormat {
-    override def concrete: ConcreteSerializationFormat = Json
+  def fromBundle(format: Format): SerializationFormat = {
+    if(format.isJson) {
+      SerializationFormat.Json
+    } else {
+      SerializationFormat.Protobuf
+    }
+  }
+
+  object Json extends SerializationFormat {
+    override def asBundle: Format = Format.JSON
     override def toString: String = "json"
   }
 
-  object Protobuf extends ConcreteSerializationFormat {
-    override def concrete: ConcreteSerializationFormat = Protobuf
+  object Protobuf extends SerializationFormat {
+    override def asBundle: Format = Format.PROTOBUF
     override def toString: String = "proto"
-  }
-
-  object Mixed extends SerializationFormat {
-    override def toString: String = "mixed"
   }
 }

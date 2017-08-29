@@ -2,16 +2,16 @@ package org.apache.spark.ml.bundle.ops.classification
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.ModelSerializer
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.classification.GBTClassificationModel
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel
 
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-class GBTClassifierOpV20 extends OpNode[SparkBundleContext, GBTClassificationModel, GBTClassificationModel] {
+class GBTClassifierOpV20 extends SimpleSparkOp[GBTClassificationModel] {
   override val Model: OpModel[SparkBundleContext, GBTClassificationModel] = new OpModel[SparkBundleContext, GBTClassificationModel] {
     override val klazz: Class[GBTClassificationModel] = classOf[GBTClassificationModel]
 
@@ -27,10 +27,10 @@ class GBTClassifierOpV20 extends OpNode[SparkBundleContext, GBTClassificationMod
           i = i + 1
           name
       }
-      model.withAttr("num_features", Value.long(obj.numFeatures)).
-        withAttr("num_classes", Value.long(2)).
-        withAttr("tree_weights", Value.doubleList(obj.treeWeights)).
-        withAttr("trees", Value.stringList(trees))
+      model.withValue("num_features", Value.long(obj.numFeatures)).
+        withValue("num_classes", Value.long(2)).
+        withValue("tree_weights", Value.doubleList(obj.treeWeights)).
+        withValue("trees", Value.stringList(trees))
     }
 
     override def load(model: Model)
@@ -53,22 +53,18 @@ class GBTClassifierOpV20 extends OpNode[SparkBundleContext, GBTClassificationMod
     }
   }
 
-  override val klazz: Class[GBTClassificationModel] = classOf[GBTClassificationModel]
-
-  override def name(node: GBTClassificationModel): String = node.uid
-
-  override def model(node: GBTClassificationModel): GBTClassificationModel = node
-
-  override def load(node: Node, model: GBTClassificationModel)
-                   (implicit context: BundleContext[SparkBundleContext]): GBTClassificationModel = {
-    new GBTClassificationModel(uid = node.name,
+  override def sparkLoad(uid: String, shape: NodeShape, model: GBTClassificationModel): GBTClassificationModel = {
+    new GBTClassificationModel(uid = uid,
       _trees = model.trees,
       _treeWeights = model.treeWeights,
-      numFeatures = model.numFeatures).
-      setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.output("prediction").name)
+      numFeatures = model.numFeatures)
   }
 
-  override def shape(node: GBTClassificationModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getPredictionCol, "prediction")
+  override def sparkInputs(obj: GBTClassificationModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
+
+  override def sparkOutputs(obj: GBTClassificationModel): Seq[SimpleParamSpec] = {
+    Seq("prediction" -> obj.predictionCol)
+  }
 }

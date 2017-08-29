@@ -5,11 +5,11 @@ import java.nio.charset.Charset
 
 import ml.combust.mleap.runtime.Row
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowWriter}
-import ml.combust.mleap.runtime.types.StructType
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericDatumReader, GenericDatumWriter}
 import org.apache.avro.io.{BinaryDecoder, BinaryEncoder, EncoderFactory}
 import SchemaConverter._
+import ml.combust.mleap.core.types.StructType
 import resource._
 
 import scala.util.Try

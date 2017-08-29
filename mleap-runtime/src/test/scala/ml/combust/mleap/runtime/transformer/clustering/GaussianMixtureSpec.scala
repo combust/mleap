@@ -1,24 +1,27 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
-import ml.combust.mleap.runtime.types.{DoubleType, IntegerType, StructField, TensorType}
+import ml.combust.mleap.core.clustering.GaussianMixtureModel
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
 class GaussianMixtureSpec extends FunSpec {
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs with only prediction column") {
-      val transformer = new GaussianMixture("transformer", "features", "prediction", None, null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", IntegerType())))
+      val transformer = GaussianMixture(shape = NodeShape.probabilisticCluster(3),
+        model = new GaussianMixtureModel(Array(null, null), Array(1, 2, 3)))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("prediction", ScalarType.Int)))
     }
 
     it("has the correct inputs and outputs with only prediction column as well as probability column") {
-      val transformer = new GaussianMixture("transformer", "features", "prediction", Some("probability"), null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", IntegerType()),
-          StructField("probability", TensorType(DoubleType()))))
+      val transformer = GaussianMixture(shape = NodeShape.probabilisticCluster(3, probabilityCol = Some("probability")),
+        model = new GaussianMixtureModel(Array(null, null, null, null), Array(1, 2, 3)))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("prediction", ScalarType.Int),
+          StructField("probability", TensorType.Double(4))))
     }
   }
 }

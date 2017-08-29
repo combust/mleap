@@ -1,6 +1,8 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
 import org.apache.spark.ml.linalg.{Vector, Vectors}
@@ -11,7 +13,10 @@ import scala.collection.mutable
   * Created by hollinwilkins on 4/26/17.
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/branch-2.1/mllib/src/main/scala/org/apache/spark/ml/feature/Interaction.scala")
-case class InteractionModel(featuresSpec: Array[Array[Int]]) {
+case class InteractionModel(featuresSpec: Array[Array[Int]],
+                            inputShapes: Seq[DataShape]) extends Model {
+  assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and tensor shapes as inputs")
+
   val encoders: Array[FeatureEncoder] = featuresSpec.map(FeatureEncoder.apply)
 
   def apply(features: Seq[Any]): Vector = {
@@ -41,6 +46,19 @@ case class InteractionModel(featuresSpec: Array[Array[Int]]) {
     }
     Vectors.sparse(size, indices.result(), values.result()).compressed
   }
+
+  override def inputSchema: StructType = {
+    val inputFields = inputShapes.zipWithIndex.map {
+      case (shape, i) => StructField(s"input$i", DataType(BasicType.Double, shape))
+    }
+    StructType(inputFields).get
+  }
+
+  override def outputSchema: StructType = {
+    val outputSize = featuresSpec.map(_.sum).product
+    StructType(StructField("output" -> TensorType.Double(outputSize))).get
+  }
+
 }
 
 case class FeatureEncoder(numFeatures: Array[Int]) {

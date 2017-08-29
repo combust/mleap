@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.tensor.{DenseTensor, Tensor}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.clustering.GaussianMixtureModel
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
 import org.apache.spark.ml.stat.distribution.MultivariateGaussian
@@ -12,7 +12,7 @@ import org.apache.spark.ml.stat.distribution.MultivariateGaussian
 /**
   * Created by hollinwilkins on 9/30/16.
   */
-class GaussianMixtureOp extends OpNode[SparkBundleContext, GaussianMixtureModel, GaussianMixtureModel] {
+class GaussianMixtureOp extends SimpleSparkOp[GaussianMixtureModel] {
   override val Model: OpModel[SparkBundleContext, GaussianMixtureModel] = new OpModel[SparkBundleContext, GaussianMixtureModel] {
     override val klazz: Class[GaussianMixtureModel] = classOf[GaussianMixtureModel]
 
@@ -25,9 +25,9 @@ class GaussianMixtureOp extends OpNode[SparkBundleContext, GaussianMixtureModel,
         getOrElse((-1, -1))
       val (means, covs) = obj.gaussians.map(g => (g.mean, g.cov)).unzip
 
-      model.withAttr("means", Value.tensorList(means.map(_.toArray).map(Tensor.denseVector))).
-        withAttr("covs", Value.tensorList(covs.map(m => DenseTensor(m.toArray, Seq(m.numRows, m.numCols))))).
-        withAttr("weights", Value.doubleList(obj.weights.toSeq))
+      model.withValue("means", Value.tensorList(means.map(_.toArray).map(Tensor.denseVector))).
+        withValue("covs", Value.tensorList(covs.map(m => DenseTensor(m.toArray, Seq(m.numRows, m.numCols))))).
+        withValue("weights", Value.doubleList(obj.weights.toSeq))
     }
 
     override def load(model: Model)
@@ -45,30 +45,15 @@ class GaussianMixtureOp extends OpNode[SparkBundleContext, GaussianMixtureModel,
     }
   }
 
-  override val klazz: Class[GaussianMixtureModel] = classOf[GaussianMixtureModel]
-
-  override def name(node: GaussianMixtureModel): String = node.uid
-
-  override def model(node: GaussianMixtureModel): GaussianMixtureModel = node
-
-  override def load(node: Node, model: GaussianMixtureModel)
-                   (implicit context: BundleContext[SparkBundleContext]): GaussianMixtureModel = {
-    val gmm = new GaussianMixtureModel(uid = node.name,
-      gaussians = model.gaussians,
-      weights = model.weights)
-    gmm.set(gmm.featuresCol, node.shape.input("features").name)
-    gmm.set(gmm.predictionCol, node.shape.output("prediction").name)
-    for(p <- node.shape.getOutput("probability")) {
-      gmm.set(gmm.probabilityCol, p.name)
-    }
-    gmm
+  override def sparkLoad(uid: String, shape: NodeShape, model: GaussianMixtureModel): GaussianMixtureModel = {
+    new GaussianMixtureModel(uid = uid, weights = model.weights, gaussians = model.gaussians)
   }
 
-  override def shape(node: GaussianMixtureModel): Shape = {
-    val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+  override def sparkInputs(obj: GaussianMixtureModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
 
-    Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction").
-      withOutput(probability, "probability")
+  override def sparkOutputs(obj: GaussianMixtureModel): Seq[SimpleParamSpec] = {
+    Seq("probability" -> obj.probabilityCol, "prediction" -> obj.predictionCol)
   }
 }

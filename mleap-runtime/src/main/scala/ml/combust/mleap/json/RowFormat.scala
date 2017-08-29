@@ -1,7 +1,7 @@
 package ml.combust.mleap.json
 
+import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.Row
-import ml.combust.mleap.runtime.types.StructType
 import spray.json._
 
 /**

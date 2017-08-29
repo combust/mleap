@@ -3,13 +3,14 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.CountVectorizerModel
+import org.apache.spark.ml.param.Param
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class CountVectorizerOp extends OpNode[SparkBundleContext, CountVectorizerModel, CountVectorizerModel] {
+class CountVectorizerOp extends SimpleSparkOp[CountVectorizerModel] {
   override val Model: OpModel[SparkBundleContext, CountVectorizerModel] = new OpModel[SparkBundleContext, CountVectorizerModel] {
     override val klazz: Class[CountVectorizerModel] = classOf[CountVectorizerModel]
 
@@ -17,9 +18,9 @@ class CountVectorizerOp extends OpNode[SparkBundleContext, CountVectorizerModel,
 
     override def store(model: Model, obj: CountVectorizerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("vocabulary", Value.stringList(obj.vocabulary)).
-        withAttr("binary", Value.boolean(obj.getBinary)).
-        withAttr("min_tf", Value.double(obj.getMinTF))
+      model.withValue("vocabulary", Value.stringList(obj.vocabulary)).
+        withValue("binary", Value.boolean(obj.getBinary)).
+        withValue("min_tf", Value.double(obj.getMinTF))
     }
 
     override def load(model: Model)
@@ -31,21 +32,16 @@ class CountVectorizerOp extends OpNode[SparkBundleContext, CountVectorizerModel,
     }
   }
 
-  override val klazz: Class[CountVectorizerModel] = classOf[CountVectorizerModel]
-
-  override def name(node: CountVectorizerModel): String = node.uid
-
-  override def model(node: CountVectorizerModel): CountVectorizerModel = node
-
-  override def load(node: Node, model: CountVectorizerModel)
-                   (implicit context: BundleContext[SparkBundleContext]): CountVectorizerModel = {
-    new CountVectorizerModel(uid = node.name,
-      vocabulary = model.vocabulary).
-      setBinary(model.getBinary).
-      setMinTF(model.getMinTF).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: CountVectorizerModel): CountVectorizerModel = {
+    new CountVectorizerModel(uid = uid,
+      vocabulary = model.vocabulary)
   }
 
-  override def shape(node: CountVectorizerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: CountVectorizerModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: CountVectorizerModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

@@ -2,14 +2,15 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.RegexTokenizerModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.RegexTokenizer
 
 import scala.util.matching.Regex
 
-class RegexTokenizerOp extends OpNode[MleapContext, RegexTokenizer, RegexTokenizerModel] {
+class RegexTokenizerOp extends MleapOp[RegexTokenizer, RegexTokenizerModel] {
   override val Model: OpModel[MleapContext, RegexTokenizerModel] = new OpModel[MleapContext, RegexTokenizerModel] {
 
     val RegexIdentifier = "regex"
@@ -24,10 +25,10 @@ class RegexTokenizerOp extends OpNode[MleapContext, RegexTokenizer, RegexTokeniz
     override def store(model: Model, obj: RegexTokenizerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       model
-        .withAttr(RegexIdentifier, Value.string(obj.regex.toString()))
-        .withAttr(MatchGapsIdentifier, Value.boolean(obj.matchGaps))
-        .withAttr(MinTokenLengthIdentifer, Value.int(obj.tokenMinLength))
-        .withAttr(LowercaseText, Value.boolean(obj.lowercaseText))
+        .withValue(RegexIdentifier, Value.string(obj.regex.toString()))
+        .withValue(MatchGapsIdentifier, Value.boolean(obj.matchGaps))
+        .withValue(MinTokenLengthIdentifer, Value.int(obj.tokenMinLength))
+        .withValue(LowercaseText, Value.boolean(obj.lowercaseText))
     }
 
     override def load(model: Model)
@@ -41,19 +42,5 @@ class RegexTokenizerOp extends OpNode[MleapContext, RegexTokenizer, RegexTokeniz
     }
   }
 
-  override val klazz: Class[RegexTokenizer] = classOf[RegexTokenizer]
-
-  override def name(node: RegexTokenizer): String = node.uid
-
   override def model(node: RegexTokenizer): RegexTokenizerModel = node.model
-
-  override def load(node: Node, model: RegexTokenizerModel)
-                   (implicit context: BundleContext[MleapContext]): RegexTokenizer = {
-    RegexTokenizer(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: RegexTokenizer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
 }

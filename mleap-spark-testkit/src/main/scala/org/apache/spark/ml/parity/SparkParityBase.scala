@@ -10,6 +10,9 @@ import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.MleapSupport._
 import com.databricks.spark.avro._
 import ml.combust.bundle.BundleFile
+import ml.combust.bundle.serializer.SerializationFormat
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{DataType, TensorType}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.bundle.SparkBundleContext
@@ -18,6 +21,8 @@ import org.apache.spark.sql.mleap.TensorUDT
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.types.ArrayType
 import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.runtime.transformer.{BaseTransformer, Pipeline}
 import resource._
 
 import scala.collection.mutable
@@ -43,8 +48,11 @@ object SparkParityBase extends FunSpec {
     v: Vector => v: Tensor[Double]
   }
 
-  val toTensorArray = udf {
-    v: mutable.WrappedArray[Vector] => v.map(vv => vv: Tensor[Double])
+  val toTensorFromArray = udf {
+    (v: mutable.WrappedArray[Vector]) =>
+      val values = v.flatMap(_.toArray).toArray
+      val dim1 = v.head.size
+      Tensor.create(values = values, dimensions = Seq(v.length, dim1))
   }
 }
 
@@ -61,7 +69,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
           case _: VectorUDT =>
             SparkParityBase.toTensor(dataset.col(field.name))
           case at: ArrayType if at.elementType.isInstanceOf[VectorUDT] =>
-            SparkParityBase.toTensorArray(dataset.col(field.name))
+            SparkParityBase.toTensorFromArray(dataset.col(field.name))
           case _ => dataset.col(field.name)
         }
     }
@@ -87,7 +95,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       file.delete()
 
       for(bf <- managed(BundleFile(file))) {
-        transformer.writeBundle.save(bf).get
+        transformer.writeBundle.format(SerializationFormat.Json).save(bf).get
       }
 
       bundleCache = Some(file)
@@ -108,6 +116,27 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }).tried.get
   }
 
+  def asssertModelTypesMatchTransformerTypes(model: Model, exec: UserDefinedFunction) = {
+    checkTypes(model.inputSchema.fields.map(field => field.dataType),
+      exec.inputs.map(in => in.dataTypes).flatten)
+    checkTypes(model.outputSchema.fields.map(field => field.dataType),
+      exec.output.dataTypes)
+  }
+
+  def checkTypes(modelTypes: Seq[DataType], transformerTypes: Seq[DataType]) = {
+    assert(modelTypes.size == modelTypes.size)
+    modelTypes.zip(transformerTypes).foreach {
+      case (modelType, transformerType) => {
+        if (modelType.isInstanceOf[TensorType]) {
+          assert(transformerType.isInstanceOf[TensorType] &&
+            modelType.base == transformerType.base)
+        } else {
+          assert(modelType == transformerType)
+        }
+      }
+    }
+  }
+
   def parityTransformer(): Unit = {
     it("has parity between Spark/MLeap") {
       val sparkTransformed = sparkTransformer.transform(dataset)
@@ -122,6 +151,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
     it("serializes/deserializes the Spark model properly") {
       val deserializedSparkModel = deserializedSparkTransformer(sparkTransformer)
+
       sparkTransformer.params.zip(deserializedSparkModel.params).foreach {
         case (param1, param2) =>
           val v1 = sparkTransformer.get(param1)
@@ -129,6 +159,8 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
           v1 match {
             case Some(v1Value) =>
+              assert(v2.isDefined, s"v2 is not defined $param2")
+
               v1Value match {
                 case v1Value: Array[_] =>
                   assert(v1Value sameElements v2.get.asInstanceOf[Array[_]])
@@ -140,6 +172,25 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
           }
       }
     }
+
+    it("model input/output schema matches transformer UDF") {
+      val mTransformer = mleapTransformer(sparkTransformer)
+
+      mTransformer match {
+        case transformer: BaseTransformer => {
+          asssertModelTypesMatchTransformerTypes(transformer.model, transformer.exec)
+        }
+        case pipeline: Pipeline => {
+          pipeline.transformers.foreach(tran => tran match {
+            case stage: BaseTransformer => {
+              asssertModelTypesMatchTransformerTypes(stage.model, stage.exec)
+            }
+            case _ => assert(true) // no udf to check against
+          })
+        }
+        case _ => assert(true) // no udf to check against
+      }
+   }
   }
 
   it should behave like parityTransformer()

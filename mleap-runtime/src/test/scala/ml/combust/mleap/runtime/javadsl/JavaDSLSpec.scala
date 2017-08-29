@@ -4,12 +4,11 @@ import java.io.File
 import java.nio.file.Files
 import java.util
 
-import ml.combust.bundle.ByteString
 import ml.combust.mleap.core.feature.StringIndexerModel
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.mleap.runtime.{DefaultLeapFrame, Row}
-import ml.combust.mleap.runtime.types._
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
 
 import scala.collection.JavaConverters._
@@ -31,8 +30,8 @@ class JavaDSLSpec extends FunSpec {
     fields.add(builder.createField("float", builder.createFloat()))
     fields.add(builder.createField("double", builder.createDouble()))
     fields.add(builder.createField("byte_string", builder.createByteString()))
-    fields.add(builder.createField("list", builder.createList(builder.createLong())))
-    fields.add(builder.createField("tensor", builder.createTensor(builder.createByte())))
+    fields.add(builder.createField("list", builder.createList(builder.createBasicLong())))
+    fields.add(builder.createField("tensor", builder.createTensor(builder.createBasicByte())))
 
     val rows = new util.ArrayList[Row]()
     val list = Seq[Long](23, 44, 55).asJava
@@ -52,17 +51,17 @@ class JavaDSLSpec extends FunSpec {
       val frame = buildFrame()
       val schema = frame.schema
 
-      assert(schema.getField("bool").get == StructField("bool", BooleanType()))
-      assert(schema.getField("string").get == StructField("string", StringType()))
-      assert(schema.getField("byte").get == StructField("byte", ByteType()))
-      assert(schema.getField("short").get == StructField("short", ShortType()))
-      assert(schema.getField("int").get == StructField("int", IntegerType()))
-      assert(schema.getField("long").get == StructField("long", LongType()))
-      assert(schema.getField("float").get == StructField("float", FloatType()))
-      assert(schema.getField("double").get == StructField("double", DoubleType()))
-      assert(schema.getField("byte_string").get == StructField("byte_string", ByteStringType()))
-      assert(schema.getField("list").get == StructField("list", ListType(LongType())))
-      assert(schema.getField("tensor").get == StructField("tensor", TensorType(ByteType())))
+      assert(schema.getField("bool").get == StructField("bool", ScalarType.Boolean))
+      assert(schema.getField("string").get == StructField("string", ScalarType.String))
+      assert(schema.getField("byte").get == StructField("byte", ScalarType.Byte))
+      assert(schema.getField("short").get == StructField("short", ScalarType.Short))
+      assert(schema.getField("int").get == StructField("int", ScalarType.Int))
+      assert(schema.getField("long").get == StructField("long", ScalarType.Long))
+      assert(schema.getField("float").get == StructField("float", ScalarType.Float))
+      assert(schema.getField("double").get == StructField("double", ScalarType.Double))
+      assert(schema.getField("byte_string").get == StructField("byte_string", ScalarType.ByteString))
+      assert(schema.getField("list").get == StructField("list", ListType(BasicType.Long)))
+      assert(schema.getField("tensor").get == StructField("tensor", TensorType(BasicType.Byte)))
 
       val d = frame.dataset
       assert(d.head.getBool(0))
@@ -80,9 +79,9 @@ class JavaDSLSpec extends FunSpec {
   }
 
   describe("MLeap bundles") {
-    val stringIndexer = StringIndexer(inputCol = "string",
-      inputDataType = Some(StringType()),
-      outputCol = "string_index",
+    val stringIndexer = StringIndexer(shape = NodeShape().
+              withStandardInput("string").
+          withStandardOutput("string_index"),
       model = StringIndexerModel(Seq("hello")))
     val dir = Files.createTempDirectory("mleap")
     val file = new File(dir.toFile, "model.zip")
@@ -93,6 +92,7 @@ class JavaDSLSpec extends FunSpec {
         val bundleBuilder = new BundleBuilder()
 
         bundleBuilder.save(stringIndexer, file, context)
+
         val transformer = bundleBuilder.load(file, context).root
         val frame = buildFrame()
 

@@ -3,6 +3,7 @@ package ml.combust.bundle.tensor
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, DataInputStream, DataOutputStream}
 import java.nio.ByteBuffer
 
+import ml.combust.mleap.tensor.ByteString
 import resource._
 
 import scala.collection.mutable
@@ -34,44 +35,6 @@ object BooleanArraySerializer extends ArraySerializer[Boolean] {
       bArr += (if(b.get == 1) true else false)
     }
     bArr.result()
-  }
-}
-
-object StringArraySerializer extends ArraySerializer[String] {
-  override def write(arr: Array[String]): Array[Byte] = {
-    (for(out <- managed(new ByteArrayOutputStream())) yield {
-      val dout = new DataOutputStream(out)
-      arr.foreach {
-        str =>
-          dout.writeInt(str.length)
-          dout.writeBytes(str)
-      }
-
-      dout.flush()
-      out.toByteArray
-    }).opt.get
-  }
-
-  override def read(arr: Array[Byte]): Array[String] = {
-    (for(in <- managed(new ByteArrayInputStream(arr))) yield {
-      val din = new DataInputStream(in)
-      val arr = mutable.ArrayBuilder.make[String]
-
-      var done = false
-      while(!done) {
-        Try {
-          val size = din.readInt()
-          val bytes = new Array[Byte](size)
-          din.readFully(bytes)
-          new String(bytes)
-        } match {
-          case Success(str) => arr += str
-          case Failure(_) => done = true
-        }
-      }
-
-      arr.result()
-    }).opt.get
   }
 }
 
@@ -172,5 +135,81 @@ object DoubleArraySerializer extends ArraySerializer[Double] {
     }
 
     a.result()
+  }
+}
+
+object StringArraySerializer extends ArraySerializer[String] {
+  override def write(arr: Array[String]): Array[Byte] = {
+    (for(out <- managed(new ByteArrayOutputStream())) yield {
+      val dout = new DataOutputStream(out)
+      arr.foreach {
+        str =>
+          dout.writeInt(str.length)
+          dout.writeBytes(str)
+      }
+
+      dout.flush()
+      out.toByteArray
+    }).opt.get
+  }
+
+  override def read(arr: Array[Byte]): Array[String] = {
+    (for(in <- managed(new ByteArrayInputStream(arr))) yield {
+      val din = new DataInputStream(in)
+      val arr = mutable.ArrayBuilder.make[String]
+
+      var done = false
+      while(!done) {
+        Try {
+          val size = din.readInt()
+          val bytes = new Array[Byte](size)
+          din.readFully(bytes)
+          new String(bytes)
+        } match {
+          case Success(str) => arr += str
+          case Failure(_) => done = true
+        }
+      }
+
+      arr.result()
+    }).opt.get
+  }
+}
+
+object ByteStringArraySerializer extends ArraySerializer[ByteString] {
+  override def write(arr: Array[ByteString]): Array[Byte] = {
+    (for(out <- managed(new ByteArrayOutputStream())) yield {
+      val dout = new DataOutputStream(out)
+      arr.foreach {
+        bs =>
+          dout.writeInt(bs.bytes.length)
+          dout.write(bs.bytes)
+      }
+
+      dout.flush()
+      out.toByteArray
+    }).opt.get
+  }
+
+  override def read(arr: Array[Byte]): Array[ByteString] = {
+    (for(in <- managed(new ByteArrayInputStream(arr))) yield {
+      val din = new DataInputStream(in)
+      val arr = mutable.ArrayBuilder.make[ByteString]
+
+      var done = false
+      while(!done) {
+        Try {
+          val size = din.readInt()
+          val bytes = new Array[Byte](size)
+          din.readFully(bytes)
+          ByteString(bytes)
+        } match {
+          case Success(bs) => arr += bs
+          case Failure(_) => done = true
+        }
+      }
+
+      arr.result()
+    }).opt.get
   }
 }

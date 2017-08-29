@@ -3,7 +3,7 @@ package ml.combust.mleap.runtime.serialization
 import java.nio.charset.Charset
 
 import ml.combust.bundle.util.ClassLoaderUtil
-import ml.combust.mleap.runtime.types.StructType
+import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.Row
 
 import scala.util.Try

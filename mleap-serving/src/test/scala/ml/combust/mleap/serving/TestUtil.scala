@@ -6,11 +6,12 @@ import java.util.UUID
 
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
+import ml.combust.mleap.core.feature.VectorAssemblerModel
 import ml.combust.mleap.core.regression.LinearRegressionModel
-import ml.combust.mleap.runtime.transformer.Pipeline
+import ml.combust.mleap.core.types._
+import ml.combust.mleap.runtime.transformer.{Pipeline, PipelineModel}
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType}
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, LocalDataset, Row}
 import org.apache.spark.ml.linalg.Vectors
 import resource.managed
@@ -27,9 +28,9 @@ object TestUtil {
 
   def getLeapFrame : DefaultLeapFrame = {
     LeapFrame(StructType(
-      StructField("first_double", DoubleType()),
-      StructField("second_double", DoubleType()),
-      StructField("third_double", DoubleType())).get,
+      StructField("first_double", ScalarType.Double),
+      StructField("second_double", ScalarType.Double),
+      StructField("third_double", ScalarType.Double)).get,
       LocalDataset(Row(5d, 1.0, 4.0), Row(2.0, 2.0, 4.0),
         Row(3.0, 2.0, 5.0)))
   }
@@ -37,20 +38,33 @@ object TestUtil {
   def serializeModelInJsonFormatToZipFile : String = {
     val bundleName = UUID.randomUUID().toString
 
-    val featureAssembler = VectorAssembler(inputCols = Array("first_double", "second_double", "third_double"),
-      inputDataTypes = Some(Array(DoubleType(), DoubleType(), DoubleType())),
-      outputCol = "features")
-    val linearRegression = LinearRegression(featuresCol = "features", predictionCol = "prediction",
-      model = LinearRegressionModel(Vectors.dense(2.0, 1.0, 2.0), 5d))
-    val pipeline = Pipeline("pipeline", Seq(featureAssembler, linearRegression))
+    val vectorAssembler = VectorAssembler(
+      shape = NodeShape().withInput("input0", "feature1").
+        withInput("input1", "feature2").
+        withInput("input2", "feature3").
+        withStandardOutput("features"),
+      model = VectorAssemblerModel(Seq(TensorShape(3), ScalarShape(), ScalarShape())))
 
-    val uri = new URI(s"jar:file:${TestUtil.baseDir}/${bundleName}.json.zip")
+
+    val model = VectorAssemblerModel(Seq(ScalarShape(), ScalarShape(), ScalarShape()))
+    val featureAssembler = VectorAssembler(
+      shape = NodeShape().withInput("input0", "first_double").
+      withInput("input1", "second_double").
+      withInput("input2", "third_double").
+      withStandardOutput("features"),
+      model = model)
+    val linearRegression = LinearRegression(shape = NodeShape.regression(1),
+      model = LinearRegressionModel(Vectors.dense(2.0, 1.0, 2.0), 5d))
+    val pipeline = Pipeline("pipeline", NodeShape(),
+      new PipelineModel(Seq(featureAssembler, linearRegression)))
+
+    val uri = new URI(s"jar:file:${TestUtil.baseDir}/$bundleName.json.zip")
     for (file <- managed(BundleFile(uri))) {
       pipeline.writeBundle.name("bundle")
         .format(SerializationFormat.Json)
         .save(file)
     }
 
-    s"${baseDir}/${bundleName}.json.zip"
+    s"$baseDir/$bundleName.json.zip"
   }
 }

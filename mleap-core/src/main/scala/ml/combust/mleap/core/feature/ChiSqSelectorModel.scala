@@ -1,6 +1,8 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 import scala.collection.mutable
@@ -9,11 +11,12 @@ import scala.collection.mutable
   * Created by hollinwilkins on 12/27/16.
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/feature/ChiSqSelector.scala")
-case class ChiSqSelectorModel(filterIndices: Seq[Int]) {
+case class ChiSqSelectorModel(filterIndices: Seq[Int],
+                              inputSize: Int) extends Model {
   def apply(features: Vector): Vector = {
     features match {
       case SparseVector(size, indices, values) =>
-        val newSize = indices.length
+        val newSize = filterIndices.length
         val newValues = mutable.ArrayBuilder.make[Double]
         val newIndices = mutable.ArrayBuilder.make[Int]
         var i = 0
@@ -46,4 +49,8 @@ case class ChiSqSelectorModel(filterIndices: Seq[Int]) {
           s"Only sparse and dense vectors are supported but got ${other.getClass}.")
     }
   }
+
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(inputSize)).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(filterIndices.length)).get
 }

@@ -1,10 +1,7 @@
 package ml.combust.bundle
 
-import java.nio.file.Files
-
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.serializer.{BundleSerializer, SerializationFormat}
-import ml.combust.bundle.util.FileUtil
 
 import scala.util.Try
 
@@ -14,7 +11,7 @@ import scala.util.Try
 case class BundleWriter[Context <: HasBundleRegistry,
 Transformer <: AnyRef](root: Transformer,
                        name: Option[String] = None,
-                       format: SerializationFormat = SerializationFormat.Mixed) {
+                       format: SerializationFormat = SerializationFormat.Json) {
   def name(value: String): BundleWriter[Context, Transformer] = copy(name = Some(value))
   def format(value: SerializationFormat): BundleWriter[Context, Transformer] = copy(format = value)
 

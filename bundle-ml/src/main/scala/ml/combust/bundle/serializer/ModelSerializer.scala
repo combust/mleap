@@ -2,11 +2,9 @@ package ml.combust.bundle.serializer
 
 import java.nio.file.{Files, Path}
 
-import ml.bundle.ModelDef.ModelDef
 import ml.combust.bundle.{BundleContext, HasBundleRegistry}
-import ml.combust.bundle.json.JsonSupport._
-import ml.combust.bundle.serializer.attr.{AttributeListSeparator, AttributeListSerializer}
 import ml.combust.bundle.dsl.{Bundle, Model}
+import ml.combust.bundle.json.JsonSupport._
 import spray.json._
 
 import scala.util.Try
@@ -34,10 +32,10 @@ trait FormatModelSerializer {
 object FormatModelSerializer {
   /** Get the appropriate JSON or Protobuf serializer based on the serialization context.
     *
-    * @param context serialization context for determining which serializer to return
+    * @param bc bundle context
     * @return JSON or Protobuf model definition serializer depending on serialization context
     */
-  def serializer(implicit context: SerializationContext): FormatModelSerializer = context.concrete match {
+  def serializer[T](implicit bc: BundleContext[T]): FormatModelSerializer = bc.format match {
     case SerializationFormat.Json => JsonFormatModelSerializer()
     case SerializationFormat.Protobuf => ProtoFormatModelSerializer()
   }
@@ -47,11 +45,11 @@ object FormatModelSerializer {
   */
 case class JsonFormatModelSerializer(implicit hr: HasBundleRegistry) extends FormatModelSerializer {
   override def write(path: Path, model: Model): Unit = {
-    Files.write(path, model.toJson.prettyPrint.getBytes)
+    Files.write(path, model.asBundle.toJson.prettyPrint.getBytes("UTF-8"))
   }
 
   override def read(path: Path): Model = {
-    new String(Files.readAllBytes(path)).parseJson.convertTo[Model]
+    Model.fromBundle(new String(Files.readAllBytes(path), "UTF-8").parseJson.convertTo[ml.bundle.Model])
   }
 }
 
@@ -63,7 +61,7 @@ case class ProtoFormatModelSerializer(implicit hr: HasBundleRegistry) extends Fo
   }
 
   override def read(path: Path): Model = {
-    Model.fromBundle(ModelDef.parseFrom(Files.readAllBytes(path)))
+    Model.fromBundle(ml.bundle.Model.parseFrom(Files.readAllBytes(path)))
   }
 }
 
@@ -73,7 +71,8 @@ case class ProtoFormatModelSerializer(implicit hr: HasBundleRegistry) extends Fo
   * @tparam Context context class for implementation
   */
 case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
-  private implicit val sc = bundleContext.preferredSerializationContext(SerializationFormat.Json)
+  private implicit val bc = bundleContext
+  private implicit val format = bundleContext.format
 
   /** Write a model to the current context path.
     *
@@ -84,21 +83,9 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
   def write(obj: Any): Try[Any] = Try {
     Files.createDirectories(bundleContext.path)
     val m = bundleContext.bundleRegistry.modelForObj[Context, Any](obj)
-    var model = Model(op = m.opName)
-    model = m.store(model, obj)(bundleContext)
-
-    bundleContext.format match {
-      case SerializationFormat.Mixed =>
-        val (small, large) = AttributeListSeparator().separate(model.attributes)
-        val m = model.replaceAttrList(small)
-        (for (l <- large) yield {
-          AttributeListSerializer(bundleContext.file("model.pb")).
-            writeProto(l).
-            map(_ => m)
-        }).getOrElse(Try(m))
-      case _ => Try(model)
-    }
-  }.flatMap(identity).flatMap {
+    val model = Model(op = m.opName)
+    m.store(model, obj)(bundleContext)
+  }.flatMap {
     model => Try(FormatModelSerializer.serializer.write(bundleContext.file(Bundle.modelFile), model))
   }
 
@@ -113,26 +100,10 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
     * @return (deserialized model, model type class)
     */
   def readWithModel(): Try[(Any, Model)] = {
-    Try(FormatModelSerializer.serializer.read(bundleContext.file(Bundle.modelFile))).flatMap {
+    Try(FormatModelSerializer.serializer.read(bundleContext.file(Bundle.modelFile))).map {
       bundleModel =>
-        val m = bundleContext.bundleRegistry.model[Context, Any](bundleModel.op)
-
-        val tbm = bundleContext.format match {
-          case SerializationFormat.Mixed =>
-            if (Files.exists(bundleContext.file("model.pb"))) {
-              AttributeListSerializer(bundleContext.file("model.pb")).
-                readProto().
-                map(bundleModel.withAttrList)
-            } else {
-              Try(bundleModel)
-            }
-          case _ => Try(bundleModel)
-        }
-
-        tbm.map {
-          bm =>
-            (m.load(bm)(bundleContext), bm)
-        }
+        val om = bundleContext.bundleRegistry.model[Context, Any](bundleModel.op)
+        (om.load(bundleModel), bundleModel)
     }
   }
 }

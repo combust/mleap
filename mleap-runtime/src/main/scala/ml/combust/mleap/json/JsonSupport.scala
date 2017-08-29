@@ -1,7 +1,10 @@
 package ml.combust.mleap.json
 
+import java.util.Base64
+
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, MleapContext}
-import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.tensor.ByteString
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 import spray.json.{JsValue, JsonFormat}
@@ -12,6 +15,50 @@ import scala.language.implicitConversions
   * Created by hollinwilkins on 8/23/16.
   */
 trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
+  implicit val BundleByteStringFormat: JsonFormat[ByteString] = new JsonFormat[ByteString] {
+    override def write(obj: ByteString) = {
+      JsString(Base64.getEncoder.encodeToString(obj.bytes))
+    }
+
+    override def read(json: JsValue) = json match {
+      case JsString(b64) => ByteString(Base64.getDecoder.decode(b64))
+      case _ => deserializationError("invalid byte string")
+    }
+  }
+
+  implicit val mleapBasicTypeFormat: JsonFormat[BasicType] = new JsonFormat[BasicType] {
+    override def write(obj: BasicType): JsValue = {
+      val name = obj match {
+        case BasicType.Boolean => "boolean"
+        case BasicType.Byte => "byte"
+        case BasicType.Short => "short"
+        case BasicType.Int => "int"
+        case BasicType.Long => "long"
+        case BasicType.Float => "float"
+        case BasicType.Double => "double"
+        case BasicType.String => "string"
+        case BasicType.ByteString => "byte_string"
+      }
+
+      JsString(name)
+    }
+
+    override def read(json: JsValue): BasicType = json match {
+      case JsString(name) => name match {
+        case "boolean" => BasicType.Boolean
+        case "byte" => BasicType.Byte
+        case "short" => BasicType.Short
+        case "int" => BasicType.Int
+        case "long" => BasicType.Long
+        case "float" => BasicType.Float
+        case "double" => BasicType.Double
+        case "string" => BasicType.String
+        case "byte_string" => BasicType.ByteString
+      }
+      case _ => deserializationError(s"invalid basic type: $json")
+    }
+  }
+
   implicit val mleapListTypeWriterFormat: JsonWriter[ListType] = new JsonWriter[ListType] {
     override def write(obj: ListType): JsValue = {
       JsObject("type" -> JsString("list"),
@@ -23,24 +70,33 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     override def read(json: JsValue): ListType = {
       val obj = json.asJsObject("invalid list type")
 
-      ListType(obj.fields("base").convertTo[DataType])
+      ListType(obj.fields("base").convertTo[BasicType])
     }
   }
 
   implicit val mleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
     override def write(obj: TensorType): JsValue = {
-      JsObject("type" -> JsString("tensor"),
+      var map = Map("type" -> JsString("tensor"),
         "base" -> mleapBasicTypeFormat.write(obj.base))
+
+      obj.dimensions.foreach {
+        dims => map = map + ("dimensions" -> dims.toJson)
+      }
+
+      JsObject(map)
     }
 
     override def read(json: JsValue): TensorType = {
       val obj = json.asJsObject("invalid tensor type")
 
-      TensorType(base = mleapBasicTypeFormat.read(obj.fields("base")))
+      val dimensions = obj.fields.get("dimensions").map {
+        dims => dims.convertTo[Seq[Int]]
+      }
+      TensorType(base = obj.fields("base").convertTo[BasicType], dimensions = dimensions)
     }
   })
 
-  val mleapBasicTypeFormat: JsonFormat[BasicType] = lazyFormat(new JsonFormat[BasicType] {
+  val mleapScalarTypeFormat: JsonFormat[ScalarType] = lazyFormat(new JsonFormat[ScalarType] {
     def writeMaybeNullable(base: JsString, isNullable: Boolean): JsValue = {
       if(isNullable) {
         JsObject("type" -> JsString("basic"),
@@ -49,79 +105,62 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
       } else { base }
     }
 
-    def readNullable(json: JsObject): BasicType = {
+    def readNullable(json: JsObject): ScalarType = {
       json.getFields("base", "isNullable") match {
-        case Seq(JsString(base), JsBoolean(isNullable)) => forName(base, isNullable)
+        case Seq(JsString(base), JsBoolean(isNullable)) => forName(base).setNullable(isNullable)
         case _ => deserializationError("invalid basic type format")
       }
     }
 
-    def forName(name: String, isNullable: Boolean = false): BasicType = name match {
-      case "boolean" => BooleanType(isNullable)
-      case "string" => StringType(isNullable)
-      case "byte" => ByteType(isNullable)
-      case "short" => ShortType(isNullable)
-      case "integer" => IntegerType(isNullable)
-      case "long" => LongType(isNullable)
-      case "float" => FloatType(isNullable)
-      case "double" => DoubleType(isNullable)
-      case "byte_string" => ByteStringType(isNullable)
+    def forName(name: String): ScalarType = name match {
+      case "boolean" => ScalarType.Boolean
+      case "byte" => ScalarType.Byte
+      case "short" => ScalarType.Short
+      case "integer" => ScalarType.Int
+      case "long" => ScalarType.Long
+      case "float" => ScalarType.Float
+      case "double" => ScalarType.Double
+      case "string" => ScalarType.String
+      case "byte_string" => ScalarType.ByteString
+      case _ => deserializationError(s"invalid basic type name $name")
     }
 
-    override def write(obj: BasicType): JsValue = obj match {
-      case BooleanType(isNullable) => writeMaybeNullable(JsString("boolean"), isNullable)
-      case StringType(isNullable) => writeMaybeNullable(JsString("string"), isNullable)
-      case ByteType(isNullable) => writeMaybeNullable(JsString("byte"), isNullable)
-      case ShortType(isNullable) => writeMaybeNullable(JsString("short"), isNullable)
-      case IntegerType(isNullable) => writeMaybeNullable(JsString("integer"), isNullable)
-      case LongType(isNullable) => writeMaybeNullable(JsString("long"), isNullable)
-      case FloatType(isNullable) => writeMaybeNullable(JsString("float"), isNullable)
-      case DoubleType(isNullable) => writeMaybeNullable(JsString("double"), isNullable)
-      case ByteStringType(isNullable) => writeMaybeNullable(JsString("byte_string"), isNullable)
+    override def write(obj: ScalarType): JsValue = obj.base match {
+      case BasicType.Boolean => writeMaybeNullable(JsString("boolean"), obj.isNullable)
+      case BasicType.Byte => writeMaybeNullable(JsString("byte"), obj.isNullable)
+      case BasicType.Short => writeMaybeNullable(JsString("short"), obj.isNullable)
+      case BasicType.Int => writeMaybeNullable(JsString("integer"), obj.isNullable)
+      case BasicType.Long => writeMaybeNullable(JsString("long"), obj.isNullable)
+      case BasicType.Float => writeMaybeNullable(JsString("float"), obj.isNullable)
+      case BasicType.Double => writeMaybeNullable(JsString("double"), obj.isNullable)
+      case BasicType.String => writeMaybeNullable(JsString("string"), obj.isNullable)
+      case BasicType.ByteString => writeMaybeNullable(JsString("byte_string"), obj.isNullable)
     }
 
-    override def read(json: JsValue): BasicType = json match {
+    override def read(json: JsValue): ScalarType = json match {
       case JsString(name) => forName(name)
       case json: JsObject => readNullable(json)
       case _ => throw new Error("Invalid basic type") // TODO: better error
     }
   })
 
-  implicit val mleapCustomTypeWriterFormat: JsonWriter[CustomType] = new JsonWriter[CustomType] {
-    override def write(obj: CustomType): JsValue = JsObject("type" -> JsString("custom"),
-      "custom" -> JsString(obj.name))
-  }
-
-  implicit def mleapCustomTypeReaderFormat(implicit context: MleapContext): JsonReader[CustomType] = new JsonReader[CustomType] {
-    override def read(json: JsValue): CustomType = {
-      val obj = json.asJsObject("invalid custom type")
-
-      obj.fields("custom") match {
-        case JsString(custom) => context.customTypeForAlias(custom)
-        case _ => deserializationError("invalid custom type")
-      }
-    }
-  }
-
   implicit val mleapDataTypeWriterFormat: JsonWriter[DataType] = new JsonWriter[DataType] {
     override def write(obj: DataType): JsValue = obj match {
-      case bt: BasicType => mleapBasicTypeFormat.write(bt)
+      case st: ScalarType => mleapScalarTypeFormat.write(st)
       case lt: ListType => mleapListTypeWriterFormat.write(lt)
       case tt: TensorType => mleapTensorTypeFormat.write(tt)
-      case ct: CustomType => mleapCustomTypeWriterFormat.write(ct)
       case _ => serializationError(s"$obj not supported for JSON serialization")
     }
   }
 
   implicit def mleapDataTypeReaderFormat(implicit context: MleapContext): JsonReader[DataType] = new JsonReader[DataType] {
     override def read(json: JsValue): DataType = json match {
-      case obj: JsString => mleapBasicTypeFormat.read(obj)
+      case obj: JsString => mleapScalarTypeFormat.read(obj)
       case obj: JsObject =>
         obj.fields.get("type") match {
-          case Some(JsString("basic")) => mleapBasicTypeFormat.read(obj)
+          case Some(JsString("basic")) => mleapScalarTypeFormat.read(obj)
           case Some(JsString("list")) => mleapListTypeReaderFormat.read(obj)
           case Some(JsString("tensor")) => mleapTensorTypeFormat.read(obj)
-          case Some(JsString("custom")) => mleapCustomTypeReaderFormat.read(obj)
           case _ => deserializationError(s"invalid data type: ${obj.fields.get("type")}")
         }
       case _ => throw new Error("Invalid data type") // TODO: better error

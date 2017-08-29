@@ -2,15 +2,15 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.runtime.transformer.feature.BucketizerUtil._
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.Bucketizer
 
 /**
   * Created by mikhail on 9/22/16.
   */
-class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
+class BucketizerOp extends SimpleSparkOp[Bucketizer] {
   override val Model: OpModel[SparkBundleContext, Bucketizer] = new OpModel[SparkBundleContext, Bucketizer] {
     override val klazz: Class[Bucketizer] = classOf[Bucketizer]
 
@@ -18,7 +18,7 @@ class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
 
     override def store(model: Model, obj: Bucketizer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("splits", Value.doubleList(obj.getSplits))
+      model.withValue("splits", Value.doubleList(obj.getSplits))
     }
 
     override def load(model: Model)
@@ -27,19 +27,15 @@ class BucketizerOp extends OpNode[SparkBundleContext, Bucketizer, Bucketizer] {
     }
   }
 
-  override val klazz: Class[Bucketizer] = classOf[Bucketizer]
-
-  override def name(node: Bucketizer): String = node.uid
-
-  override def model(node: Bucketizer): Bucketizer = node
-
-  override def load(node: Node, model: Bucketizer)
-                   (implicit context: BundleContext[SparkBundleContext]): Bucketizer = {
-    new Bucketizer(uid = node.name).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name).
-      setSplits(model.getSplits)
+  override def sparkLoad(uid: String, shape: NodeShape, model: Bucketizer): Bucketizer = {
+    new Bucketizer(uid = uid).setSplits(model.getSplits)
   }
 
-  override def shape(node: Bucketizer): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: Bucketizer): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: Bucketizer): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

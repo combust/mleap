@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.mleap.runtime.types.StructType
+import ml.combust.mleap.core.types.StructType
 
 /** Class for storing a leap frame locally.
   *

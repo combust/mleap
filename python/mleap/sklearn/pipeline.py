@@ -126,7 +126,7 @@ class SimpleSerializer(object):
           "name": transformer.name,
           "format": "json",
           "version": __version__,
-          "timeCreated": datetime.datetime.now().isoformat(),
+          "timestamp": datetime.datetime.now().isoformat(),
           "uid": "{}".format(uuid.uuid4())
         }
         return js
@@ -147,11 +147,8 @@ class SimpleSerializer(object):
           "op": transformer.op,
             "attributes": {
                 "nodes": {
-                    "type": {
-                        "type": "list",
-                        "base": "string"
-                    },
-                    "value": self._extract_nodes(transformer.steps)
+                    "type": "list",
+                    "string": self._extract_nodes(transformer.steps)
                 }
             }
         }

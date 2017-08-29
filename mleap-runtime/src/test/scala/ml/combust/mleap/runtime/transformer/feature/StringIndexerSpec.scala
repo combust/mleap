@@ -1,21 +1,23 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.StringIndexerModel
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 9/15/16.
   */
 class StringIndexerSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("test_string", StringType()))).get
+  val schema = StructType(Seq(StructField("test_string", ScalarType.String))).get
   val dataset = LocalDataset(Seq(Row("index1"), Row("index2"), Row("index3")))
   val frame = LeapFrame(schema, dataset)
 
-  val stringIndexer = StringIndexer(inputCol = "test_string",
-    inputDataType = Some(StringType()),
-    outputCol = "test_index",
+  val stringIndexer = StringIndexer(
+    shape = NodeShape.scalar(inputBase = BasicType.String,
+      outputBase = BasicType.Double,
+      inputCol = "test_string",
+      outputCol = "test_index"),
     model = StringIndexerModel(Seq("index1", "index2", "index3")))
 
   describe("#transform") {
@@ -29,7 +31,8 @@ class StringIndexerSpec extends FunSpec {
     }
 
     describe("with invalid input column") {
-      val stringIndexer2 = stringIndexer.copy(inputCol = "bad_input")
+      val stringIndexer2 = stringIndexer.copy(shape = NodeShape().withStandardInput("bad_input").
+              withStandardOutput("output"))
 
       it("returns a Failure") { assert(stringIndexer2.transform(frame).isFailure) }
     }
@@ -41,11 +44,11 @@ class StringIndexerSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      assert(stringIndexer.getFields().get ==
-        Seq(StructField("test_string", StringType()),
-          StructField("test_index", DoubleType())))
+      assert(stringIndexer.schema.fields ==
+        Seq(StructField("test_string", ScalarType.String),
+          StructField("test_index", ScalarType.Double)))
     }
   }
 }

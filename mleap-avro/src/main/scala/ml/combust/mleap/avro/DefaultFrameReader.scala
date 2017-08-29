@@ -4,10 +4,10 @@ import java.nio.charset.Charset
 
 import ml.combust.mleap.runtime._
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
-import ml.combust.mleap.runtime.types.StructType
 import org.apache.avro.file.{DataFileReader, SeekableByteArrayInput}
 import org.apache.avro.generic.{GenericData, GenericDatumReader}
 import SchemaConverter._
+import ml.combust.mleap.core.types.StructType
 
 import scala.collection.mutable
 import scala.util.Try

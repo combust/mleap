@@ -1,16 +1,18 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.feature.ChiSqSelectorModel
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
 class ChiSqSelectorSpec extends FunSpec {
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      val transformer = new ChiSqSelector("transformer", "features", "output", null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("output", TensorType(DoubleType()))))
+      val transformer = ChiSqSelector(shape = NodeShape.vector(3, 3, inputCol = "features"),
+        model = new ChiSqSelectorModel(Seq(1,2,3), 3))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
+          StructField("output", TensorType(BasicType.Double, Seq(3)))))
     }
   }
 }

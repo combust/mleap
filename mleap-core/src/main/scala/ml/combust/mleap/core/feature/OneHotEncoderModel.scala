@@ -1,5 +1,7 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 /** Class for a one hot encoder model.
@@ -12,7 +14,7 @@ import org.apache.spark.ml.linalg.{Vector, Vectors}
   * @param size size of the output one hot vectors
   */
 case class OneHotEncoderModel(size: Int,
-                              dropLast: Boolean = true) extends Serializable {
+                              dropLast: Boolean = true) extends Model {
   private val oneValue = Array(1.0)
   private val emptyIndices = Array[Int]()
   private val emptyValues = Array[Double]()
@@ -35,4 +37,8 @@ case class OneHotEncoderModel(size: Int,
       Vectors.sparse(size, emptyIndices, emptyValues)
     }
   }
+
+  override def inputSchema: StructType = StructType("input" -> ScalarType.Double).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(size)).get
 }

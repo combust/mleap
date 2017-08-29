@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.javadsl
 
+import ml.combust.mleap.core.types.BasicType
 import ml.combust.mleap.runtime.ArrayRow
 
 import scala.collection.JavaConverters._
@@ -17,4 +18,14 @@ class LeapFrameBuilderSupport {
 
     new ArrayRow(mutable.WrappedArray.make[Any](values))
   }
+
+  def createBoolean(): BasicType = BasicType.Boolean
+  def createByte(): BasicType = BasicType.Byte
+  def createShort(): BasicType = BasicType.Short
+  def createInt(): BasicType = BasicType.Int
+  def createLong(): BasicType = BasicType.Long
+  def createFloat(): BasicType = BasicType.Float
+  def createDouble(): BasicType = BasicType.Double
+  def createString(): BasicType = BasicType.String
+  def createByteString(): BasicType = BasicType.ByteString
 }

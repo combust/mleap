@@ -4,6 +4,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, DataInputStream, Da
 import java.nio.ByteBuffer
 
 import ml.combust.mleap.binary._
+import ml.combust.mleap.core.types.BasicType
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{GenericInternalRow, UnsafeArrayData}
@@ -17,7 +18,9 @@ object TensorUDT {
   UDTRegistration.register(classOf[Tensor[_]].getName, classOf[TensorUDT].getName)
 }
 
-class TensorUDT extends UserDefinedType[Tensor[_]] {
+class TensorUDT(val base: BasicType, val dimensions: Seq[Int]) extends UserDefinedType[Tensor[_]] {
+  def this() = this(BasicType.Double, Seq())
+
   val BOOLEAN: Byte = 0
   val STRING: Byte = 1
   val BYTE: Byte = 2

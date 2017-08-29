@@ -1,25 +1,17 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BucketedRandomProjectionLSHModel
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.FeatureTransformer
+import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-import ml.combust.mleap.runtime.types._
-
-import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-case class BucketedRandomProjectionLSH(override val uid: String,
-                                       override val inputCol: String,
-                                       override val outputCol: String,
-                                       model: BucketedRandomProjectionLSHModel) extends FeatureTransformer {
-  override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features).map(v => v: Tensor[Double])
-
-  override def getFields(): Try[Seq[StructField]] = Success(Seq(
-    StructField(inputCol, TensorType(DoubleType())),
-    StructField(outputCol, ListType(TensorType(DoubleType())))
-  ))
+case class BucketedRandomProjectionLSH(override val uid: String = Transformer.uniqueName("bucketed_rp_lsh"),
+                                       override val shape: NodeShape,
+                                       override val model: BucketedRandomProjectionLSHModel) extends SimpleTransformer {
+  override val exec: UserDefinedFunction = (features: Tensor[Double]) => model(features)
 }

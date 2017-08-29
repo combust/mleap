@@ -2,7 +2,9 @@ package ml.combust.mleap.runtime
 
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.{BundleFile, BundleWriter}
+import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.converter.LeapFrameConverter
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader, RowWriter}
 import ml.combust.mleap.runtime.transformer.Transformer
 
 import scala.reflect.runtime.universe._
@@ -31,5 +33,10 @@ object MleapSupport {
   implicit class MleapLeapFrameOps(frame: DefaultLeapFrame) {
     def to[T <: Product](implicit tag: TypeTag[T]): Seq[T] =
       LeapFrameConverter.convert(frame)
+  }
+
+  implicit class StructTypeOps(schema: StructType) {
+    def rowReader(format: String = BuiltinFormats.json): RowReader = RowReader(schema, format)
+    def rowWriter(format: String = BuiltinFormats.json): RowWriter = RowWriter(schema, format)
   }
 }

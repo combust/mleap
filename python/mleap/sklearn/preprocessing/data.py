@@ -71,10 +71,37 @@ def deserialize_from_bundle(self, path, node_name):
     return serializer.deserialize_from_bundle(self, path, node_name)
 
 
-def mleap_init(self, input_features, output_features):
-    self.input_features = input_features
-    self.output_features = output_features
+def mleap_init(self, prior_tf, output_features=None):
+
     self.name = "{}_{}".format(self.op, uuid.uuid1())
+
+    if prior_tf.op == 'vector_assembler':
+        self.input_features = prior_tf.output_vector
+        output_shape = 'tensor'
+        output_size = len(prior_tf.input_features)
+        output_feature_name = prior_tf.output_vector
+
+    else:
+        self.input_features = prior_tf.output_features
+        output_shape = 'scalar'
+        output_size = 1
+        output_feature_name = prior_tf.output_features
+
+    class_name = "{}".format(self.__init__.im_class).split('.')[-1].replace('>','').replace("'",'')
+
+    if output_features is not None:
+        self.output_features = output_features
+    else:
+        self.output_features = "{}_{}".format(output_feature_name, class_name.lower())
+
+    if class_name == 'PolynomialFeatures':
+        self.input_size = len(prior_tf.input_features)
+
+    elif output_shape == 'tensor':
+        self.input_shapes = {'data_shape': [{'shape':'tensor',
+                                                 "tensor_shape": {"dimensions": [{"size": output_size}]}}]}
+    else:
+        self.input_shapes = {'data_shape': [{'shape': output_shape}]}
 
 
 setattr(StandardScaler, 'op', ops.STANDARD_SCALER)
@@ -166,21 +193,29 @@ def _to_list(x):
 
 
 class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
-    def __init__(self, input_features, output_vector, output_vector_items):
+    def __init__(self, input_scalars=None, input_vectors=None, output_vector=None, output_vector_items=None):
         """
         Selects a subset of features from a pandas dataframe that are then passed into a subsequent transformer.
         MLeap treats this transformer like a VectorAssembler equivalent in spark.
         >>> data = pd.DataFrame([['a', 0, 1], ['b', 1, 2], ['c', 3, 4]], columns=['col_a', 'col_b', 'col_c'])
         >>> vector_items = ['col_b', 'col_c']
-        >>> feature_extractor2_tf = FeatureExtractor(vector_items, 'continuous_features', vector_items)
+        >>> input_shapes = {'data_shape': [{'shape':'scalar'}, {'shape':'scalar'}]}
+        >>> input_shapes = {'data_shape': [{'shape':'tensor', "tensor_shape": {"dimensions": [{"size": 23}]}}]}
+        >>> feature_extractor2_tf = FeatureExtractor(vector_items, 'continuous_features', vector_items, input_shapes)
         >>> feature_extractor2_tf.fit_transform(data).head(1).values
         >>> array([[0, 1]])
+        :param input_vectors: List of scalar feature names that are being extracted from a DataFrame
+        :param input_vectors: List of FeatureExtractors that were used to generate the input vectors
         :param input_features: List of features to extracts from a pandas data frame
         :param output_vector: Name of the output vector, only used for serialization
         :param output_vector_items: List of output feature names
+        :param input_shapes: the shape of each input feature, whether it is scalar or a vector
+        if it's a vector, then we include size information of the vector
         :return:
         """
-        self.input_features = input_features
+        self.input_scalars = input_scalars
+        self.input_vectors = input_vectors
+        self.input_features = self.get_input_features(input_scalars, input_vectors)
         self.output_vector_items = output_vector_items
         self.output_vector = output_vector
         self.op = 'vector_assembler'
@@ -188,15 +223,48 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         self.dtypes = None
         self.serializable = True
         self.skip_fit_transform = False
+        self.input_size = None
+        self.input_shapes = None
+
+    def get_input_features(self, input_scalars, input_vectors):
+        if input_scalars is not None:
+            return input_scalars
+        elif input_vectors is not None and isinstance(input_vectors, list) and len(input_vectors)>0:
+            features = list()
+            for x in input_vectors:
+                if 'output_vector' in x.__dict__:
+                    features.append(x.output_vector)
+                elif 'output_features' in x.__dict__:
+                    features.append(x.output_features)
+            return features
+        else:
+            raise BaseException("Unable To Define Input Features")
 
     def transform(self, df, **params):
         if not self.skip_fit_transform:
             return df[self.input_features]
         return df
 
-    def fit(self, df, y=None, **fit_params):
+    def assign_input_shapes(self, X):
+        # Figure out the data shape
+        if self.input_scalars is not None and isinstance(X, pd.DataFrame):
+            self.input_shapes = {'data_shape': [{'shape': 'scalar'}]*len(self.input_features)}
+
+        elif self.input_vectors is not None:
+            self.input_shapes = {'data_shape': []}
+            for vector in self.input_vectors:
+                if vector.op not in [ops.ONE_HOT_ENCODER, ops.POLYNOMIALEXPANSION]:
+                    shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": len(vector.input_features)}]}}
+                    self.input_shapes['data_shape'].append(shape)
+                elif vector.op == ops.ONE_HOT_ENCODER:
+                    shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": vector.n_values_[0] - 1}]}}
+                    self.input_shapes['data_shape'].append(shape)
+        return self
+
+    def fit(self, X, y=None, **fit_params):
+        self.assign_input_shapes(X)
         if not self.skip_fit_transform:
-            self.dtypes = df[self.input_features].dtypes.to_dict()
+            self.dtypes = X[self.input_features].dtypes.to_dict()
             if len([x for x in self.dtypes.values() if x.type == np.object_]) != 0:
                 self.serializable = False
         return self
@@ -204,6 +272,8 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
     def fit_transform(self, X, y=None, **fit_params):
         if not self.skip_fit_transform:
             self.fit(X)
+        else:
+            self.assign_input_shapes(X)
 
         df_subset = self.transform(X)
         return df_subset
@@ -211,7 +281,8 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
     def serialize_to_bundle(self, path, model_name):
 
         # compile tuples of model attributes to serialize
-        attributes = None
+        attributes = list()
+        attributes.append(("input_shapes", self.input_shapes))
 
         # define node inputs and outputs
         inputs = [{'name': x, 'port': 'input{}'.format(self.input_features.index(x))} for x in self.input_features]
@@ -368,6 +439,7 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
         # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('labels', self.classes_.tolist()))
+        attributes.append(('nullable_input', False))
 
         # define node inputs and outputs
         inputs = [{
@@ -595,11 +667,14 @@ class BinarizerSerializer(MLeapSerializer, MLeapDeserializer):
     def __init__(self):
         super(BinarizerSerializer, self).__init__()
 
+
+
     def serialize_to_bundle(self, transformer, path, model_name):
 
         # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('threshold', transformer.threshold))
+        attributes.append(("input_shapes", transformer.input_shapes))
 
         # define node inputs and outputs
         inputs = [{
@@ -631,6 +706,7 @@ class PolynomialExpansionSerializer(MLeapSerializer, MLeapDeserializer):
         # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('degree', transformer.degree))
+        attributes.append(('input_size', transformer.input_size))
 
         # define node inputs and outputs
         inputs = [{

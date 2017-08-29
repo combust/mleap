@@ -1,5 +1,8 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{BasicType, ScalarType, StructType}
+
 sealed trait HandleInvalid {
   def asParamString: String
 }
@@ -37,7 +40,8 @@ object HandleInvalid {
   *                      or 'keep' (put invalid data in a special bucket at index labels.size
   */
 case class StringIndexerModel(labels: Seq[String],
-                              handleInvalid: HandleInvalid = HandleInvalid.Error) extends Serializable {
+                              nullableInput: Boolean = false,
+                              handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
   private val stringToIndex: Map[String, Int] = labels.zipWithIndex.toMap
   private val keepInvalid = handleInvalid == HandleInvalid.Keep
 
@@ -46,7 +50,7 @@ case class StringIndexerModel(labels: Seq[String],
     * @param value label to index
     * @return index of label
     */
-  def apply(value: Any): Double = if (value == null || value == None) {
+  def apply(value: Any): Int = if (value == null || value == None) {
     if (keepInvalid) {
       labels.length
     } else {
@@ -73,4 +77,8 @@ case class StringIndexerModel(labels: Seq[String],
     * @return reverse string indexer of this string indexer
     */
   def toReverse: ReverseStringIndexerModel = ReverseStringIndexerModel(labels)
+
+  override def inputSchema: StructType = StructType("input" -> ScalarType(BasicType.String, this.nullableInput)).get
+
+  override def outputSchema: StructType = StructType("output" -> ScalarType.Double).get
 }

@@ -1,7 +1,6 @@
 package org.apache.spark.ml.mleap.parity.feature
 
 import org.apache.spark.ml.{Pipeline, Transformer}
-import org.apache.spark.ml.clustering.LDA
 import org.apache.spark.ml.feature.{CountVectorizer, StopWordsRemover, Tokenizer}
 import org.apache.spark.ml.mleap.feature.WordLengthFilter
 import org.apache.spark.ml.parity.SparkParityBase

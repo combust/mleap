@@ -1,8 +1,9 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.PolynomialExpansionModel
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -10,13 +11,13 @@ import org.scalatest.FunSpec
   * Created by mikhail on 10/16/16.
   */
 class PolynomialExpansionSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
+  val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(2.0, 3.0)))))
   val frame = LeapFrame(schema, dataset)
 
-  val transformer = PolynomialExpansion(inputCol = "test_vec",
-    outputCol = "test_expanded",
-    model = PolynomialExpansionModel(2))
+  val transformer = PolynomialExpansion(
+    shape = NodeShape.vector(2, 5, inputCol = "test_vec", outputCol = "test_expanded"),
+    model = PolynomialExpansionModel(2, 2))
 
   describe("#transform") {
     it("Takes 2+ dimensional vector and runs polynomial expansion") {
@@ -29,11 +30,11 @@ class PolynomialExpansionSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      assert(transformer.getFields().get ==
-        Seq(StructField("test_vec", TensorType(DoubleType())),
-          StructField("test_expanded", TensorType(DoubleType()))))
+      assert(transformer.schema.fields ==
+        Seq(StructField("test_vec", TensorType.Double(2)),
+          StructField("test_expanded", TensorType.Double(5))))
     }
   }
 }

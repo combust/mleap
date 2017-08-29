@@ -22,13 +22,6 @@ case object DirFS extends FSType
 class BundleSerializationSpec extends FunSpec {
   implicit val testContext = TestContext(BundleRegistry("test-registry"))
 
-  it should behave like bundleSerializer("Serializing/Deserializing mixed a bundle as a dir",
-    SerializationFormat.Mixed,
-    DirFS)
-  it should behave like bundleSerializer("Serializing/Deserializing mixed a bundle as a zip",
-    SerializationFormat.Mixed,
-    ZipFS)
-
   it should behave like bundleSerializer("Serializing/Deserializing json a bundle as a dir",
     SerializationFormat.Json,
     DirFS)
@@ -56,12 +49,11 @@ class BundleSerializationSpec extends FunSpec {
         output = "output_field",
         model = LinearModel(coefficients = randomCoefficients,
           intercept = 44.5))
-      val custom = MyCustomTransformer(MyCustomObject("some_custom"))
       val si = StringIndexer(uid = "string_indexer_example",
         input = "input_string",
         output = "output_index",
         model = StringIndexerModel(strings = Seq("hey", "there", "man")))
-      val pipeline = Pipeline(uid = "my_pipeline", PipelineModel(Seq(si, custom, lr)))
+      val pipeline = Pipeline(uid = "my_pipeline", PipelineModel(Seq(si, lr)))
 
       describe("with a simple linear regression") {
         it("serializes/deserializes the same object") {

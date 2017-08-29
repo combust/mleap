@@ -2,9 +2,8 @@ package ml.combust.mleap.avro
 
 import java.nio.ByteBuffer
 
-import ml.combust.bundle.ByteString
-import ml.combust.mleap.runtime.types._
-import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
+import ml.combust.mleap.core.types._
+import ml.combust.mleap.tensor.{ByteString, DenseTensor, SparseTensor, Tensor}
 import org.apache.avro.generic.GenericData
 import org.apache.avro.util.Utf8
 
@@ -17,16 +16,20 @@ case class ValueConverter() {
   import SchemaConverter._
 
   def mleapToAvro(dataType: DataType): (Any) => Any = {
-    val base = mleapToAvroBase(dataType)
+    val simple = mleapToAvroSimple(dataType)
 
     if(dataType.isNullable) {
-      (v: Any) => v.asInstanceOf[Option[Any]].map(base).orNull
-    } else { base }
+      (v: Any) => v.asInstanceOf[Option[Any]].map(simple).orNull
+    } else { simple }
   }
 
-  def mleapToAvroBase(dataType: DataType): (Any) => Any = dataType match {
-    case _: ByteStringType => (value) =>ByteBuffer.wrap(value.asInstanceOf[ByteString].bytes)
-    case _: BasicType => identity
+  def mleapToAvroBasic(base: BasicType): (Any) => Any = base match {
+    case BasicType.ByteString => (v) => ByteBuffer.wrap(v.asInstanceOf[ByteString].bytes)
+    case _ => identity
+  }
+
+  def mleapToAvroSimple(dataType: DataType): (Any) => Any = dataType match {
+    case st: ScalarType => mleapToAvroBasic(st.base)
     case _: ListType => (value) => value.asInstanceOf[Seq[_]].asJava
     case tt: TensorType =>
       val vectorRecord = new GenericData.Record(tt)
@@ -40,46 +43,42 @@ case class ValueConverter() {
         vectorRecord.put(tensorSchemaDimensionsIndex, tensor.dimensions.asJava)
         vectorRecord.put(tensorSchemaValuesIndex, values)
         tensor match {
-          case tensor: DenseTensor[_] =>
+          case _: DenseTensor[_] =>
             vectorRecord.put(tensorSchemaIndicesIndex, null)
           case tensor: SparseTensor[_] =>
             vectorRecord.put(tensorSchemaIndicesIndex, tensor.indices.map(_.asJava).asJava)
         }
         vectorRecord
       }
-    case dataType: CustomType =>
-      val customRecord = new GenericData.Record(customSchema(dataType))
-      (value) =>
-        customRecord.put(customSchemaIndex, new String(dataType.toBytes(value), bytesCharset))
-        customRecord
     case _ => throw new IllegalArgumentException(s"invalid data type: $dataType")
   }
 
-  def avroToMleap(dataType: DataType): (Any) => Any = {
-    val base = avroToMleapBase(dataType)
-
-    if(dataType.isNullable) {
-      (v) =>
-        Option[Any](v).map(base)
-    } else { base }
+  def avroToMleapBasic(base: BasicType): (Any) => Any = base match {
+    case BasicType.String => _.asInstanceOf[Utf8].toString
+    case BasicType.ByteString => (value) => ByteString(value.asInstanceOf[ByteBuffer].array())
+    case _ => identity
   }
 
-  def avroToMleapBase(dataType: DataType): (Any) => Any = dataType match {
-    case StringType(_) => (value) => value.asInstanceOf[Utf8].toString
-    case ByteStringType(_) => (value) => ByteString(value.asInstanceOf[ByteBuffer].array())
-    case _: BasicType => identity
+  def avroToMleap(dataType: DataType): (Any) => Any = if(dataType.isNullable) {
+    val simple = avroToMleapSimple(dataType)
+
+    (v) => Option[Any](v).map(simple)
+  } else { avroToMleapSimple(dataType) }
+
+  def avroToMleapSimple(dataType: DataType): (Any) => Any = dataType match {
+    case st: ScalarType => avroToMleapBasic(st.base)
     case at: ListType => at.base match {
-      case BooleanType(_) => (value) => value.asInstanceOf[GenericData.Array[Boolean]].asScala
-      case StringType(_) => (value) => value.asInstanceOf[GenericData.Array[Utf8]].asScala.map(_.toString)
-      case ByteType(_) => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.map(_.toByte)
-      case ShortType(_) => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.map(_.toShort)
-      case IntegerType(_) => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala
-      case LongType(_) => (value) => value.asInstanceOf[GenericData.Array[Long]].asScala
-      case FloatType(_) => (value) => value.asInstanceOf[GenericData.Array[Float]].asScala
-      case DoubleType(_) => (value) => value.asInstanceOf[GenericData.Array[Double]].asScala
-      case ByteStringType(_) => (value) => value.asInstanceOf[GenericData.Array[ByteBuffer]].asScala.map(b => ByteString(b.array()))
+      case BasicType.Boolean => (value) => value.asInstanceOf[GenericData.Array[Boolean]].asScala
+      case BasicType.Byte => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.map(_.toByte)
+      case BasicType.Short => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.map(_.toShort)
+      case BasicType.Int => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala
+      case BasicType.Long => (value) => value.asInstanceOf[GenericData.Array[Long]].asScala
+      case BasicType.Float => (value) => value.asInstanceOf[GenericData.Array[Float]].asScala
+      case BasicType.Double => (value) => value.asInstanceOf[GenericData.Array[Double]].asScala
+      case BasicType.String => (value) => value.asInstanceOf[GenericData.Array[Utf8]].asScala.map(_.toString)
+      case BasicType.ByteString => (value) => value.asInstanceOf[GenericData.Array[ByteBuffer]].asScala.map(b => ByteString(b.array()))
       case _ =>
-        val atm = avroToMleap(at.base)
+        val atm = avroToMleapBasic(at.base)
         (value) => value.asInstanceOf[GenericData.Array[_]].asScala.map(atm)
     }
     case tt: TensorType =>
@@ -93,28 +92,24 @@ case class ValueConverter() {
         }
 
         tt.base match {
-          case BooleanType(_) =>
+          case BasicType.Boolean =>
             Tensor.create(values.asInstanceOf[java.util.List[Boolean]].asScala.toArray, dimensions, indices)
-          case StringType(_) =>
-            Tensor.create(values.asInstanceOf[java.util.List[String]].asScala.toArray, dimensions, indices)
-          case ByteType(_) =>
+          case BasicType.Byte =>
             Tensor.create(values.asInstanceOf[ByteBuffer].array(), dimensions, indices)
-          case ShortType(_) =>
+          case BasicType.Short =>
             Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.map(_.toShort).toArray, dimensions, indices)
-          case IntegerType(_) =>
+          case BasicType.Int =>
             Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.toArray, dimensions, indices)
-          case LongType(_) =>
+          case BasicType.Long =>
             Tensor.create(values.asInstanceOf[java.util.List[Long]].asScala.toArray, dimensions, indices)
-          case FloatType(_) =>
+          case BasicType.Float =>
             Tensor.create(values.asInstanceOf[java.util.List[Float]].asScala.toArray, dimensions, indices)
-          case DoubleType(_) =>
+          case BasicType.Double =>
             Tensor.create(values.asInstanceOf[java.util.List[Double]].asScala.toArray, dimensions, indices)
+          case BasicType.String =>
+            Tensor.create(values.asInstanceOf[java.util.List[String]].asScala.toArray, dimensions, indices)
           case tpe => throw new IllegalArgumentException(s"invalid base type for tensor $tpe")
         }
-      }
-    case ct: CustomType =>
-      (value) => {
-        ct.fromBytes(value.asInstanceOf[GenericData.Record].get(customSchemaIndex).toString.getBytes(bytesCharset))
       }
     case tpe => throw new IllegalArgumentException(s"invalid data type $tpe")
   }

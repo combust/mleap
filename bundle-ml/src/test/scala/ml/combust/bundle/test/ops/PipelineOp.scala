@@ -20,7 +20,7 @@ class PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
 
     override def store(model: Model, obj: PipelineModel)
                       (implicit context: BundleContext[Any]): Model = {
-      model.withAttr("nodes", Value.stringList(GraphSerializer(context).write(obj.stages).get))
+      model.withValue("nodes", Value.stringList(GraphSerializer(context).write(obj.stages).get))
     }
 
 
@@ -43,7 +43,7 @@ class PipelineOp extends OpNode[Any, Pipeline, PipelineModel] {
     Pipeline(node.name, model)
   }
 
-  override def shape(node: Pipeline): Shape = Shape()
+  override def shape(node: Pipeline)(implicit context: BundleContext[Any]): NodeShape = NodeShape()
 
   override def children(node: Pipeline): Option[Array[Any]] = Some(node.model.stages.toArray)
 }

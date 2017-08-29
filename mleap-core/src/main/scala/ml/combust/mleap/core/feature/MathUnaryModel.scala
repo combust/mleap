@@ -1,5 +1,8 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{ScalarType, StructType}
+
 /**
   * Created by hollinwilkins on 12/27/16.
   */
@@ -30,7 +33,7 @@ object UnaryOperation {
   val forName: Map[String, UnaryOperation] = all.map(o => (o.name, o)).toMap
 }
 
-case class MathUnaryModel(operation: UnaryOperation) {
+case class MathUnaryModel(operation: UnaryOperation) extends Model {
   import UnaryOperation._
 
   def apply(a: Double): Double = operation match {
@@ -42,4 +45,10 @@ case class MathUnaryModel(operation: UnaryOperation) {
     case Tan => Math.tan(a)
     case _ => throw new RuntimeException(s"unsupported unary operation: $operation")
   }
+
+  override def inputSchema: StructType = StructType(
+    "input" -> ScalarType.Double).get
+
+  override def outputSchema: StructType = StructType(
+    "output" -> ScalarType.Double).get
 }

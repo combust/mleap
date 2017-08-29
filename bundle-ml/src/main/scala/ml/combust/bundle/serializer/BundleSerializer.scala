@@ -4,12 +4,12 @@ import java.io.Closeable
 import java.nio.file.Files
 
 import ml.combust.bundle.{BundleContext, BundleFile, HasBundleRegistry}
-import ml.combust.bundle.json.JsonSupport._
 import ml.combust.bundle.dsl.Bundle
+import ml.combust.bundle.json.JsonSupport._
 import spray.json._
 import resource._
 
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 /** Class for serializing/deserializing Bundle.ML [[ml.combust.bundle.dsl.Bundle]] objects.
   *
@@ -28,13 +28,13 @@ case class BundleSerializer[Context](context: Context,
     */
   def write[Transformer <: AnyRef](bundle: Bundle[Transformer]): Try[Bundle[Transformer]] = Try {
     val bundleContext = bundle.bundleContext(context, hr.bundleRegistry, file.fs, file.path)
-    implicit val sc = bundleContext.serializationContext(SerializationFormat.Json)
+    implicit val format = bundleContext.format
 
     Files.createDirectories(file.path)
     NodeSerializer(bundleContext.bundleContext("root")).write(bundle.root).flatMap {
       _ =>
         (for (out <- managed(Files.newOutputStream(bundleContext.file(Bundle.bundleJson)))) yield {
-          val json = bundle.info.toJson.prettyPrint.getBytes
+          val json = bundle.info.asBundle.toJson.prettyPrint.getBytes("UTF-8")
           out.write(json)
           bundle
         }).tried
@@ -52,7 +52,6 @@ case class BundleSerializer[Context](context: Context,
           hr.bundleRegistry,
           file.fs,
           file.path);
-        sc = bundleContext.serializationContext(SerializationFormat.Json);
         root <- NodeSerializer(bundleContext.bundleContext("root")).read()) yield {
       Bundle(info, root.asInstanceOf[Transformer])
     }

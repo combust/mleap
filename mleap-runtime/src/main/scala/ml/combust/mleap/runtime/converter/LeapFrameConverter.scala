@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.converter
 
 import ml.combust.mleap.runtime._
-import ml.combust.mleap.runtime.reflection.MleapReflection._
-import ml.combust.mleap.runtime.types.{StructField, StructType}
+import ml.combust.mleap.core.reflection.MleapReflection._
+import ml.combust.mleap.core.types.{StructField, StructType}
 
 import scala.reflect.runtime.universe._
 

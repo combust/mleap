@@ -21,7 +21,7 @@ object Dependencies {
       "org.apache.spark" %% "spark-catalyst" % sparkVersion)
     val avroDep = "org.apache.avro" % "avro" % "1.8.1"
     val sprayJson = "io.spray" %% "spray-json" % "1.3.2"
-    val arm = "com.jsuereth" %% "scala-arm" % "2.0-RC1"
+    val arm = "com.jsuereth" %% "scala-arm" % "2.0"
     val config = "com.typesafe" % "config" % "1.3.0"
     val scalaReflect = ScalaVersionDependentModuleID.versioned("org.scala-lang" % "scala-reflect" % _)
     val sparkAvro = "com.databricks" %% "spark-avro" % "3.0.1"
@@ -48,7 +48,7 @@ object Dependencies {
 
   val tensor = l ++= Seq(sprayJson, Test.scalaTest)
 
-  val bundleMl = l ++= Seq(arm, config, Test.scalaTest)
+  val bundleMl = l ++= Seq(arm, config, sprayJson, Test.scalaTest)
 
   val base = l ++= Seq()
 

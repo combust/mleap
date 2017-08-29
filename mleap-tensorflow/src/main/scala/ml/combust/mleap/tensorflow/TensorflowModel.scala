@@ -1,6 +1,6 @@
 package ml.combust.mleap.tensorflow
 
-import ml.combust.mleap.runtime.types.DataType
+import ml.combust.mleap.core.types.DataType
 import ml.combust.mleap.tensorflow.converter.{MleapConverter, TensorflowConverter}
 import org.tensorflow
 

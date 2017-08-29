@@ -1,41 +1,49 @@
 package ml.combust.mleap.runtime.transformer.classification
 
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.classification.SupportVectorMachineModel
+import ml.combust.mleap.core.types._
+import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 
 class SupportVectorMachineSpec extends FunSpec {
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      val transformer = new SupportVectorMachine("transformer", "features", "prediction", None, None, null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(3, 2),
+        model = new SupportVectorMachineModel(Vectors.dense(1, 2, 3), 2))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("prediction", ScalarType.Double)))
     }
 
     it("has the correct inputs and outputs with probability column") {
-      val transformer = new SupportVectorMachine("transformer", "features", "prediction", None, Some("probability"), null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("probability", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(3, 2, probabilityCol = Some("probability")),
+        model = new SupportVectorMachineModel(Vectors.dense(1, 2, 3), 2))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("probability", TensorType.Double(2)),
+          StructField("prediction", ScalarType.Double)))
     }
 
     it("has the correct inputs and outputs with rawPrediction column") {
-      val transformer = new SupportVectorMachine("transformer", "features", "prediction", Some("rawPrediction"), None, null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("rawPrediction", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(3, 2, rawPredictionCol = Some("rp")),
+        model = new SupportVectorMachineModel(Vectors.dense(1, 2, 3), 2))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("rp", TensorType(BasicType.Double, Seq(2))),
+          StructField("prediction", ScalarType.Double)))
     }
 
     it("has the correct inputs and outputs with both probability and rawPrediction columns") {
-      val transformer = new SupportVectorMachine("transformer", "features", "prediction", Some("rawPrediction"), Some("probability"), null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("rawPrediction", TensorType(DoubleType())),
-          StructField("probability", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(3, 2,
+        rawPredictionCol = Some("rp"),
+        probabilityCol = Some("probability")),
+        model = new SupportVectorMachineModel(Vectors.dense(1, 2, 3), 2))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("rp", TensorType.Double(2)),
+          StructField("probability", TensorType.Double(2)),
+          StructField("prediction", ScalarType.Double)))
     }
   }
 }

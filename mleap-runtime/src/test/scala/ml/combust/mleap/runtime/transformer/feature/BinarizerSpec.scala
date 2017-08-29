@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BinarizerModel
-import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
@@ -10,16 +10,15 @@ import org.scalatest.FunSpec
   * Created by fshabbir on 12/1/16.
   */
 class BinarizerSpec extends FunSpec {
-  val binarizer = Binarizer(inputCol = "test_vec",
-    inputDataType = Some(TensorType(DoubleType())),
-    outputCol = "test_binarizer",
-    outputDataType = Some(TensorType(DoubleType())),
-    model = BinarizerModel(0.6))
+  val binarizer = Binarizer(shape = NodeShape.vector(3, 3,
+    inputCol = "test_vec",
+    outputCol = "test_binarizer"),
+    model = BinarizerModel(0.6, TensorShape(3)))
 
   describe("with a double tensor input column") {
     describe("#transform") {
       it("thresholds the input column to 0 or 1") {
-        val schema = StructType(Seq(StructField("test_vec", TensorType(DoubleType())))).get
+        val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
         val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.1, 0.6, 0.7)))))
         val frame = LeapFrame(schema, dataset)
 
@@ -32,22 +31,22 @@ class BinarizerSpec extends FunSpec {
       }
     }
 
-    describe("#getFields") {
+    describe("input/output schema") {
       it("has the correct inputs and outputs") {
-        assert(binarizer.getFields().get ==
-          Seq(StructField("test_vec", TensorType(DoubleType())),
-            StructField("test_binarizer", TensorType(DoubleType()))))
+        assert(binarizer.schema.fields ==
+          Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
+            StructField("test_binarizer", TensorType(BasicType.Double, Seq(3)))))
       }
     }
   }
 
   describe("with a double input column") {
-    val binarizer2 = binarizer.copy(inputCol = "test",
-                                    inputDataType = Some(DoubleType()),
-                                    outputDataType = Some(DoubleType()))
+    val binarizer2 = binarizer.copy(shape = NodeShape.scalar(
+      inputCol = "test",
+      outputCol = "test_binarizer"), model = binarizer.model.copy(inputShape = ScalarShape()))
     describe("#transform") {
       it("thresholds the input column to 0 or 1") {
-        val schema = StructType(Seq(StructField("test", DoubleType()))).get
+        val schema = StructType(Seq(StructField("test", ScalarType.Double))).get
         val dataset = LocalDataset(Seq(Row(0.7), Row(0.1)))
         val frame = LeapFrame(schema, dataset)
 
@@ -59,11 +58,11 @@ class BinarizerSpec extends FunSpec {
       }
     }
 
-    describe("#getFields") {
+    describe("input/output schema") {
       it("has the correct inputs and outputs") {
-        assert(binarizer2.getFields().get ==
-          Seq(StructField("test", DoubleType()),
-            StructField("test_binarizer", DoubleType())))
+        assert(binarizer2.schema.fields ==
+          Seq(StructField("test", ScalarType.Double),
+            StructField("test_binarizer", ScalarType.Double)))
       }
     }
   }

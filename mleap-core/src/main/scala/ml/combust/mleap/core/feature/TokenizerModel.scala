@@ -1,5 +1,8 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{BasicType, ListType, ScalarType, StructType}
+
 /** Companion object for defaults.
   */
 object TokenizerModel {
@@ -8,12 +11,9 @@ object TokenizerModel {
 
 /** Class for a tokenizer model.
   *
-  * Default regular expression for tokenizing strings is defined by
-  * [[TokenizerModel.defaultTokenizer]]
-  *
   * @param regex regular expression used for tokenizing strings
   */
-case class TokenizerModel(regex: String = "\\s") {
+case class TokenizerModel(regex: String = "\\s") extends Model {
   /** Tokenize a document string.
     *
     * Uses regex to split the document into an array.
@@ -22,4 +22,8 @@ case class TokenizerModel(regex: String = "\\s") {
     * @return array of tokens
     */
   def apply(document: String): Seq[String] = document.toLowerCase.split(regex).toSeq
+
+  override def inputSchema: StructType = StructType("input" -> ScalarType.String).get
+
+  override def outputSchema: StructType = StructType("output" -> ListType(BasicType.String)).get
 }

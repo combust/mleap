@@ -7,12 +7,12 @@ import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.types.{DoubleType, StructType}
 import SparkSupport._
-import ml.combust.mleap.runtime.types
-import ml.combust.mleap.runtime.types.{StructField, TensorType}
+import ml.combust.mleap.core.{Model, types}
+import ml.combust.mleap.core.types.{NodeShape, ScalarType, StructField}
 import org.scalatest.FunSpec
 
 import scala.collection.JavaConverters._
-import scala.util.{Success, Try}
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 4/21/17.
@@ -26,10 +26,14 @@ case class MyTransformer() extends Transformer {
     }
   }
 
-  override def getFields(): Try[Seq[types.StructField]] = {
-    Success(Seq(types.StructField("input", types.DoubleType()),
-      types.StructField("output1", types.DoubleType()),
-      types.StructField("output2", types.StringType())))
+  override val shape: NodeShape = NodeShape().withStandardInput("input").
+    withOutput("output1", "output1").withOutput("output2", "output2")
+
+  override val model: Model = new Model {
+    override def inputSchema: types.StructType = types.StructType("input" -> ScalarType.Double).get
+
+    override def outputSchema: types.StructType = types.StructType("output1" -> ScalarType.Double,
+      "output2" -> ScalarType.String).get
   }
 }
 
@@ -52,13 +56,13 @@ class SparkTransformBuilderSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       val transformer = MyTransformer()
-      assert(transformer.getFields().get ==
-        Seq(StructField("input", types.DoubleType()),
-          StructField("output1", types.DoubleType()),
-          StructField("output2", types.StringType())))
+      assert(transformer.schema.fields ==
+        Seq(StructField("input", types.ScalarType.Double),
+          StructField("output1", types.ScalarType.Double),
+          StructField("output2", types.ScalarType.String)))
     }
   }
 }

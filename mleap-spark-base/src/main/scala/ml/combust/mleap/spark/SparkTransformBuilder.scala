@@ -1,8 +1,8 @@
 package ml.combust.mleap.spark
 
-import ml.combust.mleap.runtime.function.{ArraySelector, FieldSelector, Selector, UserDefinedFunction}
+import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.runtime.function.{StructSelector, FieldSelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.StructType
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.mleap.TypeConverters
 import org.apache.spark.sql.{Column, DataFrame, expressions}
@@ -14,7 +14,7 @@ import scala.util.{Random, Try}
   * Created by hollinwilkins on 10/22/16.
   */
 case class SparkTransformBuilder(dataset: DataFrame) extends TransformBuilder[SparkTransformBuilder] {
-  override def schema: StructType = {
+  def schema: StructType = {
     TypeConverters.mleapStructType(dataset.schema)
   }
 
@@ -22,7 +22,7 @@ case class SparkTransformBuilder(dataset: DataFrame) extends TransformBuilder[Sp
                           (udf: UserDefinedFunction): Try[SparkTransformBuilder] = Try {
     val structUdf: expressions.UserDefinedFunction = udf
     val sparkSelectors = inputs.map(sparkSelector)
-    val tmpName = s"tmp_${Random.nextInt()}"
+    val tmpName = s"tmp_${Math.abs(Random.nextInt())}"
     val dataset2 = dataset.withColumn(tmpName, structUdf(sparkSelectors: _*))
     val dataset3 = outputs.zipWithIndex.foldLeft(dataset2) {
       case (d, (name, index)) =>
@@ -40,6 +40,10 @@ case class SparkTransformBuilder(dataset: DataFrame) extends TransformBuilder[Sp
 
   private def sparkSelector(selector: Selector): Column = selector match {
     case FieldSelector(name) => dataset.col(name)
-    case ArraySelector(names @ _*) => struct(names.map(dataset.col): _*)
+    case StructSelector(names) =>
+      val cols = names.zipWithIndex.map {
+        case (name, index) => dataset.col(name).as(s"_$index")
+      }
+      struct(cols: _*)
   }
 }

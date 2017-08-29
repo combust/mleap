@@ -1,26 +1,26 @@
 package ml.combust.mleap.avro
 
-import ml.combust.bundle.ByteString
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.serialization._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types._
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, Tensor}
+import ml.combust.mleap.runtime.MleapSupport._
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 10/31/16.
   */
 class DefaultFrameSerializerSpec extends FunSpec {
-  val schema = StructType(StructField("test_double", DoubleType()),
-    StructField("test_float", FloatType()),
-    StructField("test_string", StringType()),
-    StructField("test_vector", TensorType(DoubleType())),
-    StructField("test_vector2", TensorType(DoubleType())),
-    StructField("test_float_vector", TensorType(FloatType())),
-    StructField("test_byte_vector", TensorType(ByteType())),
-    StructField("test_short_vector", TensorType(ShortType())),
-    StructField("test_byte_string", ByteStringType()),
-    StructField("test_nullable", StringType(true))).get
+  val schema = StructType(StructField("test_double", ScalarType.Double),
+    StructField("test_float", ScalarType.Float),
+    StructField("test_string", ScalarType.String),
+    StructField("test_vector", TensorType(BasicType.Double)),
+    StructField("test_vector2", TensorType(BasicType.Double)),
+    StructField("test_float_vector", TensorType(BasicType.Float)),
+    StructField("test_byte_vector", TensorType(BasicType.Byte)),
+    StructField("test_short_vector", TensorType(BasicType.Short)),
+    StructField("test_byte_string", ScalarType.ByteString),
+    StructField("test_nullable", ScalarType.String.asNullable)).get
   val row = Row(2.0d, 45.3f, "hello",
     Tensor.denseVector(Array(0.1, 2.33, 4.5)),
     Tensor.denseVector(Array(0.1, 2.33, 4.5)),

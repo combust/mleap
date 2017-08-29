@@ -2,7 +2,7 @@ package ml.combust.mleap.serving
 
 import java.nio.file.NoSuchFileException
 
-import ml.combust.mleap.runtime.types.{DoubleType, TensorType}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.serving.domain.v1._
 import org.scalatest.{AsyncFunSpec, Matchers}
 
@@ -82,20 +82,20 @@ class MleapServiceSpec extends AsyncFunSpec with Matchers {
       modelLoaded.map(response => {
         response shouldBe a [LoadModelResponse]
 
-        val result = service.getSchema()
+        val result = service.getSchema
         assert(result.isSuccess)
         val schema = result.get
         assert(schema.fields.size == 5)
-        assert(schema.getField("first_double").get.dataType == DoubleType())
-        assert(schema.getField("second_double").get.dataType == DoubleType())
-        assert(schema.getField("third_double").get.dataType == DoubleType())
-        assert(schema.getField("features").get.dataType == TensorType(DoubleType()))
-        assert(schema.getField("prediction").get.dataType == DoubleType())
+        assert(schema.getField("first_double").get.dataType == ScalarType.Double)
+        assert(schema.getField("second_double").get.dataType == ScalarType.Double)
+        assert(schema.getField("third_double").get.dataType == ScalarType.Double)
+        assert(schema.getField("features").get.dataType == TensorType(BasicType.Double, Some(Seq(3))))
+        assert(schema.getField("prediction").get.dataType == ScalarType.Double)
       })
     }
 
     it("returns a failure if no model has been loaded when schema request is received") {
-      val result = new MleapService().getSchema()
+      val result = new MleapService().getSchema
       assert(result.isFailure)
       result match {
         case Failure(error) =>

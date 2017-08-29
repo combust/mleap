@@ -202,7 +202,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         >>> feature_extractor2_tf.fit_transform(data).head(1).values
         >>> array([[0, 1]])
         :param input_scalars: List of scalar feature names that are being extracted from a DataFrame
-        :param input_vectors: List of FeatureExtractors that were used to generate the input vectors
+        :param input_vectors: List of FeatureExtractors and other transformers that were used to generate the input vectors
         :param output_vector: Name of the output vector, only used for serialization
         :param output_vector_items: List of output feature names
         :return:

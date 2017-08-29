@@ -162,7 +162,7 @@ class SimpleSerializer(object):
                 union_steps = [x[1].name for x in step.transformer_list if hasattr(x[1], 'serialize_to_bundle') and x[1].serializable]
                 pipeline_steps += union_steps
             elif hasattr(step, 'serialize_to_bundle') and step.serializable:
-                pipeline_steps.append(name)
+                pipeline_steps.append(step.name)
         return pipeline_steps
 
 

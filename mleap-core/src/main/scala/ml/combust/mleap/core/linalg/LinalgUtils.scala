@@ -61,4 +61,12 @@ object LinalgUtils {
     }
     sqDist
   }
+
+  def log1pExp(x: Double): Double = {
+    if (x > 0) {
+      x + math.log1p(math.exp(-x))
+    } else {
+      math.log1p(math.exp(x))
+    }
+  }
 }

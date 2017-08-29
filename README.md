@@ -176,12 +176,9 @@ data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
 
 continuous_features = ['col_a']
 
-input_shapes = {'data_shape': [{'shape':'scalar'}, {'shape':'scalar'}]}
-
-feature_extractor_tf = FeatureExtractor(input_features=continuous_features, 
+feature_extractor_tf = FeatureExtractor(input_scalars=continuous_features, 
                                          output_vector='imputed_features', 
-                                         output_vector_items=continuous_features,
-                                         input_shapes=input_shapes)
+                                         output_vector_items=continuous_features)
 
 # Label Encoder for x1 Label 
 label_encoder_tf = LabelEncoder(input_features=feature_extractor_tf.output_vector_items,
@@ -192,7 +189,7 @@ reshape_le_tf = ReshapeArrayToN1()
 
 # Vector Assembler for x1 One Hot Encoder
 one_hot_encoder_tf = OneHotEncoder(sparse=False)
-one_hot_encoder_tf.mlinit(input_features = label_encoder_tf.output_features, 
+one_hot_encoder_tf.mlinit(prior_tf = label_encoder_tf, 
                           output_features = '{}_label_one_hot_encoded'.format(continuous_features[0]))
 
 one_hot_encoder_pipeline_x0 = Pipeline([

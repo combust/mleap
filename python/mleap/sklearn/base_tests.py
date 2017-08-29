@@ -28,7 +28,7 @@ from sklearn.linear_model import LinearRegression, LogisticRegression, LogisticR
 from sklearn.preprocessing import Binarizer
 from mleap.sklearn.base import LinearRegression
 from mleap.sklearn.logistic import LogisticRegression, LogisticRegressionCV
-from mleap.sklearn.preprocessing.data import Binarizer
+from mleap.sklearn.preprocessing.data import FeatureExtractor, Binarizer
 
 
 class TransformerTests(unittest.TestCase):
@@ -95,10 +95,14 @@ class TransformerTests(unittest.TestCase):
         logistic_regression.mlinit(input_features='a',
                                  prediction_column='e_binary')
 
+        extract_features = ['e']
+        feature_extractor = FeatureExtractor(input_scalars=['e'],
+                                         output_vector='extracted_e_output',
+                                         output_vector_items=["{}_out".format(x) for x in extract_features])
+
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features='e',
-                         output_features='e_binary',
-                         input_shapes={'data_shape':[{'shape':'scalar'}]})
+        binarizer.mlinit(prior_tf=feature_extractor,
+                         output_features='e_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
@@ -120,10 +124,14 @@ class TransformerTests(unittest.TestCase):
         logistic_regression.mlinit(input_features='a',
                                    prediction_column='e_binary')
 
+        extract_features = ['e']
+        feature_extractor = FeatureExtractor(input_scalars=['e'],
+                                         output_vector='extracted_e_output',
+                                         output_vector_items=["{}_out".format(x) for x in extract_features])
+
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features='e',
-                         output_features='e_binary',
-                         input_shapes={'data_shape':[{'shape':'scalar'}]})
+        binarizer.mlinit(prior_tf=feature_extractor,
+                         output_features='e_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
@@ -153,10 +161,14 @@ class TransformerTests(unittest.TestCase):
         logistic_regression.mlinit(input_features='a',
                                  prediction_column='e_binary')
 
+        extract_features = ['e']
+        feature_extractor = FeatureExtractor(input_scalars=['e'],
+                                             output_vector='extracted_e_output',
+                                             output_vector_items=["{}_out".format(x) for x in extract_features])
+
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features='e',
-                         output_features='e_binary',
-                         input_shapes={'data_shape':[{'shape':'scalar'}]})
+        binarizer.mlinit(prior_tf=feature_extractor,
+                         output_features='e_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 
@@ -178,10 +190,14 @@ class TransformerTests(unittest.TestCase):
         logistic_regression.mlinit(input_features='a',
                                    prediction_column='e_binary')
 
+        extract_features = ['e']
+        feature_extractor = FeatureExtractor(input_scalars=['e'],
+                                             output_vector='extracted_e_output',
+                                             output_vector_items=["{}_out".format(x) for x in extract_features])
+
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(input_features='e',
-                         output_features='e_binary',
-                         input_shapes={'data_shape':[{'shape':'scalar'}]})
+        binarizer.mlinit(prior_tf=feature_extractor,
+                         output_features='e_binary')
 
         Xres = binarizer.fit_transform(self.df[['a']])
 

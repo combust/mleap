@@ -923,18 +923,12 @@ class TransformerTests(unittest.TestCase):
             "op": "string_map",
             "attributes": {
                 "labels": {
-                    "type": {
-                        "type": "list",
-                        "base": "string"
-                    },
-                    "value": ["test_one", "test_two"]
+                    "type": "list",
+                    "string": ["test_one", "test_two"]
                 },
                 "values": {
-                    "type": {
-                        "type": "list",
-                        "base": "double"
-                    },
-                    "value": [1.0, 0.0]
+                    "type": "list",
+                    "double": [1.0, 0.0]
                 }
             }
         }
@@ -943,8 +937,8 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, string_map_tf.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['labels']['value'], model['attributes']['labels']['value'])
-        self.assertEqual(expected_model['attributes']['values']['value'], model['attributes']['values']['value'])
+        self.assertEqual(expected_model['attributes']['labels']['string'], model['attributes']['labels']['string'])
+        self.assertEqual(expected_model['attributes']['values']['double'], model['attributes']['values']['double'])
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, string_map_tf.name)) as json_data:

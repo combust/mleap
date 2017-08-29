@@ -71,12 +71,6 @@ def deserialize_from_bundle(self, path, node_name):
     return serializer.deserialize_from_bundle(self, path, node_name)
 
 
-def mleap_init_v0(self, input_features, output_features):
-    self.input_features = input_features
-    self.output_features = output_features
-    self.name = "{}_{}".format(self.op, uuid.uuid1())
-
-
 def mleap_init(self, prior_tf, output_features=None):
 
     self.name = "{}_{}".format(self.op, uuid.uuid1())
@@ -110,19 +104,6 @@ def mleap_init(self, prior_tf, output_features=None):
         self.input_shapes = {'data_shape': [{'shape': output_shape}]}
 
 
-def mleap_init_with_input_size(self, input_features, output_features, input_size):
-    self.input_features = input_features
-    self.output_features = output_features
-    self.input_size = input_size
-    self.name = "{}_{}".format(self.op, uuid.uuid1())
-
-
-def mleap_init_with_input_shapes(self, input_features, output_features, input_shapes):
-    self.input_features = input_features
-    self.output_features = output_features
-    self.input_shapes = input_shapes
-    self.name = "{}_{}".format(self.op, uuid.uuid1())
-
 setattr(StandardScaler, 'op', ops.STANDARD_SCALER)
 setattr(StandardScaler, 'serialize_to_bundle', serialize_to_bundle)
 setattr(StandardScaler, 'deserialize_from_bundle', deserialize_from_bundle)
@@ -147,13 +128,13 @@ setattr(OneHotEncoder, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(OneHotEncoder, 'serializable', True)
 
 setattr(Binarizer, 'op', ops.BINARIZER)
-setattr(Binarizer, 'mlinit', mleap_init_with_input_shapes)
+setattr(Binarizer, 'mlinit', mleap_init)
 setattr(Binarizer, 'serialize_to_bundle', serialize_to_bundle)
 setattr(Binarizer, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(Binarizer, 'serializable', True)
 
 setattr(PolynomialFeatures, 'op', ops.POLYNOMIALEXPANSION)
-setattr(PolynomialFeatures, 'mlinit', mleap_init_with_input_size)
+setattr(PolynomialFeatures, 'mlinit', mleap_init)
 setattr(PolynomialFeatures, 'serialize_to_bundle', serialize_to_bundle)
 setattr(PolynomialFeatures, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(PolynomialFeatures, 'serializable', True)
@@ -272,9 +253,11 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         elif self.input_vectors is not None:
             self.input_shapes = {'data_shape': []}
             for vector in self.input_vectors:
-                if vector.op not in [ops.ONE_HOT_ENCODER, ops.POLYNOMIALEXPANSION]:
+                if vector.op not in [ops.ONE_HOT_ENCODER]:
                     shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": len(vector.input_features)}]}}
                     self.input_shapes['data_shape'].append(shape)
+                elif vector.op == ops.POLYNOMIALEXPANSION:
+                    self.input_size = len(vector.input_features)
                 elif vector.op == ops.ONE_HOT_ENCODER:
                     shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": vector.n_values_[0] - 1}]}}
                     self.input_shapes['data_shape'].append(shape)

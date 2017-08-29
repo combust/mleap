@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{ScalarType, StructType}
 
 /** Class for a reverse string indexer model.
   *
@@ -18,4 +19,8 @@ case class ReverseStringIndexerModel(labels: Seq[String]) extends Model {
     * @return string representation of index
     */
   def apply(index: Int): String = indexToString(index)
+
+  override def inputSchema: StructType = StructType("input" -> ScalarType.Double).get
+
+  override def outputSchema: StructType = StructType("output" -> ScalarType.String).get
 }

@@ -1,6 +1,6 @@
 package ml.combust.mleap.core.feature
 
-import ml.combust.mleap.core.types.{BasicType, StructType, TensorType}
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import org.apache.spark.ml.linalg.mleap.BLAS
 import org.apache.spark.ml.linalg.{Vector, Vectors}

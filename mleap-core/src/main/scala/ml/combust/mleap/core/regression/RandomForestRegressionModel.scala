@@ -3,6 +3,7 @@ package ml.combust.mleap.core.regression
 import ml.combust.mleap.core.Model
 import org.apache.spark.ml.linalg.Vector
 import ml.combust.mleap.core.tree.TreeEnsemble
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 
 /** Companion object for constructing [[RandomForestRegressionModel]].
   */
@@ -39,4 +40,9 @@ case class RandomForestRegressionModel(override val trees: Seq[DecisionTreeRegre
   def predict(features: Vector): Double = {
     trees.map(_.predict(features)).sum / numTrees
   }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
+
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
+
 }

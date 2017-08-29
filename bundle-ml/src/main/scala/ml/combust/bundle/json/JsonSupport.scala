@@ -4,6 +4,8 @@ import java.util.{Base64, UUID}
 
 import com.google.protobuf.ByteString
 import ml.bundle._
+import ml.combust.bundle.tensor._
+import ml.combust.mleap.tensor
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
@@ -56,12 +58,23 @@ trait JsonSupport {
   }
 
   implicit val BundleByteStringFormat: JsonFormat[ByteString] = new JsonFormat[ByteString] {
-    override def write(obj: ByteString) = {
+    override def write(obj: ByteString): JsValue = {
       JsString(Base64.getEncoder.encodeToString(obj.toByteArray))
     }
 
-    override def read(json: JsValue) = json match {
+    override def read(json: JsValue): ByteString = json match {
       case JsString(b64) => ByteString.copyFrom(Base64.getDecoder.decode(b64))
+      case _ => deserializationError("invalid byte string")
+    }
+  }
+
+  implicit val TensorByteStringFormat: JsonFormat[tensor.ByteString] = new JsonFormat[tensor.ByteString] {
+    override def write(obj: tensor.ByteString): JsValue = {
+      JsString(Base64.getEncoder.encodeToString(obj.bytes))
+    }
+
+    override def read(json: JsValue): tensor.ByteString = json match {
+      case JsString(b64) => tensor.ByteString(Base64.getDecoder.decode(b64))
       case _ => deserializationError("invalid byte string")
     }
   }
@@ -140,7 +153,57 @@ trait JsonSupport {
       case _ => deserializationError(s"invalid scalar value $json")
     }
   }
-  implicit val bundleTensorFormat: JsonFormat[Tensor] = jsonFormat3(Tensor.apply)
+
+  implicit val bundleTensorFormat: JsonFormat[Tensor] = new JsonFormat[Tensor] {
+    override def write(obj: Tensor): JsValue = {
+      val value = obj.base match {
+        case BasicType.BOOLEAN => "boolean" -> BooleanArraySerializer.read(obj.value.toByteArray).toJson
+        case BasicType.BYTE => "byte" -> obj.value.toByteArray.toJson
+        case BasicType.SHORT => "short" -> ShortArraySerializer.read(obj.value.toByteArray).toJson
+        case BasicType.INT => "int" -> IntArraySerializer.read(obj.value.toByteArray).toJson
+        case BasicType.LONG => "long" -> LongArraySerializer.read(obj.value.toByteArray).toJson
+        case BasicType.FLOAT => "float" -> FloatArraySerializer.read(obj.value.toByteArray).toJson
+        case BasicType.DOUBLE => "double" -> DoubleArraySerializer.read(obj.value.toByteArray).toJson
+        case BasicType.BYTE_STRING => "byte_string" -> ByteStringArraySerializer.read(obj.value.toByteArray).toJson
+        case BasicType.STRING => "string" -> StringArraySerializer.read(obj.value.toByteArray).toJson
+        case _ => serializationError(s"Invalid tensor type: ${obj.base}")
+      }
+
+      JsObject(value, "shape" -> obj.shape.get.toJson)
+    }
+
+    override def read(json: JsValue): Tensor = json match {
+      case JsObject(fields) =>
+        val (base, value) = if(fields.contains("boolean")) {
+          (BasicType.BOOLEAN, BooleanArraySerializer.write(fields("boolean").convertTo[Array[Boolean]]))
+        } else if(fields.contains("byte")) {
+          (BasicType.BYTE, ByteArraySerializer.write(fields("byte").convertTo[Array[Byte]]))
+        } else if(fields.contains("short")) {
+          (BasicType.SHORT, ShortArraySerializer.write(fields("short").convertTo[Array[Short]]))
+        } else if(fields.contains("int")) {
+          (BasicType.INT, IntArraySerializer.write(fields("int").convertTo[Array[Int]]))
+        } else if(fields.contains("long")) {
+          (BasicType.LONG, LongArraySerializer.write(fields("long").convertTo[Array[Long]]))
+        } else if(fields.contains("float")) {
+          (BasicType.FLOAT, FloatArraySerializer.write(fields("float").convertTo[Array[Float]]))
+        } else if(fields.contains("double")) {
+          (BasicType.DOUBLE, DoubleArraySerializer.write(fields("double").convertTo[Array[Double]]))
+        } else if(fields.contains("byte_string")) {
+          (BasicType.BYTE_STRING, ByteStringArraySerializer.write(fields("byte_string").convertTo[Array[tensor.ByteString]]))
+        } else if(fields.contains("string")) {
+          (BasicType.STRING, StringArraySerializer.write(fields("string").convertTo[Array[String]]))
+        } else {
+          deserializationError("Invalid tensor")
+        }
+        val shape = fields("shape").convertTo[TensorShape]
+
+        Tensor(base = base,
+          value = ByteString.copyFrom(value),
+          shape = Some(shape))
+      case _ => deserializationError("Invalid tensor")
+    }
+  }
+
   implicit val bundleListFormat: JsonFormat[List] = new JsonFormat[List] {
     override def write(obj: List): JsValue = {
       val fb = mutable.Seq.newBuilder[(String, JsValue)]

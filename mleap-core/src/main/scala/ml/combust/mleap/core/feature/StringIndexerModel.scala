@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{BasicType, ScalarType, StructType}
 
 sealed trait HandleInvalid {
   def asParamString: String
@@ -76,4 +77,8 @@ case class StringIndexerModel(labels: Seq[String],
     * @return reverse string indexer of this string indexer
     */
   def toReverse: ReverseStringIndexerModel = ReverseStringIndexerModel(labels)
+
+  override def inputSchema: StructType = StructType("input" -> ScalarType(BasicType.String, this.nullableInput)).get
+
+  override def outputSchema: StructType = StructType("output" -> ScalarType.Double).get
 }

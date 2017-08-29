@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{BasicType, ListType, StructType, TensorType}
 import org.apache.spark.ml.linalg.mleap.BLAS
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
@@ -32,4 +33,8 @@ case class WordToVectorModel(wordIndex: Map[String, Int],
       sum
     }
   }
+
+  override def inputSchema: StructType = StructType("input" -> ListType(BasicType.String)).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(vectorSize)).get
 }

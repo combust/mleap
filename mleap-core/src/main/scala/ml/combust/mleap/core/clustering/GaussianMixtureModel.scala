@@ -30,6 +30,7 @@ object GaussianMixtureModel {
 
 case class GaussianMixtureModel(gaussians: Array[MultivariateGaussian],
                                 weights: Array[Double]) extends Model {
+  val numClusters = gaussians.length
   val numFeatures: Int = weights.length
 
   def apply(features: Vector): Int = predict(features)
@@ -55,5 +56,6 @@ case class GaussianMixtureModel(gaussians: Array[MultivariateGaussian],
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 
-  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int).get
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int,
+    "probability" -> TensorType.Double(numClusters)).get
 }

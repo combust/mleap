@@ -1,4 +1,5 @@
 package ml.combust.mleap.core.feature
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
@@ -9,7 +10,7 @@ object MinHashLSHModel {
   val HASH_PRIME = 2038074743
 }
 
-case class MinHashLSHModel(randomCoefficients: Seq[(Int, Int)]) extends LSHModel{
+case class MinHashLSHModel(randomCoefficients: Seq[(Int, Int)], inputSize: Int) extends LSHModel{
   def apply(features: Vector): Tensor[Double] = predict(features)
 
   def predict(features: Vector): Tensor[Double] = {
@@ -41,4 +42,8 @@ case class MinHashLSHModel(randomCoefficients: Seq[(Int, Int)]) extends LSHModel
       vectorPair._1.toArray.zip(vectorPair._2.toArray).count(pair => pair._1 != pair._2)
     ).min
   }
+
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(inputSize)).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(inputSize, 1)).get
 }

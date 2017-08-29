@@ -6,14 +6,14 @@ import org.scalatest.FunSpec
 
 class HashingTermFrequencySpec extends FunSpec {
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       val transformer = HashingTermFrequency(shape = NodeShape().
-                    withStandardInput("input").
+              withStandardInput("input").
               withStandardOutput("output"), model = HashingTermFrequencyModel())
       assert(transformer.schema.fields ==
         Seq(StructField("input", ListType(BasicType.String)),
-          StructField("output", TensorType(BasicType.Double, Seq(3)))))
+          StructField("output", TensorType.Double(262144))))
     }
   }
 }

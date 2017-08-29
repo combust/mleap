@@ -2,6 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 
 /**
@@ -45,4 +46,9 @@ case class VectorIndexerModel(numFeatures: Int,
         tmpv
     }
   }
+
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(localNumFeatures)).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(localNumFeatures)).get
+
 }

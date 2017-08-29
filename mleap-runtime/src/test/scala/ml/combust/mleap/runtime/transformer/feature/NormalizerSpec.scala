@@ -16,7 +16,7 @@ class NormalizerSpec extends FunSpec {
 
   val normalizer = Normalizer(
     shape = NodeShape.vector(3, 3, inputCol = "test_vec", outputCol = "test_norm"),
-    model = NormalizerModel(20.0))
+    model = NormalizerModel(20.0, 3))
 
   describe("#transform") {
     it("normalizes the input column") {
@@ -36,11 +36,11 @@ class NormalizerSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(normalizer.schema.fields ==
-        Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
-          StructField("test_norm", TensorType(BasicType.Double, Seq(3)))))
+        Seq(StructField("test_vec", TensorType.Double(3)),
+          StructField("test_norm", TensorType.Double(3))))
     }
   }
 }

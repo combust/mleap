@@ -33,6 +33,13 @@ trait Transformer extends AutoCloseable {
   /** Model for this transformer */
   val model: Model
 
+  /** Get the input schema of this transformer.
+    *
+    * The input schema is the recommended values to
+    * pass in to this transformer.
+    *
+    * @return input schema
+    */
   def inputSchema: StructType = {
     val fields = model.inputSchema.fields.map {
       case StructField(port, dataType) => StructField(shape.input(port).name, dataType)
@@ -41,7 +48,13 @@ trait Transformer extends AutoCloseable {
     StructType(fields).get
   }
 
-  // TODO: filter optional outputs using shape
+  /** Get the output schema of this transformer.
+    *
+    * The outputs schema is the actual output datatype(s) of
+    * this transformer that will be produced.
+    *
+    * @return output schema
+    */
   def outputSchema: StructType = {
     val outputs = shape.outputs.values.map(_.port).toSet
     val fields = model.outputSchema.fields.filter(f => outputs.contains(f.name)).map {

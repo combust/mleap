@@ -9,7 +9,7 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 1/4/17.
   */
 class ImputerSpec extends FunSpec {
-  describe("#transform") {
+  describe("imputer") {
     val transformer = Imputer(
       shape = NodeShape().withStandardInput("test_a").
               withStandardOutput("test_out"),
@@ -41,7 +41,7 @@ class ImputerSpec extends FunSpec {
       val frame = LeapFrame(schema, dataset)
       val transformer2 = transformer.copy(shape = NodeShape().
               withStandardInput("test_a").
-        withStandardOutput("test_out", ScalarType.Double),
+        withStandardOutput("test_out"),
         model = transformer.model.copy(nullableInput = false))
 
       it("transforms the leap frame using the given input and operation") {

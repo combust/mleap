@@ -2,11 +2,10 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.runtime.transformer.feature.BucketizerUtil._
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.Bucketizer
-import org.apache.spark.ml.param.Param
 
 /**
   * Created by mikhail on 9/22/16.
@@ -29,7 +28,7 @@ class BucketizerOp extends SimpleSparkOp[Bucketizer] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: Bucketizer): Bucketizer = {
-    new Bucketizer(uid = uid)
+    new Bucketizer(uid = uid).setSplits(model.getSplits)
   }
 
   override def sparkInputs(obj: Bucketizer): Seq[ParamSpec] = {

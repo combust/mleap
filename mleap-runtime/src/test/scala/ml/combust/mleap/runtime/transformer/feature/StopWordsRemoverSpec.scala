@@ -30,7 +30,7 @@ class StopWordsRemoverSpec extends FunSpec{
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(stopWordsTransformer.schema.fields ==
         Seq(StructField("test_string_seq", ListType(BasicType.String)),

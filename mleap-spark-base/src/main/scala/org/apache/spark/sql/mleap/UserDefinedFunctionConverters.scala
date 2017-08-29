@@ -23,26 +23,40 @@ trait UserDefinedFunctionConverters {
   }
 
   private def convertFunction(udf: MleapUDF): AnyRef = {
+    val oc = outConverter(udf.output)
     val c = udf.inputs.map(converter)
-      udf.inputs.length match {
+    udf.inputs.length match {
       case 0 =>
         udf.f
       case 1 =>
         val f = udf.f.asInstanceOf[(Any) => Any]
-        (a1: Any) => f(c.head(a1))
+        (a1: Any) => oc(f(c.head(a1)))
       case 2 =>
         val f = udf.f.asInstanceOf[(Any, Any) => Any]
-        (a1: Any, a2: Any) => f(c.head(a1), c(1)(a2))
+        (a1: Any, a2: Any) => oc(f(c.head(a1), c(1)(a2)))
       case 3 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any) => Any]
-        (a1: Any, a2: Any, a3: Any) => f(c.head(a1), c(1)(a2), c(2)(a3))
+        (a1: Any, a2: Any, a3: Any) => oc(f(c.head(a1), c(1)(a2), c(2)(a3)))
       case 4 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any, Any) => Any]
-        (a1: Any, a2: Any, a3: Any, a4: Any) => f(c.head(a1), c(1)(a2), c(2)(a3), c(3)(a4))
+        (a1: Any, a2: Any, a3: Any, a4: Any) => oc(f(c.head(a1), c(1)(a2), c(2)(a3), c(3)(a4)))
       case 5 =>
         val f = udf.f.asInstanceOf[(Any, Any, Any, Any, Any) => Any]
-        (a1: Any, a2: Any, a3: Any, a4: Any, a5: Any) => f(c.head(a1), c(1)(a2), c(2)(a3), c(3)(a4), c(4)(a5))
+        (a1: Any, a2: Any, a3: Any, a4: Any, a5: Any) => oc(f(c.head(a1), c(1)(a2), c(2)(a3), c(3)(a4), c(4)(a5)))
     }
+  }
+
+  private def outConverter(spec: types.TypeSpec): (Any) => Any = spec match {
+    case DataTypeSpec(_) => (a: Any) => a
+    case SchemaSpec(_) =>
+        (a: Any) => {
+          val values = a match {
+            case row: runtime.Row => row.toSeq
+            case pr: Product => pr.productIterator.toSeq
+          }
+
+          Row(values: _*)
+        }
   }
 
   private def converter(spec: types.TypeSpec): (Any) => Any = spec match {

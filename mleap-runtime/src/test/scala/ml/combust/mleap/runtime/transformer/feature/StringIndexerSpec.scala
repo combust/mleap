@@ -44,7 +44,7 @@ class StringIndexerSpec extends FunSpec {
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(stringIndexer.schema.fields ==
         Seq(StructField("test_string", ScalarType.String),

@@ -1,9 +1,11 @@
 package ml.combust.mleap.core.regression
 
+import breeze.numerics.erfinv
 import breeze.stats.{distributions => dist}
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.regression.GeneralizedLinearRegressionModel.FamilyAndLink
+import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.linalg.mleap.BLAS
 
@@ -273,11 +275,13 @@ object GeneralizedLinearRegressionModel {
   }
 
   object Probit extends Link("probit") {
+    //TODO: use Gaussian#inverseCdf() from breeze 0.13 after updating to spark 2.2
+    private def icdf(mu:Double, sigma:Double, p:Double) = mu + sigma * math.sqrt(2.0) * erfinv(2 * p - 1)
 
-    override def link(mu: Double): Double = dist.Gaussian(0.0, 1.0).icdf(mu)
+    override def link(mu: Double): Double = icdf(0.0, 1.0, mu)
 
     override def deriv(mu: Double): Double = {
-      1.0 / dist.Gaussian(0.0, 1.0).pdf(dist.Gaussian(0.0, 1.0).icdf(mu))
+      1.0 / dist.Gaussian(0.0, 1.0).pdf(icdf(0.0, 1.0, mu))
     }
 
     override def unlink(eta: Double): Double = dist.Gaussian(0.0, 1.0).cdf(eta)
@@ -319,5 +323,12 @@ case class GeneralizedLinearRegressionModel(coefficients: Vector,
   def predict(features: Vector): Double = {
     val eta = predictLink(features)
     fal.fitted(eta)
+  }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(coefficients.size)).get
+
+  override def outputSchema: StructType = {
+    StructType("prediction" -> ScalarType.Double,
+      "link_prediction" -> ScalarType.Double).get
   }
 }

@@ -2,7 +2,7 @@ package org.apache.spark.ml.bundle.ops.classification
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.ModelSerializer
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.classification.GBTClassificationModel
@@ -11,7 +11,7 @@ import org.apache.spark.ml.regression.DecisionTreeRegressionModel
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-class GBTClassifierOp extends SimpleSparkOp[GBTClassificationModel] {
+class GBTClassifierOpV20 extends SimpleSparkOp[GBTClassificationModel] {
   override val Model: OpModel[SparkBundleContext, GBTClassificationModel] = new OpModel[SparkBundleContext, GBTClassificationModel] {
     override val klazz: Class[GBTClassificationModel] = classOf[GBTClassificationModel]
 
@@ -35,7 +35,7 @@ class GBTClassifierOp extends SimpleSparkOp[GBTClassificationModel] {
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): GBTClassificationModel = {
-      if(model.value("num_classes").getLong != 2) {
+      if (model.value("num_classes").getLong != 2) {
         throw new IllegalArgumentException("MLeap only supports binary logistic regression")
       }
 

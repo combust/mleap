@@ -2,6 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import ml.combust.mleap.core.util.Murmur3_x86_32._
 import ml.combust.mleap.core.util.Platform
@@ -59,5 +60,13 @@ case class HashingTermFrequencyModel(numFeatures: Int = 1 << 18,
   def nonNegativeMod(x: Int, mod: Int): Int = {
     val rawMod = x % mod
     rawMod + (if (rawMod < 0) mod else 0)
+  }
+
+  override def inputSchema: StructType = {
+    StructType(StructField("input" -> ListType(BasicType.String))).get
+  }
+
+  override def outputSchema: StructType = {
+    StructType(StructField("output" -> TensorType.Double(numFeatures))).get
   }
 }

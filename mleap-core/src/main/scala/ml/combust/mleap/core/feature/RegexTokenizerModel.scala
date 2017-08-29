@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{BasicType, ListType, ScalarType, StructType}
 
 import scala.util.matching.Regex
 
@@ -12,4 +13,8 @@ case class RegexTokenizerModel(regex: Regex, matchGaps: Boolean = true, tokenMin
 
     tokens.filter(_.length >= tokenMinLength)
   }
+
+  override def inputSchema: StructType = StructType("input" -> ScalarType.String).get
+
+  override def outputSchema: StructType = StructType("output" -> ListType(BasicType.String)).get
 }

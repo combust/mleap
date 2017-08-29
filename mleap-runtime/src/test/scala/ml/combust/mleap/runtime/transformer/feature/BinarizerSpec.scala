@@ -31,7 +31,7 @@ class BinarizerSpec extends FunSpec {
       }
     }
 
-    describe("#getFields") {
+    describe("input/output schema") {
       it("has the correct inputs and outputs") {
         assert(binarizer.schema.fields ==
           Seq(StructField("test_vec", TensorType(BasicType.Double, Seq(3))),
@@ -58,7 +58,7 @@ class BinarizerSpec extends FunSpec {
       }
     }
 
-    describe("#getFields") {
+    describe("input/output schema") {
       it("has the correct inputs and outputs") {
         assert(binarizer2.schema.fields ==
           Seq(StructField("test", ScalarType.Double),

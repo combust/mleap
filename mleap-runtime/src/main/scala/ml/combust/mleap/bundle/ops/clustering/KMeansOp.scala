@@ -23,11 +23,14 @@ class KMeansOp extends MleapOp[KMeans, KMeansModel] {
                       (implicit context: BundleContext[MleapContext]): Model = {
       model.withValue("cluster_centers",
         Value.tensorList(obj.clusterCenters.map(cc => Tensor.denseVector(cc.vector.toArray))))
+      .withValue("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): KMeansModel = {
-      KMeansModel(model.value("cluster_centers").getTensorList[Double].map(t => Vectors.dense(t.toArray)))
+      val numFeatures = model.value("num_features").getLong.toInt
+
+      KMeansModel(model.value("cluster_centers").getTensorList[Double].map(t => Vectors.dense(t.toArray)), numFeatures)
     }
   }
 

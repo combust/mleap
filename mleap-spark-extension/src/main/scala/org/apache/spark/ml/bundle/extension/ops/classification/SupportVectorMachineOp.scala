@@ -60,13 +60,13 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
     node.shape.getOutput("probability").map(s => svm.setProbabilityCol(s.name)).getOrElse(svm)
   }
 
-  override def shape(node: SVMModel): NodeShape = {
+  override def shape(node: SVMModel)(implicit context: BundleContext[SparkBundleContext]): NodeShape = {
     val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
 
     NodeShape().withInput(node.getFeaturesCol, "features").
       withOutput(node.getPredictionCol, "prediction").
-      withOutput(rawPrediction, "raw_prediction").
-      withOutput(probability, "probability")
+      withOutput(node.getRawPredictionCol, "raw_prediction").
+      withOutput(node.getProbabilityCol, "probability")
   }
 }

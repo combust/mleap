@@ -22,7 +22,7 @@ case class SparkTransformBuilder(dataset: DataFrame) extends TransformBuilder[Sp
                           (udf: UserDefinedFunction): Try[SparkTransformBuilder] = Try {
     val structUdf: expressions.UserDefinedFunction = udf
     val sparkSelectors = inputs.map(sparkSelector)
-    val tmpName = s"tmp_${Random.nextInt()}"
+    val tmpName = s"tmp_${Math.abs(Random.nextInt())}"
     val dataset2 = dataset.withColumn(tmpName, structUdf(sparkSelectors: _*))
     val dataset3 = outputs.zipWithIndex.foldLeft(dataset2) {
       case (d, (name, index)) =>

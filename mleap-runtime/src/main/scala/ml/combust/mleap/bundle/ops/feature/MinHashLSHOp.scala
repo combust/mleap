@@ -22,7 +22,8 @@ class MinHashLSHOp extends MleapOp[MinHashLSH, MinHashLSHModel] {
       val (ca, cb) = obj.randomCoefficients.unzip
 
       model.withValue("random_coefficients_a", Value.longList(ca.map(_.toLong))).
-        withValue("random_coefficients_b", Value.longList(cb.map(_.toLong)))
+        withValue("random_coefficients_b", Value.longList(cb.map(_.toLong))).
+        withValue("input_size", Value.int(obj.inputSize))
     }
 
     override def load(model: Model)
@@ -30,7 +31,8 @@ class MinHashLSHOp extends MleapOp[MinHashLSH, MinHashLSHModel] {
       val ca = model.value("random_coefficients_a").getLongList.map(_.toInt)
       val cb = model.value("random_coefficients_b").getLongList.map(_.toInt)
       val randomCoefficients = ca.zip(cb)
-      MinHashLSHModel(randomCoefficients = randomCoefficients)
+      MinHashLSHModel(randomCoefficients = randomCoefficients,
+        inputSize = model.value("input_size").getInt)
     }
   }
 

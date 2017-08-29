@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.transformer
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{DataType, NodeShape, StructField, StructType}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 
@@ -8,7 +9,7 @@ import scala.util.Try
 /**
  * Created by hwilkins on 11/8/15.
  */
-case class PipelineModel(transformers: Seq[Transformer])
+case class PipelineModel(transformers: Seq[Transformer]) extends Model
 
 case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"),
                     override val shape: NodeShape,

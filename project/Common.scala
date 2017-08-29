@@ -20,11 +20,14 @@ object Common {
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
-    resolvers += "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
+    resolvers += Resolver.mavenLocal,
     resolvers ++= {
       // Only add Sonatype Snapshots if this version itself is a snapshot version
       if(isSnapshot.value) {
-        Seq("Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots")
+        Seq(
+          "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+          "ASF Snapshots" at "https://repository.apache.org/content/groups/snapshots"
+        )
       } else {
         Seq()
       }

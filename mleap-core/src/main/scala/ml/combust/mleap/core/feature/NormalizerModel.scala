@@ -2,6 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 /** Class for storing a normalizer model.
@@ -9,7 +10,7 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
   * @param pNorm p normalization param
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/Normalizer.scala")
-case class NormalizerModel(pNorm: Double) extends Model {
+case class NormalizerModel(pNorm: Double, inputSize: Int) extends Model {
   /** Normalizes a feature vector.
     *
     * @param features features to normalize
@@ -50,4 +51,8 @@ case class NormalizerModel(pNorm: Double) extends Model {
       features
     }
   }
+
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(inputSize)).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(inputSize)).get
 }

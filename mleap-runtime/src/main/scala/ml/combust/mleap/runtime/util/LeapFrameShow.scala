@@ -14,11 +14,11 @@ case class LeapFrameShow[LF <: LeapFrame[LF]](frame: LF, n: Int = 20, truncate: 
     val rows = schema.fields.map(_.name) +: dataset.take(n).toSeq.map {
       _.map {
         cell =>
-          val str = cell match {
+          val str = if (cell != null) cell match {
             case v: Option[_] => v.map(_.toString).getOrElse("null")
             case v: Seq[_] => v.mkString("[", ",", "]")
             case v => v.toString
-          }
+          }else "null"
 
           if (truncate > 0 && str.length > truncate) {
             // do not show ellipses for strings shorter than 4 characters.

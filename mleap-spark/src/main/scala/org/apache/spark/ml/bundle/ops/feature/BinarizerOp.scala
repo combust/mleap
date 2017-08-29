@@ -2,12 +2,11 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.Binarizer
 import org.apache.spark.sql.mleap.TypeConverters._
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
-import org.apache.spark.ml.param.Param
 
 /**
   * Created by fshabbir on 12/1/16.

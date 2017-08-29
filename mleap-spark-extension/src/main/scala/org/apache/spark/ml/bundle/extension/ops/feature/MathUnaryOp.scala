@@ -40,5 +40,6 @@ class MathUnaryOp extends OpNode[SparkBundleContext, MathUnary, MathUnaryModel] 
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: MathUnary): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: MathUnary)(implicit context: BundleContext[SparkBundleContext]): NodeShape =
+    NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

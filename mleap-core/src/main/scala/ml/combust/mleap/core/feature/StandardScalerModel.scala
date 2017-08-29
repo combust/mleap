@@ -2,6 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 /** Class for standard scaler models.
@@ -16,6 +17,13 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 case class StandardScalerModel(std: Option[Vector],
                                mean: Option[Vector]) extends Model {
   require(std.nonEmpty || mean.nonEmpty, "need to scale with mean and/or with stdev")
+
+  val size = (std, mean) match {
+    case (None, None) => throw new IllegalStateException("need to scale with mean and/or with stdev")
+    case (Some(stdV), None) => stdV.size
+    case (None, Some(meanV)) => meanV.size
+    case (Some(stdV), Some(meanV)) => stdV.size
+  }
 
   /** Scale a feature vector using stddev, mean, or both.
     *
@@ -73,4 +81,11 @@ case class StandardScalerModel(std: Option[Vector],
         }
     }
   }
+
+  override def inputSchema: StructType = {
+    StructType("input" -> TensorType.Double(size)).get
+  }
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(size)).get
+
 }

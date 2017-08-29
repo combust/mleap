@@ -33,7 +33,7 @@ class CoalesceSpec extends FunSpec {
       }
     }
 
-    describe("#getFields") {
+    describe("input/output schema") {
       it("has the correct inputs and outputs") {
         assert(coalesce.schema.fields ==
           Seq(StructField("test1", ScalarType.Double.asNullable),
@@ -60,7 +60,7 @@ class CoalesceSpec extends FunSpec {
       }
     }
 
-    describe("#getFields") {
+    describe("input/output schema") {
       it("has the correct inputs and outputs") {
         assert(coalesce.schema.fields ==
           Seq(StructField("test1", ScalarType.Double.asNullable),

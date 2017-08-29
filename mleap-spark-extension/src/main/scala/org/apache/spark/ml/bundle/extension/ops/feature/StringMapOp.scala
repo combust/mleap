@@ -58,5 +58,6 @@ class StringMapOp extends OpNode[SparkBundleContext, StringMap, StringMapModel] 
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: StringMap): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: StringMap)(implicit context: BundleContext[SparkBundleContext]): NodeShape =
+    NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

@@ -2,6 +2,7 @@ package ml.combust.mleap.core.regression
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import org.apache.spark.ml.linalg.mleap.BLAS
 
@@ -34,5 +35,12 @@ case class AFTSurvivalRegressionModel(coefficients: Vector,
 
   def predict(features: Vector): Double = {
     math.exp(BLAS.dot(coefficients, features) + intercept)
+  }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(coefficients.size)).get
+
+  override def outputSchema: StructType = {
+    StructType("prediction" -> ScalarType.Double,
+      "quantiles" -> TensorType.Double(quantileProbabilities.length)).get
   }
 }

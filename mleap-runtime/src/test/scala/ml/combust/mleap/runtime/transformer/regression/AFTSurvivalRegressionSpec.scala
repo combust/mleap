@@ -1,24 +1,22 @@
 package ml.combust.mleap.runtime.transformer.regression
 
+import ml.combust.mleap.core.regression.AFTSurvivalRegressionModel
 import ml.combust.mleap.core.types._
+import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 
 class AFTSurvivalRegressionSpec extends FunSpec {
 
-  describe("#getFields") {
-    it("has the correct inputs and outputs without quantilesCol") {
-      val transformer = AFTSurvivalRegression(shape = NodeShape.regression(3), model = null)
-      assert(transformer.schema.fields ==
-        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
-          StructField("prediction", ScalarType.Double)))
-    }
+  describe("input/output schema") {
 
-    it("has the correct inputs and outputs with quantilesCol") {
-      val transformer = AFTSurvivalRegression(shape = NodeShape.regression(3).withOutput("quantiles", "quantiles"), model = null)
+    it("has the correct inputs and outputs") {
+      val transformer = AFTSurvivalRegression(shape = NodeShape.regression(3)
+        .withOutput("quantiles", "quantiles"),
+        model = new AFTSurvivalRegressionModel(Vectors.dense(1, 3, 4), 23, Array(1, 2, 3, 4, 5), 5))
       assert(transformer.schema.fields ==
-        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
+        Seq(StructField("features", TensorType.Double(3)),
           StructField("prediction", ScalarType.Double),
-          StructField("quantiles", TensorType(BasicType.Double, Seq(6)))))
+          StructField("quantiles", TensorType.Double(5))))
     }
   }
 }

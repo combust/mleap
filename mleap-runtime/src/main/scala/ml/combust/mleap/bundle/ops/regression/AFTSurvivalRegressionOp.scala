@@ -28,6 +28,7 @@ class AFTSurvivalRegressionOp extends MleapOp[AFTSurvivalRegression, AFTSurvival
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): AFTSurvivalRegressionModel = {
+
       AFTSurvivalRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble,
         quantileProbabilities = model.value("quantile_probabilities").getDoubleList.toArray,

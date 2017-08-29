@@ -2,7 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
-import ml.combust.mleap.core.types.{BasicType, DataShape}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
 import org.apache.spark.ml.linalg.{Vector, Vectors}
@@ -46,6 +46,19 @@ case class InteractionModel(featuresSpec: Array[Array[Int]],
     }
     Vectors.sparse(size, indices.result(), values.result()).compressed
   }
+
+  override def inputSchema: StructType = {
+    val inputFields = inputShapes.zipWithIndex.map {
+      case (shape, i) => StructField(s"input$i", DataType(BasicType.Double, shape))
+    }
+    StructType(inputFields).get
+  }
+
+  override def outputSchema: StructType = {
+    val outputSize = featuresSpec.map(_.sum).product
+    StructType(StructField("output" -> TensorType.Double(outputSize))).get
+  }
+
 }
 
 case class FeatureEncoder(numFeatures: Array[Int]) {

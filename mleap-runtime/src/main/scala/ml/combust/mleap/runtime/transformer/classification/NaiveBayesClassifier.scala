@@ -23,7 +23,7 @@ case class NaiveBayesClassifier(override val uid: String = Transformer.uniqueNam
         (features: Tensor[Double]) => {
           val rawPrediction = model.predictRaw(features)
           val probability = model.rawToProbability(rawPrediction)
-          val prediction = model.predictWithProbability(probability)
+          val prediction = model.probabilityToPrediction(probability)
           Row(rawPrediction: Tensor[Double], probability: Tensor[Double], prediction)
         }
       case (Some(_), None) =>

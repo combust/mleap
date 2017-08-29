@@ -55,6 +55,7 @@ class ImputerOp extends OpNode[SparkBundleContext, ImputerModel, ImputerModel] {
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: ImputerModel): NodeShape = NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: ImputerModel)(implicit context: BundleContext[SparkBundleContext]): NodeShape =
+    NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 
 }

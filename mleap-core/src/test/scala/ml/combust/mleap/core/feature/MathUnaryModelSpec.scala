@@ -1,12 +1,13 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.feature.UnaryOperation._
+import ml.combust.mleap.core.types.{ScalarType, StructField}
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 12/27/16.
   */
-class MathUnarySpec extends FunSpec {
+class MathUnaryModelSpec extends FunSpec {
   def unaryLike(operation: UnaryOperation,
                 name: String,
                 input: Double,
@@ -16,6 +17,10 @@ class MathUnarySpec extends FunSpec {
 
       it(s"has the name: $name") { assert(operation.name == name) }
       it("computes the value properly") { assert(model(input) == expected) }
+      it("has the right input schema") {
+        assert(model.inputSchema.fields == Seq(StructField("input", ScalarType.Double)))}
+      it("has the right output schema") {
+        assert(model.outputSchema.fields == Seq(StructField("output", ScalarType.Double)))}
     }
   }
 

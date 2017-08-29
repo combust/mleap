@@ -21,6 +21,15 @@ class GBTClassifierSpec extends FunSpec {
     model = GBTClassifierModel(Seq(tree1, tree2, tree3), Seq(0.5, 2.0, 1.0), 5))
 
   describe("#transform") {
+    val schema = StructType(Seq(StructField("features", TensorType.Double(3)))).get
+    val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.2, 0.7, 0.4)))))
+    val frame = LeapFrame(schema, dataset)
+    val tree1 = TestUtil.buildDecisionTreeRegression(0.5, 0, goLeft = true)
+    val tree2 = TestUtil.buildDecisionTreeRegression(0.75, 1, goLeft = false)
+    val tree3 = TestUtil.buildDecisionTreeRegression(0.1, 2, goLeft = true)
+    val gbt = GBTClassifier(shape = NodeShape.probabilisticClassifier(3, 2),
+      model = GBTClassifierModel(Seq(tree1, tree2, tree3), Seq(0.5, 2.0, 1.0), 5))
+
     it("uses the GBT to make predictions on the features column") {
       val frame2 = gbt.transform(frame).get
       val prediction = frame2.dataset(0).getDouble(1)
@@ -36,11 +45,45 @@ class GBTClassifierSpec extends FunSpec {
     }
   }
 
+
   describe("input/output schema") {
-    it("has the correct inputs and outputs") {
-      assert(gbt.schema.fields ==
-        Seq(StructField("features", TensorType(BasicType.Double, Seq(5))),
-            StructField("prediction", ScalarType.Double)))
+    it("has the correct inputs and outputs with only prediction column") {
+      val transformer = GBTClassifier(
+        shape = NodeShape.probabilisticClassifier(3, 2),
+        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 2))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
+          StructField("prediction", ScalarType.Double)))
+    }
+
+    it("has the correct inputs and outputs with prediction column as well as probabilityCol") {
+      val transformer = GBTClassifier(shape = NodeShape.probabilisticClassifier(3, 2, probabilityCol = Some("probability")),
+        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 2))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
+          StructField("probability", TensorType(BasicType.Double, Seq(2))),
+          StructField("prediction", ScalarType.Double)))
+    }
+
+    it("has the correct inputs and outputs with prediction column as well as rawPredictionCol") {
+      val transformer = GBTClassifier(shape = NodeShape.probabilisticClassifier(3, 2, rawPredictionCol = Some("rp")),
+        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 2))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
+          StructField("rp", TensorType(BasicType.Double, Seq(2))),
+          StructField("prediction", ScalarType.Double)))
+    }
+
+    it("has the correct inputs and outputs with prediction column as well as both rawPredictionCol and probabilityCol") {
+      val transformer = GBTClassifier(shape = NodeShape.probabilisticClassifier(3, 2,
+        rawPredictionCol = Some("rp"),
+        probabilityCol = Some("probability")),
+        model = new GBTClassifierModel(null, Seq(1.0, 1.0), 2))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
+          StructField("rp", TensorType(BasicType.Double, Seq(2))),
+          StructField("probability", TensorType(BasicType.Double, Seq(2))),
+          StructField("prediction", ScalarType.Double)))
     }
   }
 }

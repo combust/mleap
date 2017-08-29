@@ -19,7 +19,7 @@ from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer, Binarizer, PolynomialFeatures
 from sklearn.preprocessing.data import OneHotEncoder
 from sklearn.preprocessing.label import LabelEncoder
-from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer
+from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer, Vector
 from sklearn.utils import column_or_1d
 from sklearn.utils.validation import check_is_fitted
 from sklearn.utils.fixes import np_version
@@ -1056,3 +1056,56 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
         transformer = self.deserialize_single_input_output(self, full_node_path, attributes_map)
         return transformer
 
+class StringMap(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserializer):
+
+    def __init__(self, input_features=None, output_features=None, labels=None):
+        self.op = 'string_map'
+        self.name = "{}_{}".format(self.op, uuid.uuid4())
+        self.input_features = input_features
+        self.output_features = output_features
+        self.serializable = True
+        self.labels = labels
+        if labels is not None:
+            self.label_keys = self.labels.keys
+            self.label_values = self.labels.values
+
+    def fit(self, y):
+        if self.labels is None:
+            self.labels = dict(zip(self.label_keys, self.label_values))
+        return self
+
+    def transform(self, y):
+       return y.applymap(lambda input : self.labels[input]).values
+
+    def fit_transform(self, X, y=None, **fit_params):
+        self.fit(X)
+        return self.transform(X)
+
+    def serialize_to_bundle(self, path, model_name):
+        # compile tuples of model attributes to serialize
+        attributes = list()
+        attributes.append(("labels", self.labels.keys()))
+        attributes.append(("values", Vector(self.labels.values())))
+
+        # define node inputs and outputs
+        inputs = [{
+            "name": self.input_features[0],
+            "port": "input"
+        }]
+
+        outputs = [{
+            "name": self.output_features[0],
+            "port": "output"
+        }]
+
+        self.serialize(self, path, model_name, attributes, inputs, outputs)
+
+    def deserialize_from_bundle(self, node_path, node_name):
+        attributes_map = {
+            'labels': 'label_keys',
+            'values': 'label_values'
+        }
+
+        full_node_path = os.path.join(node_path, node_name)
+        transformer = self.deserialize_single_input_output(self, full_node_path, attributes_map)
+        return transformer

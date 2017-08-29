@@ -152,7 +152,7 @@ case class NodeShape private(inputs: Seq[Socket],
     */
   def getInput(port: String): Option[Socket] = inputLookup.get(port)
 
-  /** Get an optional input by the port name. 
+  /** Get an optional output by the port name. 
     *
     * @param port name of the port 
     * @return optional socket for the named port 

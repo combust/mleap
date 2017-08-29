@@ -18,7 +18,7 @@ class GBTClassifierSpec extends FunSpec {
   val tree2 = TestUtil.buildDecisionTreeRegression(0.75, 1, goLeft = false)
   val tree3 = TestUtil.buildDecisionTreeRegression(0.1, 2, goLeft = true)
   val gbt = GBTClassifier(shape = NodeShape.probabilisticClassifier(3, 2),
-    model = GBTClassifierModel(Seq(tree1, tree2, tree3), Seq(0.5, 2.0, 1.0), 5))
+    model = GBTClassifierModel(Seq(tree1, tree2, tree3), Seq(0.5, 2.0, 1.0), 3))
 
   describe("#transform") {
     val schema = StructType(Seq(StructField("features", TensorType.Double(3)))).get
@@ -28,7 +28,7 @@ class GBTClassifierSpec extends FunSpec {
     val tree2 = TestUtil.buildDecisionTreeRegression(0.75, 1, goLeft = false)
     val tree3 = TestUtil.buildDecisionTreeRegression(0.1, 2, goLeft = true)
     val gbt = GBTClassifier(shape = NodeShape.probabilisticClassifier(3, 2),
-      model = GBTClassifierModel(Seq(tree1, tree2, tree3), Seq(0.5, 2.0, 1.0), 5))
+      model = GBTClassifierModel(Seq(tree1, tree2, tree3), Seq(0.5, 2.0, 1.0), 3))
 
     it("uses the GBT to make predictions on the features column") {
       val frame2 = gbt.transform(frame).get

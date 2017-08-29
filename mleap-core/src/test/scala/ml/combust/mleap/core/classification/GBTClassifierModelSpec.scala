@@ -15,7 +15,7 @@ class GBTClassifierModelSpec extends FunSpec {
 
   val classifier = GBTClassifierModel(trees = Seq(tree1, tree2, tree3),
     treeWeights = Seq(0.5, 2.0, 1.0),
-    numFeatures = 5)
+    numFeatures = 3)
 
   describe("#apply") {
     val features = Vectors.dense(Array(0.2, 0.8, 0.4))
@@ -28,7 +28,7 @@ class GBTClassifierModelSpec extends FunSpec {
   describe("input/output schema") {
     it("has the right input schema") {
       assert(classifier.inputSchema.fields ==
-        Seq(StructField("features", TensorType(BasicType.Double, Seq(5)))))
+        Seq(StructField("features", TensorType(BasicType.Double, Seq(3)))))
     }
 
     it("has the right output schema") {

@@ -253,11 +253,9 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         elif self.input_vectors is not None:
             self.input_shapes = {'data_shape': []}
             for vector in self.input_vectors:
-                if vector.op not in [ops.ONE_HOT_ENCODER]:
+                if vector.op not in [ops.ONE_HOT_ENCODER, ops.POLYNOMIALEXPANSION]:
                     shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": len(vector.input_features)}]}}
                     self.input_shapes['data_shape'].append(shape)
-                elif vector.op == ops.POLYNOMIALEXPANSION:
-                    self.input_size = len(vector.input_features)
                 elif vector.op == ops.ONE_HOT_ENCODER:
                     shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": vector.n_values_[0] - 1}]}}
                     self.input_shapes['data_shape'].append(shape)

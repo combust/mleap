@@ -70,6 +70,8 @@ class GBTClassifierOpV22 extends SimpleSparkOp[GBTClassificationModel] {
   }
 
   override def sparkOutputs(obj: GBTClassificationModel): Seq[SimpleParamSpec] = {
-    Seq("prediction" -> obj.predictionCol)
+    Seq("raw_prediction" -> obj.rawPredictionCol,
+      "probability" -> obj.probabilityCol,
+      "prediction" -> obj.predictionCol)
   }
 }

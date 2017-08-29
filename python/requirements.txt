@@ -1,4 +1,4 @@
-numpy>=1.8.2,
+numpy>=1.8.2
 six>=1.10.0
 argparse>=1.1
 scipy>=0.13.0b1

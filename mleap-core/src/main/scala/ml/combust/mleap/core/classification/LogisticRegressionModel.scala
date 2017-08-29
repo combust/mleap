@@ -12,9 +12,14 @@ case class BinaryLogisticRegressionModel(coefficients: Vector,
     BLAS.dot(features, coefficients) + intercept
   }
 
-  override def predict(features: Vector): Double = if(margin(features) > threshold) 1.0 else 0.0
+  override def predict(features: Vector): Double = if(score(features) > threshold) 1.0 else 0.0
 
   override val numClasses: Int = 2
+
+  def score(features: Vector): Double = {
+    val m = margin(features)
+    1.0 / (1.0 + math.exp(-m))
+  }
 
   override def predictRaw(features: Vector): Vector = {
     val m = margin(features)

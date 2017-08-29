@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.StringMapModel
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{StringType, StructField, StructType}
+import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /**
@@ -30,6 +30,14 @@ class StringMapSpec extends FunSpec {
       val frame2 = frame.copy(dataset = LocalDataset(Array(Row("bad_index"))))
 
       it("returns a Failure") { assert(stringMap.transform(frame2).isFailure) }
+    }
+  }
+
+  describe("#getFields") {
+    it("has the correct inputs and outputs") {
+      assert(stringMap.getFields().get ==
+        Seq(StructField("test_string", StringType()),
+          StructField("test_index", DoubleType())))
     }
   }
 }

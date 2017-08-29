@@ -4,11 +4,13 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.runtime.types.BundleTypeConverters.mleapTypeToBundleType
 import org.apache.spark.ml.attribute.{Attribute, AttributeGroup, NominalAttribute}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
 import org.apache.spark.ml.feature.Interaction
 import org.apache.spark.ml.linalg.VectorUDT
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.mleap.TypeConverters.mleapType
 import org.apache.spark.sql.types.{BooleanType, NumericType}
 
 /**
@@ -22,11 +24,16 @@ class InteractionOp extends OpNode[SparkBundleContext, Interaction, Interaction]
 
     override def store(model: Model, obj: Interaction)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      assert(context.context.dataset.isDefined, "Must provide a sample dataset for the Interaction transformer")
+      assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
-      val spec = buildSpec(obj.getInputCols, context.context.dataset.get)
+      val dataset = context.context.dataset.get
+      val spec = buildSpec(obj.getInputCols, dataset)
 
       val m = model.withAttr("num_inputs", Value.int(spec.length))
+                    .withAttr("input_types",
+                      Value.dataTypeList(obj.getInputCols
+                                      .map(v => mleapTypeToBundleType(
+                                        mleapType(dataset.schema(v).dataType))).toSeq))
       spec.zipWithIndex.foldLeft(m) {
         case (m2, (numFeatures, index)) => m2.withAttr(s"num_features$index", Value.intList(numFeatures))
       }

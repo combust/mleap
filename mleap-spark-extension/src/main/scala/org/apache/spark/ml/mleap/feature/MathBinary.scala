@@ -52,7 +52,8 @@ with MathBinaryParams {
     }
   }
 
-  override def copy(extra: ParamMap): Transformer = defaultCopy(extra)
+  override def copy(extra: ParamMap): Transformer =
+    copyValues(new MathBinary(uid, model), extra)
 
   @DeveloperApi
   override def transformSchema(schema: StructType): StructType = {

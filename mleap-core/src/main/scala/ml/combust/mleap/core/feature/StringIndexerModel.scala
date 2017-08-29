@@ -15,9 +15,14 @@ object HandleInvalid {
     override def asParamString: String = "skip"
   }
 
+  case object Keep extends HandleInvalid {
+    override def asParamString: String = "keep"
+  }
+
   def fromString(value: String): HandleInvalid = value match {
     case "error" => HandleInvalid.Error
     case "skip" => HandleInvalid.Skip
+    case "keep" => HandleInvalid.Keep
     case _ => throw new IllegalArgumentException(s"Invalid handler: $value")
   }
 }
@@ -27,20 +32,40 @@ object HandleInvalid {
   * String indexer converts a string into an integer representation.
   *
   * @param labels list of labels that can be indexed
-  * @param handleInvalid how to handle invalid values, doesn't do anything in MLeap Runtime
+  * @param handleInvalid how to handle invalid values (unseen or NULL labels): 'error' (throw an error),
+  *                      'skip' (doesn't work in MLeap Runtime and also throws an error)
+  *                      or 'keep' (put invalid data in a special bucket at index labels.size
   */
 case class StringIndexerModel(labels: Seq[String],
                               handleInvalid: HandleInvalid = HandleInvalid.Error) extends Serializable {
   private val stringToIndex: Map[String, Int] = labels.zipWithIndex.toMap
+  private val keepInvalid = handleInvalid == HandleInvalid.Keep
 
   /** Convert a string into its integer representation.
     *
     * @param value label to index
     * @return index of label
     */
-  def apply(value: Any): Double = value match {
-    case opt: Option[_] => stringToIndex(opt.get.toString)
-    case _ => stringToIndex(value.toString)
+  def apply(value: Any): Double = if (value == null || value == None) {
+    if (keepInvalid) {
+      labels.length
+    } else {
+      throw new NullPointerException("StringIndexer encountered NULL value. " +
+        s"To handle NULLS, set handleInvalid to ${HandleInvalid.Keep.asParamString}")
+    }
+  } else {
+    val label = value match {
+      case Some(v) => v.toString
+      case _ => value.toString
+    }
+    if (stringToIndex.contains(label)) {
+      stringToIndex(label)
+    } else if (keepInvalid) {
+      labels.length
+    } else {
+      throw new NoSuchElementException(s"Unseen label: $label. To handle unseen labels, " +
+        s"set handleInvalid to ${HandleInvalid.Keep.asParamString}")
+    }
   }
 
   /** Create a [[ml.combust.mleap.core.feature.ReverseStringIndexerModel]] from this model.

@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, StructType, TensorType}
+import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -15,6 +15,7 @@ class VectorAssemblerSpec extends FunSpec {
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.5, -0.5, 1.0)), 42.0, 13.0)))
   val frame = LeapFrame(schema, dataset)
   val vectorAssembler = VectorAssembler(inputCols = Array("feature1", "feature2", "feature3"),
+    inputDataTypes = Some(Array(DoubleType(), DoubleType(), DoubleType())),
     outputCol = "features")
 
   describe("#transform") {
@@ -29,6 +30,16 @@ class VectorAssemblerSpec extends FunSpec {
       val vectorAssembler2 = vectorAssembler.copy(inputCols = vectorAssembler.inputCols :+ "bad_feature")
 
       it("returns a Failure") { assert(vectorAssembler2.transform(frame).isFailure) }
+    }
+  }
+
+  describe("#getFields") {
+    it("has the correct inputs and outputs") {
+      assert(vectorAssembler.getFields().get ==
+        Seq(StructField("feature1", DoubleType()),
+          StructField("feature2", DoubleType()),
+          StructField("feature3", DoubleType()),
+          StructField("features", TensorType(DoubleType()))))
     }
   }
 }

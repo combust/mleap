@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 /**
   * Created by hollinwilkins on 12/27/16.
   */
-class IsotonicRegressionSpec extends FunSpec {
+class IsotonicRegressionModelSpec extends FunSpec {
   describe("#apply") {
     it("applies the linear regression to a feature vector") {
       val regression = IsotonicRegressionModel(boundaries = Array(0.0, 4.0, 5.0, 7.0, 8.0),

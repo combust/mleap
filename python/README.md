@@ -5,6 +5,12 @@ This package contains libraries to integrate MLeap with:
 * Scikit-Learn
 * TensorFlow (coming soon)
 
+# Installation
+
+```bash
+$ pip install mleap
+```
+
 ## PySpark Integration
 
 MLeap's PySpark library provides serialization and deserialization functionality to/from Bundle.ML. There is 100% parity between MLeap's PySpark and Scala/Spark support and all of the supported transformers can be found [here](http://mleap-docs.combust.ml/core-concepts/transformers/support.html).

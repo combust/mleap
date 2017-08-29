@@ -6,8 +6,9 @@ import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.runtime.types.{DoubleType, IntegerType, StructField, TensorType}
 
-import scala.util.Try
+import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 11/17/16.
@@ -27,6 +28,18 @@ case class GaussianMixture(override val uid: String = Transformer.uniqueName("gm
         for(b <- builder.withOutput(probability, featuresCol)(predictProbability);
             b2 <- b.withOutput(predictionCol, probability)(predictionFromProbability)) yield b2
       case None => builder.withOutput(predictionCol, featuresCol)(exec)
+    }
+  }
+
+  override def getFields(): Try[Seq[StructField]] = {
+    probabilityCol match {
+      case Some(probability) => Success(Seq(
+        StructField(featuresCol, TensorType(DoubleType())),
+        StructField(predictionCol, IntegerType()),
+        StructField(probability, TensorType(DoubleType()))))
+      case None => Success(Seq(
+        StructField(featuresCol, TensorType(DoubleType())),
+        StructField(predictionCol, IntegerType())))
     }
   }
 }

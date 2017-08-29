@@ -36,4 +36,12 @@ class MaxAbsScalerSpec extends FunSpec{
       it("returns a Failure") { assert(maxAbsScaler2.transform(frame).isFailure) }
     }
   }
+
+  describe("#getFields") {
+    it("has the correct inputs and outputs") {
+      assert(maxAbsScaler.getFields().get ==
+        Seq(StructField("test_vec", TensorType(DoubleType())),
+          StructField("test_normalized", TensorType(DoubleType()))))
+    }
+  }
 }

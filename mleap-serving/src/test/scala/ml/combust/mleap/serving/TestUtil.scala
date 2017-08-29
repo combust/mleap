@@ -38,6 +38,7 @@ object TestUtil {
     val bundleName = UUID.randomUUID().toString
 
     val featureAssembler = VectorAssembler(inputCols = Array("first_double", "second_double", "third_double"),
+      inputDataTypes = Some(Array(DoubleType(), DoubleType(), DoubleType())),
       outputCol = "features")
     val linearRegression = LinearRegression(featuresCol = "features", predictionCol = "prediction",
       model = LinearRegressionModel(Vectors.dense(2.0, 1.0, 2.0), 5d))

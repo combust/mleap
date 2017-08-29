@@ -3,14 +3,15 @@ package org.apache.spark.ml.bundle.ops.regression
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.ml.param.Param
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class GeneralizedLinearRegressionOp extends OpNode[SparkBundleContext, GeneralizedLinearRegressionModel, GeneralizedLinearRegressionModel] {
+class GeneralizedLinearRegressionOp extends SimpleSparkOp[GeneralizedLinearRegressionModel] {
   override val Model: OpModel[SparkBundleContext, GeneralizedLinearRegressionModel] = new OpModel[SparkBundleContext, GeneralizedLinearRegressionModel] {
     override val klazz: Class[GeneralizedLinearRegressionModel] = classOf[GeneralizedLinearRegressionModel]
 
@@ -18,10 +19,10 @@ class GeneralizedLinearRegressionOp extends OpNode[SparkBundleContext, Generaliz
 
     override def store(model: Model, obj: GeneralizedLinearRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
-        withAttr("intercept", Value.double(obj.intercept)).
-        withAttr("family", Value.string(obj.getFamily)).
-        withAttr("link", Value.string(obj.getLink))
+      model.withValue("coefficients", Value.vector(obj.coefficients.toArray)).
+        withValue("intercept", Value.double(obj.intercept)).
+        withValue("family", Value.string(obj.getFamily)).
+        withValue("link", Value.string(obj.getLink))
     }
 
     override def load(model: Model)
@@ -35,29 +36,18 @@ class GeneralizedLinearRegressionOp extends OpNode[SparkBundleContext, Generaliz
     }
   }
 
-  override val klazz: Class[GeneralizedLinearRegressionModel] = classOf[GeneralizedLinearRegressionModel]
-
-  override def name(node: GeneralizedLinearRegressionModel): String = node.uid
-
-  override def model(node: GeneralizedLinearRegressionModel): GeneralizedLinearRegressionModel = node
-
-  override def load(node: Node, model: GeneralizedLinearRegressionModel)
-                   (implicit context: BundleContext[SparkBundleContext]): GeneralizedLinearRegressionModel = {
-    val m = new GeneralizedLinearRegressionModel(uid = node.name,
+  override def sparkLoad(uid: String, shape: NodeShape, model: GeneralizedLinearRegressionModel): GeneralizedLinearRegressionModel = {
+    new GeneralizedLinearRegressionModel(uid = uid,
       coefficients = model.coefficients,
       intercept = model.intercept)
-    m.set(m.family, model.getFamily)
-    m.set(m.link, model.getLink)
-    m.setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.output("prediction").name)
-    node.shape.getOutput("link_prediction").foreach(col => m.setLinkPredictionCol(col.name))
-    m
   }
 
-  override def shape(node: GeneralizedLinearRegressionModel): Shape = {
-    val s = Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction")
-    if(node.isSet(node.linkPredictionCol)) { s.withOutput(node.getLinkPredictionCol, "link_prediction") }
-    s
+  override def sparkInputs(obj: GeneralizedLinearRegressionModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
+
+  override def sparkOutputs(obj: GeneralizedLinearRegressionModel): Seq[SimpleParamSpec] = {
+    Seq("link_prediction" -> obj.linkPredictionCol,
+      "prediction" -> obj.predictionCol)
   }
 }

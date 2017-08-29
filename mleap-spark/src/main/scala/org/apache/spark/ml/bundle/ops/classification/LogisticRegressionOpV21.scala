@@ -4,15 +4,14 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.tensor.DenseTensor
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.classification.LogisticRegressionModel
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
-import org.apache.spark.ml.bundle.util.ParamUtil
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class LogisticRegressionOpV21 extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
+class LogisticRegressionOpV21 extends SimpleSparkOp[LogisticRegressionModel] {
   override val Model: OpModel[SparkBundleContext, LogisticRegressionModel] = new OpModel[SparkBundleContext, LogisticRegressionModel] {
     override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 
@@ -20,19 +19,19 @@ class LogisticRegressionOpV21 extends OpNode[SparkBundleContext, LogisticRegress
 
     override def store(model: Model, obj: LogisticRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      val m = model.withAttr("num_classes", Value.long(obj.numClasses))
+      val m = model.withValue("num_classes", Value.long(obj.numClasses))
       if(obj.numClasses > 2) {
         val cm = obj.coefficientMatrix
         val thresholds = if(obj.isSet(obj.thresholds)) {
           Some(obj.getThresholds)
         } else None
-        m.withAttr("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
-          withAttr("intercept_vector", Value.vector(obj.interceptVector.toArray)).
-          withAttr("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
+        m.withValue("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
+          withValue("intercept_vector", Value.vector(obj.interceptVector.toArray)).
+          withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
       } else {
-        m.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
-          withAttr("intercept", Value.double(obj.intercept)).
-          withAttr("threshold", Value.double(obj.getThreshold))
+        m.withValue("coefficients", Value.vector(obj.coefficients.toArray)).
+          withValue("intercept", Value.double(obj.intercept)).
+          withValue("threshold", Value.double(obj.getThreshold))
       }
     }
 
@@ -59,31 +58,21 @@ class LogisticRegressionOpV21 extends OpNode[SparkBundleContext, LogisticRegress
     }
   }
 
-  override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
-
-  override def name(node: LogisticRegressionModel): String = node.uid
-
-  override def model(node: LogisticRegressionModel): LogisticRegressionModel = node
-
-  override def load(node: Node, model: LogisticRegressionModel)
-                   (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
-    var lr = new LogisticRegressionModel(uid = node.name,
-      coefficients = model.coefficients,
-      intercept = model.intercept).
-      setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.output("prediction").name)
-    ParamUtil.setOptional(lr, model, lr.threshold, model.threshold)
-    lr = node.shape.getOutput("probability").map(p => lr.setProbabilityCol(p.name)).getOrElse(lr)
-    node.shape.getOutput("raw_prediction").map(rp => lr.setRawPredictionCol(rp.name)).getOrElse(lr)
+  override def sparkLoad(uid: String, shape: NodeShape, model: LogisticRegressionModel): LogisticRegressionModel = {
+    new LogisticRegressionModel(uid = uid,
+      coefficientMatrix = model.coefficientMatrix,
+      interceptVector = model.interceptVector,
+      numClasses = model.numClasses,
+      isMultinomial = true)
   }
 
-  override def shape(node: LogisticRegressionModel): Shape = {
-    val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
-    val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+  override def sparkInputs(obj: LogisticRegressionModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
 
-    Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction").
-      withOutput(rawPrediction, "raw_prediction").
-      withOutput(probability, "probability")
+  override def sparkOutputs(obj: LogisticRegressionModel): Seq[SimpleParamSpec] = {
+    Seq("raw_prediction" -> obj.rawPredictionCol,
+      "probability" -> obj.probabilityCol,
+      "prediction" -> obj.predictionCol)
   }
 }

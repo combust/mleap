@@ -19,8 +19,8 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoderModel, One
 
     override def store(model: Model, obj: OneHotEncoderModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("size", Value.long(obj.size)).
-        withAttr("drop_last", Value.boolean(obj.getDropLast))
+      model.withValue("size", Value.long(obj.size)).
+        withValue("drop_last", Value.boolean(obj.getDropLast))
     }
 
     override def load(model: Model)
@@ -43,5 +43,6 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoderModel, One
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: OneHotEncoderModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: OneHotEncoderModel)(implicit context: BundleContext[SparkBundleContext]): NodeShape =
+    NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

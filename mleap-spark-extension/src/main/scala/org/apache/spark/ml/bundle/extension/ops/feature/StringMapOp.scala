@@ -29,8 +29,8 @@ class StringMapOp extends OpNode[SparkBundleContext, StringMap, StringMapModel] 
 
       // add the labels and values to the Bundle model that
       // will be serialized to our MLeap bundle
-      model.withAttr("labels", Value.stringList(labels)).
-        withAttr("values", Value.doubleList(values))
+      model.withValue("labels", Value.stringList(labels)).
+        withValue("values", Value.doubleList(values))
     }
 
     override def load(model: Model)
@@ -58,5 +58,6 @@ class StringMapOp extends OpNode[SparkBundleContext, StringMap, StringMapModel] 
       setOutputCol(node.shape.standardOutput.name)
   }
 
-  override def shape(node: StringMap): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: StringMap)(implicit context: BundleContext[SparkBundleContext]): NodeShape =
+    NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 }

@@ -13,14 +13,14 @@ import ml.combust.bundle.serializer._
   * Contains file names for bundle JSON files and model JSON files.
   */
 object Bundle {
-  val version = BuildValues.version
-  val bundleJson = "bundle.json"
-  val root = "root"
+  val version: String = BuildValues.version
+  val bundleJson: String = "bundle.json"
+  val root: String = "root"
 
-  def nodeFile(implicit sc: SerializationContext): String = formattedFile("node")
-  def modelFile(implicit sc: SerializationContext): String = formattedFile("model")
+  def nodeFile[T](implicit format: SerializationFormat): String = formattedFile("node")
+  def modelFile[T](implicit format: SerializationFormat): String = formattedFile("model")
 
-  def formattedFile(base: String)(implicit sc: SerializationContext): String = sc.concrete match {
+  def formattedFile(base: String)(implicit format: SerializationFormat): String = format match {
     case SerializationFormat.Json => s"$base.json"
     case SerializationFormat.Protobuf => s"$base.pb"
   }
@@ -106,7 +106,17 @@ object Bundle {
       name = name,
       format = format,
       version = Bundle.version,
-      timeCreated = LocalDateTime.now().toString), root)
+      timestamp = LocalDateTime.now().toString), root)
+  }
+}
+
+object BundleInfo {
+  def fromBundle(bundle: ml.bundle.Bundle): BundleInfo = {
+    BundleInfo(uid = UUID.fromString(bundle.uid),
+      name = bundle.name,
+      format = SerializationFormat.fromBundle(bundle.format),
+      version = bundle.version,
+      timestamp = bundle.timestamp)
   }
 }
 
@@ -116,13 +126,21 @@ object Bundle {
   * @param name name of the bundle
   * @param format serialization format of the [[Bundle]]
   * @param version Bundle.ML version used for serializing
-  * @param timeCreated LocalDateTime when the model was created
+  * @param timestamp LocalDateTime when the model was created
   */
 case class BundleInfo(uid: UUID,
                       name: String,
                       format: SerializationFormat,
                       version: String,
-                      timeCreated: String)
+                      timestamp: String) {
+  def asBundle: ml.bundle.Bundle = {
+    ml.bundle.Bundle(uid = uid.toString,
+      name = name,
+      format = format.asBundle,
+      version = version,
+      timestamp = timestamp)
+  }
+}
 
 /** Root object for serializing Bundle.ML pipelines and graphs.
   *

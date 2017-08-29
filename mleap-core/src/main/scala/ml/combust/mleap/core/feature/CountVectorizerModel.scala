@@ -1,6 +1,8 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{BasicType, ListType, StructType, TensorType}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 import scala.collection.mutable
@@ -11,7 +13,7 @@ import scala.collection.mutable
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/CountVectorizer.scala")
 case class CountVectorizerModel(vocabulary: Array[String],
                                 binary: Boolean,
-                                minTf: Double) {
+                                minTf: Double) extends Model {
   val dict: Map[String, Int] = vocabulary.zipWithIndex.toMap
 
   def apply(document: Seq[String]): Vector = {
@@ -35,4 +37,8 @@ case class CountVectorizerModel(vocabulary: Array[String],
 
     Vectors.sparse(dict.size, effectiveCounts)
   }
+
+  override def inputSchema: StructType = StructType("input" -> ListType(BasicType.String)).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(dict.size)).get
 }

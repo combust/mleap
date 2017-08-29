@@ -23,10 +23,10 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
         Some(obj.getThresholds)
       } else None
 
-      model.withAttr("coefficients", Value.vector(obj.model.weights.toArray)).
-        withAttr("intercept", Value.double(obj.model.intercept)).
-        withAttr("num_classes", Value.long(2)).
-        withAttr("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
+      model.withValue("coefficients", Value.vector(obj.model.weights.toArray)).
+        withValue("intercept", Value.double(obj.model.intercept)).
+        withValue("num_classes", Value.long(2)).
+        withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
     }
 
     override def load(model: Model)
@@ -60,13 +60,13 @@ class SupportVectorMachineOp extends OpNode[SparkBundleContext, SVMModel, SVMMod
     node.shape.getOutput("probability").map(s => svm.setProbabilityCol(s.name)).getOrElse(svm)
   }
 
-  override def shape(node: SVMModel): Shape = {
+  override def shape(node: SVMModel)(implicit context: BundleContext[SparkBundleContext]): NodeShape = {
     val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
     val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
 
-    Shape().withInput(node.getFeaturesCol, "features").
+    NodeShape().withInput(node.getFeaturesCol, "features").
       withOutput(node.getPredictionCol, "prediction").
-      withOutput(rawPrediction, "raw_prediction").
-      withOutput(probability, "probability")
+      withOutput(node.getRawPredictionCol, "raw_prediction").
+      withOutput(node.getProbabilityCol, "probability")
   }
 }

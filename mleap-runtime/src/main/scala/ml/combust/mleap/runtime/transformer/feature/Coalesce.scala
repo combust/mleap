@@ -1,32 +1,29 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CoalesceModel
+import ml.combust.mleap.core.types._
+import ml.combust.mleap.runtime.Row
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.{DataType, DoubleType, StructField}
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 1/5/17.
   */
 case class Coalesce(override val uid: String = Transformer.uniqueName("coalesce"),
-                    inputCols: Array[String],
-                    inputDataTypes: Option[Array[DataType]],
-                    outputCol: String,
-                    model: CoalesceModel) extends Transformer {
-  val exec: UserDefinedFunction = (values: Seq[Any]) => model(values: _*)
+                    override val shape: NodeShape,
+                    override val model: CoalesceModel) extends Transformer {
+  val inputs: Seq[String] = shape.inputs.values.map(_.name).toSeq
+  val outputCol: String = shape.standardOutput.name
+
+  private val f = (values: Row) => model(values.toSeq: _*)
+  val exec: UserDefinedFunction = UserDefinedFunction(f,
+    ScalarType.Double,
+    Seq(SchemaSpec(inputSchema)))
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(outputCol, inputCols)(exec)
-  }
-
-  override def getFields(): Try[Seq[StructField]] = {
-    inputDataTypes match {
-      case None => Failure(new RuntimeException(s"Cannot determine schema for transformer ${this.uid}"))
-      case Some(inputTypes) => val inputs : Seq[StructField] = (0 until inputCols.length).map(index => StructField(inputCols(index), inputTypes(index)))
-                                Success(inputs :+ StructField(outputCol, DoubleType(true)))
-    }
+    builder.withOutput(outputCol, inputs)(exec)
   }
 }

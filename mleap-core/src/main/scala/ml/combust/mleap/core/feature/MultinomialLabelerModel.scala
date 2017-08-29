@@ -1,5 +1,7 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{BasicType, ListType, StructType, TensorType}
 import ml.combust.mleap.tensor.Tensor
 
 /**
@@ -13,7 +15,7 @@ object MultinomialLabelerModel {
 }
 
 case class MultinomialLabelerModel(threshold: Double,
-                                   indexer: ReverseStringIndexerModel) {
+                                   indexer: ReverseStringIndexerModel) extends Model {
   def apply(tensor: Tensor[Double]): Seq[(Double, Int, String)] = {
     top(tensor).map(v => (v._1, v._2, indexer(v._2)))
   }
@@ -29,4 +31,9 @@ case class MultinomialLabelerModel(threshold: Double,
   def topLabels(tensor: Tensor[Double]): Seq[String] = {
     top(tensor).map(_._2).map(indexer.apply)
   }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double()).get
+
+  override def outputSchema: StructType = StructType("probabilities" -> ListType(BasicType.Double),
+  "labels" -> ListType(BasicType.String)).get
 }

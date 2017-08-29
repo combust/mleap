@@ -50,69 +50,78 @@ class MLeapSerializer(object):
         for name, value in attributes_to_serialize:
             if isinstance(value, float):
                 attributes[name] = {
-                    "type": "double",
-                    "value": value
+                    "double": value
                 }
 
             elif isinstance(value, bool) and value in [True, False]:
                 attributes[name] = {
-                    "type": "boolean",
-                    "value": value
+                    "boolean": value
                 }
 
             elif isinstance(value, int):
                 attributes[name] = {
-                    "type": "long",
-                    "value": value
+                    "long": value
                 }
             elif isinstance(value, Vector):
                 attributes[name] = {
-                    "type": {
-                      "type": "list",
-                      "base": "double"
-                    },
-                    "value": value.values
+                    "type": "list",
+                    "double": value.values
                 }
             elif isinstance(value, list) and (isinstance(value[0], np.float64) or isinstance(value[0], float)):
                 base = type(value[0])
                 attributes[name] = {
-                    "type": {
-                      "type": "tensor",
-                      "tensor": {
-                        "base": _type_map[base]
-                      }
+                    _type_map[base]: value,
+                    "shape": {
+                        "dimensions": [{
+                            "size": len(value),
+                            "name": ""
+                        }]
                     },
-                    "value": {
-                        "values": value,
-                        "dimensions": [len(value)]
-                        }
+                    "type": "tensor"
                 }
-
             elif isinstance(value, list) and isinstance(value[0], str):
                 attributes[name] = {
-                    "type": {
                       "type": "list",
-                      "base": "string"
-                    },
-                    "value": value
+                      "string": value
                 }
 
             elif isinstance(value, np.ndarray):
                 attributes[name] = {
-                    "type": {
-                        "type": "tensor",
-                        "tensor": {
-                            "base": "double",
-                            "dimension": list(value.shape)
-                        }
+                    "double":  list(value.flatten()),
+                    "shape": {
+                        "dimensions": [{
+                            "size": list(value.shape),
+                            "name": ""
+                        }]
                     },
-                    "value": list(value.flatten())
+                    "type": "tensor"
                 }
 
             elif isinstance(value, str):
                 attributes[name] = {
-                    'type': 'string',
-                    'value': value
+                    'string': value
+                }
+
+            elif isinstance(value, dict):
+                shapes = list()
+                for shape in value['data_shape']:
+                    if shape['shape'] == 'scalar':
+                        shapes.append(({"base": "scalar",
+                                        "isNullable": False}))
+                    elif shape['shape'] == 'tensor':
+                        shapes.append(({"base": "tensor",
+                                        "isNullable": False,
+                                        "tensorShape": {
+                                            "dimensions": [{
+                                                "size": shape['tensor_shape']['dimensions'][0]['size'],
+                                                "name": ""
+                                                }]
+                                            }
+                                        }
+                                       ))
+                attributes[name] = {
+                    'type': 'list',
+                    'data_shape': shapes
                 }
 
         js['attributes'] = attributes
@@ -190,16 +199,12 @@ class MLeapDeserializer(object):
         # Set Transformer Attributes
         attributes = model_j['attributes']
         for attribute in attributes.keys():
+            value_key = [key for key in attributes[attribute].keys()
+                         if key in ['string', 'boolean','long', 'double', 'data_shape']][0]
             if attributes_map is not None and attribute in attributes_map.keys():
-                if isinstance(attributes[attribute]['value'], dict):
-                    setattr(transformer, attributes_map[attribute], attributes[attribute]['value']['values'])
-                else:
-                    setattr(transformer, attributes_map[attribute], attributes[attribute]['value'])
+                setattr(transformer, attributes_map[attribute], attributes[attribute][value_key])
             else:
-                if isinstance(attributes[attribute]['value'], dict):
-                    setattr(transformer, attribute, attributes[attribute]['value']['values'])
-                else:
-                    setattr(transformer, attribute, attributes[attribute]['value'])
+                setattr(transformer, attribute, attributes[attribute][value_key])
 
         transformer.op = model_j['op']
 

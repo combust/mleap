@@ -2,16 +2,18 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.core.types.TensorShape
 import ml.combust.mleap.tensor.Tensor
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.BucketedRandomProjectionLSHModel
 import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.sql.mleap.TypeConverters.sparkToMleapDataShape
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class BucketedRandomProjectionLSHOp extends OpNode[SparkBundleContext, BucketedRandomProjectionLSHModel, BucketedRandomProjectionLSHModel] {
+class BucketedRandomProjectionLSHOp extends SimpleSparkOp[BucketedRandomProjectionLSHModel] {
   override val Model: OpModel[SparkBundleContext, BucketedRandomProjectionLSHModel] = new OpModel[SparkBundleContext, BucketedRandomProjectionLSHModel] {
     override val klazz: Class[BucketedRandomProjectionLSHModel] = classOf[BucketedRandomProjectionLSHModel]
 
@@ -19,8 +21,13 @@ class BucketedRandomProjectionLSHOp extends OpNode[SparkBundleContext, BucketedR
 
     override def store(model: Model, obj: BucketedRandomProjectionLSHModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("random_unit_vectors", Value.tensorList[Double](obj.randUnitVectors.map(_.toArray).map(Tensor.denseVector))).
-        withAttr("bucket_length", Value.double(obj.getBucketLength))
+      val dataset = context.context.dataset.get
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
+
+      model.withValue("random_unit_vectors", Value.tensorList[Double](obj.randUnitVectors.map(_.toArray).map(Tensor.denseVector))).
+        withValue("bucket_length", Value.double(obj.getBucketLength))
+        .withValue("input_size", Value.int(inputShape.dimensions.get(0)))
+
     }
 
     override def load(model: Model)
@@ -34,23 +41,26 @@ class BucketedRandomProjectionLSHOp extends OpNode[SparkBundleContext, BucketedR
     }
   }
 
-  override val klazz: Class[BucketedRandomProjectionLSHModel] = classOf[BucketedRandomProjectionLSHModel]
-
-  override def name(node: BucketedRandomProjectionLSHModel): String = node.uid
-
-  override def model(node: BucketedRandomProjectionLSHModel): BucketedRandomProjectionLSHModel = node
-
-  override def load(node: Node, model: BucketedRandomProjectionLSHModel)
-                   (implicit context: BundleContext[SparkBundleContext]): BucketedRandomProjectionLSHModel = {
-    val m = new BucketedRandomProjectionLSHModel(uid = node.name,
+  override def sparkLoad(uid: String, shape: NodeShape, model: BucketedRandomProjectionLSHModel): BucketedRandomProjectionLSHModel = {
+    new BucketedRandomProjectionLSHModel(uid = uid,
       randUnitVectors = model.randUnitVectors)
-    m.set(m.bucketLength, model.getBucketLength)
-    m.set(m.inputCol, node.shape.standardInput.name)
-    m.set(m.outputCol, node.shape.standardOutput.name)
-
-    m
   }
 
-  override def shape(node: BucketedRandomProjectionLSHModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: BucketedRandomProjectionLSHModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: BucketedRandomProjectionLSHModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
+
+  override def load(node: Node, model: BucketedRandomProjectionLSHModel)(implicit context: BundleContext[SparkBundleContext]): BucketedRandomProjectionLSHModel = {
+    val n = new BucketedRandomProjectionLSHModel(uid = node.name,
+      randUnitVectors = model.randUnitVectors)
+    n.set(n.bucketLength, model.getBucketLength)
+
+    SparkShapeLoader(node.shape, n, sparkInputs(n), sparkOutputs(n)).loadShape()
+    n
+  }
 }
 

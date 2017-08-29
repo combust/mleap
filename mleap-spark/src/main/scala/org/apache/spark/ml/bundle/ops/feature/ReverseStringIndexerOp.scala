@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.{Attribute, BinaryAttribute, NominalAttribute, NumericAttribute}
-import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
+import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.IndexToString
 import org.apache.spark.sql.types.StructField
 
@@ -34,7 +34,7 @@ object ReverseStringIndexerOp {
   }
 }
 
-class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, IndexToString] {
+class ReverseStringIndexerOp extends SimpleSparkOp[IndexToString] {
   override val Model: OpModel[SparkBundleContext, IndexToString] = new OpModel[SparkBundleContext, IndexToString] {
     override val klazz: Class[IndexToString] = classOf[IndexToString]
 
@@ -48,7 +48,7 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
         ReverseStringIndexerOp.labelsForField(df.schema(obj.getInputCol))
       }
 
-      model.withAttr("labels", Value.stringList(labels))
+      model.withValue("labels", Value.stringList(labels))
     }
 
     override def load(model: Model)
@@ -57,16 +57,15 @@ class ReverseStringIndexerOp extends OpNode[SparkBundleContext, IndexToString, I
     }
   }
 
-  override val klazz: Class[IndexToString] = classOf[IndexToString]
-
-  override def name(node: IndexToString): String = node.uid
-
-  override def model(node: IndexToString): IndexToString = node
-
-  override def load(node: Node, model: IndexToString)
-                   (implicit context: BundleContext[SparkBundleContext]): IndexToString = {
-    new IndexToString(uid = node.name).setLabels(model.getLabels)
+  override def sparkLoad(uid: String, shape: NodeShape, model: IndexToString): IndexToString = {
+    new IndexToString(uid = uid)
   }
 
-  override def shape(node: IndexToString): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: IndexToString): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: IndexToString): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

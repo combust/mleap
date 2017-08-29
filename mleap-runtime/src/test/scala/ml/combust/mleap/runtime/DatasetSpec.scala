@@ -1,5 +1,7 @@
 package ml.combust.mleap.runtime
 
+import ml.combust.mleap.core.types.ScalarType
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.scalatest.FunSpec
 
 /** Base trait for testing implementations of Dataset.
@@ -27,9 +29,10 @@ trait DatasetSpec[D <: Dataset] extends FunSpec {
       describe("#withValue") {
         describe("with a user defined function") {
           it("created a new dataset with the calculated value from the user defined function") {
-            val dataset2 = dataset.withValue(r => r.get(1), r => r.get(0)) {
+            val dataset2 = dataset.withValue(r => r.get(1), r => r.get(0)){
               (v1: String, v2: Int) => s"$v1:$v2"
             }
+
             val data = dataset2.toSeq.map(r => r.getString(2))
 
             assert(data == Seq("hey:42", "there:13"))

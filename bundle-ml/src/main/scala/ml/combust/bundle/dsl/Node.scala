@@ -1,18 +1,16 @@
 package ml.combust.bundle.dsl
 
-import ml.bundle.NodeDef.NodeDef
-
 /** Companion object for node.
   */
 object Node {
   /** Create a node from a bundle node.
     *
-    * @param nodeDef bundle node definition
+    * @param node bundle node definition
     * @return dsl node
     */
-  def fromBundle(nodeDef: NodeDef): Node = {
-    Node(name = nodeDef.name,
-      shape = Shape.fromBundle(nodeDef.shape.get))
+  def fromBundle(node: ml.bundle.Node): Node = {
+    Node(name = node.name,
+      shape = NodeShape.fromBundle(node.shape.get))
   }
 }
 
@@ -29,11 +27,11 @@ object Node {
   * @param shape shape of the node
   */
 case class Node(name: String,
-                shape: Shape) {
+                shape: NodeShape) {
   /** Convert to a bundle node.
     *
     * @return bundle node definition
     */
-  def asBundle: NodeDef = NodeDef(name = name,
+  def asBundle: ml.bundle.Node = ml.bundle.Node(name = name,
     shape = Some(shape.asBundle))
 }

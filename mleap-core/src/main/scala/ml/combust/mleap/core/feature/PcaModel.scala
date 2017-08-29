@@ -1,6 +1,8 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import org.apache.spark.ml.linalg._
 
 /** Class for principal components analysis model.
@@ -8,7 +10,7 @@ import org.apache.spark.ml.linalg._
   * @param k number of elements in output vector
   * @param principalComponents matrix of principal components
   */
-case class PcaModel(principalComponents: DenseMatrix) {
+case class PcaModel(principalComponents: DenseMatrix) extends Model {
   /** Convert input vector to its principal components.
     *
     * @param vector vector to transform
@@ -26,4 +28,8 @@ case class PcaModel(principalComponents: DenseMatrix) {
       throw new IllegalArgumentException("Unsupported vector format. Expected " +
         s"SparseVector or DenseVector. Instead got: ${vector.getClass}")
   }
+
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double()).get
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double()).get
 }

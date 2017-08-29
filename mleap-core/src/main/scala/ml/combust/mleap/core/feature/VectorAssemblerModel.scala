@@ -1,16 +1,12 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 import scala.collection.mutable
-
-/** Companion object for defaults.
-  */
-object VectorAssemblerModel {
-  val default: VectorAssemblerModel = VectorAssemblerModel()
-}
 
 /** Class for a vector assembler model.
   *
@@ -20,7 +16,15 @@ object VectorAssemblerModel {
   * a model.
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/VectorAssembler.scala")
-case class VectorAssemblerModel() extends Serializable {
+case class VectorAssemblerModel(inputShapes: Seq[DataShape]) extends Model {
+  assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and vector shapes as inputs")
+
+  val outputSize: Int = inputShapes.map {
+    case ScalarShape(_) => 1
+    case TensorShape(Some(Seq(size)), _) => size
+    case _ => throw new IllegalArgumentException("must provide scalar and vector shapes as inputs")
+  }.sum
+
   /** Assemble a feature vector from a set of input features.
     *
     * @param vv all input feature values
@@ -85,4 +89,14 @@ case class VectorAssemblerModel() extends Serializable {
     }
     Vectors.sparse(cur, indices.result(), values.result()).compressed
   }
+
+  override def inputSchema: StructType = {
+    val inputFields = inputShapes.zipWithIndex.map {
+      case (shape, i) => StructField(s"input$i", DataType(BasicType.Double, shape))
+    }
+
+    StructType(inputFields).get
+  }
+
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(outputSize)).get
 }

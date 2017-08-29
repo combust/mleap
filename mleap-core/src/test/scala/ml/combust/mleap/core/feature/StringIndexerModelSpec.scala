@@ -1,5 +1,6 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.types.{ScalarType, StructField}
 import org.scalatest.FunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks
 
@@ -17,7 +18,7 @@ class StringIndexerModelSpec extends FunSpec with TableDrivenPropertyChecks {
     }
 
     it("returns the index of Optional string") {
-      val indexer = StringIndexerModel(Array("hello", "there", "dude"))
+      val indexer = StringIndexerModel(Array("hello", "there", "dude"), nullableInput = true)
 
       assert(indexer(Some("hello")) == 0.0)
       assert(indexer(Some("there")) == 1.0)
@@ -47,12 +48,24 @@ class StringIndexerModelSpec extends FunSpec with TableDrivenPropertyChecks {
     }
 
     it("returns default index for HandleInvalid.keep mode") {
-      val indexer = StringIndexerModel(Array("hello", "there", "dude"), HandleInvalid.Keep)
+      val indexer = StringIndexerModel(Array("hello", "there", "dude"), handleInvalid = HandleInvalid.Keep)
       val invalidLabels = Table("unknown", Some("other unknown"), null, None)
 
       forAll(invalidLabels) { (label: Any) =>
         assert(indexer(label) == 3.0)
       }
+    }
+  }
+
+  describe("input/output schema") {
+    val indexer = StringIndexerModel(Array("hello", "there", "dude"))
+
+    it("has the right input schema") {
+      assert(indexer.inputSchema.fields == Seq(StructField("input", ScalarType.String)))
+    }
+
+    it("has the right output schema") {
+      assert(indexer.outputSchema.fields == Seq(StructField("output", ScalarType.Double)))
     }
   }
 }

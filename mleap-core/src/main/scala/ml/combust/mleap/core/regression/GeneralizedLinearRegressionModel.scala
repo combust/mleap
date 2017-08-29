@@ -2,8 +2,10 @@ package ml.combust.mleap.core.regression
 
 import breeze.numerics.erfinv
 import breeze.stats.{distributions => dist}
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.regression.GeneralizedLinearRegressionModel.FamilyAndLink
+import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.linalg.mleap.BLAS
 
@@ -306,8 +308,13 @@ object GeneralizedLinearRegressionModel {
 
 case class GeneralizedLinearRegressionModel(coefficients: Vector,
                                             intercept: Double,
-                                            fal: FamilyAndLink) {
+                                            fal: FamilyAndLink) extends Model {
   def apply(features: Vector): Double = predict(features)
+
+  def predictWithLink(features: Vector): (Double, Double) = {
+    val eta = predictLink(features)
+    (fal.fitted(eta), eta)
+  }
 
   def predictLink(features: Vector): Double = {
     BLAS.dot(features, coefficients) + intercept
@@ -316,5 +323,12 @@ case class GeneralizedLinearRegressionModel(coefficients: Vector,
   def predict(features: Vector): Double = {
     val eta = predictLink(features)
     fal.fitted(eta)
+  }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(coefficients.size)).get
+
+  override def outputSchema: StructType = {
+    StructType("prediction" -> ScalarType.Double,
+      "link_prediction" -> ScalarType.Double).get
   }
 }

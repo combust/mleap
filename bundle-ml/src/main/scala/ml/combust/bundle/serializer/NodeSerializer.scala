@@ -2,7 +2,6 @@ package ml.combust.bundle.serializer
 
 import java.nio.file.{Files, Path}
 
-import ml.bundle.NodeDef.NodeDef
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.{Bundle, Node}
 import ml.combust.bundle.json.JsonSupport._
@@ -33,10 +32,10 @@ trait FormatNodeSerializer {
 object FormatNodeSerializer {
   /** Get the serializer for a given serialization context.
     *
-    * @param context serialization context for desired format
+    * @param format serialization format
     * @return serializer for given concrete serialization format
     */
-  def serializer(implicit context: SerializationContext): FormatNodeSerializer = context.concrete match {
+  def serializer(implicit format: SerializationFormat): FormatNodeSerializer = format match {
     case SerializationFormat.Json => JsonFormatNodeSerializer
     case SerializationFormat.Protobuf => ProtoFormatNodeSerializer
   }
@@ -46,11 +45,11 @@ object FormatNodeSerializer {
   */
 object JsonFormatNodeSerializer extends FormatNodeSerializer {
   override def write(path: Path, node: Node): Unit = {
-    Files.write(path, node.toJson.prettyPrint.getBytes)
+    Files.write(path, node.asBundle.toJson.prettyPrint.getBytes("UTF-8"))
   }
 
   override def read(path: Path): Node = {
-    new String(Files.readAllBytes(path)).parseJson.convertTo[Node]
+    Node.fromBundle(new String(Files.readAllBytes(path), "UTF-8").parseJson.convertTo[ml.bundle.Node])
   }
 }
 
@@ -63,7 +62,7 @@ object ProtoFormatNodeSerializer extends FormatNodeSerializer {
 
   override def read(path: Path): Node = {
     val bytes = Files.readAllBytes(path)
-    Node.fromBundle(NodeDef.parseFrom(bytes))
+    Node.fromBundle(ml.bundle.Node.parseFrom(bytes))
   }
 }
 
@@ -73,7 +72,7 @@ object ProtoFormatNodeSerializer extends FormatNodeSerializer {
   * @tparam Context context class for implementation
   */
 case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
-  private implicit val sc = bundleContext.preferredSerializationContext(SerializationFormat.Json)
+  private implicit val format = bundleContext.format
 
   /** Write a node to the current context path.
     *
@@ -86,7 +85,7 @@ case class NodeSerializer[Context](bundleContext: BundleContext[Context]) {
     modelSerializer.write(op.model(obj)).map {
       _ =>
         val name = op.name(obj)
-        val shape = op.shape(obj)
+        val shape = op.shape(obj)(bundleContext)
         Node(name = name, shape = shape)
     }
   }.flatMap(identity).flatMap {

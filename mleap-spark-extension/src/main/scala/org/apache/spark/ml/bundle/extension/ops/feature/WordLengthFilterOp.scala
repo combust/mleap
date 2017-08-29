@@ -1,7 +1,7 @@
 package org.apache.spark.ml.bundle.extension.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.dsl.{Model, Node, Shape, _}
+import ml.combust.bundle.dsl.{Model, Node, NodeShape, _}
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.WordLengthFilterModel
 import org.apache.spark.ml.bundle.SparkBundleContext
@@ -18,7 +18,7 @@ class WordLengthFilterOp extends OpNode[SparkBundleContext, WordLengthFilter, Wo
     override def opName: String = Bundle.BuiltinOps.feature.word_filter
 
     override def store(model: Model, obj: WordLengthFilterModel)(implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("length", Value.int(obj.length))
+      model.withValue("length", Value.int(obj.length))
     }
 
     override def load(model: Model)(implicit context: BundleContext[SparkBundleContext]): WordLengthFilterModel = {
@@ -31,7 +31,8 @@ class WordLengthFilterOp extends OpNode[SparkBundleContext, WordLengthFilter, Wo
 
   override def model(node: WordLengthFilter): WordLengthFilterModel = node.model
 
-  override def shape(node: WordLengthFilter): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def shape(node: WordLengthFilter)(implicit context: BundleContext[SparkBundleContext]): NodeShape =
+    NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
 
   override def load(node: Node, model: WordLengthFilterModel)(implicit context: BundleContext[SparkBundleContext]): WordLengthFilter = {
     new WordLengthFilter(uid = node.name).

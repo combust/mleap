@@ -9,7 +9,7 @@ import org.scalatest.{FunSpec, Matchers}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import ml.combust.mleap.runtime.DefaultLeapFrame
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import ml.combust.mleap.runtime.types.{DoubleType, StructType, TensorType}
+import ml.combust.mleap.core.types._
 
 class MleapResourceSpec extends FunSpec with Matchers with ScalatestRouteTest with LeapFrameMarshalling with ApiMarshalling {
 
@@ -56,11 +56,11 @@ class MleapResourceSpec extends FunSpec with Matchers with ScalatestRouteTest wi
         status shouldEqual StatusCodes.OK
         val schema = responseAs[StructType]
         assert(schema.fields.size == 5)
-        assert(schema.getField("first_double").get.dataType == DoubleType())
-        assert(schema.getField("second_double").get.dataType == DoubleType())
-        assert(schema.getField("third_double").get.dataType == DoubleType())
-        assert(schema.getField("features").get.dataType == TensorType(DoubleType()))
-        assert(schema.getField("prediction").get.dataType == DoubleType())
+        assert(schema.getField("first_double").get.dataType == ScalarType.Double)
+        assert(schema.getField("second_double").get.dataType == ScalarType.Double)
+        assert(schema.getField("third_double").get.dataType == ScalarType.Double)
+        assert(schema.getField("features").get.dataType == TensorType(BasicType.Double, Some(Seq(3))))
+        assert(schema.getField("prediction").get.dataType == ScalarType.Double)
       }
     }
 

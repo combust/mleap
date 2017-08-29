@@ -3,13 +3,13 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.VectorIndexerModel
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class VectorIndexerOp extends OpNode[SparkBundleContext, VectorIndexerModel, VectorIndexerModel] {
+class VectorIndexerOp extends SimpleSparkOp[VectorIndexerModel] {
   override val Model: OpModel[SparkBundleContext, VectorIndexerModel] = new OpModel[SparkBundleContext, VectorIndexerModel] {
     override val klazz: Class[VectorIndexerModel] = classOf[VectorIndexerModel]
 
@@ -26,10 +26,10 @@ class VectorIndexerOp extends OpNode[SparkBundleContext, VectorIndexerModel, Vec
 
       mapValues.foldLeft(model) {
         case (m, (key, vKeys, vValues)) =>
-          m.withAttr(s"${key}_keys", Value.doubleList(vKeys)).
-            withAttr(s"${key}_values", Value.longList(vValues.map(_.toLong)))
-      }.withAttr("keys", Value.longList(keys.map(_.toLong).toSeq)).
-        withAttr("num_features", Value.long(obj.numFeatures))
+          m.withValue(s"${key}_keys", Value.doubleList(vKeys)).
+            withValue(s"${key}_values", Value.longList(vValues.map(_.toLong)))
+      }.withValue("keys", Value.longList(keys.map(_.toLong).toSeq)).
+        withValue("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(model: Model)
@@ -48,20 +48,15 @@ class VectorIndexerOp extends OpNode[SparkBundleContext, VectorIndexerModel, Vec
     }
   }
 
-  override val klazz: Class[VectorIndexerModel] = classOf[VectorIndexerModel]
-
-  override def name(node: VectorIndexerModel): String = node.uid
-
-  override def model(node: VectorIndexerModel): VectorIndexerModel = node
-
-  override def load(node: Node, model: VectorIndexerModel)
-                   (implicit context: BundleContext[SparkBundleContext]): VectorIndexerModel = {
-    new VectorIndexerModel(uid = node.name,
-      numFeatures = model.numFeatures,
-      categoryMaps = model.categoryMaps).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: VectorIndexerModel): VectorIndexerModel = {
+    new VectorIndexerModel(uid = uid, numFeatures = model.numFeatures, categoryMaps = model.categoryMaps)
   }
 
-  override def shape(node: VectorIndexerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: VectorIndexerModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: VectorIndexerModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

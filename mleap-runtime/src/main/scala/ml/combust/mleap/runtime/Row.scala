@@ -1,9 +1,8 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.bundle.ByteString
 import ml.combust.mleap.runtime.Row.RowSelector
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, Tensor}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -210,8 +209,9 @@ trait Row extends Iterable[Any] {
 
   def withValues(selectors: RowSelector *)(udf: UserDefinedFunction): Row = {
     udfValue(selectors: _*)(udf) match {
-      case s: Product => withValues(s.productIterator.toSeq)
-      case _ => throw new IllegalArgumentException("Output of udf must be a Seq for multiple outputs")
+      case r: Row => withValues(r.toSeq)
+      case p: Product => withValues(p.productIterator.toSeq)
+      case _ => throw new IllegalArgumentException("Output of udf must be a Row or Product for multiple outputs")
     }
   }
 

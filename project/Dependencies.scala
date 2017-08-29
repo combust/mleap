@@ -6,9 +6,9 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "2.1.0"
+  val sparkVersion = "2.2.0"
   val scalaTestVersion = "3.0.0"
-  val tensorflowVersion = "0.12.head"
+  val tensorflowVersion = "1.1.0"
   val akkaVersion = "2.4.16"
   val akkaHttpVersion = "10.0.3"
 

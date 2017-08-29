@@ -24,7 +24,10 @@ object Common {
     resolvers ++= {
       // Only add Sonatype Snapshots if this version itself is a snapshot version
       if(isSnapshot.value) {
-        Seq("Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots")
+        Seq(
+          "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+          "ASF Snapshots" at "https://repository.apache.org/content/groups/snapshots"
+        )
       } else {
         Seq()
       }

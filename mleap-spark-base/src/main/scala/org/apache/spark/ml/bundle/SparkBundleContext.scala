@@ -1,5 +1,6 @@
 package org.apache.spark.ml.bundle
 
+import com.typesafe.config.ConfigFactory
 import ml.combust.bundle.util.ClassLoaderUtil
 import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import org.apache.spark.sql.DataFrame
@@ -8,6 +9,8 @@ import org.apache.spark.sql.DataFrame
   * Created by hollinwilkins on 10/26/16.
   */
 object SparkBundleContext {
+  val DEFAULT_REGISTRY_KEY: String = "ml.combust.mleap.spark.registry.default"
+
   private val sparkVersion = org.apache.spark.SPARK_VERSION
   private val versionedRegistryKey: String = {
     if(sparkVersion.startsWith("2.0")) {
@@ -27,7 +30,11 @@ object SparkBundleContext {
 
   def apply(dataset: Option[DataFrame], clOption: Option[ClassLoader]): SparkBundleContext = {
     val cl = clOption.getOrElse(ClassLoaderUtil.findClassLoader(classOf[SparkBundleContext].getCanonicalName))
-    apply(dataset, BundleRegistry(versionedRegistryKey, Some(cl)))
+    val config = ConfigFactory.load(cl)
+    val registryKey = if(config.hasPath(DEFAULT_REGISTRY_KEY)) {
+      DEFAULT_REGISTRY_KEY
+    } else { versionedRegistryKey }
+    apply(dataset, BundleRegistry(registryKey, Some(cl)))
   }
 }
 

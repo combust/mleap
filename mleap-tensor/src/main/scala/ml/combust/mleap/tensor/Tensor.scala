@@ -3,7 +3,7 @@ package ml.combust.mleap.tensor
 import java.util
 
 import scala.language.implicitConversions
-import scala.reflect.ClassTag
+import scala.reflect.{ClassTag, classTag}
 
 /**
   * Created by hollinwilkins on 1/12/17.
@@ -43,6 +43,7 @@ sealed trait Tensor[T] {
   def rawSize: Int = rawValues.length
   def rawValues: Array[T]
   def rawValuesIterator: Iterator[T]
+  def mapValues[T2: ClassTag](f: (T) => T2): Tensor[T2]
 
   def apply(indices: Int *): T = get(indices: _*).get
   def get(indices: Int *): Option[T]
@@ -58,6 +59,9 @@ case class DenseTensor[T](values: Array[T],
 
   override def rawValues: Array[T] = values
   override def rawValuesIterator: Iterator[T] = values.iterator
+  override def mapValues[T2: ClassTag](f: (T) => T2): Tensor[T2] = {
+    DenseTensor(values.map(f), dimensions)(classTag[T2])
+  }
 
   override def get(indices: Int *): Option[T] = {
     var i = 0
@@ -122,6 +126,10 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
 
   override def rawValues: Array[T] = values
   override def rawValuesIterator: Iterator[T] = values.iterator
+  override def mapValues[T2: ClassTag](f: (T) => T2): Tensor[T2] = {
+    SparseTensor(indices, values.map(f), dimensions)(classTag[T2])
+  }
+
   override def get(is: Int *): Option[T] = {
     val index = util.Arrays.binarySearch(indices.toArray: Array[AnyRef], is)
 

@@ -1,10 +1,10 @@
 package ml.combust.mleap.runtime
 
 import ml.combust.mleap.runtime.Row.RowSelector
-import ml.combust.mleap.runtime.function.{FieldSelector, Selector, StructSelector}
-import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.runtime.function.{FieldSelector, Selector, StructSelector, UserDefinedFunction}
+import ml.combust.mleap.core.types._
 
-import scala.util.Try
+import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 10/30/16.
@@ -17,11 +17,12 @@ object RowUtil {
     * @return row selectors
     */
   def createRowSelectors(schema: StructType,
-                         selectors: Selector *): Try[Seq[RowSelector]] = {
+                         selectors: Selector *)
+                        (udf: UserDefinedFunction): Try[Seq[RowSelector]] = {
     var i = 0
     selectors.foldLeft(Try(Seq[RowSelector]())) {
       case (trss, s) =>
-        val rs = RowUtil.createRowSelector(schema, s).flatMap {
+        val rs = RowUtil.createRowSelector(schema, s, udf.inputs(i)).flatMap {
           rs => trss.map(trs => rs +: trs)
         }
         i = i + 1
@@ -36,14 +37,39 @@ object RowUtil {
     * @return row selector
     */
   def createRowSelector(schema: StructType,
-                        selector: Selector): Try[RowSelector] = selector match {
+                        selector: Selector,
+                        typeSpec: TypeSpec): Try[RowSelector] = selector match {
     case FieldSelector(name) =>
-      schema.indexOf(name).flatMap(index => Try(r => r.get(index)))
+      schema.indexedField(name).flatMap {
+        case (index, field) =>
+          val dt = typeSpec.asInstanceOf[DataTypeSpec].dt
+          if(field.dataType.needsCast(dt)) {
+            Success((r: Row) => r.get(index))
+          } else {
+            Casting.cast(field.dataType, dt).map {
+              c => (r: Row) => c(r.get(index))
+            }
+          }
+      }
     case StructSelector(fields) =>
-      schema.indicesOf(fields: _*).map {
-        indices =>
-          val indicesArr = indices
-          (r: Row) => Row(indicesArr.map(r.get): _*)
+      schema.indexedFields(fields: _*).flatMap {
+        fields =>
+          val dts = typeSpec.asInstanceOf[SchemaSpec].dts
+          Try {
+            dts.zip(fields).map {
+              case (expDt, (index, field)) =>
+                if (field.dataType.needsCast(expDt)) {
+                  Casting.cast(field.dataType, expDt).map {
+                    c => (r: Row) => c(r.get(index))
+                  }.get
+                } else {
+                  (r: Row) => r.get(index)
+                }
+            }
+          }.map {
+            selectors =>
+              (r: Row) => Row(selectors.map(s => s(r)): _*)
+          }
       }
   }
 }

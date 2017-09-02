@@ -26,7 +26,7 @@ case class RowTransformBuilder private (inputSchema: StructType,
       case (name, dt) => StructField(name, dt)
     }
 
-    RowUtil.createRowSelectors(outputSchema, inputs: _*).flatMap {
+    RowUtil.createRowSelectors(outputSchema, inputs: _*)(udf).flatMap {
       rowSelectors =>
         outputSchema.withFields(fields).map {
           schema2 =>
@@ -48,7 +48,7 @@ case class RowTransformBuilder private (inputSchema: StructType,
                          (udf: UserDefinedFunction): Try[RowTransformBuilder] = {
     val index = outputSchema.fields.length
 
-    RowUtil.createRowSelectors(outputSchema, selectors: _*).flatMap {
+    RowUtil.createRowSelectors(outputSchema, selectors: _*)(udf).flatMap {
       rowSelectors =>
         outputSchema.withField(name, udf.outputTypes.head).map {
           schema2 =>

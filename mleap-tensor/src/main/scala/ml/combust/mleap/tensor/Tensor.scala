@@ -27,6 +27,7 @@ object Tensor {
   }
 
   def denseVector[T: ClassTag](values: Array[T]): DenseTensor[T] = DenseTensor(values, Seq(values.length))
+  def scalar[T: ClassTag](value: T): DenseTensor[T] = DenseTensor(Array(value), Seq())
 }
 
 sealed trait Tensor[T] {

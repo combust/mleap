@@ -1,6 +1,6 @@
 package ml.combust.mleap.core.types
 
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, DenseTensor, Tensor}
 
 import scala.util.{Failure, Success, Try}
 
@@ -80,22 +80,65 @@ object Casting {
     (BasicType.String, BasicType.Double) -> { (v: String) => v.toDouble }
   )
 
-  def cast(from: DataType, to: DataType): Try[(Any) => Any] = {
-    if(from.shape.getClass != to.shape.getClass) {
-      return Failure(new IllegalArgumentException("Shapes of casting from -> to do not match"))
-    }
-
-    val c = (basicCast.get((from.base, to.base)) match {
+  def tryBasicCast(from: DataType, to: DataType): Try[(Any) => Any] = {
+    (basicCast.get((from.base, to.base)) match {
       case Some(c) => Success(c)
       case None => Failure(new IllegalArgumentException(s"Cannot cast base type ${from.base} -> ${to.base}"))
-    }).get.asInstanceOf[(Any) => Any]
+    }).map(_.asInstanceOf[(Any) => Any])
+  }
 
+  def cast(from: DataType, to: DataType): Try[(Any) => Any] = {
     (from, to) match {
-      case (_: ScalarType, _: ScalarType) => Success(c)
+      case (_: ScalarType, _: ScalarType) =>
+        tryBasicCast(from, to)
+      case (_: ScalarType, tt: TensorType) if tt.dimensions.get.isEmpty =>
+        if(from.base == to.base) {
+          Try {
+            from.base match {
+              case BasicType.Boolean => (v: Any) => Tensor.scalar(v.asInstanceOf[Boolean])
+              case BasicType.Byte => (v: Any) => Tensor.scalar(v.asInstanceOf[Byte])
+              case BasicType.Short => (v: Any) => Tensor.scalar(v.asInstanceOf[Short])
+              case BasicType.Int => (v: Any) => Tensor.scalar(v.asInstanceOf[Int])
+              case BasicType.Long => (v: Any) => Tensor.scalar(v.asInstanceOf[Long])
+              case BasicType.Float => (v: Any) => Tensor.scalar(v.asInstanceOf[Float])
+              case BasicType.Double => (v: Any) => Tensor.scalar(v.asInstanceOf[Double])
+              case BasicType.String => (v: Any) => Tensor.scalar(v.asInstanceOf[String])
+              case BasicType.ByteString => (v: Any) => Tensor.scalar(v.asInstanceOf[ByteString])
+            }
+          }
+        } else {
+          tryBasicCast(from, to).map {
+            c =>
+              to.base match {
+                case BasicType.Boolean => (v: Any) => Tensor.scalar(c(v).asInstanceOf[Boolean])
+                case BasicType.Byte => (v: Any) => Tensor.scalar(c(v).asInstanceOf[Byte])
+                case BasicType.Short => (v: Any) => Tensor.scalar(c(v).asInstanceOf[Short])
+                case BasicType.Int => (v: Any) => Tensor.scalar(c(v).asInstanceOf[Int])
+                case BasicType.Long => (v: Any) => Tensor.scalar(c(v).asInstanceOf[Long])
+                case BasicType.Float => (v: Any) => Tensor.scalar(c(v).asInstanceOf[Float])
+                case BasicType.Double => (v: Any) => Tensor.scalar(c(v).asInstanceOf[Double])
+                case BasicType.String => (v: Any) => Tensor.scalar(c(v).asInstanceOf[String])
+                case BasicType.ByteString => (v: Any) => Tensor.scalar(c(v).asInstanceOf[ByteString])
+              }
+          }
+        }
       case (_: ListType, _: ListType) =>
-        Success((l: Any) => l.asInstanceOf[Seq[Any]].map(c))
-      case (f: TensorType, t: TensorType) if f.shape == t.shape =>
-        Success((l: Any) => l.asInstanceOf[Tensor[_]].mapValues(c))
+        tryBasicCast(from, to).map {
+          c =>(l: Any) => l.asInstanceOf[Seq[Any]].map(c)
+        }
+      case (tt1: TensorType, tt2: TensorType) if tt1.dimensions == tt2.dimensions =>
+        tryBasicCast(from, to).map {
+          c => (l: Any) => l.asInstanceOf[Tensor[_]].mapValues(c)
+        }
+      case (_: TensorType, _: TensorType) =>
+        // This branch doesn't really do anything yet...
+        if(from.base == to.base) {
+          Try((l: Any) => l.asInstanceOf[Tensor[_]])
+        } else {
+          tryBasicCast(from, to).map {
+            c => (l: Any) => l.asInstanceOf[Tensor[_]].mapValues(c)
+          }
+        }
       case _ => Failure(new IllegalArgumentException(s"Cannot cast $from to $to"))
     }
   }

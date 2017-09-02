@@ -2,8 +2,9 @@ package ml.combust.mleap.runtime
 
 import java.io.{ByteArrayOutputStream, PrintStream}
 
-import ml.combust.mleap.core.types._
+import ml.combust.mleap.core.types.{SchemaSpec, _}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
 import resource._
 
@@ -62,10 +63,10 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
           assert(data(1).getDouble(2) == 23.42)
         }
 
-        describe("with non-matching data types") {
+        describe("with non-castable data types") {
           it("returns a failure") {
             val frame2 = frame.withField("test_double_2", "test_double") {
-              (r: Int) => r + 10
+              (_: ByteString) => 22
             }
 
             assert(frame2.isFailure)
@@ -78,6 +79,32 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
           }
 
           assert(frame2.isFailure)
+        }
+
+        describe("automatic casting") {
+          it("automatically casts the values to the UDF") {
+            val frame2 = frame.withField("test_double_2", "test_double") {
+              (r: Int) => r + 10
+            }.get
+            val data = frame2.dataset.toArray
+
+            assert(frame2.schema.fields.length == 3)
+            assert(frame2.schema.indexOf("test_double_2").get == 2)
+            assert(data(0).getInt(2) == 52)
+            assert(data(1).getInt(2) == 23)
+          }
+
+          it("automatically casts the data in a struct selector") {
+            val f = (r: Row) => r.getString(0) + r.getString(1)
+            val exec: UserDefinedFunction = UserDefinedFunction(f,
+              ScalarType.String,
+              Seq(SchemaSpec(Seq(ScalarType.String, ScalarType.String))))
+            val frame2 = frame.withField("test_string2", Seq("test_string", "test_double"))(exec).get
+            val data = frame2.dataset.toArray
+
+            assert(frame2.schema.fields.length == 3)
+            assert(data(0).getString(2) == "hello42.13")
+          }
         }
       }
 

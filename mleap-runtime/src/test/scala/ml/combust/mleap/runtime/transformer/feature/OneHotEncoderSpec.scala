@@ -8,8 +8,7 @@ class OneHotEncoderSpec extends FunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      val transformer = OneHotEncoder(shape = NodeShape().withStandardInput("input").
-              withStandardOutput("output"), model = OneHotEncoderModel(5))
+      val transformer = OneHotEncoder(shape = NodeShape.vector(1, 5), model = OneHotEncoderModel(5))
       assert(transformer.schema.fields ==
         Seq(StructField("input", ScalarType.Double),
           StructField("output", TensorType.Double(5))))

@@ -31,7 +31,7 @@ Our goals for this project are:
 1. Core execution engine implemented in Scala
 2. [Spark](http://spark.apache.org/), PySpark and Scikit-Learn support
 3. Export a model with Scikit-learn or Spark and execute it using the MLeap Runtime (without dependencies on the Spark Context, or sklearn/numpy/pandas/etc)
-4. Choose from 3 portable serialization formats (JSON, Protobuf, and Mixed)
+4. Choose from 2 portable serialization formats (JSON, Protobuf)
 5. Implement your own custom data types and transformers for use with MLeap data frames and transformer pipelines
 6. Extensive test coverage with full parity tests for Spark and MLeap pipelines
 7. Optional Spark transformer extension to extend Spark's default transformer offerings

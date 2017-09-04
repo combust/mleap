@@ -7,7 +7,6 @@ import ml.bundle.Format
   *
   * Currently supported formats are:
   * <ol>
-  *   <li>mixed - use JSON for smaller attributes, models and nodes and protobuf for large attributes, models and nodes</li>
   *   <li>json - used JSON for all attributes, models and nodes</li>
   *   <li>protobuf - use protobuf for all attributes, models and nodes</li>
   * </ol>

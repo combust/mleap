@@ -88,7 +88,7 @@ object Casting {
   }
 
   def cast(from: DataType, to: DataType): Try[(Any) => Any] = {
-    (from, to) match {
+    val c = (from, to) match {
       case (_: ScalarType, _: ScalarType) =>
         tryBasicCast(from, to)
       case (_: ScalarType, tt: TensorType) if tt.dimensions.get.isEmpty =>
@@ -140,6 +140,13 @@ object Casting {
           }
         }
       case _ => Failure(new IllegalArgumentException(s"Cannot cast $from to $to"))
+    }
+
+    (from.isNullable, to.isNullable) match {
+      case (false, false) => c
+      case (true, true) => c
+      case (true, false) => c.map(cc => (v: Any) => cc(v.asInstanceOf[Option[_]].get))
+      case (false, true) => c.map(cc => (v: Any) => Some(cc(v)))
     }
   }
 }

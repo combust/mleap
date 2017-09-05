@@ -44,11 +44,11 @@ object RowUtil {
         case (index, field) =>
           val dt = typeSpec.asInstanceOf[DataTypeSpec].dt
           if(field.dataType.needsCast(dt)) {
-            Success((r: Row) => r.get(index))
-          } else {
             Casting.cast(field.dataType, dt).map {
               c => (r: Row) => c(r.get(index))
             }
+          } else {
+            Success((r: Row) => r.get(index))
           }
       }
     case StructSelector(fields) =>

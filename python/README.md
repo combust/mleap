@@ -41,7 +41,6 @@ A simple example is the `StandardScaler` transformer that normalizes the data gi
     "op": "standard_scaler",
     "attributes": {
         "mean": {
-            "type": {
               "double": [0.2354223, 1.34502332],
               "shape": {
                 "dimensions": [{

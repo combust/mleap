@@ -42,27 +42,24 @@ A simple example is the `StandardScaler` transformer that normalizes the data gi
     "attributes": {
         "mean": {
             "type": {
-                "type": "tensor",
-                "tensor": {
-                   "base": "double"
-                }
-             },
-             "value": {
-                "values": [0.2354223, 1.34502332],
-                 "dimensions": [2]
-             }
+              "double": [0.2354223, 1.34502332],
+              "shape": {
+                "dimensions": [{
+                  "size": 2,
+                  "name": ""
+                }]
+              },
+             "type": "tensor"             
         },
         "std": {
-            "type": {
-                "type": "tensor",
-                "tensor": {
-                   "base": "double"
-                }
-             },
-             "value": {
-                "values": [0.13842223, 0.78320249],
-                "dimensions": [2]
-             }
+              "double": [0.13842223, 0.78320249],
+              "shape": {
+                "dimensions": [{
+                  "size": 2,
+                  "name": ""
+                }]
+              },
+             "type": "tensor"
         }
     }
 }

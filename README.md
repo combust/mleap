@@ -120,7 +120,7 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import resource._
 
-  val datasetName = "./mleap-docs/assets/spark-demo.csv"
+  val datasetName = "./examples/spark-demo.csv"
 
   val dataframe: DataFrame = spark.sqlContext.read.format("csv")
     .option("header", true)
@@ -149,7 +149,7 @@ import resource._
   }
 ```
 
-The dataset used for training can be found [here](https://github.com/combust/mleap/tree/master/mleap-runtime/src/main/resources/spark-demo.csv)
+The dataset used for training can be found [here](https://github.com/combust/mleap/tree/master/examples/spark-demo.csv)
 
 Spark pipelines are not meant to be run outside of Spark. They require a DataFrame and therefore a SparkContext to run. These are expensive data structures and libraries to include in a project. With MLeap, there is no dependency on Spark to execute a pipeline. MLeap dependencies are lightweight and we use fast data structures to execute your ML pipelines.
 

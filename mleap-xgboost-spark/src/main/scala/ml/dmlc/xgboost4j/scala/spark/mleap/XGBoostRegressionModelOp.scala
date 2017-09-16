@@ -3,7 +3,7 @@ package ml.dmlc.xgboost4j.scala.spark.mleap
 import java.nio.file.Files
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.dsl.{Model, NodeShape}
+import ml.combust.bundle.dsl.{Model, NodeShape, Value}
 import ml.combust.bundle.op.OpModel
 import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel
 import ml.dmlc.xgboost4j.scala.{XGBoost => SXGBoost}
@@ -27,7 +27,8 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
         obj.booster.saveModel(out)
       }
 
-      model
+      // TODO: extract num features from sample data frame
+      model.withValue("num_features", Value.int(numFeatures))
     }
 
     override def load(model: Model)

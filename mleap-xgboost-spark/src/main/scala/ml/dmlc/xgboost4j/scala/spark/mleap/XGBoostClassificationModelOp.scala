@@ -30,10 +30,12 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
       for(out <- managed(Files.newOutputStream(context.file("xgboost.model")))) {
         obj.booster.saveModel(out)
       }
+
+      // TODO: extract numFeatures from sample data frame
       model.withValue("output_margin", Value.boolean(obj.getOrDefault(obj.outputMargin))).
         withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList)).
         withValue("num_classes", Value.int(obj.numClasses)).
-        withValue("num_features", Value.int(obj.numFeatures))
+        withValue("num_features", Value.int(numFeatures))
     }
 
     override def load(model: Model)

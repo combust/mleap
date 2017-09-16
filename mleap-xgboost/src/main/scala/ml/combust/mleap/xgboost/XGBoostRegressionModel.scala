@@ -8,12 +8,14 @@ import ml.combust.mleap.tensor.Tensor
 /**
   * Created by hollinwilkins on 9/16/17.
   */
-case class XGBoostRegressionModel(predictor: Predictor) extends Model {
+case class XGBoostRegressionModel(predictor: Predictor,
+                                  numFeatures: Int,
+                                  outputMargin: Boolean) extends Model {
   def predictDouble(tensor: Tensor[Double]): Double = {
-    predictor.predict(FVecTensorImpl(tensor))(0)
+    predictor.predictSingle(FVecTensorImpl(tensor), outputMargin)
   }
 
-  override def inputSchema: StructType = StructType("features" -> TensorType.Double(-1)).get
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 
   override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
 }

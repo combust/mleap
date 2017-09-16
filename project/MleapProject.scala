@@ -98,7 +98,7 @@ object MleapProject {
   lazy val xgboost = Project(
     id = "mleap-xgboost",
     base = file("mleap-xgboost"),
-    dependencies = Seq()
+    dependencies = Seq(runtime)
   )
 
   lazy val xgboostSpark = Project(

@@ -12,5 +12,7 @@ lazy val sparkTestkit = MleapProject.sparkTestkit
 lazy val spark = MleapProject.spark
 lazy val sparkExtension = MleapProject.sparkExtension
 lazy val tensorflow = MleapProject.tensorflow
+lazy val xgboost = MleapProject.xgboost
+lazy val xgboostSpark = MleapProject.xgboostSpark
 lazy val serving = MleapProject.serving
 lazy val benchmarks = MleapProject.benchmark

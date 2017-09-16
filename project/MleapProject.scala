@@ -95,6 +95,18 @@ object MleapProject {
     dependencies = Seq(runtime)
   )
 
+  lazy val xgboost = Project(
+    id = "mleap-xgboost",
+    base = file("mleap-xgboost"),
+    dependencies = Seq()
+  )
+
+  lazy val xgboostSpark = Project(
+    id = "mleap-xgboost-spark",
+    base = file("mleap-xgboost-spark"),
+    dependencies = Seq()
+  )
+
   lazy val serving = Project(
     id = "mleap-serving",
     base = file("mleap-serving"),

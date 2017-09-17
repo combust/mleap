@@ -14,10 +14,16 @@ object MleapProject {
       sparkBase,
       sparkTestkit,
       spark,
-      sparkExtension)
+      sparkExtension,
+      xgboost)
 
     sys.props.get("mleap.tensorflow.enabled") match {
       case Some("true") => base :+ (tensorflow: ProjectReference)
+      case _ => base
+    }
+
+    sys.props.get("mleap.xgboost-spark.enabled") match {
+      case Some("true") => base :+ (xgboostSpark: ProjectReference)
       case _ => base
     }
   }

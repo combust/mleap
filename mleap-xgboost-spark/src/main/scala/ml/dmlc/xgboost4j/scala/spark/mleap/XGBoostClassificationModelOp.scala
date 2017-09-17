@@ -30,9 +30,8 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
         Some(obj.getThresholds)
       } else None
 
-      for(out <- managed(Files.newOutputStream(context.file("xgboost.model")))) {
-        obj.booster.saveModel(out)
-      }
+      val out = Files.newOutputStream(context.file("xgboost.model"))
+      obj.booster.saveModel(out)
 
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("output_margin", Value.boolean(obj.getOrDefault(obj.outputMargin))).

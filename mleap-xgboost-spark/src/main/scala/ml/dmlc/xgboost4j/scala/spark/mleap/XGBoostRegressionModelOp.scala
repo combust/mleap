@@ -26,9 +26,8 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
-      for(out <- managed(Files.newOutputStream(context.file("xgboost.model")))) {
-        obj.booster.saveModel(out)
-      }
+      val out = Files.newOutputStream(context.file("xgboost.model"))
+      obj.booster.saveModel(out)
 
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("num_features", Value.int(numFeatures))

@@ -26,8 +26,7 @@ class XGBoostRegressionOp extends MleapOp[XGBoostRegression, XGBoostRegressionMo
       assert(obj.booster.isDefined, "must provide the bytes containing the booster")
 
       Files.write(context.file("xgboost.model"), obj.booster.get)
-      model.withValue("num_features", Value.int(obj.numFeatures)).
-        withValue("output_margin", Value.boolean(obj.outputMargin))
+      model.withValue("num_features", Value.int(obj.numFeatures))
     }
 
     override def load(model: Model)
@@ -39,8 +38,7 @@ class XGBoostRegressionOp extends MleapOp[XGBoostRegression, XGBoostRegressionMo
 
       XGBoostRegressionModel(predictor,
         Some(booster),
-        numFeatures = model.value("num_features").getInt,
-        outputMargin = model.value("output_margin").getBoolean)
+        numFeatures = model.value("num_features").getInt)
     }
   }
 

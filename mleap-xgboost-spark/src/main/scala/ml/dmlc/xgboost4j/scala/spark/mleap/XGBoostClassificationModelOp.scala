@@ -7,7 +7,8 @@ import ml.combust.bundle.dsl.{Model, NodeShape, Value}
 import ml.combust.bundle.op.OpModel
 import ml.dmlc.xgboost4j.scala.spark.XGBoostClassificationModel
 import ml.dmlc.xgboost4j.scala.{XGBoost => SXGBoost}
-import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
+import org.apache.spark.ml.bundle._
+import org.apache.spark.ml.linalg.Vector
 import resource._
 
 /**
@@ -23,6 +24,8 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
 
     override def store(model: Model, obj: XGBoostClassificationModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
+
       val thresholds = if(obj.isSet(obj.thresholds)) {
         Some(obj.getThresholds)
       } else None
@@ -31,7 +34,7 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
         obj.booster.saveModel(out)
       }
 
-      // TODO: extract numFeatures from sample data frame
+      val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("output_margin", Value.boolean(obj.getOrDefault(obj.outputMargin))).
         withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList)).
         withValue("num_classes", Value.int(obj.numClasses)).

@@ -9,6 +9,7 @@ import ml.combust.mleap.tensor.Tensor
   * Created by hollinwilkins on 9/16/17.
   */
 case class XGBoostRegressionModel(predictor: Predictor,
+                                  booster: Option[Array[Byte]] = None,
                                   numFeatures: Int,
                                   outputMargin: Boolean) extends Model {
   def predictDouble(tensor: Tensor[Double]): Double = {

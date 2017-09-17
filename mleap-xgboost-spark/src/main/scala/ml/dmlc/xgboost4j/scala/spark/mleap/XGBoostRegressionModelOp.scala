@@ -7,7 +7,8 @@ import ml.combust.bundle.dsl.{Model, NodeShape, Value}
 import ml.combust.bundle.op.OpModel
 import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel
 import ml.dmlc.xgboost4j.scala.{XGBoost => SXGBoost}
-import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
+import org.apache.spark.ml.bundle._
+import org.apache.spark.ml.linalg.Vector
 import resource.managed
 
 /**
@@ -23,11 +24,13 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
 
     override def store(model: Model, obj: XGBoostRegressionModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
+
       for(out <- managed(Files.newOutputStream(context.file("xgboost.model")))) {
         obj.booster.saveModel(out)
       }
 
-      // TODO: extract num features from sample data frame
+      val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("num_features", Value.int(numFeatures))
     }
 

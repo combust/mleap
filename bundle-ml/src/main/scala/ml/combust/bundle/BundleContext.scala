@@ -8,7 +8,7 @@ import ml.combust.bundle.serializer.SerializationFormat
   *
   * This class holds all contextual information for serializing components into Bundle.ML.
   *
-  * @param format desired serialization format (Json, Protobuf, or Mixed)
+  * @param format desired serialization format (Json, Protobuf)
   * @param bundleRegistry bundle registry of all supported operations
   * @param fs file system for bundle
   * @param path path to the Bundle.ML model

@@ -109,7 +109,7 @@ object Casting {
     (from, to) match {
       case (_: ScalarType, _: ScalarType) =>
         tryBasicCast(from, to)
-      case (_: ScalarType, tt: TensorType) if tt.dimensions.get.isEmpty =>
+      case (_: ScalarType, tt: TensorType) if tt.dimensions.exists(_.isEmpty) =>
         if(from.base == to.base) {
           Try {
             from.base match {
@@ -138,6 +138,14 @@ object Casting {
                 case BasicType.String => (v: Any) => Tensor.scalar(c(v).asInstanceOf[String])
                 case BasicType.ByteString => (v: Any) => Tensor.scalar(c(v).asInstanceOf[ByteString])
               }
+          }
+        }
+      case (tt: TensorType, _: ScalarType) if tt.dimensions.exists(_.isEmpty) =>
+        if(from.base == to.base) {
+          Success((v: Any) => v.asInstanceOf[Tensor[_]](0))
+        } else {
+          tryBasicCast(from, to).map {
+            c => (v: Any) => c(v.asInstanceOf[Tensor[_]](0))
           }
         }
       case (_: ListType, _: ListType) =>

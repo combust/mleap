@@ -8,7 +8,7 @@ import scala.util.{Failure, Success, Try}
   * Created by hollinwilkins on 9/1/17.
   */
 object Casting {
-  val basicCast: Map[(BasicType, BasicType), AnyRef] = Map(
+  val basicCast: Map[(BasicType, BasicType), (Any) => Any] = Map(
     (BasicType.Boolean, BasicType.Byte) -> { (v: Boolean) => (if (v) 1 else 0).toByte },
     (BasicType.Boolean, BasicType.Short) -> { (v: Boolean) => (if (v) 1 else 0).toShort },
     (BasicType.Boolean, BasicType.Int) -> { (v: Boolean) => if (v) 1 else 0 },
@@ -78,17 +78,35 @@ object Casting {
     (BasicType.String, BasicType.Long) -> { (v: String) => v.toLong },
     (BasicType.String, BasicType.Float) -> { (v: String) => v.toFloat },
     (BasicType.String, BasicType.Double) -> { (v: String) => v.toDouble }
-  )
+  ).map {
+    case (k, v) => (k, v.asInstanceOf[(Any) => Any])
+  }
 
   def tryBasicCast(from: DataType, to: DataType): Try[(Any) => Any] = {
-    (basicCast.get((from.base, to.base)) match {
-      case Some(c) => Success(c)
-      case None => Failure(new IllegalArgumentException(s"Cannot cast base type ${from.base} -> ${to.base}"))
-    }).map(_.asInstanceOf[(Any) => Any])
+    if(from.base == to.base) {
+      (from.isNullable, to.isNullable) match {
+        case (true, false) => Success((v: Any) => v.asInstanceOf[Option[Any]].get)
+        case (false, true) => Success((v: Any) => Option(v))
+        case _ => Failure(new IllegalArgumentException(s"Cannot cast base type $from -> $to"))
+      }
+    } else {
+      basicCast.get((from.base, to.base)) match {
+        case Some(c) =>
+          Success(c).map {
+            c =>
+              (from.isNullable, to.isNullable) match {
+                case (true, false) => (v: Any) => c(v.asInstanceOf[Option[Any]].get)
+                case (false, true) => (v: Any) => Option(c(v))
+                case _ => c
+              }
+          }
+        case None => Failure(new IllegalArgumentException(s"Cannot cast base type $from -> $to"))
+      }
+    }
   }
 
   def cast(from: DataType, to: DataType): Try[(Any) => Any] = {
-    val c = (from, to) match {
+    (from, to) match {
       case (_: ScalarType, _: ScalarType) =>
         tryBasicCast(from, to)
       case (_: ScalarType, tt: TensorType) if tt.dimensions.get.isEmpty =>
@@ -140,13 +158,6 @@ object Casting {
           }
         }
       case _ => Failure(new IllegalArgumentException(s"Cannot cast $from to $to"))
-    }
-
-    (from.isNullable, to.isNullable) match {
-      case (false, false) => c
-      case (true, true) => c
-      case (true, false) => c.map(cc => (v: Any) => cc(v.asInstanceOf[Option[_]].get))
-      case (false, true) => c.map(cc => (v: Any) => Some(cc(v)))
     }
   }
 }

@@ -1,8 +1,9 @@
 package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
+import org.apache.avro.generic.GenericData.StringType
 import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.StringIndexerModel
 
@@ -17,8 +18,12 @@ class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] {
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      val dataset = context.context.dataset.get
+      val field = dataset.schema(obj.getInputCol)
+      val isNullable = field.dataType == org.apache.spark.sql.types.StringType && field.nullable
+
       model.withValue("labels", Value.stringList(obj.labels)).
-        withValue("nullable_input", Value.boolean(false)).
+        withValue("nullable_input", Value.boolean(isNullable)).
         withValue("handle_invalid", Value.string(obj.getHandleInvalid))
     }
 

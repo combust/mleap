@@ -22,7 +22,7 @@ class BucketedRandomProjectionLSHOp extends SimpleSparkOp[BucketedRandomProjecti
     override def store(model: Model, obj: BucketedRandomProjectionLSHModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val dataset = context.context.dataset.get
-      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset).asInstanceOf[TensorShape]
 
       model.withValue("random_unit_vectors", Value.tensorList[Double](obj.randUnitVectors.map(_.toArray).map(Tensor.denseVector))).
         withValue("bucket_length", Value.double(obj.getBucketLength))

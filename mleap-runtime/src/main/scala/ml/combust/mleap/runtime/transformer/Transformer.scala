@@ -92,15 +92,17 @@ trait BaseTransformer extends Transformer {
 trait SimpleTransformer extends BaseTransformer {
   val output: String = outputSchema.fields.head.name
 
+  lazy val typedExec: UserDefinedFunction = exec.withOutput(outputSchema)
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(output, selectors: _*)(exec)
+    builder.withOutput(output, selectors: _*)(typedExec)
   }
 }
 
 trait MultiTransformer extends BaseTransformer {
   val outputs: Seq[String] = outputSchema.fields.map(_.name)
 
+  lazy val typedExec: UserDefinedFunction = exec.withOutput(outputSchema)
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutputs(outputs, selectors: _*)(exec)
+    builder.withOutputs(outputs, selectors: _*)(typedExec)
   }
 }

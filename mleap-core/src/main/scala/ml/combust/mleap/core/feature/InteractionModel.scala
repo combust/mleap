@@ -17,6 +17,7 @@ case class InteractionModel(featuresSpec: Array[Array[Int]],
                             inputShapes: Seq[DataShape]) extends Model {
   assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and tensor shapes as inputs")
 
+  val outputSize = featuresSpec.map(_.sum).product
   val encoders: Array[FeatureEncoder] = featuresSpec.map(FeatureEncoder.apply)
 
   def apply(features: Seq[Any]): Vector = {
@@ -55,7 +56,6 @@ case class InteractionModel(featuresSpec: Array[Array[Int]],
   }
 
   override def outputSchema: StructType = {
-    val outputSize = featuresSpec.map(_.sum).product
     StructType(StructField("output" -> TensorType.Double(outputSize))).get
   }
 

@@ -20,12 +20,11 @@ class ChiSqSelectorOp extends SimpleSparkOp[ChiSqSelectorModel] {
 
     override def store(model: Model, obj: ChiSqSelectorModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-
       val dataset = context.context.dataset.get
-      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getFeaturesCol)).asInstanceOf[TensorShape]
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getFeaturesCol), dataset).asInstanceOf[TensorShape]
 
       model.withValue("filter_indices", Value.longList(obj.selectedFeatures.map(_.toLong).toSeq))
-           .withValue("input_size", Value.int(inputShape.dimensions.get(0)))
+           .withValue("input_size", Value.int(inputShape.dimensions.get.head))
     }
 
     override def load(model: Model)

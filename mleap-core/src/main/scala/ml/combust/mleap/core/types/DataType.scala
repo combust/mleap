@@ -76,7 +76,9 @@ case class ScalarType(override val base: BasicType, override val isNullable: Boo
 
   override def shape: ScalarShape = ScalarShape(isNullable)
   override def needsCast(other: DataType): Boolean = {
-    other.shape.isTensor || (other.shape.isScalar && base != other.base)
+    other.shape.isTensor ||
+      (other.shape.isScalar && base != other.base) ||
+      isNullable != other.isNullable
   }
 }
 

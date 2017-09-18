@@ -68,6 +68,7 @@ object Casting {
     (BasicType.String, BasicType.Boolean) -> { (v: String) => v match {
       case "true" | "yes" => true
       case "false" | "no" => false
+      case "" => false
       case digits if v.forall(_.isDigit) => digits.toDouble != 0
       case _ => true
     }
@@ -189,8 +190,13 @@ object Casting {
     }
 
     (from.isNullable, to.isNullable) match {
-      case (true, true) => primaryCast
       case (false, false) => primaryCast
+      case (true, true) =>
+        primaryCast.map {
+          _.map {
+            c => (v: Any) => v.asInstanceOf[Option[Any]].map(c)
+          }
+        }
       case (true, false) =>
         primaryCast.map {
           _.map {

@@ -37,7 +37,7 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
       case (sp, ml) =>
         val v1 = sp.getFloat(6)
         val v2 = ml.getDouble(6)
-        Math.abs(v2 - v1) > 0.001
+        Math.abs(v2 - v1) > 0.0000001
     }
   }
 }

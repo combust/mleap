@@ -37,10 +37,11 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
     !sparkDataset.zip(mleapDataset).exists {
       case (sp, ml) =>
         val sparkTensor = sp.getAs[DenseTensor[Double]](7)
-        val mleapTensor = sp.getAs[DenseTensor[Double]](7)
+        val mleapTensor = ml.getAs[DenseTensor[Double]](7)
 
         sparkTensor.values.zip(mleapTensor.values).exists {
-          case (v1, v2) => Math.abs(v2 - v1) > 0.001
+          case (v1, v2) =>
+            Math.abs(v2 - v1) > 0.0000001
         }
     }
   }

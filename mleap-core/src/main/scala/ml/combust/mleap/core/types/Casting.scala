@@ -27,10 +27,10 @@ object Casting {
 
     (BasicType.Short, BasicType.Boolean) -> { (v: Short) => if (v != 0) true else false },
     (BasicType.Short, BasicType.Byte) -> { (v: Short) => v.toByte },
-    (BasicType.Short, BasicType.Int) -> { (v: Short) => v.toByte },
-    (BasicType.Short, BasicType.Long) -> { (v: Short) => v.toByte },
-    (BasicType.Short, BasicType.Float) -> { (v: Short) => v.toByte },
-    (BasicType.Short, BasicType.Double) -> { (v: Short) => v.toByte },
+    (BasicType.Short, BasicType.Int) -> { (v: Short) => v.toInt },
+    (BasicType.Short, BasicType.Long) -> { (v: Short) => v.toLong },
+    (BasicType.Short, BasicType.Float) -> { (v: Short) => v.toFloat },
+    (BasicType.Short, BasicType.Double) -> { (v: Short) => v.toDouble },
     (BasicType.Short, BasicType.String) -> { (v: Short) => v.toString },
 
     (BasicType.Int, BasicType.Boolean) -> { (v: Int) => if (v != 0) true else false },

@@ -126,6 +126,24 @@ case class StructType private(fields: Seq[StructField],
     }
   }
 
+  /** Try to select fields to create a new struct.
+    *
+    * @param fieldNames names of fields to go into new struct
+    * @return try new struct with selected fields
+    */
+  def selectFields(fieldNames: String *): Try[Seq[StructField]] = {
+    indicesOf(fieldNames: _*).flatMap {
+      indices =>
+        val invalid = indices.filter(_ >= fields.length)
+
+        if(invalid.nonEmpty) {
+          Failure(new IllegalArgumentException(s"invalid indices: ${invalid.mkString(",")}"))
+        } else {
+          Success(indices.map(fields))
+        }
+    }
+  }
+
   /** Try to get indices for a list of field names.
     *
     * @param fieldNames names of fields
@@ -183,6 +201,20 @@ case class StructType private(fields: Seq[StructField],
     */
   def indexedField(name: String): Try[(Int, StructField)] = {
     indexOf(name).map(index => (index, fields(index)))
+  }
+
+  /** Try to get the index and field for all field names.
+    *
+    * @param names names of fields
+    * @return try (index of field, field definition)
+    */
+  def indexedFields(names: String *): Try[Seq[(Int, StructField)]] = {
+    indicesOf(names: _*).map {
+      indices =>
+        indices.map {
+          i => (i, fields(i))
+        }
+    }
   }
 
   /** Print schema to standard out.

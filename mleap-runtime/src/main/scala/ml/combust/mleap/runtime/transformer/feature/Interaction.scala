@@ -20,7 +20,7 @@ case class Interaction(override val uid: String = Transformer.uniqueName("intera
   private val f = (row: Row) => model(row.toSeq): Tensor[Double]
   val exec: UserDefinedFunction = {
     UserDefinedFunction(f,
-      TensorType(BasicType.Double),
+      TensorType(BasicType.Double, Seq(model.outputSize)),
       Seq(SchemaSpec(inputSchema)))
   }
 

@@ -12,8 +12,8 @@ import org.scalatest.FunSpec
 class VectorAssemblerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("feature1", TensorType(BasicType.Double)),
     StructField("feature2", ScalarType.Double),
-    StructField("feature3", ScalarType.Double))).get
-  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.5, -0.5, 1.0)), 42.0, 13.0)))
+    StructField("feature3", ScalarType.Int))).get
+  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.5, -0.5, 1.0)), 42.0, 13)))
   val frame = LeapFrame(schema, dataset)
   val vectorAssembler = VectorAssembler(
     shape = NodeShape().withInput("input0", "feature1").

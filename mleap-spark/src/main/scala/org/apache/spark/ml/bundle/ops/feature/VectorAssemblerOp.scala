@@ -23,7 +23,7 @@ class VectorAssemblerOp extends SimpleSparkOp[VectorAssembler] {
       assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
       val dataset = context.context.dataset.get
-      val inputShapes = obj.getInputCols.map(i => sparkToMleapDataShape(dataset.schema(i)): DataShape)
+      val inputShapes = obj.getInputCols.map(i => sparkToMleapDataShape(dataset.schema(i), dataset): DataShape)
 
       model.withValue("input_shapes", Value.dataShapeList(inputShapes))
     }

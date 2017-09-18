@@ -22,7 +22,7 @@ class MinHashLSHOp extends SimpleSparkOp[MinHashLSHModel] {
       val (ca, cb) = obj.randCoefficients.unzip
 
       val dataset = context.context.dataset.get
-      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset).asInstanceOf[TensorShape]
 
       model.withValue("random_coefficients_a", Value.longList(ca.map(_.toLong))).
         withValue("random_coefficients_b", Value.longList(cb.map(_.toLong)))

@@ -29,7 +29,7 @@ class InteractionOp extends SimpleSparkOp[Interaction] {
 
       val dataset = context.context.dataset.get
       val spec = buildSpec(obj.getInputCols, dataset)
-      val inputShapes = obj.getInputCols.map(v => sparkToMleapDataShape(dataset.schema(v), Some(dataset)): DataShape)
+      val inputShapes = obj.getInputCols.map(v => sparkToMleapDataShape(dataset.schema(v), dataset): DataShape)
 
       val m = model.withValue("num_inputs", Value.int(spec.length)).
         withValue("input_shapes", Value.dataShapeList(inputShapes))

@@ -4,9 +4,8 @@ import java.io.File
 
 import ml.combust.mleap.runtime
 import org.apache.spark.ml.Transformer
-import org.apache.spark.sql.{Column, DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
-import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.MleapSupport._
 import com.databricks.spark.avro._
 import ml.combust.bundle.BundleFile
@@ -14,25 +13,16 @@ import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{DataType, TensorType}
 import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.bundle.SparkBundleContext
-import org.apache.spark.ml.linalg.{Vector, VectorUDT}
-import org.apache.spark.sql.mleap.TensorUDT
-import org.apache.spark.sql.functions.udf
-import org.apache.spark.sql.types.ArrayType
-import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{BaseTransformer, Pipeline}
 import resource._
-
-import scala.collection.mutable
 
 /**
   * Created by hollinwilkins on 10/30/16.
   */
 object SparkParityBase extends FunSpec {
-  TensorUDT // make sure UDT is registered
-
   val sparkRegistry = SparkBundleContext.defaultContext
   val mleapRegistry = MleapContext.defaultContext
 
@@ -43,17 +33,6 @@ object SparkParityBase extends FunSpec {
   def dataset(spark: SparkSession): DataFrame = {
     spark.sqlContext.read.avro(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").toString)
   }
-
-  val toTensor = udf {
-    v: Vector => v: Tensor[Double]
-  }
-
-  val toTensorFromArray = udf {
-    (v: mutable.WrappedArray[Vector]) =>
-      val values = v.flatMap(_.toArray).toArray
-      val dim1 = v.head.size
-      Tensor.create(values = values, dimensions = Seq(v.length, dim1))
-  }
 }
 
 abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
@@ -61,22 +40,6 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   val textDataset: DataFrame = SparkParityBase.textDataset(spark)
   val dataset: DataFrame
   val sparkTransformer: Transformer
-
-  def sparkCols(dataset: DataFrame): Seq[Column] = {
-    dataset.schema.fields.sortBy(_.name).map {
-      field =>
-        field.dataType match {
-          case _: VectorUDT =>
-            SparkParityBase.toTensor(dataset.col(field.name))
-          case at: ArrayType if at.elementType.isInstanceOf[VectorUDT] =>
-            SparkParityBase.toTensorFromArray(dataset.col(field.name))
-          case _ => dataset.col(field.name)
-        }
-    }
-  }
-  def mleapCols(dataset: DataFrame): Seq[Column] = {
-    dataset.schema.fieldNames.sortBy(identity).map(dataset.col)
-  }
 
   lazy val spark = SparkSession.builder().
     appName("Spark/MLeap Parity Tests").
@@ -142,9 +105,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       val sparkTransformed = sparkTransformer.transform(dataset)
       implicit val sbc = SparkBundleContext().withDataset(sparkTransformed)
       val mTransformer = mleapTransformer(sparkTransformer)
-      val sparkDataset = sparkTransformed.select(sparkCols(sparkTransformed): _*).collect()
+      val sparkDataset = sparkTransformed.toSparkLeapFrame.toSpark.collect()
       val mleapTransformed = mTransformer.sparkTransform(dataset)
-      val mleapDataset = mleapTransformed.select(mleapCols(mleapTransformed): _*).collect()
+      val mleapDataset = mleapTransformed.collect()
 
       assert(sparkDataset sameElements mleapDataset)
     }

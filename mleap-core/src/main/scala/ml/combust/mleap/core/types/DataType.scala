@@ -100,6 +100,19 @@ case class TensorType(override val base: BasicType,
 
   override def shape: TensorShape = TensorShape(dimensions, isNullable)
 }
+
+object ListType {
+  val Boolean = ListType(BasicType.Boolean)
+  val Byte = ListType(BasicType.Byte)
+  val Int = ListType(BasicType.Int)
+  val Short = ListType(BasicType.Short)
+  val Long = ListType(BasicType.Long)
+  val Float = ListType(BasicType.Float)
+  val Double = ListType(BasicType.Double)
+  val String = ListType(BasicType.String)
+  val ByteString = ListType(BasicType.ByteString)
+}
+
 case class ListType(override val base: BasicType,
                     override val isNullable: Boolean = false) extends DataType {
   override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)

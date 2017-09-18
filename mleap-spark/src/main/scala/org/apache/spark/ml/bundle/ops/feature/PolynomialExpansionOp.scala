@@ -20,9 +20,9 @@ class PolynomialExpansionOp extends SimpleSparkOp[PolynomialExpansion] {
     override def store(model: Model, obj: PolynomialExpansion)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val dataset = context.context.dataset.get
-      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset).asInstanceOf[TensorShape]
       model.withValue("degree", Value.long(obj.getDegree))
-        .withValue("input_size", Value.long(inputShape.dimensions.get(0)))
+        .withValue("input_size", Value.long(inputShape.dimensions.get.head))
     }
 
     override def load(model: Model)

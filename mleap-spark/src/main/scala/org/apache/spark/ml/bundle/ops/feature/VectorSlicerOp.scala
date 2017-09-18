@@ -30,12 +30,12 @@ class VectorSlicerOp extends SimpleSparkOp[VectorSlicer] {
         extractNamedIndices(obj.getInputCol, obj.getNames, dataset)
       } else { Array() }
       val (names, namedIndices) = namedIndicesMap.unzip
-      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset).asInstanceOf[TensorShape]
 
       model.withValue("indices", Value.longList(obj.getIndices.map(_.toLong).toSeq)).
         withValue("names", Value.stringList(names)).
         withValue("named_indices", Value.intList(namedIndices)).
-        withValue("input_size", Value.int(inputShape.dimensions.get(0)))
+        withValue("input_size", Value.int(inputShape.dimensions.get.head))
     }
 
     override def load(model: Model)

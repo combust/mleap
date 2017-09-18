@@ -20,10 +20,10 @@ class NormalizerOp extends SimpleSparkOp[Normalizer] {
     override def store(model: Model, obj: Normalizer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val dataset = context.context.dataset.get
-      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset).asInstanceOf[TensorShape]
 
       model.withValue("p_norm", Value.double(obj.getP))
-      .withValue("input_size", Value.int(inputShape.dimensions.get(0)))
+      .withValue("input_size", Value.int(inputShape.dimensions.get.head))
     }
 
     override def load(model: Model)

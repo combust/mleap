@@ -21,10 +21,10 @@ class DCTOp extends SimpleSparkOp[DCT] {
     override def store(model: Model, obj: DCT)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val dataset = context.context.dataset.get
-      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol)).asInstanceOf[TensorShape]
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset).asInstanceOf[TensorShape]
 
       model.withValue("inverse", Value.boolean(obj.getInverse))
-        .withValue("input_size", Value.int(inputShape.dimensions.get(0)))
+        .withValue("input_size", Value.int(inputShape.dimensions.get.head))
     }
 
     override def load(model: Model)

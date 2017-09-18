@@ -43,11 +43,11 @@ object RowUtil {
       schema.indexedField(name).flatMap {
         case (index, field) =>
           val dt = typeSpec.asInstanceOf[DataTypeSpec].dt
-          if(field.dataType.needsCast(dt)) {
-            Casting.cast(field.dataType, dt).map {
+          Casting.cast(field.dataType, dt).map {
+            _.map {
               c => (r: Row) => c(r.get(index))
             }
-          } else {
+          }.getOrElse {
             Success((r: Row) => r.get(index))
           }
       }
@@ -58,11 +58,9 @@ object RowUtil {
           Try {
             dts.zip(fields).map {
               case (expDt, (index, field)) =>
-                if (field.dataType.needsCast(expDt)) {
-                  Casting.cast(field.dataType, expDt).map {
+                Casting.cast(field.dataType, expDt).map(_.get).map {
                     c => (r: Row) => c(r.get(index))
-                  }.get
-                } else {
+                }.getOrElse {
                   (r: Row) => r.get(index)
                 }
             }

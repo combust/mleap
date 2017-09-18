@@ -21,7 +21,6 @@ sealed trait DataType extends Serializable {
   def base: BasicType
   def shape: DataShape
 
-  def needsCast(other: DataType): Boolean
   def simpleString: String
   def printString: String = s"$simpleString (nullable = $isNullable)"
 }
@@ -75,11 +74,6 @@ case class ScalarType(override val base: BasicType, override val isNullable: Boo
   override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"
 
   override def shape: ScalarShape = ScalarShape(isNullable)
-  override def needsCast(other: DataType): Boolean = {
-    other.shape.isTensor ||
-      (other.shape.isScalar && base != other.base) ||
-      isNullable != other.isNullable
-  }
 }
 
 object TensorType {
@@ -105,9 +99,6 @@ case class TensorType(override val base: BasicType,
   override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"
 
   override def shape: TensorShape = TensorShape(dimensions, isNullable)
-  override def needsCast(other: DataType): Boolean = {
-    other.shape.isScalar || (other.shape.isTensor && base != other.base)
-  }
 }
 
 object ListType {
@@ -129,7 +120,4 @@ case class ListType(override val base: BasicType,
   override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"
 
   override def shape: ListShape = ListShape(isNullable)
-  override def needsCast(other: DataType): Boolean = {
-    other.shape.isList && base != other.base
-  }
 }

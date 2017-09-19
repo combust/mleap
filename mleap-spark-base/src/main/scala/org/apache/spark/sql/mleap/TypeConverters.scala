@@ -81,6 +81,7 @@ trait TypeConverters {
   }
 
   def mleapToSparkValue(dataType: types.DataType): (Any) => Any = dataType match {
+    case types.ScalarType(BasicType.String, true) => (v: Any) => v.asInstanceOf[Option[String]].orNull
     case types.ScalarType(_, true) => (v: Any) => v.asInstanceOf[Option[Any]].get
     case tt: types.TensorType =>
       if(tt.dimensions.isEmpty) {

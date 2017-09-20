@@ -18,7 +18,7 @@ class BisectingKMeansModelSpec extends FunSpec {
 
     it("has the right output schema") {
       assert(model.outputSchema.fields ==
-        Seq(StructField("prediction", ScalarType.Int)))
+        Seq(StructField("prediction", ScalarType.Int.nonNullable)))
     }
   }
 }

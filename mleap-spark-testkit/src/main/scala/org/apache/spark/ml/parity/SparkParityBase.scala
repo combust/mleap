@@ -11,7 +11,7 @@ import com.databricks.spark.avro._
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.Model
-import ml.combust.mleap.core.types.{DataType, TensorType}
+import ml.combust.mleap.core.types.{BasicType, DataType, TensorType}
 import ml.combust.mleap.runtime.MleapContext
 import org.apache.spark.ml.bundle.SparkBundleContext
 import ml.combust.mleap.spark.SparkSupport._
@@ -80,8 +80,28 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   }
 
   def asssertModelTypesMatchTransformerTypes(model: Model, exec: UserDefinedFunction) = {
+//    println("\n\n*************** INPUT")
+//    println("*************** INPUT")
+//    println("*************** INPUT")
+//    println(model)
+//    println("=============== INPUT")
+//    println(model.inputSchema)
+//    println("=============== INPUT")
+//    println("MODEL: " + model.inputSchema.fields.map(field => field.dataType))
+//    println("TRANSFORMER: " + exec.inputs.map(in => in.dataTypes).flatten)
+//    println("===============\n\n")
     checkTypes(model.inputSchema.fields.map(field => field.dataType),
       exec.inputs.map(in => in.dataTypes).flatten)
+
+//    println("\n\n***************")
+//    println("***************")
+//    println(model)
+//    println("===============")
+//    println(model.outputSchema)
+//    println("===============")
+//    println("MODEL: " + model.outputSchema.fields.map(field => field.dataType))
+//    println("TRANSFORMER: " + exec.output.dataTypes)
+//    println("===============\n\n")
     checkTypes(model.outputSchema.fields.map(field => field.dataType),
       exec.output.dataTypes)
   }

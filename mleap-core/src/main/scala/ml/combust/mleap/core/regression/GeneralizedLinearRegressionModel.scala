@@ -328,7 +328,7 @@ case class GeneralizedLinearRegressionModel(coefficients: Vector,
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(coefficients.size)).get
 
   override def outputSchema: StructType = {
-    StructType("prediction" -> ScalarType.Double,
-      "link_prediction" -> ScalarType.Double).get
+    StructType("prediction" -> ScalarType.Double.nonNullable,
+      "link_prediction" -> ScalarType.Double.nonNullable).get
   }
 }

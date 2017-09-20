@@ -54,7 +54,7 @@ class LogisticRegressionSpec extends FunSpec {
       it("has the correct inputs and outputs") {
         assert(logisticRegression.schema.fields ==
           Seq(StructField("features", TensorType.Double(3)),
-            StructField("prediction", ScalarType.Double)))
+            StructField("prediction", ScalarType.Double.nonNullable)))
       }
 
       it("has the correct inputs and outputs with probability column") {
@@ -62,7 +62,7 @@ class LogisticRegressionSpec extends FunSpec {
         assert(logisticRegression2.schema.fields ==
           Seq(StructField("features", TensorType.Double(3)),
             StructField("probability", TensorType.Double(2)),
-            StructField("prediction", ScalarType.Double)))
+            StructField("prediction", ScalarType.Double.nonNullable)))
       }
 
       it("has the correct inputs and outputs with rawPrediction column") {
@@ -70,7 +70,7 @@ class LogisticRegressionSpec extends FunSpec {
         assert(logisticRegression2.schema.fields ==
           Seq(StructField("features", TensorType.Double(3)),
             StructField("rp", TensorType.Double(2)),
-            StructField("prediction", ScalarType.Double)))
+            StructField("prediction", ScalarType.Double.nonNullable)))
       }
 
       it("has the correct inputs and outputs with both probability and rawPrediction column") {
@@ -81,7 +81,7 @@ class LogisticRegressionSpec extends FunSpec {
           Seq(StructField("features", TensorType.Double(3)),
             StructField("rp", TensorType.Double(2)),
             StructField("p", TensorType.Double(2)),
-            StructField("prediction", ScalarType.Double)))
+            StructField("prediction", ScalarType.Double.nonNullable)))
       }
     }
   }

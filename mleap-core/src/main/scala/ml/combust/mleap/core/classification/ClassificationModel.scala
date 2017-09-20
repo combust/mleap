@@ -101,5 +101,5 @@ trait ProbabilisticClassificationModel extends ClassificationModel {
 
   override def outputSchema: StructType = StructType("raw_prediction" -> TensorType.Double(numClasses),
     "probability" -> TensorType.Double(numClasses),
-    "prediction" -> ScalarType.Double).get
+    "prediction" -> ScalarType.Double.nonNullable).get
 }

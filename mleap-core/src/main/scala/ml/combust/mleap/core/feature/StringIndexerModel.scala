@@ -40,7 +40,6 @@ object HandleInvalid {
   *                      or 'keep' (put invalid data in a special bucket at index labels.size
   */
 case class StringIndexerModel(labels: Seq[String],
-                              nullableInput: Boolean = true,
                               handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
   private val stringToIndex: Map[String, Int] = labels.zipWithIndex.toMap
   private val keepInvalid = handleInvalid == HandleInvalid.Keep
@@ -75,7 +74,7 @@ case class StringIndexerModel(labels: Seq[String],
     */
   def toReverse: ReverseStringIndexerModel = ReverseStringIndexerModel(labels)
 
-  override def inputSchema: StructType = StructType("input" -> ScalarType(BasicType.String, this.nullableInput)).get
+  override def inputSchema: StructType = StructType("input" -> ScalarType.String).get
 
-  override def outputSchema: StructType = StructType("output" -> ScalarType.Double).get
+  override def outputSchema: StructType = StructType("output" -> ScalarType.Double.nonNullable).get
 }

@@ -12,7 +12,7 @@ class GaussianMixtureSpec extends FunSpec {
         model = new GaussianMixtureModel(Array(null, null), Array(1, 2, 3)))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Int)))
+          StructField("prediction", ScalarType.Int.nonNullable)))
     }
 
     it("has the correct inputs and outputs with only prediction column as well as probability column") {
@@ -20,7 +20,7 @@ class GaussianMixtureSpec extends FunSpec {
         model = new GaussianMixtureModel(Array(null, null, null, null), Array(1, 2, 3)))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Int),
+          StructField("prediction", ScalarType.Int.nonNullable),
           StructField("probability", TensorType.Double(4))))
     }
   }

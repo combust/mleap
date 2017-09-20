@@ -56,6 +56,6 @@ case class GaussianMixtureModel(gaussians: Array[MultivariateGaussian],
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 
-  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int,
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int.nonNullable,
     "probability" -> TensorType.Double(numClusters)).get
 }

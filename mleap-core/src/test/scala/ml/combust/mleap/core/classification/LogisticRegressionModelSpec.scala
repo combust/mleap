@@ -30,7 +30,7 @@ class LogisticRegressionModelSpec extends FunSpec {
         assert(lr.outputSchema.fields == Seq(
           StructField("raw_prediction", TensorType.Double(2)),
           StructField("probability", TensorType.Double(2)),
-          StructField("prediction", ScalarType.Double)
+          StructField("prediction", ScalarType.Double.nonNullable)
         ))
       }
     }
@@ -50,7 +50,7 @@ class LogisticRegressionModelSpec extends FunSpec {
         assert(lr.outputSchema.fields == Seq(
           StructField("raw_prediction", TensorType.Double(3)),
           StructField("probability", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Double)
+          StructField("prediction", ScalarType.Double.nonNullable)
         ))
       }
     }

@@ -13,7 +13,7 @@ class SupportVectorMachineSpec extends FunSpec {
         model = new SupportVectorMachineModel(Vectors.dense(1, 2, 3), 2))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with probability column") {
@@ -22,7 +22,7 @@ class SupportVectorMachineSpec extends FunSpec {
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
           StructField("probability", TensorType.Double(2)),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with rawPrediction column") {
@@ -31,7 +31,7 @@ class SupportVectorMachineSpec extends FunSpec {
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
           StructField("rp", TensorType(BasicType.Double, Seq(2))),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with both probability and rawPrediction columns") {
@@ -43,7 +43,7 @@ class SupportVectorMachineSpec extends FunSpec {
         Seq(StructField("features", TensorType.Double(3)),
           StructField("rp", TensorType.Double(2)),
           StructField("probability", TensorType.Double(2)),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

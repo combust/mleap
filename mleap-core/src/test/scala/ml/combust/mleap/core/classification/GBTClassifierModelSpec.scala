@@ -35,7 +35,7 @@ class GBTClassifierModelSpec extends FunSpec {
       assert(classifier.outputSchema.fields ==
         Seq(StructField("raw_prediction", TensorType.Double(2)),
           StructField("probability", TensorType.Double(2)),
-          StructField("prediction", ScalarType.Double)
+          StructField("prediction", ScalarType.Double.nonNullable)
         ))
     }
   }

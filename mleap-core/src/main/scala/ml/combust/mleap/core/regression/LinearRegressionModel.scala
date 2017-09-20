@@ -30,5 +30,5 @@ case class LinearRegressionModel(coefficients: Vector,
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(coefficients.size)).get
 
-  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double.nonNullable).get
 }

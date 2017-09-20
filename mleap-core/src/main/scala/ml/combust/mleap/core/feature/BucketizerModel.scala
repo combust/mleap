@@ -36,7 +36,7 @@ case class BucketizerModel(splits: Array[Double]) extends Model {
     }
   }
 
-  override def inputSchema: StructType = StructType("input" -> ScalarType.Double).get
+  override def inputSchema: StructType = StructType("input" -> ScalarType.Double.nonNullable).get
 
-  override def outputSchema: StructType = StructType("output" -> ScalarType.Double).get
+  override def outputSchema: StructType = StructType("output" -> ScalarType.Double.nonNullable).get
 }

@@ -15,8 +15,7 @@ import scala.language.implicitConversions
   * Created by hollinwilkins on 10/22/16.
   */
 trait TypeConverters {
-  def sparkToMleapValue(dataType: DataType,
-                        isNullable: Boolean): (Any) => Any = dataType match {
+  def sparkToMleapValue(dataType: DataType): (Any) => Any = dataType match {
     case _: VectorUDT =>
       (v: Any) =>
         v.asInstanceOf[Vector]: Tensor[Double]
@@ -43,7 +42,7 @@ trait TypeConverters {
       case FloatType => types.ScalarType.Float
       case DoubleType => types.ScalarType.Double
       case StringType => types.ScalarType.String.setNullable(field.nullable)
-      case ArrayType(ByteType, _) => types.ScalarType.ByteString
+      case ArrayType(ByteType, _) => types.ListType.Byte
       case ArrayType(BooleanType, _) => types.ListType.Boolean
       case ArrayType(ShortType, _) => types.ListType.Short
       case ArrayType(IntegerType, _) => types.ListType.Int
@@ -63,7 +62,8 @@ trait TypeConverters {
         types.TensorType.Double(a.length, a.head.size)
     }
 
-    (types.StructField(field.name, dt), sparkToMleapValue(field.dataType, field.nullable))
+    (types.StructField(field.name, dt.setNullable(field.nullable)),
+      sparkToMleapValue(field.dataType))
   }
 
   def mleapBasicTypeToSparkType(base: BasicType): DataType = base match {
@@ -109,7 +109,7 @@ trait TypeConverters {
       case tt: types.TensorType => mleapTensorToSpark(tt)
     }
 
-    (StructField(field.name, dt), mleapToSparkValue(field.dataType))
+    (StructField(field.name, dt, nullable = field.dataType.isNullable), mleapToSparkValue(field.dataType))
   }
 
   def mleapTensorToSpark(tt: types.TensorType): DataType = {

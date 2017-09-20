@@ -16,7 +16,7 @@ class BisectingKMeansSpec extends FunSpec {
 
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Int)))
+          StructField("prediction", ScalarType.Int.nonNullable)))
     }
   }
 }

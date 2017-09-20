@@ -75,7 +75,7 @@ trait Row extends Iterable[Any] {
     * @tparam T type of value
     * @return optional value at index cast to given type
     */
-  def optionAs[T](index: Int): Option[T] = Option(get(index)).asInstanceOf[Option[T]]
+  def optionAs[T](index: Int): Option[T] = option(index).asInstanceOf[Option[T]]
 
   /** Get value at index as a boolean.
     *

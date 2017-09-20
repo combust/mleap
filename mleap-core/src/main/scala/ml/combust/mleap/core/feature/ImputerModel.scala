@@ -10,18 +10,12 @@ case class ImputerModel(surrogateValue: Double,
                         missingValue: Double,
                         strategy: String,
                         nullableInput: Boolean = true) extends Model {
-  def predictAny(value: Any): Double = value match {
-    case value: Double => apply(value)
-    case value: Option[_] => apply(value.asInstanceOf[Option[Double]])
-  }
-
   def apply(value: Double): Double = {
     if(value.isNaN || value == missingValue) surrogateValue else value
   }
 
-  def apply(value: Option[Double]): Double = value match {
-    case Some(v) => apply(v)
-    case None => surrogateValue
+  def apply(value: java.lang.Double): Double = {
+    Option(value).map(v => apply(v: Double)).getOrElse(surrogateValue)
   }
 
   override def inputSchema: StructType = StructType(StructField("input" -> ScalarType(BasicType.Double, nullableInput))).get

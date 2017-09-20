@@ -9,7 +9,7 @@ class LeapFrameConverterSpec extends FunSpec {
 
   describe("LeapFrameConverter") {
     val expectedSchema = StructType(Seq(StructField("test_string", ScalarType.String),
-      StructField("test_double", ScalarType.Double))).get
+      StructField("test_double", ScalarType.Double.nonNullable))).get
 
     val frameWith1Row = DefaultLeapFrame(expectedSchema,
       LocalDataset(Array(Row("hello", 42.13))))
@@ -36,4 +36,4 @@ class LeapFrameConverterSpec extends FunSpec {
   }
 }
 
-case class DummyData(test_string:String, test_double:Double)
+case class DummyData(test_string: String, test_double: Double)

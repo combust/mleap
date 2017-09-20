@@ -21,7 +21,7 @@ class DefaultRowWriter(override val schema: StructType) extends RowWriter {
       val dout = new DataOutputStream(out)
       var i = 0
       for(s <- serializers) {
-        s.write(row(i), dout)
+        s.write(row.getRaw(i), dout)
         i = i + 1
       }
       dout.flush()

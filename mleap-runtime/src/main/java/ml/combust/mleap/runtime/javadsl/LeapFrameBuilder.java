@@ -42,7 +42,7 @@ public class LeapFrameBuilder {
         return new LocalDataset(rows);
     }
 
-    public ScalarType createBool() { return createBool(false); }
+    public ScalarType createBool() { return createBool(true); }
     public ScalarType createBool(boolean isNullable) {
         return new ScalarType(support.createBoolean(), isNullable);
     }
@@ -57,51 +57,51 @@ public class LeapFrameBuilder {
     public BasicType createBasicString() { return support.createString(); }
     public BasicType createBasicByteString() { return support.createByteString(); }
 
-    public ScalarType createBoolean() { return createBoolean(false); }
+    public ScalarType createBoolean() { return createBoolean(true); }
     public ScalarType createBoolean(boolean isNullable) {
         return new ScalarType(support.createBoolean(), isNullable);
     }
 
-    public ScalarType createByte() { return createByte(false); }
+    public ScalarType createByte() { return createByte(true); }
     public ScalarType createByte(boolean isNullable) {
         return new ScalarType(support.createByte(), isNullable);
     }
 
-    public ScalarType createShort() { return createShort(false); }
+    public ScalarType createShort() { return createShort(true); }
     public ScalarType createShort(boolean isNullable) {
         return new ScalarType(support.createShort(), isNullable);
     }
 
-    public ScalarType createInt() { return createInt(false); }
+    public ScalarType createInt() { return createInt(true); }
     public ScalarType createInt(boolean isNullable) {
         return new ScalarType(support.createInt(), isNullable);
     }
 
-    public ScalarType createLong() { return createLong(false); }
+    public ScalarType createLong() { return createLong(true); }
     public ScalarType createLong(boolean isNullable) {
         return new ScalarType(support.createLong(), isNullable);
     }
 
-    public ScalarType createFloat() { return createFloat(false); }
+    public ScalarType createFloat() { return createFloat(true); }
     public ScalarType createFloat(boolean isNullable) {
         return new ScalarType(support.createFloat(), isNullable);
     }
 
-    public ScalarType createDouble() { return createDouble(false); }
+    public ScalarType createDouble() { return createDouble(true); }
     public ScalarType createDouble(boolean isNullable) {
         return new ScalarType(support.createDouble(), isNullable);
     }
 
-    public ScalarType createString() { return createString(false); }
+    public ScalarType createString() { return createString(true); }
     public ScalarType createString(boolean isNullable) { return new ScalarType(support.createString(), isNullable); }
 
-    public ScalarType createByteString() { return createByteString(false); }
+    public ScalarType createByteString() { return createByteString(true); }
     public ScalarType createByteString(boolean isNullable) { return new ScalarType(support.createByteString(), isNullable); }
 
-    public TensorType createTensor(BasicType base) { return createTensor(base, false); }
+    public TensorType createTensor(BasicType base) { return createTensor(base, true); }
     public TensorType createTensor(BasicType base, boolean isNullable) { return new TensorType(base, isNullable); }
 
-    public ListType createList(BasicType base) { return createList(base, false); }
+    public ListType createList(BasicType base) { return createList(base, true); }
     public ListType createList(BasicType base, boolean isNullable) {
         return new ListType(base, isNullable);
     }

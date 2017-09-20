@@ -8,15 +8,22 @@ import spray.json._
   * Created by hollinwilkins on 10/31/16.
   */
 case class RowFormat(schema: StructType) extends RootJsonFormat[Row] {
-  val serializers: Seq[JsonFormat[Any]] = schema.fields.map(_.dataType).
-    map(DatasetFormat.serializer).
-    map(_.asInstanceOf[JsonFormat[Any]])
+  val serializers: Seq[(JsonFormat[Any], Boolean)] = schema.fields.map(_.dataType).
+    map {
+      dt =>
+        val s = DatasetFormat.serializer(dt).asInstanceOf[JsonFormat[Any]]
+        (s, dt.isNullable)
+    }
 
   override def write(obj: Row): JsValue = {
     var i = 0
     val values = serializers.map {
-      s =>
-        val v = s.write(obj(i))
+      case (s, isNullable) =>
+        val v = if(isNullable) {
+          s.write(obj.option(i))
+        } else {
+          s.write(obj.getRaw(i))
+        }
         i += 1
         v
     }
@@ -27,8 +34,12 @@ case class RowFormat(schema: StructType) extends RootJsonFormat[Row] {
     case json: JsArray =>
       var i = 0
       val values = serializers.map {
-        s =>
-          val v = s.read(json.elements(i))
+        case (s, isNullable) =>
+          val v = if(isNullable) {
+            s.read(json.elements(i)).asInstanceOf[Option[Any]].orNull
+          } else {
+            s.read(json.elements(i))
+          }
           i += 1
           v
       }

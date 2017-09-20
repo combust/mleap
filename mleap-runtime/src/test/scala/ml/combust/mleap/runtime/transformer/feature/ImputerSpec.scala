@@ -13,10 +13,10 @@ class ImputerSpec extends FunSpec {
     val transformer = Imputer(
       shape = NodeShape().withStandardInput("test_a").
               withStandardOutput("test_out"),
-      model = ImputerModel(45.7, 23.6, "", nullableInput = true))
+      model = ImputerModel(45.7, 23.6, ""))
 
     describe("null values") {
-      val schema = StructType(StructField("test_a", ScalarType.Double.asNullable)).get
+      val schema = StructType(StructField("test_a", ScalarType.Double)).get
       val dataset = LocalDataset(Seq(Row(42.0), Row(null), Row(23.6)))
       val frame = LeapFrame(schema, dataset)
 
@@ -30,7 +30,7 @@ class ImputerSpec extends FunSpec {
 
       it("has the correct inputs and outputs") {
         assert(transformer.schema.fields ==
-          Seq(StructField("test_a", ScalarType.Double.asNullable),
+          Seq(StructField("test_a", ScalarType.Double),
             StructField("test_out", ScalarType.Double)))
       }
     }
@@ -54,7 +54,7 @@ class ImputerSpec extends FunSpec {
 
       it("has the correct inputs and outputs") {
         assert(transformer2.schema.fields ==
-          Seq(StructField("test_a", ScalarType.Double),
+          Seq(StructField("test_a", ScalarType.Double.nonNullable),
             StructField("test_out", ScalarType.Double)))
       }
     }

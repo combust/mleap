@@ -15,7 +15,7 @@ class ImputerModelSpec extends FunSpec {
 
     it("Has the right output schema") {
       assert(model.outputSchema.fields ==
-        Seq(StructField("output", ScalarType.Double)))
+        Seq(StructField("output", ScalarType.Double.nonNullable)))
     }
   }
 }

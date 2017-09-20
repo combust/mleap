@@ -31,7 +31,7 @@ class DefaultRowWriter(override val schema: StructType) extends RowWriter {
 
       var i = 0
       for(writer <- writers) {
-        record.put(i, writer(row(i)))
+        record.put(i, writer(row.getRaw(i)))
         i = i + 1
       }
       datumWriter.write(record, encoder)

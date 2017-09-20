@@ -31,7 +31,7 @@ class ImputerSpec extends FunSpec {
       it("has the correct inputs and outputs") {
         assert(transformer.schema.fields ==
           Seq(StructField("test_a", ScalarType.Double),
-            StructField("test_out", ScalarType.Double)))
+            StructField("test_out", ScalarType.Double.nonNullable)))
       }
     }
 
@@ -55,7 +55,7 @@ class ImputerSpec extends FunSpec {
       it("has the correct inputs and outputs") {
         assert(transformer2.schema.fields ==
           Seq(StructField("test_a", ScalarType.Double.nonNullable),
-            StructField("test_out", ScalarType.Double)))
+            StructField("test_out", ScalarType.Double.nonNullable)))
       }
     }
   }

@@ -20,5 +20,5 @@ case class ImputerModel(surrogateValue: Double,
 
   override def inputSchema: StructType = StructType(StructField("input" -> ScalarType(BasicType.Double, nullableInput))).get
 
-  override def outputSchema: StructType = StructType(StructField("output" -> ScalarType.Double)).get
+  override def outputSchema: StructType = StructType(StructField("output" -> ScalarType.Double.nonNullable)).get
 }

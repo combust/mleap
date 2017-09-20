@@ -18,9 +18,9 @@ class MathUnaryModelSpec extends FunSpec {
       it(s"has the name: $name") { assert(operation.name == name) }
       it("computes the value properly") { assert(model(input) == expected) }
       it("has the right input schema") {
-        assert(model.inputSchema.fields == Seq(StructField("input", ScalarType.Double)))}
+        assert(model.inputSchema.fields == Seq(StructField("input", ScalarType.Double.nonNullable)))}
       it("has the right output schema") {
-        assert(model.outputSchema.fields == Seq(StructField("output", ScalarType.Double)))}
+        assert(model.outputSchema.fields == Seq(StructField("output", ScalarType.Double.nonNullable)))}
     }
   }
 

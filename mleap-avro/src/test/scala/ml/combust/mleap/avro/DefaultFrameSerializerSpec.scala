@@ -28,7 +28,7 @@ class DefaultFrameSerializerSpec extends FunSpec {
     Tensor.denseVector(Array[Byte](1, 2, 3, 4)),
     Tensor.denseVector(Array[Short](16, 45, 78)),
     ByteString(Array[Byte](1, 2, 3, 4, 5)),
-    None)
+    null)
   val dataset = LocalDataset(Seq(row))
   val frame = LeapFrame(schema, dataset)
 

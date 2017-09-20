@@ -50,5 +50,5 @@ case class KMeansModel(clusterCenters: Array[VectorWithNorm], numFeatures: Int) 
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 
-  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int).get
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int.nonNullable).get
 }

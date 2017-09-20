@@ -17,7 +17,7 @@ class DecisionTreeRegressionSpec extends FunSpec {
 
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

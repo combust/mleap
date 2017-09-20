@@ -38,7 +38,7 @@ case class OneHotEncoderModel(size: Int,
     }
   }
 
-  override def inputSchema: StructType = StructType("input" -> ScalarType.Double).get
+  override def inputSchema: StructType = StructType("input" -> ScalarType.Double.nonNullable).get
 
   override def outputSchema: StructType = StructType("output" -> TensorType.Double(size)).get
 }

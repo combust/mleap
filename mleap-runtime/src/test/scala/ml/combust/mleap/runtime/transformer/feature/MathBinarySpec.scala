@@ -28,9 +28,9 @@ class MathBinarySpec extends FunSpec {
 
     it("has correct inputs and outputs with a and b inputs") {
       assert(transformer.schema.fields ==
-        Seq(StructField("test_a", ScalarType.Double),
-          StructField("test_b", ScalarType.Double),
-          StructField("test_out", ScalarType.Double)))
+        Seq(StructField("test_a", ScalarType.Double.nonNullable),
+          StructField("test_b", ScalarType.Double.nonNullable),
+          StructField("test_out", ScalarType.Double.nonNullable)))
     }
   }
 
@@ -47,8 +47,8 @@ class MathBinarySpec extends FunSpec {
 
     it("has correct inputs and outputs using the default b") {
       assert(transformer.schema.fields ==
-        Seq(StructField("test_a", ScalarType.Double),
-          StructField("test_out", ScalarType.Double)))
+        Seq(StructField("test_a", ScalarType.Double.nonNullable),
+          StructField("test_out", ScalarType.Double.nonNullable)))
     }
   }
 
@@ -65,8 +65,8 @@ class MathBinarySpec extends FunSpec {
 
     it("has correct inputs and outputs using the default a") {
       assert(transformer.schema.fields ==
-        Seq(StructField("test_b", ScalarType.Double),
-          StructField("test_out", ScalarType.Double)))
+        Seq(StructField("test_b", ScalarType.Double.nonNullable),
+          StructField("test_out", ScalarType.Double.nonNullable)))
     }
   }
 
@@ -80,7 +80,7 @@ class MathBinarySpec extends FunSpec {
     }
 
     it("has correct inputs and outputs using both defaults") {
-      assert(transformer.schema.fields == Seq(StructField("test_out", ScalarType.Double)))
+      assert(transformer.schema.fields == Seq(StructField("test_out", ScalarType.Double.nonNullable)))
     }
   }
 }

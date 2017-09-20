@@ -52,7 +52,7 @@ case class MultiLayerPerceptronClassifierModel(layers: Seq[Int],
   val numFeatures: Int = layers.head
 
   private val mlpModel = FeedForwardTopology
-    .multiLayerPerceptron(layers.toArray, softmaxOnTop = true)
+    .multiLayerPerceptron(layers.toArray)
     .model(weights)
 
   def apply(features: Vector): Double = {
@@ -61,5 +61,5 @@ case class MultiLayerPerceptronClassifierModel(layers: Seq[Int],
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 
-  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double.nonNullable).get
 }

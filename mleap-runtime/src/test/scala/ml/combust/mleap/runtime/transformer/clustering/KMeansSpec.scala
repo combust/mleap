@@ -43,7 +43,7 @@ class KMeansSpec extends FunSpec {
     it("has the correct inputs and outputs") {
       assert(km.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Int)))
+          StructField("prediction", ScalarType.Int.nonNullable)))
     }
   }
 }

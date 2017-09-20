@@ -12,7 +12,7 @@ class RandomForestClassifierSpec extends FunSpec {
         model = new RandomForestClassifierModel(Seq(), Seq(), 3, 2))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with probability column") {
@@ -21,7 +21,7 @@ class RandomForestClassifierSpec extends FunSpec {
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("probability", TensorType(BasicType.Double, Seq(2))),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with rawPrediction column") {
@@ -30,7 +30,7 @@ class RandomForestClassifierSpec extends FunSpec {
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("rp", TensorType(BasicType.Double, Seq(2))),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with both probability and rawPrediction columns") {
@@ -42,7 +42,7 @@ class RandomForestClassifierSpec extends FunSpec {
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
           StructField("rp", TensorType(BasicType.Double, Seq(2))),
           StructField("probability", TensorType(BasicType.Double, Seq(2))),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

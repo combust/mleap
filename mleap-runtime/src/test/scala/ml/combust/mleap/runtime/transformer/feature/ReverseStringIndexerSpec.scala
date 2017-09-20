@@ -14,7 +14,7 @@ class ReverseStringIndexerSpec extends FunSpec {
       ), model = new ReverseStringIndexerModel(Seq("one", "two", "three")))
 
       assert(transformer.schema.fields ==
-        Seq(StructField("input", ScalarType.Double),
+        Seq(StructField("input", ScalarType.Double.nonNullable),
           StructField("output", ScalarType.String)))
     }
   }

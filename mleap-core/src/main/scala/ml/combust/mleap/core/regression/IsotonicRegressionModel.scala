@@ -46,9 +46,9 @@ case class IsotonicRegressionModel(boundaries: Array[Double],
   override def inputSchema: StructType = {
     this.featureIndex match {
       case Some(_) => StructType("features" -> TensorType.Double()).get
-      case None => StructType("features" -> ScalarType.Double).get
+      case None => StructType("features" -> ScalarType.Double.nonNullable).get
     }
   }
 
-  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double).get
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double.nonNullable).get
 }

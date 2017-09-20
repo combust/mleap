@@ -19,7 +19,7 @@ case class ValueConverter() {
     val simple = mleapToAvroSimple(dataType)
 
     if(dataType.isNullable) {
-      (v: Any) => v.asInstanceOf[Option[Any]].map(simple).orNull
+      (v: Any) => Option(v).map(simple).orNull
     } else { simple }
   }
 
@@ -62,7 +62,7 @@ case class ValueConverter() {
   def avroToMleap(dataType: DataType): (Any) => Any = if(dataType.isNullable) {
     val simple = avroToMleapSimple(dataType)
 
-    (v) => Option[Any](v).map(simple)
+    (v) => Option[Any](v).map(simple).orNull
   } else { avroToMleapSimple(dataType) }
 
   def avroToMleapSimple(dataType: DataType): (Any) => Any = dataType match {

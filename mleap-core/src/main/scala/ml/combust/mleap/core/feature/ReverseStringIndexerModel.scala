@@ -20,7 +20,7 @@ case class ReverseStringIndexerModel(labels: Seq[String]) extends Model {
     */
   def apply(index: Int): String = indexToString(index)
 
-  override def inputSchema: StructType = StructType("input" -> ScalarType.Double).get
+  override def inputSchema: StructType = StructType("input" -> ScalarType.Double.nonNullable).get
 
   override def outputSchema: StructType = StructType("output" -> ScalarType.String).get
 }

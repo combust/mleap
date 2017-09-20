@@ -190,34 +190,34 @@ object Casting {
     }
 
     (from.isNullable, to.isNullable) match {
-      case (false, false) => primaryCast
       case (true, true) =>
         primaryCast.map {
           _.map {
-            c => (v: Any) => v.asInstanceOf[Option[Any]].map(c)
+            c =>
+              // Handle nulls here
+              (v: Any) => Option(v).map(c).orNull
           }
         }
+      case (false, false) => primaryCast
+      case (false, true) => primaryCast
       case (true, false) =>
         primaryCast.map {
           _.map {
-            c => (v: Any) => c(v.asInstanceOf[Option[Any]].get)
+            c =>
+              // Handle nulls here
+              (v: Any) =>
+                c(Option(v).getOrElse {
+                  throw new NullPointerException("trying to cast null to non-nullable value")
+                })
           }
         }.orElse {
           Some {
             Try {
-              (v: Any) => v.asInstanceOf[Option[Any]].get
-            }
-          }
-        }
-      case (false, true) =>
-        primaryCast.map {
-          _.map {
-            c => (v: Any) => Option(c(v))
-          }
-        }.orElse {
-          Some {
-            Try {
-              (v: Any) => Option(v)
+              // Handle nulls here
+              (v: Any) =>
+                Option(v).getOrElse {
+                  throw new NullPointerException("trying to cast null to non-nullable value")
+                }
             }
           }
         }

@@ -16,8 +16,8 @@ class GeneralizedLinearRegressionModelSpec extends FunSpec {
 
     it("has the right output schema") {
       assert(model.outputSchema.fields ==
-        Seq(StructField("prediction", ScalarType.Double),
-           StructField("link_prediction", ScalarType.Double)))
+        Seq(StructField("prediction", ScalarType.Double.nonNullable),
+           StructField("link_prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

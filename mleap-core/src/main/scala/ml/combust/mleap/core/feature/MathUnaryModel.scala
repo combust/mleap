@@ -47,8 +47,8 @@ case class MathUnaryModel(operation: UnaryOperation) extends Model {
   }
 
   override def inputSchema: StructType = StructType(
-    "input" -> ScalarType.Double).get
+    "input" -> ScalarType.Double.nonNullable).get
 
   override def outputSchema: StructType = StructType(
-    "output" -> ScalarType.Double).get
+    "output" -> ScalarType.Double.nonNullable).get
 }

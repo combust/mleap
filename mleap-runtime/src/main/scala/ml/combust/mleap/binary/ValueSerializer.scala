@@ -70,16 +70,17 @@ trait ValueSerializer[T] {
   def read(in: DataInputStream): T
 }
 
-case class NullableSerializer[T](base: ValueSerializer[T]) extends ValueSerializer[Option[T]] {
-  override def write(value: Option[T], out: DataOutputStream): Unit = {
-    out.writeBoolean(value.isDefined)
-    value.foreach(v => base.write(v, out))
+case class NullableSerializer[T](base: ValueSerializer[T]) extends ValueSerializer[T] {
+  override def write(value: T, out: DataOutputStream): Unit = {
+    val o = Option(value)
+    out.writeBoolean(o.isDefined)
+    o.foreach(v => base.write(v, out))
   }
 
-  override def read(in: DataInputStream): Option[T] = {
+  override def read(in: DataInputStream): T = {
     if(in.readBoolean()) {
-      Option(base.read(in))
-    } else { None }
+      base.read(in)
+    } else { null.asInstanceOf[T] }
   }
 }
 

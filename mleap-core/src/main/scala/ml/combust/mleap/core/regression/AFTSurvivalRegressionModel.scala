@@ -40,7 +40,7 @@ case class AFTSurvivalRegressionModel(coefficients: Vector,
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(coefficients.size)).get
 
   override def outputSchema: StructType = {
-    StructType("prediction" -> ScalarType.Double,
+    StructType("prediction" -> ScalarType.Double.nonNullable,
       "quantiles" -> TensorType.Double(quantileProbabilities.length)).get
   }
 }

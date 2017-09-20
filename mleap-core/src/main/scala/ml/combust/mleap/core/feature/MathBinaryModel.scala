@@ -60,13 +60,13 @@ case class MathBinaryModel(operation: BinaryOperation,
   override def inputSchema: StructType = {
     (da, db) match {
       case (Some(a), Some(b)) => StructType.empty.get
-      case (Some(a), None) => StructType("input_b" -> ScalarType.Double).get
-      case (None, Some(b)) => StructType("input_a" -> ScalarType.Double).get
-      case (None, None) => StructType("input_a" -> ScalarType.Double,
-        "input_b" -> ScalarType.Double).get
+      case (Some(a), None) => StructType("input_b" -> ScalarType.Double.nonNullable).get
+      case (None, Some(b)) => StructType("input_a" -> ScalarType.Double.nonNullable).get
+      case (None, None) => StructType("input_a" -> ScalarType.Double.nonNullable,
+        "input_b" -> ScalarType.Double.nonNullable).get
     }
   }
 
   override def outputSchema: StructType = StructType(
-    "output" -> ScalarType.Double).get
+    "output" -> ScalarType.Double.nonNullable).get
 }

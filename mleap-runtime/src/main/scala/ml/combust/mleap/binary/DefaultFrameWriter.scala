@@ -27,7 +27,7 @@ class DefaultFrameWriter[LF <: LeapFrame[LF]](frame: LF) extends FrameWriter {
       for(row <- frame.dataset) {
         var i = 0
         for(s <- serializers) {
-          s.write(row(i), dout)
+          s.write(row.getRaw(i), dout)
           i = i + 1
         }
       }

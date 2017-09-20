@@ -12,11 +12,11 @@ class MleapReflectionSpec extends FunSpec {
     import ml.combust.mleap.core.reflection.MleapReflection.dataType
 
     it("returns the Mleap runtime data type from the Scala type") {
-      assert(dataType[Boolean] == ScalarType.Boolean)
-      assert(dataType[Int] == ScalarType.Int)
-      assert(dataType[Long] == ScalarType.Long)
-      assert(dataType[Float] == ScalarType.Float)
-      assert(dataType[Double] == ScalarType.Double)
+      assert(dataType[Boolean] == ScalarType.Boolean.nonNullable)
+      assert(dataType[Int] == ScalarType.Int.nonNullable)
+      assert(dataType[Long] == ScalarType.Long.nonNullable)
+      assert(dataType[Float] == ScalarType.Float.nonNullable)
+      assert(dataType[Double] == ScalarType.Double.nonNullable)
       assert(dataType[String] == ScalarType.String)
       assert(dataType[ByteString] == ScalarType.ByteString)
       assert(dataType[Seq[Boolean]] == ListType(BasicType.Boolean))
@@ -24,11 +24,10 @@ class MleapReflectionSpec extends FunSpec {
       assert(dataType[Seq[Int]] == ListType(BasicType.Int))
       assert(dataType[Seq[Long]] == ListType(BasicType.Long))
       assert(dataType[Seq[Double]] == ListType(BasicType.Double))
-      assert(dataType[Option[Boolean]] == ScalarType.Boolean.asNullable)
-      assert(dataType[Option[String]] == ScalarType.String.asNullable)
-      assert(dataType[Option[Int]] == ScalarType.Int.asNullable)
-      assert(dataType[Option[Long]] == ScalarType.Long.asNullable)
-      assert(dataType[Option[Double]] == ScalarType.Double.asNullable)
+      assert(dataType[java.lang.Boolean] == ScalarType.Boolean)
+      assert(dataType[java.lang.Integer] == ScalarType.Int)
+      assert(dataType[java.lang.Long] == ScalarType.Long)
+      assert(dataType[java.lang.Double] == ScalarType.Double)
       assert(dataType[Tensor[Double]] == TensorType(BasicType.Double))
     }
 

@@ -14,8 +14,8 @@ class IsotonicRegressionSpec extends FunSpec {
         isotonic = true,
         featureIndex = None))
       assert(transformer.schema.fields ==
-        Seq(StructField("features", ScalarType.Double),
-          StructField("prediction", ScalarType.Double)))
+        Seq(StructField("features", ScalarType.Double.nonNullable),
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with feature index") {
@@ -26,7 +26,7 @@ class IsotonicRegressionSpec extends FunSpec {
           featureIndex = Some(2)))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double()),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

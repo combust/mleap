@@ -40,7 +40,6 @@ object HandleInvalid {
   *                      or 'keep' (put invalid data in a special bucket at index labels.size
   */
 case class StringIndexerModel(labels: Seq[String],
-                              nullableInput: Boolean = false,
                               handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
   private val stringToIndex: Map[String, Int] = labels.zipWithIndex.toMap
   private val keepInvalid = handleInvalid == HandleInvalid.Keep
@@ -50,7 +49,7 @@ case class StringIndexerModel(labels: Seq[String],
     * @param value label to index
     * @return index of label
     */
-  def apply(value: Any): Int = if (value == null || value == None) {
+  def apply(value: Any): Int = if (value == null) {
     if (keepInvalid) {
       labels.length
     } else {
@@ -58,10 +57,7 @@ case class StringIndexerModel(labels: Seq[String],
         s"To handle NULLS, set handleInvalid to ${HandleInvalid.Keep.asParamString}")
     }
   } else {
-    val label = value match {
-      case Some(v) => v.toString
-      case _ => value.toString
-    }
+    val label = value.toString
     if (stringToIndex.contains(label)) {
       stringToIndex(label)
     } else if (keepInvalid) {
@@ -78,7 +74,7 @@ case class StringIndexerModel(labels: Seq[String],
     */
   def toReverse: ReverseStringIndexerModel = ReverseStringIndexerModel(labels)
 
-  override def inputSchema: StructType = StructType("input" -> ScalarType(BasicType.String, this.nullableInput)).get
+  override def inputSchema: StructType = StructType("input" -> ScalarType.String).get
 
-  override def outputSchema: StructType = StructType("output" -> ScalarType.Double).get
+  override def outputSchema: StructType = StructType("output" -> ScalarType.Double.nonNullable).get
 }

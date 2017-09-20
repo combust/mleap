@@ -98,7 +98,7 @@ object SchemaConverter {
     case st: ScalarType => maybeNullableAvroType(mleapBasicToAvroType(st.base), st.isNullable)
     case lt: ListType => maybeNullableAvroType(Schema.createArray(mleapBasicToAvroType(lt.base)), lt.isNullable)
     case tt: TensorType =>
-      val ts = tt.base match {
+      tt.base match {
         case BasicType.Boolean => booleanTensorSchema
         case BasicType.Byte => byteTensorSchema
         case BasicType.Short => shortTensorSchema
@@ -110,7 +110,6 @@ object SchemaConverter {
         case BasicType.ByteString => byteStringTensorSchema
         case _ => throw new IllegalArgumentException(s"invalid type ${tt.base}")
       }
-      maybeNullableAvroType(ts, tt.isNullable)
     case _ => throw new IllegalArgumentException(s"invalid data type: $dataType")
   }
 

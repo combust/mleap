@@ -9,12 +9,12 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 1/5/17.
   */
 class CoalesceSpec extends FunSpec {
-  val schema = StructType(StructField("test1", ScalarType.Double.asNullable),
-    StructField("test2", ScalarType.Double.asNullable),
-    StructField("test3", ScalarType.Double.asNullable),
-    StructField("test4", ScalarType.Double)).get
-  val dataset = LocalDataset(Seq(Row(None, None, Some(23.4), 56.7),
-    Row(None, None, None, 34.4)))
+  val schema = StructType(StructField("test1", ScalarType.Double),
+    StructField("test2", ScalarType.Double),
+    StructField("test3", ScalarType.Double),
+    StructField("test4", ScalarType.Double.nonNullable)).get
+  val dataset = LocalDataset(Seq(Row(null, null, 23.4, 56.7),
+    Row(null, null, null, 34.4)))
   val frame = LeapFrame(schema, dataset)
 
   describe("with all optional doubles") {
@@ -36,10 +36,10 @@ class CoalesceSpec extends FunSpec {
     describe("input/output schema") {
       it("has the correct inputs and outputs") {
         assert(coalesce.schema.fields ==
-          Seq(StructField("test1", ScalarType.Double.asNullable),
-            StructField("test2", ScalarType.Double.asNullable),
-            StructField("test3", ScalarType.Double.asNullable),
-            StructField("test_bucket", ScalarType.Double.asNullable)))
+          Seq(StructField("test1", ScalarType.Double),
+            StructField("test2", ScalarType.Double),
+            StructField("test3", ScalarType.Double),
+            StructField("test_bucket", ScalarType.Double)))
       }
     }
   }
@@ -63,10 +63,10 @@ class CoalesceSpec extends FunSpec {
     describe("input/output schema") {
       it("has the correct inputs and outputs") {
         assert(coalesce.schema.fields ==
-          Seq(StructField("test1", ScalarType.Double.asNullable),
-            StructField("test3", ScalarType.Double.asNullable),
-            StructField("test4", ScalarType.Double),
-            StructField("test_bucket", ScalarType.Double.asNullable)))
+          Seq(StructField("test1", ScalarType.Double),
+            StructField("test3", ScalarType.Double),
+            StructField("test4", ScalarType.Double.nonNullable),
+            StructField("test_bucket", ScalarType.Double)))
       }
     }
   }

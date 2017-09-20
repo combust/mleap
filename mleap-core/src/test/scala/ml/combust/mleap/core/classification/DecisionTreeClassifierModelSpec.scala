@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 class DecisionTreeClassifierModelSpec extends FunSpec {
 
   describe("decision tree classifier model") {
-    val model = new DecisionTreeClassifierModel(null, 3, 2)
+    val model = DecisionTreeClassifierModel(null, 3, 2)
 
     it("has the right input schema") {
       assert(model.inputSchema.fields ==
@@ -17,7 +17,7 @@ class DecisionTreeClassifierModelSpec extends FunSpec {
       assert(model.outputSchema.fields ==
         Seq(StructField("raw_prediction", TensorType.Double(2)),
           StructField("probability", TensorType.Double(2)),
-          StructField("prediction", ScalarType.Double)
+          StructField("prediction", ScalarType.Double.nonNullable)
         ))
     }
   }

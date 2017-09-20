@@ -22,7 +22,7 @@ class LinearRegressionModelSpec extends FunSpec {
     }
 
     it("has the right output schema") {
-      assert(linearRegression.outputSchema.fields == Seq(StructField("prediction", ScalarType.Double)))
+      assert(linearRegression.outputSchema.fields == Seq(StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

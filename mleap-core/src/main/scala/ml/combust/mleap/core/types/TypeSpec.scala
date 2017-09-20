@@ -17,8 +17,7 @@ case class DataTypeSpec(dt: DataType) extends TypeSpec {
 }
 
 object SchemaSpec {
-  def
-  apply(schema: StructType): SchemaSpec = SchemaSpec(schema.fields.map(_.dataType))
+  def apply(schema: StructType): SchemaSpec = SchemaSpec(schema.fields.map(_.dataType))
 }
 case class SchemaSpec(dts: Seq[DataType]) extends TypeSpec {
   override def dataTypes: Seq[DataType] = dts

@@ -24,7 +24,7 @@ case class BisectingKMeansModel(root: ClusteringTreeNode) extends Model {
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 
-  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int).get
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int.nonNullable).get
 }
 
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/clustering/BisectingKMeansModel.scala")

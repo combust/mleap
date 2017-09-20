@@ -18,12 +18,7 @@ class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] {
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      val dataset = context.context.dataset.get
-      val field = dataset.schema(obj.getInputCol)
-      val isNullable = field.dataType == org.apache.spark.sql.types.StringType && field.nullable
-
       model.withValue("labels", Value.stringList(obj.labels)).
-        withValue("nullable_input", Value.boolean(isNullable)).
         withValue("handle_invalid", Value.string(obj.getHandleInvalid))
     }
 

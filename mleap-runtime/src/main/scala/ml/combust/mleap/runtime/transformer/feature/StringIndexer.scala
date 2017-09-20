@@ -11,9 +11,5 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 case class StringIndexer(override val uid: String = Transformer.uniqueName("string_indexer"),
                          override val shape: NodeShape,
                          override val model: StringIndexerModel) extends SimpleTransformer {
-  val exec: UserDefinedFunction = if(model.nullableInput) {
-    (value: Option[String]) => model(value).toDouble
-  } else {
-    (value: String) => model(value).toDouble
-  }
+  val exec: UserDefinedFunction = (value: String) => model(value).toDouble
 }

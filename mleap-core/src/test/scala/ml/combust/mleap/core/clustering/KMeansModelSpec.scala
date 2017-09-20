@@ -27,7 +27,7 @@ class KMeansModelSpec extends FunSpec {
     }
 
     it("has the right output schema") {
-      assert(km.outputSchema.fields == Seq(StructField("prediction", ScalarType.Int)))
+      assert(km.outputSchema.fields == Seq(StructField("prediction", ScalarType.Int.nonNullable)))
     }
   }
 }

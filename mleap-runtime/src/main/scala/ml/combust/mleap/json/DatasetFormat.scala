@@ -20,7 +20,9 @@ object DatasetFormat {
     }
   }
 
-  def listSerializer(lt: ListType): JsonFormat[_] = seqFormat(basicSerializer(lt.base, isNullable = false))
+  def listSerializer(lt: ListType): JsonFormat[_] = {
+    maybeNullableFormat(seqFormat(basicSerializer(lt.base, isNullable = false)), lt.isNullable)
+  }
 
   def tensorSerializer(tt: TensorType): JsonFormat[_] = {
     val isNullable = tt.isNullable

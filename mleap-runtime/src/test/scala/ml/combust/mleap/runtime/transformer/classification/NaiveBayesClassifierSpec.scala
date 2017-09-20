@@ -12,7 +12,7 @@ class NaiveBayesClassifierSpec extends FunSpec {
         model = new NaiveBayesModel(3, 2, null, null, null))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with probability column") {
@@ -21,7 +21,7 @@ class NaiveBayesClassifierSpec extends FunSpec {
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
           StructField("probability", TensorType.Double(2)),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with rawPrediction column") {
@@ -30,7 +30,7 @@ class NaiveBayesClassifierSpec extends FunSpec {
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
           StructField("rp", TensorType.Double(2)),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with both probability and rawPrediction columns") {
@@ -42,7 +42,7 @@ class NaiveBayesClassifierSpec extends FunSpec {
         Seq(StructField("features", TensorType.Double(3)),
           StructField("rp", TensorType.Double(2)),
           StructField("probability", TensorType.Double(2)),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

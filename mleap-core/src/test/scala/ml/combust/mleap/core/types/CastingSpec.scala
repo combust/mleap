@@ -121,14 +121,14 @@ class CastingSpec extends FunSpec {
     describe(s"cast from $from to $to - $i") {
       it("casts the scalar") {
         val c = Casting.cast(ScalarType(from), ScalarType(to)).get.get
-        val oc = Casting.cast(ScalarType(from).asNullable, ScalarType(to)).get.get
-        val co = Casting.cast(ScalarType(from), ScalarType(to).asNullable).get.get
-        val oco = Casting.cast(ScalarType(from).asNullable, ScalarType(to).asNullable).get.get
+        val oc = Casting.cast(ScalarType(from), ScalarType(to).nonNullable).get.get
+        val co = Casting.cast(ScalarType(from).nonNullable, ScalarType(to)).get.get
+        val oco = Casting.cast(ScalarType(from), ScalarType(to)).get.get
 
         assert(c(fromValue) == expectedValue)
-        assert(oc(Option(fromValue)) == expectedValue)
-        assert(co(fromValue) == Option(expectedValue))
-        assert(oco(Option(fromValue)) == Option(expectedValue))
+        assertThrows[NullPointerException](oc(null))
+        assert(co(fromValue) == expectedValue)
+        assert(oco(null) == null)
       }
 
       it("casts the list") {
@@ -136,14 +136,14 @@ class CastingSpec extends FunSpec {
         val expectedList = Seq(expectedValue, expectedValue, expectedValue)
 
         val c = Casting.cast(ListType(from), ListType(to)).get.get
-        val oc = Casting.cast(ListType(from).asNullable, ListType(to)).get.get
-        val co = Casting.cast(ListType(from), ListType(to).asNullable).get.get
-        val oco = Casting.cast(ListType(from).asNullable, ListType(to).asNullable).get.get
+        val oc = Casting.cast(ListType(from), ListType(to).nonNullable).get.get
+        val co = Casting.cast(ListType(from).nonNullable, ListType(to)).get.get
+        val oco = Casting.cast(ListType(from), ListType(to)).get.get
 
         assert(c(fromList) == expectedList)
-        assert(oc(Option(fromList)) == expectedList)
-        assert(co(fromList) == Option(expectedList))
-        assert(oco(Option(fromList)) == Option(expectedList))
+        assertThrows[NullPointerException](oc(null))
+        assert(co(fromList) == expectedList)
+        assert(oco(null) == null)
       }
 
       it("casts the tensor") {
@@ -154,16 +154,16 @@ class CastingSpec extends FunSpec {
         val expectedScalarTensor = createTensorScalar(to, expectedValue)
 
         val c = Casting.cast(TensorType(from), TensorType(to)).get.get
-        val oc = Casting.cast(TensorType(from).asNullable, TensorType(to)).get.get
-        val co = Casting.cast(TensorType(from), TensorType(to).asNullable).get.get
-        val oco = Casting.cast(TensorType(from).asNullable, TensorType(to).asNullable).get.get
+        val oc = Casting.cast(TensorType(from), TensorType(to).nonNullable).get.get
+        val co = Casting.cast(TensorType(from).nonNullable, TensorType(to)).get.get
+        val oco = Casting.cast(TensorType(from), TensorType(to)).get.get
         val tc = Casting.cast(ScalarType(from), TensorType(to, Some(Seq()))).get.get
         val ct = Casting.cast(TensorType(from, Some(Seq())), ScalarType(to)).get.get
 
         assert(c(fromTensor) == expectedTensor)
-        assert(oc(Option(fromTensor)) == expectedTensor)
-        assert(co(fromTensor) == Option(expectedTensor))
-        assert(oco(Option(fromTensor)) == Option(expectedTensor))
+        assertThrows[NullPointerException](oc(null))
+        assert(co(fromTensor) == expectedTensor)
+        assert(oco(null) == null)
         assert(tc(fromValue) == expectedScalarTensor)
         assert(ct(fromScalarTensor) == expectedValue)
       }

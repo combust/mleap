@@ -15,8 +15,7 @@ import scala.language.implicitConversions
   * Created by hollinwilkins on 10/22/16.
   */
 trait TypeConverters {
-  def sparkToMleapValue(dataType: DataType,
-                        isNullable: Boolean): (Any) => Any = dataType match {
+  def sparkToMleapValue(dataType: DataType): (Any) => Any = dataType match {
     case _: VectorUDT =>
       (v: Any) =>
         v.asInstanceOf[Vector]: Tensor[Double]
@@ -29,8 +28,6 @@ trait TypeConverters {
         val s = t.head.size
         val values = t.flatMap(_.toArray).toArray
         DenseTensor(values, Seq(t.size, s))
-    case StringType if isNullable =>
-      (v: Any) => Option(v.asInstanceOf[String])
     case _ => (v) => v
   }
 
@@ -45,7 +42,7 @@ trait TypeConverters {
       case FloatType => types.ScalarType.Float
       case DoubleType => types.ScalarType.Double
       case StringType => types.ScalarType.String.setNullable(field.nullable)
-      case ArrayType(ByteType, _) => types.ScalarType.ByteString
+      case ArrayType(ByteType, _) => types.ListType.Byte
       case ArrayType(BooleanType, _) => types.ListType.Boolean
       case ArrayType(ShortType, _) => types.ListType.Short
       case ArrayType(IntegerType, _) => types.ListType.Int
@@ -65,7 +62,8 @@ trait TypeConverters {
         types.TensorType.Double(a.length, a.head.size)
     }
 
-    (types.StructField(field.name, dt), sparkToMleapValue(field.dataType, field.nullable))
+    (types.StructField(field.name, dt.setNullable(field.nullable)),
+      sparkToMleapValue(field.dataType))
   }
 
   def mleapBasicTypeToSparkType(base: BasicType): DataType = base match {
@@ -81,8 +79,6 @@ trait TypeConverters {
   }
 
   def mleapToSparkValue(dataType: types.DataType): (Any) => Any = dataType match {
-    case types.ScalarType(BasicType.String, true) => (v: Any) => v.asInstanceOf[Option[String]].orNull
-    case types.ScalarType(_, true) => (v: Any) => v.asInstanceOf[Option[Any]].get
     case tt: types.TensorType =>
       if(tt.dimensions.isEmpty) {
         (v: Any) => v.asInstanceOf[Tensor[_]](0)
@@ -113,7 +109,7 @@ trait TypeConverters {
       case tt: types.TensorType => mleapTensorToSpark(tt)
     }
 
-    (StructField(field.name, dt), mleapToSparkValue(field.dataType))
+    (StructField(field.name, dt, nullable = field.dataType.isNullable), mleapToSparkValue(field.dataType))
   }
 
   def mleapTensorToSpark(tt: types.TensorType): DataType = {

@@ -14,7 +14,7 @@ class MultiLayerPerceptronClassifierSpec extends FunSpec {
           model = new MultiLayerPerceptronClassifierModel(Seq(3, 1), Vectors.dense(Array(1.9, 2.2, 4, 1))))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

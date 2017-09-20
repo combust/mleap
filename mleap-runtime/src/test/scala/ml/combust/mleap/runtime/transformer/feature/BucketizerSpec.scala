@@ -44,8 +44,8 @@ class BucketizerSpec extends FunSpec {
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(bucketizer.schema.fields ==
-        Seq(StructField("test_double", ScalarType.Double),
-          StructField("test_bucket", ScalarType.Double)))
+        Seq(StructField("test_double", ScalarType.Double.nonNullable),
+          StructField("test_bucket", ScalarType.Double.nonNullable)))
     }
   }
 }

@@ -119,7 +119,7 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
 
   test("prints the schema to a PrintStream") {
     val printStruct = StructType(StructField("a_double", ScalarType.Double),
-      StructField("a_list", ListType(BasicType.Float, isNullable = true)),
+      StructField("a_list", ListType(BasicType.Float).nonNullable),
       StructField("a_tensor", TensorType(BasicType.Byte))).get
 
     val out = new ByteArrayOutputStream()
@@ -132,9 +132,9 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
     val expected =
       """
         |root
-        | |-- a_double: scalar(base=double,nullable=false)
-        | |-- a_list: list(base=float,nullable=true)
-        | |-- a_tensor: tensor(base=byte,nullable=false)
+        | |-- a_double: scalar(base=double,nullable=true)
+        | |-- a_list: list(base=float,nullable=false)
+        | |-- a_tensor: tensor(base=byte,nullable=true)
       """.stripMargin
 
     assert(schema.trim == expected.trim)

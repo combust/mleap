@@ -45,10 +45,10 @@ object RowUtil {
           val dt = typeSpec.asInstanceOf[DataTypeSpec].dt
           Casting.cast(field.dataType, dt).map {
             _.map {
-              c => (r: Row) => c(r.get(index))
+              c => (r: Row) => c(r.getRaw(index))
             }
           }.getOrElse {
-            Success((r: Row) => r.get(index))
+            Success((r: Row) => r.getRaw(index))
           }
       }
     case StructSelector(fields) =>
@@ -59,9 +59,9 @@ object RowUtil {
             dts.zip(fields).map {
               case (expDt, (index, field)) =>
                 Casting.cast(field.dataType, expDt).map(_.get).map {
-                    c => (r: Row) => c(r.get(index))
+                    c => (r: Row) => c(r.getRaw(index))
                 }.getOrElse {
-                  (r: Row) => r.get(index)
+                  (r: Row) => r.getRaw(index)
                 }
             }
           }.map {

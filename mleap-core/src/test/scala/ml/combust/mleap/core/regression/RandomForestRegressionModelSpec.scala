@@ -32,7 +32,7 @@ class RandomForestRegressionModelSpec extends FunSpec {
     }
 
     it("has the right output schema") {
-      assert(regression.outputSchema.fields == Seq(StructField("prediction", ScalarType.Double)))
+      assert(regression.outputSchema.fields == Seq(StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 

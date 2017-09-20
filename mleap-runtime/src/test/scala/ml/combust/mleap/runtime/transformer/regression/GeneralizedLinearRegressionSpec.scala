@@ -13,7 +13,7 @@ class GeneralizedLinearRegressionSpec extends FunSpec {
         model = new GeneralizedLinearRegressionModel(Vectors.dense(1, 2, 3), 23, null))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with prediction column as well as linkPrediction column") {
@@ -22,8 +22,8 @@ class GeneralizedLinearRegressionSpec extends FunSpec {
         model = new GeneralizedLinearRegressionModel(Vectors.dense(1, 2, 3), 23, null))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Double),
-          StructField("lp", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable),
+          StructField("lp", ScalarType.Double.nonNullable)))
     }
   }
 }

@@ -36,7 +36,7 @@ class BinarizerModelSpec extends FunSpec {
 
     it("Has the right input schema") {
       assert(binarizer.inputSchema.fields ==
-        Seq(StructField("input", ScalarType.Double)))
+        Seq(StructField("input", ScalarType.Double.nonNullable)))
     }
 
     it("Has the right output schema") {

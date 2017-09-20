@@ -17,14 +17,6 @@ class StringIndexerModelSpec extends FunSpec with TableDrivenPropertyChecks {
       assert(indexer("dude") == 2.0)
     }
 
-    it("returns the index of Optional string") {
-      val indexer = StringIndexerModel(Array("hello", "there", "dude"), nullableInput = true)
-
-      assert(indexer("hello") == 0.0)
-      assert(indexer("there") == 1.0)
-      assert(indexer("dude") == 2.0)
-    }
-
     it("throws NullPointerException when encounters NULL/None and handleInvalid is not keep") {
       val indexer = StringIndexerModel(Array("hello"))
       assertThrows[NullPointerException](indexer(null))
@@ -59,7 +51,7 @@ class StringIndexerModelSpec extends FunSpec with TableDrivenPropertyChecks {
     }
 
     it("has the right output schema") {
-      assert(indexer.outputSchema.fields == Seq(StructField("output", ScalarType.Double)))
+      assert(indexer.outputSchema.fields == Seq(StructField("output", ScalarType.Double.nonNullable)))
     }
   }
 }

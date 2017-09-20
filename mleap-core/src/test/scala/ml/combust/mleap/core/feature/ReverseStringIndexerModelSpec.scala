@@ -10,7 +10,7 @@ class ReverseStringIndexerModelSpec extends FunSpec {
 
     it("has the right input schema") {
       assert(model.inputSchema.fields ==
-        Seq(StructField("input", ScalarType.Double)))
+        Seq(StructField("input", ScalarType.Double.nonNullable)))
     }
 
     it("has the right output schema") {

@@ -18,7 +18,7 @@ class OneHotEncoderModelSpec extends FunSpec {
     }
 
     it("has the right input schema") {
-      assert(encoder.inputSchema.fields == Seq(StructField("input", ScalarType.Double)))
+      assert(encoder.inputSchema.fields == Seq(StructField("input", ScalarType.Double.nonNullable)))
     }
 
     it("has the right output schema") {

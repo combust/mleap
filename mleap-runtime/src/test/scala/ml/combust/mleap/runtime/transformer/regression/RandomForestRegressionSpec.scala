@@ -19,7 +19,7 @@ class RandomForestRegressionSpec extends FunSpec {
         model = regression)
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(5)),
-          StructField("prediction", ScalarType.Double)))
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

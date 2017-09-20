@@ -15,7 +15,7 @@ class AFTSurvivalRegressionSpec extends FunSpec {
         model = new AFTSurvivalRegressionModel(Vectors.dense(1, 3, 4), 23, Array(1, 2, 3, 4, 5), 5))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
-          StructField("prediction", ScalarType.Double),
+          StructField("prediction", ScalarType.Double.nonNullable),
           StructField("quantiles", TensorType.Double(5))))
     }
   }

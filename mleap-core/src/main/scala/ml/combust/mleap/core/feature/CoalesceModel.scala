@@ -28,5 +28,5 @@ case class CoalesceModel(nullableInputs: Seq[Boolean]) extends Model {
     StructType(is).get
   }
 
-  override def outputSchema: StructType = StructType(StructField("output", ScalarType.Double.asNullable)).get
+  override def outputSchema: StructType = StructType(StructField("output", ScalarType.Double)).get
 }

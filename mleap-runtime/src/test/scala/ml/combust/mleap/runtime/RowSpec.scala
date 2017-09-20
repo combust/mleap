@@ -14,13 +14,13 @@ trait RowSpec[R <: Row] extends FunSpec {
     val rowValues = Seq("test", 42, Seq(56, 78, 23), 57.3, Tensor.denseVector(Array(2.3, 4.4)), 56L)
     val row = create(rowValues: _*)
 
-    val optionRowValues = Seq(Option("test"),
-      None,
-      Option(42),
-      Option(45.4),
-      Option(Tensor.denseVector(Array(42.3, 65.7))),
-      Option(33l),
-      Option(Seq(56, 78, 23)))
+    val optionRowValues = Seq("test",
+      null,
+      42,
+      45.4,
+      Tensor.denseVector(Array(42.3, 65.7)),
+      33l,
+      Seq(56, 78, 23))
     val optionRow = create(optionRowValues: _*)
 
     describe("#apply") {

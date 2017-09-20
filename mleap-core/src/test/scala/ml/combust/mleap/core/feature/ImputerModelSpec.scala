@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 class ImputerModelSpec extends FunSpec {
 
   describe("input/output schema"){
-    val model = new ImputerModel(12, 23.4, "mean", false)
+    val model = ImputerModel(12, 23.4, "mean")
 
     it("Has the right input schema") {
       assert(model.inputSchema.fields ==

@@ -34,17 +34,32 @@ trait Row extends Iterable[Any] {
 
   /** Get value at index.
     *
+    * Does not perform null checks
+    *
     * @param index index of value
     * @return value at index
     */
-  def get(index: Int): Any
+  def getRaw(index: Int): Any
+
+  /** Get value at index.
+    *
+    * Performs a null check
+    *
+    * @param index index of value
+    * @return value at index
+    */
+  def get(index: Int): Any = {
+    Option(getRaw(index)).getOrElse {
+      throw new NullPointerException(s"value at $index is null")
+    }
+  }
 
   /** Get optional value at index.
     *
     * @param index index of value
     * @return optional value at index
     */
-  def option(index: Int): Option[Any] = getAs[Option[Any]](index)
+  def option(index: Int): Option[Any] = Option(getRaw(index))
 
   /** Get value at index as specified type.
     *
@@ -60,7 +75,7 @@ trait Row extends Iterable[Any] {
     * @tparam T type of value
     * @return optional value at index cast to given type
     */
-  def optionAs[T](index: Int): Option[T] = get(index).asInstanceOf[Option[T]]
+  def optionAs[T](index: Int): Option[T] = Option(get(index)).asInstanceOf[Option[T]]
 
   /** Get value at index as a boolean.
     *
@@ -274,7 +289,7 @@ object ArrayRow {
 case class ArrayRow(values: mutable.WrappedArray[Any]) extends Row {
   def this(values: java.lang.Iterable[Any]) = this(values.asScala.toArray)
 
-  override def get(index: Int): Any = values(index)
+  override def getRaw(index: Int): Any = values(index)
 
   override def iterator: Iterator[Any] = values.iterator
 

@@ -21,11 +21,11 @@ class FrameSerializerSpec extends FunSpec {
     StructField("nullable_string", ScalarType.String.asNullable)).get
   val dataset = LocalDataset(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)),
     "hello", Seq("hello", "there"),
-    Option(56.7d), 32.4f,
+    56.7d, 32.4f,
     Tensor.denseVector(Array[Byte](1, 2, 3, 4)),
     Seq[Short](99, 12, 45),
     ByteString(Array[Byte](32, 4, 55, 67)),
-    None))
+    null))
   val frame = LeapFrame(schema, dataset)
   import MleapContext.defaultContext
 

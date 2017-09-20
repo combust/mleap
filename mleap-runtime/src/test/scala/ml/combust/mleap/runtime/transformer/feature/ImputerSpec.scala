@@ -17,7 +17,7 @@ class ImputerSpec extends FunSpec {
 
     describe("null values") {
       val schema = StructType(StructField("test_a", ScalarType.Double.asNullable)).get
-      val dataset = LocalDataset(Seq(Row(Option(42.0)), Row(None), Row(Option(23.6))))
+      val dataset = LocalDataset(Seq(Row(42.0), Row(null), Row(23.6)))
       val frame = LeapFrame(schema, dataset)
 
       it("transforms the leap frame using the given input and operation") {

@@ -10,14 +10,14 @@ class CoalesceModelSpec extends FunSpec {
 
     it("Has the right input schema") {
       assert(model.inputSchema.fields ==
-        Seq(StructField("input0", ScalarType.Double.asNullable),
-          StructField("input1", ScalarType.Double.asNullable),
-          StructField("input2", ScalarType.Double.asNullable)))
+        Seq(StructField("input0", ScalarType.Double),
+          StructField("input1", ScalarType.Double),
+          StructField("input2", ScalarType.Double)))
     }
 
     it("Has the right output schema") {
       assert(model.outputSchema.fields ==
-        Seq(StructField("output", ScalarType.Double.asNullable)))
+        Seq(StructField("output", ScalarType.Double)))
     }
   }
 }

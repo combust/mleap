@@ -13,8 +13,8 @@ class CoalesceSpec extends FunSpec {
     StructField("test2", ScalarType.Double.asNullable),
     StructField("test3", ScalarType.Double.asNullable),
     StructField("test4", ScalarType.Double)).get
-  val dataset = LocalDataset(Seq(Row(None, None, Some(23.4), 56.7),
-    Row(None, None, None, 34.4)))
+  val dataset = LocalDataset(Seq(Row(null, null, 23.4, 56.7),
+    Row(null, null, null, 34.4)))
   val frame = LeapFrame(schema, dataset)
 
   describe("with all optional doubles") {

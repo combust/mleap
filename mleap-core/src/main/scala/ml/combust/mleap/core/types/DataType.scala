@@ -15,7 +15,9 @@ object DataType {
 
 sealed trait DataType extends Serializable {
   val isNullable: Boolean
+
   def asNullable: DataType = setNullable(true)
+  def nonNullable: DataType = setNullable(false)
   def setNullable(isNullable: Boolean): DataType
 
   def base: BasicType
@@ -68,7 +70,7 @@ object ScalarType {
   val ByteString = ScalarType(BasicType.ByteString)
 }
 
-case class ScalarType(override val base: BasicType, override val isNullable: Boolean = false) extends DataType {
+case class ScalarType(override val base: BasicType, override val isNullable: Boolean = true) extends DataType {
   override def setNullable(isNullable: Boolean): ScalarType = copy(isNullable = isNullable)
   override def simpleString: String = "scalar"
   override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"
@@ -91,7 +93,7 @@ object TensorType {
  */
 case class TensorType(override val base: BasicType,
                       dimensions: Option[Seq[Int]] = None,
-                      override val isNullable: Boolean = false) extends DataType {
+                      override val isNullable: Boolean = true) extends DataType {
   def this(base: BasicType, isNullable: Boolean) = this(base, None, isNullable)
 
   override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
@@ -114,7 +116,7 @@ object ListType {
 }
 
 case class ListType(override val base: BasicType,
-                    override val isNullable: Boolean = false) extends DataType {
+                    override val isNullable: Boolean = true) extends DataType {
   override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
   override def simpleString: String = "list"
   override def printString: String = s"$simpleString(base=$base,nullable=$isNullable)"

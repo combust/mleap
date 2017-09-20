@@ -43,25 +43,30 @@ trait MleapReflection {
 
   private def dataTypeFor(tpe: `Type`): DataType = MleapReflectionLock.synchronized {
     tpe match {
-      case t if t <:< mirrorType[Boolean] => ScalarType(BasicType.Boolean)
-      case t if t <:< mirrorType[Byte] => ScalarType(BasicType.Byte)
-      case t if t <:< mirrorType[Short] => ScalarType(BasicType.Short)
-      case t if t <:< mirrorType[Int] => ScalarType(BasicType.Int)
-      case t if t <:< mirrorType[Long] => ScalarType(BasicType.Long)
-      case t if t <:< mirrorType[Float] => ScalarType(BasicType.Float)
-      case t if t <:< mirrorType[Double] => ScalarType(BasicType.Double)
+      case t if t <:< mirrorType[Boolean] => ScalarType(BasicType.Boolean).nonNullable
+      case t if t <:< mirrorType[Byte] => ScalarType(BasicType.Byte).nonNullable
+      case t if t <:< mirrorType[Short] => ScalarType(BasicType.Short).nonNullable
+      case t if t <:< mirrorType[Int] => ScalarType(BasicType.Int).nonNullable
+      case t if t <:< mirrorType[Long] => ScalarType(BasicType.Long).nonNullable
+      case t if t <:< mirrorType[Float] => ScalarType(BasicType.Float).nonNullable
+      case t if t <:< mirrorType[Double] => ScalarType(BasicType.Double).nonNullable
+
       case t if t <:< mirrorType[String] => ScalarType(BasicType.String)
       case t if t <:< mirrorType[ByteString] => ScalarType(BasicType.ByteString)
+      case t if t <:< mirrorType[java.lang.Boolean] => ScalarType(BasicType.Boolean)
+      case t if t <:< mirrorType[java.lang.Byte] => ScalarType(BasicType.Byte)
+      case t if t <:< mirrorType[java.lang.Short] => ScalarType(BasicType.Short)
+      case t if t <:< mirrorType[java.lang.Integer] => ScalarType(BasicType.Int)
+      case t if t <:< mirrorType[java.lang.Long] => ScalarType(BasicType.Long)
+      case t if t <:< mirrorType[java.lang.Float] => ScalarType(BasicType.Float)
+      case t if t <:< mirrorType[java.lang.Double] => ScalarType(BasicType.Double)
+
       case t if t <:< mirrorType[Seq[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t
         ListType(basicTypeFor(elementType))
       case t if t <:< mirrorType[Tensor[_]] =>
         val TypeRef(_, _, Seq(elementType)) = t
         TensorType(basicTypeFor(elementType))
-      case t if t <:< mirrorType[Option[_]] =>
-        val TypeRef(_, _, Seq(elementType)) = t
-        val baseType = dataTypeFor(elementType)
-        baseType.asNullable
       case t => throw new IllegalArgumentException(s"unknown type $t")
     }
   }
@@ -106,7 +111,7 @@ trait MleapReflection {
     }
   }
 
-  def newInstance[T:TypeTag](args: Seq[_]) : T = MleapReflectionLock.synchronized {
+  def newInstance[T: TypeTag](args: Seq[_]) : T = MleapReflectionLock.synchronized {
     val tpe = mirrorType[T]
     tpe match {
       case t if representsCaseClass(t) =>

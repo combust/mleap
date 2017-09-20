@@ -9,7 +9,7 @@ import ml.combust.mleap.core.types.{BasicType, ScalarType, StructField, StructTy
 case class ImputerModel(surrogateValue: Double,
                         missingValue: Double,
                         strategy: String,
-                        nullableInput: Boolean = false) extends Model {
+                        nullableInput: Boolean = true) extends Model {
   def predictAny(value: Any): Double = value match {
     case value: Double => apply(value)
     case value: Option[_] => apply(value.asInstanceOf[Option[Double]])

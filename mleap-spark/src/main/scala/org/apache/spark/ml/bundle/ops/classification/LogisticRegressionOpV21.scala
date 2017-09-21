@@ -63,7 +63,7 @@ class LogisticRegressionOpV21 extends SimpleSparkOp[LogisticRegressionModel] {
       coefficientMatrix = model.coefficientMatrix,
       interceptVector = model.interceptVector,
       numClasses = model.numClasses,
-      isMultinomial = true)
+      isMultinomial = if (model.numClasses > 2) true else false)
     if(r.isDefined(r.thresholds)) { r.setThresholds(r.getThresholds) }
     r
   }

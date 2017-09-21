@@ -6,6 +6,10 @@ This is the XGBoost Spark integration for MLeap. It provides Bundle Ops for seri
 
 The first thing to do is follow the [xgboost4j-spark installation](http://xgboost.readthedocs.io/en/latest/jvm/) documents to get a copy of the `xgboost4j-spark` jars in your local maven repository. At the time of writing this document, `xgboost4j` libraries are not provided on any public repositories such as maven central or bintray.
 
+**IMPORTANT NOTES**
+
+1. If you see an issue during `mvn install` about "Training failed", add your hostname to `/etc/hosts`: `127.0.0.1 your-computers-hostname`
+
 After you have installed the local `xgboost4j-spark` library, test to make sure everything is working by running the unit tests.
 
 ```

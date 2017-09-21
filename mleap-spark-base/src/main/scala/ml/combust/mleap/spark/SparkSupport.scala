@@ -51,7 +51,7 @@ trait SparkSupport {
     def mleapSchema: types.StructType = TypeConverters.sparkSchemaToMleapSchema(dataset)
   }
 
-  implicit class MleapSchema(schema: types.StructType) {
+  implicit class MleapSchemaOps(schema: types.StructType) {
     def toSpark: StructType = TypeConverters.mleapSchemaToSparkSchema(schema)
   }
 }

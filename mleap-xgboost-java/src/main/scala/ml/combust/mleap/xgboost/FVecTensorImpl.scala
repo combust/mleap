@@ -9,5 +9,7 @@ import ml.combust.mleap.tensor.{SparseTensor, Tensor}
 case class FVecTensorImpl(tensor: Tensor[Double]) extends FVec {
   assert(tensor.dimensions.size == 1, "must provide a vector")
 
-  override def fvalue(index: Int): Double = tensor.get(index).getOrElse(Double.NaN)
+  // Casting to floats, because doubles result in compounding differences from the c++ implementation
+  // https://github.com/komiya-atsushi/xgboost-predictor-java/issues/21
+  override def fvalue(index: Int): Double = tensor.get(index).getOrElse(Double.NaN).toFloat
 }

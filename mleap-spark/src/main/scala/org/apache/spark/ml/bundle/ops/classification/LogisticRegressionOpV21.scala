@@ -38,33 +38,48 @@ class LogisticRegressionOpV21 extends SimpleSparkOp[LogisticRegressionModel] {
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
       val numClasses = model.value("num_classes").getLong
-      val lr = if(numClasses > 2) {
+      val r = if(numClasses > 2) {
         val cmTensor = model.value("coefficient_matrix").getTensor[Double]
         val coefficientMatrix = Matrices.dense(cmTensor.dimensions.head, cmTensor.dimensions(1), cmTensor.toArray)
-        new LogisticRegressionModel(uid = "",
+        val lr = new LogisticRegressionModel(uid = "",
           coefficientMatrix = coefficientMatrix,
           interceptVector = Vectors.dense(model.value("intercept").getTensor[Double].toArray),
           numClasses = numClasses.toInt,
           isMultinomial = true)
+        model.getValue("thresholds").
+          map(t => lr.setThresholds(t.getDoubleList.toArray)).
+          getOrElse(lr)
       } else {
-        new LogisticRegressionModel(uid = "",
+        val lr = new LogisticRegressionModel(uid = "",
           coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
           intercept = model.value("intercept").getDouble)
+        model.getValue("threshold").
+          map(t => lr.setThreshold(t.getDouble)).
+          getOrElse(lr)
       }
-
-      model.getValue("threshold").
-        map(t => lr.setThreshold(t.getDouble)).
-        getOrElse(lr)
+      r
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: LogisticRegressionModel): LogisticRegressionModel = {
-    val r = new LogisticRegressionModel(uid = uid,
-      coefficientMatrix = model.coefficientMatrix,
-      interceptVector = model.interceptVector,
-      numClasses = model.numClasses,
-      isMultinomial = if (model.numClasses > 2) true else false)
-    if(r.isDefined(r.thresholds)) { r.setThresholds(r.getThresholds) }
+    val numClasses = model.numClasses
+    val r = if (numClasses > 2) {
+        val lr = new LogisticRegressionModel(uid = uid,
+          coefficientMatrix = model.coefficientMatrix,
+          interceptVector = model.interceptVector,
+          numClasses = numClasses,
+          isMultinomial = true)
+        if(lr.isDefined(lr.thresholds)) { lr.setThresholds(model.getThresholds) }
+        lr
+    } else {
+        val lr = new LogisticRegressionModel(uid = uid,
+          coefficientMatrix = model.coefficientMatrix,
+          interceptVector = model.interceptVector,
+          numClasses = numClasses,
+          isMultinomial = false)
+        if(lr.isDefined(lr.threshold)) { lr.setThreshold(model.getThreshold) }   
+        lr
+    }
     r
   }
 

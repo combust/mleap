@@ -31,8 +31,13 @@ trait TypeConverters {
     case _ => (v) => v
   }
 
+  def sparkToMleapConverter(dataset: DataFrame,
+                            field: StructField): (types.StructField, (Any) => Any) = {
+    (sparkFieldToMleapField(dataset, field), sparkToMleapValue(field.dataType))
+  }
+
   def sparkFieldToMleapField(dataset: DataFrame,
-                             field: StructField): (types.StructField, (Any) => Any) = {
+                             field: StructField): types.StructField = {
     val dt = field.dataType match {
       case BooleanType => types.ScalarType.Boolean
       case ByteType => types.ScalarType.Byte
@@ -62,8 +67,12 @@ trait TypeConverters {
         types.TensorType.Double(a.length, a.head.size)
     }
 
-    (types.StructField(field.name, dt.setNullable(field.nullable)),
-      sparkToMleapValue(field.dataType))
+    types.StructField(field.name, dt.setNullable(field.nullable))
+  }
+
+  def sparkSchemaToMleapSchema(dataset: DataFrame): types.StructType = {
+    val fields = dataset.schema.fields.map(f => sparkFieldToMleapField(dataset, f))
+    types.StructType(fields).get
   }
 
   def mleapBasicTypeToSparkType(base: BasicType): DataType = base match {
@@ -102,7 +111,7 @@ trait TypeConverters {
     case _ => (v: Any) => v
   }
 
-  def mleapFieldToSparkField(field: types.StructField): (StructField, (Any) => Any) = {
+  def mleapToSparkConverter(field: types.StructField): (StructField, (Any) => Any) = {
     val dt = field.dataType match {
       case types.ScalarType(base, _) => mleapBasicTypeToSparkType(base)
       case types.ListType(base, _) => ArrayType(mleapBasicTypeToSparkType(base), containsNull = false)
@@ -110,6 +119,21 @@ trait TypeConverters {
     }
 
     (StructField(field.name, dt, nullable = field.dataType.isNullable), mleapToSparkValue(field.dataType))
+  }
+
+  def mleapFieldToSparkField(field: types.StructField): StructField = {
+    val dt = field.dataType match {
+      case types.ScalarType(base, _) => mleapBasicTypeToSparkType(base)
+      case types.ListType(base, _) => ArrayType(mleapBasicTypeToSparkType(base), containsNull = false)
+      case tt: types.TensorType => mleapTensorToSpark(tt)
+    }
+
+    StructField(field.name, dt, nullable = field.dataType.isNullable)
+  }
+
+  def mleapSchemaToSparkSchema(schema: types.StructType): StructType = {
+    val fields = schema.fields.map(mleapFieldToSparkField)
+    StructType(fields)
   }
 
   def mleapTensorToSpark(tt: types.TensorType): DataType = {

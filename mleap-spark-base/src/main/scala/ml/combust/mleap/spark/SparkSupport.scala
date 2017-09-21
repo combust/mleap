@@ -9,6 +9,7 @@ import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.mleap.TypeConverters
+import org.apache.spark.sql.types.StructType
 
 import scala.util.Try
 
@@ -31,10 +32,10 @@ trait SparkSupport {
     }
   }
 
-  implicit class MleapDataFrameOps(dataset: DataFrame) {
+  implicit class SparkDataFrameOps(dataset: DataFrame) {
     def toSparkLeapFrame: SparkLeapFrame = {
       val spec = dataset.schema.fields.
-        map(f => TypeConverters.sparkFieldToMleapField(dataset, f))
+        map(f => TypeConverters.sparkToMleapConverter(dataset, f))
       val schema = types.StructType(spec.map(_._1)).get
       val converters = spec.map(_._2)
       val data = dataset.rdd.map(r => {
@@ -46,6 +47,12 @@ trait SparkSupport {
 
       SparkLeapFrame(schema, data, dataset.sqlContext)
     }
+
+    def mleapSchema: types.StructType = TypeConverters.sparkSchemaToMleapSchema(dataset)
+  }
+
+  implicit class MleapSchema(schema: types.StructType) {
+    def toSpark: StructType = TypeConverters.mleapSchemaToSparkSchema(schema)
   }
 }
 

@@ -52,7 +52,7 @@ case class SparkLeapFrame(schema: StructType,
   }
 
   def toSpark: DataFrame = {
-    val spec = schema.fields.map(TypeConverters.mleapFieldToSparkField)
+    val spec = schema.fields.map(TypeConverters.mleapToSparkConverter)
     val fields = spec.map(_._1)
     val converters = spec.map(_._2)
     val sparkSchema = new types.StructType(fields.toArray)

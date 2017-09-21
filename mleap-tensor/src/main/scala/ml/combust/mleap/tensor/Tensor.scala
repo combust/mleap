@@ -1,6 +1,7 @@
 package ml.combust.mleap.tensor
 
 import java.util
+import java.util.Comparator
 
 import scala.language.implicitConversions
 import scala.reflect.{ClassTag, classTag}
@@ -9,35 +10,25 @@ import scala.reflect.{ClassTag, classTag}
   * Created by hollinwilkins on 1/12/17.
   */
 object Tensor {
-  val BooleanClass = classOf[Boolean]
-  val StringClass = classOf[String]
-  val ByteClass = classOf[Byte]
-  val ShortClass = classOf[Short]
-  val IntClass = classOf[Int]
-  val LongClass = classOf[Long]
-  val FloatClass = classOf[Float]
-  val DoubleClass = classOf[Double]
-
-  def zero[T: ClassTag]: T = (classTag[T].runtimeClass match {
-    case BooleanClass => false
-    case StringClass => ""
-    case ByteClass => 0: Byte
-    case ShortClass => 0: Short
-    case IntClass => 0: Int
-    case LongClass => 0: Long
-    case FloatClass => 0.0f
-    case DoubleClass => 0.0d
-    case _ => throw new IllegalArgumentException(s"unsupported class ${classTag[T].runtimeClass.getName}")
-  }).asInstanceOf[T]
+  val BooleanClass: Class[Boolean] = classOf[Boolean]
+  val ByteClass: Class[Byte] = classOf[Byte]
+  val ShortClass: Class[Short] = classOf[Short]
+  val IntClass: Class[Int] = classOf[Int]
+  val LongClass: Class[Long] = classOf[Long]
+  val FloatClass: Class[Float] = classOf[Float]
+  val DoubleClass: Class[Double] = classOf[Double]
+  val StringClass: Class[String] = classOf[String]
+  val ByteStringClass: Class[ByteString] = classOf[ByteString]
 
   def create[T: ClassTag](values: Array[T],
                           dimensions: Seq[Int],
-                          indices: Option[Seq[Seq[Int]]]): Tensor[T] = indices match {
+                          indices: Option[Seq[Seq[Int]]] = None): Tensor[T] = indices match {
     case Some(is) => SparseTensor(is, values, dimensions)
     case None => DenseTensor(values, dimensions)
   }
 
   def denseVector[T: ClassTag](values: Array[T]): DenseTensor[T] = DenseTensor(values, Seq(values.length))
+  def scalar[T: ClassTag](value: T): DenseTensor[T] = DenseTensor(Array(value), Seq())
 }
 
 sealed trait Tensor[T] {
@@ -54,9 +45,10 @@ sealed trait Tensor[T] {
   def rawSize: Int = rawValues.length
   def rawValues: Array[T]
   def rawValuesIterator: Iterator[T]
+  def mapValues[T2: ClassTag](f: (T) => T2): Tensor[T2]
 
-  def apply(indices: Int *): T = get(indices: _*)
-  def get(indices: Int *): T
+  def apply(indices: Int *): T = get(indices: _*).get
+  def get(indices: Int *): Option[T]
 }
 
 case class DenseTensor[T](values: Array[T],
@@ -69,8 +61,11 @@ case class DenseTensor[T](values: Array[T],
 
   override def rawValues: Array[T] = values
   override def rawValuesIterator: Iterator[T] = values.iterator
+  override def mapValues[T2: ClassTag](f: (T) => T2): Tensor[T2] = {
+    DenseTensor(values.map(f), dimensions)(classTag[T2])
+  }
 
-  override def get(indices: Int *): T = {
+  override def get(indices: Int *): Option[T] = {
     var i = 0
     var dimI = 1
     var n = indices.head
@@ -88,7 +83,9 @@ case class DenseTensor[T](values: Array[T],
       n += tn
     }
 
-    values(n)
+    if (values.size > n) {
+      Some(values(n))
+    } else { None }
   }
 
 
@@ -131,13 +128,25 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
 
   override def rawValues: Array[T] = values
   override def rawValuesIterator: Iterator[T] = values.iterator
-  override def get(is: Int *): T = {
-    val index = util.Arrays.binarySearch(indices.toArray: Array[AnyRef], is)
+  override def mapValues[T2: ClassTag](f: (T) => T2): Tensor[T2] = {
+    SparseTensor(indices, values.map(f), dimensions)(classTag[T2])
+  }
 
-    if(index >= 0) { values(denseIndex(indices(index))) }
-    else if(is.zip(dimensions).exists(v => v._1 >= v._2)) {
-      throw new IndexOutOfBoundsException(s"index is out of bounds")
-    } else { Tensor.zero[T] }
+  override def get(is: Int *): Option[T] = {
+    val index = util.Arrays.binarySearch(indices.toArray, is, new Comparator[Seq[Int]] {
+      override def compare(o1: Seq[Int], o2: Seq[Int]): Int = {
+        for((v1, v2) <- o1.zip(o2)) {
+          val c = v1.compareTo(v2)
+          if(c != 0) { return c }
+        }
+
+        0
+      }
+    })
+
+    if(index >= 0) {
+      Some(values(index))
+    } else { None }
   }
 
   private def denseIndex(index: Seq[Int]): Int = {

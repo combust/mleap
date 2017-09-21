@@ -1,10 +1,10 @@
 package ml.combust.bundle.tree
 
-import ml.bundle.tree.clustering.Node.{Node => ClusterNode}
-import ml.bundle.tree.decision.Node.{Node => DecisionNode}
-import ml.bundle.tree.decision.Node.Node.{InternalNode, LeafNode}
-import ml.bundle.tree.decision.Split.Split
-import ml.bundle.tree.decision.Split.Split.{CategoricalSplit, ContinuousSplit}
+import ml.bundle.ctree.{Node => ClusterNode}
+import ml.bundle.dtree.{Node => DecisionNode}
+import ml.bundle.dtree.Node.{InternalNode, LeafNode}
+import ml.bundle.dtree.Split
+import ml.bundle.dtree.Split.{CategoricalSplit, ContinuousSplit}
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 

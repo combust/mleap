@@ -3,13 +3,13 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.NGram
 
 /**
   * Created by mikhail on 10/16/16.
   */
-class NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
+class NGramOp extends SimpleSparkOp[NGram] {
   override val Model: OpModel[SparkBundleContext, NGram] = new OpModel[SparkBundleContext, NGram] {
     override val klazz: Class[NGram] = classOf[NGram]
 
@@ -17,7 +17,7 @@ class NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
 
     override def store(model: Model, obj: NGram)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("n", Value.long(obj.getN))
+      model.withValue("n", Value.long(obj.getN))
     }
 
     override def load(model: Model)
@@ -27,19 +27,15 @@ class NGramOp extends OpNode[SparkBundleContext, NGram, NGram] {
 
   }
 
-  override val klazz: Class[NGram] = classOf[NGram]
-
-  override def name(node: NGram): String = node.uid
-
-  override def model(node: NGram): NGram = node
-
-  override def load(node: Node, model: NGram)
-                   (implicit context: BundleContext[SparkBundleContext]): NGram = {
-    new NGram(uid = node.name).
-      setN(model.getN).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: NGram): NGram = {
+    new NGram(uid = uid)
   }
 
-  override def shape(node: NGram): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: NGram): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: NGram): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

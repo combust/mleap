@@ -1,16 +1,22 @@
 package ml.combust.mleap.runtime.transformer.clustering
 
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.clustering.{BisectingKMeansModel, ClusteringTreeNode}
+import ml.combust.mleap.core.types._
+import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.ml.linalg.mleap.VectorWithNorm
 import org.scalatest.FunSpec
 
 class BisectingKMeansSpec extends FunSpec {
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      val transformer = new BisectingKMeans("transformer", "features", "prediction", null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+      val transformer = BisectingKMeans(shape = NodeShape.basicCluster(3),
+        model = new BisectingKMeansModel(ClusteringTreeNode(23,
+          VectorWithNorm(Vectors.dense(1, 2, 3)) , Array())))
+
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("prediction", ScalarType.Int.nonNullable)))
     }
   }
 }

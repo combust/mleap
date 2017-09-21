@@ -3,8 +3,9 @@ package ml.combust.mleap.bundle.ops.classification
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.classification.{BinaryLogisticRegressionModel, LogisticRegressionModel, ProbabilisticLogisticsRegressionModel}
 import ml.combust.mleap.runtime.transformer.classification.LogisticRegression
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
@@ -12,7 +13,7 @@ import org.apache.spark.ml.linalg.{Matrices, Vectors}
 /**
   * Created by hollinwilkins on 8/24/16.
   */
-class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, LogisticRegressionModel] {
+class LogisticRegressionOp extends MleapOp[LogisticRegression, LogisticRegressionModel] {
   override val Model: OpModel[MleapContext, LogisticRegressionModel] = new OpModel[MleapContext, LogisticRegressionModel] {
     override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 
@@ -20,17 +21,17 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
 
     override def store(model: Model, obj: LogisticRegressionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      val m = model.withAttr("num_classes", Value.long(obj.numClasses))
+      val m = model.withValue("num_classes", Value.long(obj.numClasses))
       if(obj.isMultinomial) {
         val mm = obj.multinomialModel
         val cm = mm.coefficientMatrix
-        m.withAttr("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
-          withAttr("intercept_vector", Value.vector(mm.interceptVector.toArray)).
-          withAttr("thresholds", mm.thresholds.map(_.toSeq).map(Value.doubleList))
+        m.withValue("coefficient_matrix", Value.tensor[Double](DenseTensor(cm.toArray, Seq(cm.numRows, cm.numCols)))).
+          withValue("intercept_vector", Value.vector(mm.interceptVector.toArray)).
+          withValue("thresholds", mm.thresholds.map(_.toSeq).map(Value.doubleList))
       } else {
-        m.withAttr("coefficients", Value.vector(obj.binaryModel.coefficients.toArray)).
-          withAttr("intercept", Value.double(obj.binaryModel.intercept)).
-          withAttr("threshold", Value.double(obj.binaryModel.threshold))
+        m.withValue("coefficients", Value.vector(obj.binaryModel.coefficients.toArray)).
+          withValue("intercept", Value.double(obj.binaryModel.intercept)).
+          withValue("threshold", Value.double(obj.binaryModel.threshold))
       }
     }
 
@@ -55,25 +56,5 @@ class LogisticRegressionOp extends OpNode[MleapContext, LogisticRegression, Logi
     }
   }
 
-  override val klazz: Class[LogisticRegression] = classOf[LogisticRegression]
-
-  override def name(node: LogisticRegression): String = node.uid
-
   override def model(node: LogisticRegression): LogisticRegressionModel = node.model
-
-  override def load(node: Node, model: LogisticRegressionModel)
-                   (implicit context: BundleContext[MleapContext]): LogisticRegression = {
-    LogisticRegression(uid = node.name,
-      featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.output("prediction").name,
-      rawPredictionCol = node.shape.getOutput("raw_prediction").map(_.name),
-      probabilityCol = node.shape.getOutput("probability").map(_.name),
-      model = model)
-  }
-
-  override def shape(node: LogisticRegression): Shape = Shape().
-    withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.rawPredictionCol, "raw_prediction").
-    withOutput(node.probabilityCol, "probability")
 }

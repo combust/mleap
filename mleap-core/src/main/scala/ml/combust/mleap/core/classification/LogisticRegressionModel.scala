@@ -15,6 +15,7 @@ case class BinaryLogisticRegressionModel(coefficients: Vector,
   override def predict(features: Vector): Double = if(score(features) > threshold) 1.0 else 0.0
 
   override val numClasses: Int = 2
+  override val numFeatures: Int = coefficients.size
 
   def score(features: Vector): Double = {
     val m = margin(features)
@@ -43,6 +44,7 @@ case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix,
                                                  interceptVector: Vector,
                                                  override val thresholds: Option[Array[Double]]) extends AbstractLogisticRegressionModel {
   override val numClasses: Int = interceptVector.size
+  override val numFeatures: Int = coefficientMatrix.numCols
 
   lazy val binaryModel: BinaryLogisticRegressionModel = {
     val coefficients = {
@@ -113,6 +115,7 @@ case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix,
 
 case class LogisticRegressionModel(impl: AbstractLogisticRegressionModel) extends ProbabilisticClassificationModel {
   override val numClasses: Int = impl.numClasses
+  override val numFeatures: Int = impl.numFeatures
   val isMultinomial: Boolean = impl.numClasses > 2
 
   def multinomialModel: ProbabilisticLogisticsRegressionModel = impl.asInstanceOf[ProbabilisticLogisticsRegressionModel]

@@ -2,8 +2,8 @@ package org.apache.spark.ml.parity.classification
 
 import org.apache.spark.ml.classification.GBTClassifier
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
-import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.parity.SparkParityBase
+import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.sql._
 
 /**
@@ -22,5 +22,10 @@ class GBTClassifierParitySpec extends SparkParityBase {
       setOutputCol("label"),
     new GBTClassifier().
       setFeaturesCol("features").
-      setLabelCol("label"))).fit(dataset)
+      setLabelCol("label").
+      setThresholds(Array(1.0, 1.0)).
+      setProbabilityCol("myProbability").
+      setPredictionCol("myPrediction").
+      setRawPredictionCol("myRawPrediction")
+  )).fit(dataset)
 }

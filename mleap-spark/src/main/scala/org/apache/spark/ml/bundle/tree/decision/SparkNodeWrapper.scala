@@ -1,9 +1,9 @@
 package org.apache.spark.ml.bundle.tree.decision
 
-import ml.bundle.tree.decision.Node.Node
-import ml.bundle.tree.decision.Node.Node.{InternalNode, LeafNode}
-import ml.bundle.tree.decision.Split.Split
-import ml.bundle.tree.decision.Split.Split.{CategoricalSplit, ContinuousSplit}
+import ml.bundle.dtree.Node
+import ml.bundle.dtree.Node.{InternalNode, LeafNode}
+import ml.bundle.dtree.Split
+import ml.bundle.dtree.Split.{CategoricalSplit, ContinuousSplit}
 import ml.combust.bundle.tree.decision.NodeWrapper
 import org.apache.spark.ml.tree
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator
@@ -47,7 +47,7 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
     } else {
       null
     }
-    new tree.LeafNode(prediction = node.values.head,
+    new tree.LeafNode(prediction = node.values.indexOf(node.values.max),
       impurity = 0.0,
       impurityStats = calc)
   }

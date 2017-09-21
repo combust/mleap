@@ -1,6 +1,8 @@
 package ml.combust.mleap.core.clustering
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.mleap.Utils._
 import org.apache.spark.ml.linalg.{DenseVector, Vector, Vectors}
 import org.apache.spark.ml.stat.distribution.MultivariateGaussian
@@ -27,11 +29,20 @@ object GaussianMixtureModel {
 }
 
 case class GaussianMixtureModel(gaussians: Array[MultivariateGaussian],
-                                weights: Array[Double]) {
+                                weights: Array[Double]) extends Model {
+  val numClusters = gaussians.length
+  val numFeatures: Int = weights.length
+
   def apply(features: Vector): Int = predict(features)
 
   def predict(features: Vector): Int = {
     predictionFromProbability(predictProbability(features))
+  }
+
+  def predictWithProbability(features: Vector): (Int, Double) = {
+    val probability = predictProbability(features)
+    val index = probability.argmax
+    (index, probability(index))
   }
 
   def predictionFromProbability(probabilities: Vector): Int = {
@@ -42,4 +53,9 @@ case class GaussianMixtureModel(gaussians: Array[MultivariateGaussian],
     val probs: Array[Double] = GaussianMixtureModel.computeProbabilities(features.toDense, gaussians, weights)
     Vectors.dense(probs)
   }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
+
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int.nonNullable,
+    "probability" -> TensorType.Double(numClusters)).get
 }

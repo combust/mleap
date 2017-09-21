@@ -3,13 +3,15 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import ml.combust.mleap.core.types.TensorShape
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.PolynomialExpansion
+import org.apache.spark.sql.mleap.TypeConverters.sparkToMleapDataShape
 
 /**
   * Created by mikhail on 10/16/16.
   */
-class PolynomialExpansionOp extends OpNode[SparkBundleContext, PolynomialExpansion, PolynomialExpansion] {
+class PolynomialExpansionOp extends SimpleSparkOp[PolynomialExpansion] {
   override val Model: OpModel[SparkBundleContext, PolynomialExpansion] = new OpModel[SparkBundleContext, PolynomialExpansion] {
     override val klazz: Class[PolynomialExpansion] = classOf[PolynomialExpansion]
 
@@ -17,30 +19,27 @@ class PolynomialExpansionOp extends OpNode[SparkBundleContext, PolynomialExpansi
 
     override def store(model: Model, obj: PolynomialExpansion)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("degree", Value.long(obj.getDegree))
+      val dataset = context.context.dataset.get
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset).asInstanceOf[TensorShape]
+      model.withValue("degree", Value.long(obj.getDegree))
+        .withValue("input_size", Value.long(inputShape.dimensions.get.head))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): PolynomialExpansion = {
       new PolynomialExpansion(uid = "").setDegree(model.value("degree").getLong.toInt)
     }
-
   }
 
-  override val klazz: Class[PolynomialExpansion] = classOf[PolynomialExpansion]
-
-  override def name(node: PolynomialExpansion): String = node.uid
-
-  override def model(node: PolynomialExpansion): PolynomialExpansion = node
-
-
-  override def load(node: Node, model: PolynomialExpansion)
-                   (implicit context: BundleContext[SparkBundleContext]): PolynomialExpansion = {
-    new PolynomialExpansion(uid = node.name).
-      setDegree(model.getDegree).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: PolynomialExpansion): PolynomialExpansion = {
+    new PolynomialExpansion(uid = uid)
   }
 
-  override def shape(node: PolynomialExpansion): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: PolynomialExpansion): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: PolynomialExpansion): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

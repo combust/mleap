@@ -1,11 +1,13 @@
 package ml.combust.mleap.core.classification
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.{DenseVector, Vector, Vectors}
 
 /** Trait for all classification models.
   */
-trait ClassificationModel {
+trait ClassificationModel extends Model {
   /** Alias for [[ml.combust.mleap.core.classification.ClassificationModel#predict]].
     *
     * @param features feature vector
@@ -50,12 +52,14 @@ trait ProbabilisticClassificationModel extends ClassificationModel {
     */
   val numClasses: Int
 
+  val numFeatures: Int
+
   def thresholds: Option[Array[Double]] = None
 
-  def predict(features: Vector): Double = predictProbabilities(features).argmax.toDouble
+  def predict(features: Vector): Double = probabilityToPrediction(predictProbabilities(features))
   def predictWithProbability(features: Vector): (Double, Double) = {
     val probabilities = predictProbabilities(features)
-    val index = probabilities.argmax
+    val index = probabilityToPredictionIndex(probabilities)
     (index.toDouble, probabilities(index))
   }
 
@@ -78,6 +82,10 @@ trait ProbabilisticClassificationModel extends ClassificationModel {
   }
 
   def probabilityToPrediction(probability: Vector): Double = {
+    probabilityToPredictionIndex(probability).toDouble
+  }
+
+  def probabilityToPredictionIndex(probability: Vector): Int = {
     thresholds match {
       case Some(ts) =>
         val scaledProbability: Array[Double] =
@@ -92,4 +100,10 @@ trait ProbabilisticClassificationModel extends ClassificationModel {
   def rawToProbabilityInPlace(raw: Vector): Vector
 
   def predictRaw(features: Vector): Vector
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
+
+  override def outputSchema: StructType = StructType("raw_prediction" -> TensorType.Double(numClasses),
+    "probability" -> TensorType.Double(numClasses),
+    "prediction" -> ScalarType.Double.nonNullable).get
 }

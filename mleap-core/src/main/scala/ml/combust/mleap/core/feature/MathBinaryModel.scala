@@ -1,5 +1,8 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{ScalarType, StructType}
+
 /**
   * Created by hollinwilkins on 12/27/16.
   */
@@ -35,7 +38,7 @@ object BinaryOperation {
 
 case class MathBinaryModel(operation: BinaryOperation,
                            da: Option[Double] = None,
-                           db: Option[Double] = None) extends Serializable {
+                           db: Option[Double] = None) extends Model {
   import BinaryOperation._
 
   def apply(ma: Option[Double], mb: Option[Double]): Double = {
@@ -53,4 +56,17 @@ case class MathBinaryModel(operation: BinaryOperation,
       case _ => throw new RuntimeException(s"unsupported binary operation $operation")
     }
   }
+
+  override def inputSchema: StructType = {
+    (da, db) match {
+      case (Some(a), Some(b)) => StructType.empty.get
+      case (Some(a), None) => StructType("input_b" -> ScalarType.Double.nonNullable).get
+      case (None, Some(b)) => StructType("input_a" -> ScalarType.Double.nonNullable).get
+      case (None, None) => StructType("input_a" -> ScalarType.Double.nonNullable,
+        "input_b" -> ScalarType.Double.nonNullable).get
+    }
+  }
+
+  override def outputSchema: StructType = StructType(
+    "output" -> ScalarType.Double.nonNullable).get
 }

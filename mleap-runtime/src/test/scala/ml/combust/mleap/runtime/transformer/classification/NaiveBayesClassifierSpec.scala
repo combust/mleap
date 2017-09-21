@@ -1,41 +1,48 @@
 package ml.combust.mleap.runtime.transformer.classification
 
-import ml.combust.mleap.runtime.types.{DoubleType, StructField, TensorType}
+import ml.combust.mleap.core.classification.NaiveBayesModel
+import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 
 class NaiveBayesClassifierSpec extends FunSpec {
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      val transformer = new NaiveBayesClassifier("transformer", "features", "prediction", None, None, null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+      val transformer = NaiveBayesClassifier(shape = NodeShape.probabilisticClassifier(3, 2),
+        model = new NaiveBayesModel(3, 2, null, null, null))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with probability column") {
-      val transformer = new NaiveBayesClassifier("transformer", "features", "prediction", None, Some("probability"), null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("probability", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+      val transformer = NaiveBayesClassifier(shape = NodeShape.probabilisticClassifier(3, 2, probabilityCol = Some("probability")),
+        model = new NaiveBayesModel(3, 2, null, null, null))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("probability", TensorType.Double(2)),
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with rawPrediction column") {
-      val transformer = new NaiveBayesClassifier("transformer", "features", "prediction", Some("rawPrediction"), None, null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("rawPrediction", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+      val transformer = NaiveBayesClassifier(shape = NodeShape.probabilisticClassifier(3, 2, rawPredictionCol = Some("rp")),
+        model = new NaiveBayesModel(3, 2, null, null, null))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("rp", TensorType.Double(2)),
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
 
     it("has the correct inputs and outputs with both probability and rawPrediction columns") {
-      val transformer = new NaiveBayesClassifier("transformer", "features", "prediction", Some("rawPrediction"), Some("probability"), null)
-      assert(transformer.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("rawPrediction", TensorType(DoubleType())),
-          StructField("probability", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+      val transformer = NaiveBayesClassifier(shape = NodeShape.probabilisticClassifier(3, 2,
+        rawPredictionCol = Some("rp"),
+        probabilityCol = Some("probability")),
+        model = new NaiveBayesModel(3, 2, null, null, null))
+      assert(transformer.schema.fields ==
+        Seq(StructField("features", TensorType.Double(3)),
+          StructField("rp", TensorType.Double(2)),
+          StructField("probability", TensorType.Double(2)),
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

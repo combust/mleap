@@ -1,7 +1,9 @@
 package ml.combust.mleap.core.clustering
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.linalg.LinalgUtils
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.mleap.VectorWithNorm
 import org.apache.spark.ml.linalg.Vector
 
@@ -9,12 +11,12 @@ import org.apache.spark.ml.linalg.Vector
   * Created by hollinwilkins on 9/30/16.
   */
 object KMeansModel {
-  def apply(clusterCenters: Seq[Vector]): KMeansModel = {
-    KMeansModel(clusterCenters.map(VectorWithNorm.apply).toArray)
+  def apply(clusterCenters: Seq[Vector], numFeatures: Int): KMeansModel = {
+    KMeansModel(clusterCenters.map(VectorWithNorm.apply).toArray, numFeatures)
   }
 }
 
-case class KMeansModel(clusterCenters: Array[VectorWithNorm]) {
+case class KMeansModel(clusterCenters: Array[VectorWithNorm], numFeatures: Int) extends Model {
   def clusterCount: Int = clusterCenters.length
 
   def apply(features: Vector): Int = predict(features)
@@ -45,4 +47,8 @@ case class KMeansModel(clusterCenters: Array[VectorWithNorm]) {
     }
     (bestIndex, bestDistance)
   }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
+
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int.nonNullable).get
 }

@@ -18,8 +18,8 @@ class MultinomialLabelerOp extends OpNode[SparkBundleContext, MultinomialLabeler
 
     override def store(model: Model, obj: MultinomialLabelerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("threshold", Value.double(obj.threshold)).
-        withAttr("labels", Value.stringList(obj.indexer.labels))
+      model.withValue("threshold", Value.double(obj.threshold)).
+        withValue("labels", Value.stringList(obj.indexer.labels))
     }
 
     override def load(model: Model)
@@ -44,7 +44,8 @@ class MultinomialLabelerOp extends OpNode[SparkBundleContext, MultinomialLabeler
       setLabelsCol(node.shape.output("labels").name)
   }
 
-  override def shape(node: MultinomialLabeler): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withOutput(node.getProbabilitiesCol, "probabilities").
-    withOutput(node.getLabelsCol, "labels")
+  override def shape(node: MultinomialLabeler)(implicit context: BundleContext[SparkBundleContext]): NodeShape =
+    NodeShape().withInput("features", node.getFeaturesCol).
+    withOutput("probabilities", node.getProbabilitiesCol).
+    withOutput("labels", node.getLabelsCol)
 }

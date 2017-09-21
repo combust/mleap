@@ -1,17 +1,16 @@
 package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.avro.generic.GenericData.StringType
+import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.StringIndexerModel
-import org.apache.spark.sql.mleap.TypeConverters.mleapType
-import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, StringIndexerModel] {
+class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] {
   override val Model: OpModel[SparkBundleContext, StringIndexerModel] = new OpModel[SparkBundleContext, StringIndexerModel] {
     override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
 
@@ -19,11 +18,8 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      context.context.dataset.map(dataset => {
-        model.withAttr("input_type", Value.dataType(mleapType(dataset.schema(obj.getInputCol).dataType)))
-      }).getOrElse(model)
-        .withAttr("labels", Value.stringList(obj.labels))
-        .withAttr("handle_invalid", Value.string(obj.getHandleInvalid))
+      model.withValue("labels", Value.stringList(obj.labels)).
+        withValue("handle_invalid", Value.string(obj.getHandleInvalid))
     }
 
     override def load(model: Model)
@@ -33,18 +29,16 @@ class StringIndexerOp extends OpNode[SparkBundleContext, StringIndexerModel, Str
     }
   }
 
-  override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
-
-  override def name(node: StringIndexerModel): String = node.uid
-
-  override def model(node: StringIndexerModel): StringIndexerModel = node
-
-  override def load(node: Node, model: StringIndexerModel)
-                   (implicit context: BundleContext[SparkBundleContext]): StringIndexerModel = {
-    new StringIndexerModel(uid = node.name, labels = model.labels).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: StringIndexerModel): StringIndexerModel = {
+    new StringIndexerModel(uid = uid,
+      labels = model.labels)
   }
 
-  override def shape(node: StringIndexerModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: StringIndexerModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: StringIndexerModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

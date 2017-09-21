@@ -1,20 +1,22 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.StopWordsRemoverModel
-import ml.combust.mleap.runtime.{LeapFrame, Row, LocalDataset}
-import ml.combust.mleap.runtime.types.{StringType, ListType, StructField, StructType}
+import ml.combust.mleap.core.types._
+import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+
 import org.scalatest.FunSpec
 
 /**
   * Created by mikhail on 10/16/16.
   */
 class StopWordsRemoverSpec extends FunSpec{
-  val schema = StructType(Seq(StructField("test_string_seq", ListType(StringType())))).get
+  val schema = StructType(Seq(StructField("test_string_seq", ListType(BasicType.String)))).get
   val dataset = LocalDataset(Seq(Row("I used MLeap transformer".split(" ").toSeq), Row("You use Mleap transformer".split(" ").toSeq)))
   val frame = LeapFrame(schema,dataset)
 
-  val stopWordsTransformer = StopWordsRemover(inputCol = "test_string_seq",
-    outputCol = "output_seq",
+  val stopWordsTransformer = StopWordsRemover(
+    shape = NodeShape().withStandardInput("test_string_seq").
+          withStandardOutput("output_seq"),
     model = StopWordsRemoverModel(Seq("I", "You", "the"), caseSensitive = true)
   )
 
@@ -28,11 +30,11 @@ class StopWordsRemoverSpec extends FunSpec{
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      assert(stopWordsTransformer.getFields().get ==
-        Seq(StructField("test_string_seq", ListType(StringType())),
-          StructField("output_seq", ListType(StringType()))))
+      assert(stopWordsTransformer.schema.fields ==
+        Seq(StructField("test_string_seq", ListType(BasicType.String)),
+          StructField("output_seq", ListType(BasicType.String))))
     }
   }
 }

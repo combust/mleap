@@ -2,7 +2,8 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.MinHashLSHModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.MinHashLSH
@@ -10,7 +11,7 @@ import ml.combust.mleap.runtime.transformer.feature.MinHashLSH
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class MinHashLSHOp extends OpNode[MleapContext, MinHashLSH, MinHashLSHModel] {
+class MinHashLSHOp extends MleapOp[MinHashLSH, MinHashLSHModel] {
   override val Model: OpModel[MleapContext, MinHashLSHModel] = new OpModel[MleapContext, MinHashLSHModel] {
     override val klazz: Class[MinHashLSHModel] = classOf[MinHashLSHModel]
 
@@ -20,8 +21,9 @@ class MinHashLSHOp extends OpNode[MleapContext, MinHashLSH, MinHashLSHModel] {
                       (implicit context: BundleContext[MleapContext]): Model = {
       val (ca, cb) = obj.randomCoefficients.unzip
 
-      model.withAttr("random_coefficients_a", Value.longList(ca.map(_.toLong))).
-        withAttr("random_coefficients_b", Value.longList(cb.map(_.toLong)))
+      model.withValue("random_coefficients_a", Value.longList(ca.map(_.toLong))).
+        withValue("random_coefficients_b", Value.longList(cb.map(_.toLong))).
+        withValue("input_size", Value.int(obj.inputSize))
     }
 
     override def load(model: Model)
@@ -29,23 +31,10 @@ class MinHashLSHOp extends OpNode[MleapContext, MinHashLSH, MinHashLSHModel] {
       val ca = model.value("random_coefficients_a").getLongList.map(_.toInt)
       val cb = model.value("random_coefficients_b").getLongList.map(_.toInt)
       val randomCoefficients = ca.zip(cb)
-      MinHashLSHModel(randomCoefficients = randomCoefficients)
+      MinHashLSHModel(randomCoefficients = randomCoefficients,
+        inputSize = model.value("input_size").getInt)
     }
   }
 
-  override val klazz: Class[MinHashLSH] = classOf[MinHashLSH]
-
-  override def name(node: MinHashLSH): String = node.uid
-
   override def model(node: MinHashLSH): MinHashLSHModel = node.model
-
-  override def load(node: Node, model: MinHashLSHModel)
-                   (implicit context: BundleContext[MleapContext]): MinHashLSH = {
-    MinHashLSH(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: MinHashLSH): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
 }

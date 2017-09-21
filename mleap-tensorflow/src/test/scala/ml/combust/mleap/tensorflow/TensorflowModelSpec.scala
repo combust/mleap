@@ -1,6 +1,7 @@
 package ml.combust.mleap.tensorflow
 
-import ml.combust.mleap.runtime.types.{FloatType, TensorType}
+import ml.combust.mleap.core.types.{FloatType, TensorType}
+import ml.combust.mleap.runtime.types.TensorType
 import ml.combust.mleap.tensor.DenseTensor
 import org.scalatest.FunSpec
 

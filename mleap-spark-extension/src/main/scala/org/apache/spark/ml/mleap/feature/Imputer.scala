@@ -187,8 +187,7 @@ class ImputerModel private[ml](override val uid: String,
   }
 
   override def copy(extra: ParamMap): ImputerModel = {
-    val copied = new ImputerModel(uid, surrogateValue)
-    copyValues(copied, extra).setParent(parent)
+    copyValues(new ImputerModel(uid, surrogateValue), extra).setParent(parent)
   }
 
   @Since("2.1.0")

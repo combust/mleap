@@ -4,11 +4,11 @@ import java.io.File
 
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.dsl.Bundle
+import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.DefaultLeapFrame
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.serving.domain.v1.{LoadModelRequest, LoadModelResponse, UnloadModelRequest, UnloadModelResponse}
 import ml.combust.mleap.runtime.MleapSupport._
-import ml.combust.mleap.runtime.types.StructType
 import resource._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,12 +43,9 @@ class MleapService()
     }.getOrElse(Failure(new IllegalStateException("no transformer loaded")))
   }
 
-  def getSchema(): Try[StructType] = synchronized {
+  def getSchema: Try[StructType] = synchronized {
     bundle.map {
-      _.root.getFields() match {
-        case Success(fields) => StructType(fields.toSet.toSeq)
-        case Failure(ex) => return Failure(ex)
-      }
+      bundle => Success(bundle.root.schema)
     }.getOrElse(Failure(new IllegalStateException("no transformer loaded")))
   }
 }

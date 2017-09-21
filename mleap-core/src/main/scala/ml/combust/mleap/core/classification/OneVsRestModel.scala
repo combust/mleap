@@ -1,5 +1,7 @@
 package ml.combust.mleap.core.classification
 
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.Vector
 
 /** Class for multinomial one vs rest models.
@@ -10,7 +12,8 @@ import org.apache.spark.ml.linalg.Vector
   *
   * @param classifiers binary classification models
   */
-case class OneVsRestModel(classifiers: Array[ProbabilisticClassificationModel]) {
+case class OneVsRestModel(classifiers: Array[ProbabilisticClassificationModel],
+                          numFeatures: Int) extends Model {
   /** Alias for [[ml.combust.mleap.core.classification.OneVsRestModel#predict]].
     *
     * @param features feature vector
@@ -45,4 +48,9 @@ case class OneVsRestModel(classifiers: Array[ProbabilisticClassificationModel]) 
 
     (prediction, probability)
   }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
+
+  override def outputSchema: StructType = StructType("probability" -> ScalarType.Double,
+    "prediction" -> ScalarType.Double).get
 }

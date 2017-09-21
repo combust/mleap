@@ -2,8 +2,9 @@ package ml.combust.mleap.runtime
 
 import java.io.{ByteArrayOutputStream, PrintStream}
 
-import ml.combust.mleap.runtime.test.MyCustomObject
-import ml.combust.mleap.runtime.types._
+import ml.combust.mleap.core.types.{SchemaSpec, _}
+import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
 import resource._
 
@@ -12,14 +13,14 @@ import resource._
   * @tparam LF LeapFrame type
   */
 trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
-  val fields = Seq(StructField("test_string", StringType()),
-    StructField("test_double", DoubleType()))
-  val schema = StructType(fields).get
+  val fields = Seq(StructField("test_string", ScalarType.String),
+    StructField("test_double", ScalarType.Double))
+  val schema: StructType = StructType(fields).get
   val dataset = LocalDataset(Array(
     Row("hello", 42.13),
     Row("there", 13.42)
   ))
-  val frame = create(schema, dataset)
+  val frame: LF = create(schema, dataset)
 
   def create(schema: StructType, dataset: Dataset): LF
 
@@ -62,21 +63,10 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
           assert(data(1).getDouble(2) == 23.42)
         }
 
-        describe("with a custom data type") {
-          val frame2 = frame.withField("test_custom", "test_string") {
-            (v: String) => MyCustomObject(v)
-          }.flatMap(_.select("test_custom")).get
-          val data = frame2.dataset.toArray
-
-          assert(frame2.schema.getField("test_custom").get.dataType == MleapContext.defaultContext.customType[MyCustomObject])
-          assert(data(0).getAs[MyCustomObject](0) == MyCustomObject("hello"))
-          assert(data(1).getAs[MyCustomObject](0) == MyCustomObject("there"))
-        }
-
-        describe("with non-matching data types") {
+        describe("with non-castable data types") {
           it("returns a failure") {
             val frame2 = frame.withField("test_double_2", "test_double") {
-              (r: Int) => r + 10
+              (_: ByteString) => 22
             }
 
             assert(frame2.isFailure)
@@ -84,17 +74,43 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
         }
 
         describe("with ArraySelector and non Array[Any] data type") {
-          val frame2 = frame.withField("test_double_2", Array("test_double")) {
+          val frame2 = frame.withField("test_double_2", Seq("test_double")) {
             (r: Seq[Double]) => r.head
           }
 
           assert(frame2.isFailure)
         }
+
+        describe("automatic casting") {
+          it("automatically casts the values to the UDF") {
+            val frame2 = frame.withField("test_double_2", "test_double") {
+              (r: Int) => r + 10
+            }.get
+            val data = frame2.dataset.toArray
+
+            assert(frame2.schema.fields.length == 3)
+            assert(frame2.schema.indexOf("test_double_2").get == 2)
+            assert(data(0).getInt(2) == 52)
+            assert(data(1).getInt(2) == 23)
+          }
+
+          it("automatically casts the data in a struct selector") {
+            val f = (r: Row) => r.getString(0) + r.getString(1)
+            val exec: UserDefinedFunction = UserDefinedFunction(f,
+              ScalarType.String,
+              Seq(SchemaSpec(Seq(ScalarType.String, ScalarType.String))))
+            val frame2 = frame.withField("test_string2", Seq("test_string", "test_double"))(exec).get
+            val data = frame2.dataset.toArray
+
+            assert(frame2.schema.fields.length == 3)
+            assert(data(0).getString(2) == "hello42.13")
+          }
+        }
       }
 
       describe("#withFields") {
         it("creates a new LeapFrame with fields added") {
-          val frame2 = frame.withFields(Seq("test_double_2", "test_double_string"), "test_double") {
+          val frame2 = frame.withFields(Seq("test_double_2", "test_double_string"), "test_double"){
             (r: Double) => (r + 10, r.toString)
           }.get
           val data = frame2.dataset.toArray

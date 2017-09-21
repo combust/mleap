@@ -1,9 +1,11 @@
 package ml.combust.mleap.core.classification
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.ann.FeedForwardTopology
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.classification.MultiLayerPerceptronClassifierModel.LabelConverter
 import ml.combust.mleap.core.feature.LabeledPoint
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 /**
@@ -46,14 +48,18 @@ object MultiLayerPerceptronClassifierModel {
 
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/MultilayerPerceptronClassifier.scala")
 case class MultiLayerPerceptronClassifierModel(layers: Seq[Int],
-                                               weights: Vector) {
-  val numFeatures = layers.head
+                                               weights: Vector) extends Model {
+  val numFeatures: Int = layers.head
 
   private val mlpModel = FeedForwardTopology
-    .multiLayerPerceptron(layers.toArray, softmaxOnTop = true)
+    .multiLayerPerceptron(layers.toArray)
     .model(weights)
 
   def apply(features: Vector): Double = {
     LabelConverter.decodeLabel(mlpModel.predict(features))
   }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
+
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double.nonNullable).get
 }

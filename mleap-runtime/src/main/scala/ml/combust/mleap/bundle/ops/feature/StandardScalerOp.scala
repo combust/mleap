@@ -3,15 +3,16 @@ package ml.combust.mleap.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.feature.StandardScalerModel
 import ml.combust.mleap.runtime.transformer.feature.StandardScaler
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
 import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class StandardScalerOp extends OpNode[MleapContext, StandardScaler, StandardScalerModel] {
+class StandardScalerOp extends MleapOp[StandardScaler, StandardScalerModel] {
   override val Model: OpModel[MleapContext, StandardScalerModel] = new OpModel[MleapContext, StandardScalerModel] {
     override val klazz: Class[StandardScalerModel] = classOf[StandardScalerModel]
 
@@ -19,8 +20,8 @@ class StandardScalerOp extends OpNode[MleapContext, StandardScaler, StandardScal
 
     override def store(model: Model, obj: StandardScalerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withAttr("mean", obj.mean.map(_.toArray).map(Value.vector)).
-        withAttr("std", obj.mean.map(_.toArray).map(Value.vector))
+      model.withValue("mean", obj.mean.map(_.toArray).map(Value.vector[Double])).
+        withValue("std", obj.mean.map(_.toArray).map(Value.vector[Double]))
     }
 
     override def load(model: Model)
@@ -31,19 +32,5 @@ class StandardScalerOp extends OpNode[MleapContext, StandardScaler, StandardScal
     }
   }
 
-  override val klazz: Class[StandardScaler] = classOf[StandardScaler]
-
-  override def name(node: StandardScaler): String = node.uid
-
   override def model(node: StandardScaler): StandardScalerModel = node.model
-
-  override def load(node: Node, model: StandardScalerModel)
-                   (implicit context: BundleContext[MleapContext]): StandardScaler = {
-    StandardScaler(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: StandardScaler): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
 }

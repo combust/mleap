@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.{Attribute, BinaryAttribute, NominalAttribute, NumericAttribute}
-import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
+import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.OneHotEncoder
 import org.apache.spark.sql.types.StructField
 
@@ -36,7 +36,7 @@ object OneHotEncoderOp {
   }
 }
 
-class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoder, OneHotEncoder] {
+class OneHotEncoderOp extends SimpleSparkOp[OneHotEncoder] {
   override val Model: OpModel[SparkBundleContext, OneHotEncoder] = new OpModel[SparkBundleContext, OneHotEncoder] {
     override val klazz: Class[OneHotEncoder] = classOf[OneHotEncoder]
 
@@ -51,8 +51,8 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoder, OneHotEn
       val dropLast = obj.getDropLast
       val arrSize = if(dropLast) { size - 1 } else { size }
 
-      model.withAttr("size", Value.long(arrSize)).
-        withAttr("drop_last", Value.boolean(dropLast))
+      model.withValue("size", Value.long(arrSize)).
+        withValue("drop_last", Value.boolean(dropLast))
     }
 
     override def load(model: Model)
@@ -61,19 +61,15 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoder, OneHotEn
     }
   }
 
-  override val klazz: Class[OneHotEncoder] = classOf[OneHotEncoder]
-
-  override def name(node: OneHotEncoder): String = node.uid
-
-  override def model(node: OneHotEncoder): OneHotEncoder = node
-
-  override def load(node: Node, model: OneHotEncoder)
-                   (implicit context: BundleContext[SparkBundleContext]): OneHotEncoder = {
-    new OneHotEncoder(uid = node.name).
-      setDropLast(model.getDropLast).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: OneHotEncoder): OneHotEncoder = {
+    new OneHotEncoder(uid = uid)
   }
 
-  override def shape(node: OneHotEncoder): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: OneHotEncoder): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: OneHotEncoder): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

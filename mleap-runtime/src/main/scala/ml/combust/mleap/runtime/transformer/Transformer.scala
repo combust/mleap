@@ -2,9 +2,10 @@ package ml.combust.mleap.runtime.transformer
 
 import java.util.UUID
 
-import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{NodeShape, StructField, StructType}
+import ml.combust.mleap.runtime.function.{FieldSelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
-import ml.combust.mleap.runtime.types.StructField
 
 import scala.util.Try
 
@@ -26,6 +27,42 @@ trait Transformer extends AutoCloseable {
     */
   val uid: String
 
+  /** Shape of inputs/outputs */
+  val shape: NodeShape
+
+  /** Model for this transformer */
+  val model: Model
+
+  /** Get the input schema of this transformer.
+    *
+    * The input schema is the recommended values to
+    * pass in to this transformer.
+    *
+    * @return input schema
+    */
+  def inputSchema: StructType = {
+    val fields = model.inputSchema.fields.map {
+      case StructField(port, dataType) => StructField(shape.input(port).name, dataType)
+    }
+
+    StructType(fields).get
+  }
+
+  /** Get the output schema of this transformer.
+    *
+    * The outputs schema is the actual output datatype(s) of
+    * this transformer that will be produced.
+    *
+    * @return output schema
+    */
+  def outputSchema: StructType = {
+    val outputs = shape.outputs.values.map(_.port).toSet
+    val fields = model.outputSchema.fields.filter(f => outputs.contains(f.name)).map {
+      case StructField(port, dataType) => StructField(shape.output(port).name, dataType)
+    }
+    StructType(fields).get
+  }
+
   /** Transform a builder using this MLeap transformer.
     *
     * @param builder builder to transform
@@ -34,17 +71,38 @@ trait Transformer extends AutoCloseable {
     */
   def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB]
 
-  def getFields(): Try[Seq[StructField]]
+  /** Get the full schema of this transformer (inputs ++ outputs).
+    *
+    * @return full schema of this transformer
+    */
+  def schema: StructType = {
+    StructType(inputSchema.fields ++ outputSchema.fields).get
+  }
 
   override def close(): Unit = { /* do nothing by default */ }
 }
 
-trait FeatureTransformer extends Transformer {
-  val inputCol: String
-  val outputCol: String
+trait BaseTransformer extends Transformer {
   val exec: UserDefinedFunction
 
+  val inputs: Seq[String] = inputSchema.fields.map(_.name)
+  val selectors: Seq[Selector] = inputs.map(FieldSelector)
+}
+
+trait SimpleTransformer extends BaseTransformer {
+  val output: String = outputSchema.fields.head.name
+
+  lazy val typedExec: UserDefinedFunction = exec.withOutput(outputSchema)
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(outputCol, inputCol)(exec)
+    builder.withOutput(output, selectors: _*)(typedExec)
+  }
+}
+
+trait MultiTransformer extends BaseTransformer {
+  val outputs: Seq[String] = outputSchema.fields.map(_.name)
+
+  lazy val typedExec: UserDefinedFunction = exec.withOutput(outputSchema)
+  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+    builder.withOutputs(outputs, selectors: _*)(typedExec)
   }
 }

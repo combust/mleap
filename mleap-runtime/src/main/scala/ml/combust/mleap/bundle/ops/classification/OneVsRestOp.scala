@@ -3,15 +3,16 @@ package ml.combust.mleap.bundle.ops.classification
 import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.classification.{OneVsRestModel, ProbabilisticClassificationModel}
 import ml.combust.mleap.runtime.transformer.classification.OneVsRest
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
+class OneVsRestOp extends MleapOp[OneVsRest, OneVsRestModel] {
   override val Model: OpModel[MleapContext, OneVsRestModel] = new OpModel[MleapContext, OneVsRestModel] {
     override val klazz: Class[OneVsRestModel] = classOf[OneVsRestModel]
 
@@ -27,37 +28,22 @@ class OneVsRestOp extends OpNode[MleapContext, OneVsRest, OneVsRestModel] {
         name
       }
 
-      model.withAttr("num_classes", Value.long(obj.classifiers.length))
+      model.withValue("num_classes", Value.long(obj.classifiers.length)).
+        withValue("num_features", Value.long(obj.numFeatures))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): OneVsRestModel = {
       val numClasses = model.value("num_classes").getLong.toInt
+      val numFeatures = model.value("num_features").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
         i => ModelSerializer(context.bundleContext(s"model$i")).read().get.asInstanceOf[ProbabilisticClassificationModel]
       }
 
-      OneVsRestModel(classifiers = models)
+      OneVsRestModel(classifiers = models, numFeatures = numFeatures)
     }
   }
 
-  override val klazz: Class[OneVsRest] = classOf[OneVsRest]
-
-  override def name(node: OneVsRest): String = node.uid
-
   override def model(node: OneVsRest): OneVsRestModel = node.model
-
-  override def load(node: Node, model: OneVsRestModel)
-                   (implicit context: BundleContext[MleapContext]): OneVsRest = {
-    OneVsRest(uid = node.name,
-      featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.output("prediction").name,
-      probabilityCol = node.shape.getOutput("probability").map(_.name),
-      model = model)
-  }
-
-  override def shape(node: OneVsRest): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.probabilityCol, "probability"  )
 }

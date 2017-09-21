@@ -31,7 +31,7 @@ class DefaultFrameWriter[LF <: LeapFrame[LF]](frame: LF) extends FrameWriter {
       for(row <- frame.dataset.toArray) {
         var i = 0
         for(writer <- writers) {
-          record.put(i, writer(row(i)))
+          record.put(i, writer(row.getRaw(i)))
           i = i + 1
         }
 

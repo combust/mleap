@@ -1,27 +1,28 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CoalesceModel
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types._
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 1/5/17.
   */
 class CoalesceSpec extends FunSpec {
-  val schema = StructType(StructField("test1", DoubleType(true)),
-    StructField("test2", DoubleType(true)),
-    StructField("test3", DoubleType(true)),
-    StructField("test4", DoubleType(false))).get
-  val dataset = LocalDataset(Seq(Row(None, None, Some(23.4), 56.7),
-    Row(None, None, None, 34.4)))
+  val schema = StructType(StructField("test1", ScalarType.Double),
+    StructField("test2", ScalarType.Double),
+    StructField("test3", ScalarType.Double),
+    StructField("test4", ScalarType.Double.nonNullable)).get
+  val dataset = LocalDataset(Seq(Row(null, null, 23.4, 56.7),
+    Row(null, null, null, 34.4)))
   val frame = LeapFrame(schema, dataset)
 
   describe("with all optional doubles") {
-    val coalesce = Coalesce(inputCols = Array("test1", "test2", "test3"),
-      inputDataTypes = Some(Array(DoubleType(true), DoubleType(true), DoubleType(true))),
-      outputCol = "test_bucket",
-      model = CoalesceModel())
+    val coalesce = Coalesce(shape = NodeShape().withInput("input0", "test1").
+              withInput("input1", "test2").
+              withInput("input2", "test3").
+          withStandardOutput("test_bucket"),
+      model = CoalesceModel(Seq(true, true, true)))
 
     describe("#transform") {
       it("returns the non-null value or null if no value exists") {
@@ -32,22 +33,23 @@ class CoalesceSpec extends FunSpec {
       }
     }
 
-    describe("#getFields") {
+    describe("input/output schema") {
       it("has the correct inputs and outputs") {
-        assert(coalesce.getFields().get ==
-          Seq(StructField("test1", DoubleType(true)),
-          StructField("test2", DoubleType(true)),
-          StructField("test3", DoubleType(true)),
-          StructField("test_bucket", DoubleType(true))))
+        assert(coalesce.schema.fields ==
+          Seq(StructField("test1", ScalarType.Double),
+            StructField("test2", ScalarType.Double),
+            StructField("test3", ScalarType.Double),
+            StructField("test_bucket", ScalarType.Double)))
       }
     }
   }
 
   describe("with a non-optional double") {
-    val coalesce = Coalesce(inputCols = Array("test1", "test3", "test4"),
-      inputDataTypes = Some(Array(DoubleType(true), DoubleType(true), DoubleType(false))),
-      outputCol = "test_bucket",
-      model = CoalesceModel())
+    val coalesce = Coalesce(shape = NodeShape().withInput("input0", "test1").
+              withInput("input1", "test3").
+              withInput("input2", "test4").
+          withStandardOutput("test_bucket"),
+      model = CoalesceModel(Seq(true, true, false)))
 
     describe("#transform") {
       it("returns the first non-null value") {
@@ -58,13 +60,13 @@ class CoalesceSpec extends FunSpec {
       }
     }
 
-    describe("#getFields") {
+    describe("input/output schema") {
       it("has the correct inputs and outputs") {
-        assert(coalesce.getFields().get ==
-          Seq(StructField("test1", DoubleType(true)),
-            StructField("test3", DoubleType(true)),
-            StructField("test4", DoubleType()),
-          StructField("test_bucket", DoubleType(true))))
+        assert(coalesce.schema.fields ==
+          Seq(StructField("test1", ScalarType.Double),
+            StructField("test3", ScalarType.Double),
+            StructField("test4", ScalarType.Double.nonNullable),
+            StructField("test_bucket", ScalarType.Double)))
       }
     }
   }

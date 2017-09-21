@@ -1,9 +1,9 @@
 package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.GBTRegressionModel
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.test.TestUtil
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -11,14 +11,13 @@ import org.scalatest.FunSpec
   * Created by hollinwilkins on 9/28/16.
   */
 class GBTRegressionSpec extends FunSpec {
-  val schema = StructType(Seq(StructField("features", TensorType(DoubleType())))).get
+  val schema = StructType(Seq(StructField("features", TensorType(BasicType.Double)))).get
   val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.2, 0.7, 0.4)))))
   val frame = LeapFrame(schema, dataset)
   val tree1 = TestUtil.buildDecisionTreeRegression(0.5, 0, goLeft = true)
   val tree2 = TestUtil.buildDecisionTreeRegression(0.75, 1, goLeft = false)
   val tree3 = TestUtil.buildDecisionTreeRegression(0.1, 2, goLeft = true)
-  val gbt = GBTRegression(featuresCol = "features",
-    predictionCol = "prediction",
+  val gbt = GBTRegression(shape = NodeShape.regression(5),
     model = GBTRegressionModel(Seq(tree1, tree2, tree3), Seq(0.5, 2.0, 1.0), 5))
 
   describe("#transform") {
@@ -30,17 +29,17 @@ class GBTRegressionSpec extends FunSpec {
     }
 
     describe("with invalid features column") {
-      val gbt2 = gbt.copy(featuresCol = "bad_features")
+      val gbt2 = gbt.copy(shape = NodeShape.regression(3, featuresCol = "bad_features"))
 
       it("returns a Failure") { assert(gbt2.transform(frame).isFailure) }
     }
   }
 
-  describe("#getFields") {
+  describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      assert(gbt.getFields().get ==
-        Seq(StructField("features", TensorType(DoubleType())),
-          StructField("prediction", DoubleType())))
+      assert(gbt.schema.fields ==
+        Seq(StructField("features", TensorType.Double(5)),
+          StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }
 }

@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.tensor.DenseTensor
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.classification.LogisticRegressionModel
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.bundle.util.ParamUtil
@@ -12,7 +12,7 @@ import org.apache.spark.ml.bundle.util.ParamUtil
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class LogisticRegressionOpV20 extends OpNode[SparkBundleContext, LogisticRegressionModel, LogisticRegressionModel] {
+class LogisticRegressionOpV20 extends SimpleSparkOp[LogisticRegressionModel] {
   override val Model: OpModel[SparkBundleContext, LogisticRegressionModel] = new OpModel[SparkBundleContext, LogisticRegressionModel] {
     override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 
@@ -22,10 +22,10 @@ class LogisticRegressionOpV20 extends OpNode[SparkBundleContext, LogisticRegress
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       assert(obj.numClasses == 2, "This op only supports binary logistic regression")
 
-      val m = model.withAttr("num_classes", Value.long(obj.numClasses))
-      m.withAttr("coefficients", Value.vector(obj.coefficients.toArray)).
-        withAttr("intercept", Value.double(obj.intercept)).
-        withAttr("threshold", Value.double(obj.getThreshold))
+      val m = model.withValue("num_classes", Value.long(obj.numClasses))
+      m.withValue("coefficients", Value.vector(obj.coefficients.toArray)).
+        withValue("intercept", Value.double(obj.intercept)).
+        withValue("threshold", Value.double(obj.getThreshold))
     }
 
     override def load(model: Model)
@@ -44,31 +44,21 @@ class LogisticRegressionOpV20 extends OpNode[SparkBundleContext, LogisticRegress
     }
   }
 
-  override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
-
-  override def name(node: LogisticRegressionModel): String = node.uid
-
-  override def model(node: LogisticRegressionModel): LogisticRegressionModel = node
-
-  override def load(node: Node, model: LogisticRegressionModel)
-                   (implicit context: BundleContext[SparkBundleContext]): LogisticRegressionModel = {
-    var lr = new LogisticRegressionModel(uid = node.name,
+  override def sparkLoad(uid: String, shape: NodeShape, model: LogisticRegressionModel): LogisticRegressionModel = {
+    val r = new LogisticRegressionModel(uid = uid,
       coefficients = model.coefficients,
-      intercept = model.intercept).
-      setFeaturesCol(node.shape.input("features").name).
-      setPredictionCol(node.shape.output("prediction").name)
-    ParamUtil.setOptional(lr, model, lr.threshold, model.threshold)
-    lr = node.shape.getOutput("probability").map(p => lr.setProbabilityCol(p.name)).getOrElse(lr)
-    node.shape.getOutput("raw_prediction").map(rp => lr.setRawPredictionCol(rp.name)).getOrElse(lr)
+      intercept = model.intercept)
+    if(r.isDefined(r.threshold)) { r.setThreshold(r.getThreshold) }
+    r
   }
 
-  override def shape(node: LogisticRegressionModel): Shape = {
-    val rawPrediction = if(node.isDefined(node.rawPredictionCol)) Some(node.getRawPredictionCol) else None
-    val probability = if(node.isDefined(node.probabilityCol)) Some(node.getProbabilityCol) else None
+  override def sparkInputs(obj: LogisticRegressionModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
 
-    Shape().withInput(node.getFeaturesCol, "features").
-      withOutput(node.getPredictionCol, "prediction").
-      withOutput(rawPrediction, "raw_prediction").
-      withOutput(probability, "probability")
+  override def sparkOutputs(obj: LogisticRegressionModel): Seq[SimpleParamSpec] = {
+    Seq("raw_prediction" -> obj.rawPredictionCol,
+      "probability" -> obj.probabilityCol,
+      "prediction" -> obj.predictionCol)
   }
 }

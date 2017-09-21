@@ -31,7 +31,7 @@ Our goals for this project are:
 1. Core execution engine implemented in Scala
 2. [Spark](http://spark.apache.org/), PySpark and Scikit-Learn support
 3. Export a model with Scikit-learn or Spark and execute it using the MLeap Runtime (without dependencies on the Spark Context, or sklearn/numpy/pandas/etc)
-4. Choose from 3 portable serialization formats (JSON, Protobuf, and Mixed)
+4. Choose from 2 portable serialization formats (JSON, Protobuf)
 5. Implement your own custom data types and transformers for use with MLeap data frames and transformer pipelines
 6. Extensive test coverage with full parity tests for Spark and MLeap pipelines
 7. Optional Spark transformer extension to extend Spark's default transformer offerings
@@ -111,38 +111,45 @@ The first step is to create our pipeline in Spark. For our example we will manua
 
 
 ```scala
-import org.apache.spark.ml.feature.{StringIndexerModel, Binarizer}
-
-// User out-of-the-box Spark transformers like you normally would
-val stringIndexer = new StringIndexerModel(uid = "si", labels = Array("hello", "MLeap")).
-  setInputCol("test_string").
-  setOutputCol("test_index")
-
-val binarizer = new Binarizer(uid = "bin").
-  setThreshold(0.5).
-  setInputCol("test_double").
-  setOutputCol("test_bin")
-
-// Use the MLeap utility method to directly create an org.apache.spark.ml.PipelineModel
-
-import org.apache.spark.ml.mleap.SparkUtil
-
-// Without needing to fit an org.apache.spark.ml.Pipeline
-val pipeline = SparkUtil.createPipelineModel(uid = "pipeline", Array(stringIndexer, binarizer))
-
 import ml.combust.bundle.BundleFile
 import ml.combust.mleap.spark.SparkSupport._
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.feature.{Binarizer, StringIndexer}
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
 import resource._
 
-// Optionally yield from here to get the try back from serializing
-// The try will indicate if serialization was successful
-for(modelFile <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) {
-  pipeline.writeBundle.
-    // save our pipeline to a zip file
-    // we can save a file to any supported java.nio.FileSystem
-    save(modelFile)
-}
+  val datasetName = "./examples/spark-demo.csv"
+
+  val dataframe: DataFrame = spark.sqlContext.read.format("csv")
+    .option("header", true)
+    .load(datasetName)
+    .withColumn("test_double", col("test_double").cast("double"))
+
+  // User out-of-the-box Spark transformers like you normally would
+  val stringIndexer = new StringIndexer().
+    setInputCol("test_string").
+    setOutputCol("test_index")
+
+  val binarizer = new Binarizer().
+    setThreshold(0.5).
+    setInputCol("test_double").
+    setOutputCol("test_bin")
+
+  val pipelineEstimator = new Pipeline()
+    .setStages(Array(stringIndexer, binarizer))
+
+  val pipeline = pipelineEstimator.fit(dataframe)
+
+  // then serialize pipeline
+  val sbc = SparkBundleContext().withDataset(pipeline.transform(dataframe))
+  for(bf <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) {
+    pipeline.writeBundle.save(bf)(sbc).get
+  }
 ```
+
+The dataset used for training can be found [here](https://github.com/combust/mleap/tree/master/examples/spark-demo.csv)
 
 Spark pipelines are not meant to be run outside of Spark. They require a DataFrame and therefore a SparkContext to run. These are expensive data structures and libraries to include in a project. With MLeap, there is no dependency on Spark to execute a pipeline. MLeap dependencies are lightweight and we use fast data structures to execute your ML pipelines.
 
@@ -176,7 +183,7 @@ data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
 
 continuous_features = ['col_a']
 
-feature_extractor_tf = FeatureExtractor(input_features=continuous_features, 
+feature_extractor_tf = FeatureExtractor(input_scalars=continuous_features, 
                                          output_vector='imputed_features', 
                                          output_vector_items=continuous_features)
 
@@ -189,7 +196,7 @@ reshape_le_tf = ReshapeArrayToN1()
 
 # Vector Assembler for x1 One Hot Encoder
 one_hot_encoder_tf = OneHotEncoder(sparse=False)
-one_hot_encoder_tf.mlinit(input_features = label_encoder_tf.output_features, 
+one_hot_encoder_tf.mlinit(prior_tf = label_encoder_tf, 
                           output_features = '{}_label_one_hot_encoded'.format(continuous_features[0]))
 
 one_hot_encoder_pipeline_x0 = Pipeline([
@@ -216,7 +223,6 @@ Becuase we export Spark and Scikit-learn pipelines to a standard format, we can 
 import ml.combust.bundle.BundleFile
 import ml.combust.mleap.runtime.MleapSupport._
 import resource._
-
 // load the Spark pipeline we saved in the previous section
 val bundle = (for(bundleFile <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) yield {
   bundleFile.loadMleapBundle().get
@@ -224,15 +230,13 @@ val bundle = (for(bundleFile <- managed(BundleFile("jar:file:/tmp/simple-spark-p
 
 // create a simple LeapFrame to transform
 import ml.combust.mleap.runtime.{Row, LeapFrame, LocalDataset}
-import ml.combust.mleap.runtime.types._
-import ml.combust.mleap.tensor.Tensor
-
+import ml.combust.mleap.core.types._
 
 // MLeap makes extensive use of monadic types like Try
-val schema = StructType(StructField("test_string", StringType()),
-  StructField("test_double", TensorType(DoubleType()))).get
-val data = LocalDataset(Row("hello", Tensor.denseVector(Array(0.6))),
-  Row("MLeap", Tensor.denseVector(Array(0.2))))
+val schema = StructType(StructField("test_string", ScalarType.String),
+  StructField("test_double", ScalarType.Double)).get
+val data = LocalDataset(Row("hello", 0.6),
+  Row("MLeap", 0.2))
 val frame = LeapFrame(schema, data)
 
 // transform the dataframe using our pipeline
@@ -242,11 +246,11 @@ val data2 = frame2.dataset
 
 // get data from the transformed rows and make some assertions
 assert(data2(0).getDouble(2) == 0.0) // string indexer output
-assert(data2(0).getTensor[Double](3).get(0) == 1.0) // binarizer output
+assert(data2(0).getDouble(3) == 1.0) // binarizer output
 
 // the second row
 assert(data2(1).getDouble(2) == 1.0)
-assert(data2(1).getTensor[Double](3).get(0) == 0.0)
+assert(data2(1).getDouble(3) == 0.0)
 ```
 
 ## Documentation

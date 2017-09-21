@@ -1,6 +1,8 @@
 package ml.combust.mleap.core.feature
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
+import ml.combust.mleap.core.types.{ScalarType, StructType}
 
 /** Class for a bucketizer model.
   *
@@ -9,7 +11,7 @@ import ml.combust.mleap.core.annotation.SparkCode
   * @param splits splits used to determine bucket
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/Bucketizer.scala")
-case class BucketizerModel(splits: Array[Double]) extends Serializable {
+case class BucketizerModel(splits: Array[Double]) extends Model {
   def apply(feature: Double): Double = {
     binarySearchForBuckets(splits, feature)
   }
@@ -33,4 +35,8 @@ case class BucketizerModel(splits: Array[Double]) extends Serializable {
       }
     }
   }
+
+  override def inputSchema: StructType = StructType("input" -> ScalarType.Double.nonNullable).get
+
+  override def outputSchema: StructType = StructType("output" -> ScalarType.Double.nonNullable).get
 }

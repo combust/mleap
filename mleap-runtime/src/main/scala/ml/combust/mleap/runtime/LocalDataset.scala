@@ -15,9 +15,7 @@ case class LocalDataset(data: Seq[Row]) extends Dataset {
 
   override def apply(index: Int): Row = data(index)
 
-  override def update(f: (Row) => Row): LocalDataset = {
-    LocalDataset(data = data.map(f))
-  }
+  override def update(f: (Row) => Row): LocalDataset = LocalDataset(data = data.map(f))
 
   override def toLocal: LocalDataset = this
 

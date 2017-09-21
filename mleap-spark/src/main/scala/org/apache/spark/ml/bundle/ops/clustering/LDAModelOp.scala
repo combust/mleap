@@ -2,9 +2,9 @@ package org.apache.spark.ml.bundle.ops.clustering
 
 import ml.combust.mleap.tensor.DenseTensor
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.dsl.{Model, Node, Shape}
+import ml.combust.bundle.dsl.Model
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.clustering.LocalLDAModel
 import org.apache.spark.mllib.clustering.{LocalLDAModel => oldLocalLDAModel}
 import ml.combust.bundle.dsl._
@@ -15,7 +15,7 @@ import org.apache.spark.sql.SparkSession
 /**
   * Created by mageswarand on 15/2/17.
   */
-class LDAModelOp extends OpNode[SparkBundleContext, LocalLDAModel, LocalLDAModel] {
+class LDAModelOp extends SimpleSparkOp[LocalLDAModel] {
 
   override val Model: OpModel[SparkBundleContext, LocalLDAModel] = new OpModel[SparkBundleContext, LocalLDAModel] {
     override val klazz: Class[LocalLDAModel] = classOf[LocalLDAModel]
@@ -27,10 +27,10 @@ class LDAModelOp extends OpNode[SparkBundleContext, LocalLDAModel, LocalLDAModel
       val topicMatrixRows = obj.topicsMatrix.numRows
       val topicMatrixCols = obj.topicsMatrix.numCols
 
-      model.withAttr("vocabSize", Value.int(obj.vocabSize)).
-        withAttr("docConcentration", Value.doubleList(obj.getEffectiveDocConcentration)).
-        withAttr("topicConcentration", Value.double(obj.getEffectiveTopicConcentration)).
-        withAttr("topicMatrix", Value.tensor[Double](DenseTensor[Double](topicMatrixArray, Seq(topicMatrixRows, topicMatrixCols))))
+      model.withValue("vocabSize", Value.int(obj.vocabSize)).
+        withValue("docConcentration", Value.doubleList(obj.getEffectiveDocConcentration)).
+        withValue("topicConcentration", Value.double(obj.getEffectiveTopicConcentration)).
+        withValue("topicMatrix", Value.tensor[Double](DenseTensor[Double](topicMatrixArray, Seq(topicMatrixRows, topicMatrixCols))))
     }
 
     override def load(model: Model)(implicit context: BundleContext[SparkBundleContext]): LocalLDAModel  = {
@@ -48,19 +48,23 @@ class LDAModelOp extends OpNode[SparkBundleContext, LocalLDAModel, LocalLDAModel
         SparkSession.builder().getOrCreate())
     }
   }
-  override val klazz: Class[LocalLDAModel] = classOf[LocalLDAModel]
 
-  override def name(node: LocalLDAModel): String = node.uid
+  override def sparkLoad(uid: String, shape: NodeShape, model: LocalLDAModel): LocalLDAModel = {
+    val field = classOf[LocalLDAModel].getDeclaredField("oldLocalModel")
+    field.setAccessible(true)
+    val oldLocalModel = field.get(model).asInstanceOf[oldLocalLDAModel]
 
-  override def model(node: LocalLDAModel): LocalLDAModel = node
-
-  override def shape(node: LocalLDAModel): Shape = {
-    Shape().
-      withInput("features", "features").
-      withOutput("topicDistribution", "topicDistribution")
+    new LocalLDAModel(uid = uid,
+      vocabSize = model.vocabSize,
+      oldLocalModel = oldLocalModel,
+      sparkSession = model.sparkSession)
   }
 
-  override def load(node: Node, model: LocalLDAModel)(implicit context: BundleContext[SparkBundleContext]): LocalLDAModel = {
-    model.setFeaturesCol(node.shape.input("features").name)
+  override def sparkInputs(obj: LocalLDAModel): Seq[ParamSpec] = {
+    Seq("features" -> obj.featuresCol)
+  }
+
+  override def sparkOutputs(obj: LocalLDAModel): Seq[SimpleParamSpec] = {
+    Seq("prediction" -> obj.topicDistributionCol)
   }
 }

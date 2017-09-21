@@ -2,8 +2,10 @@ package ml.combust.mleap.core.clustering
 
 import breeze.linalg.{Matrix, Vector, normalize, sum, DenseMatrix => BDM, DenseVector => BDV}
 import breeze.numerics.{exp, lgamma}
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.clustering.optimization.OnlineLDAOptimizer
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 
 /**
   * Created by mageswarand on 15/2/17.
@@ -79,11 +81,11 @@ abstract class LDAModel private[clustering] {
   *
   * @param topics Inferred topics (vocabSize x k matrix).
   */
-case class LocalLDAModel ( val topics: Matrix[Double],
-                      override val docConcentration: BDV[Double],
-                      override val topicConcentration: Double,
-                      protected val gammaShape: Double = 100)
-  extends LDAModel {
+case class LocalLDAModel (topics: Matrix[Double],
+                          override val docConcentration: BDV[Double],
+                          override val topicConcentration: Double,
+                          protected val gammaShape: Double = 100)
+  extends LDAModel with Model {
 
   override def k: Int = topics.cols
 
@@ -101,12 +103,14 @@ case class LocalLDAModel ( val topics: Matrix[Double],
     }.toArray
   }
 
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(k)).get
 
+  override def outputSchema: StructType = StructType("prediction" -> TensorType.Double(k)).get
 
-  // TODO: declare in LDAModel and override once implemented in DistributedLDAModel
   /**
     * Calculates a lower bound on the log likelihood of the entire corpus.
     *
+    * TODO: declare in LDAModel and override once implemented in DistributedLDAModel
     * See Equation (16) in original Online LDA paper.
     *
     * @param documents test corpus to use for calculating log likelihood

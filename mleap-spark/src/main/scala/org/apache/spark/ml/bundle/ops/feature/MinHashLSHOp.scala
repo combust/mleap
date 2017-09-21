@@ -2,14 +2,16 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.core.types.TensorShape
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.MinHashLSHModel
+import org.apache.spark.sql.mleap.TypeConverters.sparkToMleapDataShape
 
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-class MinHashLSHOp extends OpNode[SparkBundleContext, MinHashLSHModel, MinHashLSHModel] {
+class MinHashLSHOp extends SimpleSparkOp[MinHashLSHModel] {
   override val Model: OpModel[SparkBundleContext, MinHashLSHModel] = new OpModel[SparkBundleContext, MinHashLSHModel] {
     override val klazz: Class[MinHashLSHModel] = classOf[MinHashLSHModel]
 
@@ -19,8 +21,12 @@ class MinHashLSHOp extends OpNode[SparkBundleContext, MinHashLSHModel, MinHashLS
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       val (ca, cb) = obj.randCoefficients.unzip
 
-      model.withAttr("random_coefficients_a", Value.longList(ca.map(_.toLong))).
-        withAttr("random_coefficients_b", Value.longList(cb.map(_.toLong)))
+      val dataset = context.context.dataset.get
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset).asInstanceOf[TensorShape]
+
+      model.withValue("random_coefficients_a", Value.longList(ca.map(_.toLong))).
+        withValue("random_coefficients_b", Value.longList(cb.map(_.toLong)))
+        .withValue("input_size", Value.int(inputShape.dimensions.get(0)))
     }
 
     override def load(model: Model)
@@ -32,20 +38,20 @@ class MinHashLSHOp extends OpNode[SparkBundleContext, MinHashLSHModel, MinHashLS
     }
   }
 
-  override val klazz: Class[MinHashLSHModel] = classOf[MinHashLSHModel]
-
-  override def name(node: MinHashLSHModel): String = node.uid
-
-  override def model(node: MinHashLSHModel): MinHashLSHModel = node
-
-  override def load(node: Node, model: MinHashLSHModel)
-                   (implicit context: BundleContext[SparkBundleContext]): MinHashLSHModel = {
-    val m = new MinHashLSHModel(uid = node.name, randCoefficients = model.randCoefficients)
-    m.set(m.inputCol, node.shape.standardInput.name)
-    m.set(m.outputCol, node.shape.standardOutput.name)
-
-    m
+  override def sparkLoad(uid: String, shape: NodeShape, model: MinHashLSHModel): MinHashLSHModel = {
+    new MinHashLSHModel(uid = uid,
+      randCoefficients = model.randCoefficients)
   }
 
-  override def shape(node: MinHashLSHModel): Shape = Shape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: MinHashLSHModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: MinHashLSHModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
+
+  override def load(node: Node, model: MinHashLSHModel)(implicit context: BundleContext[SparkBundleContext]): MinHashLSHModel = {
+    new MinHashLSHModel(uid = node.name, randCoefficients = model.randCoefficients)
+  }
 }

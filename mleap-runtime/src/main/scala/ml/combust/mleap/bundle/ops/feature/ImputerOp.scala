@@ -2,19 +2,16 @@ package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.ImputerModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.Imputer
-import ml.combust.mleap.runtime.types.DataType
-import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by mikhail on 12/18/16.
   */
-class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
-  var inputDataType: Option[DataType] = None
-
+class ImputerOp extends MleapOp[Imputer, ImputerModel] {
   override val Model: OpModel[MleapContext, ImputerModel] = new OpModel[MleapContext, ImputerModel] {
     override val klazz: Class[ImputerModel] = classOf[ImputerModel]
 
@@ -22,47 +19,24 @@ class ImputerOp extends OpNode[MleapContext, Imputer, ImputerModel] {
 
     override def store(model: Model, obj: ImputerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      inputDataType.map(inputType => model.withAttr("input_type", Value.dataType(inputType)))
-      .getOrElse(model)
-        .withAttr("surrogate_value", Value.double(obj.surrogateValue))
-        .withAttr("missing_value", Value.double(obj.missingValue))
-        .withAttr("strategy", Value.string(obj.strategy))
+        model.withValue("surrogate_value", Value.double(obj.surrogateValue)).
+          withValue("missing_value", Value.double(obj.missingValue)).
+          withValue("strategy", Value.string(obj.strategy)).
+          withValue("nullable_input", Value.boolean(obj.nullableInput))
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): ImputerModel = {
-      inputDataType = model.attributes match {
-        case None => None
-        case Some(attributeList) => attributeList.get("input_type") match {
-          case None => None
-          case Some(attribute) => Some(attribute.value.getDataType)
-        }
-      }
+      val missingValue = model.getValue("missing_value")
+        .map(value => value.getDouble)
+        .getOrElse(Double.NaN)
 
       ImputerModel(model.value("surrogate_value").getDouble,
-        model.value("missing_value").getDouble,
-        model.value("strategy").getString)
+        missingValue,
+        model.value("strategy").getString,
+        nullableInput = model.value("nullable_input").getBoolean)
     }
 
   }
 
-  override val klazz: Class[Imputer] = classOf[Imputer]
-
-  override def name(node: Imputer): String = node.uid
-
-  override def model(node: Imputer): ImputerModel = {
-    inputDataType = node.inputDataType
-    node.model
-  }
-
-
-  override def load(node: Node, model: ImputerModel)
-                   (implicit context: BundleContext[MleapContext]): Imputer = {
-    Imputer(uid = node.name,
-      inputCol = node.shape.standardInput.name,
-      inputDataType = inputDataType,
-      outputCol = node.shape.standardOutput.name,
-      model = model)
-  }
-
-  override def shape(node: Imputer): Shape = Shape().withStandardIO(node.inputCol, node.outputCol)
+  override def model(node: Imputer): ImputerModel = node.model
 }

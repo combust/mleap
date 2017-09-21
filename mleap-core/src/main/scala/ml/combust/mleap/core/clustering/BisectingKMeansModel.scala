@@ -1,7 +1,9 @@
 package ml.combust.mleap.core.clustering
 
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.linalg.LinalgUtils
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.linalg.mleap.VectorWithNorm
 
@@ -11,13 +13,18 @@ import scala.annotation.tailrec
   * Created by hollinwilkins on 12/26/16.
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/clustering/BisectingKMeansModel.scala")
-case class BisectingKMeansModel(root: ClusteringTreeNode) {
+case class BisectingKMeansModel(root: ClusteringTreeNode) extends Model {
+  lazy val numFeatures: Int = root.centerWithNorm.vector.size
   lazy val clusterCenters: Array[Vector] = root.leafNodes.map(_.center)
   lazy val k: Int = clusterCenters.length
 
-  def apply(features: Vector): Double = {
+  def apply(features: Vector): Int = {
     root.predict(features)
   }
+
+  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
+
+  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Int.nonNullable).get
 }
 
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/mllib/clustering/BisectingKMeansModel.scala")

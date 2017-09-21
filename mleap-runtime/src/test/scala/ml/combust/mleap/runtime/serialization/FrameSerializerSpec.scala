@@ -1,33 +1,32 @@
 package ml.combust.mleap.runtime.serialization
 
-import ml.combust.bundle.ByteString
-import ml.combust.mleap.runtime.test.MyCustomObject
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, MleapContext, Row}
-import ml.combust.mleap.runtime.types._
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, Tensor}
+import ml.combust.mleap.runtime.MleapSupport._
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 11/1/16.
   */
 class FrameSerializerSpec extends FunSpec {
-  val schema = StructType(StructField("features", TensorType(DoubleType())),
-    StructField("name", StringType()),
-    StructField("list_data", ListType(StringType())),
-    StructField("nullable_double", DoubleType(true)),
-    StructField("float", FloatType(false)),
-    StructField("byte_tensor", TensorType(ByteType(false))),
-    StructField("short_list", ListType(ShortType(false))),
-    StructField("byte_string", ByteStringType()),
-    StructField("nullable_string", StringType(true))).get
+  val schema = StructType(StructField("features", TensorType(BasicType.Double)),
+    StructField("name", ScalarType.String),
+    StructField("list_data", ListType(BasicType.String)),
+    StructField("nullable_double", ScalarType.Double),
+    StructField("float", ScalarType.Float),
+    StructField("byte_tensor", TensorType(BasicType.Byte)),
+    StructField("short_list", ListType(BasicType.Short)),
+    StructField("byte_string", ScalarType.ByteString),
+    StructField("nullable_string", ScalarType.String)).get
   val dataset = LocalDataset(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)),
     "hello", Seq("hello", "there"),
-    Option(56.7d), 32.4f,
+    56.7d, 32.4f,
     Tensor.denseVector(Array[Byte](1, 2, 3, 4)),
     Seq[Short](99, 12, 45),
     ByteString(Array[Byte](32, 4, 55, 67)),
-    None))
-  val frame = LeapFrame(schema, dataset).withOutput("custom_object", "name")((name: String) => MyCustomObject(name)).get
+    null))
+  val frame = LeapFrame(schema, dataset)
   import MleapContext.defaultContext
 
   describe("with format ml.combust.mleap.json") {

@@ -4,16 +4,17 @@ import ml.combust.bundle.BundleContext
 import ml.combust.mleap.core.classification.DecisionTreeClassifierModel
 import ml.combust.mleap.core.tree
 import ml.combust.mleap.runtime.transformer.classification.DecisionTreeClassifier
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.tree.decision.TreeSerializer
+import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.bundle.tree.decision.MleapNodeWrapper
 import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class DecisionTreeClassifierOp extends OpNode[MleapContext, DecisionTreeClassifier, DecisionTreeClassifierModel] {
+class DecisionTreeClassifierOp extends MleapOp[DecisionTreeClassifier, DecisionTreeClassifierModel] {
   implicit val nodeWrapper = MleapNodeWrapper
 
   override val Model: OpModel[MleapContext, DecisionTreeClassifierModel] = new OpModel[MleapContext, DecisionTreeClassifierModel] {
@@ -24,8 +25,8 @@ class DecisionTreeClassifierOp extends OpNode[MleapContext, DecisionTreeClassifi
     override def store(model: Model, obj: DecisionTreeClassifierModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).write(obj.rootNode)
-      model.withAttr("num_features", Value.long(obj.numFeatures)).
-        withAttr("num_classes", Value.long(obj.numClasses))
+      model.withValue("num_features", Value.long(obj.numFeatures)).
+        withValue("num_classes", Value.long(obj.numClasses))
     }
 
     override def load(model: Model)
@@ -37,24 +38,5 @@ class DecisionTreeClassifierOp extends OpNode[MleapContext, DecisionTreeClassifi
     }
   }
 
-  override val klazz: Class[DecisionTreeClassifier] = classOf[DecisionTreeClassifier]
-
-  override def name(node: DecisionTreeClassifier): String = node.uid
-
   override def model(node: DecisionTreeClassifier): DecisionTreeClassifierModel = node.model
-
-  override def load(node: Node, model: DecisionTreeClassifierModel)
-                   (implicit context: BundleContext[MleapContext]): DecisionTreeClassifier = {
-    DecisionTreeClassifier(uid = node.name,
-      featuresCol = node.shape.input("features").name,
-      predictionCol = node.shape.output("prediction").name,
-      rawPredictionCol = node.shape.getOutput("raw_prediction").map(_.name),
-      probabilityCol = node.shape.getOutput("probability").map(_.name),
-      model = model)
-  }
-
-  override def shape(node: DecisionTreeClassifier): Shape = Shape().withInput(node.featuresCol, "features").
-    withOutput(node.predictionCol, "prediction").
-    withOutput(node.rawPredictionCol, "raw_prediction").
-    withOutput(node.probabilityCol, "probability")
 }

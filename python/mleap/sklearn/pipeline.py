@@ -22,7 +22,7 @@ import json
 import shutil
 import uuid
 import zipfile
-
+import datetime
 
 def serialize_to_bundle(self, path, model_name, init=False):
     serializer = SimpleSerializer()
@@ -126,6 +126,7 @@ class SimpleSerializer(object):
           "name": transformer.name,
           "format": "json",
           "version": __version__,
+          "timestamp": datetime.datetime.now().isoformat(),
           "uid": "{}".format(uuid.uuid4())
         }
         return js
@@ -146,11 +147,8 @@ class SimpleSerializer(object):
           "op": transformer.op,
             "attributes": {
                 "nodes": {
-                    "type": {
-                        "type": "list",
-                        "base": "string"
-                    },
-                    "value": self._extract_nodes(transformer.steps)
+                    "type": "list",
+                    "string": self._extract_nodes(transformer.steps)
                 }
             }
         }
@@ -164,7 +162,7 @@ class SimpleSerializer(object):
                 union_steps = [x[1].name for x in step.transformer_list if hasattr(x[1], 'serialize_to_bundle') and x[1].serializable]
                 pipeline_steps += union_steps
             elif hasattr(step, 'serialize_to_bundle') and step.serializable:
-                pipeline_steps.append(name)
+                pipeline_steps.append(step.name)
         return pipeline_steps
 
 

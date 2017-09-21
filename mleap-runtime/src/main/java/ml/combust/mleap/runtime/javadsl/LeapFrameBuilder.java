@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.javadsl;
 
+import ml.combust.mleap.core.types.*;
 import ml.combust.mleap.runtime.*;
-import ml.combust.mleap.runtime.types.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,58 +42,67 @@ public class LeapFrameBuilder {
         return new LocalDataset(rows);
     }
 
-    public BooleanType createBool() { return createBool(false); }
-    public BooleanType createBool(boolean isNullable) {
-        return new BooleanType(isNullable);
+    public ScalarType createBool() { return createBool(true); }
+    public ScalarType createBool(boolean isNullable) {
+        return new ScalarType(support.createBoolean(), isNullable);
     }
 
-    public StringType createString() { return createString(false); }
-    public StringType createString(boolean isNullable) {
-        return new StringType(isNullable);
+    public BasicType createBasicBoolean() { return support.createBoolean(); }
+    public BasicType createBasicByte() { return support.createByte(); }
+    public BasicType createBasicShort() { return support.createShort(); }
+    public BasicType createBasicInt() { return support.createInt(); }
+    public BasicType createBasicLong() { return support.createLong(); }
+    public BasicType createBasicFloat() { return support.createFloat(); }
+    public BasicType createBasicDouble() { return support.createDouble(); }
+    public BasicType createBasicString() { return support.createString(); }
+    public BasicType createBasicByteString() { return support.createByteString(); }
+
+    public ScalarType createBoolean() { return createBoolean(true); }
+    public ScalarType createBoolean(boolean isNullable) {
+        return new ScalarType(support.createBoolean(), isNullable);
     }
 
-    public ByteType createByte() { return createByte(false); }
-    public ByteType createByte(boolean isNullable) {
-        return new ByteType(isNullable);
+    public ScalarType createByte() { return createByte(true); }
+    public ScalarType createByte(boolean isNullable) {
+        return new ScalarType(support.createByte(), isNullable);
     }
 
-    public ShortType createShort() { return createShort(false); }
-    public ShortType createShort(boolean isNullable) {
-        return new ShortType(isNullable);
+    public ScalarType createShort() { return createShort(true); }
+    public ScalarType createShort(boolean isNullable) {
+        return new ScalarType(support.createShort(), isNullable);
     }
 
-    public IntegerType createInt() { return createInt(false); }
-    public IntegerType createInt(boolean isNullable) {
-        return new IntegerType(isNullable);
+    public ScalarType createInt() { return createInt(true); }
+    public ScalarType createInt(boolean isNullable) {
+        return new ScalarType(support.createInt(), isNullable);
     }
 
-    public LongType createLong() { return createLong(false); }
-    public LongType createLong(boolean isNullable) {
-        return new LongType(isNullable);
+    public ScalarType createLong() { return createLong(true); }
+    public ScalarType createLong(boolean isNullable) {
+        return new ScalarType(support.createLong(), isNullable);
     }
 
-    public FloatType createFloat() { return createFloat(false); }
-    public FloatType createFloat(boolean isNullable) {
-        return new FloatType(isNullable);
+    public ScalarType createFloat() { return createFloat(true); }
+    public ScalarType createFloat(boolean isNullable) {
+        return new ScalarType(support.createFloat(), isNullable);
     }
 
-    public DoubleType createDouble() { return createDouble(false); }
-    public DoubleType createDouble(boolean isNullable) {
-        return new DoubleType(isNullable);
+    public ScalarType createDouble() { return createDouble(true); }
+    public ScalarType createDouble(boolean isNullable) {
+        return new ScalarType(support.createDouble(), isNullable);
     }
 
-    public ByteStringType createByteString() { return createByteString(false); }
-    public ByteStringType createByteString(boolean isNullable) {
-        return new ByteStringType(isNullable);
-    }
+    public ScalarType createString() { return createString(true); }
+    public ScalarType createString(boolean isNullable) { return new ScalarType(support.createString(), isNullable); }
 
-    public TensorType createTensor(BasicType base) { return createTensor(base, false); }
-    public TensorType createTensor(BasicType base, boolean isNullable) {
-        return new TensorType(base, isNullable);
-    }
+    public ScalarType createByteString() { return createByteString(true); }
+    public ScalarType createByteString(boolean isNullable) { return new ScalarType(support.createByteString(), isNullable); }
 
-    public ListType createList(DataType base) { return createList(base, false); }
-    public ListType createList(DataType base, boolean isNullable) {
+    public TensorType createTensor(BasicType base) { return createTensor(base, true); }
+    public TensorType createTensor(BasicType base, boolean isNullable) { return new TensorType(base, isNullable); }
+
+    public ListType createList(BasicType base) { return createList(base, true); }
+    public ListType createList(BasicType base, boolean isNullable) {
         return new ListType(base, isNullable);
     }
 }

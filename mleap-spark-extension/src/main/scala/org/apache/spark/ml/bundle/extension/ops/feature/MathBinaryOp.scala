@@ -18,9 +18,9 @@ class MathBinaryOp extends OpNode[SparkBundleContext, MathBinary, MathBinaryMode
 
     override def store(model: Model, obj: MathBinaryModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("operation", Value.string(obj.operation.name)).
-        withAttr("da", obj.da.map(Value.double)).
-        withAttr("db", obj.db.map(Value.double))
+      model.withValue("operation", Value.string(obj.operation.name)).
+        withValue("da", obj.da.map(Value.double)).
+        withValue("db", obj.db.map(Value.double))
     }
 
     override def load(model: Model)
@@ -46,15 +46,16 @@ class MathBinaryOp extends OpNode[SparkBundleContext, MathBinary, MathBinaryMode
     mb
   }
 
-  override def shape(node: MathBinary): Shape = {
-    var shape = Shape().withStandardOutput(node.getOutputCol)
+  override def shape(node: MathBinary)
+                    (implicit context: BundleContext[SparkBundleContext]): NodeShape = {
+    var shape = NodeShape().withStandardOutput(node.getOutputCol)
 
     if(node.isSet(node.inputA)) {
-      shape = shape.withInput(node.getInputA, "input_a")
+      shape = shape.withInput("input_a", node.getInputA)
     }
 
     if(node.isSet(node.inputB)) {
-      shape = shape.withInput(node.getInputB, "input_b")
+      shape = shape.withInput("input_b", node.getInputB)
     }
 
     shape

@@ -2,15 +2,17 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.core.types.TensorShape
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.ChiSqSelectorModel
 import org.apache.spark.mllib.feature
+import org.apache.spark.sql.mleap.TypeConverters.sparkToMleapDataShape
 
 /**
   * Created by hollinwilkins on 12/27/16.
   */
-class ChiSqSelectorOp extends OpNode[SparkBundleContext, ChiSqSelectorModel, ChiSqSelectorModel] {
+class ChiSqSelectorOp extends SimpleSparkOp[ChiSqSelectorModel] {
   override val Model: OpModel[SparkBundleContext, ChiSqSelectorModel] = new OpModel[SparkBundleContext, ChiSqSelectorModel] {
     override val klazz: Class[ChiSqSelectorModel] = classOf[ChiSqSelectorModel]
 
@@ -18,7 +20,11 @@ class ChiSqSelectorOp extends OpNode[SparkBundleContext, ChiSqSelectorModel, Chi
 
     override def store(model: Model, obj: ChiSqSelectorModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      model.withAttr("filter_indices", Value.longList(obj.selectedFeatures.map(_.toLong).toSeq))
+      val dataset = context.context.dataset.get
+      val inputShape = sparkToMleapDataShape(dataset.schema(obj.getFeaturesCol), dataset).asInstanceOf[TensorShape]
+
+      model.withValue("filter_indices", Value.longList(obj.selectedFeatures.map(_.toLong).toSeq))
+           .withValue("input_size", Value.int(inputShape.dimensions.get.head))
     }
 
     override def load(model: Model)
@@ -28,20 +34,16 @@ class ChiSqSelectorOp extends OpNode[SparkBundleContext, ChiSqSelectorModel, Chi
     }
   }
 
-  override val klazz: Class[ChiSqSelectorModel] = classOf[ChiSqSelectorModel]
-
-  override def name(node: ChiSqSelectorModel): String = node.uid
-
-  override def model(node: ChiSqSelectorModel): ChiSqSelectorModel = node
-
-  override def load(node: Node, model: ChiSqSelectorModel)
-                   (implicit context: BundleContext[SparkBundleContext]): ChiSqSelectorModel = {
-    new ChiSqSelectorModel(uid = node.name,
-      chiSqSelector = new feature.ChiSqSelectorModel(model.selectedFeatures)).
-      setFeaturesCol(node.shape.input("features").name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: ChiSqSelectorModel): ChiSqSelectorModel = {
+    new ChiSqSelectorModel(uid = uid,
+      chiSqSelector = new feature.ChiSqSelectorModel(model.selectedFeatures))
   }
 
-  override def shape(node: ChiSqSelectorModel): Shape = Shape().withInput(node.getFeaturesCol, "features").
-    withStandardOutput(node.getOutputCol)
+  override def sparkInputs(obj: ChiSqSelectorModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.featuresCol)
+  }
+
+  override def sparkOutputs(obj: ChiSqSelectorModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

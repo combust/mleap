@@ -3,7 +3,7 @@ package org.apache.spark.ml.bundle.extension.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.SparkBundleContext
+import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.mleap.feature.OneHotEncoderModel
 
 import scala.util.{Failure, Try}
@@ -11,7 +11,7 @@ import scala.util.{Failure, Try}
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoderModel, OneHotEncoderModel] {
+class OneHotEncoderOp extends SimpleSparkOp[OneHotEncoderModel] {
   override val Model: OpModel[SparkBundleContext, OneHotEncoderModel] = new OpModel[SparkBundleContext, OneHotEncoderModel] {
     override val klazz: Class[OneHotEncoderModel] = classOf[OneHotEncoderModel]
 
@@ -29,20 +29,18 @@ class OneHotEncoderOp extends OpNode[SparkBundleContext, OneHotEncoderModel, One
     }
   }
 
-  override val klazz: Class[OneHotEncoderModel] = classOf[OneHotEncoderModel]
 
-  override def name(node: OneHotEncoderModel): String = node.uid
 
-  override def model(node: OneHotEncoderModel): OneHotEncoderModel = node
-
-  override def load(node: Node, model: OneHotEncoderModel)
-                   (implicit context: BundleContext[SparkBundleContext]): OneHotEncoderModel = {
-    new OneHotEncoderModel(uid = node.name, size = model.size).
-      setDropLast(model.getDropLast).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: OneHotEncoderModel): OneHotEncoderModel = {
+    new OneHotEncoderModel(uid = uid, size = model.size).
+      setDropLast(model.getDropLast)
   }
 
-  override def shape(node: OneHotEncoderModel)(implicit context: BundleContext[SparkBundleContext]): NodeShape =
-    NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: OneHotEncoderModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
+
+  override def sparkOutputs(obj: OneHotEncoderModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

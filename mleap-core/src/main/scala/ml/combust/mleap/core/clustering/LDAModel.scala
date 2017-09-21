@@ -81,10 +81,10 @@ abstract class LDAModel private[clustering] {
   *
   * @param topics Inferred topics (vocabSize x k matrix).
   */
-case class LocalLDAModel (val topics: Matrix[Double],
-                      override val docConcentration: BDV[Double],
-                      override val topicConcentration: Double,
-                      protected val gammaShape: Double = 100)
+case class LocalLDAModel (topics: Matrix[Double],
+                          override val docConcentration: BDV[Double],
+                          override val topicConcentration: Double,
+                          protected val gammaShape: Double = 100)
   extends LDAModel with Model {
 
   override def k: Int = topics.cols
@@ -102,9 +102,6 @@ case class LocalLDAModel (val topics: Matrix[Double],
       (terms.toArray, termWeights.toArray)
     }.toArray
   }
-
-
-
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(k)).get
 

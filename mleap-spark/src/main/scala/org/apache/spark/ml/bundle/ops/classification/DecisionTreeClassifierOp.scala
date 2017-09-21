@@ -1,7 +1,7 @@
 package org.apache.spark.ml.bundle.ops.classification
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import org.apache.spark.ml.tree
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.tree.decision.TreeSerializer
@@ -38,10 +38,12 @@ class DecisionTreeClassifierOp extends SimpleSparkOp[DecisionTreeClassificationM
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: DecisionTreeClassificationModel): DecisionTreeClassificationModel = {
-    new DecisionTreeClassificationModel(uid = uid,
+    val r = new DecisionTreeClassificationModel(uid = uid,
       rootNode = model.rootNode,
       numFeatures = model.numFeatures,
       numClasses = model.numClasses)
+    if(r.isDefined(r.thresholds)) { r.setThresholds(r.getThresholds) }
+    r
   }
 
   override def sparkInputs(obj: DecisionTreeClassificationModel): Seq[ParamSpec] = {

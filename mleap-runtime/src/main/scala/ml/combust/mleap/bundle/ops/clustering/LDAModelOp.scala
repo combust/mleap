@@ -19,7 +19,8 @@ class LDAModelOp extends MleapOp[LDA, LocalLDAModel] {
 
     override def opName: String = Bundle.BuiltinOps.clustering.lda
 
-    override def store(model: Model, obj: LocalLDAModel)(implicit context: BundleContext[MleapContext]): Model = {
+    override def store(model: Model, obj: LocalLDAModel)
+                      (implicit context: BundleContext[MleapContext]): Model = {
       val topicMatrixArray = obj.topicsMatrix.toDenseMatrix.toArray //TODO should we add SparseMatrix?
       val topicMatrixRows = obj.topicsMatrix.rows
       val topicMatrixCols = obj.topicsMatrix.cols
@@ -30,7 +31,8 @@ class LDAModelOp extends MleapOp[LDA, LocalLDAModel] {
         withValue("topicMatrix", Value.tensor[Double](DenseTensor(topicMatrixArray, Seq(topicMatrixRows, topicMatrixCols))))
     }
 
-    override def load(model: Model)(implicit context: BundleContext[MleapContext]): LocalLDAModel = {
+    override def load(model: Model)
+                     (implicit context: BundleContext[MleapContext]): LocalLDAModel = {
 
       val topicMatrix = model.value("topicMatrix").getTensor[Double]
       val rows = topicMatrix.dimensions.head

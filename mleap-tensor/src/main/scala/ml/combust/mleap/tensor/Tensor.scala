@@ -1,6 +1,7 @@
 package ml.combust.mleap.tensor
 
 import java.util
+import java.util.Comparator
 
 import scala.language.implicitConversions
 import scala.reflect.{ClassTag, classTag}
@@ -132,10 +133,19 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
   }
 
   override def get(is: Int *): Option[T] = {
-    val index = util.Arrays.binarySearch(indices.toArray: Array[AnyRef], is)
+    val index = util.Arrays.binarySearch(indices.toArray, is, new Comparator[Seq[Int]] {
+      override def compare(o1: Seq[Int], o2: Seq[Int]): Int = {
+        for((v1, v2) <- o1.zip(o2)) {
+          val c = v1.compareTo(v2)
+          if(c != 0) { return c }
+        }
+
+        0
+      }
+    })
 
     if(index >= 0) {
-      Some(values(denseIndex(indices(index))))
+      Some(values(index))
     } else { None }
   }
 

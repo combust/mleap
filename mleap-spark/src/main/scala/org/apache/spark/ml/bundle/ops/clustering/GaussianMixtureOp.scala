@@ -54,6 +54,7 @@ class GaussianMixtureOp extends SimpleSparkOp[GaussianMixtureModel] {
   }
 
   override def sparkOutputs(obj: GaussianMixtureModel): Seq[SimpleParamSpec] = {
-    Seq("probability" -> obj.probabilityCol, "prediction" -> obj.predictionCol)
+    Seq("prediction" -> obj.predictionCol,
+      "probability" -> obj.probabilityCol)
   }
 }

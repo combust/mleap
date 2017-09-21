@@ -100,7 +100,9 @@ class SVMModel(override val uid: String,
 
   override def numClasses: Int = 2
 
-  override def copy(extra: ParamMap): SVMModel = defaultCopy(extra)
+  override def copy(extra: ParamMap): SVMModel = {
+    copyValues(new SVMModel(uid, model), extra)
+  }
 
   override protected def raw2probabilityInPlace(rawPrediction: linalg.Vector): linalg.Vector = rawPrediction
 }

@@ -4,7 +4,6 @@ import ml.bundle.Socket
 import ml.combust.bundle.dsl.NodeShape
 import org.apache.spark.ml.param.{Param, Params, StringArrayParam}
 import org.apache.spark.sql.DataFrame
-import BundleTypeConverters._
 
 import scala.language.implicitConversions
 
@@ -43,13 +42,13 @@ case class SparkShapeSaver(dataset: DataFrame,
   def asNodeShape: NodeShape = {
     val is = inputs.flatMap {
       case SimpleParamSpec(port, param) =>
-        if(params.isDefined(param)) {
-          val field = dataset.schema(params.get(param).get)
+        if(params.isDefined(param) && params.getOrDefault(param).nonEmpty) {
+          val field = dataset.schema(params.getOrDefault(param))
           Seq(Socket(port, field.name))
         }
         else { Seq() }
       case ArrayParamSpec(portPrefix, param) =>
-        if(params.isDefined(param)) {
+        if(params.isDefined(param) && params.getOrDefault(param).nonEmpty) {
           params.get(param).get.zipWithIndex.map {
             case (name, i) =>
               val field = dataset.schema(name)
@@ -58,7 +57,7 @@ case class SparkShapeSaver(dataset: DataFrame,
         } else { Seq() }
     }
 
-    val os = outputs.filter(pp => params.isDefined(pp.param)).map {
+    val os = outputs.filter(pp => params.isDefined(pp.param) && params.getOrDefault(pp.param).nonEmpty).map {
       case SimpleParamSpec(port, param) =>
         val field = dataset.schema(params.getOrDefault(param))
         Socket(port, field.name)

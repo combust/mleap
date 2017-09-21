@@ -22,7 +22,7 @@ class WordLengthFilterOp extends OpNode[SparkBundleContext, WordLengthFilter, Wo
     }
 
     override def load(model: Model)(implicit context: BundleContext[SparkBundleContext]): WordLengthFilterModel = {
-      new WordLengthFilterModel(model.value("length").getInt)
+      WordLengthFilterModel(model.value("length").getInt)
     }
   }
   override val klazz: Class[WordLengthFilter] = classOf[WordLengthFilter]

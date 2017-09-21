@@ -2,14 +2,14 @@ package org.apache.spark.ml.bundle.extension.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
-import org.apache.spark.ml.bundle.{BundleHelper, SparkBundleContext}
+import ml.combust.bundle.op.OpModel
+import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.mleap.feature.ImputerModel
 
 /**
   * Created by mikhail on 12/18/16.
   */
-class ImputerOp extends OpNode[SparkBundleContext, ImputerModel, ImputerModel] {
+class ImputerOp extends SimpleSparkOp[ImputerModel] {
   override val Model: OpModel[SparkBundleContext, ImputerModel] = new OpModel[SparkBundleContext, ImputerModel] {
     override val klazz: Class[ImputerModel] = classOf[ImputerModel]
 
@@ -40,22 +40,15 @@ class ImputerOp extends OpNode[SparkBundleContext, ImputerModel, ImputerModel] {
     }
   }
 
-  override val klazz: Class[ImputerModel] = classOf[ImputerModel]
-
-  override def name(node: ImputerModel): String = node.uid
-
-  override def model(node: ImputerModel): ImputerModel = node
-
-  override def load(node: Node, model: ImputerModel)
-                   (implicit context: BundleContext[SparkBundleContext]): ImputerModel = {
-    new ImputerModel(uid = node.name, surrogateValue = model.surrogateValue).
-      setMissingValue(model.getMissingValue).
-      setStrategy(model.getStrategy).
-      setInputCol(node.shape.standardInput.name).
-      setOutputCol(node.shape.standardOutput.name)
+  override def sparkLoad(uid: String, shape: NodeShape, model: ImputerModel): ImputerModel = {
+    new ImputerModel(uid = uid, surrogateValue = model.surrogateValue)
   }
 
-  override def shape(node: ImputerModel)(implicit context: BundleContext[SparkBundleContext]): NodeShape =
-    NodeShape().withStandardIO(node.getInputCol, node.getOutputCol)
+  override def sparkInputs(obj: ImputerModel): Seq[ParamSpec] = {
+    Seq("input" -> obj.inputCol)
+  }
 
+  override def sparkOutputs(obj: ImputerModel): Seq[SimpleParamSpec] = {
+    Seq("output" -> obj.outputCol)
+  }
 }

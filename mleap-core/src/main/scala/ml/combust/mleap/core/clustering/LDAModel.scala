@@ -103,12 +103,9 @@ case class LocalLDAModel (val topics: Matrix[Double],
     }.toArray
   }
 
-
-
-
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(k)).get
 
-  override def outputSchema: StructType = StructType("prediction" -> TensorType.Double(k)).get
+  override def outputSchema: StructType = StructType("topic_distribution" -> TensorType.Double(k)).get
 
   /**
     * Calculates a lower bound on the log likelihood of the entire corpus.

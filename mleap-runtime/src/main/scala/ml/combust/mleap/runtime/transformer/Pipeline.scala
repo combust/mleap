@@ -9,7 +9,14 @@ import scala.util.Try
 /**
  * Created by hwilkins on 11/8/15.
  */
-case class PipelineModel(transformers: Seq[Transformer]) extends Model
+case class PipelineModel(transformers: Seq[Transformer]) extends Model {
+  override def inputSchema: StructType = {
+    throw new NotImplementedError("inputSchema is not implemented for a PipelineModel")
+  }
+  override def outputSchema: StructType = {
+    throw new NotImplementedError("outputSchema is not implemented for a PipelineModel")
+  }
+}
 
 case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"),
                     override val shape: NodeShape,
@@ -20,8 +27,10 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
     model.transformers.foldLeft(Try(builder))((b, stage) => b.flatMap(stage.transform))
   }
 
-  override lazy val inputSchema: StructType = schemas._1
-  override lazy val outputSchema: StructType = schemas._2
+  override def close(): Unit = transformers.foreach(_.close())
+
+  override def inputSchema: StructType = schemas._1
+  override def outputSchema: StructType = schemas._2
 
   private lazy val schemas: (StructType, StructType) = {
     val (inputs, outputs) = transformers.foldLeft((Map[String, DataType](), Map[String, DataType]())) {
@@ -41,5 +50,4 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
     (StructType(actualInputs).get, StructType(actualOutputs).get)
   }
 
-  override def close(): Unit = transformers.foreach(_.close())
 }

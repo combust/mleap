@@ -47,7 +47,7 @@ class AFTSurvivalRegressionOp extends SimpleSparkOp[AFTSurvivalRegressionModel] 
   }
 
   override def sparkOutputs(obj: AFTSurvivalRegressionModel): Seq[SimpleParamSpec] = {
-    Seq("quantiles" -> obj.quantilesCol,
-      "prediction" -> obj.predictionCol)
+    Seq("prediction" -> obj.predictionCol,
+      "quantiles" -> obj.quantilesCol)
   }
 }

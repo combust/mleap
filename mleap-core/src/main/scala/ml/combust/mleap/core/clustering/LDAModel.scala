@@ -99,7 +99,7 @@ case class LocalLDAModel (topics: Matrix[Double],
       val topic = normalize(brzTopics(::, topicIndex), 1.0)
       val (termWeights, terms) =
         topic.toArray.zipWithIndex.sortBy(-_._1).take(maxTermsPerTopic).unzip
-      (terms, termWeights)
+      (terms.toArray, termWeights.toArray)
     }.toArray
   }
 

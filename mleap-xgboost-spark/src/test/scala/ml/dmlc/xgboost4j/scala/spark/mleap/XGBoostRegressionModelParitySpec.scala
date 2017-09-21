@@ -31,13 +31,17 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
       setLabelCol("loan_amount").
       setPredictionCol("prediction"))).fit(dataset)
 
-  override def equalityTest(sparkDataset: Array[Row],
-                            mleapDataset: Array[Row]): Boolean = {
-    !sparkDataset.zip(mleapDataset).exists {
+  override def equalityTest(sparkDataset: DataFrame,
+                            mleapDataset: DataFrame): Unit = {
+    val sparkPredictionCol = sparkDataset.schema.fieldIndex("prediction")
+    val mleapPredictionCol = mleapDataset.schema.fieldIndex("prediction")
+
+    sparkDataset.collect().zip(mleapDataset.collect()).foreach {
       case (sp, ml) =>
-        val v1 = sp.getFloat(6)
-        val v2 = ml.getDouble(6)
-        Math.abs(v2 - v1) > 0.0000001
+        val v1 = sp.getFloat(sparkPredictionCol)
+        val v2 = ml.getDouble(mleapPredictionCol)
+
+        assert(Math.abs(v2 - v1) < 0.0000001)
     }
   }
 }

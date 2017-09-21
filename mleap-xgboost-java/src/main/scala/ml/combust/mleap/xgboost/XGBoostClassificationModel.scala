@@ -3,6 +3,7 @@ package ml.combust.mleap.xgboost
 import biz.k11i.xgboost.Predictor
 import ml.combust.mleap.core.classification.ProbabilisticClassificationModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
+import ml.combust.mleap.core.util.VectorConverters._
 
 trait XGBoostClassificationModelBase extends ProbabilisticClassificationModel {
   val booster: Option[Array[Byte]]
@@ -17,7 +18,7 @@ case class XGBoostBinaryClassificationModel(override val predictor: Predictor,
   override val numClasses: Int = 2
 
   override def predictRaw(features: Vector): Vector = {
-    val m = predictor.predictSingle(FVecVectorImpl(features), outputMargin)
+    val m = predictor.predictSingle(FVecTensorImpl(features), outputMargin)
     Vectors.dense(1 - m, m)
   }
 
@@ -30,7 +31,7 @@ case class XGBoostMultinomialClassificationModel(override val predictor: Predict
                                                  override val numFeatures: Int,
                                                  override val outputMargin: Boolean) extends XGBoostClassificationModelBase {
   override def predictRaw(features: Vector): Vector = {
-    Vectors.dense(predictor.predict(FVecVectorImpl(features), outputMargin))
+    Vectors.dense(predictor.predict(FVecTensorImpl(features), outputMargin))
   }
 
   override def rawToProbabilityInPlace(raw: Vector): Vector = {

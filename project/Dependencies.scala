@@ -70,7 +70,7 @@ object Dependencies {
 
   val tensorflow = l ++= Seq(tensorflowDep)
 
-  val xgboost = l ++= Seq(xgboostEvaluator)
+  val xgboostJava = l ++= Seq(xgboostEvaluator)
 
   val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark
 

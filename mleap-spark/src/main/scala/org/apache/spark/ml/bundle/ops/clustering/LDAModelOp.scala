@@ -65,6 +65,6 @@ class LDAModelOp extends SimpleSparkOp[LocalLDAModel] {
   }
 
   override def sparkOutputs(obj: LocalLDAModel): Seq[SimpleParamSpec] = {
-    Seq("topic_distribution" -> obj.topicDistributionCol)
+    Seq("prediction" -> obj.topicDistributionCol)
   }
 }

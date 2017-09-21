@@ -39,7 +39,9 @@ class NaiveBayesClassifierOp extends SimpleSparkOp[NaiveBayesModel] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: NaiveBayesModel): NaiveBayesModel = {
-    new NaiveBayesModel(uid = uid, pi = model.pi, theta = model.theta)
+    val r = new NaiveBayesModel(uid = uid, pi = model.pi, theta = model.theta)
+    if(r.isDefined(r.thresholds)) { r.setThresholds(r.getThresholds) }
+    r
   }
 
   override def sparkInputs(obj: NaiveBayesModel): Seq[ParamSpec] = {

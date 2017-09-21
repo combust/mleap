@@ -49,7 +49,11 @@ class SupportVectorMachineOp extends SimpleSparkOp[SVMModel] {
   override def sparkLoad(uid: String,
                          shape: NodeShape,
                          model: SVMModel): SVMModel = {
-    new SVMModel(uid = uid, model = model.model)
+    val m = new SVMModel(uid = uid, model = model.model)
+    if(model.isDefined(model.thresholds)) {
+      m.setThresholds(model.getThresholds)
+    }
+    m
   }
 
   override def sparkInputs(obj: SVMModel): Seq[ParamSpec] = {

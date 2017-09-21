@@ -13,6 +13,5 @@ import ml.combust.mleap.tensor.Tensor
 case class LDA(override val uid: String = Transformer.uniqueName("lda"),
                override val shape: NodeShape,
                override val model: LocalLDAModel) extends SimpleTransformer {
-
   override val exec: UserDefinedFunction = (features: Tensor[Double]) => model.topicDistribution(features): Tensor[Double]
 }

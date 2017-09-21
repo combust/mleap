@@ -59,10 +59,12 @@ class GBTClassifierOpV22 extends SimpleSparkOp[GBTClassificationModel] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: GBTClassificationModel): GBTClassificationModel = {
-    new GBTClassificationModel(uid = uid,
+    val r = new GBTClassificationModel(uid = uid,
       _trees = model.trees,
       _treeWeights = model.treeWeights,
       numFeatures = model.numFeatures)
+    if(r.isDefined(r.thresholds)) { r.setThresholds(r.getThresholds) }
+    r
   }
 
   override def sparkInputs(obj: GBTClassificationModel): Seq[ParamSpec] = {

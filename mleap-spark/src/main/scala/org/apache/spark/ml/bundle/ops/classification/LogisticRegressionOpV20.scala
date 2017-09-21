@@ -45,9 +45,11 @@ class LogisticRegressionOpV20 extends SimpleSparkOp[LogisticRegressionModel] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: LogisticRegressionModel): LogisticRegressionModel = {
-    new LogisticRegressionModel(uid = uid,
+    val r = new LogisticRegressionModel(uid = uid,
       coefficients = model.coefficients,
       intercept = model.intercept)
+    if(r.isDefined(r.threshold)) { r.setThreshold(r.getThreshold) }
+    r
   }
 
   override def sparkInputs(obj: LogisticRegressionModel): Seq[ParamSpec] = {

@@ -32,7 +32,8 @@ class OneHotEncoderOp extends SimpleSparkOp[OneHotEncoderModel] {
 
 
   override def sparkLoad(uid: String, shape: NodeShape, model: OneHotEncoderModel): OneHotEncoderModel = {
-    new OneHotEncoderModel(uid = uid, size = model.size)
+    new OneHotEncoderModel(uid = uid, size = model.size).
+      setDropLast(model.getDropLast)
   }
 
   override def sparkInputs(obj: OneHotEncoderModel): Seq[ParamSpec] = {

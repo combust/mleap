@@ -56,10 +56,12 @@ class RandomForestClassifierOp extends SimpleSparkOp[RandomForestClassificationM
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: RandomForestClassificationModel): RandomForestClassificationModel = {
-    new RandomForestClassificationModel(uid = uid,
+    val r = new RandomForestClassificationModel(uid = uid,
       _trees = model.trees,
       numFeatures = model.numFeatures,
       numClasses = model.numClasses)
+    if(r.isDefined(r.thresholds)) { r.setThresholds(r.getThresholds) }
+    r
   }
 
   override def sparkInputs(obj: RandomForestClassificationModel): Seq[ParamSpec] = {

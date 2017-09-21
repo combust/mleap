@@ -132,21 +132,19 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
       sparkTransformer.params.zip(deserializedSparkModel.params).foreach {
         case (param1, param2) =>
-          val v1 = sparkTransformer.get(param1)
-          val v2 = deserializedSparkModel.get(param2)
+          assert(sparkTransformer.isDefined(param1) == deserializedSparkModel.isDefined(param2),
+            s"spark transformer is define ${sparkTransformer.isDefined(param1)} deserialized is ${deserializedSparkModel.isDefined(param2)}")
 
-          v1 match {
-            case Some(v1Value) =>
-              assert(v2.isDefined, s"v2 is not defined $param2")
+          if(sparkTransformer.isDefined(param1)) {
+            val v1Value = sparkTransformer.getOrDefault(param1)
+            val v2Value = deserializedSparkModel.getOrDefault(param1)
 
-              v1Value match {
-                case v1Value: Array[_] =>
-                  assert(v1Value sameElements v2.get.asInstanceOf[Array[_]])
-                case _ =>
-                  assert(v1Value == v2.get)
-              }
-            case None =>
-              assert(v2.isEmpty)
+            v1Value match {
+              case v1Value: Array[_] =>
+                assert(v1Value sameElements v2Value.asInstanceOf[Array[_]])
+              case _ =>
+                assert(v1Value == v2Value, s"$param1 is not equivalent")
+            }
           }
       }
     }

@@ -41,7 +41,9 @@ class ImputerOp extends SimpleSparkOp[ImputerModel] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: ImputerModel): ImputerModel = {
-    new ImputerModel(uid = uid, surrogateValue = model.surrogateValue)
+    new ImputerModel(uid = uid, surrogateValue = model.surrogateValue).
+      setMissingValue(model.getMissingValue).
+      setStrategy(model.getStrategy)
   }
 
   override def sparkInputs(obj: ImputerModel): Seq[ParamSpec] = {

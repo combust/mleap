@@ -81,10 +81,10 @@ abstract class LDAModel private[clustering] {
   *
   * @param topics Inferred topics (vocabSize x k matrix).
   */
-case class LocalLDAModel (val topics: Matrix[Double],
-                      override val docConcentration: BDV[Double],
-                      override val topicConcentration: Double,
-                      protected val gammaShape: Double = 100)
+case class LocalLDAModel (topics: Matrix[Double],
+                          override val docConcentration: BDV[Double],
+                          override val topicConcentration: Double,
+                          protected val gammaShape: Double = 100)
   extends LDAModel with Model {
 
   override def k: Int = topics.cols
@@ -99,13 +99,13 @@ case class LocalLDAModel (val topics: Matrix[Double],
       val topic = normalize(brzTopics(::, topicIndex), 1.0)
       val (termWeights, terms) =
         topic.toArray.zipWithIndex.sortBy(-_._1).take(maxTermsPerTopic).unzip
-      (terms.toArray, termWeights.toArray)
+      (terms, termWeights)
     }.toArray
   }
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(k)).get
 
-  override def outputSchema: StructType = StructType("topic_distribution" -> TensorType.Double(k)).get
+  override def outputSchema: StructType = StructType("prediction" -> TensorType.Double(k)).get
 
   /**
     * Calculates a lower bound on the log likelihood of the entire corpus.

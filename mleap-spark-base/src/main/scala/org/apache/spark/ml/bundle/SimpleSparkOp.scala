@@ -23,7 +23,7 @@ abstract class SimpleSparkOp[N <: Transformer](implicit ct: ClassTag[N]) extends
 
   override def load(node: Node, model: N)
                    (implicit context: BundleContext[SparkBundleContext]): N = {
-    val n = sparkLoad(node.name, node.shape, model).copy(model.extractParamMap()).asInstanceOf[N]
+    val n = sparkLoad(node.name, node.shape, model)
     SparkShapeLoader(node.shape, n, sparkInputs(n), sparkOutputs(n)).loadShape()
     n
   }

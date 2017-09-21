@@ -12,9 +12,12 @@ import org.apache.spark.sql.{DataFrame, Row}
   */
 class XGBoostClassificationModelParitySpec extends SparkParityBase {
   private val xgboostParams: Map[String, Any] = Map(
-    "eta" -> 0.1,
+    "eta" -> 0.3,
     "max_depth" -> 2,
-    "objective" -> "binary:logistic"
+    "objective" -> "binary:logistic",
+    "early_stopping_rounds" ->2,
+    "num_round" -> 15,
+    "nworkers" -> 2
   )
 
   override val dataset: DataFrame = baseDataset.select("fico_score_group_fnl", "dti", "approved")

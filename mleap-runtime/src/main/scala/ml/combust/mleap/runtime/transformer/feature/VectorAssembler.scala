@@ -7,7 +7,8 @@ import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.runtime.Row
-import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.runtime.Row.RowSelector
+import ml.combust.mleap.runtime.function.{StructSelector, UserDefinedFunction}
 
 import scala.util.Try
 
@@ -22,7 +23,11 @@ case class VectorAssembler(override val uid: String = Transformer.uniqueName("ve
     outputSchema.fields.head.dataType,
     Seq(SchemaSpec(inputSchema)))
 
+  val outputCol: String = outputSchema.fields.head.name
+  val inputCols: Seq[String] = inputSchema.fields.map(_.name)
+  private val inputSelector: StructSelector = StructSelector(inputCols)
+
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(outputSchema.fields.head.name, inputSchema.fields.map(_.name))(exec)
+    builder.withOutput(outputCol, inputSelector)(exec)
   }
 }

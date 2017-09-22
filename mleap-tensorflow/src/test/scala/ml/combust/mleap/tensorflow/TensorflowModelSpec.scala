@@ -14,9 +14,9 @@ class TensorflowModelSpec extends FunSpec {
         inputs = Seq(("InputA", TensorType.Float()), ("InputB", TensorType.Float())),
         outputs = Seq(("MyResult", TensorType.Float())))
 
-      assert(model(Tensor.scalar(23.4f), Tensor.scalar(45.6f)).head == 23.4f + 45.6f)
-      assert(model(Tensor.scalar(42.3f), Tensor.scalar(99.9f)).head == 42.3f + 99.9f)
-      assert(model(Tensor.scalar(65.8f), Tensor.scalar(34.6f)).head == 65.8f + 34.6f)
+      assert(model(Tensor.scalar(23.4f), Tensor.scalar(45.6f)).head == Tensor.scalar(23.4f + 45.6f))
+      assert(model(Tensor.scalar(42.3f), Tensor.scalar(99.9f)).head == Tensor.scalar(42.3f + 99.9f))
+      assert(model(Tensor.scalar(65.8f), Tensor.scalar(34.6f)).head == Tensor.scalar(65.8f + 34.6f))
 
       model.close()
     }

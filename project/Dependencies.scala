@@ -8,7 +8,7 @@ object Dependencies {
 
   val sparkVersion = "2.2.0"
   val scalaTestVersion = "3.0.0"
-  val tensorflowVersion = "1.1.0"
+  val tensorflowVersion = "1.3.0"
   val akkaVersion = "2.4.16"
   val akkaHttpVersion = "10.0.3"
 

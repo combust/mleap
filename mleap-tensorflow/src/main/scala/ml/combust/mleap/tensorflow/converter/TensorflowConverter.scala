@@ -15,19 +15,19 @@ object TensorflowConverter {
 
     tt.base match {
       case BasicType.Int =>
-        val b = IntBuffer.allocate(Math.min(1, dimensions.product))
+        val b = IntBuffer.allocate(Math.max(1, dimensions.product))
         tensor.writeTo(b)
         DenseTensor(b.array(), dimensions)
       case BasicType.Long =>
-        val b = LongBuffer.allocate(Math.min(1, dimensions.product))
+        val b = LongBuffer.allocate(Math.max(1, dimensions.product))
         tensor.writeTo(b)
         DenseTensor(b.array(), dimensions)
       case BasicType.Float =>
-        val b = FloatBuffer.allocate(Math.min(1, dimensions.product))
+        val b = FloatBuffer.allocate(Math.max(1, dimensions.product))
         tensor.writeTo(b)
         DenseTensor(b.array(), dimensions)
       case BasicType.Double =>
-        val b = DoubleBuffer.allocate(Math.min(1, dimensions.product))
+        val b = DoubleBuffer.allocate(Math.max(1, dimensions.product))
         tensor.writeTo(b)
         DenseTensor(b.array(), dimensions)
       case _ =>

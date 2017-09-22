@@ -1,6 +1,8 @@
 package ml.combust.mleap.tensorflow
 
-import ml.combust.mleap.core.types.DataType
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.{StructField, StructType, TensorType}
+import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.tensorflow.converter.{MleapConverter, TensorflowConverter}
 import org.tensorflow
 
@@ -12,13 +14,13 @@ import scala.util.Try
   * Created by hollinwilkins on 1/12/17.
   */
 case class TensorflowModel(graph: tensorflow.Graph,
-                           inputs: Seq[(String, DataType)],
-                           outputs: Seq[(String, DataType)],
-                           nodes: Option[Seq[String]] = None) extends AutoCloseable {
+                           inputs: Seq[(String, TensorType)],
+                           outputs: Seq[(String, TensorType)],
+                           nodes: Option[Seq[String]] = None) extends Model with AutoCloseable {
   @transient
   private var session: Option[tensorflow.Session] = None
 
-  def apply(values: Any *): Seq[Any] = {
+  def apply(values: Tensor[_] *): Seq[Any] = {
     val garbage: mutable.ArrayBuilder[tensorflow.Tensor] = mutable.ArrayBuilder.make[tensorflow.Tensor]()
 
     val result = Try {
@@ -79,4 +81,12 @@ case class TensorflowModel(graph: tensorflow.Graph,
     close()
     super.finalize()
   }
+
+  override def inputSchema: StructType = StructType(inputs.map {
+    case (name, dt) => StructField(name, dt)
+  }).get
+
+  override def outputSchema: StructType = StructType(outputs.map {
+    case (name, dt) => StructField(name, dt)
+  }).get
 }

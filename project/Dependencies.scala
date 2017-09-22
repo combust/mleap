@@ -66,7 +66,7 @@ object Dependencies {
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 
-  val tensorflow = l ++= Seq(tensorflowDep)
+  val tensorflow = l ++= Seq(tensorflowDep, Test.scalaTest)
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

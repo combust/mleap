@@ -32,7 +32,7 @@ object Dependencies {
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
     val scalameter = "com.storm-enroute" %% "scalameter" % "0.8.2"
     val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
-    val xgboostEvaluator = "biz.k11i" % "xgboost-predictor" % "0.2.1"
+    val jafama = "net.jafama" % "jafama" % "2.1.0"
   }
 
   object Test {
@@ -70,7 +70,7 @@ object Dependencies {
 
   val tensorflow = l ++= Seq(tensorflowDep)
 
-  val xgboostJava = l ++= Seq(xgboostEvaluator)
+  val xgboostJava = l ++= Seq(jafama)
 
   val xgboostSpark = l ++= Seq(Provided.xgboostSparkDep) ++ Provided.spark
 

@@ -4,9 +4,9 @@ import sbt.Keys._
 import sbt._
 
 object MleapProject {
-  lazy val aggregatedProjects: Seq[ProjectReference] = {
-    val base: Seq[ProjectReference] = Seq(baseProject,
+  lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
       tensor,
+      tensorflow,
       bundleMl,
       core,
       runtime,
@@ -16,13 +16,11 @@ object MleapProject {
       spark,
       sparkExtension)
 
-    sys.props.get("mleap.tensorflow.enabled") match {
-      case Some("true") => base :+ (tensorflow: ProjectReference)
-      case _ => base
-    }
-  }
-
-  lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Common.sonatypeSettings ++ Seq(publishArtifact := false)
+  lazy val rootSettings = Release.settings ++
+    Common.buildSettings ++
+    Common.sonatypeSettings ++
+    Seq(publishArtifact := false) ++
+    Seq(test in tensorflow := false) // skip tests because of JNI library requirement
 
   lazy val root = Project(
     id = "mleap",

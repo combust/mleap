@@ -16,6 +16,8 @@ import scala.language.implicitConversions
   */
 trait TypeConverters {
   def sparkToMleapValue(dataType: DataType): (Any) => Any = dataType match {
+    case _: DecimalType =>
+      (v: Any) => v.asInstanceOf[BigDecimal].toDouble
     case _: VectorUDT =>
       (v: Any) =>
         v.asInstanceOf[Vector]: Tensor[Double]
@@ -46,6 +48,7 @@ trait TypeConverters {
       case LongType => types.ScalarType.Long
       case FloatType => types.ScalarType.Float
       case DoubleType => types.ScalarType.Double
+      case _: DecimalType => types.ScalarType.Double
       case StringType => types.ScalarType.String.setNullable(field.nullable)
       case ArrayType(ByteType, _) => types.ListType.Byte
       case ArrayType(BooleanType, _) => types.ListType.Boolean
@@ -156,15 +159,16 @@ trait TypeConverters {
                             dataset: DataFrame): types.DataShape = field.dataType match {
     case BooleanType | ByteType | ShortType
          | IntegerType | LongType | FloatType
-         | DoubleType | StringType | ArrayType(ByteType, false) => types.ScalarShape()
-    case ArrayType(_, false) => types.ListShape()
+         | DoubleType | StringType => types.ScalarShape(field.nullable)
+    case _: DecimalType => types.ScalarShape(field.nullable)
+    case ArrayType(_, false) => types.ListShape(field.nullable)
     case vu: VectorUDT =>
       val size = dataset.select(field.name).head.getAs[Vector](0).size
-      types.TensorShape(Some(Seq(size)))
+      types.TensorShape(Some(Seq(size)), field.nullable)
     case mu: MatrixUDT =>
       val m = dataset.select(field.name).head.getAs[Matrix](0)
-      types.TensorShape(Some(Seq(m.numRows, m.numCols)))
-    case _ => throw new IllegalArgumentException("invalid struct field for shape")
+      types.TensorShape(Some(Seq(m.numRows, m.numCols)), field.nullable)
+    case _ => throw new IllegalArgumentException(s"invalid struct field for shape: $field")
   }
 }
 

@@ -4,29 +4,18 @@ import sbt.Keys._
 import sbt._
 
 object MleapProject {
-  lazy val aggregatedProjects: Seq[ProjectReference] = {
-    val base: Seq[ProjectReference] = Seq(baseProject,
-      tensor,
-      bundleMl,
-      core,
-      runtime,
-      avro,
-      sparkBase,
-      sparkTestkit,
-      spark,
-      sparkExtension,
-      xgboostJava)
-
-    sys.props.get("mleap.tensorflow.enabled") match {
-      case Some("true") => base :+ (tensorflow: ProjectReference)
-      case _ => base
-    }
-
-    sys.props.get("mleap.xgboost-spark.enabled") match {
-      case Some("true") => base :+ (xgboostSpark: ProjectReference)
-      case _ => base
-    }
-  }
+  lazy val aggregatedProjects: Seq[ProjectReference] = Seq(
+    baseProject,
+    tensor,
+    bundleMl,
+    core,
+    runtime,
+    avro,
+    sparkBase,
+    sparkTestkit,
+    spark,
+    sparkExtension,
+    xgboostJava)
 
   lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Common.sonatypeSettings ++ Seq(publishArtifact := false)
 

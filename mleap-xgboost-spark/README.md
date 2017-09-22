@@ -66,12 +66,10 @@ Once you have added `mleap-xgboost-spark` as a dependency to your project, you s
 
 ## Usage in Notebook
 
-To setup the xgboost integration for usage with a notebook like Zeppelin or Jupyter, you need to make sure that `mleap-xgboost-spark` *as well as its dependencies* are included in the class path. A common way to do this is to use an assembly jar, also known as a "fat" or "shaded" jar.
+To use `mleap-xgboost-spark` from a notebook, make sure you include all required dependencies for your interpreter. A good set of dependencies for working with MLeap and XGBoost could be these:
 
-### Create Assembly Jar
-
-```
-sbt mleap-xgboost-spark/assembly
-```
-
-Once you have created the assembly jar, point your notebook to it as a dependency.
+1. `mleap-spark` - Support for all out-of-the-box Spark transformers
+2. `mleap-xgboost-spark` - Support for XGBoost Spark transformer serialization/deserialization to MLeap bundle
+3. `xgboost4j-spark` - Required by `mleap-xgboost-spark`, as it is marked as a provided dependency
+4. `mleap-runtime` - Support for all out-of-the-box MLeap transformers
+5. `mleap-xgboost-java` - Support for XGBoost MLeap runtime transformers

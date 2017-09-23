@@ -82,7 +82,15 @@ object TensorType {
   def apply(base: BasicType,
             dimensions: Seq[Int]): TensorType = TensorType(base, Some(dimensions))
 
+  def Boolean(dims: Int *): TensorType = TensorType(BasicType.Boolean, Some(dims))
+  def Byte(dims: Int *): TensorType = TensorType(BasicType.Byte, Some(dims))
+  def Short(dims: Int *): TensorType = TensorType(BasicType.Short, Some(dims))
+  def Int(dims: Int *): TensorType = TensorType(BasicType.Int, Some(dims))
+  def Long(dims: Int *): TensorType = TensorType(BasicType.Long, Some(dims))
+  def Float(dims: Int *): TensorType = TensorType(BasicType.Float, Some(dims))
   def Double(dims: Int *): TensorType = TensorType(BasicType.Double, Some(dims))
+  def String(dims: Int *): TensorType = TensorType(BasicType.String, Some(dims))
+  def ByteString(dims: Int *): TensorType = TensorType(BasicType.ByteString, Some(dims))
 }
 
 /**

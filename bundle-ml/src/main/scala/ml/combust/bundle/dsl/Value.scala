@@ -1,7 +1,7 @@
 package ml.combust.bundle.dsl
 
 import com.google.protobuf
-import ml.bundle.{List, DataShape, BasicType, Scalar, Tensor}
+import ml.bundle.{BasicType, DataShape, DataType, List, Scalar, Tensor}
 import ml.combust.bundle.tensor.TensorSerializer
 import ml.combust.mleap.tensor.ByteString
 import ml.combust.mleap

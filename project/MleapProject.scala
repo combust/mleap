@@ -4,20 +4,24 @@ import sbt.Keys._
 import sbt._
 
 object MleapProject {
-  lazy val aggregatedProjects: Seq[ProjectReference] = Seq(
-    baseProject,
-    tensor,
-    bundleMl,
-    core,
-    runtime,
-    avro,
-    sparkBase,
-    sparkTestkit,
-    spark,
-    sparkExtension,
-    xgboostJava)
+  lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
+      tensor,
+      tensorflow,
+      bundleMl,
+      core,
+      runtime,
+      avro,
+      sparkBase,
+      sparkTestkit,
+      spark,
+      sparkExtension,
+      xgboostJava)
 
-  lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Common.sonatypeSettings ++ Seq(publishArtifact := false)
+  lazy val rootSettings = Release.settings ++
+    Common.buildSettings ++
+    Common.sonatypeSettings ++
+    Seq(publishArtifact := false) ++
+    Seq(test in tensorflow := false) // skip tests because of JNI library requirement
 
   lazy val root = Project(
     id = "mleap",

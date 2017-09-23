@@ -32,6 +32,7 @@ object Dependencies {
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
     val scalameter = "com.storm-enroute" %% "scalameter" % "0.8.2"
     val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
+    val jafama = "net.jafama" % "jafama" % "2.1.0"
   }
 
   object Test {
@@ -41,6 +42,7 @@ object Dependencies {
 
   object Provided {
     val spark = Compile.spark.map(_.excludeAll(ExclusionRule(organization = "org.scalatest"))).map(_ % "provided")
+    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % "0.7" % "provided"
   }
 
   import Compile._
@@ -67,6 +69,10 @@ object Dependencies {
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 
   val tensorflow = l ++= Seq(tensorflowDep, Test.scalaTest)
+
+  val xgboostJava = l ++= Seq(jafama)
+
+  val xgboostSpark = l ++= Seq(Provided.xgboostSparkDep) ++ Provided.spark
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

@@ -14,7 +14,8 @@ object MleapProject {
       sparkBase,
       sparkTestkit,
       spark,
-      sparkExtension)
+      sparkExtension,
+      xgboostJava)
 
   lazy val rootSettings = Release.settings ++
     Common.buildSettings ++
@@ -93,10 +94,25 @@ object MleapProject {
     dependencies = Seq(runtime)
   )
 
+  lazy val xgboostJava = Project(
+    id = "mleap-xgboost-java",
+    base = file("mleap-xgboost-java"),
+    dependencies = Seq(runtime)
+  )
+
+  lazy val xgboostSpark = Project(
+    id = "mleap-xgboost-spark",
+    base = file("mleap-xgboost-spark"),
+    dependencies = Seq(sparkBase % "provided",
+      xgboostJava % "test",
+      spark % "test",
+      sparkTestkit % "test")
+  )
+
   lazy val serving = Project(
     id = "mleap-serving",
     base = file("mleap-serving"),
-    dependencies = Seq(runtime, avro)
+    dependencies = Seq(runtime, avro, xgboostJava)
   )
 
   lazy val benchmark = Project(

@@ -4,6 +4,7 @@ import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{DataType, NodeShape, StructField, StructType}
 import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 /**
@@ -25,6 +26,13 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
     model.transformers.foldLeft(Try(builder))((b, stage) => b.flatMap(stage.transform))
+  }
+
+  override def transformAsync[TB <: TransformBuilder[TB]](builder: TB)
+                                                         (implicit ec: ExecutionContext): Future[TB] = {
+    model.transformers.foldLeft(Future(builder)) {
+      (fb, stage) => fb.flatMap(b => stage.transformAsync(b))
+    }
   }
 
   override def close(): Unit = transformers.foreach(_.close())

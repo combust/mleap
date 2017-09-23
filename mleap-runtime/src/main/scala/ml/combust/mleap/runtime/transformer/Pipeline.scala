@@ -49,5 +49,4 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
 
     (StructType(actualInputs).get, StructType(actualOutputs).get)
   }
-
 }

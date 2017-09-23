@@ -4,23 +4,18 @@ import sbt.Keys._
 import sbt._
 
 object MleapProject {
-  lazy val aggregatedProjects: Seq[ProjectReference] = {
-    val base: Seq[ProjectReference] = Seq(baseProject,
-      tensor,
-      bundleMl,
-      core,
-      runtime,
-      avro,
-      sparkBase,
-      sparkTestkit,
-      spark,
-      sparkExtension)
-
-    sys.props.get("mleap.tensorflow.enabled") match {
-      case Some("true") => base :+ (tensorflow: ProjectReference)
-      case _ => base
-    }
-  }
+  lazy val aggregatedProjects: Seq[ProjectReference] = Seq(
+    baseProject,
+    tensor,
+    bundleMl,
+    core,
+    runtime,
+    avro,
+    sparkBase,
+    sparkTestkit,
+    spark,
+    sparkExtension,
+    xgboostJava)
 
   lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Common.sonatypeSettings ++ Seq(publishArtifact := false)
 
@@ -95,10 +90,25 @@ object MleapProject {
     dependencies = Seq(runtime)
   )
 
+  lazy val xgboostJava = Project(
+    id = "mleap-xgboost-java",
+    base = file("mleap-xgboost-java"),
+    dependencies = Seq(runtime)
+  )
+
+  lazy val xgboostSpark = Project(
+    id = "mleap-xgboost-spark",
+    base = file("mleap-xgboost-spark"),
+    dependencies = Seq(sparkBase % "provided",
+      xgboostJava % "test",
+      spark % "test",
+      sparkTestkit % "test")
+  )
+
   lazy val serving = Project(
     id = "mleap-serving",
     base = file("mleap-serving"),
-    dependencies = Seq(runtime, avro)
+    dependencies = Seq(runtime, avro, xgboostJava)
   )
 
   lazy val benchmark = Project(

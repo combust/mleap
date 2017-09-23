@@ -13,6 +13,16 @@ Code derived from Apache Spark is under the Apache License 2.0
 
 Library (MLeap) is licensed under Apache License 2.0, as per accompanying LICENSE file.
 
+## Included Libraries
+
+MLeap includes the following libraries as their source version:
+
+Project: xgboost-predictor-java
+Author: Komiya Atsushi
+Github: https://github.com/komiya-atsushi/xgboost-predictor-java
+License: Apache 2.0
+License URL: https://github.com/komiya-atsushi/xgboost-predictor-java/blob/master/LICENSE
+
 ## Credit
 
 Library has been written by Hollin Wilkins (hollinrwilkins@gmail.com)

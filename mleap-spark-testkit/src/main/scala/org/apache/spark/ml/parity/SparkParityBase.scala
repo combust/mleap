@@ -110,9 +110,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  def equalityTest(sparkDataset: Array[Row],
-                   mleapDataset: Array[Row]): Boolean = {
-    sparkDataset sameElements mleapDataset
+  def equalityTest(sparkDataset: DataFrame,
+                   mleapDataset: DataFrame): Unit = {
+    assert(sparkDataset.collect() sameElements mleapDataset.collect())
   }
 
   def parityTransformer(): Unit = {
@@ -120,11 +120,11 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       val sparkTransformed = sparkTransformer.transform(dataset)
       implicit val sbc = SparkBundleContext().withDataset(sparkTransformed)
       val mTransformer = mleapTransformer(sparkTransformer)
-      val sparkDataset = sparkTransformed.toSparkLeapFrame.toSpark.collect()
+      val sparkDataset = sparkTransformed.toSparkLeapFrame.toSpark
       val mleapTransformed = mTransformer.sparkTransform(dataset)
-      val mleapDataset = mleapTransformed.collect()
+      val mleapDataset = mleapTransformed
 
-      assert(equalityTest(sparkDataset, mleapDataset))
+      equalityTest(sparkDataset, mleapDataset)
     }
 
     it("serializes/deserializes the Spark model properly") {

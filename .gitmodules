@@ -1,3 +1,6 @@
 [submodule "bundle-protobuf"]
 	path = bundle-protobuf
 	url = https://github.com/combust/bundle-protobuf.git
+[submodule "vendor/xgboost-predictor-java"]
+	path = vendor/xgboost-predictor-java
+	url = https://github.com/komiya-atsushi/xgboost-predictor-java.git

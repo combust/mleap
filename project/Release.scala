@@ -18,6 +18,7 @@ object Release {
       runTest,
       commitReleaseVersion,
       tagRelease,
+      runClean,
       publishArtifacts,
       releaseStepCommand(SonatypeCommand.sonatypeRelease),
       releaseStepTask(publish in autoImport.Docker in MleapProject.serving),

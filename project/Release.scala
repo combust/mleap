@@ -8,17 +8,17 @@ import xerial.sbt.Sonatype.SonatypeCommand
 
 object Release {
   lazy val settings = Seq(releaseVersionBump := sbtrelease.Version.Bump.Minor,
-    releaseCrossBuild := true,
+    releaseCrossBuild := false, // rely on sbt-doge for cross versions
 
     releaseProcess := Seq[ReleaseStep](
       checkSnapshotDependencies,
       inquireVersions,
       runClean,
-      runTest,
+      releaseStepCommand("+ test"),
       setReleaseVersion,
       commitReleaseVersion,
       tagRelease,
-      publishArtifacts,
+      releaseStepCommand("+ publishSigned"),
       releaseStepCommand(SonatypeCommand.sonatypeRelease),
       releaseStepTask(publish in autoImport.Docker in MleapProject.serving),
       setNextVersion,

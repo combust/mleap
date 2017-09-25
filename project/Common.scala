@@ -10,7 +10,8 @@ import xerial.sbt.Sonatype.autoImport._
 object Common {
   lazy val defaultMleapSettings = defaultSettings ++ mleapSettings ++ sonatypeSettings
   lazy val defaultBundleSettings = defaultSettings ++ bundleSettings ++ sonatypeSettings
-  lazy val defaultMleapServingSettings = defaultMleapSettings ++ Seq(crossScalaVersions := Seq("2.11.8"))
+  lazy val defaultMleapServingSettings = defaultMleapSettings ++ noPublishSettings ++ Seq(crossScalaVersions := Seq("2.11.8"))
+  lazy val defaultMleapXgboostSparkSettings = defaultMleapSettings ++ noPublishSettings
 
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
@@ -37,17 +38,22 @@ object Common {
   lazy val mleapSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")
   lazy val bundleSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.bundle")
 
+  lazy val noPublishSettings: Seq[Def.Setting[_]] = Seq(
+    publishTo in publishSigned := None,
+    publishTo := None
+  )
+
   lazy val sonatypeSettings: Seq[Def.Setting[_]] = Seq(
     sonatypeProfileName := "ml.combust",
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-    publishMavenStyle in publishSigned := true,
-    publishTo in publishSigned := {
-      val nexus = "https://oss.sonatype.org/"
-      if (isSnapshot.value)
-        Some("snapshots" at nexus + "content/repositories/snapshots")
-      else
-        Some("releases" at nexus + "service/local/staging/deploy/maven2")
-    },
+    publishMavenStyle := true,
+    publishTo := Some({
+      if (isSnapshot.value) {
+        Opts.resolver.sonatypeSnapshots
+      } else {
+        Opts.resolver.sonatypeStaging
+      }
+    }),
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },
     licenses := Seq("Apache 2.0 License" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),

@@ -61,16 +61,23 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
 
   implicit val mleapListTypeWriterFormat: JsonWriter[ListType] = new JsonWriter[ListType] {
     override def write(obj: ListType): JsValue = {
-      JsObject("type" -> JsString("list"),
+      var fields = Seq("type" -> JsString("list"),
         "base" -> obj.base.toJson)
+
+      if(!obj.isNullable) {
+        fields :+= "isNullable" -> JsBoolean(false)
+      }
+
+      JsObject(fields: _*)
     }
   }
 
   implicit def mleapListTypeReaderFormat(implicit context: MleapContext): JsonReader[ListType] = new JsonReader[ListType] {
     override def read(json: JsValue): ListType = {
       val obj = json.asJsObject("invalid list type")
+      val isNullable = obj.fields.get("isNullable").forall(_.convertTo[Boolean])
 
-      ListType(obj.fields("base").convertTo[BasicType])
+      ListType(obj.fields("base").convertTo[BasicType], isNullable)
     }
   }
 
@@ -78,6 +85,10 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     override def write(obj: TensorType): JsValue = {
       var map = Map("type" -> JsString("tensor"),
         "base" -> mleapBasicTypeFormat.write(obj.base))
+
+      if(!obj.isNullable) {
+        map += "isNullable" -> JsBoolean(false)
+      }
 
       obj.dimensions.foreach {
         dims => map = map + ("dimensions" -> dims.toJson)
@@ -88,21 +99,26 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
 
     override def read(json: JsValue): TensorType = {
       val obj = json.asJsObject("invalid tensor type")
+      val isNullable = obj.fields.get("isNullable").forall(_.convertTo[Boolean])
 
       val dimensions = obj.fields.get("dimensions").map {
         dims => dims.convertTo[Seq[Int]]
       }
-      TensorType(base = obj.fields("base").convertTo[BasicType], dimensions = dimensions)
+      TensorType(base = obj.fields("base").convertTo[BasicType],
+        dimensions = dimensions,
+        isNullable = isNullable)
     }
   })
 
   val mleapScalarTypeFormat: JsonFormat[ScalarType] = lazyFormat(new JsonFormat[ScalarType] {
     def writeMaybeNullable(base: JsString, isNullable: Boolean): JsValue = {
       if(isNullable) {
+        base
+      } else {
         JsObject("type" -> JsString("basic"),
           "base" -> base,
-          "isNullable" -> JsBoolean(true))
-      } else { base }
+          "isNullable" -> JsBoolean(false))
+      }
     }
 
     def readNullable(json: JsObject): ScalarType = {
@@ -163,7 +179,7 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
           case Some(JsString("tensor")) => mleapTensorTypeFormat.read(obj)
           case _ => deserializationError(s"invalid data type: ${obj.fields.get("type")}")
         }
-      case _ => throw new Error("Invalid data type") // TODO: better error
+      case _ => deserializationError(s"Invalid data type $json")
     }
   }
 

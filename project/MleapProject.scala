@@ -21,7 +21,7 @@ object MleapProject {
     Common.buildSettings ++
     Common.sonatypeSettings ++
     Seq(publishArtifact := false) ++
-    Seq(test in tensorflow := false) // skip tests because of JNI library requirement
+    Seq(test in tensorflow in Test := false) // skip tests because of JNI library requirement
 
   lazy val root = Project(
     id = "mleap",

@@ -9,7 +9,7 @@ import ml.combust.mleap.core.types.{ScalarType, StructType}
 case class StringMapModel(labels: Map[String, Double]) extends Model {
   def apply(label: String): Double = labels(label)
 
-  override def inputSchema: StructType = StructType("input" -> ScalarType.String).get
+  override def inputSchema: StructType = StructType("input" -> ScalarType.String.nonNullable).get
 
-  override def outputSchema: StructType = StructType("output" -> ScalarType.Double).get
+  override def outputSchema: StructType = StructType("output" -> ScalarType.Double.nonNullable).get
 }

@@ -23,7 +23,7 @@ case class TokenizerModel(regex: String = "\\s") extends Model {
     */
   def apply(document: String): Seq[String] = document.toLowerCase.split(regex).toSeq
 
-  override def inputSchema: StructType = StructType("input" -> ScalarType.String).get
+  override def inputSchema: StructType = StructType("input" -> ScalarType.String.nonNullable).get
 
   override def outputSchema: StructType = StructType("output" -> ListType(BasicType.String)).get
 }

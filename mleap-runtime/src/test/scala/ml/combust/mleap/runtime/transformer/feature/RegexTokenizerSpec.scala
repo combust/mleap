@@ -51,7 +51,7 @@ class RegexTokenizerSpec extends FunSpec {
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
       assert(wordRegexTokenizer.schema.fields ==
-        Seq(StructField("test_string", ScalarType.String),
+        Seq(StructField("test_string", ScalarType.String.nonNullable),
           StructField("test_tokens", ListType(BasicType.String))))
     }
   }

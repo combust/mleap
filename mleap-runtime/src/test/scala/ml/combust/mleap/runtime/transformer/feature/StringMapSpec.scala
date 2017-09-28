@@ -40,7 +40,7 @@ class StringMapSpec extends FunSpec {
     it("has the correct inputs and outputs") {
       assert(stringMap.schema.fields ==
         Seq(StructField("test_string", ScalarType.String),
-          StructField("test_index", ScalarType.Double)))
+          StructField("test_index", ScalarType.Double.nonNullable)))
     }
   }
 }

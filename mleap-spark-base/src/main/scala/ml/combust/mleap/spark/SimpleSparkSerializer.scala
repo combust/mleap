@@ -18,7 +18,7 @@ class SimpleSparkSerializer() {
       getOrElse(SparkBundleContext.defaultContext)
 
     (for(file <- managed(BundleFile(path))) yield {
-      transformer.writeBundle.save(file)
+      transformer.writeBundle.save(file).get
     }).tried.get
   }
 

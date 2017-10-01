@@ -11,6 +11,5 @@ import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 case class Tokenizer(override val uid: String = Transformer.uniqueName("tokenizer"),
                      override val shape: NodeShape,
                      override val model: TokenizerModel) extends SimpleTransformer {
-  override val exec: UserDefinedFunction = UserDefinedFunction((value: String) => model(value),
-    ListType(BasicType.String), ScalarType.String.nonNullable)
+  override val exec: UserDefinedFunction = (value: String) => model(value)
 }

@@ -13,7 +13,11 @@ import resource._
   *
   */
 class SimpleSparkSerializer() {
-  def serializeToBundle(transformer: Transformer, path: String, dataset: DataFrame, format: SerializationFormat = SerializationFormat.Json): Unit = {
+  def serializeToBundle(transformer: Transformer, path: String, dataset: DataFrame): Unit = {
+    serializeToBundleWithFormat(transformer = transformer, path = path, dataset = dataset, format = SerializationFormat.Json)
+  }
+
+  def serializeToBundleWithFormat(transformer: Transformer, path: String, dataset: DataFrame, format: SerializationFormat = SerializationFormat.Json): Unit = {
     implicit val context: SparkBundleContext = Option(dataset).
       map(d => SparkBundleContext.defaultContext.withDataset(d)).
       getOrElse(SparkBundleContext.defaultContext)

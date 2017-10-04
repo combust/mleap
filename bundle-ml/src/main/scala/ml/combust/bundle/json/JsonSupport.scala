@@ -129,7 +129,7 @@ trait JsonSupport {
       if(obj.s != "") { fb += ("string" -> obj.s.toJson) }
       if(obj.bs != ByteString.EMPTY) { fb += ("byte_string" -> obj.bs.toJson) }
       obj.t.foreach(t => fb += ("tensor" -> t.toJson))
-      if(obj.bt != BasicType.BOOLEAN) { fb += ("basic_type" -> obj.bt.toJson) }
+      if(obj.bt != BasicType.UNDEFINED) { fb += ("basic_type" -> obj.bt.toJson) }
       obj.ds.foreach(ds => fb += ("data_shape" -> ds.toJson))
       obj.m.foreach(m => fb += ("model" -> m.toJson))
 

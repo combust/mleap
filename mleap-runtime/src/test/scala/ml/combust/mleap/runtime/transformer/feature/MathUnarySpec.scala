@@ -15,7 +15,7 @@ class MathUnarySpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   val transformer = MathUnary(
-    shape = NodeShape.scalar(inputCol = "test_a",
+    shape = NodeShape.feature(inputCol = "test_a",
       outputCol = "test_out"),
     model = MathUnaryModel(Sin))
 

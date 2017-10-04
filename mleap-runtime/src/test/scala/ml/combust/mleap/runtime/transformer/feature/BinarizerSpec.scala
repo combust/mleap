@@ -10,7 +10,7 @@ import org.scalatest.FunSpec
   * Created by fshabbir on 12/1/16.
   */
 class BinarizerSpec extends FunSpec {
-  val binarizer = Binarizer(shape = NodeShape.vector(3, 3,
+  val binarizer = Binarizer(shape = NodeShape.feature(
     inputCol = "test_vec",
     outputCol = "test_binarizer"),
     model = BinarizerModel(0.6, TensorShape(3)))
@@ -41,7 +41,7 @@ class BinarizerSpec extends FunSpec {
   }
 
   describe("with a double input column") {
-    val binarizer2 = binarizer.copy(shape = NodeShape.scalar(
+    val binarizer2 = binarizer.copy(shape = NodeShape.feature(
       inputCol = "test",
       outputCol = "test_binarizer"), model = binarizer.model.copy(inputShape = ScalarShape()))
     describe("#transform") {

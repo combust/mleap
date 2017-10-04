@@ -16,7 +16,7 @@ class MaxAbsScalerSpec extends FunSpec{
   val frame = LeapFrame(schema, dataset)
 
   val maxAbsScaler = MaxAbsScaler(
-    shape = NodeShape.vector(3, 3, inputCol = "test_vec", outputCol = "test_normalized"),
+    shape = NodeShape.feature(inputCol = "test_vec", outputCol = "test_normalized"),
     model = MaxAbsScalerModel(Vectors.dense(Array(10.0, 20.0, 40.0))))
 
   describe("#transform") {
@@ -31,7 +31,7 @@ class MaxAbsScalerSpec extends FunSpec{
     }
 
     describe("with invalid input column") {
-      val maxAbsScaler2 = maxAbsScaler.copy(shape = NodeShape.vector(3, 3, inputCol = "bad_input"))
+      val maxAbsScaler2 = maxAbsScaler.copy(shape = NodeShape.feature(inputCol = "bad_input"))
 
       it("returns a Failure") { assert(maxAbsScaler2.transform(frame).isFailure) }
     }

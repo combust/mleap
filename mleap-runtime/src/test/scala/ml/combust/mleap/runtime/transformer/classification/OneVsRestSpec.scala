@@ -7,7 +7,7 @@ import org.scalatest.FunSpec
 class OneVsRestSpec extends FunSpec {
   describe("input/output schema") {
     it("has the correct inputs and outputs without probability column") {
-      val transformer = OneVsRest(shape = NodeShape.basicClassifier(3),
+      val transformer = OneVsRest(shape = NodeShape.basicClassifier(),
         model = new OneVsRestModel(null, 3))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),

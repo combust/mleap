@@ -14,8 +14,7 @@ class StringMapSpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   val stringMap = StringMap(
-    shape = NodeShape.scalar(inputBase = BasicType.String,
-      outputBase = BasicType.Double,
+    shape = NodeShape.feature(
       inputCol = "test_string",
       outputCol = "test_index"),
     model = StringMapModel(Map("index1" -> 1.0, "index2" -> 1.0, "index3" -> 2.0)))

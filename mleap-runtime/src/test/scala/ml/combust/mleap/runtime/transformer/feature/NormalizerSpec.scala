@@ -15,7 +15,7 @@ class NormalizerSpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   val normalizer = Normalizer(
-    shape = NodeShape.vector(3, 3, inputCol = "test_vec", outputCol = "test_norm"),
+    shape = NodeShape.feature(inputCol = "test_vec", outputCol = "test_norm"),
     model = NormalizerModel(20.0, 3))
 
   describe("#transform") {
@@ -30,7 +30,7 @@ class NormalizerSpec extends FunSpec {
     }
 
     describe("with invalid input column") {
-      val normalizer2 = normalizer.copy(shape = NodeShape.vector(3, 3, inputCol = "bad_input"))
+      val normalizer2 = normalizer.copy(shape = NodeShape.feature(inputCol = "bad_input"))
 
       it("returns a Failure") { assert(normalizer2.transform(frame).isFailure) }
     }

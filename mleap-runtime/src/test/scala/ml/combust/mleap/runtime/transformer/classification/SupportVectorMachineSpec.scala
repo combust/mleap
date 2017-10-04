@@ -9,7 +9,7 @@ class SupportVectorMachineSpec extends FunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(3, 2),
+      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(),
         model = new SupportVectorMachineModel(Vectors.dense(1, 2, 3), 2))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
@@ -17,7 +17,7 @@ class SupportVectorMachineSpec extends FunSpec {
     }
 
     it("has the correct inputs and outputs with probability column") {
-      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(3, 2, probabilityCol = Some("probability")),
+      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(probabilityCol = Some("probability")),
         model = new SupportVectorMachineModel(Vectors.dense(1, 2, 3), 2))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
@@ -26,7 +26,7 @@ class SupportVectorMachineSpec extends FunSpec {
     }
 
     it("has the correct inputs and outputs with rawPrediction column") {
-      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(3, 2, rawPredictionCol = Some("rp")),
+      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(rawPredictionCol = Some("rp")),
         model = new SupportVectorMachineModel(Vectors.dense(1, 2, 3), 2))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),
@@ -35,7 +35,7 @@ class SupportVectorMachineSpec extends FunSpec {
     }
 
     it("has the correct inputs and outputs with both probability and rawPrediction columns") {
-      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(3, 2,
+      val transformer = SupportVectorMachine(shape = NodeShape.probabilisticClassifier(
         rawPredictionCol = Some("rp"),
         probabilityCol = Some("probability")),
         model = new SupportVectorMachineModel(Vectors.dense(1, 2, 3), 2))

@@ -16,7 +16,7 @@ class PolynomialExpansionSpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   val transformer = PolynomialExpansion(
-    shape = NodeShape.vector(2, 5, inputCol = "test_vec", outputCol = "test_expanded"),
+    shape = NodeShape.feature(inputCol = "test_vec", outputCol = "test_expanded"),
     model = PolynomialExpansionModel(2, 2))
 
   describe("#transform") {

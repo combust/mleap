@@ -15,48 +15,27 @@ object NodeShape {
     NodeShape(imap, omap)
   }
 
-  def vector(inputSize: Int,
-             outputSize: Int,
-             inputBase: BasicType = BasicType.Double,
-             outputBase: BasicType = BasicType.Double,
-             inputPort: String = "input",
-             outputPort: String = "output",
-             inputCol: String = "input",
-             outputCol: String = "output"): NodeShape = {
+  def feature(inputPort: String = "input",
+              outputPort: String = "output",
+              inputCol: String = "input",
+              outputCol: String = "output"): NodeShape = {
     NodeShape().withInput(inputPort, inputCol).
           withOutput(outputPort, outputCol)
   }
 
-  def scalar(inputBase: BasicType = BasicType.Double,
-             outputBase: BasicType = BasicType.Double,
-             inputPort: String = "input",
-             outputPort: String = "output",
-             inputCol: String = "input",
-             outputCol: String = "output"): NodeShape = {
-    NodeShape().withInput(inputPort, inputCol).
-          withOutput(outputPort, outputCol)
-  }
-
-  def regression(featuresSize: Int,
-                 base: BasicType = BasicType.Double,
-                 featuresCol: String = "features",
+  def regression(featuresCol: String = "features",
                  predictionCol: String = "prediction"): NodeShape = {
     NodeShape().withInput("features", featuresCol).
           withOutput("prediction", predictionCol)
   }
 
-  def basicClassifier(featuresSize: Int,
-                      base: BasicType = BasicType.Double,
-                      featuresCol: String = "features",
+  def basicClassifier(featuresCol: String = "features",
                       predictionCol: String = "prediction"): NodeShape = {
     NodeShape().withInput("features", featuresCol).
           withOutput("prediction", predictionCol)
   }
 
-  def probabilisticClassifier(featuresSize: Int,
-                              numClasses: Int,
-                              base: BasicType = BasicType.Double,
-                              featuresCol: String = "features",
+  def probabilisticClassifier(featuresCol: String = "features",
                               predictionCol: String = "prediction",
                               rawPredictionCol: Option[String] = None,
                               probabilityCol: Option[String] = None): NodeShape = {
@@ -68,19 +47,13 @@ object NodeShape {
     ns.withOutput("prediction", predictionCol)
   }
 
-  def basicCluster(featuresSize: Int,
-                   base: BasicType = BasicType.Double,
-                   outputType: DataType = ScalarType.Int,
-                   featuresCol: String = "features",
+  def basicCluster(featuresCol: String = "features",
                    predictionCol: String = "prediction"): NodeShape = {
     NodeShape().withInput("features", featuresCol).
           withOutput("prediction", predictionCol)
   }
 
-  def probabilisticCluster(featuresSize: Int,
-                           base: BasicType = BasicType.Double,
-                           outputType: DataType = ScalarType.Int,
-                           featuresCol: String = "features",
+  def probabilisticCluster(featuresCol: String = "features",
                            predictionCol: String = "prediction",
                            probabilityCol: Option[String] = None): NodeShape = {
     var ns = NodeShape().withInput("features", featuresCol)

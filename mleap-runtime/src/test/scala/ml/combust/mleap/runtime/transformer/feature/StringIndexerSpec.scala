@@ -14,8 +14,7 @@ class StringIndexerSpec extends FunSpec {
   val frame = LeapFrame(schema, dataset)
 
   val stringIndexer = StringIndexer(
-    shape = NodeShape.scalar(inputBase = BasicType.String,
-      outputBase = BasicType.Double,
+    shape = NodeShape.feature(
       inputCol = "test_string",
       outputCol = "test_index"),
     model = StringIndexerModel(Seq("index1", "index2", "index3")))

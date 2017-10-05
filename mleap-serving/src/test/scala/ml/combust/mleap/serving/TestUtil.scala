@@ -53,7 +53,7 @@ object TestUtil {
       withInput("input2", "third_double").
       withStandardOutput("features"),
       model = model)
-    val linearRegression = LinearRegression(shape = NodeShape.regression(1),
+    val linearRegression = LinearRegression(shape = NodeShape.regression(),
       model = LinearRegressionModel(Vectors.dense(2.0, 1.0, 2.0), 5d))
     val pipeline = Pipeline("pipeline", NodeShape(),
       new PipelineModel(Seq(featureAssembler, linearRegression)))

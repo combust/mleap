@@ -8,7 +8,7 @@ class VectorIndexerSpec extends FunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      val transformer = VectorIndexer(shape = NodeShape.vector(3, 20),
+      val transformer = VectorIndexer(shape = NodeShape.feature(),
         model = VectorIndexerModel(3, Map()))
 
       assert(transformer.schema.fields ==

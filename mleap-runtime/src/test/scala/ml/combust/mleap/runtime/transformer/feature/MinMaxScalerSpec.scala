@@ -17,7 +17,7 @@ class MinMaxScalerSpec extends FunSpec{
   val frame = LeapFrame(schema, dataset)
 
   val minMaxScaler = MinMaxScaler(
-    shape = NodeShape.vector(3, 3, inputCol = "test_vec", outputCol = "test_normalized"),
+    shape = NodeShape.feature(inputCol = "test_vec", outputCol = "test_normalized"),
     model = MinMaxScalerModel(Vectors.dense(Array(0.0, 0.0, 0.0)), Vectors.dense(Array(10.0, 20.0, 40.0))))
 
   describe("#transform") {
@@ -31,7 +31,7 @@ class MinMaxScalerSpec extends FunSpec{
       assert(norm(2) == 0.5)
     }
     describe("with invalid input column") {
-      val minMaxScaler2 = minMaxScaler.copy(shape = NodeShape.vector(3, 3, inputCol = "bad_feature"))
+      val minMaxScaler2 = minMaxScaler.copy(shape = NodeShape.feature(inputCol = "bad_feature"))
 
       it("returns a Failure") {
         assert(minMaxScaler2.transform(frame).isFailure)

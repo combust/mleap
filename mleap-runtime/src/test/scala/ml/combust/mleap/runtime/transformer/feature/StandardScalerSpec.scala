@@ -18,7 +18,7 @@ class StandardScalerSpec extends FunSpec {
   val means = Some(Vectors.dense(Array(50.0, 20.0, 30.0)))
   val std = Some(Vectors.dense(Array(5.0, 1.0, 3.0)))
 
-  val transformer = StandardScaler(shape = NodeShape.vector(3, 3),
+  val transformer = StandardScaler(shape = NodeShape.feature(),
     model = StandardScalerModel(std, means))
 
   describe("input/output schema") {

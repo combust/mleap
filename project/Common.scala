@@ -64,13 +64,13 @@ object Common {
       "Hollin Wilkins",
       "hollinrwilkins@gmail.com",
       url("http://hollinwilkins.com")),
-      Developer("priannaahsan",
-        "Prianna Ahsan",
-        "prianna.ahsan@gmail.com",
-        url("http://prianna.me")),
       Developer("seme0021",
         "Mikhail Semeniuk",
         "mikhail@combust.ml",
-        url("https://www.linkedin.com/in/semeniuk")))
+        url("https://www.linkedin.com/in/semeniuk")),
+      Developer("ancasarb",
+        "Anca Sarb",
+        "sarb.anca@gmail.com",
+        url("https://www.linkedin.com/in/anca-sarb")))
   )
 }

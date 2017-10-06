@@ -161,24 +161,25 @@ case class StructType private(fields: Seq[StructField],
 
   /** Try to drop a field from the struct.
     *
-    * @param name name of field to drop
-    * @return try new struct without field
+    * @param names names of fields to drop
+    * @return try new struct without fields
     */
-  def dropField(name: String): Try[StructType] = {
-    indexOf(name).flatMap(dropIndex)
+  def dropFields(names: String *): Try[StructType] = {
+    indicesOf(names: _*).flatMap(dropIndices)
   }
 
   /** Try to drop an index from the struct.
     *
-    * @param index index of field to drop
+    * @param indices index of field to drop
     * @return try new struct without index
     */
-  def dropIndex(index: Int): Try[StructType] = {
-    if(index >= fields.length) {
-      Failure(new IllegalArgumentException(s"invalid index: $index"))
-    } else {
-      StructType(fields.take(index) ++ fields.drop(index + 1))
-    }
+  def dropIndices(indices: Int *): Try[StructType] = {
+    val drops = Set(indices: _*)
+    val newFields = fields.zipWithIndex.filter {
+      case (_, i) => !drops.contains(i)
+    }.map(_._1)
+
+    StructType(newFields)
   }
 
   /** Try to get the index of a field.

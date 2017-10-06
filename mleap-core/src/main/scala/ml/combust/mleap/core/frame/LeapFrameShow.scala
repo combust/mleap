@@ -1,16 +1,15 @@
-package ml.combust.mleap.runtime.util
+package ml.combust.mleap.core.frame
 
 import ml.combust.mleap.core.annotation.SparkCode
-import ml.combust.mleap.runtime.LeapFrame
 
 /**
   * Created by hollinwilkins on 2/16/17.
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/branch-2.1/sql/core/src/main/scala/org/apache/spark/sql/Dataset.scala#L246")
-case class LeapFrameShow[LF <: LeapFrame[LF]](frame: LF, n: Int = 20, truncate: Int = 20) {
+case class LeapFrameShow[LF <: LeapFrame[LF]](frame: LeapFrame[LF], n: Int = 20, truncate: Int = 20) {
   override def toString: String = {
     val schema = frame.schema
-    val dataset = frame.dataset.toLocal
+    val dataset = frame.collect()
     val rows = schema.fields.map(_.name) +: dataset.take(n).toSeq.map {
       _.map {
         cell =>
@@ -18,7 +17,7 @@ case class LeapFrameShow[LF <: LeapFrame[LF]](frame: LF, n: Int = 20, truncate: 
             case v: Option[_] => v.map(_.toString).getOrElse("null")
             case v: Seq[_] => v.mkString("[", ",", "]")
             case v => v.toString
-          }else "null"
+          } else "null"
 
           if (truncate > 0 && str.length > truncate) {
             // do not show ellipses for strings shorter than 4 characters.

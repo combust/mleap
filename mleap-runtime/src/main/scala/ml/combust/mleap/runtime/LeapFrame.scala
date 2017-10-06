@@ -105,7 +105,7 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] with Serializa
   def dropField(name: String): Try[LF] = {
     schema.indexOf(name).flatMap {
       index =>
-        schema.dropIndex(index).map {
+        schema.dropIndices(index).map {
           schema2 =>
             val dataset2 = dataset.dropIndex(index)
             withSchemaAndDataset(schema2, dataset2)

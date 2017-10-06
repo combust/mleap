@@ -51,8 +51,8 @@ class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
   }
   
   test("Dropping a field from a StructType should remove the field") {
-    assert(testStruct.dropField("first").get.getField("first").isEmpty)
-    assert(testStruct.dropField("first").get.fields.length == testStruct.fields.length - 1)
+    assert(testStruct.dropFields("first").get.getField("first").isEmpty)
+    assert(testStruct.dropFields("first").get.fields.length == testStruct.fields.length - 1)
   }
 
   test("select should return a StructType with selected fields") {

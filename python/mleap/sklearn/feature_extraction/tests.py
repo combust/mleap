@@ -49,17 +49,16 @@ class TransformerTests(unittest.TestCase):
             tf_node = json.load(tf_node_json)
 
         self.assertEqual(tf_node['shape']['inputs'][0]['name'], 'some_text')
-        self.assertEqual(tf_node['shape']['outputs'][0]['name'], tf_node_name)
+        self.assertEqual(tf_node['shape']['outputs'][0]['name'], 'token_counts')
 
     def test_tfidf_vectorizer_serializer_idf_part(self):
         nodes = self.pipe_model['attributes']['nodes']['string']
-        tf_node_name = nodes[0]
         idf_node_name = nodes[1]
 
         with open('{}/{}/root/{}.node/node.json'.format(self.tmp_dir, self.tfidf.name, idf_node_name)) as idf_node_json:
             idf_node = json.load(idf_node_json)
 
-        self.assertEqual(idf_node['shape']['inputs'][0]['name'], tf_node_name)
+        self.assertEqual(idf_node['shape']['inputs'][0]['name'], 'token_counts')
         self.assertEqual(idf_node['shape']['outputs'][0]['name'], 'features')
 
         idf_model_file = '{}/{}/root/{}.node/model.json'.format(self.tmp_dir, self.tfidf.name, idf_node_name)

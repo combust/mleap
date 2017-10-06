@@ -1,8 +1,8 @@
 package ml.combust.mleap.xgboost
 
 import ml.combust.mleap.core.types.NodeShape
-import ml.combust.mleap.runtime.Row
-import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.core.frame.Row
+import ml.combust.mleap.core.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{MultiTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._

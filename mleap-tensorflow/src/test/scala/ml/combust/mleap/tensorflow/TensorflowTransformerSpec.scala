@@ -1,10 +1,9 @@
 package ml.combust.mleap.tensorflow
 
 import ml.combust.mleap.core.types.{NodeShape, StructField, StructType, TensorType}
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
-import resource._
 
 /**
   * Created by hollinwilkins on 1/13/17.
@@ -22,13 +21,12 @@ class TensorflowTransformerSpec extends FunSpec {
         shape = shape,
         model = model)
       val schema = StructType(StructField("input_a", TensorType.Float()), StructField("input_b", TensorType.Float())).get
-      val dataset = LocalDataset(Seq(Row(Tensor.scalar(5.6f), Tensor.scalar(7.9f)),
+      val dataset = Seq(Row(Tensor.scalar(5.6f), Tensor.scalar(7.9f)),
         Row(Tensor.scalar(3.4f), Tensor.scalar(6.7f)),
-        Row(Tensor.scalar(1.2f), Tensor.scalar(9.7f))))
-      val frame = LeapFrame(schema, dataset)
+        Row(Tensor.scalar(1.2f), Tensor.scalar(9.7f)))
+      val frame = DefaultLeapFrame(schema, dataset)
 
       val data = transformer.transform(frame).get.dataset
-      println(data(0)(2))
       assert(data(0)(2) == Tensor.scalar(5.6f + 7.9f))
       assert(data(1)(2) == Tensor.scalar(3.4f + 6.7f))
       assert(data(2)(2) == Tensor.scalar(1.2f + 9.7f))

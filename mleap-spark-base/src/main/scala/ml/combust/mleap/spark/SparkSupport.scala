@@ -2,8 +2,8 @@ package ml.combust.mleap.spark
 
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.{BundleFile, BundleWriter}
+import ml.combust.mleap.core.frame.Row
 import ml.combust.mleap.core.types
-import ml.combust.mleap.runtime
 import ml.combust.mleap.runtime.transformer.{Transformer => MleapTransformer}
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.bundle.SparkBundleContext
@@ -42,7 +42,7 @@ trait SparkSupport {
         val values = r.toSeq.zip(converters).map {
           case (v, c) => c(v)
         }
-        runtime.Row(values: _*)
+        Row(values: _*)
       })
 
       SparkLeapFrame(schema, data, dataset.sqlContext)

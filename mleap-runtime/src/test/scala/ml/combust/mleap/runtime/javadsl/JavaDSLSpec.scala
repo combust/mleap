@@ -5,9 +5,9 @@ import java.nio.file.Files
 import java.util
 
 import ml.combust.mleap.core.feature.StringIndexerModel
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
-import ml.combust.mleap.runtime.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
 
@@ -42,8 +42,7 @@ class JavaDSLSpec extends FunSpec {
       list, tensor))
 
     val schema = builder.createSchema(fields)
-    val dataset = builder.createDataset(rows)
-    builder.createFrame(schema, dataset)
+    builder.createFrame(schema, rows)
   }
 
   describe("building a LeapFrame") {

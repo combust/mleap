@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BucketizerModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
 
 /**
@@ -10,8 +10,8 @@ import org.scalatest.FunSpec
   */
 class BucketizerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_double", ScalarType.Double))).get
-  val dataset = LocalDataset(Seq(Row(11.0), Row(0.0), Row(55.0)))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(11.0), Row(0.0), Row(55.0))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   val bucketizer = Bucketizer(
     shape = NodeShape.feature(inputCol = "test_double", outputCol = "test_bucket"),
@@ -28,8 +28,8 @@ class BucketizerSpec extends FunSpec {
     }
 
     describe("with input feature out of range") {
-      val dataset = LocalDataset(Array(Row(11.0), Row(0.0), Row(-23.0)))
-      val frame = LeapFrame(schema, dataset)
+      val dataset = Seq(Row(11.0), Row(0.0), Row(-23.0))
+      val frame = DefaultLeapFrame(schema, dataset)
 
       it("returns a Failure") { assert(bucketizer.transform(frame).isFailure) }
     }

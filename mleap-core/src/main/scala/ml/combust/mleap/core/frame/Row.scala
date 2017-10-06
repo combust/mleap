@@ -5,7 +5,6 @@ import ml.combust.mleap.core.function.UserDefinedFunction
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 /** Companion object for creating default rows.
   */

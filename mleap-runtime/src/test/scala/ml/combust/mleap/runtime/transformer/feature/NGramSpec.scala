@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.NGramModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
 
 /**
@@ -10,8 +10,8 @@ import org.scalatest.FunSpec
   */
 class NGramSpec extends FunSpec{
   val schema = StructType(Seq(StructField("test_string_seq", ListType(BasicType.String)))).get
-  val dataset = LocalDataset(Seq(Row("a b c".split(" ").toSeq), Row("d e f".split(" ").toSeq), Row("g h i".split(" ").toSeq)))
-  val frame = LeapFrame(schema,dataset)
+  val dataset = Seq(Row("a b c".split(" ").toSeq), Row("d e f".split(" ").toSeq), Row("g h i".split(" ").toSeq))
+  val frame = DefaultLeapFrame(schema,dataset)
 
   val ngram = NGram(
     shape = NodeShape().withStandardInput("test_string_seq").

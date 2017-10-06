@@ -1,12 +1,11 @@
-package ml.combust.mleap.runtime
+package ml.combust.mleap.core.frame
 
 import java.io.{ByteArrayOutputStream, PrintStream}
 
+import ml.combust.mleap.core.function.UserDefinedFunction
 import ml.combust.mleap.core.types.{SchemaSpec, _}
-import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.tensor.{ByteString, Tensor}
+import ml.combust.mleap.tensor.ByteString
 import org.scalatest.FunSpec
-import resource._
 
 /** Base trait for testing LeapFrame implementations.
   *
@@ -16,13 +15,13 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
   val fields = Seq(StructField("test_string", ScalarType.String),
     StructField("test_double", ScalarType.Double))
   val schema: StructType = StructType(fields).get
-  val dataset = LocalDataset(Array(
+  val dataset = Seq(
     Row("hello", 42.13),
     Row("there", 13.42)
-  ))
+  )
   val frame: LF = create(schema, dataset)
 
-  def create(schema: StructType, dataset: Dataset): LF
+  def create(schema: StructType, dataset: Seq[Row]): LF
 
   def leapFrame(name: String): Unit = {
     describe(name) {
@@ -30,18 +29,14 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
         it("gets the schema") { assert(frame.schema == schema) }
       }
 
-      describe("#dataset") {
-        it("gets the dataset") { assert(frame.dataset == dataset) }
-      }
-
       describe("#select") {
         it("creates a new LeapFrame from selected fields") {
           val frame2 = frame.select("test_double").get
-          val data = frame2.dataset.toArray
+          val data = frame2.collect()
 
           assert(frame2.schema.fields.length == 1)
           assert(frame2.schema.indexOf("test_double").get == 0)
-          assert(data(0).getDouble(0) == 42.13)
+          assert(data.head.getDouble(0) == 42.13)
           assert(data(1).getDouble(0) == 13.42)
         }
 
@@ -52,20 +47,20 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
 
       describe("#withField") {
         it("creates a new LeapFrame with field added") {
-          val frame2 = frame.withField("test_double_2", "test_double") {
+          val frame2 = frame.withColumn("test_double_2", "test_double") {
             (r: Double) => r + 10
           }.get
-          val data = frame2.dataset.toArray
+          val data = frame2.collect()
 
           assert(frame2.schema.fields.length == 3)
           assert(frame2.schema.indexOf("test_double_2").get == 2)
-          assert(data(0).getDouble(2) == 52.13)
+          assert(data.head.getDouble(2) == 52.13)
           assert(data(1).getDouble(2) == 23.42)
         }
 
         describe("with non-castable data types") {
           it("returns a failure") {
-            val frame2 = frame.withField("test_double_2", "test_double") {
+            val frame2 = frame.withColumn("test_double_2", "test_double") {
               (_: ByteString) => 22
             }
 
@@ -74,7 +69,7 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
         }
 
         describe("with ArraySelector and non Array[Any] data type") {
-          val frame2 = frame.withField("test_double_2", Seq("test_double")) {
+          val frame2 = frame.withColumn("test_double_2", Seq("test_double")) {
             (r: Seq[Double]) => r.head
           }
 
@@ -83,14 +78,14 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
 
         describe("automatic casting") {
           it("automatically casts the values to the UDF") {
-            val frame2 = frame.withField("test_double_2", "test_double") {
+            val frame2 = frame.withColumn("test_double_2", "test_double") {
               (r: Int) => r + 10
             }.get
-            val data = frame2.dataset.toArray
+            val data = frame2.collect()
 
             assert(frame2.schema.fields.length == 3)
             assert(frame2.schema.indexOf("test_double_2").get == 2)
-            assert(data(0).getInt(2) == 52)
+            assert(data.head.getInt(2) == 52)
             assert(data(1).getInt(2) == 23)
           }
 
@@ -99,52 +94,52 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
             val exec: UserDefinedFunction = UserDefinedFunction(f,
               ScalarType.String,
               Seq(SchemaSpec(Seq(ScalarType.String, ScalarType.String))))
-            val frame2 = frame.withField("test_string2", Seq("test_string", "test_double"))(exec).get
-            val data = frame2.dataset.toArray
+            val frame2 = frame.withColumn("test_string2", Seq("test_string", "test_double"))(exec).get
+            val data = frame2.collect()
 
             assert(frame2.schema.fields.length == 3)
-            assert(data(0).getString(2) == "hello42.13")
+            assert(data.head.getString(2) == "hello42.13")
           }
         }
       }
 
       describe("#withFields") {
         it("creates a new LeapFrame with fields added") {
-          val frame2 = frame.withFields(Seq("test_double_2", "test_double_string"), "test_double"){
+          val frame2 = frame.withColumns(Seq("test_double_2", "test_double_string"), "test_double"){
             (r: Double) => (r + 10, r.toString)
           }.get
-          val data = frame2.dataset.toArray
+          val data = frame2.collect()
 
           assert(frame2.schema.fields.length == 4)
           assert(frame2.schema.indexOf("test_double_2").get == 2)
           assert(frame2.schema.indexOf("test_double_string").get == 3)
-          assert(data(0).getDouble(2) == 52.13)
+          assert(data.head.getDouble(2) == 52.13)
           assert(data(1).getDouble(2) == 23.42)
-          assert(data(0).getString(3) == "42.13")
+          assert(data.head.getString(3) == "42.13")
           assert(data(1).getString(3) == "13.42")
         }
       }
 
       describe("#dropField") {
         it("creates a new LeapFrame with field dropped") {
-          val frame2 = frame.dropField("test_string").get
+          val frame2 = frame.drop("test_string").get
 
           assert(frame2.schema.fields.map(_.name) == Seq("test_double"))
         }
 
         describe("with a non-existent field") {
-          it("returns a Failure") { assert(frame.dropField("non_existent").isFailure) }
+          it("returns a Failure") { assert(frame.drop("non_existent").isFailure) }
         }
       }
 
       describe("#show") {
         it("prints the leap frame to a PrintStream") {
-          val str = (for(out <- managed(new ByteArrayOutputStream())) yield {
-            val p = new PrintStream(out)
-            frame.show(p)
-            out.flush()
-            new String(out.toByteArray)
-          }).tried.get
+          val out = new ByteArrayOutputStream()
+          val p = new PrintStream(out)
+          frame.show(p)
+          out.flush()
+          val str = new String(out.toByteArray)
+          out.close()
 
           val expected =
             """
@@ -164,7 +159,7 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
 }
 
 class DefaultLeapFrameSpec extends LeapFrameSpec[DefaultLeapFrame] {
-  override def create(schema: StructType, dataset: Dataset): DefaultLeapFrame = DefaultLeapFrame(schema, dataset)
+  override def create(schema: StructType, dataset: Seq[Row]): DefaultLeapFrame = DefaultLeapFrame(schema, dataset)
 
   it should behave like leapFrame("DefaultLeapFrame")
 }

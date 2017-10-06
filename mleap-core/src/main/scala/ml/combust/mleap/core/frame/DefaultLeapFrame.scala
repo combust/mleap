@@ -1,8 +1,11 @@
 package ml.combust.mleap.core.frame
 
+import java.lang.Iterable
+
 import ml.combust.mleap.core.function.{Selector, UserDefinedFunction}
 import ml.combust.mleap.core.types.{BasicType, StructField, StructType}
 
+import scala.collection.JavaConverters._
 import scala.util.{Failure, Try}
 
 /** Class for storing a leap frame locally.
@@ -11,6 +14,8 @@ import scala.util.{Failure, Try}
   */
 case class DefaultLeapFrame(override val schema: StructType,
                             dataset: Seq[Row]) extends LeapFrame[DefaultLeapFrame] {
+  def this(schema: StructType, rows: Iterable[Row]) = this(schema, rows.asScala.toSeq)
+
   /** Try to select fields to create a new LeapFrame.
     *
     * Returns a Failure if attempting to select any fields that don't exist.

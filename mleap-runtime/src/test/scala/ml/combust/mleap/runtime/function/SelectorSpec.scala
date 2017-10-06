@@ -1,5 +1,6 @@
 package ml.combust.mleap.runtime.function
 
+import ml.combust.mleap.core.function.{FieldSelector, Selector, StructSelector}
 import org.scalatest.FunSpec
 
 /**

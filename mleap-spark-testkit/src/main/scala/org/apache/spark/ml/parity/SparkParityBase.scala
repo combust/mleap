@@ -13,7 +13,7 @@ import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{DataType, NodeShape, TensorType}
 import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.core.function.UserDefinedFunction
 import org.apache.spark.ml.bundle.SparkBundleContext
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.{BaseTransformer, MultiTransformer, Pipeline, SimpleTransformer}

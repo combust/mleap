@@ -7,8 +7,8 @@ import ml.combust.mleap.serving.domain.v1.LoadModelRequest
 import ml.combust.mleap.serving.marshalling.{ApiMarshalling, JsonSupport, LeapFrameMarshalling}
 import org.scalatest.{FunSpec, Matchers}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import ml.combust.mleap.runtime.DefaultLeapFrame
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import ml.combust.mleap.core.frame.DefaultLeapFrame
 import ml.combust.mleap.core.types._
 
 class MleapResourceSpec extends FunSpec with Matchers with ScalatestRouteTest with LeapFrameMarshalling with ApiMarshalling {

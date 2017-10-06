@@ -3,9 +3,9 @@ package ml.combust.mleap.runtime.transformer
 import java.util.UUID
 
 import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.frame.TransformBuilder
+import ml.combust.mleap.core.function.{FieldSelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.core.types.{NodeShape, StructField, StructType}
-import ml.combust.mleap.runtime.function.{FieldSelector, Selector, UserDefinedFunction}
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 
 import scala.util.Try
 
@@ -94,7 +94,7 @@ trait SimpleTransformer extends BaseTransformer {
 
   lazy val typedExec: UserDefinedFunction = exec.withInputs(inputSchema).withOutput(outputSchema)
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(output, selectors: _*)(typedExec)
+    builder.withColumn(output, selectors: _*)(typedExec)
   }
 }
 
@@ -103,6 +103,6 @@ trait MultiTransformer extends BaseTransformer {
 
   lazy val typedExec: UserDefinedFunction = exec.withInputs(inputSchema).withOutput(outputSchema)
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutputs(outputs, selectors: _*)(typedExec)
+    builder.withColumns(outputs, selectors: _*)(typedExec)
   }
 }

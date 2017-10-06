@@ -7,7 +7,7 @@ import scala.collection.JavaConverters._
   * Created by hollinwilkins on 10/5/17.
   */
 object ArrayRow {
-  def apply(values: Seq[Any]): ArrayRow = ArrayRow(values.toArray)
+  def apply(values: Seq[Any]): ArrayRow = new ArrayRow(mutable.WrappedArray.make[Any](values.toArray))
 }
 
 /** Class for holding Row values in an array.
@@ -25,6 +25,7 @@ case class ArrayRow(values: mutable.WrappedArray[Any]) extends Row {
   override def withValues(values: Seq[Any]): ArrayRow = ArrayRow(this.values ++ values)
 
   override def selectIndices(indices: Int *): ArrayRow = ArrayRow(indices.toArray.map(values))
+
   override def dropIndices(indices: Int *): ArrayRow = {
     val drops = Set(indices: _*)
     val newValues = values.zipWithIndex.filter {

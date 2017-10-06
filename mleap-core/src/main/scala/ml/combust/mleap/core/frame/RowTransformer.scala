@@ -32,9 +32,7 @@ case class RowTransformer private (inputSchema: StructType,
     for (indices <- outputSchema.indicesOf(fieldNames: _*);
          schema2 <- outputSchema.selectIndices(indices: _*)) yield {
       val s = Set(indices: _*)
-      val newIndices = this.indices.zipWithIndex.filter {
-        case (_, i) => s.contains(i)
-      }.map(_._1)
+      val newIndices = indices.map(this.indices)
       val dropped = this.indices.zipWithIndex.filterNot {
         case (_, i) => s.contains(i)
       }.map(_._1)
@@ -111,7 +109,7 @@ case class RowTransformer private (inputSchema: StructType,
 
   override def drop(names: String *): Try[RowTransformer] = {
     for (indices <- outputSchema.indicesOf(names: _*);
-         schema2 <- outputSchema.selectIndices(indices: _*)) yield {
+         schema2 <- outputSchema.dropIndices(indices: _*)) yield {
       val s = Set(indices: _*)
       val newIndices = this.indices.zipWithIndex.filterNot {
         case (_, i) => s.contains(i)
@@ -144,13 +142,19 @@ case class RowTransformer private (inputSchema: StructType,
 
   def ensureAvailableIndices(numAvailable: Int): RowTransformer = {
     if(availableIndices.size < numAvailable) {
-      val diff = availableIndices.size - numAvailable
+      val diff = numAvailable - availableIndices.size
       val newMaxSize = maxSize + diff
       val newAvailableIndices = availableIndices ::: List(maxSize until newMaxSize: _*)
 
       copy(maxSize = newMaxSize,
         availableIndices = newAvailableIndices)
-    } else { this }
+    } else {
+      this
+    }
+  }
+
+  def transform(row: Row): Row = {
+    transformOption(row).orNull
   }
 
   /** Transform an input row with the predetermined schema.
@@ -158,7 +162,7 @@ case class RowTransformer private (inputSchema: StructType,
     * @param row row to transform
     * @return transformed row, or None if filtered
     */
-  def transform(row: Row): Option[ArrayRow] = {
+  def transformOption(row: Row): Option[ArrayRow] = {
     val arr = new Array[Any](maxSize)
     row.toArray.copyToArray(arr)
     val arrRow = ArrayRow(arr)

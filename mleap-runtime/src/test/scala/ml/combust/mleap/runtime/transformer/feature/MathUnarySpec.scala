@@ -3,7 +3,7 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.MathUnaryModel
 import ml.combust.mleap.core.feature.UnaryOperation.Sin
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
 
 /**
@@ -11,8 +11,8 @@ import org.scalatest.FunSpec
   */
 class MathUnarySpec extends FunSpec {
   val schema = StructType(StructField("test_a", ScalarType.Double)).get
-  val dataset = LocalDataset(Seq(Row(42.0)))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(42.0))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   val transformer = MathUnary(
     shape = NodeShape.feature(inputCol = "test_a",

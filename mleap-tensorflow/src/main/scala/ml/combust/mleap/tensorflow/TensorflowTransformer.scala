@@ -1,9 +1,9 @@
 package ml.combust.mleap.tensorflow
 
 import ml.combust.mleap.core.types.{NodeShape, SchemaSpec}
-import ml.combust.mleap.runtime.Row
-import ml.combust.mleap.runtime.function.{StructSelector, UserDefinedFunction}
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.core.frame.Row
+import ml.combust.mleap.core.frame.TransformBuilder
+import ml.combust.mleap.core.function.{StructSelector, UserDefinedFunction}
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.tensor.Tensor
 
@@ -27,7 +27,7 @@ case class TensorflowTransformer(override val uid: String = Transformer.uniqueNa
   private val inputSelector: StructSelector = StructSelector(inputCols)
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutputs(outputCols, inputSelector)(exec)
+    builder.withColumns(outputCols, inputSelector)(exec)
   }
 
   override def close(): Unit = { model.close() }

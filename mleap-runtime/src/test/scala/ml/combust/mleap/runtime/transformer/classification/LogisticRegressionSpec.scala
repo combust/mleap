@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.classification
 
 import ml.combust.mleap.core.classification.{BinaryLogisticRegressionModel, LogisticRegressionModel}
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
@@ -12,8 +12,8 @@ import org.scalatest.FunSpec
   */
 class LogisticRegressionSpec extends FunSpec {
   val schema = StructType(Seq(StructField("features", TensorType(BasicType.Double)))).get
-  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.5, -0.5, 1.0)))))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(Tensor.denseVector(Array(0.5, -0.5, 1.0))))
+  val frame = DefaultLeapFrame(schema, dataset)
   val logisticRegression = LogisticRegression(shape = NodeShape.probabilisticClassifier(),
     model = LogisticRegressionModel(BinaryLogisticRegressionModel(coefficients = Vectors.dense(Array(1.0, 1.0, 2.0)),
       intercept = -0.2,

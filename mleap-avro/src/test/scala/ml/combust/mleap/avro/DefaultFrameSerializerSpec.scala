@@ -1,8 +1,8 @@
 package ml.combust.mleap.avro
 
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.serialization._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.core.serialization.FrameReader
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import ml.combust.mleap.runtime.MleapSupport._
 import org.scalatest.FunSpec
@@ -29,10 +29,8 @@ class DefaultFrameSerializerSpec extends FunSpec {
     Tensor.denseVector(Array[Short](16, 45, 78)),
     ByteString(Array[Byte](1, 2, 3, 4, 5)),
     null)
-  val dataset = LocalDataset(Seq(row))
-  val frame = LeapFrame(schema, dataset)
-
-  import ml.combust.mleap.runtime.MleapContext.defaultContext
+  val dataset = Seq(row)
+  val frame = DefaultLeapFrame(schema, dataset)
 
   describe("with format ml.combust.mleap.avro") {
     it("serializes the leap frame as avro") {

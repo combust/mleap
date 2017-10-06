@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CoalesceModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
 
 /**
@@ -13,9 +13,9 @@ class CoalesceSpec extends FunSpec {
     StructField("test2", ScalarType.Double),
     StructField("test3", ScalarType.Double),
     StructField("test4", ScalarType.Double.nonNullable)).get
-  val dataset = LocalDataset(Seq(Row(null, null, 23.4, 56.7),
-    Row(null, null, null, 34.4)))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(null, null, 23.4, 56.7),
+    Row(null, null, null, 34.4))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   describe("with all optional doubles") {
     val coalesce = Coalesce(shape = NodeShape().withInput("input0", "test1").

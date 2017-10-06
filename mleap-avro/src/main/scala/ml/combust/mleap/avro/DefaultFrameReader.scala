@@ -3,10 +3,11 @@ package ml.combust.mleap.avro
 import java.nio.charset.Charset
 
 import ml.combust.mleap.runtime._
-import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
 import org.apache.avro.file.{DataFileReader, SeekableByteArrayInput}
 import org.apache.avro.generic.{GenericData, GenericDatumReader}
 import SchemaConverter._
+import ml.combust.mleap.core.frame.{ArrayRow, DefaultLeapFrame, Row}
+import ml.combust.mleap.core.serialization.{BuiltinFormats, FrameReader}
 import ml.combust.mleap.core.types.StructType
 
 import scala.collection.mutable
@@ -18,8 +19,7 @@ import scala.util.Try
 class DefaultFrameReader extends FrameReader {
   val valueConverter = ValueConverter()
 
-  override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset)
-                        (implicit context: MleapContext): Try[DefaultLeapFrame] = Try {
+  override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Try[DefaultLeapFrame] = Try {
     val datumReader = new GenericDatumReader[GenericData.Record]()
     val reader = new DataFileReader[GenericData.Record](new SeekableByteArrayInput(bytes), datumReader)
     val avroSchema = reader.getSchema
@@ -27,14 +27,14 @@ class DefaultFrameReader extends FrameReader {
     val readers = schema.fields.map(_.dataType).map(valueConverter.avroToMleap)
 
     var record = new GenericData.Record(avroSchema)
-    var rows = mutable.ArrayBuilder.make[Row]()
+    var rows = mutable.Seq[Row]()
     while(Try(reader.hasNext).getOrElse(false)) {
       record = reader.next(record)
       val row = ArrayRow(new Array[Any](schema.fields.length))
       for(i <- schema.fields.indices) { row.set(i, readers(i)(record.get(i))) }
-      rows += row
+      rows :+= row
     }
 
-    DefaultLeapFrame(schema, LocalDataset(rows.result))
+    DefaultLeapFrame(schema, rows)
   }
 }

@@ -7,12 +7,12 @@ import java.util.UUID
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.feature.VectorAssemblerModel
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.core.regression.LinearRegressionModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.transformer.{Pipeline, PipelineModel}
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
-import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, LocalDataset, Row}
 import org.apache.spark.ml.linalg.Vectors
 import resource.managed
 import ml.combust.mleap.runtime.MleapSupport._
@@ -27,11 +27,11 @@ object TestUtil {
   }
 
   def getLeapFrame : DefaultLeapFrame = {
-    LeapFrame(StructType(
+    DefaultLeapFrame(StructType(
       StructField("first_double", ScalarType.Double),
       StructField("second_double", ScalarType.Double),
       StructField("third_double", ScalarType.Double)).get,
-      LocalDataset(Row(5d, 1.0, 4.0), Row(2.0, 2.0, 4.0),
+      Seq(Row(5d, 1.0, 4.0), Row(2.0, 2.0, 4.0),
         Row(3.0, 2.0, 5.0)))
   }
 
@@ -56,7 +56,7 @@ object TestUtil {
     val linearRegression = LinearRegression(shape = NodeShape.regression(),
       model = LinearRegressionModel(Vectors.dense(2.0, 1.0, 2.0), 5d))
     val pipeline = Pipeline("pipeline", NodeShape(),
-      new PipelineModel(Seq(featureAssembler, linearRegression)))
+      PipelineModel(Seq(featureAssembler, linearRegression)))
 
     val uri = new URI(s"jar:file:${TestUtil.baseDir}/$bundleName.json.zip")
     for (file <- managed(BundleFile(uri))) {

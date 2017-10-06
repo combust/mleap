@@ -2,12 +2,12 @@ package ml.combust.mleap.runtime.transformer.classification
 
 import ml.combust.mleap.core.classification.RandomForestClassifierModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.core.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{MultiTransformer, Transformer}
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.core.frame.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-import ml.combust.mleap.runtime.Row
+import ml.combust.mleap.core.frame.Row
 
 /**
   * Created by hollinwilkins on 3/30/16.

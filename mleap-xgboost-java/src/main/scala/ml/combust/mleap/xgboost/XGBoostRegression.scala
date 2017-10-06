@@ -1,7 +1,7 @@
 package ml.combust.mleap.xgboost
 
 import ml.combust.mleap.core.types.NodeShape
-import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.core.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 

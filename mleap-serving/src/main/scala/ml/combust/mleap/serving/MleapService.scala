@@ -4,8 +4,8 @@ import java.io.File
 
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.dsl.Bundle
+import ml.combust.mleap.core.frame.DefaultLeapFrame
 import ml.combust.mleap.core.types.StructType
-import ml.combust.mleap.runtime.DefaultLeapFrame
 import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.serving.domain.v1.{LoadModelRequest, LoadModelResponse, UnloadModelRequest, UnloadModelResponse}
 import ml.combust.mleap.runtime.MleapSupport._

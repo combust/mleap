@@ -2,6 +2,10 @@ package ml.combust.mleap.core.frame
 
 import java.io.PrintStream
 
+import ml.combust.mleap.core.serialization.{BuiltinFormats, FrameWriter}
+
+import scala.reflect.ClassTag
+
 /**
   * Created by hollinwilkins on 10/5/17.
   */
@@ -12,9 +16,8 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] {
     */
   def collect(): Seq[Row]
 
-  // TODO: Get this working again
-//  def writer(format: String = BuiltinFormats.json)
-//            (implicit ct: ClassTag[LF]): FrameWriter = FrameWriter(lf, format)
+  def writer(format: String = BuiltinFormats.json)
+            (implicit ct: ClassTag[LF]): FrameWriter = FrameWriter(this.asInstanceOf[LF], format)
 
   /** Print this leap frame to standard out.
     */

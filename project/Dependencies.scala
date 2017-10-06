@@ -54,7 +54,7 @@ object Dependencies {
 
   val base = l ++= Seq()
 
-  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)
+  val core = l ++= Seq(sparkMllibLocal, jTransform, arm, Test.scalaTest)
 
   def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest) ++ scalaReflect.modules(scalaVersion.value))
 

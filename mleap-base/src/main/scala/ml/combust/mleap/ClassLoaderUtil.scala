@@ -1,4 +1,4 @@
-package ml.combust.bundle.util
+package ml.combust.mleap
 
 import scala.util.control.NonFatal
 

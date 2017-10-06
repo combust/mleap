@@ -2,10 +2,10 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CoalesceModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.Row
-import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.core.frame.Row
+import ml.combust.mleap.core.function.UserDefinedFunction
 import ml.combust.mleap.runtime.transformer.Transformer
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.core.frame.TransformBuilder
 
 import scala.util.Try
 
@@ -24,6 +24,6 @@ case class Coalesce(override val uid: String = Transformer.uniqueName("coalesce"
     Seq(SchemaSpec(inputSchema)))
 
   override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(outputCol, inputs)(exec)
+    builder.withColumn(outputCol, inputs)(exec)
   }
 }

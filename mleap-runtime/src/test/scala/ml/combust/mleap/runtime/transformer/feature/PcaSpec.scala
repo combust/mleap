@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.PcaModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.{DenseMatrix, Vectors}
@@ -13,8 +13,8 @@ import org.scalatest.FunSpec
   */
 class PcaSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
-  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(2.0, 1.0, 0.0)))))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(Tensor.denseVector(Array(2.0, 1.0, 0.0))))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   val pc = new DenseMatrix(3, 2, Array(1d, -1, 2,
     0, -3, 1))

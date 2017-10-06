@@ -2,8 +2,8 @@ package ml.combust.mleap.json
 
 import java.util.Base64
 
+import ml.combust.mleap.core.frame.{DefaultLeapFrame, LeapFrame, Row}
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{DefaultLeapFrame, LeapFrame, MleapContext}
 import ml.combust.mleap.tensor.ByteString
 import spray.json.DefaultJsonProtocol._
 import spray.json._
@@ -26,7 +26,7 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     }
   }
 
-  implicit val mleapBasicTypeFormat: JsonFormat[BasicType] = new JsonFormat[BasicType] {
+  implicit val MleapBasicTypeFormat: JsonFormat[BasicType] = new JsonFormat[BasicType] {
     override def write(obj: BasicType): JsValue = {
       val name = obj match {
         case BasicType.Boolean => "boolean"
@@ -59,8 +59,8 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     }
   }
 
-  implicit val mleapListTypeWriterFormat: JsonWriter[ListType] = new JsonWriter[ListType] {
-    override def write(obj: ListType): JsValue = {
+  implicit val MleapListTypeFormat: JsonFormat[ListType] = new JsonFormat[ListType] {
+    override def write(obj: ListType): JsObject = {
       var fields = Seq("type" -> JsString("list"),
         "base" -> obj.base.toJson)
 
@@ -70,9 +70,7 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
 
       JsObject(fields: _*)
     }
-  }
 
-  implicit def mleapListTypeReaderFormat(implicit context: MleapContext): JsonReader[ListType] = new JsonReader[ListType] {
     override def read(json: JsValue): ListType = {
       val obj = json.asJsObject("invalid list type")
       val isNullable = obj.fields.get("isNullable").forall(_.convertTo[Boolean])
@@ -81,10 +79,10 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     }
   }
 
-  implicit val mleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
+  implicit val MleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
     override def write(obj: TensorType): JsValue = {
       var map = Map("type" -> JsString("tensor"),
-        "base" -> mleapBasicTypeFormat.write(obj.base))
+        "base" -> MleapBasicTypeFormat.write(obj.base))
 
       if(!obj.isNullable) {
         map += "isNullable" -> JsBoolean(false)
@@ -110,7 +108,7 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     }
   })
 
-  val mleapScalarTypeFormat: JsonFormat[ScalarType] = lazyFormat(new JsonFormat[ScalarType] {
+  val MleapScalarTypeFormat: JsonFormat[ScalarType] = lazyFormat(new JsonFormat[ScalarType] {
     def writeMaybeNullable(base: JsString, isNullable: Boolean): JsValue = {
       if(isNullable) {
         base
@@ -160,57 +158,47 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     }
   })
 
-  implicit val mleapDataTypeWriterFormat: JsonWriter[DataType] = new JsonWriter[DataType] {
+  implicit val MleapDataTypeFormat: JsonFormat[DataType] = new JsonFormat[DataType] {
     override def write(obj: DataType): JsValue = obj match {
-      case st: ScalarType => mleapScalarTypeFormat.write(st)
-      case lt: ListType => mleapListTypeWriterFormat.write(lt)
-      case tt: TensorType => mleapTensorTypeFormat.write(tt)
+      case st: ScalarType => MleapScalarTypeFormat.write(st)
+      case lt: ListType => MleapListTypeFormat.write(lt)
+      case tt: TensorType => MleapTensorTypeFormat.write(tt)
       case _ => serializationError(s"$obj not supported for JSON serialization")
     }
-  }
 
-  implicit def mleapDataTypeReaderFormat(implicit context: MleapContext): JsonReader[DataType] = new JsonReader[DataType] {
     override def read(json: JsValue): DataType = json match {
-      case obj: JsString => mleapScalarTypeFormat.read(obj)
+      case obj: JsString => MleapScalarTypeFormat.read(obj)
       case obj: JsObject =>
         obj.fields.get("type") match {
-          case Some(JsString("basic")) => mleapScalarTypeFormat.read(obj)
-          case Some(JsString("list")) => mleapListTypeReaderFormat.read(obj)
-          case Some(JsString("tensor")) => mleapTensorTypeFormat.read(obj)
+          case Some(JsString("basic")) => MleapScalarTypeFormat.read(obj)
+          case Some(JsString("list")) => MleapListTypeFormat.read(obj)
+          case Some(JsString("tensor")) => MleapTensorTypeFormat.read(obj)
           case _ => deserializationError(s"invalid data type: ${obj.fields.get("type")}")
         }
       case _ => deserializationError(s"Invalid data type $json")
     }
   }
 
-  implicit val mleapStructFieldWriterFormat: JsonWriter[StructField] = new JsonWriter[StructField] {
+  implicit val MleapStructFieldFormat: JsonFormat[StructField] = new JsonFormat[StructField] {
     override def write(obj: StructField): JsValue = {
       JsObject("name" -> JsString(obj.name),
         "type" -> obj.dataType.toJson)
     }
-  }
 
-  implicit def mleapStructFieldReaderFormat(implicit context: MleapContext): JsonReader[StructField] = new JsonReader[StructField] {
     override def read(json: JsValue): StructField = json match {
       case obj: JsObject =>
         val name = StringJsonFormat.read(obj.fields("name"))
-        val dataType = mleapDataTypeReaderFormat.read(obj.fields("type"))
+        val dataType = MleapDataTypeFormat.read(obj.fields("type"))
 
         StructField(name = name, dataType = dataType)
       case _ => throw new Error("Invalid StructField") // TODO: better error
     }
   }
 
-  implicit val mleapStructTypeWriterFormat: JsonWriter[StructType] = new JsonWriter[StructType] {
-    implicit val writer = lift(mleapStructFieldWriterFormat)
-
+  implicit val MleapStructTypeFormat: RootJsonFormat[StructType] = new RootJsonFormat[StructType] {
     override def write(obj: StructType): JsValue = {
       JsObject("fields" -> obj.fields.toJson)
     }
-  }
-
-  implicit def mleapStructTypeReaderFormat(implicit context: MleapContext): RootJsonReader[StructType] = new RootJsonReader[StructType] {
-    implicit val reader = lift(mleapStructFieldReaderFormat)
 
     override def read(json: JsValue): StructType = json match {
       case json: JsObject =>
@@ -223,21 +211,21 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     }
   }
 
-  implicit def mleapLeapFrameWriterFormat[LF <: LeapFrame[LF]]: JsonWriter[LF] = new JsonWriter[LF] {
+  implicit def MleapLeapFrameWriterFormat[LF <: LeapFrame[LF]]: JsonWriter[LF] = new JsonWriter[LF] {
     override def write(obj: LF): JsValue = {
-      val formatter = DatasetFormat(obj.schema)
-      val rows = formatter.write(obj.dataset)
+      implicit val formatter = RowFormat(obj.schema)
+      val rows = obj.collect().toJson
       JsObject(("schema", obj.schema.toJson), ("rows", rows))
     }
   }
 
-  implicit def mleapDefaultLeapFrameReaderFormat(implicit context: MleapContext): RootJsonReader[DefaultLeapFrame] = new RootJsonReader[DefaultLeapFrame] {
+  implicit val MleapDefaultLeapFrameReaderFormat: RootJsonReader[DefaultLeapFrame] = new RootJsonReader[DefaultLeapFrame] {
     override def read(json: JsValue): DefaultLeapFrame = {
       val obj = json.asJsObject("invalid LeapFrame")
 
       val schema = obj.fields("schema").convertTo[StructType]
-      val formatter = DatasetFormat(schema)
-      val rows = formatter.read(obj.fields("rows"))
+      implicit val formatter = RowFormat(schema)
+      val rows = obj.fields("rows").convertTo[Seq[Row]]
 
       DefaultLeapFrame(schema, rows)
     }

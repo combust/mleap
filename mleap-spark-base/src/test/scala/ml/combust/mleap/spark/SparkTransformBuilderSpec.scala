@@ -2,12 +2,11 @@ package ml.combust.mleap.spark
 
 import java.util.UUID
 
-import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.core.frame.TransformBuilder
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.types.{DoubleType, StructType}
 import SparkSupport._
-import ml.combust.mleap.core.{Model, types}
+import ml.combust.mleap.core.{Model, Transformer, types}
 import ml.combust.mleap.core.types.{NodeShape, ScalarType, StructField}
 import org.scalatest.FunSpec
 

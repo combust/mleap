@@ -1,8 +1,7 @@
-package ml.combust.mleap.runtime.transformer
+package ml.combust.mleap.core
 
 import java.util.UUID
 
-import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.frame.TransformBuilder
 import ml.combust.mleap.core.function.{FieldSelector, Selector, UserDefinedFunction}
 import ml.combust.mleap.core.types.{NodeShape, StructField, StructType}

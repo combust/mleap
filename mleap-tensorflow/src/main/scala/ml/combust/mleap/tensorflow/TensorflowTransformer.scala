@@ -1,10 +1,10 @@
 package ml.combust.mleap.tensorflow
 
+import ml.combust.mleap.core.Transformer
 import ml.combust.mleap.core.types.{NodeShape, SchemaSpec}
 import ml.combust.mleap.core.frame.Row
 import ml.combust.mleap.core.frame.TransformBuilder
 import ml.combust.mleap.core.function.{StructSelector, UserDefinedFunction}
-import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.tensor.Tensor
 
 import scala.util.Try

@@ -4,10 +4,9 @@ import java.io.File
 
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.dsl.Bundle
+import ml.combust.mleap.core.Transformer
 import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.runtime.MleapSupport._
-
 import resource._
 
 /**

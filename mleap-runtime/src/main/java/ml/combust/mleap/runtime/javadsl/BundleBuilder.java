@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.javadsl;
 
 import ml.combust.bundle.dsl.Bundle;
 import ml.combust.mleap.runtime.MleapContext;
-import ml.combust.mleap.runtime.transformer.Transformer;
+import ml.combust.mleap.core.Transformer;
 
 import java.io.File;
 

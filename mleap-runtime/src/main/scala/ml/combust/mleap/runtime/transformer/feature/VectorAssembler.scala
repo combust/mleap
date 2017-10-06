@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.transformer.feature
 
+import ml.combust.mleap.core.Transformer
 import ml.combust.mleap.core.feature.VectorAssemblerModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.core.frame.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._

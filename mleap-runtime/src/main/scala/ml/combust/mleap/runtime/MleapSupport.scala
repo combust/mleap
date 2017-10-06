@@ -2,8 +2,7 @@ package ml.combust.mleap.runtime
 
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.{BundleFile, BundleWriter}
-import ml.combust.mleap.core.MleapCoreSupport
-import ml.combust.mleap.runtime.transformer.Transformer
+import ml.combust.mleap.core.{MleapCoreSupport, Transformer}
 
 import scala.util.Try
 

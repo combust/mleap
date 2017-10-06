@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer
 
-import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.{Model, Transformer}
 import ml.combust.mleap.core.frame.TransformBuilder
 import ml.combust.mleap.core.types.{DataType, NodeShape, StructField, StructType}
 

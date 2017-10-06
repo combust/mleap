@@ -1,10 +1,10 @@
 package ml.combust.mleap.runtime.transformer.feature
 
+import ml.combust.mleap.core.Transformer
 import ml.combust.mleap.core.feature.CoalesceModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.core.frame.Row
 import ml.combust.mleap.core.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.Transformer
 import ml.combust.mleap.core.frame.TransformBuilder
 
 import scala.util.Try

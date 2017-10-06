@@ -2,9 +2,9 @@ package ml.combust.mleap.spark
 
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.{BundleFile, BundleWriter}
+import ml.combust.mleap.core
 import ml.combust.mleap.core.frame.Row
 import ml.combust.mleap.core.types
-import ml.combust.mleap.runtime.transformer.{Transformer => MleapTransformer}
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.sql.DataFrame
@@ -26,7 +26,7 @@ trait SparkSupport {
                        (implicit context: SparkBundleContext): Try[Bundle[Transformer]] = file.load()
   }
 
-  implicit class MleapSparkTransformerOps[T <: MleapTransformer](transformer: T) {
+  implicit class MleapSparkTransformerOps[T <: core.Transformer](transformer: T) {
     def sparkTransform(dataset: DataFrame): DataFrame = {
       transformer.transform(dataset.toSparkLeapFrame).get.toSpark
     }

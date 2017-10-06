@@ -1,9 +1,8 @@
 package ml.combust.mleap.runtime.javadsl;
 
-import ml.combust.mleap.core.frame.DefaultLeapFrame;
-import ml.combust.mleap.core.frame.Row;
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame;
+import ml.combust.mleap.runtime.frame.Row;
 import ml.combust.mleap.core.types.*;
-import ml.combust.mleap.runtime.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;

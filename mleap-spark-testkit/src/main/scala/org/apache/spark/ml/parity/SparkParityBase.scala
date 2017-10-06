@@ -2,18 +2,18 @@ package org.apache.spark.ml.parity
 
 import java.io.File
 
-import ml.combust.mleap.core
 import org.apache.spark.ml.Transformer
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
-import ml.combust.mleap.runtime.MleapSupport._
+import ml.combust.mleap.runtime.frame.MleapSupport._
 import com.databricks.spark.avro._
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
-import ml.combust.mleap.core.{BaseTransformer, Model, MultiTransformer, SimpleTransformer}
+import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{DataType, NodeShape, TensorType}
-import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.core.function.UserDefinedFunction
+import ml.combust.mleap.runtime.frame.{BaseTransformer, MleapContext, MultiTransformer, SimpleTransformer}
+import ml.combust.mleap.runtime.frame
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.bundle.SparkBundleContext
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
@@ -67,7 +67,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   }
 
   def mleapTransformer(transformer: Transformer)
-                      (implicit context: SparkBundleContext): core.Transformer = {
+                      (implicit context: SparkBundleContext): frame.Transformer = {
     (for(bf <- managed(BundleFile(serializedModel(transformer)))) yield {
       bf.loadMleapBundle().get.root
     }).tried.get

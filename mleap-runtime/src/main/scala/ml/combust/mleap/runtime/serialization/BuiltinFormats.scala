@@ -1,4 +1,4 @@
-package ml.combust.mleap.core.serialization
+package ml.combust.mleap.runtime.serialization
 
 import java.nio.charset.Charset
 

@@ -5,10 +5,10 @@ import akka.http.scaladsl.model
 import akka.http.scaladsl.model.{ContentType, HttpEntity, MediaType}
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
 import akka.util.ByteString
-import ml.combust.mleap.core.frame.DefaultLeapFrame
 import ml.combust.mleap.core.serialization.{BuiltinFormats, FrameReader, FrameWriter}
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.json.JsonSupport._
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import spray.json._
 
 import scala.language.implicitConversions

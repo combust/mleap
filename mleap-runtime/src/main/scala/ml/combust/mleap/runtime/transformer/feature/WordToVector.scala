@@ -1,11 +1,11 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.{SimpleTransformer, Transformer}
 import ml.combust.mleap.core.feature.WordToVectorModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.core.function.UserDefinedFunction
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.runtime.frame.{SimpleTransformer, Transformer}
 
 /**
   * Created by hollinwilkins on 12/28/16.

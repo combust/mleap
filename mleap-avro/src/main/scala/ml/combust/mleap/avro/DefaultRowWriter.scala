@@ -3,13 +3,13 @@ package ml.combust.mleap.avro
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 
-import ml.combust.mleap.core.frame.Row
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericDatumWriter}
 import org.apache.avro.io.{BinaryEncoder, EncoderFactory}
 import SchemaConverter._
-import ml.combust.mleap.core.serialization.{BuiltinFormats, RowWriter}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowWriter}
 import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.runtime.frame.Row
 import resource._
 
 import scala.util.Try

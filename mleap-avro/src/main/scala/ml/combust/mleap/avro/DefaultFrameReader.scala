@@ -6,9 +6,9 @@ import ml.combust.mleap.runtime._
 import org.apache.avro.file.{DataFileReader, SeekableByteArrayInput}
 import org.apache.avro.generic.{GenericData, GenericDatumReader}
 import SchemaConverter._
-import ml.combust.mleap.core.frame.{ArrayRow, DefaultLeapFrame, Row}
-import ml.combust.mleap.core.serialization.{BuiltinFormats, FrameReader}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
 import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.runtime.frame.{ArrayRow, DefaultLeapFrame, Row}
 
 import scala.collection.mutable
 import scala.util.Try

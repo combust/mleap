@@ -1,15 +1,25 @@
-package ml.combust.mleap.core
+package ml.combust.mleap.runtime.frame
 
-import ml.combust.mleap.core.converter.LeapFrameConverter
-import ml.combust.mleap.core.frame.DefaultLeapFrame
-import ml.combust.mleap.core.serialization.{BuiltinFormats, RowReader, RowWriter}
+import ml.combust.bundle.dsl.Bundle
+import ml.combust.bundle.{BundleFile, BundleWriter}
 import ml.combust.mleap.core.types.StructType
-import scala.reflect.runtime.universe._
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader, RowWriter}
 
-/**
-  * Created by hollinwilkins on 10/5/17.
+import scala.reflect.runtime.universe._
+import scala.util.Try
+
+/** Object for support classes for easily working with Bundle.ML and DefaultLeapFrame.
   */
-trait MleapCoreSupport {
+trait MleapSupport {
+  implicit class MleapTransformerOps(transformer: Transformer) {
+    def writeBundle: BundleWriter[MleapContext, Transformer] = BundleWriter(transformer)
+  }
+
+  implicit class MleapBundleFileOps(file: BundleFile) {
+    def loadMleapBundle()
+                       (implicit context: MleapContext): Try[Bundle[Transformer]] = file.load()
+  }
+
   implicit class MleapCaseClassOps[T <: Product](data: T)(implicit tag: TypeTag[T]) {
     def toLeapFrame: DefaultLeapFrame = LeapFrameConverter.convert(data)
   }
@@ -28,4 +38,4 @@ trait MleapCoreSupport {
     def rowWriter(format: String = BuiltinFormats.json): RowWriter = RowWriter(schema, format)
   }
 }
-object MleapCoreSupport extends MleapCoreSupport
+object MleapSupport extends MleapSupport

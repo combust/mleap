@@ -1,17 +1,16 @@
-package ml.combust.mleap.core.frame
+package ml.combust.mleap.runtime.frame
 
 import java.io.PrintStream
 
-import ml.combust.mleap.core.function.UserDefinedFunction
 import ml.combust.mleap.core.types.StructType
-import ml.combust.mleap.core.function.Selector
+import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 
 import scala.util.Try
 
 /**
   * Created by hollinwilkins on 10/5/17.
   */
-trait TransformBuilder[LF <: TransformBuilder[LF]] {
+trait FrameBuilder[FB <: FrameBuilder[FB]] {
   /** Get the schema.
     *
     * @return schema
@@ -25,7 +24,7 @@ trait TransformBuilder[LF <: TransformBuilder[LF]] {
     * @param fieldNames field names to select
     * @return try new LeapFrame with selected fields
     */
-  def select(fieldNames: String *): Try[LF]
+  def select(fieldNames: String *): Try[FB]
 
   /** Try to add a column to the LeapFrame.
     *
@@ -37,7 +36,7 @@ trait TransformBuilder[LF <: TransformBuilder[LF]] {
     * @return LeapFrame with new column
     */
   def withColumn(name: String, selectors: Selector *)
-                (udf: UserDefinedFunction): Try[LF]
+                (udf: UserDefinedFunction): Try[FB]
 
   /** Try to add multiple columns to the LeapFrame.
     *
@@ -49,7 +48,7 @@ trait TransformBuilder[LF <: TransformBuilder[LF]] {
     * @return LeapFrame with new columns
     */
   def withColumns(names: Seq[String], selectors: Selector *)
-                 (udf: UserDefinedFunction): Try[LF]
+                 (udf: UserDefinedFunction): Try[FB]
 
   /** Try dropping column(s) from the LeapFrame.
     *
@@ -58,7 +57,7 @@ trait TransformBuilder[LF <: TransformBuilder[LF]] {
     * @param names names of columns to drop
     * @return LeapFrame with column(s) dropped
     */
-  def drop(names: String *): Try[LF]
+  def drop(names: String *): Try[FB]
 
   /** Try filtering the leap frame using the UDF
     *
@@ -67,7 +66,7 @@ trait TransformBuilder[LF <: TransformBuilder[LF]] {
     * @return LeapFrame with rows filtered
     */
   def filter(selectors: Selector *)
-            (udf: UserDefinedFunction): Try[LF]
+            (udf: UserDefinedFunction): Try[FB]
 
   /** Print the schema to standard output.
     */

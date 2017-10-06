@@ -1,4 +1,4 @@
-package ml.combust.mleap.core.function
+package ml.combust.mleap.runtime.function
 
 import ml.combust.mleap.core.reflection.MleapReflection._
 import ml.combust.mleap.core.types.{DataType, StructType, TypeSpec}

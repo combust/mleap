@@ -3,9 +3,9 @@ package ml.combust.mleap.binary
 import java.io.{ByteArrayInputStream, DataInputStream}
 import java.nio.charset.Charset
 
-import ml.combust.mleap.core.frame.{ArrayRow, Row}
-import ml.combust.mleap.core.serialization.{BuiltinFormats, RowReader}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader}
 import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.runtime.frame.{ArrayRow, Row}
 import resource._
 
 import scala.util.Try

@@ -2,12 +2,12 @@ package ml.combust.mleap.spark
 
 import java.util.UUID
 
-import ml.combust.mleap.core.frame.TransformBuilder
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.types.{DoubleType, StructType}
 import SparkSupport._
-import ml.combust.mleap.core.{Model, Transformer, types}
+import ml.combust.mleap.core.{Model, types}
 import ml.combust.mleap.core.types.{NodeShape, ScalarType, StructField}
+import ml.combust.mleap.runtime.frame.{FrameBuilder, Transformer}
 import org.scalatest.FunSpec
 
 import scala.collection.JavaConverters._
@@ -19,7 +19,7 @@ import scala.util.Try
 case class MyTransformer() extends Transformer {
   override val uid: String = UUID.randomUUID().toString
 
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: FrameBuilder[TB]](builder: TB): Try[TB] = {
     builder.withColumns(Seq("output1", "output2"), "input") {
       (input: Double) => (input + 23, input.toString)
     }

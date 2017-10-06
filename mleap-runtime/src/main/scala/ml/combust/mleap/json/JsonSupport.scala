@@ -2,8 +2,8 @@ package ml.combust.mleap.json
 
 import java.util.Base64
 
-import ml.combust.mleap.core.frame.{DefaultLeapFrame, LeapFrame, Row}
 import ml.combust.mleap.core.types._
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, LeapFrame, Row}
 import ml.combust.mleap.tensor.ByteString
 import spray.json.DefaultJsonProtocol._
 import spray.json._

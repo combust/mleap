@@ -1,9 +1,9 @@
-package ml.combust.mleap.core.frame
+package ml.combust.mleap.runtime.frame
 
 import java.lang.Iterable
 
-import ml.combust.mleap.core.function.{Selector, UserDefinedFunction}
 import ml.combust.mleap.core.types.{BasicType, StructField, StructType}
+import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Try}

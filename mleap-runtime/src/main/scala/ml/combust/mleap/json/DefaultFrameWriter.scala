@@ -2,9 +2,9 @@ package ml.combust.mleap.json
 
 import java.nio.charset.Charset
 
-import ml.combust.mleap.core.frame.LeapFrame
 import JsonSupport._
-import ml.combust.mleap.core.serialization.{BuiltinFormats, FrameWriter}
+import ml.combust.mleap.runtime.frame.LeapFrame
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import spray.json._
 
 import scala.util.Try

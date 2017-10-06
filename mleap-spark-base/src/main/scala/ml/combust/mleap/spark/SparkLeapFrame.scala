@@ -1,8 +1,8 @@
 package ml.combust.mleap.spark
 
 import ml.combust.mleap.core.types.{StructField, StructType}
-import ml.combust.mleap.core.frame.{Row, RowUtil, TransformBuilder}
-import ml.combust.mleap.core.function.{Selector, UserDefinedFunction}
+import ml.combust.mleap.runtime.frame.{FrameBuilder, Row, RowUtil}
+import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql
 import org.apache.spark.sql.mleap.TypeConverters
@@ -15,7 +15,7 @@ import scala.util.Try
   */
 case class SparkLeapFrame(schema: StructType,
                           dataset: RDD[Row],
-                          sqlContext: SQLContext) extends TransformBuilder[SparkLeapFrame] {
+                          sqlContext: SQLContext) extends FrameBuilder[SparkLeapFrame] {
   override def withColumn(output: String, inputs: Selector *)
                          (udf: UserDefinedFunction): Try[SparkLeapFrame] = {
     RowUtil.createRowSelectors(schema, inputs: _*)(udf).flatMap {

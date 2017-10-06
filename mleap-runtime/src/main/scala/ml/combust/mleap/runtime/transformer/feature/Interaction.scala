@@ -1,13 +1,11 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.{BaseTransformer, Transformer}
 import ml.combust.mleap.core.feature.InteractionModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.core.frame.Row
-import ml.combust.mleap.core.function.UserDefinedFunction
-import ml.combust.mleap.core.frame.TransformBuilder
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.runtime.frame.{BaseTransformer, FrameBuilder, Row, Transformer}
 
 import scala.util.Try
 
@@ -24,7 +22,7 @@ case class Interaction(override val uid: String = Transformer.uniqueName("intera
       Seq(SchemaSpec(inputSchema)))
   }
 
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: FrameBuilder[TB]](builder: TB): Try[TB] = {
     builder.withColumn(shape.standardOutput.name, inputs)(exec)
   }
 }

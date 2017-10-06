@@ -1,9 +1,9 @@
-package ml.combust.mleap.core.frame
+package ml.combust.mleap.runtime.frame
 
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
-/** Base trait for testing [[ml.combust.mleap.core.frame.Row]] implementations.
+/** Base trait for testing [[Row]] implementations.
   *
   * @tparam R row class
   */

@@ -5,8 +5,9 @@ import java.nio.file.Files
 import java.util
 
 import ml.combust.mleap.core.feature.StringIndexerModel
-import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.core.types._
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec

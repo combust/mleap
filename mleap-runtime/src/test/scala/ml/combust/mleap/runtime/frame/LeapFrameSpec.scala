@@ -1,9 +1,9 @@
-package ml.combust.mleap.core.frame
+package ml.combust.mleap.runtime.frame
 
 import java.io.{ByteArrayOutputStream, PrintStream}
 
-import ml.combust.mleap.core.function.UserDefinedFunction
 import ml.combust.mleap.core.types.{SchemaSpec, _}
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.ByteString
 import org.scalatest.FunSpec
 

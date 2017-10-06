@@ -1,6 +1,5 @@
-package ml.combust.mleap.core.converter
+package ml.combust.mleap.runtime.frame
 
-import ml.combust.mleap.core.frame.{ArrayRow, DefaultLeapFrame, LeapFrame}
 import ml.combust.mleap.core.reflection.MleapReflection._
 import ml.combust.mleap.core.types.{StructField, StructType}
 

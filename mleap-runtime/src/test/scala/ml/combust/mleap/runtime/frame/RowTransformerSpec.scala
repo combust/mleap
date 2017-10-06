@@ -1,7 +1,7 @@
-package ml.combust.mleap.core.frame
+package ml.combust.mleap.runtime.frame
 
-import ml.combust.mleap.core.function.UserDefinedFunction
 import ml.combust.mleap.core.types.{ScalarType, StructType}
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.scalatest.FunSpec
 
 /**

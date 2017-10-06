@@ -1,10 +1,10 @@
-package ml.combust.mleap.core.serialization
+package ml.combust.mleap.runtime.serialization
 
 import java.io._
 import java.nio.charset.Charset
 
 import ml.combust.mleap.ClassLoaderUtil
-import ml.combust.mleap.core.frame.DefaultLeapFrame
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import resource._
 
 import scala.util.Try

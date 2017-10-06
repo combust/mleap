@@ -7,15 +7,16 @@ import java.util.UUID
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.feature.VectorAssemblerModel
-import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.core.regression.LinearRegressionModel
 import ml.combust.mleap.core.types._
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.transformer.{Pipeline, PipelineModel}
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
 import org.apache.spark.ml.linalg.Vectors
 import resource.managed
-import ml.combust.mleap.runtime.MleapSupport._
+import ml.combust.mleap.runtime.frame.MleapSupport._
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 
 object TestUtil {
   val baseDir = new File("/tmp/mleap-serving")

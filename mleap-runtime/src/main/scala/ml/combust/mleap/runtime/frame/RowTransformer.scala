@@ -1,7 +1,8 @@
-package ml.combust.mleap.core.frame
+package ml.combust.mleap.runtime.frame
 
-import ml.combust.mleap.core.function.{Selector, UserDefinedFunction}
 import ml.combust.mleap.core.types.{StructField, StructType}
+import ml.combust.mleap.runtime._
+import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 
 import scala.util.Try
 
@@ -25,7 +26,7 @@ case class RowTransformer private (inputSchema: StructType,
                                    indices: Seq[Int],
                                    availableIndices: List[Int],
                                    transforms: Seq[(ArrayRow) => Option[ArrayRow]],
-                                   shuffled: Boolean = false) extends TransformBuilder[RowTransformer] {
+                                   shuffled: Boolean = false) extends FrameBuilder[RowTransformer] {
   override def schema: StructType = outputSchema
 
   override def select(fieldNames: String *): Try[RowTransformer] = {

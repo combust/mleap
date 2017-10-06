@@ -4,11 +4,10 @@ import java.io.File
 
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.dsl.Bundle
-import ml.combust.mleap.core.Transformer
-import ml.combust.mleap.core.frame.DefaultLeapFrame
 import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
 import ml.combust.mleap.serving.domain.v1.{LoadModelRequest, LoadModelResponse, UnloadModelRequest, UnloadModelResponse}
-import ml.combust.mleap.runtime.MleapSupport._
+import ml.combust.mleap.runtime.frame.MleapSupport._
 import resource._
 
 import scala.concurrent.{ExecutionContext, Future}

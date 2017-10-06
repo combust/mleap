@@ -2,8 +2,8 @@ package ml.combust.mleap.runtime.javadsl;
 
 import ml.combust.bundle.BundleRegistry;
 import ml.combust.bundle.BundleRegistry$;
-import ml.combust.mleap.runtime.MleapContext;
-import ml.combust.mleap.runtime.MleapContext$;
+import ml.combust.mleap.runtime.frame.MleapContext;
+import ml.combust.mleap.runtime.frame.MleapContext$;
 
 /**
  * Created by hollinwilkins on 4/21/17.

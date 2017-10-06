@@ -1,10 +1,10 @@
-package ml.combust.mleap.core.serialization
+package ml.combust.mleap.runtime.serialization
 
 import java.nio.charset.Charset
 
 import ml.combust.mleap.ClassLoaderUtil
-import ml.combust.mleap.core.frame.Row
 import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.runtime.frame.Row
 
 import scala.util.Try
 

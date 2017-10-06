@@ -1,13 +1,11 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.Transformer
 import ml.combust.mleap.core.feature.VectorAssemblerModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.core.frame.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-import ml.combust.mleap.core.frame.Row
-import ml.combust.mleap.core.function.{StructSelector, UserDefinedFunction}
+import ml.combust.mleap.runtime.frame.{FrameBuilder, Row, Transformer}
+import ml.combust.mleap.runtime.function.{StructSelector, UserDefinedFunction}
 
 import scala.util.Try
 
@@ -26,7 +24,7 @@ case class VectorAssembler(override val uid: String = Transformer.uniqueName("ve
   val inputCols: Seq[String] = inputSchema.fields.map(_.name)
   private val inputSelector: StructSelector = StructSelector(inputCols)
 
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: FrameBuilder[TB]](builder: TB): Try[TB] = {
     builder.withColumn(outputCol, inputSelector)(exec)
   }
 }

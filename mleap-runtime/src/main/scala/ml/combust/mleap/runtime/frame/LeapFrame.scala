@@ -1,21 +1,27 @@
-package ml.combust.mleap.core.frame
+package ml.combust.mleap.runtime.frame
 
 import java.io.PrintStream
 
-import ml.combust.mleap.core.serialization.{BuiltinFormats, FrameWriter}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 
 import scala.reflect.ClassTag
 
 /**
   * Created by hollinwilkins on 10/5/17.
   */
-trait LeapFrame[LF <: LeapFrame[LF]] extends TransformBuilder[LF] {
+trait LeapFrame[LF <: LeapFrame[LF]] extends FrameBuilder[LF] {
   /** Collect all rows into a Seq
     *
     * @return all rows in the leap frame
     */
   def collect(): Seq[Row]
 
+  /** Writer for this leap frame
+    *
+    * @param format package with a DefaultWriter
+    * @param ct class tag of this leap frame
+    * @return writer for this leap frame with specified format
+    */
   def writer(format: String = BuiltinFormats.json)
             (implicit ct: ClassTag[LF]): FrameWriter = FrameWriter(this.asInstanceOf[LF], format)
 

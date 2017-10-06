@@ -1,10 +1,10 @@
-package ml.combust.mleap.core.serialization
+package ml.combust.mleap.runtime.serialization
 
 import java.io.{File, FileOutputStream, OutputStream}
 import java.nio.charset.Charset
 
 import ml.combust.mleap.ClassLoaderUtil
-import ml.combust.mleap.core.frame.LeapFrame
+import ml.combust.mleap.runtime.frame.LeapFrame
 import resource._
 
 import scala.reflect.ClassTag

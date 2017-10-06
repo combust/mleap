@@ -1,8 +1,8 @@
 package ml.combust.mleap.json
 
-import ml.combust.mleap.core.frame.Row
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.json.JsonSupport.{BundleByteStringFormat, mleapTensorFormat}
+import ml.combust.mleap.runtime.frame.Row
 import ml.combust.mleap.tensor.ByteString
 import spray.json.DefaultJsonProtocol._
 import spray.json._

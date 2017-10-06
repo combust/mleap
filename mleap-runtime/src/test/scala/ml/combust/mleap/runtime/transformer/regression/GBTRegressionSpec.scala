@@ -3,7 +3,8 @@ package ml.combust.mleap.runtime.transformer.regression
 import ml.combust.mleap.core.regression.GBTRegressionModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.test.TestUtil
-import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 

@@ -1,4 +1,4 @@
-package ml.combust.mleap.core.frame
+package ml.combust.mleap.runtime.frame
 
 import ml.combust.mleap.core.annotation.SparkCode
 

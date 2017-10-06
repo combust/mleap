@@ -1,29 +1,30 @@
-package ml.combust.mleap.core.frame
+package ml.combust.mleap.runtime.frame
 
-import ml.combust.mleap.core.frame.Row.RowSelector
-import ml.combust.mleap.core.function.{FieldSelector, StructSelector, UserDefinedFunction}
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.core.function.Selector
+import ml.combust.mleap.runtime.frame.Row.RowSelector
+import ml.combust.mleap.runtime.function.{FieldSelector, Selector, StructSelector, UserDefinedFunction}
 
 import scala.util.{Success, Try}
 
 /**
   * Created by hollinwilkins on 10/30/16.
   */
-object RowUtil {
+object IndexedRowUtil {
   /** Create row selectors for a given schema and inputs.
     *
     * @param schema schema for inputs
+    * @param indices index lookup
     * @param selectors selectors for row
     * @return row selectors
     */
   def createRowSelectors(schema: StructType,
+                         indices: Seq[Int],
                          selectors: Selector *)
                         (udf: UserDefinedFunction): Try[Seq[RowSelector]] = {
     var i = 0
     selectors.foldLeft(Try(Seq[RowSelector]())) {
       case (trss, s) =>
-        val rs = RowUtil.createRowSelector(schema, s, udf.inputs(i)).flatMap {
+        val rs = IndexedRowUtil.createRowSelector(schema, indices, s, udf.inputs(i)).flatMap {
           rs => trss.map(trs => rs +: trs)
         }
         i = i + 1
@@ -34,15 +35,18 @@ object RowUtil {
   /** Create a row selector from a frame selector.
     *
     * @param schema schema for creating selectors
+    * @param indices index lookup
     * @param selector frame selector
     * @return row selector
     */
   def createRowSelector(schema: StructType,
+                        indices: Seq[Int],
                         selector: Selector,
                         typeSpec: TypeSpec): Try[RowSelector] = selector match {
     case FieldSelector(name) =>
       schema.indexedField(name).flatMap {
-        case (index, field) =>
+        case (rawIndex, field) =>
+          val index = indices(rawIndex)
           val dt = typeSpec.asInstanceOf[DataTypeSpec].dt
           Casting.cast(field.dataType, dt).map {
             _.map {
@@ -58,9 +62,10 @@ object RowUtil {
           val dts = typeSpec.asInstanceOf[SchemaSpec].dts
           Try {
             dts.zip(fields).map {
-              case (expDt, (index, field)) =>
+              case (expDt, (rawIndex, field)) =>
+                val index = indices(rawIndex)
                 Casting.cast(field.dataType, expDt).map(_.get).map {
-                    c => (r: Row) => c(r.getRaw(index))
+                  c => (r: Row) => c(r.getRaw(index))
                 }.getOrElse {
                   (r: Row) => r.getRaw(index)
                 }

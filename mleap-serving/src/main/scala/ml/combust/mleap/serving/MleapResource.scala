@@ -7,7 +7,7 @@ import akka.http.scaladsl.model.{HttpRequest, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{ExceptionHandler, RouteResult}
 import akka.http.scaladsl.server.directives.LoggingMagnet
-import ml.combust.mleap.core.frame.DefaultLeapFrame
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.serving.domain.v1._
 import ml.combust.mleap.serving.marshalling.ApiMarshalling._
 import ml.combust.mleap.serving.marshalling.LeapFrameMarshalling._

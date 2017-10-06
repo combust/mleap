@@ -3,12 +3,12 @@ package ml.combust.mleap.avro
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 
-import ml.combust.mleap.core.frame.LeapFrame
 import org.apache.avro.Schema
 import org.apache.avro.file.DataFileWriter
 import org.apache.avro.generic.{GenericData, GenericDatumWriter}
 import SchemaConverter._
-import ml.combust.mleap.core.serialization.{BuiltinFormats, FrameWriter}
+import ml.combust.mleap.runtime.frame.LeapFrame
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import resource._
 
 import scala.util.{Failure, Try}

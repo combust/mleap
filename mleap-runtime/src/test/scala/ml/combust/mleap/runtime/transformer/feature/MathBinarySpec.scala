@@ -3,7 +3,8 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.BinaryOperation._
 import ml.combust.mleap.core.feature.MathBinaryModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
 
 /**

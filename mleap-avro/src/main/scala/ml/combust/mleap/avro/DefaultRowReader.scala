@@ -6,9 +6,9 @@ import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericDatumReader}
 import org.apache.avro.io.{BinaryDecoder, DecoderFactory}
 import SchemaConverter._
-import ml.combust.mleap.core.frame.{ArrayRow, Row}
-import ml.combust.mleap.core.serialization.{BuiltinFormats, RowReader}
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader}
 import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.runtime.frame.{ArrayRow, Row}
 
 import scala.util.Try
 

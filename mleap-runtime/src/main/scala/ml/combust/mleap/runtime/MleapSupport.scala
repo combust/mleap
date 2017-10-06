@@ -41,7 +41,7 @@ trait MleapSupport {
       * @return writer for this leap frame with specified format
       */
     def writer(format: String = BuiltinFormats.json)
-              (implicit ct: ClassTag[LF]): FrameWriter = FrameWriter(this.asInstanceOf[LF], format)
+              (implicit ct: ClassTag[LF]): FrameWriter = FrameWriter(frame, format)
   }
 
   implicit class StructTypeOps(schema: StructType) {

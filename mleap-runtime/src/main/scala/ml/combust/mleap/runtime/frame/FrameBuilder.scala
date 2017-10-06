@@ -38,6 +38,14 @@ trait FrameBuilder[FB <: FrameBuilder[FB]] {
   def withColumn(name: String, selectors: Selector *)
                 (udf: UserDefinedFunction): Try[FB]
 
+  @deprecated("this method will be removed for version 1.0, use #withColumn", "MLeap 0.9.0")
+  def withField(name: String, selectors: Selector *)
+               (udf: UserDefinedFunction): Try[FB] = withColumn(name, selectors: _*)(udf)
+
+  @deprecated("this method will be removed for version 1.0, use #withColumn", "MLeap 0.9.0")
+  def withOutput(name: String, selectors: Selector *)
+                (udf: UserDefinedFunction): Try[FB] = withColumn(name, selectors: _*)(udf)
+
   /** Try to add multiple columns to the LeapFrame.
     *
     * Returns a Failure if trying to add a field that already exists.
@@ -50,6 +58,15 @@ trait FrameBuilder[FB <: FrameBuilder[FB]] {
   def withColumns(names: Seq[String], selectors: Selector *)
                  (udf: UserDefinedFunction): Try[FB]
 
+  @deprecated("this method will be removed for version 1.0, use #withColumns", "MLeap 0.9.0")
+  def withFields(names: Seq[String], selectors: Selector *)
+                (udf: UserDefinedFunction): Try[FB] = withColumns(names, selectors: _*)(udf)
+
+
+  @deprecated("this method will be removed for version 1.0, use #withColumns", "MLeap 0.9.0")
+  def withOutputs(names: Seq[String], selectors: Selector *)
+                 (udf: UserDefinedFunction): Try[FB] = withColumns(names, selectors: _*)(udf)
+
   /** Try dropping column(s) from the LeapFrame.
     *
     * Returns a Failure if the column does not exist.
@@ -58,6 +75,9 @@ trait FrameBuilder[FB <: FrameBuilder[FB]] {
     * @return LeapFrame with column(s) dropped
     */
   def drop(names: String *): Try[FB]
+
+  @deprecated("this method will be removed for version 1.0, use #drop", "MLeap 0.9.0")
+  def dropField(name: String): Try[FB] = drop(name)
 
   /** Try filtering the leap frame using the UDF
     *

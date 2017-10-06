@@ -45,8 +45,8 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
         }
       }
 
-      describe("#withField") {
-        it("creates a new LeapFrame with field added") {
+      describe("#withColumn") {
+        it("creates a new LeapFrame with column added") {
           val frame2 = frame.withColumn("test_double_2", "test_double") {
             (r: Double) => r + 10
           }.get
@@ -103,8 +103,8 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
         }
       }
 
-      describe("#withFields") {
-        it("creates a new LeapFrame with fields added") {
+      describe("#withColumns") {
+        it("creates a new LeapFrame with columns added") {
           val frame2 = frame.withColumns(Seq("test_double_2", "test_double_string"), "test_double"){
             (r: Double) => (r + 10, r.toString)
           }.get
@@ -120,7 +120,7 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
         }
       }
 
-      describe("#dropField") {
+      describe("#drop") {
         it("creates a new LeapFrame with field dropped") {
           val frame2 = frame.drop("test_string").get
 
@@ -129,6 +129,18 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
 
         describe("with a non-existent field") {
           it("returns a Failure") { assert(frame.drop("non_existent").isFailure) }
+        }
+      }
+
+      describe("#filter") {
+        it("creates a new LeapFrame with rows filtered") {
+          val frame2 = frame.filter("test_string") {
+            (s: String) => s != "there"
+          }.get
+
+          assert(frame2.collect().length == 1)
+          assert(frame2.collect().head.getString(0) == "hello")
+          assert(frame2.collect().head.getDouble(1) == 42.13)
         }
       }
 

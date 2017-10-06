@@ -16,15 +16,6 @@ trait LeapFrame[LF <: LeapFrame[LF]] extends FrameBuilder[LF] {
     */
   def collect(): Seq[Row]
 
-  /** Writer for this leap frame
-    *
-    * @param format package with a DefaultWriter
-    * @param ct class tag of this leap frame
-    * @return writer for this leap frame with specified format
-    */
-  def writer(format: String = BuiltinFormats.json)
-            (implicit ct: ClassTag[LF]): FrameWriter = FrameWriter(this.asInstanceOf[LF], format)
-
   /** Print this leap frame to standard out.
     */
   def show(): Unit = show(System.out)

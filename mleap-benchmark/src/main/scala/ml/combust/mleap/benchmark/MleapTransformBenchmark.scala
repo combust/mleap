@@ -5,7 +5,7 @@ import java.io.File
 import com.typesafe.config.Config
 import ml.combust.bundle.BundleFile
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
-import ml.combust.mleap.runtime.frame.MleapSupport._
+import ml.combust.mleap.runtime.MleapSupport._
 import org.scalameter.{Bench, Gen}
 import resource._
 

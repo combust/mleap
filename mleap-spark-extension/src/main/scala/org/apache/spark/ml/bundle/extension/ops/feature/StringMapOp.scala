@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.core.feature.StringMapModel
-import ml.combust.mleap.runtime.frame.MleapContext
+import ml.combust.mleap.runtime.MleapContext
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.mleap.feature.StringMap
 

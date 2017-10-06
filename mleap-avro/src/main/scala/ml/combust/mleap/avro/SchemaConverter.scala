@@ -3,7 +3,7 @@ package ml.combust.mleap.avro
 import java.nio.charset.Charset
 
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.frame.MleapContext
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types._
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.apache.avro.Schema

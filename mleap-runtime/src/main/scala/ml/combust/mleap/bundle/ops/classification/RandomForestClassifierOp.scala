@@ -8,7 +8,7 @@ import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.bundle.tree.decision.MleapNodeWrapper
-import ml.combust.mleap.runtime.frame.MleapContext
+import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/22/16.

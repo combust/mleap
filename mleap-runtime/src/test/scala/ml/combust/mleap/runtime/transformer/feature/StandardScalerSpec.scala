@@ -11,7 +11,7 @@ import ml.combust.mleap.runtime.test.TestUtil
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 import resource.managed
-import ml.combust.mleap.runtime.frame.MleapSupport._
+import ml.combust.mleap.runtime.MleapSupport._
 
 class StandardScalerSpec extends FunSpec {
 

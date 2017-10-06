@@ -5,7 +5,7 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.clustering.GaussianMixtureModel
-import ml.combust.mleap.runtime.frame.MleapContext
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.clustering.GaussianMixture
 import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import org.apache.spark.ml.linalg.{Matrices, Vectors}

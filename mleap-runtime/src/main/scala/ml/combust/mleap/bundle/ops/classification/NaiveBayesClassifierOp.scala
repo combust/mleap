@@ -7,7 +7,7 @@ import ml.combust.mleap.runtime.transformer.classification.NaiveBayesClassifier
 import ml.combust.mleap.core.classification.NaiveBayesModel
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.bundle.ops.MleapOp
-import ml.combust.mleap.runtime.frame.MleapContext
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
 

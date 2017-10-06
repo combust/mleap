@@ -4,7 +4,8 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.{Node, NodeShape}
 import ml.combust.bundle.op.OpNode
 import ml.combust.mleap.core.types
-import ml.combust.mleap.runtime.frame.{MleapContext, Transformer}
+import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.runtime.frame.Transformer
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 import scala.reflect.ClassTag

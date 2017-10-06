@@ -15,7 +15,7 @@ import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
 import org.apache.spark.ml.linalg.Vectors
 import resource.managed
-import ml.combust.mleap.runtime.frame.MleapSupport._
+import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 
 object TestUtil {

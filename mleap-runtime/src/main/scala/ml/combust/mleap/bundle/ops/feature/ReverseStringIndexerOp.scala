@@ -6,7 +6,7 @@ import ml.combust.mleap.runtime.transformer.feature.ReverseStringIndexer
 import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.bundle.ops.MleapOp
-import ml.combust.mleap.runtime.frame.MleapContext
+import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 8/24/16.

@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.frame
 
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.frame.MleapSupport._
+import ml.combust.mleap.runtime.MleapSupport._
 import org.scalatest.FunSpec
 
 class LeapFrameConverterSpec extends FunSpec {

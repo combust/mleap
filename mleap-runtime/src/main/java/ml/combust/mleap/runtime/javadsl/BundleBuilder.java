@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.javadsl;
 
 import ml.combust.bundle.dsl.Bundle;
-import ml.combust.mleap.runtime.frame.MleapContext;
+import ml.combust.mleap.runtime.MleapContext;
 import ml.combust.mleap.runtime.frame.Transformer;
 
 import java.io.File;

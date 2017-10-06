@@ -4,7 +4,7 @@ import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.serialization.FrameReader
 import ml.combust.mleap.tensor.{ByteString, Tensor}
-import ml.combust.mleap.runtime.frame.MleapSupport._
+import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
 

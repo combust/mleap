@@ -1,8 +1,9 @@
-package ml.combust.mleap.runtime.frame
+package ml.combust.mleap.runtime
 
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.{BundleFile, BundleWriter}
 import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, LeapFrameConverter, Transformer}
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader, RowWriter}
 
 import scala.reflect.runtime.universe._

@@ -1,4 +1,4 @@
-package ml.combust.mleap.runtime.frame
+package ml.combust.mleap.runtime
 
 import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.mleap.ClassLoaderUtil

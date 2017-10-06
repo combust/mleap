@@ -6,7 +6,7 @@ import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.regression.GeneralizedLinearRegressionModel
 import ml.combust.mleap.core.regression.GeneralizedLinearRegressionModel.{Family, FamilyAndLink, Link}
-import ml.combust.mleap.runtime.frame.MleapContext
+import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.regression.GeneralizedLinearRegression
 import org.apache.spark.ml.linalg.Vectors
 

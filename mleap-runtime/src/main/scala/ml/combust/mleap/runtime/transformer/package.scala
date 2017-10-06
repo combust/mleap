@@ -1,7 +1,5 @@
 package ml.combust.mleap.runtime
 
-import ml.combust.mleap.runtime.frame
-
 /**
   * Created by hollinwilkins on 10/6/17.
   */

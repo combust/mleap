@@ -5,7 +5,7 @@ package ml.combust.mleap
   */
 package object runtime {
   @deprecated("this type will be removed for MLeap 1.0, use ml.combust.mleap.runtime.frame.LeapFrame instead", "MLeap 0.9.0")
-  type LeapFrame[LF] = frame.LeapFrame[LF]
+  type LeapFrame[LF <: frame.LeapFrame[LF]] = frame.LeapFrame[LF]
 
   @deprecated("this type will be removed for MLeap 1.0, use ml.combust.mleap.runtime.frame.DefaultLeapFrame instead", "MLeap 0.9.0")
   type DefaultLeapFrame = frame.DefaultLeapFrame

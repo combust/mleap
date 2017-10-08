@@ -1,6 +1,5 @@
 package ml.combust.mleap.runtime.function
 
-import ml.combust.mleap.runtime
 import ml.combust.mleap.runtime.frame.Row
 
 import scala.language.implicitConversions

@@ -39,11 +39,6 @@ public class LeapFrameBuilder {
         return support.createRowFromIterable(values);
     }
 
-    public ScalarType createBool() { return createBool(true); }
-    public ScalarType createBool(boolean isNullable) {
-        return new ScalarType(support.createBoolean(), isNullable);
-    }
-
     public BasicType createBasicBoolean() { return support.createBoolean(); }
     public BasicType createBasicByte() { return support.createByte(); }
     public BasicType createBasicShort() { return support.createShort(); }

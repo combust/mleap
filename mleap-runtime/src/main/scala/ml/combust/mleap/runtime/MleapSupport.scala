@@ -3,7 +3,7 @@ package ml.combust.mleap.runtime
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.{BundleFile, BundleWriter}
 import ml.combust.mleap.core.types.StructType
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, LeapFrame, LeapFrameConverter, Transformer}
+import ml.combust.mleap.runtime.frame.{LeapFrameConverter, Transformer}
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter, RowReader, RowWriter}
 
 import scala.reflect.ClassTag

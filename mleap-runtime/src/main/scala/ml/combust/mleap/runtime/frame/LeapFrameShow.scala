@@ -10,7 +10,7 @@ case class LeapFrameShow[LF <: LeapFrame[LF]](frame: LeapFrame[LF], n: Int = 20,
   override def toString: String = {
     val schema = frame.schema
     val dataset = frame.collect()
-    val rows = schema.fields.map(_.name) +: dataset.take(n).toSeq.map {
+    val rows = schema.fields.map(_.name) +: dataset.take(n).map {
       _.map {
         cell =>
           val str = if (cell != null) cell match {

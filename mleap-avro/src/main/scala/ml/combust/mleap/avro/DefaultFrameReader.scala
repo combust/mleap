@@ -2,7 +2,6 @@ package ml.combust.mleap.avro
 
 import java.nio.charset.Charset
 
-import ml.combust.mleap.runtime._
 import org.apache.avro.file.{DataFileReader, SeekableByteArrayInput}
 import org.apache.avro.generic.{GenericData, GenericDatumReader}
 import SchemaConverter._

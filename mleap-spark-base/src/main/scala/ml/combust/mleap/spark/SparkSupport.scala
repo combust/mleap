@@ -2,7 +2,6 @@ package ml.combust.mleap.spark
 
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.{BundleFile, BundleWriter}
-import ml.combust.mleap.{core, runtime}
 import ml.combust.mleap.core.types
 import ml.combust.mleap.runtime.frame
 import ml.combust.mleap.runtime.frame.Row

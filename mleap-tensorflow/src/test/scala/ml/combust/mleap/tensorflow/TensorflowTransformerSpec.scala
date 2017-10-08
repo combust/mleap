@@ -1,7 +1,6 @@
 package ml.combust.mleap.tensorflow
 
 import ml.combust.mleap.core.types.{NodeShape, StructField, StructType, TensorType}
-import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec

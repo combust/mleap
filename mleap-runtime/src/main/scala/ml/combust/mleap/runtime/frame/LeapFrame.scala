@@ -2,10 +2,6 @@ package ml.combust.mleap.runtime.frame
 
 import java.io.PrintStream
 
-import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
-
-import scala.reflect.ClassTag
-
 /**
   * Created by hollinwilkins on 10/5/17.
   */

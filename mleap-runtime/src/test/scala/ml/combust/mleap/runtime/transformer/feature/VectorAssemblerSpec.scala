@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.VectorAssemblerModel
-import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 

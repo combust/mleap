@@ -6,8 +6,8 @@ import java.util
 
 import ml.combust.mleap.core.feature.StringIndexerModel
 import ml.combust.mleap.core.types._
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
-import ml.combust.mleap.runtime.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
 
@@ -21,7 +21,7 @@ class JavaDSLSpec extends FunSpec {
     val builder = new LeapFrameBuilder
     val fields = new util.ArrayList[StructField]()
 
-    fields.add(builder.createField("bool", builder.createBool()))
+    fields.add(builder.createField("bool", builder.createBoolean()))
     fields.add(builder.createField("string", builder.createString()))
     fields.add(builder.createField("byte", builder.createByte()))
     fields.add(builder.createField("short", builder.createShort()))
@@ -42,8 +42,7 @@ class JavaDSLSpec extends FunSpec {
       list, tensor))
 
     val schema = builder.createSchema(fields)
-    val dataset = builder.createDataset(rows)
-    builder.createFrame(schema, dataset)
+    builder.createFrame(schema, rows)
   }
 
   describe("building a LeapFrame") {

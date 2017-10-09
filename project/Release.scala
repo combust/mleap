@@ -3,7 +3,7 @@ package ml.combust.mleap
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport
 import sbt.Keys._
 import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, _}
-import sbtrelease.ReleaseStateTransformations._
+import ReleaseTransformations._
 import xerial.sbt.Sonatype.SonatypeCommand
 
 object Release {

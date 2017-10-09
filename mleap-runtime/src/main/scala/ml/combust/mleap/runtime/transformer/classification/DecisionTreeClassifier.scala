@@ -3,10 +3,9 @@ package ml.combust.mleap.runtime.transformer.classification
 import ml.combust.mleap.core.classification.DecisionTreeClassifierModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.{MultiTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-import ml.combust.mleap.runtime.Row
+import ml.combust.mleap.runtime.frame.{MultiTransformer, Row, Transformer}
 
 /**
   * Created by hollinwilkins on 3/30/16.

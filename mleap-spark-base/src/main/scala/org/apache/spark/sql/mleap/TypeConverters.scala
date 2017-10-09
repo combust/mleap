@@ -16,6 +16,8 @@ import scala.language.implicitConversions
   */
 trait TypeConverters {
   def sparkToMleapValue(dataType: DataType): (Any) => Any = dataType match {
+    case _: DecimalType =>
+      (v: Any) => v.asInstanceOf[BigDecimal].toDouble
     case _: VectorUDT =>
       (v: Any) =>
         v.asInstanceOf[Vector]: Tensor[Double]
@@ -31,8 +33,13 @@ trait TypeConverters {
     case _ => (v) => v
   }
 
+  def sparkToMleapConverter(dataset: DataFrame,
+                            field: StructField): (types.StructField, (Any) => Any) = {
+    (sparkFieldToMleapField(dataset, field), sparkToMleapValue(field.dataType))
+  }
+
   def sparkFieldToMleapField(dataset: DataFrame,
-                             field: StructField): (types.StructField, (Any) => Any) = {
+                             field: StructField): types.StructField = {
     val dt = field.dataType match {
       case BooleanType => types.ScalarType.Boolean
       case ByteType => types.ScalarType.Byte
@@ -41,6 +48,7 @@ trait TypeConverters {
       case LongType => types.ScalarType.Long
       case FloatType => types.ScalarType.Float
       case DoubleType => types.ScalarType.Double
+      case _: DecimalType => types.ScalarType.Double
       case StringType => types.ScalarType.String.setNullable(field.nullable)
       case ArrayType(ByteType, _) => types.ListType.Byte
       case ArrayType(BooleanType, _) => types.ListType.Boolean
@@ -62,8 +70,12 @@ trait TypeConverters {
         types.TensorType.Double(a.length, a.head.size)
     }
 
-    (types.StructField(field.name, dt.setNullable(field.nullable)),
-      sparkToMleapValue(field.dataType))
+    types.StructField(field.name, dt.setNullable(field.nullable))
+  }
+
+  def sparkSchemaToMleapSchema(dataset: DataFrame): types.StructType = {
+    val fields = dataset.schema.fields.map(f => sparkFieldToMleapField(dataset, f))
+    types.StructType(fields).get
   }
 
   def mleapBasicTypeToSparkType(base: BasicType): DataType = base match {
@@ -102,7 +114,7 @@ trait TypeConverters {
     case _ => (v: Any) => v
   }
 
-  def mleapFieldToSparkField(field: types.StructField): (StructField, (Any) => Any) = {
+  def mleapToSparkConverter(field: types.StructField): (StructField, (Any) => Any) = {
     val dt = field.dataType match {
       case types.ScalarType(base, _) => mleapBasicTypeToSparkType(base)
       case types.ListType(base, _) => ArrayType(mleapBasicTypeToSparkType(base), containsNull = false)
@@ -110,6 +122,21 @@ trait TypeConverters {
     }
 
     (StructField(field.name, dt, nullable = field.dataType.isNullable), mleapToSparkValue(field.dataType))
+  }
+
+  def mleapFieldToSparkField(field: types.StructField): StructField = {
+    val dt = field.dataType match {
+      case types.ScalarType(base, _) => mleapBasicTypeToSparkType(base)
+      case types.ListType(base, _) => ArrayType(mleapBasicTypeToSparkType(base), containsNull = false)
+      case tt: types.TensorType => mleapTensorToSpark(tt)
+    }
+
+    StructField(field.name, dt, nullable = field.dataType.isNullable)
+  }
+
+  def mleapSchemaToSparkSchema(schema: types.StructType): StructType = {
+    val fields = schema.fields.map(mleapFieldToSparkField)
+    StructType(fields)
   }
 
   def mleapTensorToSpark(tt: types.TensorType): DataType = {
@@ -132,15 +159,16 @@ trait TypeConverters {
                             dataset: DataFrame): types.DataShape = field.dataType match {
     case BooleanType | ByteType | ShortType
          | IntegerType | LongType | FloatType
-         | DoubleType | StringType | ArrayType(ByteType, false) => types.ScalarShape()
-    case ArrayType(_, false) => types.ListShape()
+         | DoubleType | StringType => types.ScalarShape(field.nullable)
+    case _: DecimalType => types.ScalarShape(field.nullable)
+    case ArrayType(_, false) => types.ListShape(field.nullable)
     case vu: VectorUDT =>
       val size = dataset.select(field.name).head.getAs[Vector](0).size
-      types.TensorShape(Some(Seq(size)))
+      types.TensorShape(Some(Seq(size)), field.nullable)
     case mu: MatrixUDT =>
       val m = dataset.select(field.name).head.getAs[Matrix](0)
-      types.TensorShape(Some(Seq(m.numRows, m.numCols)))
-    case _ => throw new IllegalArgumentException("invalid struct field for shape")
+      types.TensorShape(Some(Seq(m.numRows, m.numCols)), field.nullable)
+    case _ => throw new IllegalArgumentException(s"invalid struct field for shape: $field")
   }
 }
 

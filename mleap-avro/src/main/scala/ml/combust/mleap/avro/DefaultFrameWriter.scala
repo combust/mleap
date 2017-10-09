@@ -3,12 +3,12 @@ package ml.combust.mleap.avro
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 
-import ml.combust.mleap.runtime.LeapFrame
-import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import org.apache.avro.Schema
 import org.apache.avro.file.DataFileWriter
 import org.apache.avro.generic.{GenericData, GenericDatumWriter}
 import SchemaConverter._
+import ml.combust.mleap.runtime.frame.LeapFrame
+import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import resource._
 
 import scala.util.{Failure, Try}
@@ -28,7 +28,7 @@ class DefaultFrameWriter[LF <: LeapFrame[LF]](frame: LF) extends FrameWriter {
       val writer = new DataFileWriter[GenericData.Record](datumWriter)
       writer.create(avroSchema, out)
 
-      for(row <- frame.dataset.toArray) {
+      for(row <- frame.collect()) {
         var i = 0
         for(writer <- writers) {
           record.put(i, writer(row.getRaw(i)))

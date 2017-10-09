@@ -7,9 +7,9 @@ import ml.combust.mleap.serving.domain.v1.LoadModelRequest
 import ml.combust.mleap.serving.marshalling.{ApiMarshalling, JsonSupport, LeapFrameMarshalling}
 import org.scalatest.{FunSpec, Matchers}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import ml.combust.mleap.runtime.DefaultLeapFrame
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import ml.combust.mleap.core.types._
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 
 class MleapResourceSpec extends FunSpec with Matchers with ScalatestRouteTest with LeapFrameMarshalling with ApiMarshalling {
 
@@ -60,7 +60,7 @@ class MleapResourceSpec extends FunSpec with Matchers with ScalatestRouteTest wi
         assert(schema.getField("second_double").get.dataType == ScalarType.Double)
         assert(schema.getField("third_double").get.dataType == ScalarType.Double)
         assert(schema.getField("features").get.dataType == TensorType(BasicType.Double, Some(Seq(3))))
-        assert(schema.getField("prediction").get.dataType == ScalarType.Double)
+        assert(schema.getField("prediction").get.dataType == ScalarType.Double.nonNullable)
       }
     }
 

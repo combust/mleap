@@ -4,9 +4,9 @@ import sbt.Keys._
 import sbt._
 
 object MleapProject {
-  lazy val aggregatedProjects: Seq[ProjectReference] = {
-    val base: Seq[ProjectReference] = Seq(baseProject,
+  lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
       tensor,
+      tensorflow,
       bundleMl,
       core,
       runtime,
@@ -14,15 +14,18 @@ object MleapProject {
       sparkBase,
       sparkTestkit,
       spark,
-      sparkExtension)
+      sparkExtension,
+      xgboostJava)
 
-    sys.props.get("mleap.tensorflow.enabled") match {
-      case Some("true") => base :+ (tensorflow: ProjectReference)
-      case _ => base
-    }
+  var rootSettings = Release.settings ++
+    Common.buildSettings ++
+    Common.sonatypeSettings ++
+    Seq(publishArtifact := false)
+
+  if(!sys.env.contains("TENSORFLOW_JNI")) {
+    // skip tests because of JNI library requirement
+    rootSettings ++= Seq(test in tensorflow in Test := false)
   }
-
-  lazy val rootSettings = Release.settings ++ Common.buildSettings ++ Common.sonatypeSettings ++ Seq(publishArtifact := false)
 
   lazy val root = Project(
     id = "mleap",
@@ -95,10 +98,25 @@ object MleapProject {
     dependencies = Seq(runtime)
   )
 
+  lazy val xgboostJava = Project(
+    id = "mleap-xgboost-java",
+    base = file("mleap-xgboost-java"),
+    dependencies = Seq(runtime)
+  )
+
+  lazy val xgboostSpark = Project(
+    id = "mleap-xgboost-spark",
+    base = file("mleap-xgboost-spark"),
+    dependencies = Seq(sparkBase % "provided",
+      xgboostJava % "test",
+      spark % "test",
+      sparkTestkit % "test")
+  )
+
   lazy val serving = Project(
     id = "mleap-serving",
     base = file("mleap-serving"),
-    dependencies = Seq(runtime, avro)
+    dependencies = Seq(runtime, avro, xgboostJava)
   )
 
   lazy val benchmark = Project(

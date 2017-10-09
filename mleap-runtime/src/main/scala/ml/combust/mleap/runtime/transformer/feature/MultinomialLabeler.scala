@@ -1,10 +1,9 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MultinomialLabelerModel
-import ml.combust.mleap.core.types.{NodeShape, TypeSpec}
-import ml.combust.mleap.runtime.Row
+import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.{MultiTransformer, Transformer}
+import ml.combust.mleap.runtime.frame.{MultiTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 
 /**

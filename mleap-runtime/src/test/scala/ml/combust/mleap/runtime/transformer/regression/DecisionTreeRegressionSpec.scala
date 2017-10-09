@@ -12,7 +12,7 @@ class DecisionTreeRegressionSpec extends FunSpec {
       val node = InternalNode(LeafNode(Seq(0.78)), LeafNode(Seq(0.34)), ContinuousSplit(0, 0.5))
       val regression = DecisionTreeRegressionModel(node, 3)
 
-      val transformer = DecisionTreeRegression(shape = NodeShape.regression(3),
+      val transformer = DecisionTreeRegression(shape = NodeShape.regression(),
         model = regression)
 
       assert(transformer.schema.fields ==

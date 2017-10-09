@@ -11,5 +11,5 @@ case class StringMapModel(labels: Map[String, Double]) extends Model {
 
   override def inputSchema: StructType = StructType("input" -> ScalarType.String).get
 
-  override def outputSchema: StructType = StructType("output" -> ScalarType.Double).get
+  override def outputSchema: StructType = StructType("output" -> ScalarType.Double.nonNullable).get
 }

@@ -8,7 +8,7 @@ class ChiSqSelectorSpec extends FunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      val transformer = ChiSqSelector(shape = NodeShape.vector(3, 3, inputCol = "features"),
+      val transformer = ChiSqSelector(shape = NodeShape.feature(inputCol = "features"),
         model = new ChiSqSelectorModel(Seq(1,2,3), 3))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),

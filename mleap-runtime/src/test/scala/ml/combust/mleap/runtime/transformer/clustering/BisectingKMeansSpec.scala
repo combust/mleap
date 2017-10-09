@@ -10,7 +10,7 @@ class BisectingKMeansSpec extends FunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      val transformer = BisectingKMeans(shape = NodeShape.basicCluster(3),
+      val transformer = BisectingKMeans(shape = NodeShape.basicCluster(),
         model = new BisectingKMeansModel(ClusteringTreeNode(23,
           VectorWithNorm(Vectors.dense(1, 2, 3)) , Array())))
 

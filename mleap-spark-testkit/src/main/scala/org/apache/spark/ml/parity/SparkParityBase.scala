@@ -2,20 +2,21 @@ package org.apache.spark.ml.parity
 
 import java.io.File
 
-import ml.combust.mleap.runtime
 import org.apache.spark.ml.Transformer
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import ml.combust.mleap.runtime.MleapSupport._
 import com.databricks.spark.avro._
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.Model
-import ml.combust.mleap.core.types.{DataType, TensorType}
-import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.core.types.{DataType, NodeShape, TensorType}
+import ml.combust.mleap.runtime.frame.{BaseTransformer, MultiTransformer, SimpleTransformer}
+import ml.combust.mleap.runtime.{MleapContext, frame}
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.bundle.SparkBundleContext
 import ml.combust.mleap.spark.SparkSupport._
-import ml.combust.mleap.runtime.transformer.{BaseTransformer, Pipeline}
+import ml.combust.mleap.runtime.transformer.Pipeline
 import resource._
 
 /**
@@ -66,7 +67,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   }
 
   def mleapTransformer(transformer: Transformer)
-                      (implicit context: SparkBundleContext): runtime.transformer.Transformer = {
+                      (implicit context: SparkBundleContext): frame.Transformer = {
     (for(bf <- managed(BundleFile(serializedModel(transformer)))) yield {
       bf.loadMleapBundle().get.root
     }).tried.get
@@ -79,18 +80,18 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }).tried.get
   }
 
-  def assertModelTypesMatchTransformerTypes(model: Model, transformer: BaseTransformer): Unit = {
-    val modelInputTypes = transformer.shape.inputs.
+  def assertModelTypesMatchTransformerTypes(model: Model, shape: NodeShape, exec: UserDefinedFunction): Unit = {
+    val modelInputTypes = shape.inputs.
       map(_._2.port).
       map(n => model.inputSchema.getField(n).get.dataType).
       toSeq
-    val transformerInputTypes = transformer.exec.inputs.flatMap(_.dataTypes)
+    val transformerInputTypes = exec.inputs.flatMap(_.dataTypes)
 
-    val modelOutputTypes = transformer.shape.outputs.
+    val modelOutputTypes = shape.outputs.
       map(_._2.port).
       map(n => model.outputSchema.getField(n).get.dataType).
       toSeq
-    val transformerOutputTypes = transformer.exec.outputTypes
+    val transformerOutputTypes = exec.outputTypes
 
     checkTypes(modelInputTypes, transformerInputTypes)
     checkTypes(modelOutputTypes, transformerOutputTypes)
@@ -110,9 +111,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  def equalityTest(sparkDataset: Array[Row],
-                   mleapDataset: Array[Row]): Boolean = {
-    sparkDataset sameElements mleapDataset
+  def equalityTest(sparkDataset: DataFrame,
+                   mleapDataset: DataFrame): Unit = {
+    assert(sparkDataset.collect() sameElements mleapDataset.collect())
   }
 
   def parityTransformer(): Unit = {
@@ -120,11 +121,11 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       val sparkTransformed = sparkTransformer.transform(dataset)
       implicit val sbc = SparkBundleContext().withDataset(sparkTransformed)
       val mTransformer = mleapTransformer(sparkTransformer)
-      val sparkDataset = sparkTransformed.toSparkLeapFrame.toSpark.collect()
+      val sparkDataset = sparkTransformed.toSparkLeapFrame.toSpark
       val mleapTransformed = mTransformer.sparkTransform(dataset)
-      val mleapDataset = mleapTransformed.collect()
+      val mleapDataset = mleapTransformed
 
-      assert(equalityTest(sparkDataset, mleapDataset))
+      equalityTest(sparkDataset, mleapDataset)
     }
 
     it("serializes/deserializes the Spark model properly") {
@@ -153,12 +154,20 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       val mTransformer = mleapTransformer(sparkTransformer)
 
       mTransformer match {
+        case transformer: SimpleTransformer =>
+          assertModelTypesMatchTransformerTypes(transformer.model, transformer.shape, transformer.typedExec)
+        case transformer: MultiTransformer =>
+          assertModelTypesMatchTransformerTypes(transformer.model, transformer.shape, transformer.typedExec)
         case transformer: BaseTransformer =>
-          assertModelTypesMatchTransformerTypes(transformer.model, transformer)
+          assertModelTypesMatchTransformerTypes(transformer.model, transformer.shape, transformer.exec)
         case pipeline: Pipeline =>
           pipeline.transformers.foreach {
+            case transformer: SimpleTransformer =>
+              assertModelTypesMatchTransformerTypes(transformer.model, transformer.shape, transformer.typedExec)
+            case transformer: MultiTransformer =>
+              assertModelTypesMatchTransformerTypes(transformer.model, transformer.shape, transformer.typedExec)
             case stage: BaseTransformer =>
-              assertModelTypesMatchTransformerTypes(stage.model, stage)
+              assertModelTypesMatchTransformerTypes(stage.model, stage.shape, stage.exec)
             case _ => // no udf to check against
           }
         case _ => // no udf to check against

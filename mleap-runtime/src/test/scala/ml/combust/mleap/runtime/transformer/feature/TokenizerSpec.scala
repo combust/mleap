@@ -11,7 +11,7 @@ class TokenizerSpec extends FunSpec {
       val transformer = Tokenizer(shape = NodeShape().withStandardInput("input").
               withStandardOutput("output"), model = TokenizerModel.defaultTokenizer)
       assert(transformer.schema.fields ==
-        Seq(StructField("input", ScalarType.String),
+        Seq(StructField("input", ScalarType.String.nonNullable),
           StructField("output", ListType(BasicType.String))))
     }
   }

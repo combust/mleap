@@ -2,8 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.PcaModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.{DenseMatrix, Vectors}
 import org.scalatest.FunSpec
@@ -13,14 +12,14 @@ import org.scalatest.FunSpec
   */
 class PcaSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
-  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(2.0, 1.0, 0.0)))))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(Tensor.denseVector(Array(2.0, 1.0, 0.0))))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   val pc = new DenseMatrix(3, 2, Array(1d, -1, 2,
     0, -3, 1))
   val input = Vectors.dense(Array(2d, 1, 0))
   val pca = Pca(
-    shape = NodeShape.vector(3, 2, inputCol = "test_vec", outputCol = "test_pca"),
+    shape = NodeShape.feature(inputCol = "test_vec", outputCol = "test_pca"),
     model = PcaModel(pc))
 
   describe("#transform") {
@@ -32,7 +31,7 @@ class PcaSpec extends FunSpec {
     }
 
     describe("with invalid input column") {
-      val pca2 = pca.copy(shape = NodeShape.vector(3, 2, inputCol = "bad_input"))
+      val pca2 = pca.copy(shape = NodeShape.feature(inputCol = "bad_input"))
 
       it("returns a Failure") { assert(pca2.transform(frame).isFailure) }
     }

@@ -12,7 +12,7 @@ class LDASpec extends FunSpec {
       val topics: Matrix[Double] = DenseMatrix.zeros[Double](3,3)
 
       val transformer = LDA(shape =
-        NodeShape.basicCluster(3, outputType = TensorType.Double(2)),
+        NodeShape.basicCluster(),
         model = new LocalLDAModel(topics, null, 2, 100))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType.Double(3)),

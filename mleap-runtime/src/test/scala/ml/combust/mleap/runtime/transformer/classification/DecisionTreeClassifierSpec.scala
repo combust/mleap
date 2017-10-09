@@ -9,7 +9,7 @@ class DecisionTreeClassifierSpec extends FunSpec {
   describe("input/output schema") {
     it("has the correct inputs and outputs with only prediction column") {
       val transformer = DecisionTreeClassifier(
-        shape = NodeShape.probabilisticClassifier(3, 2),
+        shape = NodeShape.probabilisticClassifier(),
         model = new DecisionTreeClassifierModel(null, 3, 2))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
@@ -17,7 +17,7 @@ class DecisionTreeClassifierSpec extends FunSpec {
     }
 
     it("has the correct inputs and outputs with prediction column as well as probabilityCol") {
-      val transformer = DecisionTreeClassifier(shape = NodeShape.probabilisticClassifier(3, 2, probabilityCol = Some("probability")),
+      val transformer = DecisionTreeClassifier(shape = NodeShape.probabilisticClassifier(probabilityCol = Some("probability")),
         model = new DecisionTreeClassifierModel(null, 3, 2))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
@@ -26,7 +26,7 @@ class DecisionTreeClassifierSpec extends FunSpec {
     }
 
     it("has the correct inputs and outputs with prediction column as well as rawPredictionCol") {
-      val transformer = DecisionTreeClassifier(shape = NodeShape.probabilisticClassifier(3, 2, rawPredictionCol = Some("rp")),
+      val transformer = DecisionTreeClassifier(shape = NodeShape.probabilisticClassifier(rawPredictionCol = Some("rp")),
         model = new DecisionTreeClassifierModel(null, 3, 2))
       assert(transformer.schema.fields ==
         Seq(StructField("features", TensorType(BasicType.Double, Seq(3))),
@@ -35,8 +35,7 @@ class DecisionTreeClassifierSpec extends FunSpec {
     }
 
     it("has the correct inputs and outputs with prediction column as well as both rawPredictionCol and probabilityCol") {
-      val transformer = DecisionTreeClassifier(shape = NodeShape.probabilisticClassifier(3, 2,
-        rawPredictionCol = Some("rp"),
+      val transformer = DecisionTreeClassifier(shape = NodeShape.probabilisticClassifier(rawPredictionCol = Some("rp"),
         probabilityCol = Some("probability")),
         model = new DecisionTreeClassifierModel(null, 3, 2))
       assert(transformer.schema.fields ==

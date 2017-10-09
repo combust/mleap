@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime
 
 import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
-import ml.combust.bundle.util.ClassLoaderUtil
+import ml.combust.mleap.ClassLoaderUtil
 
 /**
   * Created by hollinwilkins on 10/25/16.

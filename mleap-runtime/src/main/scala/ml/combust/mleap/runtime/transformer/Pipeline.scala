@@ -28,8 +28,8 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
     model.transformers.foldLeft(Try(builder))((b, stage) => b.flatMap(stage.transform))
   }
 
-  override def transformAsync[TB <: FrameBuilder[TB]](builder: TB)
-                                                     (implicit ec: ExecutionContext): Future[TB] = {
+  override def transformAsync[FB <: FrameBuilder[FB]](builder: FB)
+                                                     (implicit ec: ExecutionContext): Future[FB] = {
     model.transformers.foldLeft(Future(builder)) {
       (fb, stage) => fb.flatMap(b => stage.transformAsync(b))
     }

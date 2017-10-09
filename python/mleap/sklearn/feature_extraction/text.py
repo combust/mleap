@@ -31,7 +31,7 @@ ops = ops()
 
 
 def serialize_to_bundle(self, path, model_name):
-    serializer = TfidfVectorizerSerializer()
+    serializer = SimpleSerializer()
     return serializer.serialize_to_bundle(self, path, model_name)
 
 
@@ -140,13 +140,13 @@ class TfidfVectorizerSerializer(MLeapSerializer):
             "port": "input"
         }]
         tf_outputs = [{
-            "name": "token_counts".format(transformer.name),
+            "name": "token_counts",
             "port": "output"
         }]
         tf_step = TfidfStep(transformer, 'count_vectorizer', tf_attributes, tf_inputs, tf_outputs)
 
         idf_attributes = [
-            ('idf', transformer.idf_)
+            ('idf', transformer.idf_.tolist())
         ]
         idf_inputs = [{
             "name": tf_outputs[0]['name'],

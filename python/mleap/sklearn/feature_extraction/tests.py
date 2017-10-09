@@ -4,7 +4,7 @@ import shutil
 import uuid
 import json
 
-from mleap.sklearn.feature_extraction.text import TfidfVectorizer
+from mleap.sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
 
 class TransformerTests(unittest.TestCase):
@@ -30,6 +30,22 @@ class TransformerTests(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)
+
+    def test_countvectorizer_serializer(self):
+        count = CountVectorizer()
+        count.mlinit(input_features='input', prediction_column='pred')
+        count.fit(self.docs)
+        count.serialize_to_bundle(self.tmp_dir, count.name)
+
+        with open('{}/{}.node/node.json'.format(self.tmp_dir, count.name)) as node_json:
+            node = json.load(node_json)
+
+        with open('{}/{}.node/model.json'.format(self.tmp_dir, count.name)) as model_json:
+            model = json.load(model_json)
+
+        self.assertEqual(node['shape']['inputs'][0]['name'], 'input')
+        self.assertEqual(node['shape']['outputs'][0]['name'], 'pred')
+        self.assertEqual(model['op'], 'tokenizer')
 
     def test_tfidf_vectorizer_serializer_pipeline_part(self):
         self.assertEqual(self.pipe_model['op'], 'pipeline')
@@ -69,7 +85,7 @@ class TransformerTests(unittest.TestCase):
             'dimensions': [
                 {
                     'name': '',
-                    'size': [1]
+                    'size': 1
                 }
             ]
         }

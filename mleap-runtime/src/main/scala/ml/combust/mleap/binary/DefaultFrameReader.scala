@@ -3,22 +3,22 @@ package ml.combust.mleap.binary
 import java.io.{ByteArrayInputStream, DataInputStream}
 import java.nio.charset.Charset
 
-import ml.combust.mleap.core.types.StructType
-import ml.combust.mleap.runtime._
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
+import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.json.JsonSupport._
+import ml.combust.mleap.runtime.frame.{ArrayRow, DefaultLeapFrame, Row}
 import spray.json._
 import resource._
 
 import scala.collection.mutable
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 11/2/16.
   */
 class DefaultFrameReader extends FrameReader {
-  override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset)
-                        (implicit context: MleapContext): Try[DefaultLeapFrame] = {
+  override def fromBytes(bytes: Array[Byte],
+                         charset: Charset = BuiltinFormats.charset): Try[DefaultLeapFrame] = {
     (for(in <- managed(new ByteArrayInputStream(bytes))) yield {
       val din = new DataInputStream(in)
       val length = din.readInt()
@@ -41,8 +41,7 @@ class DefaultFrameReader extends FrameReader {
         rows(i) = row
       }
 
-      val dataset = LocalDataset(rows)
-      DefaultLeapFrame(schema, dataset)
+      DefaultLeapFrame(schema, rows)
     }).tried
   }
 }

@@ -2,8 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.PolynomialExpansionModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
-
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -12,11 +11,11 @@ import org.scalatest.FunSpec
   */
 class PolynomialExpansionSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
-  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(2.0, 3.0)))))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(Tensor.denseVector(Array(2.0, 3.0))))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   val transformer = PolynomialExpansion(
-    shape = NodeShape.vector(2, 5, inputCol = "test_vec", outputCol = "test_expanded"),
+    shape = NodeShape.feature(inputCol = "test_vec", outputCol = "test_expanded"),
     model = PolynomialExpansionModel(2, 2))
 
   describe("#transform") {

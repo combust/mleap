@@ -3,7 +3,7 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.StringIndexerModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
+import ml.combust.mleap.runtime.frame.{SimpleTransformer, Transformer}
 
 /**
   * Created by hwilkins on 10/22/15.

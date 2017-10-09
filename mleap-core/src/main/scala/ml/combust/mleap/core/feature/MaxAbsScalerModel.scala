@@ -35,9 +35,9 @@ case class MaxAbsScalerModel(maxAbs: Vector) extends Model {
         val nnz = vs.length
         var i = 0
         while (i < nnz) {
-          val raw = max(-1.0, min(1.0, values(i) / maxAbsUnzero(i)))
+          val raw = max(-1.0, min(1.0, values(i) / maxAbsUnzero(indices(i))))
 
-          vs(i) *= raw
+          vs(i) = raw
           i += 1
         }
         Vectors.sparse(size, indices, vs)

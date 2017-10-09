@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BucketizerModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
 
 /**
@@ -10,11 +10,11 @@ import org.scalatest.FunSpec
   */
 class BucketizerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_double", ScalarType.Double))).get
-  val dataset = LocalDataset(Seq(Row(11.0), Row(0.0), Row(55.0)))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(11.0), Row(0.0), Row(55.0))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   val bucketizer = Bucketizer(
-    shape = NodeShape.scalar(inputCol = "test_double", outputCol = "test_bucket"),
+    shape = NodeShape.feature(inputCol = "test_double", outputCol = "test_bucket"),
     model = BucketizerModel(Array(0.0, 10.0, 20.0, 100.0)))
 
   describe("#transform") {
@@ -28,14 +28,14 @@ class BucketizerSpec extends FunSpec {
     }
 
     describe("with input feature out of range") {
-      val dataset = LocalDataset(Array(Row(11.0), Row(0.0), Row(-23.0)))
-      val frame = LeapFrame(schema, dataset)
+      val dataset = Seq(Row(11.0), Row(0.0), Row(-23.0))
+      val frame = DefaultLeapFrame(schema, dataset)
 
       it("returns a Failure") { assert(bucketizer.transform(frame).isFailure) }
     }
 
     describe("with invalid input column") {
-      val bucketizer2 = bucketizer.copy(shape = NodeShape.scalar(inputCol = "bad_double", outputCol = "test_bucket"))
+      val bucketizer2 = bucketizer.copy(shape = NodeShape.feature(inputCol = "bad_double", outputCol = "test_bucket"))
 
       it("returns a Failure") { assert(bucketizer2.transform(frame).isFailure) }
     }

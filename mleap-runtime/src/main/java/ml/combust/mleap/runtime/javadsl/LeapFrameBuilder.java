@@ -1,7 +1,8 @@
 package ml.combust.mleap.runtime.javadsl;
 
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame;
+import ml.combust.mleap.runtime.frame.Row;
 import ml.combust.mleap.core.types.*;
-import ml.combust.mleap.runtime.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,8 +16,8 @@ public class LeapFrameBuilder {
 
     public LeapFrameBuilder() { }
 
-    public DefaultLeapFrame createFrame(StructType schema, LocalDataset dataset) {
-        return new DefaultLeapFrame(schema, dataset);
+    public DefaultLeapFrame createFrame(StructType schema, Iterable<Row> rows) {
+        return new DefaultLeapFrame(schema, rows);
     }
 
     public StructType createSchema(Iterable<StructField> fields) {
@@ -36,15 +37,6 @@ public class LeapFrameBuilder {
 
     public Row createRowFromIterable(Iterable<Object> values) {
         return support.createRowFromIterable(values);
-    }
-
-    public LocalDataset createDataset(Iterable<Row> rows) {
-        return new LocalDataset(rows);
-    }
-
-    public ScalarType createBool() { return createBool(true); }
-    public ScalarType createBool(boolean isNullable) {
-        return new ScalarType(support.createBoolean(), isNullable);
     }
 
     public BasicType createBasicBoolean() { return support.createBoolean(); }

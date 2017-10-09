@@ -56,7 +56,7 @@ MLeap is cross-compiled for Scala 2.10 and 2.11, so just replace 2.10 with 2.11 
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.7.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.8.1"
 ```
 
 #### Maven
@@ -65,7 +65,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.7.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.10</artifactId>
-    <version>0.7.0</version>
+    <version>0.8.1</version>
 </dependency>
 ```
 
@@ -74,7 +74,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.7.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.7.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.8.1"
 ```
 
 #### Maven
@@ -83,14 +83,14 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.7.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.10</artifactId>
-    <version>0.7.0</version>
+    <version>0.8.1</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.7.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.8.1
 ```
 
 ### PySpark Integration
@@ -103,7 +103,7 @@ $ pip install mleap
 
 ## Using the Library
 
-For more complete examples, see our other Git repository: [MLeap Demos](https://github.com/combust-ml/mleap-demo)
+For more complete examples, see our other Git repository: [MLeap Demos](https://github.com/combust/mleap-demo)
 
 ### Create and Export a Spark Pipeline
 
@@ -255,17 +255,17 @@ assert(data2(1).getDouble(3) == 0.0)
 
 ## Documentation
 
-For more documentation, please see our [wiki](https://github.com/combust-ml/mleap/wiki), where you can learn to:
+For more documentation, please see our [documentation](http://mleap-docs.combust.ml), where you can learn to:
 
-1. implement custom transformers that will work with Spark, MLeap and Scikit-learn
-2. implement custom data types to transform with Spark and MLeap pipelines
-3. transform with blazing fast speeds using optimized row-based transformers
-4. serialize MLeap data frames to various formats like avro, json, and a custom binary format
-5. implement new serialization formats for MLeap data frames
-6. work through several demonstration pipelines which use real-world data to create predictive pipelines
-7. supported Spark transformers
-8. supported Scikit-learn transformers
-9. custom transformers provided by MLeap
+1. Implement custom transformers that will work with Spark, MLeap and Scikit-learn
+2. Implement custom data types to transform with Spark and MLeap pipelines
+3. Transform with blazing fast speeds using optimized row-based transformers
+4. Serialize MLeap data frames to various formats like avro, json, and a custom binary format
+5. Implement new serialization formats for MLeap data frames
+6. Work through several demonstration pipelines which use real-world data to create predictive pipelines
+7. Supported Spark transformers
+8. Supported Scikit-learn transformers
+9. Custom transformers provided by MLeap
 
 ## Contributing
 
@@ -281,7 +281,7 @@ For more documentation, please see our [wiki](https://github.com/combust-ml/mlea
 
 * Hollin Wilkins (hollin@combust.ml)
 * Mikhail Semeniuk (mikhail@combust.ml)
-* Ram Sriharsha (ram@databricks.com)
+* Anca Sarb (sarb.anca@gmail.com)
 
 ## License
 

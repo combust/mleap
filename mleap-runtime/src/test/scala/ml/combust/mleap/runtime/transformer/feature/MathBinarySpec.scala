@@ -3,7 +3,7 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.BinaryOperation._
 import ml.combust.mleap.core.feature.MathBinaryModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
 
 /**
@@ -11,8 +11,8 @@ import org.scalatest.FunSpec
   */
 class MathBinarySpec extends FunSpec {
   val schema = StructType(StructField("test_a", ScalarType.Double), StructField("test_b", ScalarType.Double)).get
-  val dataset = LocalDataset(Seq(Row(5.6, 7.9)))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(5.6, 7.9))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   describe("with a and b inputs") {
     val transformer = MathBinary(

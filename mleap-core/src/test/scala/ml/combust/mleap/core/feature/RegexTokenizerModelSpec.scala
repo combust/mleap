@@ -11,7 +11,7 @@ class RegexTokenizerModelSpec extends FunSpec {
 
     it("has the right input schema") {
       assert(model.inputSchema.fields ==
-        Seq(StructField("input", ScalarType.String)))
+        Seq(StructField("input", ScalarType.String.nonNullable)))
     }
 
     it("has the right output schema") {

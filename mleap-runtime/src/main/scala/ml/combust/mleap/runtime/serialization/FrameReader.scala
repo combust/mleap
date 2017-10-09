@@ -3,11 +3,11 @@ package ml.combust.mleap.runtime.serialization
 import java.io._
 import java.nio.charset.Charset
 
-import ml.combust.bundle.util.ClassLoaderUtil
-import ml.combust.mleap.runtime.{DefaultLeapFrame, MleapContext}
+import ml.combust.mleap.ClassLoaderUtil
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import resource._
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 11/1/16.
@@ -23,12 +23,10 @@ object FrameReader {
 }
 
 trait FrameReader {
-  def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset)
-               (implicit context: MleapContext): Try[DefaultLeapFrame]
+  def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Try[DefaultLeapFrame]
 
   def read(file: File): Try[DefaultLeapFrame] = read(file, BuiltinFormats.charset)
-  def read(file: File, charset: Charset)
-          (implicit context: MleapContext): Try[DefaultLeapFrame] = {
+  def read(file: File, charset: Charset): Try[DefaultLeapFrame] = {
     (for(in <- managed(new FileInputStream(file))) yield {
       read(in, charset)
     }).tried.flatMap(identity)

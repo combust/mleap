@@ -8,7 +8,7 @@ class MinHashLSHSpec extends FunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
-      val transformer = MinHashLSH(shape = NodeShape.vector(3, 3),
+      val transformer = MinHashLSH(shape = NodeShape.feature(),
         model = MinHashLSHModel(Seq(), 3))
 
       assert(transformer.schema.fields ==

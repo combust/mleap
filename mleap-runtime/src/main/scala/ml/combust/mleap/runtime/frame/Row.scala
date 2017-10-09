@@ -1,11 +1,10 @@
-package ml.combust.mleap.runtime
+package ml.combust.mleap.runtime.frame
 
-import ml.combust.mleap.runtime.Row.RowSelector
+import ml.combust.mleap.runtime.frame.Row.RowSelector
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 /** Companion object for creating default rows.
   */
@@ -230,6 +229,10 @@ trait Row extends Iterable[Any] {
     }
   }
 
+  def shouldFilter(selectors: RowSelector *)(udf: UserDefinedFunction): Boolean = {
+    udfValue(selectors: _*)(udf).asInstanceOf[Boolean]
+  }
+
   def udfValue(selectors: RowSelector *)(udf: UserDefinedFunction): Any = {
     udf.inputs.length match {
       case 0 =>
@@ -265,10 +268,10 @@ trait Row extends Iterable[Any] {
 
   /** Drop value at specified index.
     *
-    * @param index index of value to drop
+    * @param indices indices of values to drop
     * @return new row without specified value
     */
-  def dropIndex(index: Int): Row
+  def dropIndices(indices: Int *): Row
 
   override def equals(obj: scala.Any): Boolean = obj match {
     case obj: Row => iterator sameElements obj.iterator
@@ -276,37 +279,4 @@ trait Row extends Iterable[Any] {
   }
 
   override def toString: String  = s"Row(${mkString(",")})"
-}
-
-object ArrayRow {
-  def apply(values: Seq[Any]): ArrayRow = ArrayRow(values.toArray)
-}
-
-/** Class for holding Row values in an array.
-  *
-  * @param values array of values in row
-  */
-case class ArrayRow(values: mutable.WrappedArray[Any]) extends Row {
-  def this(values: java.lang.Iterable[Any]) = this(values.asScala.toArray)
-
-  override def getRaw(index: Int): Any = values(index)
-
-  override def iterator: Iterator[Any] = values.iterator
-
-  override def withValue(value: Any): Row = ArrayRow(values :+ value)
-  override def withValues(values: Seq[Any]): Row = ArrayRow(this.values ++ values)
-
-  override def selectIndices(indices: Int*): Row = ArrayRow(indices.toArray.map(values))
-  override def dropIndex(index: Int): Row = ArrayRow(values.take(index) ++ values.drop(index + 1))
-
-  def set(index: Int, value: Any): ArrayRow = {
-    values(index) = value
-    this
-  }
-
-  override def hashCode(): Int = {
-    values.foldLeft(0) {
-      (hash, value) => hash * 13 + value.hashCode()
-    }
-  }
 }

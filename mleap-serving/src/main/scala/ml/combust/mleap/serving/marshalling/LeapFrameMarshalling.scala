@@ -7,8 +7,8 @@ import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
 import akka.util.ByteString
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.json.JsonSupport._
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader, FrameWriter}
-import ml.combust.mleap.runtime.{DefaultLeapFrame, MleapContext}
 import spray.json._
 
 import scala.language.implicitConversions
@@ -17,16 +17,13 @@ import scala.language.implicitConversions
   * Created by hollinwilkins on 1/30/17.
   */
 trait LeapFrameMarshalling {
-  val combustClassLoader = getClass.getClassLoader
-
-  implicit def combustLeapFrameUnmarshaller(implicit context: MleapContext): FromEntityUnmarshaller[DefaultLeapFrame] = {
+  implicit val combustLeapFrameUnmarshaller: FromEntityUnmarshaller[DefaultLeapFrame] = {
     Unmarshaller.firstOf(createUnmarshaller(ContentTypes.`application/binary`),
       createUnmarshaller(ContentTypes.`application/avro`),
       createUnmarshaller(model.ContentTypes.`application/json`))
   }
 
-  private def createUnmarshaller(contentType: ContentType)
-                                (implicit context: MleapContext): FromEntityUnmarshaller[DefaultLeapFrame] = {
+  private def createUnmarshaller(contentType: ContentType): FromEntityUnmarshaller[DefaultLeapFrame] = {
     val reader = readerForMediaType(contentType.mediaType)
     Unmarshaller.byteStringUnmarshaller.mapWithCharset {
       (bytes, charset) =>
@@ -41,11 +38,10 @@ trait LeapFrameMarshalling {
     }
   }
 
-  private def readerForMediaType(mediaType: MediaType)
-                                (implicit context: MleapContext): FrameReader = mediaType match {
-    case model.MediaTypes.`application/json` => FrameReader(BuiltinFormats.json, clOption = Some(combustClassLoader))
-    case MediaTypes.`application/binary` => FrameReader(BuiltinFormats.binary, clOption = Some(combustClassLoader))
-    case MediaTypes.`application/avro` => FrameReader(BuiltinFormats.avro, clOption = Some(combustClassLoader))
+  private def readerForMediaType(mediaType: MediaType): FrameReader = mediaType match {
+    case model.MediaTypes.`application/json` => FrameReader(BuiltinFormats.json)
+    case MediaTypes.`application/binary` => FrameReader(BuiltinFormats.binary)
+    case MediaTypes.`application/avro` => FrameReader(BuiltinFormats.avro)
     case _ => throw new IllegalArgumentException(s"invalid media type for leap frame serialization: $mediaType")
   }
 
@@ -68,14 +64,14 @@ trait LeapFrameMarshalling {
   }
 
   private def writerForMediaType(frame: DefaultLeapFrame, mediaType: MediaType): FrameWriter = mediaType match {
-    case model.MediaTypes.`application/json` => FrameWriter(frame, BuiltinFormats.json, clOption = Some(combustClassLoader))
-    case MediaTypes.`application/binary` => FrameWriter(frame, BuiltinFormats.binary, clOption = Some(combustClassLoader))
-    case MediaTypes.`application/avro` => FrameWriter(frame, BuiltinFormats.avro, clOption = Some(combustClassLoader))
+    case model.MediaTypes.`application/json` => FrameWriter(frame, BuiltinFormats.json)
+    case MediaTypes.`application/binary` => FrameWriter(frame, BuiltinFormats.binary)
+    case MediaTypes.`application/avro` => FrameWriter(frame, BuiltinFormats.avro)
     case _ => throw new IllegalArgumentException(s"invalid media type for leap frame serialization: $mediaType")
   }
 
   def leapFrameToEntity(frame: DefaultLeapFrame): HttpEntity.Strict = {
-    val bytes = FrameWriter(frame, BuiltinFormats.binary, clOption = Some(combustClassLoader)).toBytes().get
+    val bytes = FrameWriter(frame, BuiltinFormats.binary).toBytes().get
     HttpEntity.Strict(ContentTypes.`application/binary`, ByteString(bytes))
   }
 

@@ -17,7 +17,7 @@ class TokenizerModelSpec extends FunSpec {
     }
 
     it("has the right input schema") {
-      assert(tokenizer.inputSchema.fields == Seq(StructField("input", ScalarType.String)))
+      assert(tokenizer.inputSchema.fields == Seq(StructField("input", ScalarType.String.nonNullable)))
     }
 
     it("has the right output schema") {

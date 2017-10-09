@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BinarizerModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -10,7 +10,7 @@ import org.scalatest.FunSpec
   * Created by fshabbir on 12/1/16.
   */
 class BinarizerSpec extends FunSpec {
-  val binarizer = Binarizer(shape = NodeShape.vector(3, 3,
+  val binarizer = Binarizer(shape = NodeShape.feature(
     inputCol = "test_vec",
     outputCol = "test_binarizer"),
     model = BinarizerModel(0.6, TensorShape(3)))
@@ -19,8 +19,8 @@ class BinarizerSpec extends FunSpec {
     describe("#transform") {
       it("thresholds the input column to 0 or 1") {
         val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
-        val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.1, 0.6, 0.7)))))
-        val frame = LeapFrame(schema, dataset)
+        val dataset = Seq(Row(Tensor.denseVector(Array(0.1, 0.6, 0.7))))
+        val frame = DefaultLeapFrame(schema, dataset)
 
         val frame2 = binarizer.transform(frame).get
         val data = frame2.dataset(0).getTensor[Double](1)
@@ -41,14 +41,14 @@ class BinarizerSpec extends FunSpec {
   }
 
   describe("with a double input column") {
-    val binarizer2 = binarizer.copy(shape = NodeShape.scalar(
+    val binarizer2 = binarizer.copy(shape = NodeShape.feature(
       inputCol = "test",
       outputCol = "test_binarizer"), model = binarizer.model.copy(inputShape = ScalarShape()))
     describe("#transform") {
       it("thresholds the input column to 0 or 1") {
         val schema = StructType(Seq(StructField("test", ScalarType.Double))).get
-        val dataset = LocalDataset(Seq(Row(0.7), Row(0.1)))
-        val frame = LeapFrame(schema, dataset)
+        val dataset = Seq(Row(0.7), Row(0.1))
+        val frame = DefaultLeapFrame(schema, dataset)
 
         val frame2 = binarizer2.transform(frame).get
         val data = frame2.dataset

@@ -15,7 +15,7 @@ class StringMapModelSpec extends FunSpec {
 
     it("has the right output schema") {
       assert(model.outputSchema.fields ==
-        Seq(StructField("output", ScalarType.Double)))
+        Seq(StructField("output", ScalarType.Double.nonNullable)))
     }
   }
 }

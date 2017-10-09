@@ -8,8 +8,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 /**
- * Created by hwilkins on 11/8/15.
- */
+  * Created by hwilkins on 11/8/15.
+  */
 case class PipelineModel(transformers: Seq[Transformer]) extends Model {
   override def inputSchema: StructType = {
     throw new NotImplementedError("inputSchema is not implemented for a PipelineModel")
@@ -28,8 +28,8 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
     model.transformers.foldLeft(Try(builder))((b, stage) => b.flatMap(stage.transform))
   }
 
-  override def transformAsync[TB <: TransformBuilder[TB]](builder: TB)
-                                                         (implicit ec: ExecutionContext): Future[TB] = {
+  override def transformAsync[TB <: FrameBuilder[TB]](builder: TB)
+                                                     (implicit ec: ExecutionContext): Future[TB] = {
     model.transformers.foldLeft(Future(builder)) {
       (fb, stage) => fb.flatMap(b => stage.transformAsync(b))
     }

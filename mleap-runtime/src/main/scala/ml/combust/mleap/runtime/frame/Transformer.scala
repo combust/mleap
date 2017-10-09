@@ -78,8 +78,8 @@ trait Transformer extends AutoCloseable {
     * @tparam TB underlying class of builder
     * @return try new builder with transformation applied
     */
-  def transformAsync[TB <: TransformBuilder[TB]](builder: TB)
-                                                (implicit ec: ExecutionContext): Future[TB] = {
+  def transformAsync[TB <: FrameBuilder[TB]](builder: TB)
+                                            (implicit ec: ExecutionContext): Future[TB] = {
     Future.fromTry(transform(builder))
   }
 

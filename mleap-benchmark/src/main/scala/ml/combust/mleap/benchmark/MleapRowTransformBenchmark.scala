@@ -5,7 +5,7 @@ import com.typesafe.config.Config
 import ml.combust.bundle.BundleFile
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
 import ml.combust.mleap.runtime.MleapSupport._
-import ml.combust.mleap.runtime.transformer.builder.RowTransformBuilder
+import ml.combust.mleap.runtime.frame.RowTransformer
 import org.scalameter.{Bench, Gen}
 import resource._
 
@@ -19,7 +19,7 @@ class MleapRowTransformBenchmark extends Benchmark {
     }).tried.flatMap(identity).get.root
     val frame = FrameReader(BuiltinFormats.json).read(new File(config.getString("frame-path"))).get
 
-    val rowTransformer = model.transform(RowTransformBuilder(frame.schema)).get
+    val rowTransformer = model.transform(RowTransformer(frame.schema)).get
     val row = frame.dataset(0)
 
     val start = config.getInt("start")

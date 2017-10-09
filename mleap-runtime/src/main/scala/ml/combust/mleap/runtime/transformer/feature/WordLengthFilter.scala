@@ -3,7 +3,7 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.WordLengthFilterModel
 import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
+import ml.combust.mleap.runtime.frame.{SimpleTransformer, Transformer}
 
 /**
   * Created by mageswarand on 14/2/17.

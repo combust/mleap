@@ -1,11 +1,10 @@
-package ml.combust.mleap.runtime.transformer
+package ml.combust.mleap.runtime.frame
 
 import java.util.UUID
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{NodeShape, StructField, StructType}
 import ml.combust.mleap.runtime.function.{FieldSelector, Selector, UserDefinedFunction}
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 
 import scala.util.Try
 
@@ -66,10 +65,10 @@ trait Transformer extends AutoCloseable {
   /** Transform a builder using this MLeap transformer.
     *
     * @param builder builder to transform
-    * @tparam TB underlying class of builder
+    * @tparam FB underlying class of builder
     * @return try new builder with transformation applied
     */
-  def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB]
+  def transform[FB <: FrameBuilder[FB]](builder: FB): Try[FB]
 
   /** Get the full schema of this transformer (inputs ++ outputs).
     *
@@ -93,8 +92,8 @@ trait SimpleTransformer extends BaseTransformer {
   val output: String = outputSchema.fields.head.name
 
   lazy val typedExec: UserDefinedFunction = exec.withInputs(inputSchema).withOutput(outputSchema)
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutput(output, selectors: _*)(typedExec)
+  override def transform[FB <: FrameBuilder[FB]](builder: FB): Try[FB] = {
+    builder.withColumn(output, selectors: _*)(typedExec)
   }
 }
 
@@ -102,7 +101,7 @@ trait MultiTransformer extends BaseTransformer {
   val outputs: Seq[String] = outputSchema.fields.map(_.name)
 
   lazy val typedExec: UserDefinedFunction = exec.withInputs(inputSchema).withOutput(outputSchema)
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
-    builder.withOutputs(outputs, selectors: _*)(typedExec)
+  override def transform[FB <: FrameBuilder[FB]](builder: FB): Try[FB] = {
+    builder.withColumns(outputs, selectors: _*)(typedExec)
   }
 }

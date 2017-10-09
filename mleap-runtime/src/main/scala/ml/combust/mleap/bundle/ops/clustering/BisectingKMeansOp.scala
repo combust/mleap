@@ -6,9 +6,9 @@ import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.tree.cluster.NodeSerializer
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.clustering.{BisectingKMeansModel, ClusteringTreeNode}
-import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.clustering.BisectingKMeans
 import ml.combust.mleap.bundle.tree.clustering.MleapNodeWrapper
+import ml.combust.mleap.runtime.MleapContext
 
 /**
   * Created by hollinwilkins on 12/26/16.

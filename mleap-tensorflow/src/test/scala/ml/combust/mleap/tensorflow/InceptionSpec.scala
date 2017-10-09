@@ -7,7 +7,7 @@
 //import ml.combust.mleap.core.feature.MultinomialLabelerModel
 //import ml.combust.mleap.runtime.transformer.Pipeline
 //import ml.combust.mleap.runtime.transformer.feature.MultinomialLabeler
-//import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+//import ml.combust.mleap.core.frame.{DefaultLeapFrame, Row}
 //import ml.combust.mleap.runtime.types._
 //import org.scalatest.FunSpec
 //import resource._
@@ -24,8 +24,8 @@
 //    it("does the thing") {
 //      val image = Files.readAllBytes(FileSystems.getDefault.getPath("/Users/hollinwilkins/Downloads/inception-2015-12-05/cropped_panda.jpg")).toSeq
 //      val schema = StructType(Seq(StructField("input_image", ListType(ByteType())))).get
-//      val dataset = LocalDataset(Seq(Row(image)))
-//      val frame = LeapFrame(schema, dataset)
+//      val dataset = Seq(Row(image)))
+//      val frame = DefaultLeapFrame(schema, dataset)
 //
 ////      val graphBytes = Files.readAllBytes(FileSystems.getDefault.getPath("/Users/hollinwilkins/Downloads/booya.pb"))
 ////      val graph = new org.tensorflow.Graph()

@@ -1,9 +1,9 @@
-package ml.combust.mleap.runtime
+package ml.combust.mleap.runtime.frame
 
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
-/** Base trait for testing [[ml.combust.mleap.runtime.Row]] implementations.
+/** Base trait for testing [[Row]] implementations.
   *
   * @tparam R row class
   */
@@ -212,17 +212,17 @@ trait RowSpec[R <: Row] extends FunSpec {
       }
     }
 
-    describe("#dropIndex") {
+    describe("#dropIndices") {
       it("drops the value at an index") {
-        val r = row.dropIndex(2).dropIndex(3)
+        val r = row.dropIndices(2, 4)
 
-        assert(r.toArray sameElements Array("test", 42, 57.3, 56L))
+        assert(r.toSeq == Seq("test", 42, 57.3, 56L))
       }
     }
   }
 }
 
-class SeqRowSpec extends RowSpec[ArrayRow] {
+class ArrayRowSpec extends RowSpec[ArrayRow] {
   override def create(values: Any *): ArrayRow = ArrayRow(values)
 
   it should behave like row()

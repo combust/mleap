@@ -1,16 +1,16 @@
 package ml.combust.mleap.runtime.serialization
 
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, MleapContext, Row}
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import ml.combust.mleap.runtime.MleapSupport._
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
 
 /**
   * Created by hollinwilkins on 11/1/16.
   */
 class FrameSerializerSpec extends FunSpec {
-  val schema = StructType(StructField("features", TensorType(BasicType.Double)),
+  private val schema = StructType(StructField("features", TensorType(BasicType.Double)),
     StructField("name", ScalarType.String),
     StructField("list_data", ListType(BasicType.String)),
     StructField("nullable_double", ScalarType.Double),
@@ -19,15 +19,14 @@ class FrameSerializerSpec extends FunSpec {
     StructField("short_list", ListType(BasicType.Short)),
     StructField("byte_string", ScalarType.ByteString),
     StructField("nullable_string", ScalarType.String)).get
-  val dataset = LocalDataset(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)),
+  private val dataset = Seq(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0)),
     "hello", Seq("hello", "there"),
     56.7d, 32.4f,
     Tensor.denseVector(Array[Byte](1, 2, 3, 4)),
     Seq[Short](99, 12, 45),
     ByteString(Array[Byte](32, 4, 55, 67)),
     null))
-  val frame = LeapFrame(schema, dataset)
-  import MleapContext.defaultContext
+  private val frame = DefaultLeapFrame(schema, dataset)
 
   describe("with format ml.combust.mleap.json") {
     it("serializes the leap frame as JSON") {

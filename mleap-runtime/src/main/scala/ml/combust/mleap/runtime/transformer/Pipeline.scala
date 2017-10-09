@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{DataType, NodeShape, StructField, StructType}
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
+import ml.combust.mleap.runtime.frame.{FrameBuilder, Transformer}
 
 import scala.util.Try
 
@@ -23,7 +23,7 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
                     override val model: PipelineModel) extends Transformer {
   def transformers: Seq[Transformer] = model.transformers
 
-  override def transform[TB <: TransformBuilder[TB]](builder: TB): Try[TB] = {
+  override def transform[TB <: FrameBuilder[TB]](builder: TB): Try[TB] = {
     model.transformers.foldLeft(Try(builder))((b, stage) => b.flatMap(stage.transform))
   }
 

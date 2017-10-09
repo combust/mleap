@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.KMeansModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
@@ -16,10 +16,10 @@ class KMeansSpec extends FunSpec {
   val v3 = Vectors.dense(Array(100.0, 22.0, 55.0))
 
   val schema = StructType(Seq(StructField("features", TensorType(BasicType.Double)))).get
-  val dataset = LocalDataset(Seq(Row(DenseTensor(Array(2.0, 5.0, 34.0), Seq(3))),
+  val dataset = Seq(Row(DenseTensor(Array(2.0, 5.0, 34.0), Seq(3))),
     Row(DenseTensor(Array(20.0, 230.0, 34.0), Seq(3))),
-    Row(DenseTensor(Array(111.0, 20.0, 56.0), Seq(3)))))
-  val frame = LeapFrame(schema, dataset)
+    Row(DenseTensor(Array(111.0, 20.0, 56.0), Seq(3))))
+  val frame = DefaultLeapFrame(schema, dataset)
   val km = KMeans(shape = NodeShape.basicCluster(), model = KMeansModel(Seq(v1, v2, v3), 3))
 
   describe("#transform") {

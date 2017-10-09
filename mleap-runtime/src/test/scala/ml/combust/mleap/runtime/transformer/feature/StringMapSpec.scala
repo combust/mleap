@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.StringMapModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
 
 /**
@@ -10,8 +10,8 @@ import org.scalatest.FunSpec
   */
 class StringMapSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_string", ScalarType.String))).get
-  val dataset = LocalDataset(Seq(Row("index1"), Row("index2"), Row("index3")))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row("index1"), Row("index2"), Row("index3"))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   val stringMap = StringMap(
     shape = NodeShape.feature(
@@ -29,7 +29,7 @@ class StringMapSpec extends FunSpec {
     }
 
     describe("with invalid string") {
-      val frame2 = frame.copy(dataset = LocalDataset(Array(Row("bad_index"))))
+      val frame2 = frame.copy(dataset = Seq(Row("bad_index")))
 
       it("returns a Failure") { assert(stringMap.transform(frame2).isFailure) }
     }

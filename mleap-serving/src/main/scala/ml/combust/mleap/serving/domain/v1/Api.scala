@@ -1,6 +1,6 @@
 package ml.combust.mleap.serving.domain.v1
 
-import ml.combust.mleap.runtime.DefaultLeapFrame
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 
 /**
   * Created by hollinwilkins on 1/30/17.

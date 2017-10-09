@@ -3,8 +3,8 @@ package ml.combust.mleap.runtime.serialization
 import java.io.{File, FileOutputStream, OutputStream}
 import java.nio.charset.Charset
 
-import ml.combust.bundle.util.ClassLoaderUtil
-import ml.combust.mleap.runtime.LeapFrame
+import ml.combust.mleap.ClassLoaderUtil
+import ml.combust.mleap.runtime.frame.LeapFrame
 import resource._
 
 import scala.reflect.ClassTag

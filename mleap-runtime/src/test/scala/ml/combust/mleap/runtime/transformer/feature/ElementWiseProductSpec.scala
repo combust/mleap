@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.ElementwiseProductModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
@@ -12,8 +12,8 @@ import org.scalatest.FunSpec
   */
 class ElementWiseProductSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
-  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 20.0)))))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 20.0))))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   val ewp = ElementwiseProduct(shape = NodeShape.feature(inputCol = "test_vec", outputCol = "test_norm"),
     model = ElementwiseProductModel(Vectors.dense(Array(0.5, 1.0, 0.5))))

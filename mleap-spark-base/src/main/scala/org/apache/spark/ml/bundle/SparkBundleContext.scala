@@ -1,8 +1,8 @@
 package org.apache.spark.ml.bundle
 
 import com.typesafe.config.ConfigFactory
-import ml.combust.bundle.util.ClassLoaderUtil
 import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
+import ml.combust.mleap.ClassLoaderUtil
 import org.apache.spark.sql.DataFrame
 
 /**

@@ -1,9 +1,8 @@
-package ml.combust.mleap.runtime.converter
+package ml.combust.mleap.runtime.frame
 
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{DefaultLeapFrame, LocalDataset, Row}
-import org.scalatest.FunSpec
 import ml.combust.mleap.runtime.MleapSupport._
+import org.scalatest.FunSpec
 
 class LeapFrameConverterSpec extends FunSpec {
 
@@ -12,9 +11,9 @@ class LeapFrameConverterSpec extends FunSpec {
       StructField("test_double", ScalarType.Double.nonNullable))).get
 
     val frameWith1Row = DefaultLeapFrame(expectedSchema,
-      LocalDataset(Array(Row("hello", 42.13))))
+      Seq(Row("hello", 42.13)))
     val frameWithMultipleRows = DefaultLeapFrame(expectedSchema,
-      LocalDataset(Array(Row("hello", 42.13), Row("mleap", 4.3), Row("world", 1.2))))
+      Seq(Row("hello", 42.13), Row("mleap", 4.3), Row("world", 1.2)))
 
     it("converts from a case class to a default leap frame with 1 row") {
       assert(DummyData("hello", 42.13).toLeapFrame == frameWith1Row)

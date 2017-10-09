@@ -1,9 +1,8 @@
 package ml.combust.mleap.spark
 
 import ml.combust.mleap.core.types.{StructField, StructType}
-import ml.combust.mleap.runtime.{Row, RowUtil}
+import ml.combust.mleap.runtime.frame.{FrameBuilder, Row, RowUtil}
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql
 import org.apache.spark.sql.mleap.TypeConverters
@@ -16,8 +15,8 @@ import scala.util.Try
   */
 case class SparkLeapFrame(schema: StructType,
                           dataset: RDD[Row],
-                          sqlContext: SQLContext) extends TransformBuilder[SparkLeapFrame] {
-  override def withOutput(output: String, inputs: Selector *)
+                          sqlContext: SQLContext) extends FrameBuilder[SparkLeapFrame] {
+  override def withColumn(output: String, inputs: Selector *)
                          (udf: UserDefinedFunction): Try[SparkLeapFrame] = {
     RowUtil.createRowSelectors(schema, inputs: _*)(udf).flatMap {
       rowSelectors =>
@@ -33,7 +32,7 @@ case class SparkLeapFrame(schema: StructType,
     }
   }
 
-  override def withOutputs(outputs: Seq[String], inputs: Selector*)
+  override def withColumns(outputs: Seq[String], inputs: Selector*)
                           (udf: UserDefinedFunction): Try[SparkLeapFrame] = {
     RowUtil.createRowSelectors(schema, inputs: _*)(udf).flatMap {
       rowSelectors =>
@@ -48,6 +47,33 @@ case class SparkLeapFrame(schema: StructType,
             }
             copy(schema = schema2, dataset = dataset2)
         }
+    }
+  }
+
+  override def select(fieldNames: String *): Try[SparkLeapFrame] = {
+    for(indices <- schema.indicesOf(fieldNames: _*);
+      schema2 <- schema.selectIndices(indices: _*)) yield {
+      val dataset2 = dataset.map(row => row.selectIndices(indices: _*))
+
+      copy(schema = schema2, dataset = dataset2)
+    }
+  }
+
+  override def drop(names: String*): Try[SparkLeapFrame] = {
+    for(indices <- schema.indicesOf(names: _*);
+        schema2 <- schema.dropIndices(indices: _*)) yield {
+      val dataset2 = dataset.map(row => row.dropIndices(indices: _*))
+
+      copy(schema = schema2, dataset = dataset2)
+    }
+  }
+
+  override def filter(selectors: Selector*)
+                     (udf: UserDefinedFunction): Try[SparkLeapFrame] = {
+    RowUtil.createRowSelectors(schema, selectors: _*)(udf).map {
+      rowSelectors =>
+        val dataset2 = dataset.filter(row => row.shouldFilter(rowSelectors: _*)(udf))
+        copy(schema = schema, dataset = dataset2)
     }
   }
 

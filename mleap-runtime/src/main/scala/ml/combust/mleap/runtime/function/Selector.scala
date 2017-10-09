@@ -1,11 +1,13 @@
 package ml.combust.mleap.runtime.function
 
+import ml.combust.mleap.runtime.frame.Row
+
 import scala.language.implicitConversions
 
 /** Trait for a LeapFrame selector.
   *
   * A selector generates values based on other values found
-  * in a [[ml.combust.mleap.runtime.Row]]. The name parameters
+  * in a [[Row]]. The name parameters
   * to a selector specifies which column of the row to get
   * the values from.
   *
@@ -37,13 +39,13 @@ object Selector {
   implicit def apply(names: Seq[String]): StructSelector = StructSelector(names)
 }
 
-/** Class for a selector that extracts the value of a field from a [[ml.combust.mleap.runtime.Row]].
+/** Class for a selector that extracts the value of a field from a [[Row]].
   *
   * @param field name of field to extract
   */
 case class FieldSelector(field: String) extends Selector
 
-/** Class for a selector that constructs an array from values in a [[ml.combust.mleap.runtime.Row]].
+/** Class for a selector that constructs an array from values in a [[Row]].
   *
   * @param fields names of fields used to construct array
   */

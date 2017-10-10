@@ -4,11 +4,12 @@ import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{DataType, NodeShape, StructField, StructType}
 import ml.combust.mleap.runtime.frame.{FrameBuilder, Transformer}
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 /**
- * Created by hwilkins on 11/8/15.
- */
+  * Created by hwilkins on 11/8/15.
+  */
 case class PipelineModel(transformers: Seq[Transformer]) extends Model {
   override def inputSchema: StructType = {
     throw new NotImplementedError("inputSchema is not implemented for a PipelineModel")
@@ -25,6 +26,13 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
 
   override def transform[TB <: FrameBuilder[TB]](builder: TB): Try[TB] = {
     model.transformers.foldLeft(Try(builder))((b, stage) => b.flatMap(stage.transform))
+  }
+
+  override def transformAsync[FB <: FrameBuilder[FB]](builder: FB)
+                                                     (implicit ec: ExecutionContext): Future[FB] = {
+    model.transformers.foldLeft(Future(builder)) {
+      (fb, stage) => fb.flatMap(b => stage.transformAsync(b))
+    }
   }
 
   override def close(): Unit = transformers.foreach(_.close())

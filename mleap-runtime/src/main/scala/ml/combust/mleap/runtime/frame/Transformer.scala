@@ -6,7 +6,8 @@ import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{NodeShape, StructField, StructType}
 import ml.combust.mleap.runtime.function.{FieldSelector, Selector, UserDefinedFunction}
 
-import scala.util.Try
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 /** Companion class for transformer.
   */
@@ -69,6 +70,21 @@ trait Transformer extends AutoCloseable {
     * @return try new builder with transformation applied
     */
   def transform[FB <: FrameBuilder[FB]](builder: FB): Try[FB]
+
+  /** Transform a builder using this MLeap transformer.
+    *
+    * @param builder builder to transform
+    * @param ec execution context to run operation on
+    * @tparam FB underlying class of builder
+    * @return try new builder with transformation applied
+    */
+  def transformAsync[FB <: FrameBuilder[FB]](builder: FB)
+                                            (implicit ec: ExecutionContext): Future[FB] = {
+    transform(builder) match {
+      case Success(b) => Future.successful(b)
+      case Failure(e) => Future.failed(e)
+    }
+  }
 
   /** Get the full schema of this transformer (inputs ++ outputs).
     *

@@ -55,10 +55,11 @@ class MleapResourceSpec extends FunSpec with Matchers with ScalatestRouteTest wi
       Get("/model") ~> resource.routes ~> check {
         status shouldEqual StatusCodes.OK
         val schema = responseAs[StructType]
-        assert(schema.fields.size == 4)
+        assert(schema.fields.size == 5)
         assert(schema.getField("first_double").get.dataType == ScalarType.Double)
         assert(schema.getField("second_double").get.dataType == ScalarType.Double)
         assert(schema.getField("third_double").get.dataType == ScalarType.Double)
+        assert(schema.getField("features").get.dataType == TensorType(BasicType.Double, Some(Seq(3))))
         assert(schema.getField("prediction").get.dataType == ScalarType.Double.nonNullable)
       }
     }

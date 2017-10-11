@@ -29,14 +29,17 @@ class PipelineSpec extends FunSpec {
           StructField("feature1", ScalarType.Double),
           StructField("feature2", ScalarType.Double),
           StructField("feature3", ScalarType.Double),
+          StructField("features", TensorType.Double(3)),
           StructField("prediction", ScalarType.Double.nonNullable)))
 
       assert(pipeline.inputSchema.fields == Seq(
         StructField("feature1", ScalarType.Double),
         StructField("feature2", ScalarType.Double),
-        StructField("feature3", ScalarType.Double)))
+        StructField("feature3", ScalarType.Double),
+        StructField("features", TensorType.Double(3))))
 
       assert(pipeline.outputSchema.fields == Seq(
+        StructField("features", TensorType.Double(3)),
         StructField("prediction", ScalarType.Double.nonNullable)))
     }
   }

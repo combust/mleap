@@ -47,11 +47,11 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
           oacc ++ tform.outputSchema.fields.map(f => f.name -> f.dataType))
     }
 
-    val actualInputs = (inputs -- outputs.keys).map {
+    val actualInputs = inputs.map {
       case (name, dt) => StructField(name, dt)
     }.toSeq
 
-    val actualOutputs = (outputs -- inputs.keys).map {
+    val actualOutputs = outputs.map {
       case (name, dt) => StructField(name, dt)
     }.toSeq
 

@@ -51,7 +51,7 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
       case (name, dt) => StructField(name, dt)
     }.toSeq
 
-    val actualOutputs = outputs.map {
+    val actualOutputs = (outputs -- inputs.keys).map {
       case (name, dt) => StructField(name, dt)
     }.toSeq
 

@@ -41,7 +41,7 @@ object HandleInvalid {
   */
 case class StringIndexerModel(labels: Seq[String],
                               handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
-  private val stringToIndex: Map[String, Int] = labels.zipWithIndex.toMap
+  val stringToIndex: Map[String, Int] = labels.zipWithIndex.toMap
   private val keepInvalid = handleInvalid == HandleInvalid.Keep
 
   /** Convert a string into its integer representation.

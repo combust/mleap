@@ -1,8 +1,8 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.feature.StringIndexerModel
+import ml.combust.mleap.core.feature.{HandleInvalid, StringIndexerModel}
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 import org.scalatest.FunSpec
 
 /**
@@ -40,6 +40,30 @@ class StringIndexerSpec extends FunSpec {
       val frame2 = frame.copy(dataset = Seq(Row("bad_index")))
 
       it("returns a Failure") { assert(stringIndexer.transform(frame2).isFailure) }
+    }
+
+    describe("with skip logic") {
+      val stringIndexer2 = stringIndexer.copy(model = stringIndexer.model.copy(handleInvalid = HandleInvalid.Skip))
+      val dataset = Seq(Row("index_bad"), Row("index2"), Row("index_bad"))
+      val frame = DefaultLeapFrame(schema, dataset)
+
+      it("filters all of the invalid labels") {
+        val frame2 = stringIndexer2.transform(frame).get
+
+        assert(frame2.dataset.size == 1)
+        assert(frame2.dataset.head.getDouble(1) == 1.0)
+      }
+
+      describe("with a row transformer") {
+        it("filters individual rows") {
+          val rt = stringIndexer2.transform(RowTransformer(frame.schema)).get
+
+          assert(rt.transform(Row("index_bad")) == null)
+          assert(rt.transform(Row("index1")).getDouble(1) == 0.0)
+          assert(rt.transform(Row("index2")).getDouble(1) == 1.0)
+          assert(rt.transform(Row("index3")).getDouble(1) == 2.0)
+        }
+      }
     }
   }
 

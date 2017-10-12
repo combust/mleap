@@ -39,15 +39,17 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
 
   override def inputSchema: StructType = schemas._1
   override def outputSchema: StructType = schemas._2
+  def intermediateSchema: StructType = schemas._3
+  def strictOutputSchema: StructType = schemas._4
 
-  private lazy val schemas: (StructType, StructType) = {
+  private lazy val schemas: (StructType, StructType, StructType, StructType) = {
     val (inputs, outputs) = transformers.foldLeft((Map[String, DataType](), Map[String, DataType]())) {
       case ((iacc, oacc), tform) =>
         (iacc ++ tform.inputSchema.fields.map(f => f.name -> f.dataType),
           oacc ++ tform.outputSchema.fields.map(f => f.name -> f.dataType))
     }
 
-    val actualInputs = inputs.map {
+    val actualInputs = (inputs -- outputs.keys).map {
       case (name, dt) => StructField(name, dt)
     }.toSeq
 
@@ -55,6 +57,18 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
       case (name, dt) => StructField(name, dt)
     }.toSeq
 
-    (StructType(actualInputs).get, StructType(actualOutputs).get)
+    val strictOutputs = outputs -- inputs.keys
+    val strictOutputSchema = strictOutputs.map {
+      case (name, dt) => StructField(name, dt)
+    }.toSeq
+
+    val intermediateSchema = (outputs -- strictOutputs.keys).map {
+      case (name, dt) => StructField(name, dt)
+    }.toSeq
+
+    (StructType(actualInputs).get,
+      StructType(actualOutputs).get,
+      StructType(intermediateSchema).get,
+      StructType(strictOutputSchema).get)
   }
 }

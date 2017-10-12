@@ -91,7 +91,7 @@ trait Transformer extends AutoCloseable {
     * @return full schema of this transformer
     */
   def schema: StructType = {
-    StructType((inputSchema.fields ++ outputSchema.fields).distinct).get
+    StructType(inputSchema.fields ++ outputSchema.fields).get
   }
 
   override def close(): Unit = { /* do nothing by default */ }

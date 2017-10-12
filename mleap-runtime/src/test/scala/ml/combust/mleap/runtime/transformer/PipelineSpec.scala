@@ -23,8 +23,10 @@ class PipelineSpec extends FunSpec {
         withOutput("prediction", "prediction"),
         model = LinearRegressionModel(Vectors.dense(1.0, 2.0, 3.0), 4.0))
 
-      val pipeline = Pipeline(uid = "pipeline", shape = NodeShape(), PipelineModel(Seq(
-                      vectorAssembler, regression)))
+      val pipeline = Pipeline(uid = "root_pipeline", shape = NodeShape(), PipelineModel(Seq(
+          Pipeline(uid = "child_pipeline_1", shape = NodeShape(), PipelineModel(Seq(vectorAssembler))),
+        Pipeline(uid = "child_pipeline_2", shape = NodeShape(), PipelineModel(Seq(regression))))))
+
       assert(pipeline.schema.fields == Seq(
           StructField("feature1", ScalarType.Double),
           StructField("feature2", ScalarType.Double),
@@ -35,12 +37,17 @@ class PipelineSpec extends FunSpec {
       assert(pipeline.inputSchema.fields == Seq(
         StructField("feature1", ScalarType.Double),
         StructField("feature2", ScalarType.Double),
-        StructField("feature3", ScalarType.Double),
-        StructField("features", TensorType.Double(3))))
+        StructField("feature3", ScalarType.Double)))
 
       assert(pipeline.outputSchema.fields == Seq(
         StructField("features", TensorType.Double(3)),
         StructField("prediction", ScalarType.Double.nonNullable)))
+
+      assert(pipeline.strictOutputSchema.fields == Seq(
+        StructField("prediction", ScalarType.Double.nonNullable)))
+
+      assert(pipeline.intermediateSchema.fields == Seq(
+        StructField("features", TensorType.Double(3))))
     }
   }
 }

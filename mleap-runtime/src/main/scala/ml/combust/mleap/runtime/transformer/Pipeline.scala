@@ -43,10 +43,14 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
   def strictOutputSchema: StructType = schemas._4
 
   private lazy val schemas: (StructType, StructType, StructType, StructType) = {
-    val (inputs, outputs) = transformers.foldLeft((Map[String, DataType](), Map[String, DataType]())) {
-      case ((iacc, oacc), tform) =>
+    val (inputs, outputs, intermediates) = transformers.foldLeft(
+      (Map[String, DataType](), Map[String, DataType](), Map[String, DataType]())) {
+      case ((iacc, oacc, intacc), tform) =>
         (iacc ++ tform.inputSchema.fields.map(f => f.name -> f.dataType),
-          oacc ++ tform.outputSchema.fields.map(f => f.name -> f.dataType))
+          oacc ++ tform.outputSchema.fields.map(f => f.name -> f.dataType),
+          intacc ++ { tform match {
+            case pip: Pipeline => pip.intermediateSchema.fields.map(f => f.name -> f.dataType)
+            case _ => Map() } })
     }
 
     val actualInputs = (inputs -- outputs.keys).map {
@@ -57,7 +61,7 @@ case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"
       case (name, dt) => StructField(name, dt)
     }.toSeq
 
-    val strictOutputs = outputs -- inputs.keys
+    val strictOutputs = outputs -- inputs.keys -- intermediates.keys
     val strictOutputSchema = strictOutputs.map {
       case (name, dt) => StructField(name, dt)
     }.toSeq

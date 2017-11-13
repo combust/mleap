@@ -78,7 +78,7 @@ class JavaDSLSpec extends FunSpec {
   }
 
   describe("using row transformer") {
-    it("is able to transform a leap frame using a row transformer") {
+    it("is able to transform a single row using a row transformer") {
       val rowTransformer = stringIndexer.transform(RowTransformer(buildFrame.schema)).get
       val result = rowTransformer.transform(row)
       assert(result.getDouble(11) == 0.0)

@@ -65,6 +65,15 @@ case class StandardScalerModel(std: Option[Vector],
               i += 1
             }
             Vectors.dense(vs)
+          case SparseVector(size, indices, values) =>
+            val vs = values.clone()
+            val nnz = vs.length
+            var i = 0
+            while (i < nnz) {
+              vs(i) -= meanV(indices(i))
+              i += 1
+            }
+            Vectors.sparse(size, indices, vs)
         }
       case (Some(stdV), Some(meanV)) =>
         vector match {
@@ -78,6 +87,15 @@ case class StandardScalerModel(std: Option[Vector],
               i += 1
             }
             Vectors.dense(vs)
+          case SparseVector(size, indices, values) =>
+            val vs = values.clone()
+            val nnz = vs.length
+            var i = 0
+            while (i < nnz) {
+              vs(i) = if(stdV(indices(i)) != 0.0) (vs(i) - meanV(indices(i))) * (1.0 / stdV(indices(i))) else 0.0
+              i += 1
+            }
+            Vectors.sparse(size, indices, vs)
         }
     }
   }

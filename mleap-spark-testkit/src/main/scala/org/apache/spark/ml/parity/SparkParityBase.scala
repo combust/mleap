@@ -122,8 +122,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       implicit val sbc = SparkBundleContext().withDataset(sparkTransformed)
       val mTransformer = mleapTransformer(sparkTransformer)
       val sparkDataset = sparkTransformed.toSparkLeapFrame.toSpark
-      val mleapTransformed = mTransformer.sparkTransform(dataset)
-      val mleapDataset = mleapTransformed
+      val mleapDataset = mTransformer.sparkTransform(dataset)
 
       equalityTest(sparkDataset, mleapDataset)
     }

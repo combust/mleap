@@ -8,7 +8,7 @@ import org.scalatest.FunSpec
   * Created by hwilkins on 1/21/16.
   */
 class StandardScalerModelSpec extends FunSpec {
-  describe("standard scalar with dense data") {
+  describe("standard scaler with dense data") {
     describe("with mean") {
       val scaler = StandardScalerModel(None, Some(Vectors.dense(Array(50.0, 20.0, 30.0))))
 
@@ -43,7 +43,7 @@ class StandardScalerModelSpec extends FunSpec {
     }
   }
 
-  describe("standard scalar with sparse data") {
+  describe("standard scaler with sparse data") {
     describe("with mean") {
       val scaler = StandardScalerModel(None, Some(Vectors.sparse(5, Array(1, 2, 4), Array(20, 45, 100))))
 

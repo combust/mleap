@@ -6,7 +6,7 @@ import java.util
 
 import ml.combust.mleap.core.feature.StringIndexerModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, RowTransformer}
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
@@ -17,32 +17,32 @@ import scala.collection.JavaConverters._
   * Created by hollinwilkins on 4/21/17.
   */
 class JavaDSLSpec extends FunSpec {
+  val builder = new LeapFrameBuilder
+
+  val row = builder.createRow(true, "hello", Byte.box(1),
+    Short.box(2), Int.box(3), Long.box(4),
+    Float.box(34.5f), Double.box(44.5), ByteString("hello_there".getBytes()),
+    Seq[Long](23, 44, 55).asJava, Tensor.denseVector[Byte](Array[Byte](23, 3, 4)))
+
+  val stringIndexer = StringIndexer(shape = NodeShape().
+    withStandardInput("string").
+    withStandardOutput("string_index"),
+    model = StringIndexerModel(Seq("hello")))
+
   def buildFrame(): DefaultLeapFrame = {
-    val builder = new LeapFrameBuilder
-    val fields = new util.ArrayList[StructField]()
-
-    fields.add(builder.createField("bool", builder.createBoolean()))
-    fields.add(builder.createField("string", builder.createString()))
-    fields.add(builder.createField("byte", builder.createByte()))
-    fields.add(builder.createField("short", builder.createShort()))
-    fields.add(builder.createField("int", builder.createInt()))
-    fields.add(builder.createField("long", builder.createLong()))
-    fields.add(builder.createField("float", builder.createFloat()))
-    fields.add(builder.createField("double", builder.createDouble()))
-    fields.add(builder.createField("byte_string", builder.createByteString()))
-    fields.add(builder.createField("list", builder.createList(builder.createBasicLong())))
-    fields.add(builder.createField("tensor", builder.createTensor(builder.createBasicByte())))
-
-    val rows = new util.ArrayList[Row]()
-    val list = Seq[Long](23, 44, 55).asJava
-    val tensor = Tensor.denseVector[Byte](Array[Byte](23, 3, 4))
-    rows.add(builder.createRow(true, "hello", Byte.box(1),
-      Short.box(2), Int.box(3), Long.box(4),
-      Float.box(34.5f), Double.box(44.5), ByteString("hello_there".getBytes()),
-      list, tensor))
-
+    val fields = util.Arrays.asList(builder.createField("bool", builder.createBoolean()),
+                                    builder.createField("string", builder.createString()),
+                                    builder.createField("byte", builder.createByte()),
+                                    builder.createField("short", builder.createShort()),
+                                    builder.createField("int", builder.createInt()),
+                                    builder.createField("long", builder.createLong()),
+                                    builder.createField("float", builder.createFloat()),
+                                    builder.createField("double", builder.createDouble()),
+                                    builder.createField("byte_string", builder.createByteString()),
+                                    builder.createField("list", builder.createList(builder.createBasicLong())),
+                                    builder.createField("tensor", builder.createTensor(builder.createBasicByte())))
     val schema = builder.createSchema(fields)
-    builder.createFrame(schema, rows)
+    builder.createFrame(schema, util.Arrays.asList(row))
   }
 
   describe("building a LeapFrame") {
@@ -77,13 +77,16 @@ class JavaDSLSpec extends FunSpec {
     }
   }
 
+  describe("using row transformer") {
+    it("is able to transform a single row using a row transformer") {
+      val rowTransformer = stringIndexer.transform(RowTransformer(buildFrame.schema)).get
+      val result = rowTransformer.transform(row)
+      assert(result.getDouble(11) == 0.0)
+    }
+  }
+
   describe("MLeap bundles") {
-    val stringIndexer = StringIndexer(shape = NodeShape().
-              withStandardInput("string").
-          withStandardOutput("string_index"),
-      model = StringIndexerModel(Seq("hello")))
-    val dir = Files.createTempDirectory("mleap")
-    val file = new File(dir.toFile, "model.zip")
+    val file = new File(Files.createTempDirectory("mleap").toFile, "model.zip")
 
     describe("saving/loading an MLeap transformer") {
       it("is able to save and load the transformer") {

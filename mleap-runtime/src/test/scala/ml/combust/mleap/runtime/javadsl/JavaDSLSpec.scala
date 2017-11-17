@@ -107,6 +107,11 @@ class JavaDSLSpec extends FunSpec {
       assert(smallerFrame.schema.getField("string").isEmpty)
       assert(smallerFrame.schema.getField("int").nonEmpty)
     }
+
+    it("is able to get fields from the schema") {
+      val fields = leapFrameSupport.getFields(frame.schema)
+      assert(fields.size() == 11)
+    }
   }
 
   describe("MLeap bundles") {

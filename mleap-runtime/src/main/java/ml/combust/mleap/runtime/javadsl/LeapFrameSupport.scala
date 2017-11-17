@@ -19,7 +19,7 @@ class LeapFrameSupport {
     frame.drop(names.asScala: _*).get
   }
 
-  def getFields(structType: StructType): java.util.List[StructField]  = {
-    structType.fields.asJava
+  def getFields(schema: StructType): java.util.List[StructField]  = {
+    schema.fields.asJava
   }
 }

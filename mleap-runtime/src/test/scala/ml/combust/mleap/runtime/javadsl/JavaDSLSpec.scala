@@ -85,6 +85,13 @@ class JavaDSLSpec extends FunSpec {
     }
   }
 
+  describe("supports creating tensors nicely") {
+    it("can create a tensor with a dimension") {
+      def tensor = builder.createField("tensor", builder.createTensor(builder.createBasicByte(), util.Arrays.asList(1, 2), true))
+      assert(tensor.dataType.asInstanceOf[TensorType].dimensions == Some(Seq(1, 2)))
+    }
+  }
+
   describe("can use leap frame operations nicely") {
     val leapFrameSupport = new LeapFrameSupport()
     val frame = buildFrame()

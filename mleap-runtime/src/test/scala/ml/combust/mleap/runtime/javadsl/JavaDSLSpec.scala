@@ -6,7 +6,7 @@ import java.util
 
 import ml.combust.mleap.core.feature.StringIndexerModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, RowTransformer}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
@@ -82,6 +82,42 @@ class JavaDSLSpec extends FunSpec {
       val rowTransformer = stringIndexer.transform(RowTransformer(buildFrame.schema)).get
       val result = rowTransformer.transform(row)
       assert(result.getDouble(11) == 0.0)
+    }
+  }
+
+  describe("supports creating tensors nicely") {
+    it("can create a tensor with a dimension") {
+      def tensor = builder.createField("tensor", builder.createTensor(builder.createBasicByte(), util.Arrays.asList(1, 2), true))
+      assert(tensor.dataType.asInstanceOf[TensorType].dimensions == Some(Seq(1, 2)))
+    }
+  }
+
+  describe("can use leap frame operations nicely") {
+    val leapFrameSupport = new LeapFrameSupport()
+    val frame = buildFrame()
+
+    it("is able to collect all rows to a Java list") {
+      val rows : util.List[Row] = leapFrameSupport.collect(frame)
+      assert(rows.size() == 1)
+    }
+
+    it("is able to select fields given a Java list") {
+      val smallerFrame = leapFrameSupport.select(frame, util.Arrays.asList("string", "bool"))
+      assert(smallerFrame.schema.getField("bool").nonEmpty)
+      assert(smallerFrame.schema.getField("string").nonEmpty)
+      assert(smallerFrame.schema.getField("int").isEmpty)
+    }
+
+    it("is able to drop fields given a Java list") {
+      val smallerFrame = leapFrameSupport.drop(frame, util.Arrays.asList("string", "bool"))
+      assert(smallerFrame.schema.getField("bool").isEmpty)
+      assert(smallerFrame.schema.getField("string").isEmpty)
+      assert(smallerFrame.schema.getField("int").nonEmpty)
+    }
+
+    it("is able to get fields from the schema") {
+      val fields = leapFrameSupport.getFields(frame.schema)
+      assert(fields.size() == 11)
     }
   }
 

@@ -11,6 +11,7 @@ import org.apache.spark.sql.DataFrame
 class StringIndexerParitySpec extends SparkParityBase {
   override val dataset: DataFrame = baseDataset.select("state")
 
+  // setting to handle invalid to true
   override val sparkTransformer: Transformer = new StringIndexer().
     setInputCol("state").
     setOutputCol("state_index").setHandleInvalid("keep").

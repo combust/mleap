@@ -28,4 +28,8 @@ class LeapFrameBuilderSupport {
   def createDouble(): BasicType = BasicType.Double
   def createString(): BasicType = BasicType.String
   def createByteString(): BasicType = BasicType.ByteString
+
+  def createTensorDimensions(dims : java.util.List[Integer]): Option[Seq[Int]] = {
+    Some(dims.asScala.map(_.intValue()))
+  }
 }

@@ -13,6 +13,6 @@ class StringIndexerParitySpec extends SparkParityBase {
 
   override val sparkTransformer: Transformer = new StringIndexer().
     setInputCol("state").
-    setOutputCol("state_index").
+    setOutputCol("state_index").setHandleInvalid("keep").
     fit(dataset)
 }

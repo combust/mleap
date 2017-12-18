@@ -92,6 +92,8 @@ public class LeapFrameBuilder {
 
     public TensorType createTensor(BasicType base) { return createTensor(base, true); }
     public TensorType createTensor(BasicType base, boolean isNullable) { return new TensorType(base, isNullable); }
+    public TensorType createTensor(BasicType base, List<Integer> dims, boolean isNullable) {
+        return new TensorType(base, support.createTensorDimensions(dims), isNullable);}
 
     public ListType createList(BasicType base) { return createList(base, true); }
     public ListType createList(BasicType base, boolean isNullable) {

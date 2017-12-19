@@ -31,7 +31,7 @@ class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] {
 
   override def sparkLoad(uid: String, shape: NodeShape, model: StringIndexerModel): StringIndexerModel = {
     new StringIndexerModel(uid = uid,
-      labels = model.labels)
+      labels = model.labels).setHandleInvalid(model.getHandleInvalid)
   }
 
   override def sparkInputs(obj: StringIndexerModel): Seq[ParamSpec] = {

@@ -30,10 +30,15 @@ class ImputerOp extends MleapOp[Imputer, ImputerModel] {
         .map(value => value.getDouble)
         .getOrElse(Double.NaN)
 
+      // defaults to true for Scikit-learn serialized models
+      val nullableInput = model.getValue("nullable_input")
+          .map(value => value.getBoolean)
+            .getOrElse(true)
+
       ImputerModel(model.value("surrogate_value").getDouble,
         missingValue,
         model.value("strategy").getString,
-        nullableInput = model.value("nullable_input").getBoolean)
+        nullableInput)
     }
 
   }

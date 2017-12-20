@@ -23,7 +23,7 @@ class BinarizerOp extends SimpleSparkOp[Binarizer] {
 
       val dataset = context.context.dataset.get
       model.withValue("threshold", Value.double(obj.getThreshold)).
-        withValue("input_shape", Value.dataShape(sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset)))
+        withValue("input_shapes", Value.dataShape(sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset)))
     }
 
     override def load(model: Model)

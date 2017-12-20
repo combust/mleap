@@ -96,7 +96,13 @@ class CastingSpec extends FunSpec {
     (BasicType.String, BasicType.Int, "null", null),
     (BasicType.String, BasicType.Long, "null", null),
     (BasicType.String, BasicType.Float, "null", null),
-    (BasicType.String, BasicType.Double, "null", null)
+    (BasicType.String, BasicType.Double, "null", null),
+    (BasicType.String, BasicType.Byte, "", null),
+    (BasicType.String, BasicType.Short, "", null),
+    (BasicType.String, BasicType.Int, "", null),
+    (BasicType.String, BasicType.Long, "", null),
+    (BasicType.String, BasicType.Float, "", null),
+    (BasicType.String, BasicType.Double, "", null)
   )
 
   def createTensor(base: BasicType, value: Any): Tensor[_] = base match {

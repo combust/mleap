@@ -114,7 +114,7 @@ class SimpleSerializer(MLeapSerializer):
         # Define attributes
         attributes = list()
         attributes.append(('num_features', transformer.n_features_))
-        if transformer.n_classes_ > 1:
+        if transformer.classes_ is not None:
             attributes.append(('num_classes', transformer.n_classes_))
 
         inputs = []

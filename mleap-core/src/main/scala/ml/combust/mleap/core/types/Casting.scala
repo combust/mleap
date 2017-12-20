@@ -73,12 +73,12 @@ object Casting {
       case _ => true
     }
     },
-    (BasicType.String, BasicType.Byte) -> { (v: String) => if (v == "null") null else v.toByte },
-    (BasicType.String, BasicType.Short) -> { (v: String) => if (v == "null") null else v.toShort },
-    (BasicType.String, BasicType.Int) -> { (v: String) => if (v == "null") null else  v.toInt },
-    (BasicType.String, BasicType.Long) -> { (v: String) => if (v == "null") null else  v.toLong },
-    (BasicType.String, BasicType.Float) -> { (v: String) => if (v == "null") null else  v.toFloat },
-    (BasicType.String, BasicType.Double) -> { (v: String) => if (v == "null") null else  v.toDouble }
+    (BasicType.String, BasicType.Byte) -> { (v: String) => if (v == "null" || v == "") null else v.toByte },
+    (BasicType.String, BasicType.Short) -> { (v: String) => if (v == "null" || v == "") null else v.toShort },
+    (BasicType.String, BasicType.Int) -> { (v: String) => if (v == "null" || v == "") null else  v.toInt },
+    (BasicType.String, BasicType.Long) -> { (v: String) => if (v == "null" || v == "") null else  v.toLong },
+    (BasicType.String, BasicType.Float) -> { (v: String) => if (v == "null" || v == "") null else  v.toFloat },
+    (BasicType.String, BasicType.Double) -> { (v: String) => if (v == "null" || v == "") null else  v.toDouble }
   ).map {
     case (k, v) => (k, v.asInstanceOf[(Any) => Any])
   }

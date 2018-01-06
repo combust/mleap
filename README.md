@@ -167,29 +167,21 @@ from mleap.pyspark.spark_support import SimpleSparkSerializer
 ```python
 import pandas as pd
 
-# Load scikit-learn mleap extensions
-import mleap.sklearn.pipeline
-import mleap.sklearn.preprocessing.data
-from mleap.sklearn.preprocessing.data import NDArrayToDataFrame
-
-# Load the LabelEncoder from Mleap
+from mleap.sklearn.pipeline import Pipeline
 from mleap.sklearn.preprocessing.data import FeatureExtractor, LabelEncoder, ReshapeArrayToN1
-
-# Load scikit-learn transformers and models
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.pipeline import Pipeline
 
 data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
 
-continuous_features = ['col_a']
+categorical_features = ['col_a']
 
-feature_extractor_tf = FeatureExtractor(input_scalars=continuous_features, 
+feature_extractor_tf = FeatureExtractor(input_scalars=categorical_features, 
                                          output_vector='imputed_features', 
-                                         output_vector_items=continuous_features)
+                                         output_vector_items=categorical_features)
 
 # Label Encoder for x1 Label 
 label_encoder_tf = LabelEncoder(input_features=feature_extractor_tf.output_vector_items,
-                               output_features='{}_label_le'.format(continuous_features[0]))
+                               output_features='{}_label_le'.format(categorical_features[0]))
 
 # Reshape the output of the LabelEncoder to N-by-1 array
 reshape_le_tf = ReshapeArrayToN1()
@@ -197,7 +189,7 @@ reshape_le_tf = ReshapeArrayToN1()
 # Vector Assembler for x1 One Hot Encoder
 one_hot_encoder_tf = OneHotEncoder(sparse=False)
 one_hot_encoder_tf.mlinit(prior_tf = label_encoder_tf, 
-                          output_features = '{}_label_one_hot_encoded'.format(continuous_features[0]))
+                          output_features = '{}_label_one_hot_encoded'.format(categorical_features[0]))
 
 one_hot_encoder_pipeline_x0 = Pipeline([
                                          (feature_extractor_tf.name, feature_extractor_tf),

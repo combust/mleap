@@ -21,7 +21,9 @@ from sklearn.preprocessing.data import _transform_selected
 from mleap.sklearn.preprocessing.data import MLeapSerializer
 import numpy as np
 import uuid
-
+from sklearn.preprocessing import Imputer as SklearnImputer
+from mleap.sklearn.preprocessing.data import ImputerSerializer
+import pandas as pd
 
 class OneHotEncoder(OneHotEncoder, MLeapSerializer):
     def __init__(self, input_features, output_features, drop_last=False, n_values="auto", categorical_features="all",
@@ -95,3 +97,36 @@ class DefineEstimator(BaseEstimator, TransformerMixin):
 
     def predict(self, X):
         return self.transformer.predict(X[:,:-1])
+
+
+"""
+Wrapper around the sklearn Imputer so that it can be used in pipelines. 
+Delegates fit() and transform() methods to the sklearn transformer and uses the ImputerSerializer to serialize to bundle.
+
+Instead of putting a FeatureExtractor ahead of the Imputer, we add the equivalent of FeatureExtractor's transform() method
+in the fit() and transform() methods.
+
+This is because the Imputer both in Spark and MLeap operates on a scalar value and if we were to add a feature extractor in
+front of it, then it would serialize as operating on a tensor and thus, fail at scoring time. 
+"""
+class Imputer(SklearnImputer):
+
+    def __init__(self, missing_values="NaN", strategy="mean",
+                 axis=0, verbose=0, copy=True, input_features=None, output_features=None):
+        self.name = "{}_{}".format(self.op, uuid.uuid1())
+        self.input_features = input_features
+        self.output_features = output_features
+        self.input_shapes = {'data_shape': [{'shape': 'scalar'}]}
+        SklearnImputer.__init__(self, missing_values, strategy, axis, verbose, copy)
+
+    def fit(self, X, y=None):
+        X = pd.DataFrame(X[self.input_features])
+        super(Imputer, self).fit(X)
+        return self
+
+    def transform(self, X):
+        X = pd.DataFrame(X[self.input_features])
+        return pd.DataFrame(super(Imputer, self).transform(X))
+
+    def serialize_to_bundle(self, path, model_name):
+        ImputerSerializer().serialize_to_bundle(self, path, model_name)

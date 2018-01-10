@@ -551,7 +551,7 @@ class TransformerTests(unittest.TestCase):
                                          output_vector='extracted_a_output',
                                          output_vector_items=["{}_out".format(x) for x in extract_features])
 
-        binarizer = Binarizer(threshold=0.0)
+        binarizer = Binarizer(threshold=0)
         binarizer.mlinit(prior_tf=feature_extractor,
                          output_features='a_binary')
 
@@ -563,7 +563,7 @@ class TransformerTests(unittest.TestCase):
         binarizer.serialize_to_bundle(self.tmp_dir, binarizer.name)
 
         expected_model = {
-          "op": "binarizer",
+          "op": "sklearn_binarizer",
           "attributes": {
             "threshold": {
               "double": 0.0
@@ -577,6 +577,7 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(expected_model['attributes']['threshold']['double'],
                          model['attributes']['threshold']['double'])
+        self.assertEqual(expected_model['op'], model['op'])
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, binarizer.name)) as json_data:

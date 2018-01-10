@@ -41,7 +41,7 @@ class ops(object):
         self.IMPUTER = 'imputer'
         self.NDARRAYTODATAFRAME = 'one_dim_array_to_dataframe'
         self.TODENSE = 'dense_transformer'
-        self.BINARIZER = 'binarizer'
+        self.BINARIZER = 'sklearn_binarizer'
         self.POLYNOMIALEXPANSION = 'polynomial_expansion'
 
 ops = ops()
@@ -675,7 +675,7 @@ class BinarizerSerializer(MLeapSerializer, MLeapDeserializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('threshold', transformer.threshold))
+        attributes.append(('threshold', float(transformer.threshold)))
         attributes.append(("input_shapes", transformer.input_shapes))
 
         # define node inputs and outputs

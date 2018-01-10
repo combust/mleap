@@ -637,14 +637,11 @@ class TransformerTests(unittest.TestCase):
         polynomial_exp.serialize_to_bundle(self.tmp_dir, polynomial_exp.name)
 
         expected_model = {
-          "op": "polynomial_expansion",
+          "op": "sklearn_polynomial_expansion",
           "attributes": {
-            "degree": {
-              "long": 2
-            },
-            "input_size": {
-                  "long": 1
-            }
+              "combinations": {
+                  "string": "[x0,x0^2]"
+              }
           }
         }
 
@@ -652,8 +649,8 @@ class TransformerTests(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, polynomial_exp.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(expected_model['attributes']['degree']['long'], model['attributes']['degree']['long'])
-        self.assertEqual(expected_model['attributes']['input_size']['long'], model['attributes']['input_size']['long'])
+        self.assertEqual(expected_model['op'], model['op'])
+        self.assertEqual(expected_model['attributes']['combinations']['string'], model['attributes']['combinations']['string'])
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, polynomial_exp.name)) as json_data:

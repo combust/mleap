@@ -627,7 +627,9 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
         # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('size', transformer.n_values_.tolist()[0]))
-        attributes.append(('drop_last', True))
+        # the default sklearn OneHotEncoder doesn't support 'drop_last'
+        # see mleap.sklearn.extensions.data for OneHotEncoder that does support 'drop_last'
+        attributes.append(('drop_last', False))
 
         # define node inputs and outputs
         inputs = [{

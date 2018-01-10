@@ -47,25 +47,25 @@ class OneHotEncoder(OneHotEncoder, MLeapSerializer):
             return res.todense()
         return res
 
-    def serialize_to_bundle(self, transformer, path, model_name):
+    def serialize_to_bundle(self, path, model_name):
 
         # compile tuples of mode attributes to serialize
         attributes = list()
-        attributes.append(['size', transformer.n_values_.tolist()[0]])
+        attributes.append(['size', self.n_values_.tolist()[0]])
         attributes.append(['drop_last', self.drop_last])
 
         # define node inputs and outputs
         inputs = [{
-            "name": transformer.input_features,
+            "name": self.input_features,
             "port": "input"
         }]
 
         outputs = [{
-            "name": transformer.output_features,
+            "name": self.output_features,
             "port": "output"
         }]
 
-        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+        self.serialize(self, path, model_name, attributes, inputs, outputs)
 
 
 class DefineEstimator(BaseEstimator, TransformerMixin):

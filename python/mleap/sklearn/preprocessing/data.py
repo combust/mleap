@@ -42,7 +42,7 @@ class ops(object):
         self.NDARRAYTODATAFRAME = 'one_dim_array_to_dataframe'
         self.TODENSE = 'dense_transformer'
         self.BINARIZER = 'sklearn_binarizer'
-        self.POLYNOMIALEXPANSION = 'polynomial_expansion'
+        self.POLYNOMIALEXPANSION = 'sklearn_polynomial_expansion'
 
 ops = ops()
 
@@ -707,8 +707,7 @@ class PolynomialExpansionSerializer(MLeapSerializer, MLeapDeserializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('degree', transformer.degree))
-        attributes.append(('input_size', transformer.input_size))
+        attributes.append(('combinations', str(transformer.get_feature_names()).replace("'", "").replace(", ", ",")))
 
         # define node inputs and outputs
         inputs = [{

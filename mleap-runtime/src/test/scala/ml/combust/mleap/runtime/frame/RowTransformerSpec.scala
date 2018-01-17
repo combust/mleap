@@ -67,7 +67,7 @@ class RowTransformerSpec extends FunSpec {
       }).get
     }
 
-    it("handles correctly the output of udf in the shape of a Row for multiple outputs") {
+    it("handles correctly the output of UDF in the shape of a Row for multiple outputs") {
       val udf: UserDefinedFunction = (in1: Double, in2: Int) => ArrayRow(Seq(in1 + in2, in1 - in2))
 
       val is = StructType("double" -> ScalarType.Double,

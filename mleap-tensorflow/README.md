@@ -8,7 +8,7 @@ Before beginning, make sure to delete the github entry for the protobuf library 
 as per [this issue](https://github.com/tensorflow/tensorflow/issues/12979).
 
 ```
-# Clone the repo and checkout version 1.3.0 (as of MLeap 0.8.0)
+# Clone the repo and checkout version 1.3.0 (as of MLeap 0.9.0)
 git clone https://github.com/tensorflow/tensorflow.git
 cd tensorflow
 gco v1.3.0

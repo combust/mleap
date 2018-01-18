@@ -92,7 +92,11 @@ case class RowTransformer private (inputSchema: StructType,
           schema2 =>
             val transform = {
               (row: ArrayRow) =>
-                val values = row.udfValue(rowSelectors: _*)(udf).asInstanceOf[Product].productIterator.toSeq
+                val outputs = row.udfValue(rowSelectors: _*)(udf)
+                val values = outputs match {
+                  case r: ArrayRow => r.iterator.toSeq
+                  case _ => outputs.asInstanceOf[Product].productIterator.toSeq
+                }
                 indices.zip(values).foreach {
                   case (index, value) => row.set(index, value)
                 }

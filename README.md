@@ -56,7 +56,7 @@ MLeap is cross-compiled for Scala 2.10 and 2.11, so just replace 2.10 with 2.11 
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.8.1"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.9.0"
 ```
 
 #### Maven
@@ -65,7 +65,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.8.1"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.10</artifactId>
-    <version>0.8.1</version>
+    <version>0.9.0</version>
 </dependency>
 ```
 
@@ -74,7 +74,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.8.1"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.8.1"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.9.0"
 ```
 
 #### Maven
@@ -83,14 +83,14 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.8.1"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.10</artifactId>
-    <version>0.8.1</version>
+    <version>0.9.0</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.8.1
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.9.0
 ```
 
 ### PySpark Integration
@@ -167,29 +167,21 @@ from mleap.pyspark.spark_support import SimpleSparkSerializer
 ```python
 import pandas as pd
 
-# Load scikit-learn mleap extensions
-import mleap.sklearn.pipeline
-import mleap.sklearn.preprocessing.data
-from mleap.sklearn.preprocessing.data import NDArrayToDataFrame
-
-# Load the LabelEncoder from Mleap
+from mleap.sklearn.pipeline import Pipeline
 from mleap.sklearn.preprocessing.data import FeatureExtractor, LabelEncoder, ReshapeArrayToN1
-
-# Load scikit-learn transformers and models
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.pipeline import Pipeline
 
 data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
 
-continuous_features = ['col_a']
+categorical_features = ['col_a']
 
-feature_extractor_tf = FeatureExtractor(input_scalars=continuous_features, 
+feature_extractor_tf = FeatureExtractor(input_scalars=categorical_features, 
                                          output_vector='imputed_features', 
-                                         output_vector_items=continuous_features)
+                                         output_vector_items=categorical_features)
 
 # Label Encoder for x1 Label 
 label_encoder_tf = LabelEncoder(input_features=feature_extractor_tf.output_vector_items,
-                               output_features='{}_label_le'.format(continuous_features[0]))
+                               output_features='{}_label_le'.format(categorical_features[0]))
 
 # Reshape the output of the LabelEncoder to N-by-1 array
 reshape_le_tf = ReshapeArrayToN1()
@@ -197,7 +189,7 @@ reshape_le_tf = ReshapeArrayToN1()
 # Vector Assembler for x1 One Hot Encoder
 one_hot_encoder_tf = OneHotEncoder(sparse=False)
 one_hot_encoder_tf.mlinit(prior_tf = label_encoder_tf, 
-                          output_features = '{}_label_one_hot_encoded'.format(continuous_features[0]))
+                          output_features = '{}_label_one_hot_encoded'.format(categorical_features[0]))
 
 one_hot_encoder_pipeline_x0 = Pipeline([
                                          (feature_extractor_tf.name, feature_extractor_tf),
@@ -229,15 +221,14 @@ val bundle = (for(bundleFile <- managed(BundleFile("jar:file:/tmp/simple-spark-p
 }).opt.get
 
 // create a simple LeapFrame to transform
-import ml.combust.mleap.runtime.{Row, LeapFrame, LocalDataset}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.core.types._
 
 // MLeap makes extensive use of monadic types like Try
 val schema = StructType(StructField("test_string", ScalarType.String),
   StructField("test_double", ScalarType.Double)).get
-val data = LocalDataset(Row("hello", 0.6),
-  Row("MLeap", 0.2))
-val frame = LeapFrame(schema, data)
+val data = Seq(Row("hello", 0.6), Row("MLeap", 0.2))
+val frame = DefaultLeapFrame(schema, data)
 
 // transform the dataframe using our pipeline
 val mleapPipeline = bundle.root
@@ -245,11 +236,11 @@ val frame2 = mleapPipeline.transform(frame).get
 val data2 = frame2.dataset
 
 // get data from the transformed rows and make some assertions
-assert(data2(0).getDouble(2) == 0.0) // string indexer output
+assert(data2(0).getDouble(2) == 1.0) // string indexer output
 assert(data2(0).getDouble(3) == 1.0) // binarizer output
 
 // the second row
-assert(data2(1).getDouble(2) == 1.0)
+assert(data2(1).getDouble(2) == 2.0)
 assert(data2(1).getDouble(3) == 0.0)
 ```
 

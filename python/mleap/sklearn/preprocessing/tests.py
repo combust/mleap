@@ -24,11 +24,11 @@ import shutil
 import json
 import uuid
 
-import mleap.sklearn.preprocessing.data
 from mleap.sklearn.preprocessing.data import FeatureExtractor, MathUnary, MathBinary, StringMap
 from mleap.sklearn.preprocessing.data import StandardScaler, MinMaxScaler, LabelEncoder, Imputer, Binarizer, PolynomialFeatures
 from mleap.sklearn.preprocessing.data import OneHotEncoder
 
+from pandas.util.testing import assert_frame_equal
 
 class TransformerTests(unittest.TestCase):
     def setUp(self):
@@ -662,7 +662,7 @@ class TransformerTests(unittest.TestCase):
 
     def math_unary_exp_test(self):
 
-        math_unary_tf = MathUnary(input_features=['a'], output_features=['log_a'], transform_type='exp')
+        math_unary_tf = MathUnary(input_features=['a'], output_features='exp_a', transform_type='exp')
 
         Xres = math_unary_tf.fit_transform(self.df.a)
 
@@ -691,11 +691,11 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(math_unary_tf.name, node['name'])
         self.assertEqual(math_unary_tf.input_features[0], node['shape']['inputs'][0]['name'])
-        self.assertEqual(math_unary_tf.output_features[0], node['shape']['outputs'][0]['name'])
+        self.assertEqual(math_unary_tf.output_features, node['shape']['outputs'][0]['name'])
 
     def math_unary_deserialize_exp_test(self):
 
-        math_unary_tf = MathUnary(input_features=['a'], output_features=['log_a'], transform_type='exp')
+        math_unary_tf = MathUnary(input_features=['a'], output_features='exp_a', transform_type='exp')
 
         Xres = math_unary_tf.fit_transform(self.df.a)
 
@@ -717,7 +717,7 @@ class TransformerTests(unittest.TestCase):
 
     def math_unary_sin_test(self):
 
-        math_unary_tf = MathUnary(input_features=['a'], output_features=['sin_a'], transform_type='sin')
+        math_unary_tf = MathUnary(input_features=['a'], output_features='sin_a', transform_type='sin')
 
         Xres = math_unary_tf.fit_transform(self.df.a)
 
@@ -746,15 +746,15 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(math_unary_tf.name, node['name'])
         self.assertEqual(math_unary_tf.input_features[0], node['shape']['inputs'][0]['name'])
-        self.assertEqual(math_unary_tf.output_features[0], node['shape']['outputs'][0]['name'])
+        self.assertEqual(math_unary_tf.output_features, node['shape']['outputs'][0]['name'])
 
     def math_binary_test(self):
 
-        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features=['a_plus_b'], transform_type='add')
+        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features='a_plus_b', transform_type='add')
 
         Xres = math_binary_tf.fit_transform(self.df[['a', 'b']])
 
-        self.assertEqual( self.df.a[0] + self.df.b[0], Xres[0])
+        assert_frame_equal(pd.DataFrame(self.df.a + self.df.b, columns=['a']), Xres)
 
         math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
@@ -780,15 +780,15 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(math_binary_tf.name, node['name'])
         self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
         self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
-        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
+        self.assertEqual(math_binary_tf.output_features, node['shape']['outputs'][0]['name'])
 
-    def math_binary_deserialize_exp_test(self):
+    def math_binary_deserialize_add_test(self):
 
-        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features=['a_plus_b'], transform_type='add')
+        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features='a_plus_b', transform_type='add')
 
         Xres = math_binary_tf.fit_transform(self.df[['a', 'b']])
 
-        self.assertEqual( self.df.a[0] + self.df.b[0], Xres[0])
+        assert_frame_equal(pd.DataFrame(self.df.a + self.df.b, columns=['a']), Xres)
 
         math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
@@ -798,16 +798,15 @@ class TransformerTests(unittest.TestCase):
 
         res_a = math_binary_tf.transform(self.df[['a', 'b']])
         res_b = math_binary_ds_tf.transform(self.df[['a', 'b']])
-
-        self.assertEqual(res_a[0], res_b[0])
+        assert_frame_equal(res_a, res_b)
 
     def math_binary_subtract_test(self):
 
-        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features=['a_less_b'], transform_type='sub')
+        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features='a_less_b', transform_type='sub')
 
         Xres = math_binary_tf.fit_transform(self.df[['a', 'b']])
 
-        self.assertEqual(self.df.a[0] - self.df.b[0], Xres[0])
+        assert_frame_equal(pd.DataFrame(self.df.a - self.df.b, columns=['a']), Xres)
 
         math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
@@ -833,15 +832,15 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(math_binary_tf.name, node['name'])
         self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
         self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
-        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
+        self.assertEqual(math_binary_tf.output_features, node['shape']['outputs'][0]['name'])
 
     def math_binary_multiply_test(self):
 
-        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features=['a_mul_b'], transform_type='mul')
+        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features='a_mul_b', transform_type='mul')
 
         Xres = math_binary_tf.fit_transform(self.df[['a', 'b']])
 
-        self.assertEqual(self.df.a[0] * self.df.b[0], Xres[0])
+        assert_frame_equal(pd.DataFrame(self.df.a * self.df.b, columns=['a']), Xres)
 
         math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
@@ -867,15 +866,15 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(math_binary_tf.name, node['name'])
         self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
         self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
-        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
+        self.assertEqual(math_binary_tf.output_features, node['shape']['outputs'][0]['name'])
 
     def math_binary_divide_test(self):
 
-        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features=['a_mul_b'], transform_type='div')
+        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features='a_mul_b', transform_type='div')
 
         Xres = math_binary_tf.fit_transform(self.df[['a', 'b']])
 
-        self.assertEqual(self.df.a[0] / self.df.b[0], Xres[0])
+        assert_frame_equal(pd.DataFrame(self.df.a / self.df.b, columns=['a']), Xres)
 
         math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
@@ -901,12 +900,12 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(math_binary_tf.name, node['name'])
         self.assertEqual(math_binary_tf.input_features[0], node['shape']['inputs'][0]['name'])
         self.assertEqual(math_binary_tf.input_features[1], node['shape']['inputs'][1]['name'])
-        self.assertEqual(math_binary_tf.output_features[0], node['shape']['outputs'][0]['name'])
+        self.assertEqual(math_binary_tf.output_features, node['shape']['outputs'][0]['name'])
 
     def string_map_test(self):
 
         df = pd.DataFrame(['test_one', 'test_two', 'test_one', 'test_one', 'test_two'], columns=['a'])
-        string_map_tf = StringMap(input_features=['a'], output_features=['a_mapped'], labels={"test_one":1.0, "test_two": 0.0})
+        string_map_tf = StringMap(input_features=['a'], output_features='a_mapped', labels={"test_one":1.0, "test_two": 0.0})
 
         Xres = string_map_tf.fit_transform(df)
         self.assertEqual(1.0, Xres[0])
@@ -944,12 +943,12 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(string_map_tf.name, node['name'])
         self.assertEqual(string_map_tf.input_features[0], node['shape']['inputs'][0]['name'])
-        self.assertEqual(string_map_tf.output_features[0], node['shape']['outputs'][0]['name'])
+        self.assertEqual(string_map_tf.output_features, node['shape']['outputs'][0]['name'])
 
     def string_map_deserializer_test(self):
 
         df = pd.DataFrame(['test_one', 'test_two', 'test_one', 'test_one', 'test_two'], columns=['a'])
-        string_map = StringMap(input_features=['a'], output_features=['a_mapped'], labels={"test_one":1.0, "test_two": 0.0})
+        string_map = StringMap(input_features=['a'], output_features='a_mapped', labels={"test_one":1.0, "test_two": 0.0})
         string_map.serialize_to_bundle(self.tmp_dir, string_map.name)
 
         # Now deserialize it back

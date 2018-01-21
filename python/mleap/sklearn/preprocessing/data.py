@@ -893,13 +893,13 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
         self.transform_type = transform_type
         self.serializable = True
 
-    def fit(self, y):
+    def fit(self, X, y=None, **fit_params):
         """
         Fit Unary Math Operator
-        :param y:
+        :param X:
         :return:
         """
-        y = column_or_1d(y, warn=True)
+        X = column_or_1d(X, warn=True)
         if self.transform_type not in self.valid_transforms:
                 warnings.warn("Invalid transform type.", stacklevel=2)
         return self
@@ -948,7 +948,7 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
                 }]
 
         outputs = [{
-                  "name": self.output_features[0],
+                  "name": self.output_features,
                   "port": "output"
                 }]
 
@@ -989,7 +989,7 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
         if type(y, np.ndarray):
             return
 
-    def fit(self, y):
+    def fit(self, X, y=None, **fit_params):
         """
         Fit Unary Math Operator
         :param y:
@@ -1012,17 +1012,17 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
             x = y[:,0]
             y = y[:,1]
         if self.transform_type == 'add':
-            return np.add(x, y)
+            return pd.DataFrame(np.add(x, y))
         elif self.transform_type == 'sub':
-            return np.subtract(x, y)
+            return pd.DataFrame(np.subtract(x, y))
         elif self.transform_type == 'mul':
-            return np.multiply(x, y)
+            return pd.DataFrame(np.multiply(x, y))
         elif self.transform_type == 'div':
-            return np.divide(x, y)
+            return pd.DataFrame(np.divide(x, y))
         elif self.transform_type == 'rem':
-            return np.remainder(x, y)
+            return pd.DataFrame(np.remainder(x, y))
         elif self.transform_type == 'pow':
-            return x**y
+            return pd.DataFrame(x**y)
 
     def fit_transform(self, X, y=None, **fit_params):
         """
@@ -1053,7 +1053,7 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
                 }]
 
         outputs = [{
-                  "name": self.output_features[0],
+                  "name": self.output_features,
                   "port": "output"
                 }]
 
@@ -1080,7 +1080,7 @@ class StringMap(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
             self.label_keys = self.labels.keys
             self.label_values = self.labels.values
 
-    def fit(self, y):
+    def fit(self, X, y=None, **fit_params):
         if self.labels is None:
             self.labels = dict(zip(self.label_keys, self.label_values))
         return self
@@ -1105,7 +1105,7 @@ class StringMap(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
         }]
 
         outputs = [{
-            "name": self.output_features[0],
+            "name": self.output_features,
             "port": "output"
         }]
 

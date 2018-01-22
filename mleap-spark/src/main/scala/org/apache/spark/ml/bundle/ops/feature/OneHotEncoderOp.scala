@@ -1,7 +1,7 @@
 package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.attribute.{Attribute, BinaryAttribute, NominalAttribute, NumericAttribute}
 import org.apache.spark.ml.bundle._

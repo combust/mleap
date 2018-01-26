@@ -1,20 +1,23 @@
 package ml.combust.mleap.tensorflow.converter
 
-import java.nio.{DoubleBuffer, FloatBuffer, IntBuffer, LongBuffer}
+import java.nio._
 
 import ml.combust.mleap.core.types.{BasicType, TensorType}
 import ml.combust.mleap.tensor.Tensor
 import org.tensorflow
+import org.tensorflow.DataType
 
 /**
   * Created by hollinwilkins on 1/12/17.
   */
 object MleapConverter {
-  def convert(value: Tensor[_], tt: TensorType): tensorflow.Tensor = {
+  def convert(value: Tensor[_], tt: TensorType): tensorflow.Tensor[_] = {
     val dense = value.toDense
     val dimensions = dense.dimensions.map(_.toLong).toArray
 
     tt.base match {
+      case BasicType.Byte =>
+        tensorflow.Tensor.create(dense.values.asInstanceOf[Array[Byte]])
       case BasicType.Int =>
         tensorflow.Tensor.create(dimensions,
           IntBuffer.wrap(dense.values.asInstanceOf[Array[Int]]))

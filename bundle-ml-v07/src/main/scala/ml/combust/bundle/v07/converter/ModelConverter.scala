@@ -3,13 +3,19 @@ package ml.combust.bundle.v07.converter
 import com.google.protobuf.ByteString
 import ml.combust.bundle.dsl._
 import ml.bundle.{List, Scalar, Value => BValue, v07 => bv07}
+import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.bundle.v07
+
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 1/27/18.
   */
 trait ModelConverter {
   def convert(model: v07.dsl.Model): Model
+  def convertModelFiles(context: ConverterContext,
+                        format: SerializationFormat,
+                        model: Model): Try[Unit] = Try(Unit)
 
   def convertAttributes(attrs: Option[v07.dsl.AttributeList]): Attributes = attrs match {
     case Some(attributes) =>

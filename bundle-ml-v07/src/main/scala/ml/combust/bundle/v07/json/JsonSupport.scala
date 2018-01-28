@@ -4,7 +4,6 @@ import java.util.{Base64, UUID}
 
 import ml.bundle.v07.BasicType
 import ml.combust.bundle.v07.dsl._
-import ml.combust.bundle.v07.serializer.SerializationFormat
 import ml.bundle.v07.DataType
 import ml.bundle.v07.DataType.ListType
 import ml.bundle.v07.TensorType

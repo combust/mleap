@@ -1,6 +1,6 @@
 package ml.combust.bundle.v07.dsl
 
-import ml.bundle.legacy.v07.NodeDef
+import ml.bundle.v07.NodeDef
 
 /** Companion object for node.
   */
@@ -29,11 +29,4 @@ object Node {
   * @param shape shape of the node
   */
 case class Node(name: String,
-                shape: Shape) {
-  /** Convert to a bundle node.
-    *
-    * @return bundle node definition
-    */
-  def asBundle: NodeDef = NodeDef(name = name,
-    shape = Some(shape.asBundle))
-}
+                shape: Shape)

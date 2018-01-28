@@ -3,9 +3,9 @@ package ml.combust.bundle.v07.tensor
 import java.nio.ByteBuffer
 
 import com.google.protobuf.ByteString
-import ml.bundle.BasicType.BasicType
-import ml.bundle.Tensor.Tensor
-import ml.bundle.TensorType.TensorType
+import ml.bundle.v07.BasicType
+import ml.bundle.v07.Tensor
+import ml.bundle.v07.TensorType
 import ml.combust.mleap.tensor
 
 import scala.reflect.ClassTag
@@ -30,7 +30,7 @@ object TensorSerializer {
     val indices = t match {
       case t: tensor.SparseTensor[_] =>
         ByteString.copyFrom(writeIndices(t.indices, t.dimensions))
-      case t: tensor.DenseTensor[_] => ByteString.EMPTY
+      case _: tensor.DenseTensor[_] => ByteString.EMPTY
     }
 
     val (tpe, values) = t.base.runtimeClass match {

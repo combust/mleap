@@ -1,19 +1,16 @@
 package ml.combust.bundle.v07.dsl
 
-import ml.bundle.legacy.v07.ModelDef
-import ml.combust.bundle.HasBundleRegistry
+import ml.bundle.v07.ModelDef
 
 /** Companion object for model.
   */
 object Model {
-  /** Create a dsl model from a bunle model.
+  /** Create a dsl model from a bundle model.
     *
     * @param modelDef bundle model definition
-    * @param hr bundle registry for custom types
     * @return dsl model
     */
-  def fromBundle(modelDef: ModelDef)
-                (implicit hr: HasBundleRegistry): Model = Model(op = modelDef.op,
+  def fromBundle(modelDef: ModelDef): Model = Model(op = modelDef.op,
     attributes = modelDef.attributes.map(AttributeList.fromBundle))
 }
 
@@ -29,16 +26,4 @@ object Model {
   * @param attributes optional list of attributes for the model
   */
 case class Model(op: String,
-                 attributes: Option[AttributeList] = None) extends HasAttributeList[Model] {
-  /** Convert to bundle model.
-    *
-    * @param hr bundle registry from custom types
-    * @return bundle model definition
-    */
-  def asBundle(implicit hr: HasBundleRegistry): ModelDef = ModelDef(op = op,
-    attributes = attributes.map(_.asBundle))
-
-  override def replaceAttrList(list: Option[AttributeList]): Model = {
-    copy(attributes = list)
-  }
-}
+                 attributes: Option[AttributeList] = None) extends HasAttributeList[Model]

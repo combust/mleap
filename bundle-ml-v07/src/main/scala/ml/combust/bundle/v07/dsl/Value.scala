@@ -1,17 +1,16 @@
 package ml.combust.bundle.v07.dsl
 
 import com.google.protobuf.ByteString
-import ml.bundle.legacy.v07.BasicType
-import ml.bundle.legacy.v07.DataType
-import ml.bundle.legacy.v07.DataType.ListType
-import ml.bundle.legacy.v07.Tensor
-import ml.bundle.legacy.v07.TensorType
-import ml.bundle.legacy.v07.Value.ListValue
-import ml.bundle.legacy.v07.{Value => BValue}
-import ml.combust.bundle.HasBundleRegistry
+import ml.bundle.v07.BasicType
+import ml.bundle.v07.DataType
+import ml.bundle.v07.DataType.ListType
+import ml.bundle.v07.Tensor
+import ml.bundle.v07.TensorType
+import ml.bundle.v07.Value.ListValue
+import ml.bundle.v07.{Value => BValue}
 import ml.combust.bundle.v07.tensor.TensorSerializer
 import ml.combust.mleap.tensor
-import ml.combust.{bundle, mleap}
+import ml.combust.mleap
 
 import scala.reflect.{ClassTag, classTag}
 
@@ -28,7 +27,7 @@ import scala.reflect.{ClassTag, classTag}
   * Scala objects.
   */
 object Value {
-  /** Convert from a [[ml.bundle.legacy.v07.Tensor]] to a [[ml.combust.mleap.tensor.Tensor]].
+  /** Convert from a [[ml.bundle.v07.Tensor]] to a [[ml.combust.mleap.tensor.Tensor]].
     *
     * @param tt bundle type of tensor
     * @param tensor bundle tensor
@@ -38,18 +37,16 @@ object Value {
     TensorSerializer.fromProto(tt, tensor)
   }
 
-  /** Convert a [[ml.bundle.legacy.v07.Value.ListValue]] into a Scala Seq.
+  /** Convert a [[ml.bundle.v07.Value.ListValue]] into a Scala Seq.
     *
     * Lists can be of any depth, and so can be decoded to Seq[Seq[Seq[String\]\]\]
     * for example.
     *
     * @param lt list type to extract to a Scala value
     * @param list protobuf list to extract to Scala value
-    * @param hr bundle registry for custom types
     * @return Scala value of protobuf object
     */
-  def fromListValue(lt: ListType, list: ListValue)
-                   (implicit hr: HasBundleRegistry): Any = {
+  def fromListValue(lt: ListType, list: ListValue): Any = {
     val base = lt.base.get
     val u = base.underlying
     if(u.isList) {
@@ -73,16 +70,14 @@ object Value {
     } else { throw new IllegalArgumentException("unsupported list type") }
   }
 
-  /** Convert a [[ml.bundle.legacy.v07.Value]] into a [[ml.combust.bundle.v07.dsl.Value]].
+  /** Convert a [[ml.bundle.v07.Value]] into a [[ml.combust.bundle.v07.dsl.Value]].
     *
     * @param dataType data type of the protobuf value
     * @param value protobuf value to convert
-    * @param hr bundle registry for custom types
     * @return wrapped Scala value of protobuf object
     */
-  def fromBundle(dataType: DataType, value: ml.bundle.legacy.v07.Value)
-                (implicit hr: HasBundleRegistry): Value = {
-    if(dataType.underlying.isTensor) {
+  def fromBundle(dataType: DataType, value: ml.bundle.v07.Value): Value = {
+    val v = if(dataType.underlying.isTensor) {
       fromTensorValue(dataType.getTensor, value.getTensor)
     } else if(dataType.underlying.isBasic) {
       dataType.getBasic match {
@@ -105,7 +100,7 @@ object Value {
     Value(dataType, v)
   }
 
-  /** Convert [[ml.combust.mleap.tensor.Tensor]] to [[ml.bundle.legacy.v07.Tensor]].
+  /** Convert [[ml.combust.mleap.tensor.Tensor]] to [[ml.bundle.v07.Tensor]].
     *
     * @param tensor mleap tensor
     * @return bundle tensor
@@ -122,11 +117,9 @@ object Value {
     *
     * @param lt list type
     * @param value Scala list
-    * @param hr bundle registry for custom types
     * @return list protobuf object of the Scala list
     */
-  def listValue(lt: ListType, value: Seq[_])
-               (implicit hr: HasBundleRegistry): ListValue = {
+  def listValue(lt: ListType, value: Seq[_]): ListValue = {
     val base = lt.base.get
     val u = base.underlying
     if(u.isBasic) {
@@ -139,7 +132,7 @@ object Value {
         case BasicType.LONG => ListValue(i = value.asInstanceOf[Seq[Long]])
         case BasicType.FLOAT => ListValue(f = value.asInstanceOf[Seq[Float]].map(_.toDouble))
         case BasicType.DOUBLE => ListValue(f = value.asInstanceOf[Seq[Double]])
-        case BasicType.BYTE_STRING => ListValue(bs = value.asInstanceOf[Seq[tensor.ByteString]].map(_.toProto))
+        case BasicType.BYTE_STRING => ListValue(bs = value.asInstanceOf[Seq[tensor.ByteString]].map(bs => ByteString.copyFrom(bs.bytes)))
         case BasicType.DATA_TYPE => ListValue(`type` = value.asInstanceOf[Seq[DataType]])
         case _ => throw new IllegalArgumentException("unsupported basic type")
       }
@@ -156,11 +149,9 @@ object Value {
     *
     * @param dataType type of Scala value
     * @param value Scala value to convert
-    * @param hr bundle registry for custom types
     * @return protobuf value of the Scala value
     */
-  def bundleValue(dataType: DataType, value: Any)
-                 (implicit hr: HasBundleRegistry): BValue = {
+  def bundleValue(dataType: DataType, value: Any): BValue = {
     val u = dataType.underlying
     val v = if(u.isTensor) {
       BValue.V.Tensor(tensorValue(value.asInstanceOf[mleap.tensor.Tensor[_]]))
@@ -174,7 +165,7 @@ object Value {
         case BasicType.LONG => BValue.V.I(value.asInstanceOf[Long])
         case BasicType.FLOAT => BValue.V.F(value.asInstanceOf[Double].toFloat)
         case BasicType.DOUBLE => BValue.V.F(value.asInstanceOf[Double])
-        case BasicType.BYTE_STRING => BValue.V.Bs(value.asInstanceOf[bundle.ByteString].toProto)
+        case BasicType.BYTE_STRING => BValue.V.Bs(ByteString.copyFrom(value.asInstanceOf[tensor.ByteString].bytes))
         case BasicType.DATA_TYPE => BValue.V.Type(value.asInstanceOf[DataType])
         case _ => throw new IllegalArgumentException(s"unsupported basic type ${dataType.getBasic}")
       }
@@ -302,18 +293,6 @@ object Value {
     */
   def double(value: Double): Value = Value(doubleDataType, value)
 
-  /** Create a custom value.
-    *
-    * @param value value to wrap
-    * @param hr bundle registry for custom value serializer
-    * @tparam T Scala class of the custom value
-    * @return wrapped custom value
-    */
-  def custom[T: ClassTag](value: T)
-                         (implicit hr: HasBundleRegistry): Value = {
-    Value(customDataType[T], value)
-  }
-
   /** Create a tensor value.
     *
     * Dimensions must have size greater than 0. Use -1 for
@@ -341,7 +320,7 @@ object Value {
     * @param bs byte string
     * @return value with byte string
     */
-  def byteString(bs: bundle.ByteString): Value = {
+  def byteString(bs: tensor.ByteString): Value = {
     Value(byteStringDataType, bs)
   }
 
@@ -410,20 +389,6 @@ object Value {
     */
   def doubleList(value: Seq[Double]): Value = Value(doubleListDataType, value)
 
-  /** Create a list of custom objects value.
-    *
-    * @param value Scala list of custom objects
-    * @param hr bundle registry for constructing custom data type
-    * @tparam T Scala class of the custom values
-    * @return wrapped custom list
-    */
-  def customList[T: ClassTag](value: Seq[T])
-                             (implicit hr: HasBundleRegistry): Value = {
-    val base = customDataType[T]
-    val lt = DataType(DataType.Underlying.List(DataType.ListType(Some(base))))
-    Value(lt, value)
-  }
-
   /** Create a list of tensors.
     *
     * Dimensions of a tensor indicate how many values are in each dimension.
@@ -442,7 +407,7 @@ object Value {
     * @param bss data types
     * @return value with data types
     */
-  def byteStringList(bss: Seq[bundle.ByteString]): Value = {
+  def byteStringList(bss: Seq[tensor.ByteString]): Value = {
     Value(byteStringListDataType, bss)
   }
 
@@ -456,9 +421,6 @@ object Value {
   }
 
   /** Construct a nested list of any value.
-    *
-    * For custom values use [[Value.customListN]]
-    * Example to construct a nested list of Double.
     *
     * {{{
     * scala> import ml.bundle.BasicType.BasicType
@@ -477,22 +439,6 @@ object Value {
     * @return wrapped nested list
     */
   def listN(base: DataType, n: Int, value: Seq[_]): Value = Value(listDataTypeN(base, n), value)
-
-  /** Construct a nested list of custom values.
-    *
-    * See [[Value.listN]] for example usage.
-    *
-    * @param n depth of nesting
-    * @param value Scala nested list of custom objects
-    * @param hr bundle registry needed for custom data type
-    * @tparam T Scala class of the custom data
-    * @return wrapped nested list of custom values
-    */
-  def customListN[T: ClassTag](n: Int, value: Seq[_])
-                              (implicit hr: HasBundleRegistry): Value = {
-    val base = customDataType[T]
-    listN(base, n, value)
-  }
 }
 
 /** This class is used to wrap Scala objects for later serialization into Bundle.ML
@@ -501,34 +447,6 @@ object Value {
   * @param value Scala object that will be serialized later
   */
 case class Value(bundleDataType: DataType, value: Any) {
-  def asBundle(implicit hr: HasBundleRegistry): ml.bundle.Value.Value = {
-    Value.bundleValue(bundleDataType, value)
-  }
-
-  /** Whether or not this value has a small serialization size.
-    *
-    * See [[isLarge]] for usage documentation.
-    * This method will always return the inverse of [[isLarge]].
-    *
-    * @param hr bundle registry needed for custom values
-    * @return true if the value has a small serialization size, false otherwise
-    */
-  def isSmall(implicit hr: HasBundleRegistry): Boolean = !isLarge
-
-  /** Whether or not this value has a large serialization size.
-    *
-    * This method is used in [[ml.combust.bundle.v07.serializer.SerializationFormat.Mixed]] mode
-    * serialization to determine whether to serialize the value as JSON or as Protobuf.
-    *
-    * @param hr bundle registry needed for custom values
-    * @return true if the value has a large serialization size, false otherwise
-    */
-  def isLarge(implicit hr: HasBundleRegistry): Boolean = {
-    bundleDataType.underlying.isTensor && getTensor[Any].rawSize > 1024 ||
-      bundleDataType.underlying.isList && !bundleDataType.getList.base.get.underlying.isBasic ||
-      bundleDataType.underlying.isCustom && hr.bundleRegistry.custom[Any](bundleDataType.getCustom).isLarge(value)
-  }
-
   /** Get value as a boolean.
     *
     * @return boolean value
@@ -595,7 +513,7 @@ case class Value(bundleDataType: DataType, value: Any) {
     *
     * @return byte string
     */
-  def getByteString: bundle.ByteString = value.asInstanceOf[bundle.ByteString]
+  def getByteString: tensor.ByteString = value.asInstanceOf[tensor.ByteString]
 
   /** Get value as a data type.
     *
@@ -615,6 +533,18 @@ case class Value(bundleDataType: DataType, value: Any) {
     */
   def getStringList: Seq[String] = value.asInstanceOf[Seq[String]]
 
+  /** Get list of bytes.
+    *
+    * @return list of bytes
+    */
+  def getByteList: Seq[Byte] = value.asInstanceOf[Seq[Byte]]
+
+  /** Get list of shorts.
+    *
+    * @return list of shorts
+    */
+  def getShortList: Seq[Short] = value.asInstanceOf[Seq[Short]]
+
   /** Get list of ints.
     *
     * @return list of ints
@@ -626,6 +556,12 @@ case class Value(bundleDataType: DataType, value: Any) {
     * @return list of longs
     */
   def getLongList: Seq[Long] = value.asInstanceOf[Seq[Long]]
+
+  /** Get list of floats.
+    *
+    * @return list of floats
+    */
+  def getFloatList: Seq[Float] = value.asInstanceOf[Seq[Float]]
 
   /** Get list of doubles.
     *
@@ -657,7 +593,7 @@ case class Value(bundleDataType: DataType, value: Any) {
     *
     * @return list of byte strings
     */
-  def getByteStringList: Seq[bundle.ByteString] = value.asInstanceOf[Seq[bundle.ByteString]]
+  def getByteStringList: Seq[tensor.ByteString] = value.asInstanceOf[Seq[tensor.ByteString]]
 
   /** Get list of data types.
     *

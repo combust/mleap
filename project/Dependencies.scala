@@ -52,6 +52,8 @@ object Dependencies {
 
   val bundleMl = l ++= Seq(arm, config, sprayJson, Test.scalaTest)
 
+  val bundleMlV07 = l ++= Seq(Test.scalaTest)
+
   val base = l ++= Seq()
 
   val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)

@@ -5,17 +5,18 @@ import sbt._
 
 object MleapProject {
   lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
-      tensor,
-      tensorflow,
-      bundleMl,
-      core,
-      runtime,
-      avro,
-      sparkBase,
-      sparkTestkit,
-      spark,
-      sparkExtension,
-      xgboostJava)
+    tensor,
+    tensorflow,
+    bundleMl,
+    bundleMlV07,
+    core,
+    runtime,
+    avro,
+    sparkBase,
+    sparkTestkit,
+    spark,
+    sparkExtension,
+    xgboostJava)
 
   var rootSettings = Release.settings ++
     Common.buildSettings ++
@@ -48,6 +49,12 @@ object MleapProject {
     id = "bundle-ml",
     base = file("bundle-ml"),
     dependencies = Seq(baseProject, tensor)
+  )
+
+  lazy val bundleMlV07 = Project(
+    id = "bundle-ml-v07",
+    base = file("bundle-ml-v07"),
+    dependencies = Seq(bundleMl)
   )
 
   lazy val core = Project(

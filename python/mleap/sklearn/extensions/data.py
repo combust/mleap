@@ -18,7 +18,7 @@
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing.data import _transform_selected
-from mleap.sklearn.preprocessing.data import MLeapSerializer
+from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
 import numpy as np
 import uuid
 from sklearn.preprocessing import Imputer as SklearnImputer
@@ -117,16 +117,17 @@ class Imputer(SklearnImputer):
         self.input_features = input_features
         self.output_features = output_features
         self.input_shapes = {'data_shape': [{'shape': 'scalar'}]}
+        self.feature_extractor = FeatureExtractor(input_scalars=[input_features],
+                                                  output_vector='extracted_' + output_features,
+                                                  output_vector_items=[output_features])
         SklearnImputer.__init__(self, missing_values, strategy, axis, verbose, copy)
 
     def fit(self, X, y=None):
-        X = pd.DataFrame(X[self.input_features])
-        super(Imputer, self).fit(X)
+        super(Imputer, self).fit(self.feature_extractor.transform(X))
         return self
 
     def transform(self, X):
-        X = pd.DataFrame(X[self.input_features])
-        return pd.DataFrame(super(Imputer, self).transform(X))
+        return pd.DataFrame(super(Imputer, self).transform(self.feature_extractor.transform(X)))
 
     def serialize_to_bundle(self, path, model_name):
         ImputerSerializer().serialize_to_bundle(self, path, model_name)

@@ -35,7 +35,7 @@ class ExtensionsTests(unittest.TestCase):
         df2.reset_index(inplace=True)
         df2['a'] = df2.apply(_set_nulls, axis=1)
 
-        imputer.fit(df2[['a']])
+        imputer.fit(df2)
 
         self.assertAlmostEqual(imputer.statistics_[0], df2.a.mean(), places = 7)
 

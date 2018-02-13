@@ -107,6 +107,21 @@ class BundleSerializationSpec extends FunSpec {
           }
         }
       }
+
+      describe("with a backslash'd path for a linear regression") {
+        it("serializes and deserializes from a path containing '\\' separators") {
+          val uri = s"$prefix:${TestUtil.baseDir}/lr_bundle.$format$suffix".replace('/', '\\')
+          for(file <- managed(BundleFile(uri))) {
+            lr.writeBundle.name("my_bundle").
+              format(format).
+              save(file)
+
+            val bundleRead = file.loadBundle().get
+
+            assert(lr == bundleRead.root)
+          }
+        }
+      }
     }
   }
 }

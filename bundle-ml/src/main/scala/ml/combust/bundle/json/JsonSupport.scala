@@ -216,7 +216,7 @@ trait JsonSupport {
       if(obj.s.nonEmpty) { fb += ("string" -> obj.s.toJson) }
       if(obj.bs.nonEmpty) { fb += ("byte_string" -> obj.bs.toJson) }
       if(obj.t.nonEmpty) { fb += ("tensor" -> obj.t.toJson) }
-      if(obj.bt.nonEmpty) { fb += ("byte_string" -> obj.bt.toJson) }
+      if(obj.bt.nonEmpty) { fb += ("basic_type" -> obj.bt.toJson) }
       if(obj.ds.nonEmpty) { fb += ("data_shape" -> obj.ds.toJson) }
       if(obj.m.nonEmpty) { fb += ("model" -> obj.m.toJson) }
 

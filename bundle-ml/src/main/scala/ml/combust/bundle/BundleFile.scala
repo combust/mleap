@@ -48,9 +48,14 @@ object BundleFile {
 
     apply(fs, path)
   }
-  private def unbackslash(uri: String) = {
-    // replace allbackslashes with forward slashes, to handle Windows file paths in URI construction
-    uri.toString.replace('\\', '/')
+
+  /** Replace all backslashes with forward slashes, to handle Windows file paths in URI construction
+    *
+    * @param uri String representing a URI
+    * @return String containing no backslashes.
+    */
+  private def unbackslash(uri: String): String = {
+    uri.replace('\\', '/')
   }
 }
 

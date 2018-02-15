@@ -20,14 +20,15 @@ import scala.util.Try
   */
 object BundleFile {
   implicit def apply(uri: String): BundleFile = {
-    apply(new URI(uri))
+    apply(new URI(unbackslash(uri)))
   }
 
+
   implicit def apply(file: File): BundleFile = {
-    val uri = if(file.getPath.endsWith(".zip")) {
-      new URI(s"jar:file:${file.getAbsolutePath}")
+    val uri: String = if (file.getPath.endsWith(".zip")) {
+      s"jar:${file.toURI.toString}"
     } else {
-      new URI(s"file:$file")
+      file.toURI.toString
     }
 
     apply(uri)
@@ -35,16 +36,26 @@ object BundleFile {
 
   implicit def apply(uri: URI): BundleFile = {
     val env = Map("create" -> "true").asJava
+    val uriSafe = new URI(unbackslash(uri.toString))
 
-    val (fs, path) = uri.getScheme match {
+    val (fs, path) = uriSafe.getScheme match {
       case "file" =>
-        (FileSystems.getDefault, FileSystems.getDefault.getPath(uri.getPath))
+        (FileSystems.getDefault, FileSystems.getDefault.getPath(uriSafe.getPath))
       case "jar" =>
-        val zfs = FileSystems.newFileSystem(uri, env)
+        val zfs = FileSystems.newFileSystem(uriSafe, env)
         (zfs, zfs.getPath("/"))
     }
 
     apply(fs, path)
+  }
+
+  /** Replace all backslashes with forward slashes, to handle Windows file paths in URI construction
+    *
+    * @param uri String representing a URI
+    * @return String containing no backslashes.
+    */
+  private def unbackslash(uri: String): String = {
+    uri.replace('\\', '/')
   }
 }
 

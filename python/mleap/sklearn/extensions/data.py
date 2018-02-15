@@ -18,10 +18,12 @@
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing.data import _transform_selected
-from mleap.sklearn.preprocessing.data import MLeapSerializer
+from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
 import numpy as np
 import uuid
-
+from sklearn.preprocessing import Imputer as SklearnImputer
+from mleap.sklearn.preprocessing.data import ImputerSerializer
+import pandas as pd
 
 class OneHotEncoder(OneHotEncoder, MLeapSerializer):
     def __init__(self, input_features, output_features, drop_last=False, n_values="auto", categorical_features="all",
@@ -47,25 +49,25 @@ class OneHotEncoder(OneHotEncoder, MLeapSerializer):
             return res.todense()
         return res
 
-    def serialize_to_bundle(self, transformer, path, model_name):
+    def serialize_to_bundle(self, path, model_name):
 
         # compile tuples of mode attributes to serialize
         attributes = list()
-        attributes.append(['size', transformer.n_values_.tolist()[0]])
+        attributes.append(['size', self.n_values_.tolist()[0]])
         attributes.append(['drop_last', self.drop_last])
 
         # define node inputs and outputs
         inputs = [{
-            "name": transformer.input_features,
+            "name": self.input_features,
             "port": "input"
         }]
 
         outputs = [{
-            "name": transformer.output_features,
+            "name": self.output_features,
             "port": "output"
         }]
 
-        self.serialize(transformer, path, model_name, attributes, inputs, outputs)
+        self.serialize(self, path, model_name, attributes, inputs, outputs)
 
 
 class DefineEstimator(BaseEstimator, TransformerMixin):
@@ -95,3 +97,37 @@ class DefineEstimator(BaseEstimator, TransformerMixin):
 
     def predict(self, X):
         return self.transformer.predict(X[:,:-1])
+
+
+"""
+Wrapper around the sklearn Imputer so that it can be used in pipelines. 
+Delegates fit() and transform() methods to the sklearn transformer and uses the ImputerSerializer to serialize to bundle.
+
+Instead of putting a FeatureExtractor ahead of the Imputer, we add the equivalent of FeatureExtractor's transform() method
+in the fit() and transform() methods.
+
+This is because the Imputer both in Spark and MLeap operates on a scalar value and if we were to add a feature extractor in
+front of it, then it would serialize as operating on a tensor and thus, fail at scoring time. 
+"""
+class Imputer(SklearnImputer):
+
+    def __init__(self, missing_values="NaN", strategy="mean",
+                 axis=0, verbose=0, copy=True, input_features=None, output_features=None):
+        self.name = "{}_{}".format(self.op, uuid.uuid1())
+        self.input_features = input_features
+        self.output_features = output_features
+        self.input_shapes = {'data_shape': [{'shape': 'scalar'}]}
+        self.feature_extractor = FeatureExtractor(input_scalars=[input_features],
+                                                  output_vector='extracted_' + output_features,
+                                                  output_vector_items=[output_features])
+        SklearnImputer.__init__(self, missing_values, strategy, axis, verbose, copy)
+
+    def fit(self, X, y=None):
+        super(Imputer, self).fit(self.feature_extractor.transform(X))
+        return self
+
+    def transform(self, X):
+        return pd.DataFrame(super(Imputer, self).transform(self.feature_extractor.transform(X)))
+
+    def serialize_to_bundle(self, path, model_name):
+        ImputerSerializer().serialize_to_bundle(self, path, model_name)

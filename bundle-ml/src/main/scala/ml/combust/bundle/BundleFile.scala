@@ -23,6 +23,7 @@ object BundleFile {
     apply(new URI(unbackslash(uri)))
   }
 
+
   implicit def apply(file: File): BundleFile = {
     val uri: String = if (file.getPath.endsWith(".zip")) {
       s"jar:${file.toURI.toString}"
@@ -47,15 +48,9 @@ object BundleFile {
 
     apply(fs, path)
   }
-
-  private def unbackslash(uri: String): String = {
-    // same logic as https://github.com/apache/commons-io/blob/master/src/main/java/org/apache/commons/io/FilenameUtils.java#L570
-    val BACKSLASH = '\\'
-    val NOT_FOUND = -1
-    if (uri == null || uri.indexOf(BACKSLASH) == NOT_FOUND) {
-      uri
-    }
-    uri.replace(BACKSLASH, '/')
+  private def unbackslash(uri: String) = {
+    // replace allbackslashes with forward slashes, to handle Windows file paths in URI construction
+    uri.toString.replace('\\', '/')
   }
 }
 

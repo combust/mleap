@@ -140,7 +140,9 @@ class BundleSerializationSpec extends FunSpec {
 
             val bundleRead = file.loadBundle().get
 
-            assert(bundleRead.info.meta.contains(meta))
+            // These are written this way explicitly for compatibility with Scala 2.10
+            assert(!bundleRead.info.meta.isEmpty)
+            assert(bundleRead.info.meta.get.equals(meta))
           }
         }
       }

@@ -11,9 +11,11 @@ import scala.util.Try
 case class BundleWriter[Context <: HasBundleRegistry,
 Transformer <: AnyRef](root: Transformer,
                        name: Option[String] = None,
-                       format: SerializationFormat = SerializationFormat.Json) {
+                       format: SerializationFormat = SerializationFormat.Json,
+                       meta: Option[ml.bundle.Attributes] = None) {
   def name(value: String): BundleWriter[Context, Transformer] = copy(name = Some(value))
   def format(value: SerializationFormat): BundleWriter[Context, Transformer] = copy(format = value)
+  def meta(value: ml.bundle.Attributes): BundleWriter[Context, Transformer] = copy(meta = Some(value))
 
   def save(file: BundleFile)
           (implicit context: Context): Try[Bundle[Transformer]] = {
@@ -23,6 +25,7 @@ Transformer <: AnyRef](root: Transformer,
 
     BundleSerializer(context, file).write(Bundle(name = n,
       format = format,
-      root = root))
+      root = root,
+      meta = meta))
   }
 }

@@ -39,7 +39,7 @@ trait JsonSupport {
       case JsString("double") => BasicType.DOUBLE
       case JsString("string") => BasicType.STRING
       case JsString("byte_string") => BasicType.BYTE_STRING
-      case JsString("unknown") => BasicType.Unrecognized(100)
+      case JsString("unknown") => BasicType.UNDEFINED
       case _ => deserializationError("invalid basic type")
     }
 
@@ -290,6 +290,6 @@ trait JsonSupport {
 
   implicit val bundleNodeFormat: RootJsonFormat[Node] = jsonFormat2(Node.apply)
   implicit val bundleModelFormat: RootJsonFormat[Model] = jsonFormat2(Model.apply)
-  implicit val bundleBundleInfoFormat: RootJsonFormat[Bundle] = jsonFormat5(Bundle.apply)
+  implicit val bundleBundleInfoFormat: RootJsonFormat[Bundle] = jsonFormat6(Bundle.apply)
 }
 object JsonSupport extends JsonSupport

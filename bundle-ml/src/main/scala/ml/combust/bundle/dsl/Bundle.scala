@@ -101,12 +101,14 @@ object Bundle {
 
   def apply[Transformer <: AnyRef](name: String,
                                    format: SerializationFormat,
-                                   root: Transformer): Bundle[Transformer] = {
+                                   root: Transformer,
+                                   meta: Option[ml.bundle.Attributes] = None): Bundle[Transformer] = {
     apply(BundleInfo(uid = UUID.randomUUID(),
       name = name,
       format = format,
       version = Bundle.version,
-      timestamp = LocalDateTime.now().toString), root)
+      timestamp = LocalDateTime.now().toString,
+      meta = meta), root)
   }
 }
 
@@ -116,7 +118,8 @@ object BundleInfo {
       name = bundle.name,
       format = SerializationFormat.fromBundle(bundle.format),
       version = bundle.version,
-      timestamp = bundle.timestamp)
+      timestamp = bundle.timestamp,
+      meta = bundle.meta)
   }
 }
 
@@ -132,13 +135,16 @@ case class BundleInfo(uid: UUID,
                       name: String,
                       format: SerializationFormat,
                       version: String,
-                      timestamp: String) {
+                      timestamp: String,
+                      meta: Option[ml.bundle.Attributes]) {
   def asBundle: ml.bundle.Bundle = {
     ml.bundle.Bundle(uid = uid.toString,
       name = name,
       format = format.asBundle,
       version = version,
-      timestamp = timestamp)
+      timestamp = timestamp,
+      meta = meta
+    )
   }
 }
 

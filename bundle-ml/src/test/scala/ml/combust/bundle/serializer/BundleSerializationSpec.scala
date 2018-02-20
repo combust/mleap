@@ -2,12 +2,13 @@ package ml.combust.bundle.serializer
 
 import java.net.URI
 
-import ml.combust.bundle.{BundleFile, BundleRegistry, TestUtil}
+import ml.bundle.Attributes
+import ml.combust.bundle.dsl.Bundle
+import ml.combust.bundle.test.TestSupport._
 import ml.combust.bundle.test._
 import ml.combust.bundle.test.ops._
+import ml.combust.bundle.{BundleFile, BundleRegistry, TestUtil, dsl}
 import org.scalatest.FunSpec
-import TestSupport._
-import ml.combust.bundle.dsl.Bundle
 import resource._
 
 import scala.util.Random
@@ -119,6 +120,29 @@ class BundleSerializationSpec extends FunSpec {
             val bundleRead = file.loadBundle().get
 
             assert(lr == bundleRead.root)
+          }
+        }
+      }
+
+      describe("with metadata") {
+        it("serializes and deserializes any metadata we want to send along with the bundle") {
+          val uri = new URI(s"$prefix:${TestUtil.baseDir}/lr_bundle_meta.$format$suffix")
+          val meta = new Attributes().withList(Map(
+            "keyA" → dsl.Value.string("valA").value,
+            "keyB" → dsl.Value.double(1.2).value,
+            "keyC" → dsl.Value.stringList(Seq("listValA", "listValB")).value
+          ))
+          for(file <- managed(BundleFile(uri))) {
+            lr.writeBundle.name("my_bundle").
+              format(format).
+              meta(meta).
+              save(file)
+
+            val bundleRead = file.loadBundle().get
+
+            // These are written this way explicitly for compatibility with Scala 2.10
+            assert(!bundleRead.info.meta.isEmpty)
+            assert(bundleRead.info.meta.get.equals(meta))
           }
         }
       }

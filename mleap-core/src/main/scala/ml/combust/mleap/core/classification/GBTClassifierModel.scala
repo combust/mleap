@@ -3,8 +3,7 @@ package ml.combust.mleap.core.classification
 import ml.combust.mleap.core.regression.DecisionTreeRegressionModel
 import ml.combust.mleap.core.tree.TreeEnsemble
 import ml.combust.mleap.core.tree.loss.LogLoss
-import org.apache.spark.ml.linalg.mleap.BLAS
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
+import breeze.linalg.{DenseVector, SparseVector, Vector}
 
 /** Companion object for constructing [[GBTClassifierModel]].
   */
@@ -29,14 +28,14 @@ case class GBTClassifierModel(override val trees: Seq[DecisionTreeRegressionMode
                               override val thresholds: Option[Array[Double]] = None) extends ProbabilisticClassificationModel
   with TreeEnsemble
   with Serializable {
-  private val treeWeightsVector = Vectors.dense(treeWeights.toArray)
+  private val treeWeightsVector = DenseVector[Double](treeWeights.toArray)
   // hard coded loss, which is not meant to be changed in the model
   private val loss = LogLoss
 
   // Multiclass labels are not currently supported
   override val numClasses: Int = 2
 
-  override def predict(features: Vector): Double = {
+  override def predict(features: Vector[Double]): Double = {
     if (thresholds.nonEmpty) {
       super.predict(features)
     } else {
@@ -45,23 +44,24 @@ case class GBTClassifierModel(override val trees: Seq[DecisionTreeRegressionMode
   }
 
   /** Raw prediction for the positive class. */
-  def margin(features: Vector): Double = {
-    val treePredictions = Vectors.dense(trees.map(_.predict(features)).toArray)
-    BLAS.dot(treePredictions, treeWeightsVector)
+  def margin(features: Vector[Double]): Double = {
+    val treePredictions = DenseVector[Double](trees.map(_.predict(features)).toArray)
+    treePredictions.dot(treeWeightsVector)
   }
 
-  override def rawToProbabilityInPlace(raw: Vector): Vector = {
+  override def rawToProbabilityInPlace(raw: Vector[Double]): Vector[Double] = {
     raw match {
-      case dv: DenseVector =>
-        dv.values(0) = loss.computeProbability(dv.values(0))
-        dv.values(1) = 1.0 - dv.values(0)
+      case _dv: DenseVector[_] =>
+        val dv = _dv.asInstanceOf[DenseVector[Double]]
+        dv(0) = loss.computeProbability(dv(0))
+        dv(1) = 1.0 - dv(0)
         dv
-      case sv: SparseVector => throw new RuntimeException("GBTClassificationModel encountered SparseVector")
+      case _: SparseVector[_] => throw new RuntimeException("GBTClassificationModel encountered SparseVector")
     }
   }
 
-  override def predictRaw(features: Vector): Vector = {
+  override def predictRaw(features: Vector[Double]): Vector[Double] = {
     val prediction: Double = margin(features)
-    Vectors.dense(Array(-prediction, prediction))
+    DenseVector[Double](Array(-prediction, prediction))
   }
 }

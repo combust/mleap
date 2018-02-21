@@ -6,7 +6,6 @@ import ml.combust.mleap.core.classification.NaiveBayesModel.{Bernoulli, ModelTyp
 import org.apache.spark.ml.linalg.mleap.{BLAS, Matrices}
 import org.apache.spark.ml.linalg.{DenseVector, Matrix, SparseVector, Vector}
 
-
 /**
   * Created by fshabbir on 12/19/16.
   * https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/classification/NaiveBayes.scala

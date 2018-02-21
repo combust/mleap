@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.regression
 
 import ml.combust.mleap.core.Model
-import org.apache.spark.ml.linalg.Vector
+import breeze.linalg.Vector
 import ml.combust.mleap.core.tree.{DecisionTree, Node}
 import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 
@@ -16,14 +16,14 @@ case class DecisionTreeRegressionModel(rootNode: Node, numFeatures: Int) extends
     * @param features features for prediction
     * @return prediction
     */
-  def apply(features: Vector): Double = predict(features)
+  def apply(features: Vector[Double]): Double = predict(features)
 
   /** Predict value for given features.
     *
     * @param features features for predictoin
     * @return prediction
     */
-  def predict(features: Vector): Double = {
+  def predict(features: Vector[Double]): Double = {
     rootNode.predictImpl(features).prediction
   }
 

@@ -18,7 +18,7 @@ object LinalgUtils {
   }
 
   def fastSquaredDistance(v1: VectorWithNorm,
-                                  v2: VectorWithNorm): Double = {
+                          v2: VectorWithNorm): Double = {
     fastSquaredDistance(v1.vector, v1.norm, v2.vector, v2.norm)
   }
 

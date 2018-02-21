@@ -4,9 +4,7 @@ import sbt._
 import Keys._
 
 object Dependencies {
-  import DependencyHelpers._
-
-  val sparkVersion = "2.2.0"
+  val sparkVersion = "2.2.2"
   val scalaTestVersion = "3.0.0"
   val tensorflowVersion = "1.4.0"
   val akkaVersion = "2.4.16"
@@ -14,6 +12,8 @@ object Dependencies {
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
+    val breeze = "org.scalanlp" %% "breeze" % "1.0-RC2"
+    val netlib = "com.github.fommil.netlib" % "all" % "1.1.2"
     val spark = Seq("org.apache.spark" %% "spark-core" % sparkVersion,
       "org.apache.spark" %% "spark-sql" % sparkVersion,
       "org.apache.spark" %% "spark-mllib" % sparkVersion,
@@ -23,7 +23,7 @@ object Dependencies {
     val sprayJson = "io.spray" %% "spray-json" % "1.3.2"
     val arm = "com.jsuereth" %% "scala-arm" % "2.0"
     val config = "com.typesafe" % "config" % "1.3.0"
-    val scalaReflect = ScalaVersionDependentModuleID.versioned("org.scala-lang" % "scala-reflect" % _)
+    val scalaReflect = "org.scala-lang" % "scala-reflect"
     val sparkAvro = "com.databricks" %% "spark-avro" % "3.0.1"
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
@@ -54,9 +54,9 @@ object Dependencies {
 
   val base = l ++= Seq()
 
-  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)
+  val core = l ++= Seq(breeze, netlib, jTransform, Test.scalaTest)
 
-  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest) ++ scalaReflect.modules(scalaVersion.value))
+  val runtime = l ++= Seq(Test.scalaTest, scalaReflect % scalaVersion.value)
 
   val sparkBase = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
@@ -77,36 +77,4 @@ object Dependencies {
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
-
-  object DependencyHelpers {
-    case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {
-      def %(config: String): ScalaVersionDependentModuleID =
-        ScalaVersionDependentModuleID(version => modules(version).map(_ % config))
-    }
-    object ScalaVersionDependentModuleID {
-      implicit def liftConstantModule(mod: ModuleID): ScalaVersionDependentModuleID = versioned(_ => mod)
-
-      def versioned(f: String => ModuleID): ScalaVersionDependentModuleID = ScalaVersionDependentModuleID(v => Seq(f(v)))
-      def fromPF(f: PartialFunction[String, ModuleID]): ScalaVersionDependentModuleID =
-        ScalaVersionDependentModuleID(version => if (f.isDefinedAt(version)) Seq(f(version)) else Nil)
-    }
-
-    /**
-      * Use this as a dependency setting if the dependencies contain both static and Scala-version
-      * dependent entries.
-      */
-    def versionDependentDeps(modules: ScalaVersionDependentModuleID*): Def.Setting[Seq[ModuleID]] =
-      libraryDependencies <++= scalaVersion(version => modules.flatMap(m => m.modules(version)))
-
-    val ScalaVersion = """\d\.\d+\.\d+(?:-(?:M|RC)\d+)?""".r
-    val nominalScalaVersion: String => String = {
-      // matches:
-      // 2.12.0-M1
-      // 2.12.0-RC1
-      // 2.12.0
-      case version @ ScalaVersion() => version
-      // transforms 2.12.0-custom-version to 2.12.0
-      case version => version.takeWhile(_ != '-')
-    }
-  }
 }

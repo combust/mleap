@@ -13,9 +13,9 @@ object Release {
     releaseProcess := Seq[ReleaseStep](
       checkSnapshotDependencies,
       inquireVersions,
+      setReleaseVersion,
       runClean,
       runTest,
-      setReleaseVersion,
       commitReleaseVersion,
       tagRelease,
       publishArtifacts,

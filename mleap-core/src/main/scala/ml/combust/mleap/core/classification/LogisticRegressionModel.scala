@@ -1,38 +1,40 @@
 package ml.combust.mleap.core.classification
 
-import org.apache.spark.ml.linalg._
-import org.apache.spark.ml.linalg.mleap.BLAS
+import breeze.linalg.{CSCMatrix, DenseMatrix, DenseVector, Matrix, SparseVector, Vector}
+import breeze.optimize.proximal.QuadraticMinimizer.gemv
+import ml.combust.mleap.core.linalg.BLAS
 
 trait AbstractLogisticRegressionModel extends ProbabilisticClassificationModel
 
-case class BinaryLogisticRegressionModel(coefficients: Vector,
+case class BinaryLogisticRegressionModel(coefficients: Vector[Double],
                                          intercept: Double,
                                          threshold: Double) extends AbstractLogisticRegressionModel {
-  def margin(features: Vector): Double = {
-    BLAS.dot(features, coefficients) + intercept
+  def margin(features: Vector[Double]): Double = {
+    features.dot(coefficients) + intercept
   }
 
-  override def predict(features: Vector): Double = if(score(features) > threshold) 1.0 else 0.0
+  override def predict(features: Vector[Double]): Double = if(score(features) > threshold) 1.0 else 0.0
 
   override val numClasses: Int = 2
   override val numFeatures: Int = coefficients.size
 
-  def score(features: Vector): Double = {
+  def score(features: Vector[Double]): Double = {
     val m = margin(features)
     1.0 / (1.0 + math.exp(-m))
   }
 
-  override def predictRaw(features: Vector): Vector = {
+  override def predictRaw(features: Vector[Double]): Vector[Double] = {
     val m = margin(features)
-    Vectors.dense(Array(-m, m))
+    DenseVector[Double](Array(-m, m))
   }
 
-  override def rawToProbabilityInPlace(raw: Vector): Vector = raw match {
-    case dv: DenseVector =>
+  override def rawToProbabilityInPlace(raw: Vector[Double]): Vector[Double] = raw match {
+    case _dv: DenseVector[_] =>
+      val dv = _dv.asInstanceOf[DenseVector[Double]]
       var i = 0
       val size = dv.size
       while (i < size) {
-        dv.values(i) = 1.0 / (1.0 + math.exp(-dv.values(i)))
+        dv(i) = 1.0 / (1.0 + math.exp(-dv(i)))
         i += 1
       }
       dv
@@ -40,19 +42,19 @@ case class BinaryLogisticRegressionModel(coefficients: Vector,
   }
 }
 
-case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix,
-                                                 interceptVector: Vector,
+case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix[Double],
+                                                 interceptVector: Vector[Double],
                                                  override val thresholds: Option[Array[Double]]) extends AbstractLogisticRegressionModel {
   override val numClasses: Int = interceptVector.size
-  override val numFeatures: Int = coefficientMatrix.numCols
+  override val numFeatures: Int = coefficientMatrix.cols
 
   lazy val binaryModel: BinaryLogisticRegressionModel = {
-    val coefficients = {
-      require(coefficientMatrix.isTransposed,
-        "LogisticRegressionModel coefficients should be row major.")
+    val coefficients: Vector[Double] = {
       coefficientMatrix match {
-        case dm: DenseMatrix => Vectors.dense(dm.values)
-        case sm: SparseMatrix => Vectors.sparse(coefficientMatrix.numCols, sm.rowIndices, sm.values)
+        case _dm: DenseMatrix[_] =>
+          DenseVector[Double](_dm.asInstanceOf[DenseMatrix[Double]].values)
+        case _sm: CSCMatrix[_] =>
+          SparseVector[Double](coefficientMatrix.cols, _sm.rowIndices, _sm.asInstanceOf[CSCMatrix[Double]].values)
       }
     }
     val intercept = interceptVector(0)
@@ -62,21 +64,21 @@ case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix,
       threshold = thresholds.get(0))
   }
 
-  private def margins(features: Vector): Vector = {
-    val m = interceptVector.toDense.copy
-    BLAS.gemv(1.0, coefficientMatrix, features, 1.0, m)
+  private def margins(features: Vector[Double]): Vector[Double] = {
+    val m = interceptVector.toDenseVector.copy
+    gemv(1.0, coefficientMatrix, features.toDenseVector, 1.0, m)
     m
   }
 
-  override def predictRaw(features: Vector): Vector = {
+  override def predictRaw(features: Vector[Double]): Vector[Double] = {
     margins(features)
   }
 
-  override def rawToProbabilityInPlace(raw: Vector): Vector = {
+  override def rawToProbabilityInPlace(raw: Vector[Double]): Vector[Double] = {
     raw match {
-      case dv: DenseVector =>
+      case _dv: DenseVector[_] =>
+        val dv = _dv.asInstanceOf[DenseVector[Double]]
         val size = dv.size
-        val values = dv.values
 
         // get the maximum margin
         val maxMarginIndex = raw.argmax
@@ -85,7 +87,7 @@ case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix,
         if(maxMargin == Double.PositiveInfinity) {
           var k = 0
           while(k < size) {
-            values(k) = if (k == maxMarginIndex) 1.0 else 0.0
+            dv(k) = if (k == maxMarginIndex) 1.0 else 0.0
             k += 1
           }
         } else {
@@ -93,20 +95,22 @@ case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix,
             var temp = 0.0
             var k = 0
             while(k < numClasses) {
-              values(k) = if (maxMargin > 0) {
-                math.exp(values(k) - maxMargin)
+              dv(k) = if (maxMargin > 0) {
+                math.exp(dv(k) - maxMargin)
               } else {
-                math.exp(values(k))
+                math.exp(dv(k))
               }
-              temp += values(k)
+              temp += dv(k)
               k += 1
             }
             temp
           }
+
+
           BLAS.scal(1 / sum, dv)
         }
         dv
-      case sv: SparseVector =>
+      case _: SparseVector[_] =>
         throw new RuntimeException("Unexpected error in LogisticRegressionModel:" +
           " raw2probabilitiesInPlace encountered SparseVector")
     }
@@ -121,9 +125,9 @@ case class LogisticRegressionModel(impl: AbstractLogisticRegressionModel) extend
   def multinomialModel: ProbabilisticLogisticsRegressionModel = impl.asInstanceOf[ProbabilisticLogisticsRegressionModel]
   def binaryModel: BinaryLogisticRegressionModel = impl.asInstanceOf[BinaryLogisticRegressionModel]
 
-  override def predict(features: Vector): Double = impl.predict(features)
+  override def predict(features: Vector[Double]): Double = impl.predict(features)
 
-  override def predictRaw(features: Vector): Vector = impl.predictRaw(features)
+  override def predictRaw(features: Vector[Double]): Vector[Double] = impl.predictRaw(features)
 
-  override def rawToProbabilityInPlace(raw: Vector): Vector = impl.rawToProbabilityInPlace(raw)
+  override def rawToProbabilityInPlace(raw: Vector[Double]): Vector[Double] = impl.rawToProbabilityInPlace(raw)
 }

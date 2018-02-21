@@ -6,7 +6,7 @@ import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.classification.MultiLayerPerceptronClassifierModel.LabelConverter
 import ml.combust.mleap.core.feature.LabeledPoint
 import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
-import org.apache.spark.ml.linalg.{Vector, Vectors}
+import breeze.linalg.{Vector, DenseVector, argmax}
 
 /**
   * Created by hollinwilkins on 12/25/16.
@@ -27,10 +27,10 @@ object MultiLayerPerceptronClassifierModel {
       * @param labelCount   total number of labels
       * @return pair of features and vector encoding of a label
       */
-    def encodeLabeledPoint(labeledPoint: LabeledPoint, labelCount: Int): (Vector, Vector) = {
+    def encodeLabeledPoint(labeledPoint: LabeledPoint, labelCount: Int): (Vector[Double], Vector[Double]) = {
       val output = Array.fill(labelCount)(0.0)
       output(labeledPoint.label.toInt) = 1.0
-      (labeledPoint.features, Vectors.dense(output))
+      (labeledPoint.features, DenseVector[Double](output))
     }
 
     /**
@@ -40,22 +40,22 @@ object MultiLayerPerceptronClassifierModel {
       * @param output label encoded with a vector
       * @return label
       */
-    def decodeLabel(output: Vector): Double = {
-      output.argmax.toDouble
+    def decodeLabel(output: Vector[Double]): Double = {
+      argmax(output).toDouble
     }
   }
 }
 
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/MultilayerPerceptronClassifier.scala")
 case class MultiLayerPerceptronClassifierModel(layers: Seq[Int],
-                                               weights: Vector) extends Model {
+                                               weights: Vector[Double]) extends Model {
   val numFeatures: Int = layers.head
 
   private val mlpModel = FeedForwardTopology
     .multiLayerPerceptron(layers.toArray)
     .model(weights)
 
-  def apply(features: Vector): Double = {
+  def apply(features: Vector[Double]): Double = {
     LabelConverter.decodeLabel(mlpModel.predict(features))
   }
 

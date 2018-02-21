@@ -16,8 +16,8 @@ object Common {
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.11.8",
-    crossScalaVersions := Seq("2.10.6", "2.11.8"),
+    scalaVersion := "2.12.4",
+    crossScalaVersions := Seq("2.11.12", "2.12.4"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
@@ -33,6 +33,11 @@ object Common {
         Seq()
       }
     }
+  )
+
+  lazy val sparkBuildSettings: Seq[Def.Setting[_]] = Seq(
+    scalaVersion := "2.11.12",
+    crossScalaVersions := Seq("2.11.12")
   )
 
   lazy val mleapSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")

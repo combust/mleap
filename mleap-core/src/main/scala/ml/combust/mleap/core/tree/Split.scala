@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.tree
 
 import ml.combust.mleap.core.annotation.SparkCode
-import org.apache.spark.ml.linalg.Vector
+import breeze.linalg.Vector
 
 /** Trait for a split logic.
   *
@@ -20,7 +20,7 @@ sealed trait Split extends Serializable {
     * @param features features for split
     * @return true if features go left, false otherwise
     */
-  def shouldGoLeft(features: Vector): Boolean
+  def shouldGoLeft(features: Vector[Double]): Boolean
 
   /** Whether to go left or not.
     *
@@ -45,7 +45,7 @@ final case class CategoricalSplit(featureIndex: Int,
                                   numCategories: Int,
                                   categories: Array[Double],
                                   isLeft: Boolean) extends Split {
-  override def shouldGoLeft(features: Vector): Boolean = {
+  override def shouldGoLeft(features: Vector[Double]): Boolean = {
     if(isLeft) {
       categories.contains(features(featureIndex))
     } else {
@@ -70,7 +70,7 @@ final case class CategoricalSplit(featureIndex: Int,
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/tree/Split.scala")
 final case class ContinuousSplit(featureIndex: Int,
                                  threshold: Double) extends Split {
-  override def shouldGoLeft(features: Vector): Boolean = features(featureIndex) <= threshold
+  override def shouldGoLeft(features: Vector[Double]): Boolean = features(featureIndex) <= threshold
 
   override def shouldGoLeft(binnedFeature: Int, splits: Array[Split]): Boolean = {
     if(binnedFeature == splits.length) {

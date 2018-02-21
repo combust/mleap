@@ -3,7 +3,7 @@ package ml.combust.mleap.core.classification
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
-import org.apache.spark.ml.linalg.{DenseVector, Vector, Vectors}
+import breeze.linalg.{Vector, DenseVector, sum, argmax}
 
 /** Trait for all classification models.
   */
@@ -13,25 +13,25 @@ trait ClassificationModel extends Model {
     * @param features feature vector
     * @return prediction
     */
-  def apply(features: Vector): Double = predict(features)
+  def apply(features: Vector[Double]): Double = predict(features)
 
   /** Predict class based on feature vector.
     *
     * @param features feature vector
     * @return predicted class or probability
     */
-  def predict(features: Vector): Double
+  def predict(features: Vector[Double]): Double
 }
 
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/classification/ProbabilisticClassifier.scala")
 object ProbabilisticClassificationModel {
-  def normalizeToProbabilitiesInPlace(v: DenseVector): Unit = {
-    val sum = v.values.sum
-    if (sum != 0) {
+  def normalizeToProbabilitiesInPlace(v: DenseVector[Double]): Unit = {
+    val s = sum(v)
+    if (s != 0) {
       var i = 0
       val size = v.size
       while (i < size) {
-        v.values(i) /= sum
+        v(i) /= s
         i += 1
       }
     }
@@ -56,50 +56,50 @@ trait ProbabilisticClassificationModel extends ClassificationModel {
 
   def thresholds: Option[Array[Double]] = None
 
-  def predict(features: Vector): Double = probabilityToPrediction(predictProbabilities(features))
-  def predictWithProbability(features: Vector): (Double, Double) = {
+  def predict(features: Vector[Double]): Double = probabilityToPrediction(predictProbabilities(features))
+  def predictWithProbability(features: Vector[Double]): (Double, Double) = {
     val probabilities = predictProbabilities(features)
     val index = probabilityToPredictionIndex(probabilities)
     (index.toDouble, probabilities(index))
   }
 
-  def predictProbabilities(features: Vector): Vector = {
+  def predictProbabilities(features: Vector[Double]): Vector[Double] = {
     val raw = predictRaw(features)
     rawToProbabilityInPlace(raw)
     raw
   }
 
-  def rawToProbability(raw: Vector): Vector = {
+  def rawToProbability(raw: Vector[Double]): Vector[Double] = {
     val probabilities = raw.copy
     rawToProbabilityInPlace(probabilities)
   }
 
-  def rawToPrediction(raw: Vector): Double = {
+  def rawToPrediction(raw: Vector[Double]): Double = {
     thresholds match {
-      case Some(t) => probabilityToPrediction(rawToProbability(raw))
-      case None => raw.argmax
+      case Some(_) => probabilityToPrediction(rawToProbability(raw))
+      case None => argmax(raw)
     }
   }
 
-  def probabilityToPrediction(probability: Vector): Double = {
+  def probabilityToPrediction(probability: Vector[Double]): Double = {
     probabilityToPredictionIndex(probability).toDouble
   }
 
-  def probabilityToPredictionIndex(probability: Vector): Int = {
+  def probabilityToPredictionIndex(probability: Vector[Double]): Int = {
     thresholds match {
       case Some(ts) =>
         val scaledProbability: Array[Double] =
           probability.toArray.zip(ts).map { case (p, t) =>
             if (t == 0.0) Double.PositiveInfinity else p / t
           }
-        Vectors.dense(scaledProbability).argmax
-      case None => probability.argmax
+        argmax(DenseVector[Double](scaledProbability))
+      case None => argmax(probability)
     }
   }
 
-  def rawToProbabilityInPlace(raw: Vector): Vector
+  def rawToProbabilityInPlace(raw: Vector[Double]): Vector[Double]
 
-  def predictRaw(features: Vector): Vector
+  def predictRaw(features: Vector[Double]): Vector[Double]
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 

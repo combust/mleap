@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.classification
 
 import ml.combust.mleap.core.tree.{DecisionTree, Node}
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
+import breeze.linalg.{DenseVector, SparseVector, Vector}
 
 /** Class for decision tree classification models.
   *
@@ -13,16 +13,16 @@ case class DecisionTreeClassifierModel(override val rootNode: Node,
                                        numFeatures: Int,
                                        override val numClasses: Int)
   extends ProbabilisticClassificationModel with DecisionTree with Serializable {
-  override def predictRaw(features: Vector): Vector = {
+  override def predictRaw(features: Vector[Double]): Vector[Double] = {
     rootNode.predictImpl(features).impurities
   }
 
-  override def rawToProbabilityInPlace(raw: Vector): Vector = {
+  override def rawToProbabilityInPlace(raw: Vector[Double]): Vector[Double] = {
     raw match {
-      case dv: DenseVector =>
-        ProbabilisticClassificationModel.normalizeToProbabilitiesInPlace(dv)
+      case dv: DenseVector[_] =>
+        ProbabilisticClassificationModel.normalizeToProbabilitiesInPlace(dv.asInstanceOf[DenseVector[Double]])
         dv
-      case sv: SparseVector =>
+      case _: SparseVector[_] =>
         throw new RuntimeException("Unexpected error in RandomForestClassificationModel:" +
           " raw2probabilityInPlace encountered SparseVector")
     }

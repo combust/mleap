@@ -8,8 +8,7 @@ package ml.combust.mleap.core.ann
 
 import java.util.Random
 
-import breeze.linalg.{*, DenseMatrix => BDM, DenseVector => BDV}
-import org.apache.spark.ml.linalg.{Vector, Vectors, mleap}
+import breeze.linalg.{*, Vector, DenseMatrix => BDM, DenseVector => BDV}
 
 /**
   * Trait that holds Layer properties, that are needed to instantiate it.
@@ -316,7 +315,7 @@ class FunctionalLayerModel (val layer: FunctionalLayer)
   * Trait for the artificial neural network (ANN) topology properties
   */
 trait Topology extends Serializable {
-  def model(weights: Vector): TopologyModel
+  def model(weights: Vector[Double]): TopologyModel
   def model(seed: Long): TopologyModel
 }
 
@@ -325,7 +324,7 @@ trait Topology extends Serializable {
   */
 trait TopologyModel extends Serializable {
 
-  val weights: Vector
+  val weights: Vector[Double]
   /**
     * Array of layers
     */
@@ -350,7 +349,7 @@ trait TopologyModel extends Serializable {
     * @param data input data
     * @return prediction
     */
-  def predict(data: Vector): Vector
+  def predict(data: Vector[Double]): Vector[Double]
 
   /**
     * Computes gradient for the network
@@ -361,7 +360,9 @@ trait TopologyModel extends Serializable {
     * @param blockSize block size
     * @return error
     */
-  def computeGradient(data: BDM[Double], target: BDM[Double], cumGradient: Vector,
+  def computeGradient(data: BDM[Double],
+                      target: BDM[Double],
+                      cumGradient: Vector[Double],
                       blockSize: Int): Double
 }
 
@@ -371,7 +372,7 @@ trait TopologyModel extends Serializable {
   * @param layers Array of layers
   */
 class FeedForwardTopology private(val layers: Array[Layer]) extends Topology {
-  override def model(weights: Vector): TopologyModel = FeedForwardModel(this, weights)
+  override def model(weights: Vector[Double]): TopologyModel = FeedForwardModel(this, weights)
 
   override def model(seed: Long): TopologyModel = FeedForwardModel(this, seed)
 }
@@ -399,7 +400,7 @@ object FeedForwardTopology {
     * @return multilayer perceptron topology
     */
   def multiLayerPerceptron(layerSizes: Array[Int],
-                            softmaxOnTop: Boolean = true): FeedForwardTopology = {
+                           softmaxOnTop: Boolean = true): FeedForwardTopology = {
     val layers = new Array[Layer]((layerSizes.length - 1) * 2)
     for (i <- 0 until layerSizes.length - 1) {
       layers(i * 2) = new AffineLayer(layerSizes(i), layerSizes(i + 1))
@@ -426,9 +427,8 @@ object FeedForwardTopology {
   * @param weights network weights
   * @param topology network topology
   */
-class FeedForwardModel private(
-                                val weights: Vector,
-                                val topology: FeedForwardTopology) extends TopologyModel {
+class FeedForwardModel private(val weights: Vector[Double],
+                               val topology: FeedForwardTopology) extends TopologyModel {
 
   val layers = topology.layers
   val layerModels = new Array[LayerModel](layers.length)
@@ -468,7 +468,7 @@ class FeedForwardModel private(
   override def computeGradient(
                                 data: BDM[Double],
                                 target: BDM[Double],
-                                cumGradient: Vector,
+                                cumGradient: Vector[Double],
                                 realBatchSize: Int): Double = {
     val outputs = forward(data)
     val currentBatchSize = data.cols
@@ -503,10 +503,10 @@ class FeedForwardModel private(
     loss
   }
 
-  override def predict(data: Vector): Vector = {
+  override def predict(data: Vector[Double]): Vector[Double] = {
     val size = data.size
     val result = forward(new BDM[Double](size, 1, data.toArray))
-    Vectors.dense(result.last.toArray)
+    result.last.toDenseVector
   }
 }
 
@@ -522,7 +522,7 @@ object FeedForwardModel {
     * @param weights weights
     * @return model
     */
-  def apply(topology: FeedForwardTopology, weights: Vector): FeedForwardModel = {
+  def apply(topology: FeedForwardTopology, weights: Vector[Double]): FeedForwardModel = {
     val expectedWeightSize = topology.layers.map(_.weightSize).sum
     require(weights.size == expectedWeightSize,
       s"Expected weight vector of size $expectedWeightSize but got size ${weights.size}.")
@@ -547,7 +547,7 @@ object FeedForwardModel {
         initModel(new BDV[Double](weights.data, offset, 1, layers(i).weightSize), random)
       offset += layers(i).weightSize
     }
-    new FeedForwardModel(mleap.VectorUtil.fromBreeze(weights), topology)
+    new FeedForwardModel(weights, topology)
   }
 }
 

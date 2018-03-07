@@ -114,7 +114,7 @@ class SimpleSerializer(MLeapSerializer):
         # Define attributes
         attributes = list()
         attributes.append(('num_features', transformer.n_features_))
-        if transformer.n_classes_ is not None:
+        if isinstance(transformer, DecisionTreeClassifier):
             attributes.append(('num_classes', int(transformer.n_classes_)))
 
         inputs = []

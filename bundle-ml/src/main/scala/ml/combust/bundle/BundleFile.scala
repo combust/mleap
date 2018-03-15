@@ -42,8 +42,17 @@ object BundleFile {
       case "file" =>
         (FileSystems.getDefault, FileSystems.getDefault.getPath(uriSafe.getPath))
       case "jar" =>
-        val zfs = FileSystems.newFileSystem(uriSafe, env)
-        (zfs, zfs.getPath("/"))
+        // handle resource in JAR path
+        val (filesystemUri: URI, path: String) = if (uriSafe.toString.contains("!")) {
+          val uriParts: Array[String] = uriSafe.toString.split("!")
+          (new URI(uriParts(0)), uriParts(1))
+        }
+        else {
+          (uriSafe, "/")
+        }
+
+        val zfs = FileSystems.newFileSystem(filesystemUri, env)
+        (zfs, zfs.getPath(path))
     }
 
     apply(fs, path)

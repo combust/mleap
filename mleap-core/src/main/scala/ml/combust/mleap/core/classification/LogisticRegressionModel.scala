@@ -46,22 +46,6 @@ case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix,
   override val numClasses: Int = interceptVector.size
   override val numFeatures: Int = coefficientMatrix.numCols
 
-  lazy val binaryModel: BinaryLogisticRegressionModel = {
-    val coefficients = {
-      require(coefficientMatrix.isTransposed,
-        "LogisticRegressionModel coefficients should be row major.")
-      coefficientMatrix match {
-        case dm: DenseMatrix => Vectors.dense(dm.values)
-        case sm: SparseMatrix => Vectors.sparse(coefficientMatrix.numCols, sm.rowIndices, sm.values)
-      }
-    }
-    val intercept = interceptVector(0)
-
-    BinaryLogisticRegressionModel(coefficients = coefficients,
-      intercept = intercept,
-      threshold = thresholds.get(0))
-  }
-
   private def margins(features: Vector): Vector = {
     val m = interceptVector.toDense.copy
     BLAS.gemv(1.0, coefficientMatrix, features, 1.0, m)

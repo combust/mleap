@@ -19,6 +19,7 @@ import scala.util.Random
 sealed trait FSType
 case object ZipFS extends FSType
 case object DirFS extends FSType
+case object DirInJarFS extends FSType
 
 class BundleSerializationSpec extends FunSpec {
   implicit val testContext = TestContext(BundleRegistry("test-registry"))
@@ -29,6 +30,9 @@ class BundleSerializationSpec extends FunSpec {
   it should behave like bundleSerializer("Serializing/Deserializing json a bundle as a zip",
     SerializationFormat.Json,
     ZipFS)
+  it should behave like bundleSerializer("Serializing/Deserializing json a bundle as a dir in zip",
+    SerializationFormat.Json,
+    DirInJarFS)
 
   it should behave like bundleSerializer("Serializing/Deserializing proto a bundle as a dir",
     SerializationFormat.Protobuf,
@@ -36,11 +40,15 @@ class BundleSerializationSpec extends FunSpec {
   it should behave like bundleSerializer("Serializing/Deserializing proto a bundle as a zip",
     SerializationFormat.Protobuf,
     DirFS)
+  it should behave like bundleSerializer("Serializing/Deserializing proto a bundle as a dir in zip",
+    SerializationFormat.Protobuf,
+    DirInJarFS)
 
   def bundleSerializer(description: String, format: SerializationFormat, fsType: FSType) = {
     val (prefix, suffix) = fsType match {
       case DirFS => ("file", "")
       case ZipFS => ("jar:file", ".zip")
+      case DirInJarFS => ("jar:file", ".jar!custom/path")
     }
 
     describe(description) {

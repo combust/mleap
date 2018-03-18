@@ -15,7 +15,7 @@ class MultinomialLogisticRegressionParitySpec extends SparkParityBase {
   val heights = Seq(175, 190, 155, 160, 170, 180)
   val weights = Seq(67, 100, 57, 56, 56, 88)
 
-  val rows = spark.sparkContext.parallelize(Seq.tabulate(3) { i => Row(labels(i), ages(i), heights(i), weights(i)) })
+  val rows = spark.sparkContext.parallelize(Seq.tabulate(6) { i => Row(labels(i), ages(i), heights(i), weights(i)) })
   val schema = new StructType().add("label", DoubleType, nullable = false)
     .add("age", IntegerType, nullable = false)
     .add("height", IntegerType, nullable = false)

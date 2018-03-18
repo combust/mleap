@@ -89,8 +89,8 @@ class SimpleSerializer(MLeapSerializer):
         attributes.append(('num_features', transformer.n_features_))
         attributes.append(('tree_weights', tree_weights))
         attributes.append(('trees', ["tree{}".format(x) for x in range(0, len(transformer.estimators_))]))
-        if transformer.n_outputs_ > 1:
-            attributes.append(('num_classes', transformer.n_outputs_)) # TODO: get number of classes from the transformer
+        if isinstance(transformer, RandomForestClassifier):
+            attributes.append(('num_classes', transformer.n_classes_)) # TODO: get number of classes from the transformer
 
         self.serialize(transformer, path, model, attributes, inputs, outputs)
 

@@ -43,7 +43,7 @@ class LogisticRegressionOpV21 extends SimpleSparkOp[LogisticRegressionModel] {
         val coefficientMatrix = Matrices.dense(cmTensor.dimensions.head, cmTensor.dimensions(1), cmTensor.toArray)
         val lr = new LogisticRegressionModel(uid = "",
           coefficientMatrix = coefficientMatrix,
-          interceptVector = Vectors.dense(model.value("intercept").getTensor[Double].toArray),
+          interceptVector = Vectors.dense(model.value("intercept_vector").getTensor[Double].toArray),
           numClasses = numClasses.toInt,
           isMultinomial = true)
         model.getValue("thresholds").
@@ -69,7 +69,7 @@ class LogisticRegressionOpV21 extends SimpleSparkOp[LogisticRegressionModel] {
           interceptVector = model.interceptVector,
           numClasses = numClasses,
           isMultinomial = true)
-        if(lr.isDefined(lr.thresholds)) { lr.setThresholds(model.getThresholds) }
+        if(model.isDefined(model.thresholds)) { lr.setThresholds(model.getThresholds) }
         lr
     } else {
         val lr = new LogisticRegressionModel(uid = uid,
@@ -77,7 +77,7 @@ class LogisticRegressionOpV21 extends SimpleSparkOp[LogisticRegressionModel] {
           interceptVector = model.interceptVector,
           numClasses = numClasses,
           isMultinomial = false)
-        if(lr.isDefined(lr.threshold)) { lr.setThreshold(model.getThreshold) }   
+        if(model.isDefined(model.threshold)) { lr.setThreshold(model.getThreshold) }
         lr
     }
     r

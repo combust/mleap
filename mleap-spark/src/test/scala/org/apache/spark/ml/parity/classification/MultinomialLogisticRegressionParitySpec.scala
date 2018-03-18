@@ -8,12 +8,12 @@ import org.apache.spark.sql.DataFrame
 
 class MultinomialLogisticRegressionParitySpec extends SparkParityBase {
 
-  override val dataset: DataFrame = baseDataset.select("fico_score_group_fnl", "dti")
+  override val dataset: DataFrame = baseDataset.select("fico_score_group_fnl", "dti", "loan_amount")
   override val sparkTransformer: Transformer = new Pipeline().setStages(Array(new StringIndexer().
     setInputCol("fico_score_group_fnl").
     setOutputCol("fico_index"),
     new VectorAssembler().
-      setInputCols(Array("fico_index", "dti")).
+      setInputCols(Array("dti", "loan_amount")).
       setOutputCol("features"),
     new LogisticRegression().
       setLabelCol("fico_index").

@@ -8,8 +8,8 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.types.{StringType, StructType}
 
 class StringMapParitySpec extends SparkParityBase {
-  val dates = Seq("alice", "andy", "kevin")
-  val rows = spark.sparkContext.parallelize(Seq.tabulate(3) { i => Row(dates(i)) })
+  val names = Seq("alice", "andy", "kevin")
+  val rows = spark.sparkContext.parallelize(Seq.tabulate(3) { i => Row(names(i)) })
   val schema = new StructType().add("name", StringType, nullable = false)
 
   override val dataset: DataFrame = spark.sqlContext.createDataFrame(rows, schema)

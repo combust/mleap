@@ -87,7 +87,7 @@ def mleap_init(self, prior_tf, output_features=None):
         output_size = 1
         output_feature_name = prior_tf.output_features
 
-    class_name = "{}".format(self.__init__.im_class).split('.')[-1].replace('>','').replace("'",'')
+    class_name = self.__class__.__name__
 
     if output_features is not None:
         self.output_features = output_features

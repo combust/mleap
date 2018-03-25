@@ -95,6 +95,10 @@ object Bundle {
       val lda = "lda_local_model_op"
     }
 
+    object recommendation {
+      val als = "als"
+    }
+
     val pipeline = "pipeline"
     val tensorflow = "tensorflow"
   }

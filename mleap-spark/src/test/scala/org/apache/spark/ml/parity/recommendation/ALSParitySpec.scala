@@ -15,4 +15,7 @@ class ALSParitySpec extends SparkParityBase {
       .setItemCol("movieId")
       .setRatingCol("rating")
   )).fit(dataset)
+
+  override def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit =
+    super.equalityTest(sparkDataset.orderBy("userId", "movieId"), mleapDataset.orderBy("userId", "movieId"))
 }

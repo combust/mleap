@@ -5,7 +5,6 @@ import ml.combust.bundle.dsl.{Bundle, Model, NodeShape, Value}
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
-import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.recommendation.ALSModel
 import org.apache.spark.sql.SparkSession
 
@@ -20,12 +19,10 @@ class ALSOp extends SimpleSparkOp[ALSModel] {
       val sparkSession = SparkSession.builder().getOrCreate()
       import sparkSession.implicits._
 
-      val users = obj.userFactors.select("id").map(row => row(0).asInstanceOf[Int]).collect()
-      val items = obj.itemFactors.select("id").map(row => row(0).asInstanceOf[Int]).collect()
-
-      val userFactors = obj.userFactors.select("features").map(row => row(0).asInstanceOf[Seq[Float]]).collect()
-      val itemFactors = obj.itemFactors.select("features").map(row => row(0).asInstanceOf[Seq[Float]]).collect()
-
+      val (users, userFactors) = obj.userFactors.select("id", "features")
+                                                .map(row => (row.getInt(0), row.getSeq[Float](1))).collect().unzip
+      val (items, itemFactors) = obj.itemFactors.select("id", "features")
+                                                .map(row => (row.getInt(0), row.getSeq[Float](1))).collect().unzip
       model.withValue("rank", Value.int(obj.rank))
            .withValue("users", Value.intList(users))
            .withValue("user_factors", Value.tensorList(userFactors.map(factors => Tensor.denseVector(factors.toArray))))
@@ -38,13 +35,9 @@ class ALSOp extends SimpleSparkOp[ALSModel] {
       val sparkSession = SparkSession.builder().getOrCreate()
 
       val userFactors = sparkSession.createDataFrame(model.value("users").getIntList
-        .zip(model.value("user_factors")
-          .getTensorList[Float].toArray
-          .map(t => Vectors.dense(t.toArray.map((_.toDouble))))))
+        .zip(model.value("user_factors").getTensorList[Float].map(t => t.toArray)))
       val itemFactors = sparkSession.createDataFrame(model.value("items").getIntList
-        .zip(model.value("item_factors")
-          .getTensorList[Float].toArray
-          .map(t => Vectors.dense(t.toArray.map((_.toDouble))))))
+        .zip(model.value("item_factors").getTensorList[Float].map(t => t.toArray)))
 
       new ALSModel(uid = "", userFactors = userFactors, itemFactors = itemFactors, rank = model.value("rank").getInt)
     }

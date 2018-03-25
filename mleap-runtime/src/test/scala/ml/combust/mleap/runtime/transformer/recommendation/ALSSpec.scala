@@ -8,17 +8,14 @@ import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.recommendation.ALSModel
 import ml.combust.mleap.core.types.{NodeShape, ScalarType, StructField}
 import ml.combust.mleap.runtime.test.TestUtil
-import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 import resource.managed
 import ml.combust.mleap.runtime.MleapSupport._
 
 class ALSSpec extends FunSpec {
 
-  val userFactors = Map(0 -> Vectors.dense(1, 2), 1 -> Vectors.dense(3, 1),
-    2 -> Vectors.dense(2, 3))
-  val itemFactors = Map(0 -> Vectors.dense(1, 2), 1 -> Vectors.dense(3, 1),
-    2 -> Vectors.dense(2, 3), 3 -> Vectors.dense(1, 2))
+  val userFactors = Map(0 -> Array(1.0f, 2.0f), 1 -> Array(3.0f, 1.0f), 2 -> Array(2.0f, 3.0f))
+  val itemFactors = Map(0 -> Array(1.0f, 2.0f), 1 -> Array(3.0f, 1.0f), 2 -> Array(2.0f, 3.0f), 3 -> Array(1.0f, 2.0f))
 
   val transformer = ALS(shape = NodeShape().withInput("user", "user")
       .withInput("item", "movie").withOutput("prediction", "rating"),
@@ -47,8 +44,16 @@ class ALSSpec extends FunSpec {
         bf.loadMleapBundle().get.root
       }).tried.get.asInstanceOf[ALS]
 
-      assert(transformer.model.itemFactors sameElements als.model.itemFactors)
-      assert(transformer.model.userFactors sameElements als.model.userFactors)
+      val (tfUsers, tfUserFactors) = transformer.model.userFactors.toSeq.unzip
+      val (tfItems, tfItemFactors) = transformer.model.itemFactors.toSeq.unzip
+
+      val (alsUsers, alsUserFactors) = als.model.userFactors.toSeq.unzip
+      val (alsItems, alsItemFactors) = als.model.itemFactors.toSeq.unzip
+
+      assert(tfUsers sameElements alsUsers)
+      assert(tfItems sameElements alsItems)
+      assert(tfUserFactors.flatten sameElements alsUserFactors.flatten)
+      assert(tfItemFactors.flatten sameElements alsItemFactors.flatten)
     }
   }
 }

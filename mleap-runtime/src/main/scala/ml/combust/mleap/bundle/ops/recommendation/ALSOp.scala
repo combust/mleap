@@ -8,7 +8,6 @@ import ml.combust.mleap.core.recommendation.ALSModel
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.recommendation.ALS
 import ml.combust.mleap.tensor.Tensor
-import org.apache.spark.ml.linalg.Vectors
 
 class ALSOp extends MleapOp[ALS, ALSModel] {
   override val Model: OpModel[MleapContext, ALSModel] = new OpModel[MleapContext, ALSModel] {
@@ -22,19 +21,19 @@ class ALSOp extends MleapOp[ALS, ALSModel] {
       val (items, itemFactors) = obj.itemFactors.toSeq.unzip
       model.withValue("rank", Value.int(obj.rank))
            .withValue("users", Value.intList(users))
-           .withValue("user_factors", Value.tensorList(userFactors.map(factors => Tensor.denseVector(factors.toArray))))
+           .withValue("user_factors", Value.tensorList(userFactors.map(factors => Tensor.denseVector(factors))))
            .withValue("items", Value.intList(items))
-           .withValue("item_factors", Value.tensorList(itemFactors.map(factors => Tensor.denseVector(factors.toArray))))
+           .withValue("item_factors", Value.tensorList(itemFactors.map(factors => Tensor.denseVector(factors))))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): ALSModel = {
       val userFactors = model.value("users").getIntList
-                        .zip(model.value("user_factors").getTensorList[Float].toArray.map(t => Vectors.dense(t.toArray.map(_.toDouble))))
+                        .zip(model.value("user_factors").getTensorList[Float].toArray.map(t => t.toArray))
                         .toMap
       val itemFactors = model.value("items").getIntList
-                             .zip(model.value("item_factors").getTensorList[Float].toArray.map(t => Vectors.dense(t.toArray.map(_.toDouble))))
-                             .toMap
+                        .zip(model.value("item_factors").getTensorList[Float].toArray.map(t => t.toArray))
+                        .toMap
 
       ALSModel(rank = model.value("rank").getInt, userFactors = userFactors, itemFactors = itemFactors)
     }

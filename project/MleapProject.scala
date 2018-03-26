@@ -119,6 +119,12 @@ object MleapProject {
     dependencies = Seq(runtime, avro, xgboostJava)
   )
 
+  lazy val executor = Project(
+    id = "mleap-executor",
+    base = file("mleap-executor"),
+    dependencies = Seq(runtime)
+  )
+
   lazy val benchmark = Project(
     id = "mleap-benchmark",
     base = file("mleap-benchmark"),

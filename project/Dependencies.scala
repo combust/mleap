@@ -28,6 +28,7 @@ object Dependencies {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
     val tensorflowDep = "org.tensorflow" % "libtensorflow" % tensorflowVersion
+    val akkaStream = "com.typesafe.akka" %% "akka-stream" % akkaVersion
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
     val scalameter = "com.storm-enroute" %% "scalameter" % "0.8.2"
@@ -75,6 +76,8 @@ object Dependencies {
   val xgboostSpark = l ++= Seq(Provided.xgboostSparkDep) ++ Provided.spark
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
+
+  val executor = l ++= Seq(akkaStream, config, Test.scalaTest)
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 

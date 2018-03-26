@@ -15,4 +15,5 @@ lazy val tensorflow = MleapProject.tensorflow
 lazy val xgboostJava = MleapProject.xgboostJava
 lazy val xgboostSpark = MleapProject.xgboostSpark
 lazy val serving = MleapProject.serving
+lazy val executor = MleapProject.executor
 lazy val benchmarks = MleapProject.benchmark

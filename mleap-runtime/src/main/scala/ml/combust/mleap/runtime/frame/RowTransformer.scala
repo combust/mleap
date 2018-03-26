@@ -28,7 +28,7 @@ case class RowTransformer private (inputSchema: StructType,
                                    shuffled: Boolean = false) extends FrameBuilder[RowTransformer] {
   override def schema: StructType = outputSchema
 
-  override def select(fieldNames: Seq[String]): Try[RowTransformer] = {
+  override def select(fieldNames: String *): Try[RowTransformer] = {
     for (indices <- outputSchema.indicesOf(fieldNames: _*);
          schema2 <- outputSchema.selectIndices(indices: _*)) yield {
       val s = Set(indices: _*)

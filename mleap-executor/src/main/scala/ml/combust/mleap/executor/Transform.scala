@@ -26,8 +26,8 @@ object ExecuteTransform {
           request.options.select.map {
             s =>
               request.options.selectMode match {
-                case SelectMode.Strict => frame.select(s)
-                case SelectMode.Relaxed => Try(frame.relaxedSelect(s))
+                case SelectMode.Strict => frame.select(s: _*)
+                case SelectMode.Relaxed => Try(frame.relaxedSelect(s: _*))
               }
           }.getOrElse(Try(frame))
         }

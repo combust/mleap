@@ -99,8 +99,8 @@ class BundleActor(manager: TransformService,
       rt => spec.options.select.map {
         s =>
           spec.options.selectMode match {
-            case SelectMode.Strict => rt.select(s)
-            case SelectMode.Relaxed => Try(rt.relaxedSelect(s))
+            case SelectMode.Strict => rt.select(s: _*)
+            case SelectMode.Relaxed => Try(rt.relaxedSelect(s: _*))
           }
       }.getOrElse(Try(rt))
     }

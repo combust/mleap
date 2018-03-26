@@ -1,10 +1,12 @@
 package ml.combust.mleap.executor.service
 
 import java.net.URI
+import java.util.concurrent.TimeUnit
 
 import akka.NotUsed
 import akka.pattern.ask
-import akka.actor.{ActorRef, ActorRefFactory}
+import akka.actor.{ActorRef, ActorRefFactory, ActorSystem}
+import akka.stream.javadsl
 import akka.stream.scaladsl.Flow
 import ml.combust.mleap.executor.{BundleMeta, StreamRowSpec, TransformFrameRequest, TransformRowRequest}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
@@ -46,9 +48,18 @@ class TransformService(loader: RepositoryBundleLoader)
                        arf: ActorRefFactory) {
   private val lookup: concurrent.Map[URI, BundleManager] = concurrent.TrieMap()
 
-  def getbundleMeta(uri: URI)
+  def this(loader: RepositoryBundleLoader,
+           system: ActorSystem) = {
+    this(loader)(system.dispatcher, system)
+  }
+
+  def getBundleMeta(uri: URI)
                    (implicit timeout: FiniteDuration): Future[BundleMeta] = {
     manager(uri).getBundleMeta()
+  }
+
+  def getBundleMeta(uri: URI, timeout: Int): Future[BundleMeta] = {
+    getBundleMeta(uri)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 
   def transform(uri: URI, request: TransformFrameRequest)
@@ -56,10 +67,22 @@ class TransformService(loader: RepositoryBundleLoader)
     manager(uri).transform(request)
   }
 
+  def transform(uri: URI,
+                request: TransformFrameRequest,
+                timeout: Int): Future[DefaultLeapFrame] = {
+    transform(uri, request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
+  }
+
   def transformRow(uri: URI,
                    request: TransformRowRequest)
                   (implicit timeout: FiniteDuration): Future[Option[Row]] = {
     manager(uri).transformRow(request)
+  }
+
+  def transformRow(uri: URI,
+                   request: TransformRowRequest,
+                   timeout: Int): Future[Option[Row]] = {
+    transformRow(uri, request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 
   def rowFlow[Tag](uri: URI,
@@ -72,6 +95,13 @@ class TransformService(loader: RepositoryBundleLoader)
           case error => Failure(error)
         }.map(r => (r, tag))
     }
+  }
+
+  def javaRowFlow[Tag](uri: URI,
+                       spec: StreamRowSpec,
+                       timeout: Int,
+                       parallelism: Int = TransformStream.DEFAULT_PARALLELISM): javadsl.Flow[(Row, Tag), (Try[Option[Row]], Tag), NotUsed] = {
+    rowFlow(uri, spec, parallelism)(FiniteDuration(timeout, TimeUnit.MILLISECONDS)).asJava
   }
 
   private def manager(uri: URI): BundleManager = {

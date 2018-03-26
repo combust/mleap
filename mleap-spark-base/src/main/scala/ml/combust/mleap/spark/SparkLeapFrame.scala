@@ -50,7 +50,7 @@ case class SparkLeapFrame(schema: StructType,
     }
   }
 
-  override def select(fieldNames: String *): Try[SparkLeapFrame] = {
+  override def select(fieldNames: Seq[String]): Try[SparkLeapFrame] = {
     for(indices <- schema.indicesOf(fieldNames: _*);
       schema2 <- schema.selectIndices(indices: _*)) yield {
       val dataset2 = dataset.map(row => row.selectIndices(indices: _*))

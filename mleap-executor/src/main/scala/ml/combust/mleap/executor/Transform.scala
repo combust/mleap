@@ -21,7 +21,16 @@ object ExecuteTransform {
             request: TransformFrameRequest)
            (implicit ec: ExecutionContext): Future[DefaultLeapFrame] = {
     transformer.transformAsync(request.frame).flatMap {
-      frame => Future.fromTry(request.options.select.map(s => frame.select(s: _*)).getOrElse(Try(frame)))
+      frame =>
+        Future.fromTry {
+          request.options.select.map {
+            s =>
+              request.options.selectMode match {
+                case SelectMode.Strict => frame.select(s)
+                case SelectMode.Relaxed => Try(frame.relaxedSelect(s))
+              }
+          }.getOrElse(Try(frame))
+        }
     }
   }
 }

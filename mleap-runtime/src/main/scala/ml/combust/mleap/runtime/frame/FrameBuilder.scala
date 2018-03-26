@@ -24,7 +24,33 @@ trait FrameBuilder[FB <: FrameBuilder[FB]] {
     * @param fieldNames field names to select
     * @return try new LeapFrame with selected fields
     */
-  def select(fieldNames: String *): Try[FB]
+  def select(fieldNames: String *): Try[FB] = select(fieldNames)
+
+  /** Try to select fields to create a new leap frame.
+    *
+    * @param fieldNames seq of field names
+    * @return try new LeapFrame with selected fields
+    */
+  def select(fieldNames: Seq[String]): Try[FB]
+
+  /** Selects all of the fields from field names that exist in the leap frame.
+    * Returns a new leap frame with all of the available fields.
+    *
+    * @param fieldNames fields to try and select
+    * @return leap frame with select fields
+    */
+  def relaxedSelect(fieldNames: String *): FB = relaxedSelect(fieldNames)
+
+  /** Selects all of the fields from field names that exist in the leap frame.
+    * Returns a new leap frame with all of the available fields.
+    *
+    * @param fieldNames fields to try and select
+    * @return leap frame with select fields
+    */
+  def relaxedSelect(fieldNames: Seq[String]): FB = {
+    val actualFieldNames = fieldNames.filter(schema.hasField)
+    select(actualFieldNames).get
+  }
 
   /** Try to add a column to the LeapFrame.
     *

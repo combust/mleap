@@ -6,7 +6,7 @@ import akka.NotUsed
 import akka.pattern.ask
 import akka.actor.{ActorRef, ActorRefFactory}
 import akka.stream.scaladsl.Flow
-import ml.combust.mleap.executor.{StreamRowSpec, TransformFrameRequest, TransformRowRequest}
+import ml.combust.mleap.executor.{BundleMeta, StreamRowSpec, TransformFrameRequest, TransformRowRequest}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.executor.stream.TransformStream
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
@@ -22,6 +22,11 @@ class BundleManager(manager: TransformService,
                    (implicit arf: ActorRefFactory,
                     ec: ExecutionContext) {
   lazy val actor: ActorRef = arf.actorOf(BundleActor.props(manager, uri, loader.loadBundle(uri)))
+
+  def getBundleMeta()
+                   (implicit timeout: FiniteDuration): Future[BundleMeta] = {
+    (actor ? BundleActor.GetBundleMeta)(timeout).mapTo[BundleMeta]
+  }
 
   def transform(request: TransformFrameRequest)
                (implicit timeout: FiniteDuration): Future[DefaultLeapFrame] = {
@@ -40,6 +45,11 @@ class TransformService(loader: RepositoryBundleLoader)
                       (implicit ec: ExecutionContext,
                        arf: ActorRefFactory) {
   private val lookup: concurrent.Map[URI, BundleManager] = concurrent.TrieMap()
+
+  def getbundleMeta(uri: URI)
+                   (implicit timeout: FiniteDuration): Future[BundleMeta] = {
+    manager(uri).getBundleMeta()
+  }
 
   def transform(uri: URI, request: TransformFrameRequest)
                (implicit timeout: FiniteDuration): Future[DefaultLeapFrame] = {

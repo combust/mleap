@@ -23,7 +23,7 @@ case class DefaultLeapFrame(override val schema: StructType,
     * @param fieldNames field names to select
     * @return try new LeapFrame with selected fields
     */
-  override def select(fieldNames: String*): Try[DefaultLeapFrame] = {
+  override def select(fieldNames: Seq[String]): Try[DefaultLeapFrame] = {
     schema.indicesOf(fieldNames: _*).flatMap {
       indices =>
         schema.selectIndices(indices: _*).map {

@@ -5,8 +5,8 @@ import java.net.URI
 import akka.pattern.pipe
 import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Status}
 import ml.combust.bundle.dsl.Bundle
-import ml.combust.mleap.executor.{ExecuteTransform, StreamRowSpec, TransformFrameRequest, TransformRowRequest}
-import ml.combust.mleap.executor.service.BundleActor.{BundleLoaded, RequestWithSender}
+import ml.combust.mleap.executor._
+import ml.combust.mleap.executor.service.BundleActor.{BundleLoaded, GetBundleMeta, RequestWithSender}
 import ml.combust.mleap.runtime.frame.{RowTransformer, Transformer}
 
 import scala.concurrent.duration._
@@ -21,6 +21,7 @@ object BundleActor {
     Props(new BundleActor(manager, uri, eventualBundle))
   }
 
+  case object GetBundleMeta
   case class BundleLoaded(bundle: Try[Bundle[Transformer]])
   case class RequestWithSender(request: Any, sender: ActorRef)
   case object Shutdown
@@ -35,6 +36,7 @@ class BundleActor(manager: TransformService,
   private var bundle: Option[Bundle[Transformer]] = None
   private val rowTransformers: mutable.Map[StreamRowSpec, Try[RowTransformer]] = mutable.Map()
 
+  // Probably want to make this timeout configurable eventually
   context.setReceiveTimeout(15.minutes)
 
   override def preStart(): Unit = {
@@ -50,6 +52,7 @@ class BundleActor(manager: TransformService,
   override def receive: Receive = {
     case request: TransformFrameRequest => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
     case request: TransformRowRequest => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
+    case GetBundleMeta => maybeHandleRequestWithSender(RequestWithSender(GetBundleMeta, sender()))
     case bl: BundleActor.BundleLoaded => bundleLoaded(bl)
     case BundleActor.Shutdown => context.stop(self)
     case ReceiveTimeout => manager.unload(uri)
@@ -66,6 +69,13 @@ class BundleActor(manager: TransformService,
   def handleRequestWithSender(r: BundleActor.RequestWithSender): Unit = r.request match {
     case tfr: TransformFrameRequest => transformFrame(tfr, r.sender)
     case trr: TransformRowRequest => transformRow(trr, r.sender)
+    case GetBundleMeta => handleGetBundleMeta(r.sender)
+  }
+
+  def handleGetBundleMeta(sender: ActorRef): Unit = {
+    for(bundle <- this.bundle) {
+      sender ! BundleMeta(bundle.info, bundle.root.inputSchema, bundle.root.outputSchema)
+    }
   }
 
   def transformFrame(request: TransformFrameRequest, sender: ActorRef): Unit = {
@@ -86,7 +96,13 @@ class BundleActor(manager: TransformService,
 
   def createRowTransformer(spec: StreamRowSpec): Try[RowTransformer] = {
     bundle.get.root.transform(RowTransformer(spec.schema)).flatMap {
-      rt => spec.options.select.map(s => rt.select(s: _*)).getOrElse(Try(rt))
+      rt => spec.options.select.map {
+        s =>
+          spec.options.selectMode match {
+            case SelectMode.Strict => rt.select(s)
+            case SelectMode.Relaxed => Try(rt.relaxedSelect(s))
+          }
+      }.getOrElse(Try(rt))
     }
   }
 

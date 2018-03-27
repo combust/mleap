@@ -18,7 +18,7 @@ class RepositoryBundleLoaderSpec extends FunSpec with ScalaFutures with Matchers
     it("loads bundle successfully") {
       val bundleLoader = new RepositoryBundleLoader(new FileRepository(true), executionContext)
       val result = bundleLoader.loadBundle(TestUtil.lrUri)
-      whenReady(result, Timeout(2.seconds)) {
+      whenReady(result, Timeout(10.seconds)) {
         bundle => bundle.root shouldBe a [Pipeline]
       }
     }

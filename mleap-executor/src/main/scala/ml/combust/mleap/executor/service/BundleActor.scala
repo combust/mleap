@@ -1,6 +1,7 @@
 package ml.combust.mleap.executor.service
 
 import java.net.URI
+import java.util.UUID
 
 import akka.pattern.pipe
 import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Status}
@@ -17,8 +18,9 @@ import scala.util.{Failure, Success, Try}
 object BundleActor {
   def props(manager: TransformService,
             uri: URI,
+            streams: StreamLookup,
             eventualBundle: Future[Bundle[Transformer]]): Props = {
-    Props(new BundleActor(manager, uri, eventualBundle))
+    Props(new BundleActor(manager, uri, streams, eventualBundle))
   }
 
   case object GetBundleMeta
@@ -29,12 +31,13 @@ object BundleActor {
 
 class BundleActor(manager: TransformService,
                   uri: URI,
+                  streams: StreamLookup,
                   eventualBundle: Future[Bundle[Transformer]]) extends Actor {
   import context.dispatcher
 
   private val buffer: mutable.Queue[RequestWithSender] = mutable.Queue()
   private var bundle: Option[Bundle[Transformer]] = None
-  private val rowTransformers: mutable.Map[StreamRowSpec, Try[RowTransformer]] = mutable.Map()
+  private val rowTransformers: mutable.Map[UUID, Try[RowTransformer]] = mutable.Map()
 
   // Probably want to make this timeout configurable eventually
   context.setReceiveTimeout(15.minutes)
@@ -88,7 +91,7 @@ class BundleActor(manager: TransformService,
 
   def transformRow(request: TransformRowRequest, sender: ActorRef): Unit = {
     Future {
-      rowTransformers.getOrElseUpdate(request.spec, createRowTransformer(request.spec)).map {
+      rowTransformers.getOrElseUpdate(request.id, createRowTransformer(streams.get(request.id).get)).map {
         rt => rt.transformOption(request.row)
       }
     }.flatMap(Future.fromTry).pipeTo(sender)

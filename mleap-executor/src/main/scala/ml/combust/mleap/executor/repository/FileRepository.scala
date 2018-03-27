@@ -4,8 +4,6 @@ import java.io.File
 import java.net.URI
 import java.nio.file.{Files, Path, StandardCopyOption}
 
-import com.typesafe.config.Config
-
 import scala.concurrent.{ExecutionContext, Future}
 
 class FileRepository(copy: Boolean)
@@ -19,6 +17,7 @@ class FileRepository(copy: Boolean)
     if (copy) {
       val tmpFile = Files.createTempFile("mleap", ".bundle.zip")
       Files.copy(local, tmpFile, StandardCopyOption.REPLACE_EXISTING)
+      tmpFile.toFile.deleteOnExit()
       tmpFile
     } else {
       local

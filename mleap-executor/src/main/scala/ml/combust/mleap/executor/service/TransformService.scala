@@ -1,13 +1,14 @@
 package ml.combust.mleap.executor.service
 
 import java.net.URI
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import akka.NotUsed
 import akka.pattern.ask
 import akka.actor.{ActorRef, ActorRefFactory, ActorSystem}
 import akka.stream.javadsl
-import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.{Flow, Keep}
 import ml.combust.mleap.executor.{BundleMeta, StreamRowSpec, TransformFrameRequest, TransformRowRequest}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.executor.stream.TransformStream
@@ -19,11 +20,12 @@ import scala.concurrent.duration.FiniteDuration
 import scala.util.{Failure, Try}
 
 class BundleManager(manager: TransformService,
+                    streams: StreamLookup,
                     loader: RepositoryBundleLoader,
                     uri: URI)
                    (implicit arf: ActorRefFactory,
                     ec: ExecutionContext) {
-  lazy val actor: ActorRef = arf.actorOf(BundleActor.props(manager, uri, loader.loadBundle(uri)))
+  lazy val actor: ActorRef = arf.actorOf(BundleActor.props(manager, uri, streams, loader.loadBundle(uri)))
 
   def getBundleMeta()
                    (implicit timeout: FiniteDuration): Future[BundleMeta] = {
@@ -43,9 +45,18 @@ class BundleManager(manager: TransformService,
   def close(): Unit = actor ! BundleActor.Shutdown
 }
 
+class StreamLookup() {
+  private val streams: concurrent.Map[UUID, StreamRowSpec] = concurrent.TrieMap()
+
+  def get(id: UUID): Option[StreamRowSpec] = streams.get(id)
+  def put(id: UUID, spec: StreamRowSpec): Option[StreamRowSpec] = streams.putIfAbsent(id, spec)
+  def remove(id: UUID): Option[StreamRowSpec] = streams.remove(id)
+}
+
 class TransformService(loader: RepositoryBundleLoader)
                       (implicit ec: ExecutionContext,
                        arf: ActorRefFactory) {
+  private val streams: StreamLookup = new StreamLookup
   private val lookup: concurrent.Map[URI, BundleManager] = concurrent.TrieMap()
 
   def this(loader: RepositoryBundleLoader,
@@ -73,27 +84,28 @@ class TransformService(loader: RepositoryBundleLoader)
     transform(uri, request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 
-  def transformRow(uri: URI,
-                   request: TransformRowRequest)
-                  (implicit timeout: FiniteDuration): Future[Option[Row]] = {
+  private def transformRow(uri: URI,
+                           request: TransformRowRequest)
+                          (implicit timeout: FiniteDuration): Future[Option[Row]] = {
     manager(uri).transformRow(request)
-  }
-
-  def transformRow(uri: URI,
-                   request: TransformRowRequest,
-                   timeout: Int): Future[Option[Row]] = {
-    transformRow(uri, request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 
   def rowFlow[Tag](uri: URI,
                    spec: StreamRowSpec,
                    parallelism: Int = TransformStream.DEFAULT_PARALLELISM)
                   (implicit timeout: FiniteDuration): Flow[(Row, Tag), (Try[Option[Row]], Tag), NotUsed] = {
+    val id = UUID.randomUUID()
+
     Flow[(Row, Tag)].mapAsyncUnordered(parallelism) {
       case (row, tag) =>
-        transformRow(uri, TransformRowRequest(spec, row)).map(r => Try(r)).recover {
+        transformRow(uri, TransformRowRequest(id, row)).map(r => Try(r)).recover {
           case error => Failure(error)
         }.map(r => (r, tag))
+    }.watchTermination()(Keep.right).mapMaterializedValue {
+      done =>
+        streams.put(id, spec)
+        done.onComplete(_ => streams.remove(id))
+        NotUsed
     }
   }
 
@@ -105,7 +117,7 @@ class TransformService(loader: RepositoryBundleLoader)
   }
 
   private def manager(uri: URI): BundleManager = {
-    lookup.getOrElseUpdate(uri, new BundleManager(this, loader, uri))
+    lookup.getOrElseUpdate(uri, new BundleManager(this, streams, loader, uri))
   }
 
   def unload(uri: URI): Unit = {

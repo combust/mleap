@@ -39,6 +39,7 @@ object Dependencies {
   object Test {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
     val akkaHttpTestkit =  "com.typesafe.akka" % "akka-http-testkit_2.11" % akkaHttpVersion % "test"
+    val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test"
   }
 
   object Provided {
@@ -77,7 +78,7 @@ object Dependencies {
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 
-  val executor = l ++= Seq(akkaStream, config, Test.scalaTest)
+  val executor = l ++= Seq(akkaStream, config, Test.scalaTest, Test.akkaTestKit)
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 

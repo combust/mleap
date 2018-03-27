@@ -1,5 +1,7 @@
 package ml.combust.mleap.executor
 
+import java.util.UUID
+
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, Transformer}
 
@@ -42,7 +44,15 @@ object ExecuteTransform {
   * @param options transform options to apply for transform
   */
 case class StreamRowSpec(schema: StructType,
-                         options: TransformOptions)
+                         options: TransformOptions = TransformOptions.default)
+
+object TransformFrameRequest {
+  import scala.language.implicitConversions
+
+  implicit def apply(frame: DefaultLeapFrame): TransformFrameRequest = {
+    TransformFrameRequest(frame, TransformOptions.default)
+  }
+}
 
 /** Request to transform a leap frame.
   *
@@ -54,10 +64,10 @@ case class TransformFrameRequest(frame: DefaultLeapFrame,
 
 /** Request to transform a row using a row transformer.
   *
-  * @param spec spec for the row transform
+  * @param id id of the stream
   * @param row row to transform
   */
-case class TransformRowRequest(spec: StreamRowSpec, row: Row)
+case class TransformRowRequest(id: UUID, row: Row)
 
 /** Select mode is either strict or relaxed.
   *

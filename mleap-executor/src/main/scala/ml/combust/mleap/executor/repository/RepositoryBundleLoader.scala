@@ -15,14 +15,13 @@ import scala.concurrent.{ExecutionContext, Future}
   * loads the file into memory for execution.
   *
   * @param repository repository to use as source of bundles
-  * @param diskEc execution context for reading bundles
+  * @param diskEc execution context for disk operations
   * @param context MleapContext to use for loading bundles
   */
 class RepositoryBundleLoader(repository: Repository,
-                             diskEc: ExecutionContext)
+                             implicit val diskEc: ExecutionContext)
                             (implicit context: MleapContext = MleapContext.defaultContext) {
   def loadBundle(uri: URI): Future[Bundle[Transformer]] = {
-    implicit val ec: ExecutionContext = diskEc
 
     repository.downloadBundle(uri).flatMap {
       path =>

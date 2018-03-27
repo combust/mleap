@@ -26,7 +26,7 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
 
   describe("transforming a leap frame") {
     it("transforms the leap frame") {
-      val result = executor.transform(TestUtil.rfUri, frame)(5.second)
+      val result = executor.transform(TestUtil.rfUri, Try(frame))(5.second)
 
       whenReady(result, Timeout(5.seconds)) { _ => Unit }
     }
@@ -35,7 +35,7 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
   describe("transform stream") {
     it("transforms rows in a stream") {
       val spec = StreamRowSpec(frame.schema)
-      val rowsSource = Source.fromIterator(() => frame.dataset.iterator.zipWithIndex)
+      val rowsSource = Source.fromIterator(() => frame.dataset.iterator.map(row => Try(row)).zipWithIndex)
       val rowsSink = Sink.seq[(Try[Option[Row]], Int)]
       val testFlow = Flow.fromSinkAndSourceMat(rowsSink, rowsSource)(Keep.left)
 

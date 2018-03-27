@@ -38,8 +38,8 @@ class BundleManager(manager: TransformService,
   }
 
   def transformRow(request: TransformRowRequest)
-                  (implicit timeout: FiniteDuration): Future[Option[Row]] = {
-    (actor ? request)(timeout).mapTo[Option[Row]]
+                  (implicit timeout: FiniteDuration): Future[Try[Option[Row]]] = {
+    (actor ? request)(timeout).mapTo[Try[Option[Row]]]
   }
 
   def close(): Unit = actor ! BundleActor.Shutdown
@@ -86,19 +86,19 @@ class TransformService(loader: RepositoryBundleLoader)
 
   private def transformRow(uri: URI,
                            request: TransformRowRequest)
-                          (implicit timeout: FiniteDuration): Future[Option[Row]] = {
+                          (implicit timeout: FiniteDuration): Future[Try[Option[Row]]] = {
     manager(uri).transformRow(request)
   }
 
   def rowFlow[Tag](uri: URI,
                    spec: StreamRowSpec,
                    parallelism: Int = TransformStream.DEFAULT_PARALLELISM)
-                  (implicit timeout: FiniteDuration): Flow[(Row, Tag), (Try[Option[Row]], Tag), NotUsed] = {
+                  (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {
     val id = UUID.randomUUID()
 
-    Flow[(Row, Tag)].mapAsyncUnordered(parallelism) {
+    Flow[(Try[Row], Tag)].mapAsyncUnordered(parallelism) {
       case (row, tag) =>
-        transformRow(uri, TransformRowRequest(id, row)).map(r => Try(r)).recover {
+        transformRow(uri, TransformRowRequest(id, row)).recover {
           case error => Failure(error)
         }.map(r => (r, tag))
     }.watchTermination()(Keep.right).mapMaterializedValue {
@@ -112,7 +112,7 @@ class TransformService(loader: RepositoryBundleLoader)
   def javaRowFlow[Tag](uri: URI,
                        spec: StreamRowSpec,
                        timeout: Int,
-                       parallelism: Int = TransformStream.DEFAULT_PARALLELISM): javadsl.Flow[(Row, Tag), (Try[Option[Row]], Tag), NotUsed] = {
+                       parallelism: Int = TransformStream.DEFAULT_PARALLELISM): javadsl.Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {
     rowFlow(uri, spec, parallelism)(FiniteDuration(timeout, TimeUnit.MILLISECONDS)).asJava
   }
 

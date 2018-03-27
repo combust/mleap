@@ -26,12 +26,15 @@ object TransformStream {
                 (implicit ec: ExecutionContext): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
     Flow[(TransformFrameRequest, Tag)].mapAsyncUnordered(parallelism) {
       case (request, tag) =>
-        transformer.transformAsync(request.frame).map {
+        Future.fromTry(request.frame.map {
           frame =>
-            val tryFrame = request.options.select.map(select => frame.select(select: _*)).
-              getOrElse(Try(frame))
-            (tryFrame, tag)
-        }
+            transformer.transformAsync(frame).map {
+              frame =>
+                val tryFrame = request.options.select.map(select => frame.select(select: _*)).
+                  getOrElse(Try(frame))
+                (tryFrame, tag)
+            }
+        }).flatMap(identity)
     }
   }
 
@@ -49,7 +52,10 @@ object TransformStream {
     Flow[(TransformRowRequest, Tag)].mapAsyncUnordered(parallelism) {
       case (request, tag) =>
         Future {
-          val result = Try(rowTransformer.transformOption(request.row))
+          val result = request.row.flatMap {
+            row => Try(rowTransformer.transformOption(row))
+          }
+
           (result, tag)
         }
     }

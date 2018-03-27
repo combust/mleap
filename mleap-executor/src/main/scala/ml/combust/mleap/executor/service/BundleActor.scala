@@ -92,7 +92,7 @@ class BundleActor(manager: TransformService,
   def transformRow(request: TransformRowRequest, sender: ActorRef): Unit = {
     Future {
       rowTransformers.getOrElseUpdate(request.id, createRowTransformer(streams.get(request.id).get)).map {
-        rt => rt.transformOption(request.row)
+        rt => request.row.map(row => rt.transformOption(row))
       }
     }.flatMap(Future.fromTry).pipeTo(sender)
   }

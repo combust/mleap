@@ -22,18 +22,21 @@ object ExecuteTransform {
   def apply(transformer: Transformer,
             request: TransformFrameRequest)
            (implicit ec: ExecutionContext): Future[DefaultLeapFrame] = {
-    transformer.transformAsync(request.frame).flatMap {
+    Future.fromTry(request.frame.map {
       frame =>
-        Future.fromTry {
-          request.options.select.map {
-            s =>
-              request.options.selectMode match {
-                case SelectMode.Strict => frame.select(s: _*)
-                case SelectMode.Relaxed => Try(frame.relaxedSelect(s: _*))
-              }
-          }.getOrElse(Try(frame))
-        }
-    }
+      transformer.transformAsync(frame).flatMap {
+        frame =>
+          Future.fromTry {
+            request.options.select.map {
+              s =>
+                request.options.selectMode match {
+                  case SelectMode.Strict => frame.select(s: _*)
+                  case SelectMode.Relaxed => Try(frame.relaxedSelect(s: _*))
+                }
+            }.getOrElse(Try(frame))
+          }
+      }
+    }).flatMap(identity)
   }
 }
 
@@ -49,7 +52,7 @@ case class StreamRowSpec(schema: StructType,
 object TransformFrameRequest {
   import scala.language.implicitConversions
 
-  implicit def apply(frame: DefaultLeapFrame): TransformFrameRequest = {
+  implicit def apply(frame: Try[DefaultLeapFrame]): TransformFrameRequest = {
     TransformFrameRequest(frame, TransformOptions.default)
   }
 }
@@ -59,7 +62,7 @@ object TransformFrameRequest {
   * @param frame leap frame to transform
   * @param options transform options
   */
-case class TransformFrameRequest(frame: DefaultLeapFrame,
+case class TransformFrameRequest(frame: Try[DefaultLeapFrame],
                                  options: TransformOptions = TransformOptions.default)
 
 /** Request to transform a row using a row transformer.
@@ -67,7 +70,7 @@ case class TransformFrameRequest(frame: DefaultLeapFrame,
   * @param id id of the stream
   * @param row row to transform
   */
-case class TransformRowRequest(id: UUID, row: Row)
+case class TransformRowRequest(id: UUID, row: Try[Row])
 
 /** Select mode is either strict or relaxed.
   *

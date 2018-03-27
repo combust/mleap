@@ -84,7 +84,11 @@ object SelectMode {
 }
 
 object TransformOptions {
+  import scala.language.implicitConversions
+
   def default: TransformOptions = TransformOptions()
+
+  implicit def apply(o: Option[TransformOptions]): TransformOptions = o.getOrElse(TransformOptions.default)
 }
 
 /** Options that affect the result of a transform.

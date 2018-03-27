@@ -16,4 +16,6 @@ lazy val xgboostJava = MleapProject.xgboostJava
 lazy val xgboostSpark = MleapProject.xgboostSpark
 lazy val serving = MleapProject.serving
 lazy val executor = MleapProject.executor
+lazy val grpc = MleapProject.grpc
+lazy val grpcServer = MleapProject.grpcServer
 lazy val benchmarks = MleapProject.benchmark

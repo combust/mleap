@@ -125,6 +125,18 @@ object MleapProject {
     dependencies = Seq(runtime)
   )
 
+  lazy val grpc = Project(
+    id = "mleap-grpc",
+    base = file("mleap-grpc"),
+    dependencies = Seq(`executor`)
+  )
+
+  lazy val grpcServer = Project(
+    id = "mleap-grpc-server",
+    base = file("mleap-grpc-server"),
+    dependencies = Seq(`grpc`)
+  )
+
   lazy val benchmark = Project(
     id = "mleap-benchmark",
     base = file("mleap-benchmark"),

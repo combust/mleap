@@ -38,21 +38,12 @@ object TestUtil {
   def serializeModelInJsonFormatToZipFile : String = {
     val bundleName = UUID.randomUUID().toString
 
-    val vectorAssembler = VectorAssembler(
-      shape = NodeShape().withInput("input0", "feature1").
-        withInput("input1", "feature2").
-        withInput("input2", "feature3").
-        withStandardOutput("features"),
-      model = VectorAssemblerModel(Seq(TensorShape(3), ScalarShape(), ScalarShape())))
-
-
-    val model = VectorAssemblerModel(Seq(ScalarShape(), ScalarShape(), ScalarShape()))
     val featureAssembler = VectorAssembler(
       shape = NodeShape().withInput("input0", "first_double").
       withInput("input1", "second_double").
       withInput("input2", "third_double").
       withStandardOutput("features"),
-      model = model)
+      model = VectorAssemblerModel(Seq(ScalarShape(), ScalarShape(), ScalarShape())))
     val linearRegression = LinearRegression(shape = NodeShape.regression(),
       model = LinearRegressionModel(Vectors.dense(2.0, 1.0, 2.0), 5d))
     val pipeline = Pipeline("pipeline", NodeShape(),

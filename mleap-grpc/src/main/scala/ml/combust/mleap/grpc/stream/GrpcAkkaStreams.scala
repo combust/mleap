@@ -1,4 +1,4 @@
-package ml.combust.mleap.grpc.server.stream
+package ml.combust.mleap.grpc.stream
 
 import akka.NotUsed
 import akka.stream._
@@ -23,23 +23,23 @@ object GrpcAkkaStreams {
         var started: Boolean = false
         val buffer: mutable.Queue[O] = mutable.Queue[O]()
 
-        def handleError(t: Throwable): Unit = {
-          fail(out, t)
-        }
-
-        def handleCompleted(): Unit = {
-          complete(out)
-        }
-
-        def handleNext(value: O): Unit = {
-          if (started) {
-            emit(out, value)
-          } else {
-            buffer += value
-          }
-        }
-
         observer = new StreamObserver[O] {
+          def handleError(t: Throwable): Unit = {
+            fail(out, t)
+          }
+
+          def handleCompleted(): Unit = {
+            complete(out)
+          }
+
+          def handleNext(value: O): Unit = {
+            if (started) {
+              emit(out, value)
+            } else {
+              buffer += value
+            }
+          }
+
           override def onError(t: Throwable): Unit = getAsyncCallback((_: Unit) => handleError(t)).invoke(())
           override def onCompleted(): Unit = getAsyncCallback((_: Unit) => handleCompleted()).invoke(())
           override def onNext(value: O): Unit = getAsyncCallback((value: O) => handleNext(value)).invoke(value)

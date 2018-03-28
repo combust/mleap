@@ -101,3 +101,7 @@ object TransformOptions {
   */
 case class TransformOptions(select: Option[Seq[String]] = None,
                             selectMode: SelectMode = SelectMode.Strict)
+
+class TransformError(message: String, backtrace: String) extends Exception {
+  override def getMessage: String = message
+}

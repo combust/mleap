@@ -49,6 +49,8 @@ class GrpcServer(executor: MleapExecutor)
     }
   }
 
+  override def transformFrameStream(responseObserver: StreamObserver[TransformFrameResponse]): StreamObserver[TransformFrameRequest] = ???
+
   override def transformRowStream(responseObserver: StreamObserver[TransformRowResponse]): StreamObserver[TransformRowRequest] = {
     val firstObserver = new StreamObserver[TransformRowRequest] {
       private var observer: Option[StreamObserver[TransformRowRequest]] = None

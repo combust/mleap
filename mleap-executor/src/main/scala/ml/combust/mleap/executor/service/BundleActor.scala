@@ -7,7 +7,7 @@ import akka.pattern.pipe
 import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Status}
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.mleap.executor._
-import ml.combust.mleap.executor.service.BundleActor.{BundleLoaded, GetBundleMeta, RequestWithSender}
+import ml.combust.mleap.executor.service.BundleActor.{BundleLoaded, CreateRowTransformer, GetBundleMeta, RequestWithSender}
 import ml.combust.mleap.runtime.frame.{RowTransformer, Transformer}
 
 import scala.concurrent.duration._
@@ -18,20 +18,20 @@ import scala.util.{Failure, Success, Try}
 object BundleActor {
   def props(manager: TransformService,
             uri: URI,
-            streams: StreamLookup,
             eventualBundle: Future[Bundle[Transformer]]): Props = {
-    Props(new BundleActor(manager, uri, streams, eventualBundle))
+    Props(new BundleActor(manager, uri, eventualBundle))
   }
 
   case object GetBundleMeta
   case class BundleLoaded(bundle: Try[Bundle[Transformer]])
   case class RequestWithSender(request: Any, sender: ActorRef)
+  case class CreateRowTransformer(id: UUID, spec: StreamRowSpec)
+  case class CloseStream(id: UUID)
   case object Shutdown
 }
 
 class BundleActor(manager: TransformService,
                   uri: URI,
-                  streams: StreamLookup,
                   eventualBundle: Future[Bundle[Transformer]]) extends Actor {
   import context.dispatcher
 
@@ -54,11 +54,12 @@ class BundleActor(manager: TransformService,
 
   override def receive: Receive = {
     case request: TransformFrameRequest => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
-    case request: TransformRowRequest => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
+    case request: BundleActor.CreateRowTransformer => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
     case GetBundleMeta => maybeHandleRequestWithSender(RequestWithSender(GetBundleMeta, sender()))
     case bl: BundleActor.BundleLoaded => bundleLoaded(bl)
     case BundleActor.Shutdown => context.stop(self)
-    case ReceiveTimeout => manager.unload(uri)
+    case BundleActor.CloseStream(id) => rowTransformers -= id
+    case ReceiveTimeout => handleTimeout()
   }
 
   def maybeHandleRequestWithSender(r: RequestWithSender): Unit = {
@@ -71,7 +72,7 @@ class BundleActor(manager: TransformService,
 
   def handleRequestWithSender(r: BundleActor.RequestWithSender): Unit = r.request match {
     case tfr: TransformFrameRequest => transformFrame(tfr, r.sender)
-    case trr: TransformRowRequest => transformRow(trr, r.sender)
+    case crt: CreateRowTransformer => createRowTransformer(crt, r.sender)
     case GetBundleMeta => handleGetBundleMeta(r.sender)
   }
 
@@ -89,24 +90,23 @@ class BundleActor(manager: TransformService,
     }
   }
 
-  def transformRow(request: TransformRowRequest, sender: ActorRef): Unit = {
-    Future {
-      rowTransformers.getOrElseUpdate(request.id, createRowTransformer(streams.get(request.id).get)).map {
-        rt => request.row.map(row => rt.transformOption(row))
-      }
-    }.flatMap(Future.fromTry).pipeTo(sender)
+  def handleTimeout(): Unit = {
+    // Only unload on timeout if there are no open streams
+    if (rowTransformers.isEmpty) { manager.unload(uri) }
   }
 
-  def createRowTransformer(spec: StreamRowSpec): Try[RowTransformer] = {
-    bundle.get.root.transform(RowTransformer(spec.schema)).flatMap {
-      rt => spec.options.select.map {
-        s =>
-          spec.options.selectMode match {
-            case SelectMode.Strict => rt.select(s: _*)
-            case SelectMode.Relaxed => Try(rt.relaxedSelect(s: _*))
-          }
-      }.getOrElse(Try(rt))
-    }
+  def createRowTransformer(request: CreateRowTransformer, sender: ActorRef): Unit = {
+    Future.fromTry {
+      bundle.get.root.transform(RowTransformer(request.spec.schema)).flatMap {
+        rt => request.spec.options.select.map {
+          s =>
+            request.spec.options.selectMode match {
+              case SelectMode.Strict => rt.select(s: _*)
+              case SelectMode.Relaxed => Try(rt.relaxedSelect(s: _*))
+            }
+        }.getOrElse(Try(rt))
+      }
+    }.pipeTo(sender)
   }
 
   def bundleLoaded(loaded: BundleActor.BundleLoaded): Unit = {

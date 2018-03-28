@@ -9,6 +9,7 @@ import akka.stream.scaladsl.Flow
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
 trait TagBytes[Tag] {
@@ -39,10 +40,13 @@ trait RowTransformClient extends AutoCloseable {
 
 trait Client {
   def getBundleMeta(uri: URI): Future[BundleMeta]
-  def transform(uri: URI, request: TransformFrameRequest): Future[DefaultLeapFrame]
+  def transform(uri: URI, request: TransformFrameRequest)
+               (implicit timeout: FiniteDuration): Future[DefaultLeapFrame]
 
   def rowTransformClient(uri: URI, spec: StreamRowSpec): RowTransformClient = ???
 
-  def frameFlow[Tag: TagBytes](uri: URI, options: TransformOptions = TransformOptions.default): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
-  def rowFlow[Tag: TagBytes](uri: URI, spec: StreamRowSpec): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed]
+  def frameFlow[Tag: TagBytes](uri: URI, options: TransformOptions = TransformOptions.default)
+                              (implicit timeout: FiniteDuration): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
+  def rowFlow[Tag: TagBytes](uri: URI, spec: StreamRowSpec)
+                            (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed]
 }

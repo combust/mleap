@@ -58,6 +58,12 @@ class MleapExecutor()
     transformService.transform(uri, request, timeout)
   }
 
+  def frameFlow[Tag](uri: URI,
+                     parallelism: Int = TransformStream.DEFAULT_PARALLELISM)
+                    (implicit timeout: FiniteDuration): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+    transformService.frameFlow(uri, parallelism)
+  }
+
   def rowFlow[Tag](uri: URI,
                    spec: StreamRowSpec,
                    parallelism: Int = TransformStream.DEFAULT_PARALLELISM)

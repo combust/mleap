@@ -42,5 +42,7 @@ trait Client {
   def transform(uri: URI, request: TransformFrameRequest): Future[DefaultLeapFrame]
 
   def rowTransformClient(uri: URI, spec: StreamRowSpec): RowTransformClient = ???
+
+  def frameFlow[Tag: TagBytes](uri: URI, options: TransformOptions = TransformOptions.default): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
   def rowFlow[Tag: TagBytes](uri: URI, spec: StreamRowSpec): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed]
 }

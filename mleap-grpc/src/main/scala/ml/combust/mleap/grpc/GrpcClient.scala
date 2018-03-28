@@ -5,7 +5,7 @@ import java.net.URI
 import akka.NotUsed
 import akka.stream.scaladsl.{Flow, GraphDSL, Sink, Source, Zip}
 import ml.combust.mleap.executor._
-import ml.combust.mleap.pb.{GetBundleMetaRequest, TransformRowResponse}
+import ml.combust.mleap.pb.{GetBundleMetaRequest, TransformFrameResponse, TransformRowResponse}
 import ml.combust.mleap.pb.MleapGrpc.MleapStub
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
@@ -56,6 +56,77 @@ class GrpcClient(stub: MleapStub)
           }
       }
     }.flatMap(identity)
+  }
+
+  override def frameFlow[Tag: TagBytes](uri: URI,
+                                        options: TransformOptions = TransformOptions.default): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+    val frameReader = FrameReader(BuiltinFormats.binary)
+
+    val responseSource = GrpcAkkaStreams.source[TransformFrameResponse].mapMaterializedValue {
+      observer =>
+        val requestObserver = stub.transformFrameStream(observer)
+
+        // Initialize the stream
+        requestObserver.onNext(pb.TransformFrameRequest(
+          uri = uri.toString,
+          options = Some(options)
+        ))
+        requestObserver
+    }
+
+    Flow.fromGraph {
+      GraphDSL.create(responseSource) {
+        implicit builder =>
+          _ =>
+            import GraphDSL.Implicits._
+
+            val iteratorFlatten = builder.add {
+              Flow[StreamObserver[pb.TransformFrameRequest]].flatMapConcat {
+                observer => Source.repeat(observer)
+              }
+            }
+
+            val frameFlow = builder.add(Flow[(TransformFrameRequest, Tag)])
+            val zip = builder.add(Zip[StreamObserver[pb.TransformFrameRequest], (TransformFrameRequest, Tag)])
+
+            val transformFlow = builder.add {
+              Flow[(StreamObserver[pb.TransformFrameRequest], (TransformFrameRequest, Tag))].to {
+                Sink.foreachParallel[(StreamObserver[pb.TransformFrameRequest], (TransformFrameRequest, Tag))](8) {
+                  case (observer, (request, tag)) =>
+                    Future {
+                      request.frame.flatMap(frame => FrameWriter(frame, BuiltinFormats.binary).toBytes()).map {
+                        frame =>
+                          observer.onNext(pb.TransformFrameRequest(
+                            tag = ByteString.copyFrom(implicitly[TagBytes[Tag]].toBytes(tag)),
+                            frame = ByteString.copyFrom(frame)
+                          ))
+                      }
+                    }
+                }
+              }
+            }
+
+            val responseFlow = builder.add {
+              Flow[pb.TransformFrameResponse].map {
+                response =>
+                  val tryRow = if (response.error.nonEmpty) {
+                    Failure(new TransformError(response.error, response.backtrace))
+                  } else {
+                    frameReader.fromBytes(response.frame.toByteArray)
+                  }
+
+                  (tryRow, implicitly[TagBytes[Tag]].fromBytes(response.tag.toByteArray))
+              }
+            }
+
+            builder.materializedValue ~> iteratorFlatten
+            iteratorFlatten ~> zip.in0
+            frameFlow ~> zip.in1
+            zip.out ~> transformFlow
+
+            FlowShape(frameFlow.in, responseFlow.out)
+      }
+    }.mapMaterializedValue(_ => NotUsed)
   }
 
   override def rowFlow[Tag: TagBytes](uri: URI, spec: StreamRowSpec): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {

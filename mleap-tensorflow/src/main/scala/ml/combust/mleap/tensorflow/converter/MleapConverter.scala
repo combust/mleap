@@ -3,9 +3,8 @@ package ml.combust.mleap.tensorflow.converter
 import java.nio._
 
 import ml.combust.mleap.core.types.{BasicType, TensorType}
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.tensorflow
-import org.tensorflow.DataType
 
 /**
   * Created by hollinwilkins on 1/12/17.
@@ -16,6 +15,8 @@ object MleapConverter {
     val dimensions = dense.dimensions.map(_.toLong).toArray
 
     tt.base match {
+      case BasicType.ByteString =>
+        tensorflow.Tensor.create(dense.values.asInstanceOf[Array[ByteString]].map(_.bytes))
       case BasicType.Byte =>
         tensorflow.Tensor.create(dense.values.asInstanceOf[Array[Byte]])
       case BasicType.Int =>

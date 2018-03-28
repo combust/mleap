@@ -27,9 +27,11 @@ object Dependencies {
     val sparkAvro = "com.databricks" %% "spark-avro" % "3.0.1"
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
-    val netlib = "com.github.fommil.netlib" % "all" % "1.1.2" pomOnly()
-
-    val tensorflowDep = "org.tensorflow" % "libtensorflow" % tensorflowVersion
+    val tensorflowDeps = Seq(
+      "org.tensorflow" % "libtensorflow" % tensorflowVersion,
+      "org.tensorflow" % "libtensorflow_jni" % tensorflowVersion
+    )
+    val akkaStream = "com.typesafe.akka" %% "akka-stream" % akkaVersion
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
     val scalameter = "com.storm-enroute" %% "scalameter" % "0.8.2"
@@ -56,7 +58,7 @@ object Dependencies {
 
   val base = l ++= Seq()
 
-  val core = l ++= Seq(sparkMllibLocal, jTransform, netlib, Test.scalaTest)
+  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)
 
   def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest) ++ scalaReflect.modules(scalaVersion.value))
 
@@ -70,7 +72,7 @@ object Dependencies {
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 
-  val tensorflow = l ++= Seq(tensorflowDep, Test.scalaTest)
+  val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
   val xgboostJava = l ++= Seq(jafama)
 

@@ -9,6 +9,8 @@ sealed trait DataShape {
   def isTensor: Boolean = false
 
   val isNullable: Boolean
+
+  def nonNullable: Boolean = !isNullable
 }
 
 case class ScalarShape(override val isNullable: Boolean = true) extends DataShape {

@@ -9,16 +9,16 @@ import akka.pattern.ask
 import akka.actor.{ActorRef, ActorRefFactory, ActorSystem}
 import akka.stream.{FlowShape, javadsl}
 import akka.stream.scaladsl.{Flow, GraphDSL, Keep, Source, Zip}
-import ml.combust.mleap.executor.{BundleMeta, StreamRowSpec, TransformFrameRequest, TransformRowRequest}
+import ml.combust.mleap.executor._
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.executor.stream.TransformStream
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer, Transformer}
 
 import scala.concurrent.duration._
 import scala.collection.concurrent
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 class BundleManager(manager: TransformService,
                     loader: RepositoryBundleLoader,
@@ -44,7 +44,12 @@ class BundleManager(manager: TransformService,
 
   def createRowTransformer(id: UUID, spec: StreamRowSpec)
                           (implicit timeout: FiniteDuration): Future[RowTransformer] = {
-    (actor ? BundleActor.CreateRowTransformer(id, spec))(timeout).mapTo[RowTransformer]
+    (actor ? BundleActor.CreateRowStream(id, spec))(timeout).mapTo[RowTransformer]
+  }
+
+  def createFrameStream(id: UUID)
+                       (implicit timeout: FiniteDuration): Future[Transformer] = {
+    (actor ? BundleActor.CreateFrameStream(id))(timeout).mapTo[Transformer]
   }
 
   def closeStream(id: UUID): Unit = actor ! BundleActor.CloseStream(id)
@@ -80,6 +85,56 @@ class TransformService(loader: RepositoryBundleLoader)
                 request: TransformFrameRequest,
                 timeout: Int): Future[DefaultLeapFrame] = {
     transform(uri, request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
+  }
+
+  def frameFlow[Tag](uri: URI,
+                     parallelism: Int = TransformStream.DEFAULT_PARALLELISM)
+                    (implicit timeout: FiniteDuration): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+    Flow.fromGraph {
+      GraphDSL.create() {
+        implicit builder =>
+          import GraphDSL.Implicits._
+
+          val transformerSource = builder.add {
+            Source.lazily(() => {
+              val id = UUID.randomUUID()
+              val m = manager(uri)
+
+              Source.fromFutureSource {
+                val transformer = m.createFrameStream(id)(1.minute)
+                transformer.onFailure {
+                  case _ => m.closeStream(id)
+                }
+
+                transformer.map {
+                  transformer => Source.repeat(transformer)
+                }
+              }
+            })
+          }
+
+          val transformFlow = builder.add {
+            Flow[(Transformer, (TransformFrameRequest, Tag))].mapAsyncUnordered(parallelism) {
+              case (transformer, (request, tag)) =>
+                ExecuteTransform(transformer, request).
+                  map(frame => Try(frame)).
+                  recover {
+                    case error => Failure(error)
+                  }.map(frame => (frame, tag))
+            }
+          }
+
+          val frameFlow = builder.add(Flow[(TransformFrameRequest, Tag)])
+
+          val zip = builder.add(Zip[Transformer, (TransformFrameRequest, Tag)])
+
+          transformerSource ~> zip.in0
+          frameFlow ~> zip.in1
+          zip.out ~> transformFlow
+
+          FlowShape(frameFlow.in, transformFlow.out)
+      }
+    }
   }
 
   def rowFlow[Tag](uri: URI,

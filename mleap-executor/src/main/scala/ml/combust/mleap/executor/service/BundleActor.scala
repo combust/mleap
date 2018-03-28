@@ -7,7 +7,7 @@ import akka.pattern.pipe
 import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Status}
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.mleap.executor._
-import ml.combust.mleap.executor.service.BundleActor.{BundleLoaded, CreateRowTransformer, GetBundleMeta, RequestWithSender}
+import ml.combust.mleap.executor.service.BundleActor._
 import ml.combust.mleap.runtime.frame.{RowTransformer, Transformer}
 
 import scala.concurrent.duration._
@@ -25,7 +25,8 @@ object BundleActor {
   case object GetBundleMeta
   case class BundleLoaded(bundle: Try[Bundle[Transformer]])
   case class RequestWithSender(request: Any, sender: ActorRef)
-  case class CreateRowTransformer(id: UUID, spec: StreamRowSpec)
+  case class CreateRowStream(id: UUID, spec: StreamRowSpec)
+  case class CreateFrameStream(id: UUID)
   case class CloseStream(id: UUID)
   case object Shutdown
 }
@@ -37,7 +38,7 @@ class BundleActor(manager: TransformService,
 
   private val buffer: mutable.Queue[RequestWithSender] = mutable.Queue()
   private var bundle: Option[Bundle[Transformer]] = None
-  private val rowTransformers: mutable.Map[UUID, Try[RowTransformer]] = mutable.Map()
+  private val streams: mutable.Set[UUID] = mutable.Set()
 
   // Probably want to make this timeout configurable eventually
   context.setReceiveTimeout(15.minutes)
@@ -54,11 +55,12 @@ class BundleActor(manager: TransformService,
 
   override def receive: Receive = {
     case request: TransformFrameRequest => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
-    case request: BundleActor.CreateRowTransformer => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
+    case request: BundleActor.CreateRowStream => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
+    case request: BundleActor.CreateFrameStream => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
     case GetBundleMeta => maybeHandleRequestWithSender(RequestWithSender(GetBundleMeta, sender()))
     case bl: BundleActor.BundleLoaded => bundleLoaded(bl)
     case BundleActor.Shutdown => context.stop(self)
-    case BundleActor.CloseStream(id) => rowTransformers -= id
+    case BundleActor.CloseStream(id) => streams -= id
     case ReceiveTimeout => handleTimeout()
   }
 
@@ -72,7 +74,8 @@ class BundleActor(manager: TransformService,
 
   def handleRequestWithSender(r: BundleActor.RequestWithSender): Unit = r.request match {
     case tfr: TransformFrameRequest => transformFrame(tfr, r.sender)
-    case crt: CreateRowTransformer => createRowTransformer(crt, r.sender)
+    case crs: CreateRowStream => createRowStream(crs, r.sender)
+    case cfs: CreateFrameStream => createFrameStream(cfs, r.sender)
     case GetBundleMeta => handleGetBundleMeta(r.sender)
   }
 
@@ -92,10 +95,11 @@ class BundleActor(manager: TransformService,
 
   def handleTimeout(): Unit = {
     // Only unload on timeout if there are no open streams
-    if (rowTransformers.isEmpty) { manager.unload(uri) }
+    if (streams.isEmpty) { manager.unload(uri) }
   }
 
-  def createRowTransformer(request: CreateRowTransformer, sender: ActorRef): Unit = {
+  def createRowStream(request: CreateRowStream, sender: ActorRef): Unit = {
+    streams += request.id
     Future.fromTry {
       bundle.get.root.transform(RowTransformer(request.spec.schema)).flatMap {
         rt => request.spec.options.select.map {
@@ -107,6 +111,11 @@ class BundleActor(manager: TransformService,
         }.getOrElse(Try(rt))
       }
     }.pipeTo(sender)
+  }
+
+  def createFrameStream(request: BundleActor.CreateFrameStream, sender: ActorRef): Unit = {
+    streams += request.id
+    sender ! bundle.get.root
   }
 
   def bundleLoaded(loaded: BundleActor.BundleLoaded): Unit = {

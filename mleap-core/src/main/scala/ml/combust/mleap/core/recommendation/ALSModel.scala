@@ -12,7 +12,7 @@ case class ALSModel(rank: Integer, userFactors: Map[Int, Array[Float]], itemFact
     val featuresA = userFactors.get(userId)
     val featuresB = itemFactors.get(itemId)
 
-    if (featuresA.nonEmpty && featuresA.nonEmpty) {
+    if (featuresA.nonEmpty && featuresB.nonEmpty) {
       blas.sdot(rank, featuresA.get, 1, featuresB.get, 1)
     } else {
       Float.NaN

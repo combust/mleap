@@ -37,11 +37,6 @@ class BundleManager(manager: TransformService,
     (actor ? request)(timeout).mapTo[DefaultLeapFrame]
   }
 
-  def transformRow(request: TransformRowRequest)
-                  (implicit timeout: FiniteDuration): Future[Try[Option[Row]]] = {
-    (actor ? request)(timeout).mapTo[Try[Option[Row]]]
-  }
-
   def createRowTransformer(id: UUID, spec: StreamRowSpec)
                           (implicit timeout: FiniteDuration): Future[RowTransformer] = {
     (actor ? BundleActor.CreateRowStream(id, spec))(timeout).mapTo[RowTransformer]

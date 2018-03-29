@@ -64,7 +64,7 @@ class BundleActorSpec extends TestKit(ActorSystem("BundleActorSpec"))
       actor ! CreateRowStream(UUID.randomUUID(), StreamRowSpec(frame.schema))
 
       val rowTransformer = expectMsgType[RowTransformer]
-      frame.schema.fields.foreach(field => assert(rowTransformer.inputSchema.fields.contains(field)))
+      assert(frame.schema.fields sameElements( rowTransformer.inputSchema.fields))
     }
 
 

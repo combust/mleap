@@ -35,7 +35,6 @@ object TagBytes {
 
 trait RowTransformClient extends AutoCloseable {
   def transform(row: Row): Future[Option[Row]]
-  def flow[Tag: TagBytes]: Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed]
 }
 
 trait Client {

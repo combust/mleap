@@ -28,7 +28,7 @@ class GrpcServer(executor: MleapExecutor)
                  materializer: Materializer) extends Mleap {
   private val DEFAULT_TIMEOUT: FiniteDuration = FiniteDuration(5, TimeUnit.SECONDS)
 
-  def getTimeout(ms: Int): FiniteDuration = if (ms == 0) {
+  def getTimeout(ms: Long): FiniteDuration = if (ms == 0) {
     DEFAULT_TIMEOUT
   } else { FiniteDuration(ms, TimeUnit.MILLISECONDS) }
 

@@ -268,6 +268,11 @@ For more documentation, please see our [documentation](http://mleap-docs.combust
 * Make a pull request for an existing feature request or bug report
 * Join the discussion of how to get MLeap into Spark as a dependency. Talk with us on Gitter (see link at top of README.md)
 
+## Thank You
+
+Thank you to [Swoop](https://www.swoop.com/) for supporting the XGboost
+integration.
+
 ## Contact Information
 
 * Hollin Wilkins (hollin@combust.ml)

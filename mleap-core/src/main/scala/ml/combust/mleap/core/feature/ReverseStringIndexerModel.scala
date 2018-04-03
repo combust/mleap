@@ -2,6 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types._
+import ml.combust.mleap.tensor.Tensor
 
 /** Class for a reverse string indexer model.
   *
@@ -15,7 +16,6 @@ import ml.combust.mleap.core.types._
   */
 case class ReverseStringIndexerModel(labels: Seq[String],
                                      inputShape: DataShape = ScalarShape(false)) extends Model {
-  require(inputShape.isScalar || inputShape.isList, "must be scalar or list input type")
   require(inputShape.nonNullable, "cannot take null inputs")
 
   private val indexToString: Map[Int, String] = labels.zipWithIndex.map(v => (v._2, v._1)).toMap
@@ -33,6 +33,13 @@ case class ReverseStringIndexerModel(labels: Seq[String],
     * @return sequence of labels
     */
   def apply(indices: Seq[Int]): Seq[String] = indices.map(indexToString)
+
+  /** Map a tensor of indices to string representations.
+    *
+    * @param indices tensor of indices
+    * @return tensor of label strings
+    */
+  def apply(indices: Tensor[Int]): Tensor[String] = indices.mapValues(indexToString)
 
   override def inputSchema: StructType = StructType("input" -> DataType(BasicType.Double, inputShape)).get
 

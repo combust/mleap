@@ -33,11 +33,27 @@ object SparkParityBase extends FunSpec {
   def dataset(spark: SparkSession): DataFrame = {
     spark.sqlContext.read.avro(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").toString)
   }
+
+  case class Rating(userId: Int, movieId: Int, rating: Float, timestamp: Long)
+  def parseRating(str: String): Rating = {
+    val fields = str.split("::")
+    assert(fields.size == 4)
+    Rating(fields(0).toInt, fields(1).toInt, fields(2).toFloat, fields(3).toLong)
+  }
+
+  def recommendationDataset(spark: SparkSession): DataFrame = {
+    import spark.implicits._
+    spark.read.textFile(this.getClass.getClassLoader.getResource("datasources/sample_movielens_ratings.txt").toString)
+                         .map(parseRating)
+                         .toDF()
+  }
 }
 
 abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   val baseDataset: DataFrame = SparkParityBase.dataset(spark)
   val textDataset: DataFrame = SparkParityBase.textDataset(spark)
+  val recommendationDataset: DataFrame = SparkParityBase.recommendationDataset(spark)
+
   val dataset: DataFrame
   val sparkTransformer: Transformer
 

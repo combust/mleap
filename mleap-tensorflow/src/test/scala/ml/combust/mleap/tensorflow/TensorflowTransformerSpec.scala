@@ -1,5 +1,7 @@
 package ml.combust.mleap.tensorflow
 
+import java.nio.file.{Files, Paths}
+
 import ml.combust.mleap.core.types.{NodeShape, StructField, StructType, TensorType}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
@@ -32,6 +34,26 @@ class TensorflowTransformerSpec extends FunSpec {
       assert(data(2)(2) == Tensor.scalar(1.2f + 9.7f))
 
       transformer.close()
+    }
+  }
+
+  describe("wine quality model") {
+    it("loads bundle correctly") {
+      val storedModel = Paths.get(getClass.getClassLoader.getResource("optimized_WineQuality.pb").getPath)
+      val graphBytes = Files.readAllBytes(storedModel)
+      val graph = new org.tensorflow.Graph()
+      graph.importGraphDef(graphBytes)
+
+      val model = TensorflowModel(graph, inputs = Seq(("dense_1_input", TensorType.Float(-1))),
+        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(-1))))
+      val shape = NodeShape().withInput("dense_1_input", "features").withOutput("dense_3/Sigmoid", "score")
+      val transformer = TensorflowTransformer(uid = "wine_quality", shape = shape, model = model)
+
+      val schema = StructType(StructField("features", TensorType.Float(-1))).get
+      val dataset = Seq(Row(Tensor.denseVector(Array(11f, 2.2f, 4.4f, 1.2f, 0.9f, 1.2f, 3.9f, 1.2f, 4.5f, 6.4f, 4.0f))))
+      val frame = DefaultLeapFrame(schema, dataset)
+
+      val data = transformer.transform(frame).get.dataset
     }
   }
 }

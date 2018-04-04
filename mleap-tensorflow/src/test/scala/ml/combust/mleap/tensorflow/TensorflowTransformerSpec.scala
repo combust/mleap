@@ -46,7 +46,7 @@ class TensorflowTransformerSpec extends FunSpec {
 
   describe("example tensorflow wine quality model") {
 
-    val graphBytes = Files.readAllBytes(Paths.get(getClass.getClassLoader.getResource("optimized_WineQuality.pb").getPath))
+    val graphBytes = Files.readAllBytes(Paths.get(getClass.getClassLoader.getResource("optimized_wine_quality.pb").getPath))
     val graph = new org.tensorflow.Graph()
     graph.importGraphDef(graphBytes)
 

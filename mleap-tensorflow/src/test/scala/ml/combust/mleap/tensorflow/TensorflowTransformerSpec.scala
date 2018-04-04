@@ -1,11 +1,17 @@
 package ml.combust.mleap.tensorflow
 
+import java.io.File
+import java.net.URI
 import java.nio.file.{Files, Paths}
 
+import ml.combust.bundle.BundleFile
+import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.types.{NodeShape, StructField, StructType, TensorType}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.runtime.MleapSupport._
+import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import org.scalatest.FunSpec
+import resource.managed
 
 /**
   * Created by hollinwilkins on 1/13/17.
@@ -37,23 +43,43 @@ class TensorflowTransformerSpec extends FunSpec {
     }
   }
 
-  describe("wine quality model") {
-    it("loads bundle correctly") {
-      val storedModel = Paths.get(getClass.getClassLoader.getResource("optimized_WineQuality.pb").getPath)
-      val graphBytes = Files.readAllBytes(storedModel)
-      val graph = new org.tensorflow.Graph()
-      graph.importGraphDef(graphBytes)
 
-      val model = TensorflowModel(graph, inputs = Seq(("dense_1_input", TensorType.Float(-1))),
-        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(-1))))
+  describe("example tensorflow wine quality model") {
+
+    val graphBytes = Files.readAllBytes(Paths.get(getClass.getClassLoader.getResource("optimized_WineQuality.pb").getPath))
+    val graph = new org.tensorflow.Graph()
+    graph.importGraphDef(graphBytes)
+
+    it("serializes bundle from a TF frozen graph without issues and deserializes correctly") {
+
+      val model = TensorflowModel(graph, inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
+        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))))
       val shape = NodeShape().withInput("dense_1_input", "features").withOutput("dense_3/Sigmoid", "score")
       val transformer = TensorflowTransformer(uid = "wine_quality", shape = shape, model = model)
 
-      val schema = StructType(StructField("features", TensorType.Float(-1))).get
-      val dataset = Seq(Row(Tensor.denseVector(Array(11f, 2.2f, 4.4f, 1.2f, 0.9f, 1.2f, 3.9f, 1.2f, 4.5f, 6.4f, 4.0f))))
-      val frame = DefaultLeapFrame(schema, dataset)
+      val frame = DefaultLeapFrame(StructType(StructField("features", TensorType.Float(1, 11))).get,
+        Seq(Row(DenseTensor(Array(11f, 2.2f, 4.4f, 1.2f, 0.9f, 1.2f, 3.9f, 1.2f, 4.5f, 6.4f, 4.0f), Seq(1, 11)))))
 
-      val data = transformer.transform(frame).get.dataset
+      val expectedData = transformer.transform(frame).get.collect()
+
+      // serialization
+      val uri = new URI(s"jar:file:${TestUtil.baseDir}/tensorflow.json.zip")
+      for (file <- managed(BundleFile(uri))) {
+        transformer.writeBundle.name("bundle")
+          .format(SerializationFormat.Json)
+          .save(file)
+      }
+
+      // de-serialization
+      val file = new File(s"${TestUtil.baseDir}/tensorflow.json.zip")
+      val tfTransformer = (for (bf <- managed(BundleFile(file))) yield {
+        bf.loadMleapBundle().get.root
+      }).tried.get.asInstanceOf[TensorflowTransformer]
+
+      // checks
+      val actualData = tfTransformer.transform(frame).get.collect()
+      assert(actualData.head.getTensor[Float](0).toArray.toSeq sameElements expectedData.head.getTensor[Float](0).toArray.toSeq)
+      assert(actualData.head.getTensor[Float](1).toArray.toSeq sameElements expectedData.head.getTensor[Float](1).toArray.toSeq)
     }
   }
 }

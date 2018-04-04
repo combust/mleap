@@ -76,6 +76,9 @@ class TensorflowTransformerSpec extends FunSpec {
       }).tried.get.asInstanceOf[TensorflowTransformer]
 
       // checks
+      assert(transformer.inputSchema.fields sameElements( tfTransformer.inputSchema.fields))
+      assert(transformer.outputSchema.fields sameElements( tfTransformer.outputSchema.fields))
+
       val actualData = tfTransformer.transform(frame).get.collect()
       assert(actualData.head.getTensor[Float](0).toArray.toSeq sameElements expectedData.head.getTensor[Float](0).toArray.toSeq)
       assert(actualData.head.getTensor[Float](1).toArray.toSeq sameElements expectedData.head.getTensor[Float](1).toArray.toSeq)

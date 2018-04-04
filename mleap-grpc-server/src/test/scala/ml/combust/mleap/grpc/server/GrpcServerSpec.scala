@@ -7,24 +7,24 @@ import com.google.protobuf.ByteString
 import io.grpc.{ManagedChannel, Server}
 import ml.combust.mleap.pb.{GetBundleMetaRequest, MleapGrpc, TransformFrameRequest}
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
-import org.scalatest.{BeforeAndAfter, FunSpec}
+import org.scalatest.{BeforeAndAfterEach, FunSpec}
 
 import scala.concurrent.duration.FiniteDuration
 
-class GrpcServerSpec extends FunSpec with BeforeAndAfter {
+class GrpcServerSpec extends FunSpec with BeforeAndAfterEach {
 
   var server : Server = _
   var inProcessChannel : ManagedChannel = _
   var system : ActorSystem = _
   val format: String = BuiltinFormats.binary
 
-  before {
+  override def beforeEach() = {
     system = ActorSystem("grpc-server-test")
     inProcessChannel = TestUtil.inProcessChannel
     server = TestUtil.server(system)
   }
 
-  after {
+  override def afterEach() {
     inProcessChannel.shutdownNow
     server.shutdown
     system.terminate()

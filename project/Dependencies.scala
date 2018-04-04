@@ -84,6 +84,8 @@ object Dependencies {
 
   val executor = l ++= Seq(akkaStream, config, Test.scalaTest, Test.akkaTestKit)
 
+  val grpcServer = l ++= Seq(Test.scalaTest)
+
   val grpc = l ++= grpcDeps
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark

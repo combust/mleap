@@ -137,6 +137,13 @@ object MleapProject {
     dependencies = Seq(`grpc`)
   )
 
+
+  lazy val springBoot = Project(
+    id = "mleap-spring-boot",
+    base = file("mleap-spring-boot"),
+    dependencies = Seq(`executor`)
+  )
+
   lazy val benchmark = Project(
     id = "mleap-benchmark",
     base = file("mleap-benchmark"),

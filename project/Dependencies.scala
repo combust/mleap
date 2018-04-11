@@ -82,7 +82,7 @@ object Dependencies {
 
   val xgboostJava = l ++= Seq(jafama)
 
-  val xgboostSpark = l ++= Provided.spark
+  val xgboostSpark = l ++= Seq(Provided.xgboostSparkDep) ++ Provided.spark
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

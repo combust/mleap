@@ -32,7 +32,7 @@ class ScoringControllerSpec extends FunSpec with Matchers {
     it("retrieves bundle meta") {
       val bundleUri = getClass.getClassLoader.getResource("demo.zip").toURI.toString
 
-      val url = s"/bundleMeta?uri=$bundleUri"
+      val url = s"/bundle-meta?uri=$bundleUri"
       val response = testRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity[String](headers), classOf[Mleap.BundleMeta])
       assert(response.getBody.getBundle.getName == "pipeline_7a70bdf8-bd53-11e7-bcd7-6c40089417e6")
     }

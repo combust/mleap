@@ -18,7 +18,7 @@ class ScoringController(@Autowired val mleapExecutor: MleapExecutor,
                         @Autowired val actorSystem : ActorSystem,
                         @Value("${bundleMeta.timeout}") bundleMetaTimeout: Int) {
 
-  @GetMapping(path = Array("/bundleMeta"),
+  @GetMapping(path = Array("/bundle-meta"),
     consumes = Array("application/x-protobuf; charset=UTF-8"),
     produces = Array("application/x-protobuf; charset=UTF-8"))
   def getBundleMeta(@RequestParam uri: String) : CompletableFuture[Mleap.BundleMeta] =
@@ -27,4 +27,12 @@ class ScoringController(@Autowired val mleapExecutor: MleapExecutor,
       BundleMeta.toJavaProto(BundleMeta(Some(meta.info.asBundle),
           Some(meta.inputSchema), Some(meta.outputSchema)))
     }(actorSystem.dispatcher).toJava.toCompletableFuture
+
+  @PostMapping(path = Array("/transform/frame"),
+    consumes = Array("application/x-protobuf; charset=UTF-8"),
+    produces = Array("application/x-protobuf; charset=UTF-8"))
+  def transformFrame(@RequestBody transformFrameRequest: Mleap.TransformFrameRequest) : CompletableFuture[Mleap.TransformFrameResponse] = {
+    //todo
+    throw new NotImplementedError()
+  }
 }

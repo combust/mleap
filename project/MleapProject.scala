@@ -138,7 +138,7 @@ object MleapProject {
   )
 
 
-  lazy val springBoot = Project(
+  lazy val springBootServing = Project(
     id = "mleap-spring-boot",
     base = file("mleap-spring-boot"),
     dependencies = Seq(`executor`)

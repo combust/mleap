@@ -19,4 +19,4 @@ lazy val executor = MleapProject.executor
 lazy val grpc = MleapProject.grpc
 lazy val grpcServer = MleapProject.grpcServer
 lazy val benchmarks = MleapProject.benchmark
-lazy val springBoot = MleapProject.springBoot
+lazy val springBoot = MleapProject.springBootServing

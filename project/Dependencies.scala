@@ -11,7 +11,7 @@ object Dependencies {
   val tensorflowVersion = "1.4.0"
   val akkaVersion = "2.5.5"
   val akkaHttpVersion = "10.0.3"
-  val springVersion = "2.0.0.RELEASE"
+  val springBootVersion = "2.0.1.RELEASE"
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
@@ -40,14 +40,14 @@ object Dependencies {
     val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
     val jafama = "net.jafama" % "jafama" % "2.1.0"
 
-    val spring = "org.springframework.boot" % "spring-boot-starter-web" % springVersion
+    val springBoot = "org.springframework.boot" % "spring-boot-starter-web" % springBootVersion
   }
 
   object Test {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
     val akkaHttpTestkit =  "com.typesafe.akka" % "akka-http-testkit_2.11" % akkaHttpVersion % "test"
     val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test"
-    val springTest = "org.springframework.boot" % "spring-boot-starter-test" % springVersion % "test"
+    val springBootTest = "org.springframework.boot" % "spring-boot-starter-test" % springBootVersion % "test"
   }
 
   object Provided {
@@ -92,7 +92,7 @@ object Dependencies {
 
   val grpc = l ++= grpcDeps
 
-  val springBoot = l ++= Seq(spring, Test.scalaTest, Test.springTest)
+  val springBootServing = l ++= Seq(springBoot, Test.scalaTest, Test.springBootTest)
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 

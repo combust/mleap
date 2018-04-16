@@ -33,15 +33,17 @@ class ScoringController(@Autowired val executor: MleapExecutor,
   @PostMapping(path = Array("/transform/frame"),
     consumes = Array("application/x-protobuf; charset=UTF-8"),
     produces = Array("application/x-protobuf; charset=UTF-8"))
-  def transformFrame(@RequestBody rawRequest: Mleap.TransformFrameRequest) : CompletableFuture[Mleap.TransformFrameResponse] = {
-    val format = rawRequest.getFormat
-    val executorRequest = TransformFrameRequest(
-      FrameReader(format).fromBytes(rawRequest.getFrame.toByteArray), rawRequest.getOptions)
+  def transformFrame(@RequestBody request: Mleap.TransformFrameRequest) : CompletableFuture[Mleap.TransformFrameResponse] = {
+    val format = request.getFormat
+    val tag = request.getTag
+    val timeout = request.getTimeout
+    val options = request.getOptions
 
-    executor.transform(URI.create(rawRequest.getUri), executorRequest)(rawRequest.getTimeout)
-        .map(r => TransformFrameResponse(tag = rawRequest.getTag,
-          frame = ByteString.copyFrom(FrameWriter(r, format).toBytes().get)))(actorSystem.dispatcher)
-        .map(executorResponse =>TransformFrameResponse.toJavaProto(executorResponse))(actorSystem.dispatcher)
+    val response = executor.transform(URI.create(request.getUri),
+      TransformFrameRequest(FrameReader(format).fromBytes(request.getFrame.toByteArray), options))(timeout)
+    response.map(resp => TransformFrameResponse(tag = tag,
+                  frame = ByteString.copyFrom(FrameWriter(resp, format).toBytes().get)))(actorSystem.dispatcher)
+            .map(resp => TransformFrameResponse.toJavaProto(resp))(actorSystem.dispatcher)
       .toJava.toCompletableFuture
   }
 }

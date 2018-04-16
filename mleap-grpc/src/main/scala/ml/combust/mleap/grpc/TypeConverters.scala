@@ -8,7 +8,7 @@ object TypeConverters {
 
   implicit def pbToMleapSelectMode(sm: SelectMode): executor.SelectMode = {
     if (sm.isSelectModeRelaxed) {
-      executor.SelectMode.Strict
+      executor.SelectMode.Relaxed
     } else if (sm.isSelectModeStrict) {
       executor.SelectMode.Strict
     } else { executor.SelectMode.Strict }

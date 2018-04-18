@@ -54,11 +54,11 @@ class GrpcServer(executor: MleapExecutor)
           bytes =>
             TransformFrameResponse(tag = request.tag,
               frame = ByteString.copyFrom(bytes),
-              status = TransformStatus.STATUS_OK)
+              status = Status.STATUS_OK)
         })
     }.flatMap(identity).recover {
       case error => TransformFrameResponse(
-        status = TransformStatus.STATUS_ERROR,
+        status = Status.STATUS_ERROR,
         error = error.getMessage,
         backtrace = error.getStackTrace.mkString("\n"))
     }

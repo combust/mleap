@@ -1,7 +1,7 @@
 package ml.combust.mleap.springboot
 
 import java.net.URI
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionStage
 
 import akka.actor.ActorSystem
 import ml.combust.mleap.executor.{MleapExecutor, TransformFrameRequest}
@@ -24,16 +24,16 @@ class ScoringController(@Autowired val executor: MleapExecutor,
   @GetMapping(path = Array("/bundle-meta"),
     consumes = Array("application/x-protobuf; charset=UTF-8"),
     produces = Array("application/x-protobuf; charset=UTF-8"))
-  def getBundleMeta(@RequestParam uri: String) : CompletableFuture[Mleap.BundleMeta] =
+  def getBundleMeta(@RequestParam uri: String) : CompletionStage[Mleap.BundleMeta] =
     executor.getBundleMeta(URI.create(uri), bundleMetaTimeout)
     .map(meta => BundleMeta.toJavaProto(
       BundleMeta(Some(meta.info.asBundle), Some(meta.inputSchema), Some(meta.outputSchema))))(actorSystem.dispatcher)
-    .toJava.toCompletableFuture
+    .toJava
 
   @PostMapping(path = Array("/transform/frame"),
     consumes = Array("application/x-protobuf; charset=UTF-8"),
     produces = Array("application/x-protobuf; charset=UTF-8"))
-  def transformFrame(@RequestBody request: Mleap.TransformFrameRequest) : CompletableFuture[Mleap.TransformFrameResponse] = {
+  def transformFrame(@RequestBody request: Mleap.TransformFrameRequest) : CompletionStage[Mleap.TransformFrameResponse] = {
     val format = request.getFormat
     val tag = request.getTag
     val timeout = request.getTimeout
@@ -44,6 +44,6 @@ class ScoringController(@Autowired val executor: MleapExecutor,
     response.map(resp => TransformFrameResponse(tag = tag,
                   frame = ByteString.copyFrom(FrameWriter(resp, format).toBytes().get)))(actorSystem.dispatcher)
             .map(resp => TransformFrameResponse.toJavaProto(resp))(actorSystem.dispatcher)
-      .toJava.toCompletableFuture
+      .toJava
   }
 }

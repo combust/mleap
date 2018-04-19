@@ -15,7 +15,7 @@ import org.springframework.test.context.TestContextManager
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import TestUtil._
-import ml.combust.mleap.pb.Mleap.Status
+import ml.combust.mleap.pb.Mleap.TransformStatus
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
 
 @RunWith(classOf[SpringRunner])
@@ -31,15 +31,15 @@ class ScoringControllerSpec extends FunSpec with Matchers {
     it("retrieves bundle meta") {
       val url = s"/bundle-meta?uri=$demoUri"
       val response = testRestTemplate.exchange(url, HttpMethod.GET,
-        new HttpEntity[String](protoHeaders), classOf[Mleap.GetBundleMetaResponse])
-      assert(response.getBody.getBundleMeta.getBundle.getName == "pipeline_7a70bdf8-bd53-11e7-bcd7-6c40089417e6")
+        new HttpEntity[String](protoHeaders), classOf[Mleap.BundleMeta])
+      assert(response.getBody.getBundle.getName == "pipeline_7a70bdf8-bd53-11e7-bcd7-6c40089417e6")
     }
 
     it("transforms a leap frame") {
       val response = testRestTemplate.exchange("/transform/frame", HttpMethod.POST,
         new HttpEntity[Mleap.TransformFrameRequest](transformLeapFrameRequest, protoHeaders),
         classOf[Mleap.TransformFrameResponse])
-      assert(response.getBody.getStatus == Status.STATUS_OK)
+      assert(response.getBody.getStatus == TransformStatus.STATUS_OK)
 
       val data = FrameReader(BuiltinFormats.binary).fromBytes(response.getBody.getFrame.toByteArray).get.dataset.toArray
       assert(data(0).getDouble(5) == -67.78953193834998)

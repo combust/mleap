@@ -5,7 +5,7 @@ import java.util.concurrent.CompletionStage
 
 import akka.actor.ActorSystem
 import ml.combust.mleap.executor.{MleapExecutor, TransformFrameRequest}
-import ml.combust.mleap.pb.{BundleMeta, GetBundleMetaResponse, Mleap, TransformFrameResponse}
+import ml.combust.mleap.pb.{BundleMeta, Mleap, TransformFrameResponse}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.web.bind.annotation._
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
@@ -24,12 +24,10 @@ class ScoringController(@Autowired val executor: MleapExecutor,
   @GetMapping(path = Array("/bundle-meta"),
     consumes = Array("application/x-protobuf; charset=UTF-8"),
     produces = Array("application/x-protobuf; charset=UTF-8"))
-  def getBundleMeta(@RequestParam uri: String) : CompletionStage[Mleap.GetBundleMetaResponse] =
+  def getBundleMeta(@RequestParam uri: String) : CompletionStage[Mleap.BundleMeta] =
     executor.getBundleMeta(URI.create(uri), bundleMetaTimeout)
-    .map(meta =>
-      GetBundleMetaResponse.toJavaProto(GetBundleMetaResponse(
-        bundleMeta = Some(BundleMeta(Some(meta.info.asBundle), Some(meta.inputSchema), Some(meta.outputSchema)))
-      )))(actorSystem.dispatcher)
+    .map(meta => BundleMeta.toJavaProto(
+      BundleMeta(Some(meta.info.asBundle), Some(meta.inputSchema), Some(meta.outputSchema))))(actorSystem.dispatcher)
     .toJava
 
   @PostMapping(path = Array("/transform/frame"),

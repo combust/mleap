@@ -47,7 +47,7 @@ class ScoringControllerSpec extends FunSpec with Matchers {
       assert(response.getStatusCode == HttpStatus.BAD_REQUEST)
     }
 
-    it("always returns BAD_REQUEST if bundle doesn't exist at given URI for subsequent ") {
+    it("always returns BAD_REQUEST if bundle doesn't exist at given URI for subsequent requests") {
       val url = s"/bundle-meta?uri=does_not_exist&timeout=2000"
       val response = restTemplate.exchange(url, HttpMethod.GET, httpEntityWithProtoHeaders, classOf[Mleap.BundleMeta])
       assert(response.getStatusCode == HttpStatus.BAD_REQUEST)

@@ -9,6 +9,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class FileRepository(copy: Boolean)
                     (implicit diskEc: ExecutionContext) extends Repository {
   override def downloadBundle(uri: URI): Future[Path] = Future {
+
+    if (uri.getPath.isEmpty) {
+      throw new IllegalArgumentException("file path cannot be empty")
+    }
+
     val local = new File(uri.getPath).toPath
     if (!Files.exists(local)) {
       throw new IllegalArgumentException(s"file does not exist $local")

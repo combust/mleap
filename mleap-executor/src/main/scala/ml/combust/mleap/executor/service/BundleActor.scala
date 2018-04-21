@@ -129,7 +129,7 @@ class BundleActor(manager: TransformService,
         for(r <- this.buffer.dequeueAll(_ => true)) {
           r.sender ! Status.Failure(error)
         }
-        context.stop(self)
+        manager.unload(uri)
     }
   }
 }

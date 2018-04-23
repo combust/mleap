@@ -11,12 +11,12 @@ class FileRepository(copy: Boolean)
   override def downloadBundle(uri: URI): Future[Path] = Future {
 
     if (uri.getPath.isEmpty) {
-      throw new IllegalArgumentException("file path cannot be empty")
+      throw new BundleException("file path cannot be empty")
     }
 
     val local = new File(uri.getPath).toPath
     if (!Files.exists(local)) {
-      throw new IllegalArgumentException(s"file does not exist $local")
+      throw new BundleException(s"file does not exist $local")
     }
 
     if (copy) {

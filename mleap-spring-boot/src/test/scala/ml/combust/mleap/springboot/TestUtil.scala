@@ -1,8 +1,6 @@
 package ml.combust.mleap.springboot
 
-import com.google.protobuf.ByteString
 import ml.combust.mleap.core.types.{ScalarType, StructField, StructType}
-import ml.combust.mleap.pb.TransformFrameRequest
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.javadsl.LeapFrameBuilder
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
@@ -29,9 +27,9 @@ object TestUtil {
                               Seq(Row(44.5, 22.1, 98.2))),
                        BuiltinFormats.binary).toBytes().get
 
-  lazy val transformFrameRequest = TransformFrameRequest.toJavaProto(TransformFrameRequest(
-                                                            uri = demoUri,
-                                                            format = BuiltinFormats.binary,
-                                                            timeout = 2000L,
-                                                            frame = ByteString.copyFrom(leapFrame)))
+  lazy val incompleteLeapFrame = FrameWriter(DefaultLeapFrame(
+      StructType(Seq(StructField("demo:a", ScalarType.Double),
+      StructField("demo:d", ScalarType.Double))).get,
+    Seq(Row(44.5, 98.2))),
+    BuiltinFormats.binary).toBytes().get
 }

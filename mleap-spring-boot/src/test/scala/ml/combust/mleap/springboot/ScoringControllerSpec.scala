@@ -2,7 +2,7 @@ package ml.combust.mleap.springboot
 
 import java.util
 
-import ml.combust.mleap.pb.Mleap
+import ml.combust.mleap.pb.{Mleap, TransformFrameRequest}
 import org.junit.runner.RunWith
 import org.scalatest.{FunSpec, Matchers}
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,6 +14,7 @@ import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter
 import org.springframework.test.context.TestContextManager
 import org.springframework.http.{HttpEntity, HttpMethod, HttpStatus}
 import TestUtil._
+import com.google.protobuf.ByteString
 import ml.combust.mleap.pb.Mleap.TransformStatus
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
 
@@ -76,13 +77,40 @@ class ScoringControllerSpec extends FunSpec with Matchers {
     }
 
     it("transforms a leap frame") {
+      val request = TransformFrameRequest.toJavaProto(TransformFrameRequest(
+        uri = demoUri,
+        format = BuiltinFormats.binary,
+        timeout = 2000L,
+        frame = ByteString.copyFrom(leapFrame)))
       val response = restTemplate.exchange("/transform/frame", HttpMethod.POST,
-        new HttpEntity[Mleap.TransformFrameRequest](transformFrameRequest, protoHeaders),
-        classOf[Mleap.TransformFrameResponse])
+        new HttpEntity[Mleap.TransformFrameRequest](request, protoHeaders), classOf[Mleap.TransformFrameResponse])
       assert(response.getBody.getStatus == TransformStatus.STATUS_OK)
 
       val data = FrameReader(BuiltinFormats.binary).fromBytes(response.getBody.getFrame.toByteArray).get.dataset.toArray
       assert(data(0).getDouble(5) == -67.78953193834998)
+    }
+
+
+    it("fails to transform an incomplete frame") {
+      val request = TransformFrameRequest.toJavaProto(TransformFrameRequest(
+        uri = demoUri,
+        format = BuiltinFormats.binary,
+        timeout = 2000L,
+        frame = ByteString.copyFrom(incompleteLeapFrame)))
+      val response = restTemplate.exchange("/transform/frame", HttpMethod.POST,
+        new HttpEntity[Mleap.TransformFrameRequest](request, protoHeaders), classOf[Mleap.TransformFrameResponse])
+      assert(response.getStatusCode == HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    it("fails transforming a frame when a non-existent bundle URI is given") {
+      val request = TransformFrameRequest.toJavaProto(TransformFrameRequest(
+        uri = "does-not-exist",
+        format = BuiltinFormats.binary,
+        timeout = 2000L,
+        frame = ByteString.copyFrom(leapFrame)))
+      val response = restTemplate.exchange("/transform/frame", HttpMethod.POST,
+        new HttpEntity[Mleap.TransformFrameRequest](request, protoHeaders), classOf[Mleap.TransformFrameResponse])
+      assert(response.getStatusCode == HttpStatus.BAD_REQUEST)
     }
   }
 }

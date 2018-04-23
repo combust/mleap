@@ -24,13 +24,13 @@ class FileRepositorySpec extends FunSpec with ScalaFutures with Matchers {
 
     it("throws an exception when local file doesn't exist") {
       whenReady(repository.downloadBundle(URI.create("does-not-exist")).failed) {
-        ex => ex shouldBe a [IllegalArgumentException]
+        ex => ex shouldBe a [BundleException]
       }
     }
 
     it("throws an exception with empty file path") {
       whenReady(repository.downloadBundle(URI.create("")).failed) {
-        ex => ex shouldBe a [IllegalArgumentException]
+        ex => ex shouldBe a [BundleException]
       }
     }
   }

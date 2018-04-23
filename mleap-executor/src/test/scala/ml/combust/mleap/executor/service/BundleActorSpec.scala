@@ -5,7 +5,7 @@ import java.util.UUID
 import akka.actor.{ActorSystem, Status}
 import akka.testkit.{ImplicitSender, TestKit}
 import ml.combust.mleap.executor._
-import ml.combust.mleap.executor.repository.{FileRepository, RepositoryBundleLoader}
+import ml.combust.mleap.executor.repository.{BundleException, FileRepository, RepositoryBundleLoader}
 import ml.combust.mleap.executor.service.BundleActor.{CreateFrameStream, CreateRowStream, GetBundleMeta}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, RowTransformer, Transformer}
 import org.scalatest.concurrent.ScalaFutures
@@ -42,7 +42,7 @@ class BundleActorSpec extends TestKit(ActorSystem("BundleActorSpec"))
 
     it("returns failure when error loading bundle") {
       val actor = system.actorOf(BundleActor.props(service, lrUri,
-        Future { Thread.sleep(100); throw new IllegalArgumentException("invalid") }))
+        Future { Thread.sleep(100); throw new BundleException("invalid") }))
       actor ! GetBundleMeta
 
       expectMsgType[Status.Failure]

@@ -99,7 +99,12 @@ class ScoringControllerSpec extends FunSpec with Matchers {
         frame = ByteString.copyFrom(incompleteLeapFrame)))
       val response = restTemplate.exchange("/transform/frame", HttpMethod.POST,
         new HttpEntity[Mleap.TransformFrameRequest](request, protoHeaders), classOf[Mleap.TransformFrameResponse])
-      assert(response.getStatusCode == HttpStatus.INTERNAL_SERVER_ERROR)
+      assert(response.getStatusCode == HttpStatus.OK)
+
+      val transformResponse = response.getBody
+      assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_ERROR)
+      assert(!transformResponse.getError.isEmpty)
+      assert(!transformResponse.getBacktrace.isEmpty)
     }
 
     it("fails transforming a frame when a non-existent bundle URI is given") {
@@ -110,7 +115,12 @@ class ScoringControllerSpec extends FunSpec with Matchers {
         frame = ByteString.copyFrom(leapFrame)))
       val response = restTemplate.exchange("/transform/frame", HttpMethod.POST,
         new HttpEntity[Mleap.TransformFrameRequest](request, protoHeaders), classOf[Mleap.TransformFrameResponse])
-      assert(response.getStatusCode == HttpStatus.BAD_REQUEST)
+      assert(response.getStatusCode == HttpStatus.OK)
+
+      val transformResponse = response.getBody
+      assert(transformResponse.getStatus == TransformStatus.STATUS_ERROR)
+      assert(!transformResponse.getError.isEmpty)
+      assert(!transformResponse.getBacktrace.isEmpty)
     }
   }
 }

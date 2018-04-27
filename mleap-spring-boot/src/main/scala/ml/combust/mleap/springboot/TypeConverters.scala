@@ -6,7 +6,9 @@ import com.google.protobuf.ProtocolStringList
 import ml.combust.mleap.executor
 import ml.combust.mleap.pb.Mleap
 
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.concurrent.duration.FiniteDuration
+import scala.util.Try
 
 object TypeConverters {
   import scala.language.implicitConversions
@@ -33,5 +35,13 @@ object TypeConverters {
 
   implicit def pbToMleapTransformOptions(options: Mleap.TransformOptions): executor.TransformOptions = {
         executor.TransformOptions(select = options.getSelectList, selectMode = options.getSelectMode)
+  }
+
+  implicit class RichFuture[T](f: Future[T]) {
+    def mapAll[U](pf: PartialFunction[Try[T], U])(implicit executor: ExecutionContext): Future[U] = {
+      val p = Promise[U]()
+      f.onComplete(r => p.complete(Try(pf(r))))(executor)
+      p.future
+    }
   }
 }

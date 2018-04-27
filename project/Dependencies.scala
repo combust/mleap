@@ -41,6 +41,7 @@ object Dependencies {
     val jafama = "net.jafama" % "jafama" % "2.1.0"
 
     val springBoot = "org.springframework.boot" % "spring-boot-starter-web" % springBootVersion
+    val commonsLang = "org.apache.commons" % "commons-lang3" % "3.7"
   }
 
   object Test {
@@ -92,7 +93,7 @@ object Dependencies {
 
   val grpc = l ++= grpcDeps
 
-  val springBootServing = l ++= Seq(springBoot, Test.scalaTest, Test.springBootTest)
+  val springBootServing = l ++= Seq(springBoot, commonsLang, Test.scalaTest, Test.springBootTest)
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 

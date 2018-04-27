@@ -1,5 +1,5 @@
 package ml.combust.mleap.executor.repository
 
-class BundleException(s: String) extends IllegalArgumentException {
+class BundleException(message: String) extends IllegalArgumentException(message:String) {
 
 }

@@ -19,7 +19,7 @@ class GlobalExceptionHandler {
     ResponseEntity.badRequest().build()
   }
 
-  @ExceptionHandler(Array(classOf[AskTimeoutException], classOf[RuntimeException]))
+  @ExceptionHandler(Array(classOf[AskTimeoutException]))
   def handleServerErrors(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =  {
     GlobalExceptionHandler.logger.error("Returned server error due to ", ex)
     ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()

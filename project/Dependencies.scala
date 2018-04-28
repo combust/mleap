@@ -42,6 +42,7 @@ object Dependencies {
 
     val springBoot = "org.springframework.boot" % "spring-boot-starter-web" % springBootVersion
     val commonsLang = "org.apache.commons" % "commons-lang3" % "3.7"
+    val scalpbJson = "com.thesamet.scalapb" %% "scalapb-json4s" % "0.7.0"
   }
 
   object Test {
@@ -93,7 +94,7 @@ object Dependencies {
 
   val grpc = l ++= grpcDeps
 
-  val springBootServing = l ++= Seq(springBoot, commonsLang, Test.scalaTest, Test.springBootTest)
+  val springBootServing = l ++= Seq(springBoot, commonsLang, scalpbJson, Test.scalaTest, Test.springBootTest)
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 

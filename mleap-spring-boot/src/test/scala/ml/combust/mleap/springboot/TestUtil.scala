@@ -28,12 +28,17 @@ object TestUtil {
     headers
   }
 
-  lazy val leapFrame = FrameWriter(DefaultLeapFrame(
-                              StructType(Seq(StructField("demo:a", ScalarType.Double),
-                                             StructField("demo:c", ScalarType.Double),
-                                             StructField("demo:d", ScalarType.Double))).get,
-                              Seq(Row(44.5, 22.1, 98.2))),
+  lazy val frame = DefaultLeapFrame(
+    StructType(Seq(StructField("demo:a", ScalarType.Double),
+      StructField("demo:c", ScalarType.Double),
+      StructField("demo:d", ScalarType.Double))).get,
+    Seq(Row(44.5, 22.1, 98.2)))
+
+  lazy val protoLeapFrame = FrameWriter(frame,
                        BuiltinFormats.binary).toBytes().get
+
+  lazy val jsonLeapFrame = FrameWriter(frame,
+    BuiltinFormats.json).toBytes().get
 
   lazy val incompleteLeapFrame = FrameWriter(DefaultLeapFrame(
       StructType(Seq(StructField("demo:a", ScalarType.Double),

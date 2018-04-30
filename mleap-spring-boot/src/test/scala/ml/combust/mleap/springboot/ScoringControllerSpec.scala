@@ -102,7 +102,7 @@ class ScoringControllerSpec extends FunSpec with Matchers {
         uri = demoUri,
         format = BuiltinFormats.binary,
         timeout = 2000L,
-        frame = ByteString.copyFrom(leapFrame)))
+        frame = ByteString.copyFrom(protoLeapFrame)))
       val response = restTemplate.exchange("/transform/frame", HttpMethod.POST,
         new HttpEntity[Mleap.TransformFrameRequest](request, protoHeaders), classOf[Mleap.TransformFrameResponse])
       assert(response.getBody.getStatus == Mleap.TransformStatus.STATUS_OK)
@@ -114,9 +114,9 @@ class ScoringControllerSpec extends FunSpec with Matchers {
     it("transforms a leap frame (json request)") {
       val request = JsonMethods.compact(printer.toJson(TransformFrameRequest(
         uri = demoUri,
-        format = BuiltinFormats.binary,
+        format = BuiltinFormats.json,
         timeout = 2000L,
-        frame = ByteString.copyFrom(leapFrame),
+        frame = ByteString.copyFrom(jsonLeapFrame),
         options = Some(TransformOptions(select = Seq("demo:prediction"),
                 selectMode = SELECT_MODE_STRICT)))))
       val responseEntity = restTemplate.exchange("/transform/frame", HttpMethod.POST,
@@ -124,7 +124,7 @@ class ScoringControllerSpec extends FunSpec with Matchers {
       val response = parser.fromJsonString[TransformFrameResponse](responseEntity.getBody)
       assert(response.status == TransformStatus.STATUS_OK)
 
-      val data = FrameReader(BuiltinFormats.binary).fromBytes(response.frame.toByteArray).get.dataset.toArray
+      val data = FrameReader(BuiltinFormats.json).fromBytes(response.frame.toByteArray).get.dataset.toArray
       assert(data(0).getDouble(0) == -67.78953193834998)
     }
 
@@ -165,7 +165,7 @@ class ScoringControllerSpec extends FunSpec with Matchers {
         uri = "does-not-exist",
         format = BuiltinFormats.binary,
         timeout = 2000L,
-        frame = ByteString.copyFrom(leapFrame)))
+        frame = ByteString.copyFrom(protoLeapFrame)))
       val response = restTemplate.exchange("/transform/frame", HttpMethod.POST,
         new HttpEntity[Mleap.TransformFrameRequest](request, protoHeaders), classOf[Mleap.TransformFrameResponse])
       assert(response.getStatusCode == HttpStatus.OK)

@@ -14,9 +14,17 @@ object TestUtil {
 
   lazy val httpEntityWithProtoHeaders = new HttpEntity[Unit](protoHeaders)
 
+  lazy val httpEntityWithJsonHeaders = new HttpEntity[Unit](jsonHeaders)
+
   lazy val protoHeaders = {
     val headers = new HttpHeaders
     headers.add("Content-Type", "application/x-protobuf")
+    headers
+  }
+
+  lazy val jsonHeaders = {
+    val headers = new HttpHeaders
+    headers.add("Content-Type", "application/json")
     headers
   }
 

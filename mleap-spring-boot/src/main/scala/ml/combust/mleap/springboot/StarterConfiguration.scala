@@ -6,23 +6,26 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter
 
+import scalapb.json4s.{Parser, Printer}
+
 @Configuration
 @EnableConfigurationProperties
 class StarterConfiguration {
 
   @Bean
-  def actorSystem() = {
-    ActorSystem("MleapSpringBootScoring")
-  }
+  def actorSystem() = ActorSystem("MleapSpringBootScoring")
+
 
   @Bean
-  def mleapExecutor(actorSystem: ActorSystem) = {
-    MleapExecutor(actorSystem)
-  }
+  def mleapExecutor(actorSystem: ActorSystem) = MleapExecutor(actorSystem)
+
 
   @Bean
-  def protobufHttpMessageConverter() = {
-    new ProtobufHttpMessageConverter
-  }
+  def protobufHttpMessageConverter() = new ProtobufHttpMessageConverter
 
+  @Bean
+  def jsonPrinter() = new Printer(includingDefaultValueFields = true, formattingLongAsNumber = true)
+
+  @Bean
+  def jsonParser() = new Parser()
 }

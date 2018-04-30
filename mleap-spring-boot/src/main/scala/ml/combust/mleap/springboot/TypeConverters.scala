@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import com.google.protobuf.ProtocolStringList
 import ml.combust.mleap.executor
-import ml.combust.mleap.pb.Mleap
+import ml.combust.mleap.pb.{Mleap, SelectMode, TransformOptions}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.concurrent.duration.FiniteDuration
@@ -43,5 +43,22 @@ object TypeConverters {
       f.onComplete(r => p.complete(Try(pf(r))))(executor)
       p.future
     }
+  }
+
+  implicit def pbToMleapSelectMode(sm: SelectMode): executor.SelectMode = {
+    if (sm.isSelectModeRelaxed) {
+      executor.SelectMode.Relaxed
+    } else if (sm.isSelectModeStrict) {
+      executor.SelectMode.Strict
+    } else { executor.SelectMode.Strict }
+  }
+
+  private implicit def pbToMleapSelect(select: Seq[String]): Option[Seq[String]] = {
+    if (select.isEmpty) { None }
+    else { Some(select) }
+  }
+
+  implicit def pbToMleapTransformOptions(options: TransformOptions): executor.TransformOptions = {
+    executor.TransformOptions(select = options.select, selectMode = options.selectMode)
   }
 }

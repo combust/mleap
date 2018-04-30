@@ -15,6 +15,7 @@ import org.springframework.test.context.TestContextManager
 import org.springframework.http.{HttpEntity, HttpMethod, HttpStatus}
 import TestUtil._
 import com.google.protobuf.ByteString
+import ml.combust.mleap.pb.SelectMode.SELECT_MODE_STRICT
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
 import org.json4s.jackson.JsonMethods
 import org.springframework.http.converter.StringHttpMessageConverter
@@ -115,14 +116,16 @@ class ScoringControllerSpec extends FunSpec with Matchers {
         uri = demoUri,
         format = BuiltinFormats.binary,
         timeout = 2000L,
-        frame = ByteString.copyFrom(leapFrame))))
+        frame = ByteString.copyFrom(leapFrame),
+        options = Some(TransformOptions(select = Seq("demo:prediction"),
+                selectMode = SELECT_MODE_STRICT)))))
       val responseEntity = restTemplate.exchange("/transform/frame", HttpMethod.POST,
         new HttpEntity[String](request, jsonHeaders), classOf[String])
       val response = parser.fromJsonString[TransformFrameResponse](responseEntity.getBody)
       assert(response.status == TransformStatus.STATUS_OK)
 
       val data = FrameReader(BuiltinFormats.binary).fromBytes(response.frame.toByteArray).get.dataset.toArray
-      assert(data(0).getDouble(5) == -67.78953193834998)
+      assert(data(0).getDouble(0) == -67.78953193834998)
     }
 
     it("fails to transform an incomplete frame (proto request)") {

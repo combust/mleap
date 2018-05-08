@@ -82,7 +82,7 @@ class GrpcClient(stub: MleapStub)
     Flow.fromGraph {
       GraphDSL.create(responseSource) {
         implicit builder =>
-          _ =>
+          responseSource =>
             import GraphDSL.Implicits._
 
             val iteratorFlatten = builder.add {
@@ -124,6 +124,7 @@ class GrpcClient(stub: MleapStub)
               }
             }
 
+            responseSource ~> responseFlow
             builder.materializedValue ~> iteratorFlatten
             iteratorFlatten ~> zip.in0
             frameFlow ~> zip.in1
@@ -156,7 +157,7 @@ class GrpcClient(stub: MleapStub)
     Flow.fromGraph {
       GraphDSL.create(responseSource) {
         implicit builder =>
-          _ =>
+          responseSource =>
             import GraphDSL.Implicits._
 
             val iteratorFlatten = builder.add {
@@ -200,6 +201,7 @@ class GrpcClient(stub: MleapStub)
               }
             }
 
+            responseSource ~> responseFlow
             builder.materializedValue ~> iteratorFlatten
             iteratorFlatten ~> zip.in0
             rowFlow ~> zip.in1

@@ -32,10 +32,6 @@ object Dependencies {
     val akkaStream = "com.typesafe.akka" %% "akka-stream" % akkaVersion
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
-    val grpcDeps = Seq(
-      "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
-      "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
-    )
     val scalameter = "com.storm-enroute" %% "scalameter" % "0.8.2"
     val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
     val jafama = "net.jafama" % "jafama" % "2.1.0"
@@ -50,6 +46,7 @@ object Dependencies {
     val akkaHttpTestkit =  "com.typesafe.akka" % "akka-http-testkit_2.11" % akkaHttpVersion % "test"
     val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test"
     val springBootTest = "org.springframework.boot" % "spring-boot-starter-test" % springBootVersion % "test"
+    val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
   }
 
   object Provided {
@@ -92,7 +89,10 @@ object Dependencies {
 
   val grpcServer = l ++= Seq(Test.scalaTest)
 
-  val grpc = l ++= grpcDeps
+  val grpc = l ++= Seq(
+    "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
+    "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion,
+    Test.akkaStreamTestKit)
 
   val springBootServing = l ++= Seq(springBoot, commonsLang, scalpbJson, Test.scalaTest, Test.springBootTest)
 

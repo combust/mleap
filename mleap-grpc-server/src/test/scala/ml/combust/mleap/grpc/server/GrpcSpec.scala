@@ -11,39 +11,40 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures
 
 import scala.concurrent.duration._
+import ml.combust.mleap.grpc.server.TestUtil._
 
 class GrpcSpec extends FunSpec with BeforeAndAfterEach with ScalaFutures {
 
   var server : Server = _
   var client : Client = _
-  var inProcessChannel : ManagedChannel = _
+  var channel : ManagedChannel = _
   var system : ActorSystem = _
+  implicit val timeout = FiniteDuration(5, TimeUnit.SECONDS)
 
   override def beforeEach() = {
     system = ActorSystem("grpc-server-test")
-    inProcessChannel = TestUtil.inProcessChannel
-    server = TestUtil.server(system)
-    client = TestUtil.client(inProcessChannel)
+    channel = inProcessChannel
+    server = createServer(system)
+    client = createClient(channel)
   }
 
   override def afterEach() {
-    inProcessChannel.shutdownNow
+    channel.shutdownNow
     server.shutdown
     system.terminate()
   }
 
   describe("grpc server and client") {
     it("retrieves bundle metadata") {
-      val response = client.getBundleMeta(TestUtil.lrUri)
+      val response = client.getBundleMeta(lrUri)
       whenReady(response, Timeout(5.seconds)) {
         meta => assert(meta.info.name == "pipeline_ed5135e9ca49")
       }
     }
 
     it("transforms frame") {
-      client.getBundleMeta(TestUtil.lrUri)
-      val response = client.transform(TestUtil.lrUri, TransformFrameRequest(TestUtil.frame)
-                                      )(FiniteDuration(10, TimeUnit.SECONDS))
+      client.getBundleMeta(lrUri)
+      val response = client.transform(lrUri, TransformFrameRequest(frame))
       whenReady(response, Timeout(5.seconds)) {
         frame => {
           val data = frame.dataset.toArray

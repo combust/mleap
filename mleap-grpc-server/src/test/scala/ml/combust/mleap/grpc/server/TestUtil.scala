@@ -28,14 +28,14 @@ object TestUtil {
 
   lazy val uniqueServerName : String = "in-process server for " + getClass
 
-  def server(system: ActorSystem) : Server = {
-    val ssd = MleapGrpc.bindService(new GrpcServer(MleapExecutor(system))(ec, ActorMaterializer()(system)), ec)
+  def createServer(system: ActorSystem) : Server = {
+    val ssd = MleapGrpc.bindService(new GrpcServer(MleapExecutor(system))(ec, ActorMaterializer.create(system)), ec)
     val server = InProcessServerBuilder.forName(uniqueServerName).directExecutor().addService(ssd).build
     server.start()
     server
   }
 
-  def client(channel: ManagedChannel): Client = new GrpcClient(new MleapStub(channel))
+  def createClient(channel: ManagedChannel): Client = new GrpcClient(new MleapStub(channel))
 
   def inProcessChannel : ManagedChannel = InProcessChannelBuilder.forName(uniqueServerName).directExecutor.build
 

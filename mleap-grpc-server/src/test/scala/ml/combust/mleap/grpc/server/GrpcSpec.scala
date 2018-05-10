@@ -29,9 +29,9 @@ class GrpcSpec extends FunSpec with BeforeAndAfterEach with ScalaFutures {
   }
 
   override def afterEach() {
-    channel.shutdownNow
+    channel.shutdown
     server.shutdown
-    system.terminate()
+    system.terminate
   }
 
   describe("grpc server and client") {

@@ -9,7 +9,7 @@ object Dependencies {
   val sparkVersion = "2.2.0"
   val scalaTestVersion = "3.0.0"
   val tensorflowVersion = "1.4.0"
-  val akkaVersion = "2.5.5"
+  val akkaVersion = "2.5.7"
   val akkaHttpVersion = "10.0.3"
   val springBootVersion = "2.0.1.RELEASE"
 
@@ -87,12 +87,11 @@ object Dependencies {
 
   val executor = l ++= Seq(akkaStream, config, Test.scalaTest, Test.akkaTestKit)
 
-  val grpcServer = l ++= Seq(Test.scalaTest)
+  val grpcServer = l ++= Seq(Test.scalaTest, Test.akkaStreamTestKit)
 
   val grpc = l ++= Seq(
     "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
-    "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion,
-    Test.akkaStreamTestKit)
+    "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion)
 
   val springBootServing = l ++= Seq(springBoot, commonsLang, scalpbJson, Test.scalaTest, Test.springBootTest)
 

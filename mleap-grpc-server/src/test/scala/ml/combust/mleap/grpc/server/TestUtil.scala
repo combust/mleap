@@ -15,11 +15,10 @@ import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.serialization.FrameReader
 
 import scala.concurrent.ExecutionContext
+import ExecutionContext.Implicits.global
 import scala.util.Try
 
 object TestUtil {
-
-  implicit val ec = ExecutionContext.global
 
   lazy val lrUri: URI = URI.create(getClass.getClassLoader.getResource("models/airbnb.model.lr.zip").toURI.toString)
 
@@ -29,7 +28,7 @@ object TestUtil {
   lazy val uniqueServerName : String = "in-process server for " + getClass
 
   def createServer(system: ActorSystem) : Server = {
-    val ssd = MleapGrpc.bindService(new GrpcServer(MleapExecutor(system))(ec, ActorMaterializer.create(system)), ec)
+    val ssd = MleapGrpc.bindService(new GrpcServer(MleapExecutor(system))(global, ActorMaterializer.create(system)), global)
     val server = InProcessServerBuilder.forName(uniqueServerName).directExecutor().addService(ssd).build
     server.start()
     server

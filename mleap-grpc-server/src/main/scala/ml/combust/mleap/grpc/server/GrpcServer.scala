@@ -123,49 +123,52 @@ class GrpcServer(executor: MleapExecutor)
       override def onError(t: Throwable): Unit = observer.foreach(_.onError(t))
       override def onCompleted(): Unit = observer.foreach(_.onCompleted())
       override def onNext(value: TransformRowRequest): Unit = {
-        observer.getOrElse {
-          val options: mleap.executor.TransformOptions = value.options
-          val schema: StructType = value.schema.get
-          val spec: StreamRowSpec = StreamRowSpec(schema, options)
-          val rowReader = RowReader(schema, value.format)
-          val rowWriter = RowWriter(schema, value.format)
+        observer match {
+          case Some(so) =>
+            so.onNext(value)
+          case None =>
+            val options: mleap.executor.TransformOptions = value.options
+            val schema: StructType = value.schema.get
+            val spec: StreamRowSpec = StreamRowSpec(schema, options)
+            val rowReader = RowReader(schema, value.format)
+            val rowWriter = RowWriter(schema, value.format)
 
-          val rowFlow = executor.rowFlow[ByteString](URI.create(value.uri), spec)(getTimeout(value.timeout))
-          val source = GrpcAkkaStreams.source[TransformRowRequest].map {
-            request => (rowReader.fromBytes(request.row.toByteArray), request.tag)
-          }
-          val sink: Sink[(Try[Option[Row]], ByteString), NotUsed] = GrpcAkkaStreams.sink(responseObserver).contramap {
-            case (row: Try[Option[Row]], tag: ByteString) =>
-              val serializedRow: Try[Option[ByteString]] = row.flatMap {
-                _.map {
-                  r => rowWriter.toBytes(r).map(ByteString.copyFrom).map(b => Some(b))
-                } match {
-                  case Some(r) => r
-                  case None => Try(None)
+            val rowFlow = executor.rowFlow[ByteString](URI.create(value.uri), spec)(getTimeout(value.timeout))
+            val source = GrpcAkkaStreams.source[TransformRowRequest].map {
+              request => (rowReader.fromBytes(request.row.toByteArray), request.tag)
+            }
+            val sink: Sink[(Try[Option[Row]], ByteString), NotUsed] = GrpcAkkaStreams.sink(responseObserver).contramap {
+              case (row: Try[Option[Row]], tag: ByteString) =>
+                val serializedRow: Try[Option[ByteString]] = row.flatMap {
+                  _.map {
+                    r =>
+                      rowWriter.toBytes(r).map(ByteString.copyFrom).map(b => Some(b))
+                  } match {
+                    case Some(r) => r
+                    case None => Try(None)
+                  }
                 }
-              }
 
-              serializedRow match {
-                case Success(r) =>
-                  val brow = r.getOrElse(ByteString.EMPTY)
-                  TransformRowResponse(
-                    tag = tag,
-                    row = brow
-                  )
-                case Failure(error) =>
-                  TransformRowResponse(
-                    tag = tag,
-                    error = error.getMessage,
-                    backtrace = error.getStackTrace.mkString("\n")
-                  )
-              }
-          }
-          val grpcFlow = Flow.fromSinkAndSourceMat(sink, source)(Keep.right)
-          val o = rowFlow.joinMat(grpcFlow)(Keep.right).run()
+                serializedRow match {
+                  case Success(r) =>
+                    val brow = r.getOrElse(ByteString.EMPTY)
+                    TransformRowResponse(
+                      tag = tag,
+                      row = brow
+                    )
+                  case Failure(error) =>
+                    TransformRowResponse(
+                      tag = tag,
+                      error = error.getMessage,
+                      backtrace = error.getStackTrace.mkString("\n")
+                    )
+                }
+            }
+            val grpcFlow = Flow.fromSinkAndSourceMat(sink, source)(Keep.right)
+            val o = rowFlow.joinMat(grpcFlow)(Keep.right).run()
 
-          observer = Some(o)
-          o
-        }.onNext(value)
+            observer = Some(o)
+        }
       }
     }
 

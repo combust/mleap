@@ -65,13 +65,13 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
       }
     }
 
-    ignore("transforms a row") {
+    it("transforms a row") {
       val uuid = UUID.randomUUID()
       Source.fromIterator(() => frame.get.dataset.iterator.map(row => {(Try(row), uuid)}))
         .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema)))
         .runWith(TestSink.probe(system))(ActorMaterializer.create(system))
         .request(1)
-        .expectComplete()
+        .expectNext()
     }
   }
 }

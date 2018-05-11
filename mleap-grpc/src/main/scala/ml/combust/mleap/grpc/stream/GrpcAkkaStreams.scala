@@ -70,9 +70,12 @@ object GrpcAkkaStreams {
 
     override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = {
       new GraphStageLogic(shape) {
+        override def preStart(): Unit = pull(in)
+
         setHandler(in, new InHandler {
           override def onPush(): Unit = {
             observer.onNext(grab(in))
+            pull(in)
           }
 
           override def onUpstreamFinish(): Unit = {

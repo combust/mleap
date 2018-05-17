@@ -38,8 +38,10 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
     Seq("features" -> obj.featuresCol)
   }
 
-  override def sparkOutputs(obj: MultilayerPerceptronClassificationModel): Seq[SimpleParamSpec] = {
-    Seq("prediction" -> obj.predictionCol)
+  override def sparkOutputs(obj: MultilayerPerceptronClassificationModel):  Seq[SimpleParamSpec] = {
+    Seq("raw_prediction" -> obj.rawPredictionCol,
+      "probability" -> obj.probabilityCol,
+      "prediction" -> obj.predictionCol)
   }
 }
 

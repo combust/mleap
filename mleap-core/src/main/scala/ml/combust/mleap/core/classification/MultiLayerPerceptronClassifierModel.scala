@@ -48,18 +48,21 @@ object MultiLayerPerceptronClassifierModel {
 
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/classification/MultilayerPerceptronClassifier.scala")
 case class MultiLayerPerceptronClassifierModel(layers: Seq[Int],
-                                               weights: Vector) extends Model {
+                                               weights: Vector) extends ProbabilisticClassificationModel {
   val numFeatures: Int = layers.head
 
   private val mlpModel = FeedForwardTopology
     .multiLayerPerceptron(layers.toArray)
     .model(weights)
 
-  def apply(features: Vector): Double = {
-    LabelConverter.decodeLabel(mlpModel.predict(features))
+  override def predictRaw(features: Vector): Vector = {
+    mlpModel.predictRaw(features)
   }
 
-  override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
+  override def rawToProbabilityInPlace(raw: Vector): Vector = {
+    mlpModel.raw2ProbabilityInPlace(raw)
+  }
 
-  override def outputSchema: StructType = StructType("prediction" -> ScalarType.Double.nonNullable).get
+  override val numClasses: Int = layers.last
+
 }

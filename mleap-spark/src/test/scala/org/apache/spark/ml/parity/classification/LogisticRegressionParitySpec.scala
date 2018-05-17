@@ -20,5 +20,5 @@ class LogisticRegressionParitySpec extends SparkParityBase {
       setOutputCol("features"),
     new LogisticRegressionModel(uid = "logr",
       coefficients = Vectors.dense(0.44, 0.77),
-      intercept = 0.66).setFeaturesCol("features"))).fit(dataset)
+      intercept = 0.66).setThreshold(0.5).setFeaturesCol("features"))).fit(dataset)
 }

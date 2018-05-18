@@ -19,19 +19,24 @@ class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] {
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withValue("labels", Value.stringList(obj.labels)).
-        withValue("handle_invalid", Value.string(obj.getHandleInvalid))
+        withValue("handle_invalid", Value.string(obj.getHandleInvalid)).
+        withValue("string_order_type", Value.string(obj.getStringOrderType))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): StringIndexerModel = {
-      new StringIndexerModel(uid = "", labels = model.value("labels").getStringList.toArray).
+      val m = new StringIndexerModel(uid = "", labels = model.value("labels").getStringList.toArray).
         setHandleInvalid(model.value("handle_invalid").getString)
+      m.set(m.stringOrderType, model.value("string_order_type").getString)
+      m
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: StringIndexerModel): StringIndexerModel = {
-    new StringIndexerModel(uid = uid,
+    val m = new StringIndexerModel(uid = uid,
       labels = model.labels).setHandleInvalid(model.getHandleInvalid)
+    m.set(m.stringOrderType, model.getStringOrderType)
+    m
   }
 
   override def sparkInputs(obj: StringIndexerModel): Seq[ParamSpec] = {

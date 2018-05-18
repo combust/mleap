@@ -95,9 +95,6 @@ case class FeatureHasherModel(numFeatures: Int = 1 << 18,
         map.+=((idx, map.getOrElse(idx, 0.0) + value))
       }
     }
-
-
-    // TODO: Figure this out
     Vectors.sparse(numFeatures, map.toSeq)
   }
   

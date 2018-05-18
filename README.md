@@ -40,23 +40,17 @@ Our goals for this project are:
 
 ## Requirements
 
-MLeap is cross-compiled for Scala 2.10 and 2.11. Because we depend
-heavily on Typesafe config for MLeap, we only support Java 8 at the
-moment. This means the following configurations should be possible:
-
-2. Scala 2.10 and Java 8
-4. Scala 2.11 and Java 8
+MLeap is built against Scala 2.11 and Java 8.  Because we depend heavily on Typesafe config for MLeap, we only support Java 8 at the
+moment.
 
 ## Setup
 
 ### Link with Maven or SBT
 
-MLeap is cross-compiled for Scala 2.10 and 2.11, so just replace 2.10 with 2.11 wherever you see it if you are running Scala version 2.11 and using a POM file for dependency management. Otherwise, use the `%%` operator if you are using SBT and the correct Scala version will be used.
-
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.9.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.10.0"
 ```
 
 #### Maven
@@ -64,8 +58,8 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.9.0"
 ```pom
 <dependency>
     <groupId>ml.combust.mleap</groupId>
-    <artifactId>mleap-runtime_2.10</artifactId>
-    <version>0.9.0</version>
+    <artifactId>mleap-runtime_2.11</artifactId>
+    <version>0.10.0</version>
 </dependency>
 ```
 
@@ -74,7 +68,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.9.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.9.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.10.0"
 ```
 
 #### Maven
@@ -82,15 +76,15 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.9.0"
 ```pom
 <dependency>
     <groupId>ml.combust.mleap</groupId>
-    <artifactId>mleap-spark_2.10</artifactId>
-    <version>0.9.0</version>
+    <artifactId>mleap-spark_2.11</artifactId>
+    <version>0.10.0</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.9.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.10.0
 ```
 
 ### PySpark Integration

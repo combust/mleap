@@ -1,15 +1,16 @@
 package ml.combust.mleap.serving
 
 import com.typesafe.config.Config
+import scala.util.Properties
 
 /**
   * Created by hollinwilkins on 1/31/17.
   */
 case class HttpConfig(config: Config) {
   val hostname = config.getString("hostname")
-  val port = config.getInt("port")
+  val port = scala.util.Properties.envOrElse("MLEAP_SERVER_PORT", config.getInt("port"))
   val bindHostname = config.getString("bind-hostname")
-  val bindPort = config.getInt("bind-port")
+  val bindPort = scala.util.Properties.envOrElse("MLEAP_SERVER_PORT", config.getInt("bind-port"))
 }
 
 case class MleapConfig(config: Config) {

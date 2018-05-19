@@ -3,6 +3,7 @@ package ml.combust.mleap.springboot
 import javax.servlet.http.HttpServletRequest
 
 import akka.pattern.AskTimeoutException
+import com.fasterxml.jackson.core.JsonParseException
 import ml.combust.mleap.executor.repository.BundleException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.{ConversionNotSupportedException, TypeMismatchException}
@@ -106,6 +107,11 @@ class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
   def handleAsyncRequestTimeoutException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
     errorResponse(ex, HttpStatus.SERVICE_UNAVAILABLE)
+
+  @ExceptionHandler(Array(classOf[JsonParseException]))
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  def handleJsonParseException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
+    errorResponse(ex, HttpStatus.BAD_REQUEST)
 
   private def errorResponse(ex: Exception, status: HttpStatus): ResponseEntity[Unit] = {
     GlobalExceptionHandler.logger.warn("Returned error due to ", ex)

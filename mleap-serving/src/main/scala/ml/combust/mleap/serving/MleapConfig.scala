@@ -8,9 +8,9 @@ import scala.util.Properties
   */
 case class HttpConfig(config: Config) {
   val hostname = config.getString("hostname")
-  val port = scala.util.Properties.envOrElse("MLEAP_SERVER_PORT", config.getInt("port"))
+  val port = scala.util.Properties.envOrElse("MLEAP_SERVER_PORT", config.getString("port")).toInt
   val bindHostname = config.getString("bind-hostname")
-  val bindPort = scala.util.Properties.envOrElse("MLEAP_SERVER_PORT", config.getInt("bind-port"))
+  val bindPort = scala.util.Properties.envOrElse("MLEAP_SERVER_PORT", config.getString("bind-port")).toInt
 }
 
 case class MleapConfig(config: Config) {

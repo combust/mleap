@@ -7,9 +7,7 @@ import scala.util.Properties
   * Created by hollinwilkins on 1/31/17.
   */
 case class HttpConfig(config: Config) {
-  val hostname = config.getString("hostname")
-  val port = scala.util.Properties.envOrElse("MLEAP_SERVER_PORT", config.getString("port")).toInt
-  val bindHostname = config.getString("bind-hostname")
+  val bindHostname = scala.util.Properties.envOrElse("MLEAP_SERVER_HOSTNAME", config.getString("bind-hostname"))
   val bindPort = scala.util.Properties.envOrElse("MLEAP_SERVER_PORT", config.getString("bind-port")).toInt
 }
 

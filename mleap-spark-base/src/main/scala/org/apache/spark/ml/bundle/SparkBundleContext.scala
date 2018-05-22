@@ -19,6 +19,8 @@ object SparkBundleContext {
       "ml.combust.mleap.spark.registry.v21"
     } else if(sparkVersion.startsWith("2.2")) {
       "ml.combust.mleap.spark.registry.v22"
+    } else if(sparkVersion.startsWith("2.3")) {
+      "ml.combust.mleap.spark.registry.v23"
     } else {
       throw new IllegalStateException(s"unsupported Spark version: $sparkVersion")
     }

@@ -5,8 +5,8 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
+import akka.stream.{ActorMaterializer, KillSwitches}
+import akka.stream.scaladsl.{Keep, Source}
 import akka.stream.testkit.scaladsl.TestSink
 import akka.testkit.TestKit
 import io.grpc.{ManagedChannel, Server, Status, StatusRuntimeException}
@@ -18,6 +18,7 @@ import org.scalatest.concurrent.ScalaFutures
 import scala.concurrent.duration._
 import ml.combust.mleap.grpc.server.TestUtil._
 
+import scala.concurrent.Await
 import scala.util.Try
 
 class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
@@ -67,16 +68,23 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
 
     it("transforms a row using row flow") {
       val uuid = UUID.randomUUID()
-      val result = Source.fromIterator(() => frame.get.dataset.iterator.map(row => (Try(row), uuid)))
+      val ((switch, done), stream) = Source.fromIterator(() => frame.get.dataset.iterator.map(row => (Try(row), uuid)))
         .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema)))
-        .runWith(TestSink.probe(system))(ActorMaterializer.create(system))
+        .viaMat(KillSwitches.single)(Keep.right)
+        .watchTermination()(Keep.both)
+        .toMat(TestSink.probe(system))(Keep.both)
+        .run()(ActorMaterializer.create(system))
+
+      val result = stream
         .request(1)
         .expectNext()
       assert(result._2 == uuid)
       assert(result._1.isSuccess)
       val row = result._1.get.get
       assert(row.getDouble(26) == 232.62463916840318)
-      // the issue i think is that this is still only the input row, not the transformed row
+
+      switch.shutdown()
+      Await.result(done, 10.seconds)
     }
 
     it("returns error with the right exception when using row flow"){

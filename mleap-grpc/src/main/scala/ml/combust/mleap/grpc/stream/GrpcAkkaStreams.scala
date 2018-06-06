@@ -70,7 +70,16 @@ object GrpcAkkaStreams {
 
     override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = {
       new GraphStageLogic(shape) {
+        var error: Option[Throwable] = None
         override def preStart(): Unit = pull(in)
+
+        override def postStop(): Unit = {
+          error match {
+            case Some(ex) => observer.onError(ex)
+            case None =>
+              if (closeOnComplete) { observer.onCompleted() }
+          }
+        }
 
         setHandler(in, new InHandler {
           override def onPush(): Unit = {
@@ -78,11 +87,10 @@ object GrpcAkkaStreams {
             pull(in)
           }
 
-          override def onUpstreamFinish(): Unit = {
-            if (closeOnComplete) { observer.onCompleted() }
+          override def onUpstreamFailure(ex: Throwable): Unit = {
+            error = Some(ex)
+            completeStage()
           }
-
-          override def onUpstreamFailure(ex: Throwable): Unit = observer.onError(ex)
         })
       }
     }

@@ -29,7 +29,9 @@ object TestUtil {
 
   def createServer(system: ActorSystem) : Server = {
     val ssd = MleapGrpc.bindService(new GrpcServer(MleapExecutor(system))(global, ActorMaterializer.create(system)), global)
-    val server = InProcessServerBuilder.forName(uniqueServerName).directExecutor().addService(ssd).build
+    val builder = InProcessServerBuilder.forName(uniqueServerName)
+    builder.directExecutor().addService(ssd).intercept(new ErrorInterceptor)
+    val server = builder.build
     server.start()
     server
   }

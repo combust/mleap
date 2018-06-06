@@ -9,7 +9,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import akka.stream.testkit.scaladsl.TestSink
 import akka.testkit.TestKit
-import io.grpc.{ManagedChannel, Server}
+import io.grpc.{ManagedChannel, Server, Status, StatusRuntimeException}
 import ml.combust.mleap.executor.{Client, StreamRowSpec, TransformFrameRequest, TransformOptions}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSpecLike}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
@@ -79,15 +79,17 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
       // the issue i think is that this is still only the input row, not the transformed row
     }
 
-    ignore("returns error with the right exception when using row flow"){
+    it("returns error with the right exception when using row flow"){
       val ex = Source.fromIterator(() => frame.get.dataset.iterator.map(row => (Try(row), UUID.randomUUID())))
-        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema, TransformOptions(Some(Seq("dummy"))))))
+        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema, TransformOptions(Some(Seq("dummy1", "dummy2"))))))
         .runWith(TestSink.probe(system))(ActorMaterializer.create(system))
         .request(1)
         .expectError()
-      assert(ex.isInstanceOf[IllegalArgumentException])
-      // i thought ex would be IllegalArgumentException from the strict select?
-      // instead it's io.grpc.StatusRuntimeException: UNKNOWN
+
+      assert(ex.isInstanceOf[StatusRuntimeException])
+      val sre = ex.asInstanceOf[StatusRuntimeException]
+      assert(sre.getStatus.getCode == Status.FAILED_PRECONDITION.getCode)
+      assert(sre.getStatus.getDescription == "invalid fields: dummy1,dummy2")
     }
 
     it("transforms a frame using a frame flow") {

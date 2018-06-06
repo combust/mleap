@@ -14,6 +14,7 @@ import akka.stream.FlowShape
 import com.google.protobuf.ByteString
 import io.grpc.stub.StreamObserver
 import ml.combust.bundle.dsl.BundleInfo
+import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.grpc.stream.GrpcAkkaStreams
 import ml.combust.mleap.pb
 import ml.combust.mleap.runtime.serialization._
@@ -138,10 +139,9 @@ class GrpcClient(stub: MleapStub)
 
   override def rowFlow[Tag: TagBytes](uri: URI, spec: StreamRowSpec)
                                      (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {
-    val rowReader = RowReader(spec.schema, BuiltinFormats.binary)
     val rowWriter = RowWriter(spec.schema, BuiltinFormats.binary)
 
-    val responseSource = GrpcAkkaStreams.source[TransformRowResponse].mapMaterializedValue {
+    val _responseSource = GrpcAkkaStreams.source[TransformRowResponse].mapMaterializedValue {
       observer =>
         val requestObserver = stub.transformRowStream(observer)
 
@@ -157,7 +157,7 @@ class GrpcClient(stub: MleapStub)
     }
 
     Flow.fromGraph {
-      GraphDSL.create(responseSource) {
+      GraphDSL.create(_responseSource) {
         implicit builder =>
           responseSource =>
             import GraphDSL.Implicits._
@@ -189,18 +189,32 @@ class GrpcClient(stub: MleapStub)
             }
 
             val responseFlow = builder.add {
-              Flow[pb.TransformRowResponse].map {
-                response =>
-                  val tryRow = if (response.error.nonEmpty) {
-                    Failure(new TransformError(response.error, response.backtrace))
-                  } else if (response.row.isEmpty) {
-                    Try(None)
-                  } else {
-                    rowReader.fromBytes(response.row.toByteArray).map(row => Some(row))
-                  }
+              Flow[pb.TransformRowResponse].statefulMapConcat(
+                () => {
+                  var reader: Option[RowReader] = None
 
-                  (tryRow, implicitly[TagBytes[Tag]].fromBytes(response.tag.toByteArray))
-              }
+                  (response) => {
+                    reader match {
+                      case Some(r) =>
+                        val tryRow = if (response.error.nonEmpty) {
+                          Failure(new TransformError(response.error, response.backtrace))
+                        } else if (response.row.isEmpty) {
+                          Try(None)
+                        } else {
+                          r.fromBytes(response.row.toByteArray).map(row => Some(row))
+                        }
+
+                        scala.collection.immutable.Iterable((tryRow, implicitly[TagBytes[Tag]].fromBytes(response.tag.toByteArray)))
+                      case None =>
+                        for (schema <- response.schema) {
+                          val sSchema: StructType = schema
+                          reader = Some(RowReader(sSchema, format))
+                        }
+                        scala.collection.immutable.Iterable()
+                    }
+                  }
+                }
+              )
             }
 
             responseSource ~> responseFlow

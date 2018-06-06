@@ -9,15 +9,15 @@ import ml.combust.mleap.pb._
 import ml.combust.mleap.pb.MleapGrpc.Mleap
 import ml.combust.mleap.runtime.serialization.{FrameReader, FrameWriter, RowReader, RowWriter}
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
-import akka.stream.scaladsl.{Flow, Keep, Sink}
+import akka.stream.scaladsl.{Flow, GraphDSL, Keep, RunnableGraph, Sink, Source, Zip}
 import com.google.protobuf.ByteString
 import ml.combust.mleap.grpc.stream.GrpcAkkaStreams
 import ml.combust.mleap.grpc.TypeConverters._
 import akka.NotUsed
-import akka.stream.Materializer
+import akka.stream.{ClosedShape, Materializer}
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -130,42 +130,83 @@ class GrpcServer(executor: MleapExecutor)
             val options: mleap.executor.TransformOptions = value.options
             val schema: StructType = value.schema.get
             val spec: StreamRowSpec = StreamRowSpec(schema, options)
-            val rowReader = RowReader(schema, value.format)
-            val rowWriter = RowWriter(schema, value.format)
+            val reader = RowReader(schema, value.format)
 
-            val rowFlow = executor.rowFlow[ByteString](URI.create(value.uri), spec)(getTimeout(value.timeout))
-            val source = GrpcAkkaStreams.source[TransformRowRequest].map {
-              request => (rowReader.fromBytes(request.row.toByteArray), request.tag)
-            }
-            val sink: Sink[(Try[Option[Row]], ByteString), NotUsed] = GrpcAkkaStreams.sink(responseObserver).contramap {
-              case (row: Try[Option[Row]], tag: ByteString) =>
-                val serializedRow: Try[Option[ByteString]] = row.flatMap {
-                  _.map {
-                    r =>
-                      rowWriter.toBytes(r).map(ByteString.copyFrom).map(b => Some(b))
-                  } match {
-                    case Some(r) => r
-                    case None => Try(None)
+            val _source = GrpcAkkaStreams.source[TransformRowRequest]
+            val _rowFlow = executor.rowFlow[ByteString](URI.create(value.uri), spec)(getTimeout(value.timeout))
+
+            val graph = RunnableGraph.fromGraph(GraphDSL.create(_source, _rowFlow)(Keep.both) {
+              implicit builder =>
+                (source, rowFlow) =>
+                  import GraphDSL.Implicits._
+
+                  val rowWriterSource = builder.add {
+                    Flow[Future[RowTransformer]].mapAsync(1)(identity).map {
+                      rt =>
+                        val writer = RowWriter(rt.outputSchema, value.format)
+                        responseObserver.onNext(TransformRowResponse(
+                          schema = Some(rt.outputSchema)
+                        ))
+                        Source.repeat(writer)
+                    }.flatMapMerge(1, (writer) => {
+                      writer
+                    })
                   }
-                }
 
-                serializedRow match {
-                  case Success(r) =>
-                    val brow = r.getOrElse(ByteString.EMPTY)
-                    TransformRowResponse(
-                      tag = tag,
-                      row = brow
-                    )
-                  case Failure(error) =>
-                    TransformRowResponse(
-                      tag = tag,
-                      error = error.getMessage,
-                      backtrace = error.getStackTrace.mkString("\n")
-                    )
-                }
-            }
-            val grpcFlow = Flow.fromSinkAndSourceMat(sink, source)(Keep.right)
-            val o = rowFlow.joinMat(grpcFlow)(Keep.right).run()
+                  val deserializer = builder.add {
+                    Flow[TransformRowRequest].map {
+                      request =>
+                        (reader.fromBytes(request.row.toByteArray), request.tag)
+                    }
+                  }
+
+                  val serializerZip = builder.add(Zip[RowWriter, (Try[Option[Row]], ByteString)])
+                  val serializer = builder.add {
+                    Flow[(RowWriter, (Try[Option[Row]], ByteString))].map {
+                      case (writer, (tryRow, tag)) =>
+                        val serializedRow: Try[Option[ByteString]] = tryRow.flatMap {
+                          _.map {
+                            r =>
+                              writer.toBytes(r).map(ByteString.copyFrom).map(b => Some(b))
+                          } match {
+                            case Some(r) => r
+                            case None => Try(None)
+                          }
+                        }
+
+                        serializedRow match {
+                          case Success(r) =>
+                            val brow = r.getOrElse(ByteString.EMPTY)
+                            TransformRowResponse(
+                              tag = tag,
+                              row = brow
+                            )
+                          case Failure(error) =>
+                            TransformRowResponse(
+                              tag = tag,
+                              error = error.getMessage,
+                              backtrace = error.getStackTrace.mkString("\n")
+                            )
+                        }
+                    }
+                  }
+
+                  val sink = builder.add(GrpcAkkaStreams.sink(responseObserver))
+
+                  builder.materializedValue.map(_._2) ~> rowWriterSource
+
+                  source.out ~> deserializer
+                  deserializer.out ~> rowFlow
+
+                  rowWriterSource ~> serializerZip.in0
+                  rowFlow.out ~> serializerZip.in1
+                  serializerZip.out ~> serializer
+                  serializer ~> sink
+
+                  ClosedShape
+            }).mapMaterializedValue(_._1)
+
+            val o = graph.run()
 
             observer = Some(o)
         }

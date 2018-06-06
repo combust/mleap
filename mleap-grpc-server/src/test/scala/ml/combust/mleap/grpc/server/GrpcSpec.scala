@@ -65,7 +65,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
       }
     }
 
-    ignore("transforms a row using row flow") {
+    it("transforms a row using row flow") {
       val uuid = UUID.randomUUID()
       val result = Source.fromIterator(() => frame.get.dataset.iterator.map(row => (Try(row), uuid)))
         .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema)))

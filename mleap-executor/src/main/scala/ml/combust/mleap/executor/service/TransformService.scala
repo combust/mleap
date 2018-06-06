@@ -135,57 +135,56 @@ class TransformService(loader: RepositoryBundleLoader)
   def rowFlow[Tag](uri: URI,
                    spec: StreamRowSpec,
                    parallelism: Int = TransformStream.DEFAULT_PARALLELISM)
-                  (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {
-    Flow.fromGraph {
-      GraphDSL.create() {
-        implicit builder =>
-          import GraphDSL.Implicits._
+                  (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
+    val _rowTransformerSource = Source.lazily(() => {
+      val id = UUID.randomUUID()
+      val m = manager(uri)
 
-          val rowTransformerSource = builder.add {
-            Source.lazily(() => {
-              val id = UUID.randomUUID()
-              val m = manager(uri)
+      // this timeout should probably be configurable
+      val rowTransformer = m.createRowTransformer(id, spec)(1.minute)
+      rowTransformer.onFailure {
+        case _ => m.closeStream(id)
+      }
 
-              // this timeout should probably be configurable
-              val rowTransformer = m.createRowTransformer(id, spec)(1.minute)
-              rowTransformer.onFailure {
-                case _ => m.closeStream(id)
-              }
-
-              Source.fromFutureSource {
-                rowTransformer.map {
-                  rt =>
-                    Source.repeat(rt).watchTermination()(Keep.right).mapMaterializedValue {
-                      done =>
-                        done.andThen { case _ => m.closeStream(id) }
-                    }
-                }
-              }
-            })
-          }
-
-          val transformFlow = builder.add {
-            Flow[(RowTransformer, (Try[Row], Tag))].mapAsyncUnordered(parallelism) {
-              case (rowTransformer, (row, tag)) =>
-                Future {
-                  val result = row.flatMap {
-                    r => Try(rowTransformer.transformOption(r))
-                  }
-
-                  (result, tag)
-                }
+      Source.fromFutureSource {
+        rowTransformer.map {
+          rt =>
+            Source.repeat(rt).watchTermination()(Keep.right).mapMaterializedValue {
+              done =>
+                done.andThen { case _ => m.closeStream(id) }
             }
-          }
+        }
+      }.mapMaterializedValue(_ => rowTransformer)
+    }).mapMaterializedValue(_.flatMap(identity))
 
-          val flow = builder.add { Flow[(Try[Row], Tag)] }
+    Flow.fromGraph {
+      GraphDSL.create(_rowTransformerSource) {
+        implicit builder =>
+          rowTransformerSource =>
+            import GraphDSL.Implicits._
 
-          val transformZip = builder.add { Zip[RowTransformer, (Try[Row], Tag)] }
+            val transformFlow = builder.add {
+              Flow[(RowTransformer, (Try[Row], Tag))].mapAsyncUnordered(parallelism) {
+                case (rowTransformer, (row, tag)) =>
+                  Future {
+                    val result = row.flatMap {
+                      r => Try(rowTransformer.transformOption(r))
+                    }
 
-          rowTransformerSource ~> transformZip.in0
-          flow ~> transformZip.in1
-          transformZip.out ~> transformFlow
+                    (result, tag)
+                  }
+              }
+            }
 
-          FlowShape(flow.in, transformFlow.out)
+            val flow = builder.add { Flow[(Try[Row], Tag)] }
+
+            val transformZip = builder.add { Zip[RowTransformer, (Try[Row], Tag)] }
+
+            rowTransformerSource ~> transformZip.in0
+            flow ~> transformZip.in1
+            transformZip.out ~> transformFlow
+
+            FlowShape(flow.in, transformFlow.out)
       }
     }
   }
@@ -193,7 +192,7 @@ class TransformService(loader: RepositoryBundleLoader)
   def javaRowFlow[Tag](uri: URI,
                        spec: StreamRowSpec,
                        timeout: Int,
-                       parallelism: Int = TransformStream.DEFAULT_PARALLELISM): javadsl.Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {
+                       parallelism: Int = TransformStream.DEFAULT_PARALLELISM): javadsl.Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
     rowFlow(uri, spec, parallelism)(FiniteDuration(timeout, TimeUnit.MILLISECONDS)).asJava
   }
 

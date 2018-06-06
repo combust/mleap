@@ -9,7 +9,7 @@ import akka.stream.scaladsl.Flow
 import ml.combust.mleap.executor.repository.{FileRepository, Repository, RepositoryBundleLoader}
 import ml.combust.mleap.executor.service.TransformService
 import ml.combust.mleap.executor.stream.TransformStream
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
@@ -67,7 +67,7 @@ class MleapExecutor()
   def rowFlow[Tag](uri: URI,
                    spec: StreamRowSpec,
                    parallelism: Int = TransformStream.DEFAULT_PARALLELISM)
-                  (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {
+                  (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
     transformService.rowFlow(uri, spec, parallelism)
   }
 }

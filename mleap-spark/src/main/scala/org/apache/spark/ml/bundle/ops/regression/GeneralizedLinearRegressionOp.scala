@@ -34,8 +34,8 @@ class GeneralizedLinearRegressionOp extends SimpleSparkOp[GeneralizedLinearRegre
         coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble)
       m.set(m.family, model.value("family").getString)
-      if (model.getValue("link").isDefined) {
-        m.set(m.link, model.value("link").getString)
+      for (link <- model.getValue("link")) {
+        m.set(m.link, link.getString)
       }
       m
     }

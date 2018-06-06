@@ -71,45 +71,46 @@ class GrpcServer(executor: MleapExecutor)
       override def onError(t: Throwable): Unit = observer.foreach(_.onError(t))
       override def onCompleted(): Unit = observer.foreach(_.onCompleted())
       override def onNext(value: TransformFrameRequest): Unit = {
-        observer.getOrElse {
-          val frameReader = FrameReader(value.format)
+        observer match {
+          case Some(o) => o.onNext(value)
+          case None =>
+            val frameReader = FrameReader(value.format)
 
-          val frameFlow = executor.frameFlow[ByteString](URI.create(value.uri))(getTimeout(value.timeout))
-          val source = GrpcAkkaStreams.source[TransformFrameRequest].map {
-            request =>
-              val r = mleap.executor.TransformFrameRequest(
-                frameReader.fromBytes(request.frame.toByteArray),
-                request.options.orElse(value.options)
-              )
+            val frameFlow = executor.frameFlow[ByteString](URI.create(value.uri))(getTimeout(value.timeout))
+            val source = GrpcAkkaStreams.source[TransformFrameRequest].map {
+              request =>
+                val r = mleap.executor.TransformFrameRequest(
+                  frameReader.fromBytes(request.frame.toByteArray),
+                  request.options.orElse(value.options)
+                )
 
-              (r, request.tag)
-          }
-          val sink: Sink[(Try[DefaultLeapFrame], ByteString), NotUsed] = GrpcAkkaStreams.sink(responseObserver).contramap {
-            case (tryFrame: Try[DefaultLeapFrame], tag: ByteString) =>
-              val serializedFrame: Try[ByteString] = tryFrame.flatMap {
-                r => FrameWriter(r, value.format).toBytes().map(ByteString.copyFrom)
-              }
+                (r, request.tag)
+            }
+            val sink: Sink[(Try[DefaultLeapFrame], ByteString), NotUsed] = GrpcAkkaStreams.sink(responseObserver).contramap {
+              case (tryFrame: Try[DefaultLeapFrame], tag: ByteString) =>
+                val serializedFrame: Try[ByteString] = tryFrame.flatMap {
+                  r => FrameWriter(r, value.format).toBytes().map(ByteString.copyFrom)
+                }
 
-              serializedFrame match {
-                case Success(r) =>
-                  TransformFrameResponse(
-                    tag = tag,
-                    frame = r
-                  )
-                case Failure(error) =>
-                  TransformFrameResponse(
-                    tag = tag,
-                    error = error.getMessage,
-                    backtrace = error.getStackTrace.mkString("\n")
-                  )
-              }
-          }
-          val grpcFlow = Flow.fromSinkAndSourceMat(sink, source)(Keep.right)
-          val o = frameFlow.joinMat(grpcFlow)(Keep.right).run()
+                serializedFrame match {
+                  case Success(r) =>
+                    TransformFrameResponse(
+                      tag = tag,
+                      frame = r
+                    )
+                  case Failure(error) =>
+                    TransformFrameResponse(
+                      tag = tag,
+                      error = error.getMessage,
+                      backtrace = error.getStackTrace.mkString("\n")
+                    )
+                }
+            }
+            val grpcFlow = Flow.fromSinkAndSourceMat(sink, source)(Keep.right)
+            val o = frameFlow.joinMat(grpcFlow)(Keep.right).run()
 
-          observer = Some(o)
-          o
-        }.onNext(value)
+            observer = Some(o)
+        }
       }
     }
 

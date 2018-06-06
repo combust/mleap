@@ -90,7 +90,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
       // instead it's io.grpc.StatusRuntimeException: UNKNOWN
     }
 
-    ignore("transforms a frame using a frame flow") {
+    it("transforms a frame using a frame flow") {
       val uuid = UUID.randomUUID()
       val source = Source.fromIterator(() => Iterator.apply(frame).map(f => (TransformFrameRequest(f), uuid)))
       val result = source

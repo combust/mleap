@@ -7,6 +7,7 @@ import akka.stream.stage._
 import io.grpc.stub.StreamObserver
 
 import scala.collection.mutable
+import scala.util.Try
 
 object GrpcAkkaStreams {
   def source[O]: Source[O, StreamObserver[O]] = Source.fromGraph(new GrpcSourceStage[O])
@@ -77,7 +78,7 @@ object GrpcAkkaStreams {
           error match {
             case Some(ex) => observer.onError(ex)
             case None =>
-              if (closeOnComplete) { observer.onCompleted() }
+              if (closeOnComplete) { Try(observer.onCompleted()) }
           }
         }
 

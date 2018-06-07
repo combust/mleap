@@ -52,6 +52,7 @@ object Bundle {
       val chi_sq_selector = "chi_sq_selector"
       val reverse_string_indexer = "reverse_string_indexer"
       val hashing_term_frequency = "hashing_term_frequency"
+      val feature_hasher = "feature_hasher"
       val imputer = "imputer"
       val standard_scaler = "standard_scaler"
       val tokenizer = "tokenizer"
@@ -93,6 +94,10 @@ object Bundle {
       val bisecting_k_means = "bisecting_k_means"
       val k_means = "k_means"
       val lda = "lda_local_model_op"
+    }
+
+    object recommendation {
+      val als = "als"
     }
 
     val pipeline = "pipeline"

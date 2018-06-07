@@ -29,11 +29,12 @@ class GeneralizedLinearRegressionOp extends MleapOp[GeneralizedLinearRegression,
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): GeneralizedLinearRegressionModel = {
-
+      val family = Family.fromName(model.value("family").getString)
+      val link = model.getValue("link").map(v => Link.fromName(v.getString)).getOrElse(family.defaultLink)
       GeneralizedLinearRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
         intercept = model.value("intercept").getDouble,
-        fal = new FamilyAndLink(Family.fromName(model.value("family").getString),
-          Link.fromName(model.value("link").getString)))
+        fal = new FamilyAndLink(family, link)
+      )
     }
   }
 

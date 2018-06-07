@@ -6,10 +6,10 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "2.2.0"
+  val sparkVersion = "2.3.0"
   val scalaTestVersion = "3.0.0"
-  val tensorflowVersion = "1.4.0"
   val akkaVersion = "2.5.7"
+  val tensorflowVersion = "1.7.0"
   val akkaHttpVersion = "10.0.3"
   val springBootVersion = "2.0.1.RELEASE"
 
@@ -28,7 +28,11 @@ object Dependencies {
     val sparkAvro = "com.databricks" %% "spark-avro" % "3.0.1"
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
-    val tensorflowDep = "org.tensorflow" % "libtensorflow" % tensorflowVersion
+    val tensorflowDeps = Seq(
+      "org.tensorflow" % "libtensorflow" % tensorflowVersion,
+      "org.tensorflow" % "libtensorflow_jni" % tensorflowVersion
+    )
+    
     val akkaStream = "com.typesafe.akka" %% "akka-stream" % akkaVersion
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
@@ -77,7 +81,7 @@ object Dependencies {
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 
-  val tensorflow = l ++= Seq(tensorflowDep, Test.scalaTest)
+  val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
   val xgboostJava = l ++= Seq(jafama)
 

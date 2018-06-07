@@ -36,6 +36,18 @@ docker run -p 65327:65327 -v /tmp/models:/models combustml/mleap-serving:0.9.0-S
 
 This will expose the model server locally on port `65327`.
 
+NOTE: Outside of Docker, you can utilize the `MLEAP_SERVER_HOSTNAME`
+and the `MLEAP_SERVER_PORT` environment variables to explicitly control
+where MLeap serving listens. The below example will bind the RESTful
+web interface to the 127.0.0.1 interface on TCP port 12345, rather than
+the default, all interfaces (0.0.0.0) on TCP port 65327.
+
+```
+export MLEAP_SERVER_HOSTNAME=127.0.0.1
+export MLEAP_SERVER_PORT=12345
+/path/to/mleap-serving # update this with the real path to the mleap-serving binary
+```
+
 ### Load Model
 
 Use curl to load the model into memory. If you don't have your own

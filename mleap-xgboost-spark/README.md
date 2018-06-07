@@ -73,3 +73,9 @@ To use `mleap-xgboost-spark` from a notebook, make sure you include all required
 3. `xgboost4j-spark` - Required by `mleap-xgboost-spark`, as it is marked as a provided dependency
 4. `mleap-runtime` - Support for all out-of-the-box MLeap transformers
 5. `mleap-xgboost-java` - Support for XGBoost MLeap runtime transformers
+
+## Thank You
+
+Thank you to [Swoop](https://www.swoop.com/) for supporting this
+integration.
+

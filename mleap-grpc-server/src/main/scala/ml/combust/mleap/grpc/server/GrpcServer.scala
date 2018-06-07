@@ -15,6 +15,7 @@ import ml.combust.mleap.grpc.stream.GrpcAkkaStreams
 import ml.combust.mleap.grpc.TypeConverters._
 import akka.NotUsed
 import akka.stream.{ClosedShape, Materializer}
+import io.grpc.Context
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
@@ -33,7 +34,9 @@ class GrpcServer(executor: MleapExecutor)
   } else { FiniteDuration(ms, TimeUnit.MILLISECONDS) }
 
   override def getBundleMeta(request: GetBundleMetaRequest): Future[BundleMeta] = {
-    executor.getBundleMeta(URI.create(request.uri))(1.minute).map {
+    val timeout = Context.current().getDeadline.timeRemaining(TimeUnit.MILLISECONDS)
+
+    executor.getBundleMeta(URI.create(request.uri))(timeout.millis).map {
       meta =>
         BundleMeta(bundle = Some(meta.info.asBundle),
           inputSchema = Some(meta.inputSchema),
@@ -42,13 +45,13 @@ class GrpcServer(executor: MleapExecutor)
   }
 
   override def transformFrame(request: TransformFrameRequest): Future[TransformFrameResponse] = {
-    implicit val timeout: FiniteDuration = getTimeout(request.timeout)
+    val timeout = Context.current().getDeadline.timeRemaining(TimeUnit.MILLISECONDS)
     val frame = FrameReader(request.format).fromBytes(request.frame.toByteArray)
 
     executor.transform(
       URI.create(request.uri),
       mleap.executor.TransformFrameRequest(frame, request.options)
-    )(getTimeout(request.timeout)).map {
+    )(timeout.millis).map {
       frame =>
         Future.fromTry(FrameWriter(frame, request.format).toBytes().map {
           bytes =>

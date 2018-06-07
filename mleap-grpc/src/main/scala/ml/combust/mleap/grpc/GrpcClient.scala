@@ -1,6 +1,7 @@
 package ml.combust.mleap.grpc
 
 import java.net.URI
+import java.util.concurrent.TimeUnit
 
 import akka.NotUsed
 import akka.stream.scaladsl.{Flow, GraphDSL, Sink, Source, Zip}
@@ -13,6 +14,7 @@ import TypeConverters._
 import akka.stream.FlowShape
 import com.google.protobuf.ByteString
 import io.grpc.stub.StreamObserver
+import io.grpc.Context
 import ml.combust.bundle.dsl.BundleInfo
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.grpc.stream.GrpcAkkaStreams
@@ -28,8 +30,9 @@ class GrpcClient(stub: MleapStub)
   private val format: String = BuiltinFormats.binary
   private val reader: FrameReader = FrameReader(format)
 
-  override def getBundleMeta(uri: URI): Future[BundleMeta] = {
-    stub.getBundleMeta(GetBundleMetaRequest(uri = uri.toString)).map {
+  override def getBundleMeta(uri: URI)
+                            (implicit timeout: FiniteDuration = Client.defaultTimeout): Future[BundleMeta] = {
+    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).getBundleMeta(GetBundleMetaRequest(uri = uri.toString)).map {
       meta =>
         BundleMeta(info = BundleInfo.fromBundle(meta.bundle.get),
           inputSchema = meta.inputSchema.get,
@@ -42,12 +45,12 @@ class GrpcClient(stub: MleapStub)
     Future.fromTry {
       request.frame.flatMap(frame => FrameWriter(frame, format).toBytes()).map {
         bytes =>
-          stub.transformFrame(pb.TransformFrameRequest(
+          stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+            transformFrame(pb.TransformFrameRequest(
             uri = uri.toString,
             format = format,
             frame = ByteString.copyFrom(bytes),
-            options = Some(request.options),
-            timeout = timeout.toMillis
+            options = Some(request.options)
           )).flatMap {
             response =>
               Future.fromTry {

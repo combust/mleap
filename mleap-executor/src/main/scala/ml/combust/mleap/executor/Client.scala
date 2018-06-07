@@ -47,7 +47,8 @@ object Client {
 }
 
 trait Client {
-  def getBundleMeta(uri: URI): Future[BundleMeta]
+  def getBundleMeta(uri: URI)
+                   (implicit timeout: FiniteDuration = Client.defaultTimeout): Future[BundleMeta]
 
   def transform(uri: URI, request: TransformFrameRequest)
                (implicit timeout: FiniteDuration = Client.defaultTimeout): Future[DefaultLeapFrame]

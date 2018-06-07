@@ -86,7 +86,7 @@ class LocalTransformService(loader: RepositoryBundleLoader)
               val m = manager(uri)
 
               Source.fromFutureSource {
-                val transformer = m.createFrameStream(id)(1.minute)
+                val transformer = m.createFrameStream(id)(timeout)
                 transformer.onFailure {
                   case _ => m.closeStream(id)
                 }
@@ -130,8 +130,7 @@ class LocalTransformService(loader: RepositoryBundleLoader)
       val id = UUID.randomUUID()
       val m = manager(uri)
 
-      // this timeout should probably be configurable
-      val rowTransformer = m.createRowTransformer(id, spec)(1.minute)
+      val rowTransformer = m.createRowTransformer(id, spec)(timeout)
       rowTransformer.onFailure {
         case _ => m.closeStream(id)
       }

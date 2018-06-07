@@ -6,8 +6,9 @@ import java.util.concurrent.{ExecutorService, Executors}
 import akka.NotUsed
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
 import akka.stream.scaladsl.Flow
+import com.typesafe.config.{Config, ConfigFactory}
 import ml.combust.mleap.executor.repository.{FileRepository, Repository, RepositoryBundleLoader}
-import ml.combust.mleap.executor.service.TransformService
+import ml.combust.mleap.executor.service.LocalTransformService
 import ml.combust.mleap.executor.stream.TransformStream
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
@@ -17,22 +18,19 @@ import scala.util.Try
 
 object MleapExecutor extends ExtensionId[MleapExecutor] with ExtensionIdProvider {
   override def createExtension(system: ExtendedActorSystem): MleapExecutor = {
-    new MleapExecutor()(system)
+    new MleapExecutor(ConfigFactory.load().getConfig("ml.combust.mleap.executor"))(system)
   }
 
   override def lookup(): ExtensionId[_ <: Extension] = MleapExecutor
 }
 
-class MleapExecutor()
+class MleapExecutor(tConfig: Config)
                    (implicit system: ExtendedActorSystem) extends Extension {
   import system.dispatcher
 
-  private val diskThreadPool: ExecutorService = Executors.newFixedThreadPool(8)
-  private val diskEc: ExecutionContext = ExecutionContext.fromExecutor(diskThreadPool)
-
-  private val repository: Repository = new FileRepository(true)
+  private val repository: Repository = Repository.fromConfig(tConfig.getConfig("repository"))
   private val loader: RepositoryBundleLoader = new RepositoryBundleLoader(repository, diskEc)
-  private val transformService: TransformService = new TransformService(loader)(system.dispatcher, system)
+  private val transformService: LocalTransformService = new LocalTransformService(loader)(system.dispatcher, system)
 
   system.registerOnTermination {
     diskThreadPool.shutdown()

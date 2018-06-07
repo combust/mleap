@@ -16,7 +16,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 object BundleActor {
-  def props(manager: TransformService,
+  def props(manager: LocalTransformService,
             uri: URI,
             eventualBundle: Future[Bundle[Transformer]]): Props = {
     Props(new BundleActor(manager, uri, eventualBundle))
@@ -31,7 +31,7 @@ object BundleActor {
   case object Shutdown
 }
 
-class BundleActor(manager: TransformService,
+class BundleActor(manager: LocalTransformService,
                   uri: URI,
                   eventualBundle: Future[Bundle[Transformer]]) extends Actor {
   import context.dispatcher

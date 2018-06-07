@@ -30,7 +30,7 @@ class BundleActorSpec extends TestKit(ActorSystem("BundleActorSpec"))
   describe("bundle actor") {
 
     val loader = new RepositoryBundleLoader(new FileRepository(false), executionContext)
-    val service = new TransformService(loader, system)
+    val service = new LocalTransformService(loader, system)
     val actor = system.actorOf(BundleActor.props(service, lrUri, Future { lrBundle }))
 
     it("it retrieves bundle meta info correctly correctly") {

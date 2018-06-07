@@ -26,6 +26,8 @@ class FileRepository(config: FileRepositoryConfig) extends Repository {
   private val threadPool = Executors.newFixedThreadPool(config.threads)
   implicit val diskEc: ExecutionContext = ExecutionContext.fromExecutor(threadPool)
 
+  def this() = this(new FileRepositoryConfig(FileRepositoryConfig.defaults))
+
   override def downloadBundle(uri: URI): Future[Path] = Future {
 
     if (uri.getPath.isEmpty) {

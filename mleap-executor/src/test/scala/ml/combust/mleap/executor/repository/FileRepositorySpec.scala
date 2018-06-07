@@ -5,13 +5,16 @@ import java.net.URI
 import java.nio.file.Files
 
 import ml.combust.mleap.executor.TestUtil
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 
-class FileRepositorySpec extends FunSpec with ScalaFutures with Matchers {
-  val repository = new FileRepository(true)
+class FileRepositorySpec extends FunSpec
+  with ScalaFutures
+  with Matchers
+  with BeforeAndAfterAll {
+  val repository = new FileRepository()
+
+  override protected def afterAll(): Unit = repository.shutdown()
 
   describe("downloading a local bundle") {
     it("returns the local file path") {

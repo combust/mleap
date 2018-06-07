@@ -6,8 +6,7 @@ import java.util.concurrent.TimeUnit
 import akka.NotUsed
 import akka.stream.javadsl
 import akka.stream.scaladsl.Flow
-import ml.combust.mleap.executor.{BundleMeta, StreamRowSpec, TransformFrameRequest}
-import ml.combust.mleap.executor.stream.TransformStream
+import ml.combust.mleap.executor.{BundleMeta, Parallelism, StreamRowSpec, TransformFrameRequest}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
 import scala.concurrent.Future
@@ -33,20 +32,20 @@ trait TransformService {
     transform(uri, request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 
-  def frameFlow[Tag](uri: URI,
-                     parallelism: Int = TransformStream.DEFAULT_PARALLELISM)
-                    (implicit timeout: FiniteDuration): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
+  def frameFlow[Tag](uri: URI)
+                    (implicit timeout: FiniteDuration,
+                     parallelism: Parallelism): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
 
   def rowFlow[Tag](uri: URI,
-                   spec: StreamRowSpec,
-                   parallelism: Int = TransformStream.DEFAULT_PARALLELISM)
-                  (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]]
+                   spec: StreamRowSpec)
+                  (implicit timeout: FiniteDuration,
+                   parallelism: Parallelism): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]]
 
   def javaRowFlow[Tag](uri: URI,
                        spec: StreamRowSpec,
                        timeout: Int,
-                       parallelism: Int = TransformStream.DEFAULT_PARALLELISM): javadsl.Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
-    rowFlow(uri, spec, parallelism)(FiniteDuration(timeout, TimeUnit.MILLISECONDS)).asJava
+                       parallelism: Int): javadsl.Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
+    rowFlow(uri, spec)(FiniteDuration(timeout, TimeUnit.MILLISECONDS), parallelism).asJava
   }
 
   def unload(uri: URI): Unit

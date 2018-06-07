@@ -38,7 +38,7 @@ class GrpcClient(stub: MleapStub)
   }
 
   override def transform(uri: URI, request: TransformFrameRequest)
-                        (implicit timeout: FiniteDuration): Future[DefaultLeapFrame] = {
+                        (implicit timeout: FiniteDuration = Client.defaultTimeout): Future[DefaultLeapFrame] = {
     Future.fromTry {
       request.frame.flatMap(frame => FrameWriter(frame, format).toBytes()).map {
         bytes =>
@@ -64,7 +64,8 @@ class GrpcClient(stub: MleapStub)
 
   override def frameFlow[Tag: TagBytes](uri: URI,
                                         options: TransformOptions = TransformOptions.default)
-                                       (implicit timeout: FiniteDuration): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+                                       (implicit timeout: FiniteDuration = Client.defaultTimeout,
+                                        parallelism: Parallelism = Client.defaultParallelism): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
     val frameReader = FrameReader(BuiltinFormats.binary)
 
     val responseSource = GrpcAkkaStreams.source[TransformFrameResponse].mapMaterializedValue {
@@ -76,6 +77,7 @@ class GrpcClient(stub: MleapStub)
           uri = uri.toString,
           options = Some(options),
           timeout = timeout.toMillis,
+          parallelism = parallelism,
           format = BuiltinFormats.binary
         ))
         requestObserver
@@ -138,7 +140,8 @@ class GrpcClient(stub: MleapStub)
   }
 
   override def rowFlow[Tag: TagBytes](uri: URI, spec: StreamRowSpec)
-                                     (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {
+                                     (implicit timeout: FiniteDuration = Client.defaultTimeout,
+                                      parallelism: Parallelism = Client.defaultParallelism): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {
     val rowWriter = RowWriter(spec.schema, BuiltinFormats.binary)
 
     val _responseSource = GrpcAkkaStreams.source[TransformRowResponse].mapMaterializedValue {
@@ -151,6 +154,7 @@ class GrpcClient(stub: MleapStub)
           schema = Some(spec.schema),
           options = Some(spec.options),
           timeout = timeout.toMillis,
+          parallelism = parallelism,
           format = BuiltinFormats.binary
         ))
         requestObserver

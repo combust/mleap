@@ -12,6 +12,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, FunSpecLike}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 import scala.util.Success
 import TestUtil.{faultyFrame, frame, lrBundle, lrUri}
 
@@ -22,14 +23,16 @@ class BundleActorSpec extends TestKit(ActorSystem("BundleActorSpec"))
   with ScalaFutures {
 
   implicit val executionContext = ExecutionContext.Implicits.global
+  val repo = new FileRepository()
 
   override protected def afterAll(): Unit = {
-    system.terminate()
+    TestKit.shutdownActorSystem(system, 5.seconds, verifySystemShutdown = true)
+    repo.shutdown()
   }
 
   describe("bundle actor") {
 
-    val loader = new RepositoryBundleLoader(new FileRepository(false), executionContext)
+    val loader = new RepositoryBundleLoader(repo, executionContext)
     val service = new LocalTransformService(loader, system)
     val actor = system.actorOf(BundleActor.props(service, lrUri, Future { lrBundle }))
 
@@ -74,5 +77,7 @@ class BundleActorSpec extends TestKit(ActorSystem("BundleActorSpec"))
       val transformer = expectMsgType[Transformer]
       assert(lrBundle.root == transformer)
     }
+
+    repo.shutdown()
   }
 }

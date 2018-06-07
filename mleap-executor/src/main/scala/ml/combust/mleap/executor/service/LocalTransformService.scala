@@ -10,7 +10,6 @@ import akka.stream.FlowShape
 import akka.stream.scaladsl.{Flow, GraphDSL, Keep, Source, Zip}
 import ml.combust.mleap.executor._
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
-import ml.combust.mleap.executor.stream.TransformStream
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer, Transformer}
 
 import scala.concurrent.duration._
@@ -64,18 +63,18 @@ class LocalTransformService(loader: RepositoryBundleLoader)
   override def close(): Unit = { }
 
   override def getBundleMeta(uri: URI)
-                   (implicit timeout: FiniteDuration): Future[BundleMeta] = {
+                            (implicit timeout: FiniteDuration): Future[BundleMeta] = {
     manager(uri).getBundleMeta()
   }
 
   override def transform(uri: URI, request: TransformFrameRequest)
-               (implicit timeout: FiniteDuration): Future[DefaultLeapFrame] = {
+                        (implicit timeout: FiniteDuration): Future[DefaultLeapFrame] = {
     manager(uri).transform(request)
   }
 
-  override def frameFlow[Tag](uri: URI,
-                     parallelism: Int = TransformStream.DEFAULT_PARALLELISM)
-                    (implicit timeout: FiniteDuration): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+  override def frameFlow[Tag](uri: URI)
+                             (implicit timeout: FiniteDuration,
+                              parallelism: Parallelism): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
     Flow.fromGraph {
       GraphDSL.create() {
         implicit builder =>
@@ -124,9 +123,9 @@ class LocalTransformService(loader: RepositoryBundleLoader)
   }
 
   override def rowFlow[Tag](uri: URI,
-                   spec: StreamRowSpec,
-                   parallelism: Int = TransformStream.DEFAULT_PARALLELISM)
-                  (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
+                            spec: StreamRowSpec)
+                           (implicit timeout: FiniteDuration,
+                            parallelism: Parallelism): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
     val _rowTransformerSource = Source.lazily(() => {
       val id = UUID.randomUUID()
       val m = manager(uri)

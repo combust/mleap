@@ -16,12 +16,13 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
   with FunSpecLike
   with BeforeAndAfterAll
   with ScalaFutures {
+
   private val executor = MleapExecutor(system)
   private val frame = TestUtil.frame
   private implicit val materializer: Materializer = ActorMaterializer()(system)
 
   override protected def afterAll(): Unit = {
-    system.terminate()
+    TestKit.shutdownActorSystem(system, 5.seconds, verifySystemShutdown = true)
   }
 
   describe("transforming a leap frame") {
@@ -50,7 +51,7 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
       val rowsSink = Sink.seq[(Try[Option[Row]], Int)]
       val testFlow = Flow.fromSinkAndSourceMat(rowsSink, rowsSource)(Keep.left)
 
-      val transformedRows = executor.rowFlow(TestUtil.rfUri, spec)(10.seconds).joinMat(testFlow)(Keep.right).run()
+      val transformedRows = executor.rowFlow(TestUtil.rfUri, spec)(10.seconds, 1).joinMat(testFlow)(Keep.right).run()
 
       whenReady(transformedRows, Timeout(10.seconds)) {
         rows =>

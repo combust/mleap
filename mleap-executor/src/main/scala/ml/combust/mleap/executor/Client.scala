@@ -3,9 +3,11 @@ package ml.combust.mleap.executor
 import java.net.URI
 import java.nio.ByteBuffer
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 import akka.NotUsed
 import akka.stream.scaladsl.Flow
+import com.typesafe.config.ConfigFactory
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 
 import scala.concurrent.Future
@@ -37,15 +39,26 @@ trait RowTransformClient extends AutoCloseable {
   def transform(row: Row): Future[Option[Row]]
 }
 
+object Client {
+  private val config = ConfigFactory.load().getConfig("ml.combust.mleap.executor.client")
+
+  val defaultTimeout: FiniteDuration = FiniteDuration(config.getDuration("default-timeout").toMillis, TimeUnit.MILLISECONDS)
+  val defaultParallelism: Parallelism = Parallelism(config.getInt("default-parallelism"))
+}
+
 trait Client {
   def getBundleMeta(uri: URI): Future[BundleMeta]
+
   def transform(uri: URI, request: TransformFrameRequest)
-               (implicit timeout: FiniteDuration): Future[DefaultLeapFrame]
+               (implicit timeout: FiniteDuration = Client.defaultTimeout): Future[DefaultLeapFrame]
 
   def rowTransformClient(uri: URI, spec: StreamRowSpec): RowTransformClient = ???
 
   def frameFlow[Tag: TagBytes](uri: URI, options: TransformOptions = TransformOptions.default)
-                              (implicit timeout: FiniteDuration): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
+                              (implicit timeout: FiniteDuration = Client.defaultTimeout,
+                               parallelism: Parallelism = Client.defaultParallelism): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
+
   def rowFlow[Tag: TagBytes](uri: URI, spec: StreamRowSpec)
-                            (implicit timeout: FiniteDuration): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed]
+                            (implicit timeout: FiniteDuration = Client.defaultTimeout,
+                             parallelism: Parallelism = Client.defaultParallelism): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed]
 }

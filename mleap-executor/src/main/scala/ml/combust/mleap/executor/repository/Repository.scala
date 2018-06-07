@@ -17,11 +17,11 @@ object Repository {
     * @return repository
     */
   def fromConfig(config: Config)
-  (implicit system: ActorSystem): Repository = {
+                (implicit system: ActorSystem): Repository = {
     val c = Class.forName(config.getString("class"))
     c.getField("MODULE$").get(c).
-          asInstanceOf[RepositoryProvider].
-          create(config)
+      asInstanceOf[RepositoryProvider].
+      create(config)
   }
 }
 

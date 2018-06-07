@@ -12,6 +12,9 @@ object Dependencies {
   val tensorflowVersion = "1.7.0"
   val akkaHttpVersion = "10.0.3"
   val springBootVersion = "2.0.1.RELEASE"
+  lazy val logbackVersion = "1.2.3"
+  lazy val loggingVersion = "3.9.0"
+  lazy val slf4jVersion = "1.7.25"
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
@@ -32,7 +35,7 @@ object Dependencies {
       "org.tensorflow" % "libtensorflow" % tensorflowVersion,
       "org.tensorflow" % "libtensorflow_jni" % tensorflowVersion
     )
-    
+
     val akkaStream = "com.typesafe.akka" %% "akka-stream" % akkaVersion
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
@@ -43,6 +46,13 @@ object Dependencies {
     val springBoot = "org.springframework.boot" % "spring-boot-starter-web" % springBootVersion
     val commonsLang = "org.apache.commons" % "commons-lang3" % "3.7"
     val scalpbJson = "com.thesamet.scalapb" %% "scalapb-json4s" % "0.7.0"
+
+    lazy val logging = Seq(
+      "org.slf4j" % "slf4j-simple" % slf4jVersion,
+      "ch.qos.logback" % "logback-core" % logbackVersion,
+      "ch.qos.logback" % "logback-classic" % logbackVersion,
+      "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
+    )
   }
 
   object Test {
@@ -89,9 +99,9 @@ object Dependencies {
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 
-  val executor = l ++= Seq(akkaStream, config, Test.scalaTest, Test.akkaTestKit)
+  val executor = l ++= Seq(akkaStream, config, Test.scalaTest, Test.akkaTestKit) ++ logging
 
-  val grpcServer = l ++= Seq(Test.scalaTest, Test.akkaStreamTestKit)
+  val grpcServer = l ++= Seq(scopt) ++ Seq(Test.scalaTest, Test.akkaStreamTestKit)
 
   val grpc = l ++= Seq(
     "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,

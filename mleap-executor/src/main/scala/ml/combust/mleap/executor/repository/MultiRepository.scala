@@ -14,9 +14,11 @@ import scala.util.Try
 
 class MultiRepository(repositories: Seq[Repository]) extends Repository {
   val terminatePromise: Promise[Unit] = Promise[Unit]
-  val terminateThread: Thread = new Thread(() => terminatePromise.complete(Try {
-    for (repository <- repositories) { repository.awaitTermination(Long.MaxValue, TimeUnit.DAYS) }
-  }))
+  new Thread {
+    terminatePromise.complete(Try {
+      for (repository <- repositories) { repository.awaitTermination(Long.MaxValue, TimeUnit.DAYS) }
+    })
+  }.run()
 
   override def downloadBundle(uri: URI): Future[Path] = {
     for (repository <- repositories) {

@@ -1,13 +1,14 @@
 package ml.combust.mleap.executor
 
 import java.net.URI
-import java.util.concurrent.{ExecutorService, Executors}
+import java.util.concurrent.{Executors, TimeUnit}
 
 import akka.NotUsed
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
 import akka.stream.scaladsl.Flow
 import com.typesafe.config.{Config, ConfigFactory}
-import ml.combust.mleap.executor.repository.{FileRepository, Repository, RepositoryBundleLoader}
+import com.typesafe.scalalogging.Logger
+import ml.combust.mleap.executor.repository.{Repository, RepositoryBundleLoader}
 import ml.combust.mleap.executor.service.LocalTransformService
 import ml.combust.mleap.executor.stream.TransformStream
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
@@ -26,14 +27,25 @@ object MleapExecutor extends ExtensionId[MleapExecutor] with ExtensionIdProvider
 
 class MleapExecutor(tConfig: Config)
                    (implicit system: ExtendedActorSystem) extends Extension {
+  private val logger = Logger(classOf[MleapExecutor])
   import system.dispatcher
 
+  private val loadThreadPool = Executors.newFixedThreadPool(4)
+  private val loadEc = ExecutionContext.fromExecutor(loadThreadPool)
   private val repository: Repository = Repository.fromConfig(tConfig.getConfig("repository"))
-  private val loader: RepositoryBundleLoader = new RepositoryBundleLoader(repository, diskEc)
+  private val loader: RepositoryBundleLoader = new RepositoryBundleLoader(repository, loadEc)
   private val transformService: LocalTransformService = new LocalTransformService(loader)(system.dispatcher, system)
 
   system.registerOnTermination {
-    diskThreadPool.shutdown()
+    logger.info("Shutting down executor")
+
+    logger.info("Shutting down bundle loader")
+    loadThreadPool.shutdown()
+    loadThreadPool.awaitTermination(30, TimeUnit.SECONDS)
+
+    logger.info("Shutting down repository")
+    repository.shutdown()
+    repository.awaitTermination(30, TimeUnit.SECONDS)
   }
 
   def getBundleMeta(uri: URI)

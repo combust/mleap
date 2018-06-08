@@ -1,188 +1,103 @@
 package ml.combust.mleap.executor.service
 
 import java.net.URI
-import java.util.UUID
 
-import akka.NotUsed
 import akka.pattern.ask
-import akka.actor.{ActorRef, ActorRefFactory, ActorSystem}
-import akka.stream.FlowShape
-import akka.stream.scaladsl.{Flow, GraphDSL, Keep, Source, Zip}
-import ml.combust.mleap.executor._
+import akka.{Done, NotUsed}
+import akka.actor.{ActorRef, ActorRefFactory}
+import akka.stream.{FlowShape, KillSwitches, UniqueKillSwitch}
+import akka.stream.scaladsl.{Flow, GraphDSL, Keep, Sink, Source, Zip}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer, Transformer}
+import ml.combust.mleap.executor.{BundleMeta, StreamConfig, StreamRowSpec, TransformFrameRequest}
+import ml.combust.mleap.executor.service.LocalTransformServiceActor.Messages.RowFlow
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
-import scala.concurrent.duration._
-import scala.collection.concurrent
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
-import scala.util.{Failure, Try}
-
-class BundleManager(manager: LocalTransformService,
-                    loader: RepositoryBundleLoader,
-                    uri: URI)
-                   (implicit arf: ActorRefFactory,
-                    ec: ExecutionContext) {
-  lazy val actor: ActorRef = arf.actorOf(BundleActor.props(manager, uri, loader.loadBundle(uri)))
-
-  def getBundleMeta()
-                   (implicit timeout: FiniteDuration): Future[BundleMeta] = {
-    (actor ? BundleActor.GetBundleMeta)(timeout).mapTo[BundleMeta]
-  }
-
-  def transform(request: TransformFrameRequest)
-               (implicit timeout: FiniteDuration): Future[DefaultLeapFrame] = {
-    (actor ? request)(timeout).mapTo[DefaultLeapFrame]
-  }
-
-  def createRowTransformer(id: UUID, spec: StreamRowSpec)
-                          (implicit timeout: FiniteDuration): Future[RowTransformer] = {
-    (actor ? BundleActor.CreateRowStream(id, spec))(timeout).mapTo[RowTransformer]
-  }
-
-  def createFrameStream(id: UUID)
-                       (implicit timeout: FiniteDuration): Future[Transformer] = {
-    (actor ? BundleActor.CreateFrameStream(id))(timeout).mapTo[Transformer]
-  }
-
-  def closeStream(id: UUID): Unit = actor ! BundleActor.CloseStream(id)
-
-  def close(): Unit = actor ! BundleActor.Shutdown
-}
+import scala.util.{Failure, Success, Try}
 
 class LocalTransformService(loader: RepositoryBundleLoader)
-                           (implicit ec: ExecutionContext,
-                            arf: ActorRefFactory) extends TransformService {
-  private val lookup: concurrent.Map[URI, BundleManager] = concurrent.TrieMap()
+                           (implicit arf: ActorRefFactory) extends TransformService {
+  import LocalTransformServiceActor.Messages
+  import arf.dispatcher
 
-  def this(loader: RepositoryBundleLoader,
-           system: ActorSystem) = {
-    this(loader)(system.dispatcher, system)
-  }
-
-  override def close(): Unit = { }
+  private val actor: ActorRef = arf.actorOf(LocalTransformServiceActor.props(loader), "transform")
 
   override def getBundleMeta(uri: URI)
                             (implicit timeout: FiniteDuration): Future[BundleMeta] = {
-    manager(uri).getBundleMeta()
+    (actor ? Messages.GetBundleMeta(uri))(timeout).mapTo[BundleMeta]
   }
 
-  override def transform(uri: URI, request: TransformFrameRequest)
+  override def transform(uri: URI,
+                         request: TransformFrameRequest)
                         (implicit timeout: FiniteDuration): Future[DefaultLeapFrame] = {
-    manager(uri).transform(request)
+    (actor ? Messages.Transform(uri, request))(timeout).mapTo[DefaultLeapFrame]
   }
 
-  override def frameFlow[Tag](uri: URI)
-                             (implicit timeout: FiniteDuration,
-                              parallelism: Parallelism): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
-    Flow.fromGraph {
-      GraphDSL.create() {
-        implicit builder =>
+  override def frameFlow[Tag](uri: URI,
+                              config: StreamConfig): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = ???
+
+  override def rowFlow[Tag](uri: URI,
+                            spec: StreamRowSpec,
+                            config: StreamConfig): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
+    val actorSource = Source.lazily(
+      () =>
+        Source.fromFutureSource {
+          val streamActor = (actor ? RowFlow(uri, spec, config))(config.initTimeout).mapTo[(ActorRef, (RowTransformer, Future[Done]))]
+
+          streamActor.map(_._1).map {
+            actor => Source.repeat(actor).mapMaterializedValue(_ => streamActor.map(_._2))
+          }
+        }.mapMaterializedValue(_.flatMap(identity))
+    ).mapMaterializedValue(_.flatMap(identity)).viaMat(KillSwitches.single)(Keep.both)
+
+    Flow.fromGraph(GraphDSL.create(actorSource) {
+      implicit builder =>
+        actorSource =>
           import GraphDSL.Implicits._
 
-          val transformerSource = builder.add {
-            Source.lazily(() => {
-              val id = UUID.randomUUID()
-              val m = manager(uri)
-
-              Source.fromFutureSource {
-                val transformer = m.createFrameStream(id)(timeout)
-                transformer.onFailure {
-                  case _ => m.closeStream(id)
+          val doneFlow = builder.add {
+            Flow[(Future[(RowTransformer, Future[Done])], UniqueKillSwitch)].mapAsync(1) {
+              case (f, ks) =>
+                f.map(_._2).
+                  flatMap(identity).
+                  map(Try(_)).
+                  recover {
+                    case err => Failure(err)
+                  }.map(done => (done, ks))
+            }.to(Sink.foreach {
+              case (done, ks) =>
+                done match {
+                  case Success(_) => ks.shutdown()
+                  case Failure(err) => ks.abort(err)
                 }
-
-                transformer.map {
-                  transformer => Source.repeat(transformer)
-                }
-              }
             })
           }
 
-          val transformFlow = builder.add {
-            Flow[(Transformer, (TransformFrameRequest, Tag))].mapAsyncUnordered(parallelism) {
-              case (transformer, (request, tag)) =>
-                ExecuteTransform(transformer, request).
-                  map(frame => Try(frame)).
-                  recover {
-                    case error => Failure(error)
-                  }.map(frame => (frame, tag))
+          val inFlow = builder.add {
+            Flow[(Try[Row], Tag)]
+          }
+
+          val queueFlow = builder.add {
+            Flow[((Try[Row], Tag), ActorRef)].mapAsync(config.parallelism) {
+              case ((tryRow, tag), actor) =>
+                (actor ? RowFlowActor.Messages.TransformRow(tryRow, tag))(config.transformTimeout).
+                  mapTo[(Try[Option[Row]], Tag)]
             }
           }
 
-          val frameFlow = builder.add(Flow[(TransformFrameRequest, Tag)])
+          val zip = builder.add { Zip[(Try[Row], Tag), ActorRef] }
 
-          val zip = builder.add(Zip[Transformer, (TransformFrameRequest, Tag)])
+          builder.materializedValue ~> doneFlow
+          inFlow ~> zip.in0
+          actorSource ~> zip.in1
+          zip.out ~> queueFlow
 
-          transformerSource ~> zip.in0
-          frameFlow ~> zip.in1
-          zip.out ~> transformFlow
-
-          FlowShape(frameFlow.in, transformFlow.out)
-      }
-    }
+          FlowShape(inFlow.in, queueFlow.out)
+    }).mapMaterializedValue(_._1.map(_._1))
   }
 
-  override def rowFlow[Tag](uri: URI,
-                            spec: StreamRowSpec)
-                           (implicit timeout: FiniteDuration,
-                            parallelism: Parallelism): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
-    val _rowTransformerSource = Source.lazily(() => {
-      val id = UUID.randomUUID()
-      val m = manager(uri)
+  override def unload(uri: URI): Unit = actor ! Messages.Unload(uri)
 
-      val rowTransformer = m.createRowTransformer(id, spec)(timeout)
-      rowTransformer.onFailure {
-        case _ => m.closeStream(id)
-      }
-
-      Source.fromFutureSource {
-        rowTransformer.map {
-          rt =>
-            Source.repeat(rt).watchTermination()(Keep.right).mapMaterializedValue {
-              done =>
-                done.andThen { case _ => m.closeStream(id) }
-            }
-        }
-      }.mapMaterializedValue(_ => rowTransformer)
-    }).mapMaterializedValue(_.flatMap(identity))
-
-    Flow.fromGraph {
-      GraphDSL.create(_rowTransformerSource) {
-        implicit builder =>
-          rowTransformerSource =>
-            import GraphDSL.Implicits._
-
-            val transformFlow = builder.add {
-              Flow[(RowTransformer, (Try[Row], Tag))].mapAsyncUnordered(parallelism) {
-                case (rowTransformer, (row, tag)) =>
-                  Future {
-                    val result = row.flatMap {
-                      r => Try(rowTransformer.transformOption(r))
-                    }
-
-                    (result, tag)
-                  }
-              }
-            }
-
-            val flow = builder.add { Flow[(Try[Row], Tag)] }
-
-            val transformZip = builder.add { Zip[RowTransformer, (Try[Row], Tag)] }
-
-            rowTransformerSource ~> transformZip.in0
-            flow ~> transformZip.in1
-            transformZip.out ~> transformFlow
-
-            FlowShape(flow.in, transformFlow.out)
-      }
-    }
-  }
-
-  override def unload(uri: URI): Unit = {
-    lookup.remove(uri).foreach(_.close())
-  }
-
-  private def manager(uri: URI): BundleManager = {
-    lookup.getOrElseUpdate(uri, new BundleManager(this, loader, uri))
-  }
+  override def close(): Unit = actor ! Messages.Close
 }

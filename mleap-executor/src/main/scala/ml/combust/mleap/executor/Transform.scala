@@ -5,6 +5,7 @@ import java.util.UUID
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, Transformer}
 
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
@@ -39,6 +40,20 @@ object ExecuteTransform {
     }).flatMap(identity)
   }
 }
+
+/** Specifies options for streams of transforms.
+  *
+  * @param initTimeout timeout for stream initialization
+  * @param inactivityTimeout timeout for stream inactivity
+  * @param transformTimeout timeout for transforming individual elements
+  * @param parallelism parallelism of transforms
+  * @param bufferSize size of buffer for transform elements
+  */
+case class StreamConfig(initTimeout: FiniteDuration,
+                        inactivityTimeout: FiniteDuration,
+                        transformTimeout: FiniteDuration,
+                        parallelism: Parallelism,
+                        bufferSize: Int)
 
 /** Specifies the schema and transform options for
   * a row transformer.

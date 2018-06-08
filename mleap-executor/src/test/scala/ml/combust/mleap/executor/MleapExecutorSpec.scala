@@ -47,18 +47,29 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
   describe("transform stream") {
     it("transforms rows in a stream") {
       val spec = StreamRowSpec(frame.schema)
+      val config = StreamConfig(
+        initTimeout = 10.seconds,
+        inactivityTimeout = 10.seconds,
+        transformTimeout = 10.seconds,
+        parallelism = 4,
+        bufferSize = 1024
+      )
       val rowsSource = Source.fromIterator(() => frame.dataset.iterator.map(row => Try(row)).zipWithIndex)
       val rowsSink = Sink.seq[(Try[Option[Row]], Int)]
       val testFlow = Flow.fromSinkAndSourceMat(rowsSink, rowsSource)(Keep.left)
 
-      val transformedRows = executor.rowFlow(TestUtil.rfUri, spec)(10.seconds, 1).joinMat(testFlow)(Keep.right).run()
+      val (done, transformedRows) = executor.rowFlow(TestUtil.rfUri, spec, config).watchTermination()(Keep.right).joinMat(testFlow)(Keep.both).run()
 
       whenReady(transformedRows, Timeout(10.seconds)) {
         rows =>
+          assert(rows.size == 1)
+
           for((row, _) <- rows) {
             assert(row.isSuccess)
           }
       }
+
+      done.isReadyWithin(1.second)
     }
   }
 }

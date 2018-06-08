@@ -1,13 +1,14 @@
 package ml.combust.mleap.executor.service
 
 import java.net.URI
-import java.util.UUID
 
-import akka.pattern.pipe
-import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Status}
+import akka.Done
+import akka.pattern.{ask, pipe}
+import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Status, Terminated}
+import akka.stream.Materializer
 import ml.combust.bundle.dsl.Bundle
-import ml.combust.mleap.executor._
-import ml.combust.mleap.executor.service.BundleActor._
+import ml.combust.mleap.executor.{BundleMeta, ExecuteTransform, StreamRowSpec}
+import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.runtime.frame.{RowTransformer, Transformer}
 
 import scala.concurrent.duration._
@@ -15,121 +16,148 @@ import scala.collection.mutable
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
+case class RequestWithSender(request: Any, sender: ActorRef)
+
 object BundleActor {
-  def props(manager: LocalTransformService,
-            uri: URI,
-            eventualBundle: Future[Bundle[Transformer]]): Props = {
-    Props(new BundleActor(manager, uri, eventualBundle))
+  def props(uri: URI,
+            loader: RepositoryBundleLoader)
+           (implicit materializer: Materializer): Props = {
+    Props(new BundleActor(uri, loader))
   }
 
-  case object GetBundleMeta
-  case class BundleLoaded(bundle: Try[Bundle[Transformer]])
-  case class RequestWithSender(request: Any, sender: ActorRef)
-  case class CreateRowStream(id: UUID, spec: StreamRowSpec)
-  case class CreateFrameStream(id: UUID)
-  case class CloseStream(id: UUID)
-  case object Shutdown
+  object Messages {
+    case class Loaded(bundle: Try[Bundle[Transformer]])
+  }
 }
 
-class BundleActor(manager: LocalTransformService,
-                  uri: URI,
-                  eventualBundle: Future[Bundle[Transformer]]) extends Actor {
+class BundleActor(uri: URI,
+                  loader: RepositoryBundleLoader)
+                 (implicit materializer: Materializer) extends Actor {
+  import BundleActor.Messages
+  import LocalTransformServiceActor.{Messages => TMessages}
+  import RowFlowActor.{Messages => RFMessages}
   import context.dispatcher
 
-  private val buffer: mutable.Queue[RequestWithSender] = mutable.Queue()
-  private var bundle: Option[Bundle[Transformer]] = None
-  private val streams: mutable.Set[UUID] = mutable.Set()
-
-  // Probably want to make this timeout configurable eventually
+  // TODO: make configurable with model config API
   context.setReceiveTimeout(15.minutes)
 
-  override def preStart(): Unit = {
-    eventualBundle.onComplete {
-      bundle => self ! BundleLoaded(bundle)
-    }
-  }
+  private var streamId: Int = 0
+  private val buffer: mutable.Queue[RequestWithSender] = mutable.Queue()
+  private var bundle: Option[Bundle[Transformer]] = None
+
+  private var rowFlowLookup: Map[StreamRowSpec, ActorRef] = Map()
+  private var rowFlowSpecLookup: Map[ActorRef, StreamRowSpec] = Map()
+
+  private var loading: Boolean = false
 
   override def postStop(): Unit = {
-    eventualBundle.foreach(_.root.close())
+    for (child <- context.children) {
+      context.unwatch(child)
+      context.stop(child)
+    }
   }
 
   override def receive: Receive = {
-    case request: TransformFrameRequest => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
-    case request: BundleActor.CreateRowStream => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
-    case request: BundleActor.CreateFrameStream => maybeHandleRequestWithSender(RequestWithSender(request, sender()))
-    case GetBundleMeta => maybeHandleRequestWithSender(RequestWithSender(GetBundleMeta, sender()))
-    case bl: BundleActor.BundleLoaded => bundleLoaded(bl)
-    case BundleActor.Shutdown => context.stop(self)
-    case BundleActor.CloseStream(id) => streams -= id
-    case ReceiveTimeout => handleTimeout()
+    case request: TMessages.GetBundleMeta => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: TMessages.Transform => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: TMessages.FrameFlow => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: TMessages.RowFlow => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: TMessages.Unload => unload(request, sender)
+
+    case request: Messages.Loaded => loaded(request)
+
+    case ReceiveTimeout => receiveTimeout()
+    case Terminated(actor) => terminated(actor)
   }
 
-  def maybeHandleRequestWithSender(r: RequestWithSender): Unit = {
-    if (bundle.isEmpty) {
-      buffer.enqueue(r)
+  def maybeHandleRequest(request: RequestWithSender): Unit = {
+    if (bundle.isDefined) {
+      handleRequest(request)
     } else {
-      handleRequestWithSender(r)
+      buffer += request
+      maybeLoad()
     }
   }
 
-  def handleRequestWithSender(r: BundleActor.RequestWithSender): Unit = r.request match {
-    case tfr: TransformFrameRequest => transformFrame(tfr, r.sender)
-    case crs: CreateRowStream => createRowStream(crs, r.sender)
-    case cfs: CreateFrameStream => createFrameStream(cfs, r.sender)
-    case GetBundleMeta => handleGetBundleMeta(r.sender)
+  def handleRequest(request: RequestWithSender): Unit = request.request match {
+    case r: TMessages.GetBundleMeta => getBundleMeta(r, request.sender)
+    case r: TMessages.Transform => transform(r, request.sender)
+    case r: TMessages.FrameFlow => frameFlow(r, request.sender)
+    case r: TMessages.RowFlow => rowFlow(r, request.sender)
   }
 
-  def handleGetBundleMeta(sender: ActorRef): Unit = {
-    for(bundle <- this.bundle) {
-      sender ! BundleMeta(bundle.info, bundle.root.inputSchema, bundle.root.outputSchema)
+  def maybeLoad(): Unit = {
+    if (!loading) {
+      loader.loadBundle(uri).map(Try(_)).recover {
+        case err => Failure(err)
+      }.map(Messages.Loaded).pipeTo(self)
+      loading = true
     }
   }
 
-  def transformFrame(request: TransformFrameRequest, sender: ActorRef): Unit = {
-    for(bundle <- this.bundle;
-        transformer = bundle.root;
-        frame = ExecuteTransform(transformer, request)) {
-      frame.pipeTo(sender)
-    }
-  }
-
-  def handleTimeout(): Unit = {
-    // Only unload on timeout if there are no open streams
-    if (streams.isEmpty) { manager.unload(uri) }
-  }
-
-  def createRowStream(request: CreateRowStream, sender: ActorRef): Unit = {
-    streams += request.id
-    Future.fromTry {
-      bundle.get.root.transform(RowTransformer(request.spec.schema)).flatMap {
-        rt => request.spec.options.select.map {
-          s =>
-            request.spec.options.selectMode match {
-              case SelectMode.Strict => rt.select(s: _*)
-              case SelectMode.Relaxed => Try(rt.relaxedSelect(s: _*))
-            }
-        }.getOrElse(Try(rt))
-      }
-    }.pipeTo(sender)
-  }
-
-  def createFrameStream(request: BundleActor.CreateFrameStream, sender: ActorRef): Unit = {
-    streams += request.id
-    sender ! bundle.get.root
-  }
-
-  def bundleLoaded(loaded: BundleActor.BundleLoaded): Unit = {
+  def loaded(loaded: Messages.Loaded): Unit = {
     loaded.bundle match {
       case Success(b) =>
         this.bundle = Some(b)
         for(r <- this.buffer.dequeueAll(_ => true)) {
-          handleRequestWithSender(r)
+          handleRequest(r)
         }
       case Failure(error) =>
         for(r <- this.buffer.dequeueAll(_ => true)) {
           r.sender ! Status.Failure(error)
         }
-        manager.unload(uri)
+        context.stop(self)
+    }
+    loading = false
+  }
+
+  def getBundleMeta(meta: TMessages.GetBundleMeta, sender: ActorRef): Unit = {
+    for (bundle <- this.bundle) {
+      sender ! BundleMeta(bundle.info, bundle.root.inputSchema, bundle.root.outputSchema)
+    }
+  }
+
+  def transform(transform: TMessages.Transform, sender: ActorRef): Unit = {
+    for (bundle <- this.bundle;
+         transformer = bundle.root;
+         frame = ExecuteTransform(transformer, transform.request)) {
+      frame.pipeTo(sender)
+    }
+  }
+
+  def frameFlow(flow: TMessages.FrameFlow, sender: ActorRef): Unit = ???
+
+  def rowFlow(flow: TMessages.RowFlow, sender: ActorRef): Unit = {
+    val actor = rowFlowLookup.getOrElse(flow.spec, {
+      val actor = context.actorOf(RowFlowActor.props(bundle.get.root, flow), s"row-stream-$streamId")
+      context.watch(actor)
+
+      streamId += 1
+      rowFlowLookup += (flow.spec -> actor)
+      rowFlowSpecLookup += (actor -> flow.spec)
+
+      actor
+    })
+
+    (actor ? RFMessages.GetRowTransformer)(flow.config.initTimeout).
+      mapTo[(RowTransformer, Future[Done])].
+      map(rt => (actor, rt)).
+      pipeTo(sender)
+  }
+
+  def unload(unload: TMessages.Unload, sender: ActorRef): Unit = {
+    sender ! Done
+    context.stop(self)
+  }
+
+  def receiveTimeout(): Unit = {
+    if (rowFlowLookup.isEmpty) { context.stop(self) }
+  }
+
+  def terminated(ref: ActorRef): Unit = {
+    for (spec <- rowFlowSpecLookup.get(ref)) {
+      rowFlowSpecLookup -= ref
+      rowFlowLookup -= spec
     }
   }
 }

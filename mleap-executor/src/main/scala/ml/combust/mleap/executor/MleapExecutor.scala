@@ -10,7 +10,6 @@ import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.Logger
 import ml.combust.mleap.executor.repository.{Repository, RepositoryBundleLoader}
 import ml.combust.mleap.executor.service.LocalTransformService
-import ml.combust.mleap.executor.stream.TransformStream
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
 import scala.concurrent.duration.FiniteDuration
@@ -28,13 +27,12 @@ object MleapExecutor extends ExtensionId[MleapExecutor] with ExtensionIdProvider
 class MleapExecutor(tConfig: Config)
                    (implicit system: ExtendedActorSystem) extends Extension {
   private val logger = Logger(classOf[MleapExecutor])
-  import system.dispatcher
 
   private val loadThreadPool = Executors.newFixedThreadPool(4)
   private val loadEc = ExecutionContext.fromExecutor(loadThreadPool)
   private val repository: Repository = Repository.fromConfig(tConfig.getConfig("repository"))
   private val loader: RepositoryBundleLoader = new RepositoryBundleLoader(repository, loadEc)
-  private val transformService: LocalTransformService = new LocalTransformService(loader)(system.dispatcher, system)
+  private val transformService: LocalTransformService = new LocalTransformService(loader)(system)
 
   system.registerOnTermination {
     logger.info("Shutting down executor")
@@ -68,16 +66,14 @@ class MleapExecutor(tConfig: Config)
     transformService.transform(uri, request, timeout)
   }
 
-  def frameFlow[Tag](uri: URI)
-                    (implicit timeout: FiniteDuration,
-                     parallelism: Parallelism): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
-    transformService.frameFlow(uri)
+  def frameFlow[Tag](uri: URI,
+                     config: StreamConfig): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+    transformService.frameFlow(uri, config)
   }
 
   def rowFlow[Tag](uri: URI,
-                   spec: StreamRowSpec)
-                  (implicit timeout: FiniteDuration,
-                   parallelism: Parallelism): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
-    transformService.rowFlow(uri, spec)
+                   spec: StreamRowSpec,
+                   config: StreamConfig): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
+    transformService.rowFlow(uri, spec, config)
   }
 }

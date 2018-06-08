@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 import akka.NotUsed
 import akka.stream.javadsl
 import akka.stream.scaladsl.Flow
-import ml.combust.mleap.executor.{BundleMeta, Parallelism, StreamRowSpec, TransformFrameRequest}
+import ml.combust.mleap.executor._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
 import scala.concurrent.Future
@@ -32,20 +32,19 @@ trait TransformService {
     transform(uri, request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 
-  def frameFlow[Tag](uri: URI)
-                    (implicit timeout: FiniteDuration,
-                     parallelism: Parallelism): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
+  def frameFlow[Tag](uri: URI,
+                     config: StreamConfig): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
 
   def rowFlow[Tag](uri: URI,
-                   spec: StreamRowSpec)
-                  (implicit timeout: FiniteDuration,
-                   parallelism: Parallelism): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]]
+                   spec: StreamRowSpec,
+                   config: StreamConfig): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]]
 
   def javaRowFlow[Tag](uri: URI,
                        spec: StreamRowSpec,
-                       timeout: Int,
-                       parallelism: Int): javadsl.Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
-    rowFlow(uri, spec)(FiniteDuration(timeout, TimeUnit.MILLISECONDS), parallelism).asJava
+                       config: StreamConfig): javadsl.Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
+    rowFlow(uri,
+      spec,
+      config).asJava
   }
 
   def unload(uri: URI): Unit

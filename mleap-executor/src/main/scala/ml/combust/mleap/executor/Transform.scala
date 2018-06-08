@@ -16,29 +16,30 @@ object ExecuteTransform {
   /** Uses a transformer to transform a leap frame.
     *
     * @param transformer transformer to run
-    * @param request leap frame and transform options
+    * @param frame leap frame
+    * @param options transform options
     * @param ec execution context
     * @return a future of the transformed leap frame
     */
   def apply(transformer: Transformer,
-            request: TransformFrameRequest)
+            frame: DefaultLeapFrame,
+            options: TransformOptions)
            (implicit ec: ExecutionContext): Future[Try[DefaultLeapFrame]] = {
-    Future.fromTry(request.frame.map {
-      frame =>
-        transformer.transformAsync(frame).flatMap {
-          frame =>
-            Future.fromTry {
-              request.options.select.map {
-                s =>
-                  request.options.selectMode match {
-                    case SelectMode.Strict => frame.select(s: _*)
-                    case SelectMode.Relaxed => Try(frame.relaxedSelect(s: _*))
-                  }
-              }.getOrElse(Try(frame))
-            }
-        }
-    }).flatMap(identity).map(Try(_)).recover {
+    transformer.transformAsync(frame).
+      map(Try(_)).recover {
       case err => Failure(err)
+    }.map {
+      tFrame =>
+        tFrame.flatMap {
+          frame =>
+          options.select.map {
+            s =>
+              options.selectMode match {
+                case SelectMode.Strict => frame.select(s: _*)
+                case SelectMode.Relaxed => Try(frame.relaxedSelect(s: _*))
+              }
+          }.getOrElse(tFrame)
+        }
     }
   }
 }
@@ -93,13 +94,17 @@ case class StreamTransformFrameRequest(frame: DefaultLeapFrame,
 case class StreamTransformRowRequest(row: Row)
 
 case class Model(name: String,
-                 uri: URI)
+                 uri: URI,
+                 config: ModelConfig)
 
 case class FrameStream(modelName: String,
-                       streamName: String)
+                       streamName: String,
+                       streamConfig: StreamConfig)
 
 case class RowStream(modelName: String,
-                     streamName: String)
+                     streamName: String,
+                     streamConfig: StreamConfig,
+                     spec: StreamRowSpec)
 
 case class ModelConfig(memoryTimeout: FiniteDuration,
                        diskTimeout: FiniteDuration)

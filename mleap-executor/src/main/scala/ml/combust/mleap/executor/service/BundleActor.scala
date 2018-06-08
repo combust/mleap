@@ -33,21 +33,24 @@ class BundleActor(request: LoadModelRequest,
                  (implicit materializer: Materializer) extends Actor {
   import BundleActor.Messages
   import LocalTransformServiceActor.{Messages => TMessages}
-  import RowFlowActor.{Messages => RFMessages}
-  import FrameFlowActor.{Messages => FFMessages}
+  import RowStreamActor.{Messages => RFMessages}
+  import FrameStreamActor.{Messages => FFMessages}
   import context.dispatcher
 
-  // TODO: make configurable with model config API
-  context.setReceiveTimeout(5.minutes)
+  private val model: Model = Model(request.modelName,
+    request.uri,
+    request.config)
 
-  private var streamId: Int = 0
+  context.setReceiveTimeout(model.config.memoryTimeout)
+
   private val buffer: mutable.Queue[RequestWithSender] = mutable.Queue()
   private var bundle: Option[Bundle[Transformer]] = None
 
-  private var rowFlowLookup: Map[StreamRowSpec, ActorRef] = Map()
-  private var rowFlowSpecLookup: Map[ActorRef, StreamRowSpec] = Map()
+  private var rowStreamLookup: Map[String, ActorRef] = Map()
+  private var rowStreamNameLookup: Map[ActorRef, String] = Map()
 
-  private var frameFlowLookup: Set[ActorRef] = Set()
+  private var frameStreamLookup: Map[String, ActorRef] = Map()
+  private var frameStreamNameLookup: Map[ActorRef, String] = Map()
 
   private var loading: Boolean = false
 
@@ -59,11 +62,13 @@ class BundleActor(request: LoadModelRequest,
   }
 
   override def receive: Receive = {
-    case request: TMessages.GetBundleMeta => maybeHandleRequest(RequestWithSender(request, sender))
-    case request: TMessages.Transform => maybeHandleRequest(RequestWithSender(request, sender))
-    case request: TMessages.FrameFlow => maybeHandleRequest(RequestWithSender(request, sender))
-    case request: TMessages.RowFlow => maybeHandleRequest(RequestWithSender(request, sender))
-    case request: TMessages.Unload => unload(request, sender)
+    case request: GetBundleMetaRequest => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: CreateFrameStreamRequest => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: CreateRowStreamRequest => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: TransformFrameRequest => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: CreateFrameFlowRequest => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: CreateRowFlowRequest => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: UnloadModelRequest => unloadModel(request, sender)
 
     case request: Messages.Loaded => loaded(request)
 
@@ -81,15 +86,17 @@ class BundleActor(request: LoadModelRequest,
   }
 
   def handleRequest(request: RequestWithSender): Unit = request.request match {
-    case r: TMessages.GetBundleMeta => getBundleMeta(r, request.sender)
-    case r: TMessages.Transform => transform(r, request.sender)
-    case r: TMessages.FrameFlow => frameFlow(r, request.sender)
-    case r: TMessages.RowFlow => rowFlow(r, request.sender)
+    case r: GetBundleMetaRequest => getBundleMeta(r, request.sender)
+    case r: TransformFrameRequest => transform(r, request.sender)
+    case r: CreateFrameStreamRequest => createFrameStream(r, request.sender)
+    case r: CreateRowStreamRequest => createRowStream(r, request.sender)
+    case r: CreateFrameFlowRequest => createFrameFlow(r, request.sender)
+    case r: CreateRowFlowRequest => createRowFlow(r, request.sender)
   }
 
   def maybeLoad(): Unit = {
     if (!loading) {
-      loader.loadBundle(uri).map(Try(_)).recover {
+      loader.loadBundle(model.uri).map(Try(_)).recover {
         case err => Failure(err)
       }.map(Messages.Loaded).pipeTo(self)
       loading = true
@@ -112,83 +119,75 @@ class BundleActor(request: LoadModelRequest,
     loading = false
   }
 
-  def getBundleMeta(meta: TMessages.GetBundleMeta, sender: ActorRef): Unit = {
+  def getBundleMeta(request: GetBundleMetaRequest, sender: ActorRef): Unit = {
     for (bundle <- this.bundle) {
       sender ! BundleMeta(bundle.info, bundle.root.inputSchema, bundle.root.outputSchema)
     }
   }
 
-  def transform(transform: TMessages.Transform, sender: ActorRef): Unit = {
+  def transform(request: TransformFrameRequest, sender: ActorRef): Unit = {
     for (bundle <- this.bundle;
          transformer = bundle.root;
-         frame = ExecuteTransform(transformer, transform.request)) {
+         frame = ExecuteTransform(transformer, request.frame, request.options)) {
       frame.flatMap(Future.fromTry).pipeTo(sender)
     }
   }
 
-  def frameFlow(flow: TMessages.FrameFlow, sender: ActorRef): Unit = {
-    val actor = context.actorOf(FrameFlowActor.props(bundle.get.root, flow), s"frame-stream-$streamId")
-    context.watch(actor)
-
-    streamId += 1
-    frameFlowLookup += actor
-
-    (actor ? FFMessages.GetDone)(flow.config.initTimeout).
-      mapTo[Future[Done]].
-      map(done => (actor, done)).
-      pipeTo(sender)
-  }
-
-  def rowFlow(flow: TMessages.RowFlow, sender: ActorRef): Unit = {
-    val actorOpt = rowFlowLookup.get(flow.spec).orElse {
-      Try {
-        bundle.get.root.transform(RowTransformer(flow.spec.schema)).flatMap {
-          rt =>
-            flow.spec.options.select.map {
-              s =>
-                flow.spec.options.selectMode match {
-                  case SelectMode.Strict => rt.select(s: _*)
-                  case SelectMode.Relaxed => Try(rt.relaxedSelect(s: _*))
-                }
-            }.getOrElse(Try(rt))
-        }
-      }.flatMap(identity) match {
-        case Success(rowTransformer) =>
-          val actor = context.actorOf(RowFlowActor.props(rowTransformer, flow), s"row-stream-$streamId")
-          context.watch(actor)
-
-          streamId += 1
-          rowFlowLookup += (flow.spec -> actor)
-          rowFlowSpecLookup += (actor -> flow.spec)
-
-          Some(actor)
-        case Failure(err) =>
-          sender ! Status.Failure(err)
-          None
-      }
-    }
-
-    for (actor <- actorOpt) {
-      (actor ? RFMessages.GetRowTransformer) (flow.config.initTimeout).
-        mapTo[(RowTransformer, Future[Done])].
-        map(rt => (actor, rt)).
-        pipeTo(sender)
+  def createFrameStream(request: CreateFrameStreamRequest, ref: ActorRef): Unit = {
+    Try(context.actorOf(FrameStreamActor.props(bundle.get.root, request), s"frame/${request.streamName}")) match {
+      case Success(actor) =>
+        context.watch(actor)
+        frameStreamLookup += (request.streamName -> actor)
+        frameStreamNameLookup += (actor -> request.streamName)
+        actor.tell(FFMessages.Initialize, sender)
+      case Failure(err) => sender ! Status.Failure(err)
     }
   }
 
-  def unload(unload: TMessages.Unload, sender: ActorRef): Unit = {
+  def createRowStream(request: CreateRowStreamRequest, ref: ActorRef): Unit = {
+    Try(context.actorOf(RowStreamActor.props(bundle.get.root, request), s"frame/${request.streamName}")) match {
+      case Success(actor) =>
+        context.watch(actor)
+        frameStreamLookup += (request.streamName -> actor)
+        frameStreamNameLookup += (actor -> request.streamName)
+        actor.tell(RFMessages.Initialize, sender)
+      case Failure(err) => sender ! Status.Failure(err)
+    }
+  }
+
+
+  def createFrameFlow(request: CreateFrameFlowRequest, sender: ActorRef): Unit = {
+    frameStreamLookup.get(request.streamName) match {
+      case Some(actor) => actor.tell(request, sender)
+      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/frame/${request.streamName}"))
+    }
+  }
+
+  def createRowFlow(request: CreateRowFlowRequest, sender: ActorRef): Unit = {
+    rowStreamLookup.get(request.streamName) match {
+      case Some(actor) => actor.tell(request, sender)
+      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/row/${request.streamName}"))
+    }
+  }
+
+  def unloadModel(request: UnloadModelRequest, sender: ActorRef): Unit = {
     sender ! Done
     context.stop(self)
   }
 
   def receiveTimeout(): Unit = {
-    if (rowFlowLookup.isEmpty) { context.stop(self) }
+    if (rowStreamLookup.isEmpty) { context.stop(self) }
   }
 
   def terminated(ref: ActorRef): Unit = {
-    for (spec <- rowFlowSpecLookup.get(ref)) {
-      rowFlowSpecLookup -= ref
-      rowFlowLookup -= spec
+    for (name <- rowStreamNameLookup.get(ref)) {
+      rowStreamLookup -= name
+      rowStreamNameLookup -= ref
+    }
+
+    for (name <- frameStreamNameLookup.get(ref)) {
+      frameStreamLookup -= name
+      frameStreamNameLookup -= ref
     }
   }
 }

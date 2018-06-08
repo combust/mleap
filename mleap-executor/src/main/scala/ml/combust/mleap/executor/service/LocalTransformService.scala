@@ -93,7 +93,7 @@ class LocalTransformService(loader: RepositoryBundleLoader)
           val queueFlow = builder.add {
             Flow[((StreamTransformFrameRequest, Tag), ActorRef)].mapAsync(request.flowConfig.parallelism) {
               case ((req, tag), actor) =>
-                (actor ? FrameFlowActor.Messages.TransformFrame(req, tag))(request.flowConfig.transformTimeout).
+                (actor ? FrameStreamActor.Messages.TransformFrame(req, tag))(request.flowConfig.transformTimeout).
                   mapTo[(Try[DefaultLeapFrame], Tag)]
             }
           }
@@ -114,10 +114,10 @@ class LocalTransformService(loader: RepositoryBundleLoader)
     val actorSource = Source.lazily(
           () =>
             Source.fromFutureSource {
-              val streamActor = (actor ? request)(timeout).mapTo[(ActorRef, (RowTransformer, Future[Done]))]
+              val streamActor = (actor ? request)(timeout).mapTo[(ActorRef, RowTransformer, Future[Done])]
 
               streamActor.map(_._1).map {
-                actor => Source.repeat(actor).mapMaterializedValue(_ => streamActor.map(_._2))
+                actor => Source.repeat(actor).mapMaterializedValue(_ => streamActor.map(m => (m._2, m._3)))
               }
             }.mapMaterializedValue(_.flatMap(identity))
         ).mapMaterializedValue(_.flatMap(identity)).viaMat(KillSwitches.single)(Keep.both)
@@ -152,7 +152,7 @@ class LocalTransformService(loader: RepositoryBundleLoader)
               val queueFlow = builder.add {
                 Flow[((StreamTransformRowRequest, Tag), ActorRef)].mapAsync(request.flowConfig.parallelism) {
                   case ((r, tag), actor) =>
-                    (actor ? RowFlowActor.Messages.TransformRow(r, tag))(request.flowConfig.transformTimeout).
+                    (actor ? RowStreamActor.Messages.TransformRow(r, tag))(request.flowConfig.transformTimeout).
                       mapTo[(Try[Option[Row]], Tag)]
                 }
               }

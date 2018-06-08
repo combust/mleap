@@ -5,6 +5,8 @@ import akka.stream.{ActorMaterializer, Materializer}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.executor._
 
+import scala.util.{Failure, Success, Try}
+
 object LocalTransformServiceActor {
   def props(loader: RepositoryBundleLoader): Props = {
     Props(new LocalTransformServiceActor(loader))
@@ -17,7 +19,6 @@ object LocalTransformServiceActor {
 
 class LocalTransformServiceActor(loader: RepositoryBundleLoader) extends Actor {
   import LocalTransformServiceActor.Messages
-  private var id: Int = 0
 
   private implicit val materializer: Materializer = ActorMaterializer()(context.system)
 
@@ -54,15 +55,13 @@ class LocalTransformServiceActor(loader: RepositoryBundleLoader) extends Actor {
   }
 
   def loadModel(request: LoadModelRequest): Unit = {
-    lookup.get(request.modelName) match {
-      case Some(_) => sender ! Status.Failure
-      case None =>
-        val actor = context.actorOf(BundleActor.props(request, loader), s"bundle-$id")
-        id += 1
+    Try(context.actorOf(BundleActor.props(request, loader), request.modelName)) match {
+      case Success(actor) =>
         lookup += (request.modelName -> actor)
         modelNameLookup += (actor -> request.modelName)
         context.watch(actor)
         actor.tell(request, sender)
+      case Failure(err) => sender ! Status.Failure(err)
     }
   }
 

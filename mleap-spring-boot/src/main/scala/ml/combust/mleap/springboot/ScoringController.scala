@@ -20,7 +20,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 import org.json4s.jackson.JsonMethods
 import org.slf4j.LoggerFactory
 
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 import scalapb.json4s.{Parser, Printer}
 
 @RestController
@@ -51,16 +51,16 @@ class ScoringController(@Autowired val actorSystem : ActorSystem,
 
   @PostMapping(path = Array("/transform/frame"), consumes = Array("application/x-protobuf; charset=UTF-8"),
     produces = Array("application/x-protobuf; charset=UTF-8"))
-  def transformFrameProto(@RequestBody request: Mleap.TransformFrameRequest) : CompletionStage[Mleap.TransformFrameResponse] = {
-    transformFrame(request.getUri, request.getFormat, request.getTag, request.getTimeout, request.getFrame, request.getOptions)
+  def transformFrameProto(@RequestBody request: Mleap.TransformFrameRequest, @RequestHeader(value = "X-Timeout", defaultValue = "60000") timeout: Int) : CompletionStage[Mleap.TransformFrameResponse] = {
+    transformFrame(request.getUri, request.getFormat, request.getTag, timeout, request.getFrame, request.getOptions)
       .map(resp => TransformFrameResponse.toJavaProto(resp))(executor).toJava
   }
 
   @PostMapping(path = Array("/transform/frame"), consumes = Array("application/json; charset=UTF-8"),
     produces = Array("application/json; charset=UTF-8"))
-  def transformFrameJson(@RequestBody requestBody: String) : CompletionStage[String] = {
+  def transformFrameJson(@RequestBody requestBody: String, @RequestHeader(value = "X-Timeout", defaultValue = "60000") timeout: Int) : CompletionStage[String] = {
     val request = jsonParser.fromJsonString[pb.TransformFrameRequest](requestBody)
-    transformFrame(request.uri, request.format, request.tag, request.timeout, request.frame, request.getOptions)
+    transformFrame(request.uri, request.format, request.tag, timeout, request.frame, request.getOptions)
       .map(resp => JsonMethods.compact(jsonPrinter.toJson(resp)))(executor).toJava
   }
 

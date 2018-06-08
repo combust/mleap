@@ -19,6 +19,7 @@ object TestUtil {
   lazy val protoHeaders = {
     val headers = new HttpHeaders
     headers.add("Content-Type", "application/x-protobuf")
+    headers.add("X-Timeout", "2000")
     headers
   }
 

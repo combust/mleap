@@ -48,7 +48,6 @@ object Dependencies {
     val scalpbJson = "com.thesamet.scalapb" %% "scalapb-json4s" % "0.7.0"
 
     lazy val logging = Seq(
-      "org.slf4j" % "slf4j-simple" % slf4jVersion,
       "ch.qos.logback" % "logback-core" % logbackVersion,
       "ch.qos.logback" % "logback-classic" % logbackVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion

@@ -101,7 +101,6 @@ class ScoringControllerSpec extends FunSpec with Matchers {
       val request = TransformFrameRequest.toJavaProto(TransformFrameRequest(
         uri = demoUri,
         format = BuiltinFormats.binary,
-        timeout = 2000L,
         frame = ByteString.copyFrom(protoLeapFrame)))
       val response = restTemplate.exchange("/transform/frame", HttpMethod.POST,
         new HttpEntity[Mleap.TransformFrameRequest](request, protoHeaders), classOf[Mleap.TransformFrameResponse])
@@ -115,7 +114,6 @@ class ScoringControllerSpec extends FunSpec with Matchers {
       val request = JsonMethods.compact(printer.toJson(TransformFrameRequest(
         uri = demoUri,
         format = BuiltinFormats.json,
-        timeout = 2000L,
         frame = ByteString.copyFrom(jsonLeapFrame),
         options = Some(TransformOptions(select = Seq("demo:prediction"),
                 selectMode = SELECT_MODE_STRICT)))))
@@ -132,7 +130,6 @@ class ScoringControllerSpec extends FunSpec with Matchers {
       val request = TransformFrameRequest.toJavaProto(TransformFrameRequest(
         uri = demoUri,
         format = BuiltinFormats.binary,
-        timeout = 2000L,
         frame = ByteString.copyFrom(incompleteLeapFrame)))
       val response = restTemplate.exchange("/transform/frame", HttpMethod.POST,
         new HttpEntity[Mleap.TransformFrameRequest](request, protoHeaders), classOf[Mleap.TransformFrameResponse])
@@ -148,7 +145,6 @@ class ScoringControllerSpec extends FunSpec with Matchers {
       val request = JsonMethods.compact(printer.toJson(TransformFrameRequest(
         uri = demoUri,
         format = BuiltinFormats.binary,
-        timeout = 2000L,
         frame = ByteString.copyFrom(incompleteLeapFrame))))
       val responseEntity = restTemplate.exchange("/transform/frame", HttpMethod.POST,
         new HttpEntity[String](request, jsonHeaders), classOf[String])
@@ -164,7 +160,6 @@ class ScoringControllerSpec extends FunSpec with Matchers {
       val request = TransformFrameRequest.toJavaProto(TransformFrameRequest(
         uri = "does-not-exist",
         format = BuiltinFormats.binary,
-        timeout = 2000L,
         frame = ByteString.copyFrom(protoLeapFrame)))
       val response = restTemplate.exchange("/transform/frame", HttpMethod.POST,
         new HttpEntity[Mleap.TransformFrameRequest](request, protoHeaders), classOf[Mleap.TransformFrameResponse])

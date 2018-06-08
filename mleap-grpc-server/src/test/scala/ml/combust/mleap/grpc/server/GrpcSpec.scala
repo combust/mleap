@@ -32,7 +32,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
   implicit val timeout = FiniteDuration(5, TimeUnit.SECONDS)
   val streamConfig = StreamConfig(
     initTimeout = 10.seconds,
-    inactivityTimeout = 10.seconds,
+    idleTimeout = 10.seconds,
     transformTimeout = 10.seconds,
     parallelism = 4,
     bufferSize = 1024

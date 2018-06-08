@@ -43,7 +43,7 @@ class RowFlowActor(rowTransformer: RowTransformer,
 
           (row, tRow.tag, promise)
         }
-    }.to(Sink.foreach {
+    }.idleTimeout(flow.config.idleTimeout).to(Sink.foreach {
       case (row, tag, promise) => promise.success((row, tag))
     })
 

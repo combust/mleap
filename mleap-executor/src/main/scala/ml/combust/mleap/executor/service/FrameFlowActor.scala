@@ -38,7 +38,7 @@ class FrameFlowActor(transformer: Transformer,
         ExecuteTransform(transformer, tFrame.request).map {
           frame => (frame, tFrame.tag, promise)
         }
-    }.to(Sink.foreach {
+    }.idleTimeout(flow.config.idleTimeout).to(Sink.foreach {
       case (frame, tag, promise) => promise.success((frame, tag))
     })
 

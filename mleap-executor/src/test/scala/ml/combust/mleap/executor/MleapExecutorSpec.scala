@@ -49,7 +49,7 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
       val spec = StreamRowSpec(frame.schema)
       val config = StreamConfig(
         initTimeout = 10.seconds,
-        inactivityTimeout = 10.seconds,
+        idleTimeout = 10.seconds,
         transformTimeout = 10.seconds,
         parallelism = 4,
         bufferSize = 1024

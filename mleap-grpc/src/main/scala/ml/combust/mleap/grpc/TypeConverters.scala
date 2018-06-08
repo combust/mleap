@@ -43,7 +43,7 @@ object TypeConverters {
   implicit def mleapToPbStreamConfig(config: executor.StreamConfig): StreamConfig = {
     StreamConfig(
       initTimeout = config.initTimeout.toMillis,
-      inactivityTimeout = config.inactivityTimeout.toMillis,
+      idleTimeout = config.idleTimeout.toMillis,
       transformTimeout = config.transformTimeout.toMillis,
       parallelism = config.parallelism,
       bufferSize = config.bufferSize
@@ -53,7 +53,7 @@ object TypeConverters {
   implicit def pbToMleapStreamConfig(config: StreamConfig): executor.StreamConfig = {
     executor.StreamConfig(
       initTimeout = config.initTimeout.millis,
-      inactivityTimeout = config.inactivityTimeout.millis,
+      idleTimeout = config.idleTimeout.millis,
       transformTimeout = config.transformTimeout.millis,
       parallelism = config.parallelism,
       bufferSize = config.bufferSize

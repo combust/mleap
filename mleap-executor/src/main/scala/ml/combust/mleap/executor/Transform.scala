@@ -46,13 +46,13 @@ object ExecuteTransform {
 /** Specifies options for streams of transforms.
   *
   * @param initTimeout timeout for stream initialization
-  * @param inactivityTimeout timeout for stream inactivity
+  * @param idleTimeout timeout for stream inactivity
   * @param transformTimeout timeout for transforming individual elements
   * @param parallelism parallelism of transforms
   * @param bufferSize size of buffer for transform elements
   */
 case class StreamConfig(initTimeout: FiniteDuration,
-                        inactivityTimeout: FiniteDuration,
+                        idleTimeout: FiniteDuration,
                         transformTimeout: FiniteDuration,
                         parallelism: Parallelism,
                         bufferSize: Int)

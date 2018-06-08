@@ -7,7 +7,7 @@ import akka.pattern.{ask, pipe}
 import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Status, Terminated}
 import akka.stream.Materializer
 import ml.combust.bundle.dsl.Bundle
-import ml.combust.mleap.executor.{BundleMeta, ExecuteTransform, StreamRowSpec}
+import ml.combust.mleap.executor.{BundleMeta, ExecuteTransform, SelectMode, StreamRowSpec}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.runtime.frame.{RowTransformer, Transformer}
 
@@ -36,10 +36,11 @@ class BundleActor(uri: URI,
   import BundleActor.Messages
   import LocalTransformServiceActor.{Messages => TMessages}
   import RowFlowActor.{Messages => RFMessages}
+  import FrameFlowActor.{Messages => FFMessages}
   import context.dispatcher
 
   // TODO: make configurable with model config API
-  context.setReceiveTimeout(15.minutes)
+  context.setReceiveTimeout(5.minutes)
 
   private var streamId: Int = 0
   private val buffer: mutable.Queue[RequestWithSender] = mutable.Queue()
@@ -47,6 +48,8 @@ class BundleActor(uri: URI,
 
   private var rowFlowLookup: Map[StreamRowSpec, ActorRef] = Map()
   private var rowFlowSpecLookup: Map[ActorRef, StreamRowSpec] = Map()
+
+  private var frameFlowLookup: Set[ActorRef] = Set()
 
   private var loading: Boolean = false
 
@@ -121,28 +124,58 @@ class BundleActor(uri: URI,
     for (bundle <- this.bundle;
          transformer = bundle.root;
          frame = ExecuteTransform(transformer, transform.request)) {
-      frame.pipeTo(sender)
+      frame.flatMap(Future.fromTry).pipeTo(sender)
     }
   }
 
-  def frameFlow(flow: TMessages.FrameFlow, sender: ActorRef): Unit = ???
+  def frameFlow(flow: TMessages.FrameFlow, sender: ActorRef): Unit = {
+    val actor = context.actorOf(FrameFlowActor.props(bundle.get.root, flow), s"frame-stream-$streamId")
+    context.watch(actor)
+
+    streamId += 1
+    frameFlowLookup += actor
+
+    (actor ? FFMessages.GetDone)(flow.config.initTimeout).
+      mapTo[Future[Done]].
+      map(done => (actor, done)).
+      pipeTo(sender)
+  }
 
   def rowFlow(flow: TMessages.RowFlow, sender: ActorRef): Unit = {
-    val actor = rowFlowLookup.getOrElse(flow.spec, {
-      val actor = context.actorOf(RowFlowActor.props(bundle.get.root, flow), s"row-stream-$streamId")
-      context.watch(actor)
+    val actorOpt = rowFlowLookup.get(flow.spec).orElse {
+      Try {
+        bundle.get.root.transform(RowTransformer(flow.spec.schema)).flatMap {
+          rt =>
+            flow.spec.options.select.map {
+              s =>
+                flow.spec.options.selectMode match {
+                  case SelectMode.Strict => rt.select(s: _*)
+                  case SelectMode.Relaxed => Try(rt.relaxedSelect(s: _*))
+                }
+            }.getOrElse(Try(rt))
+        }
+      }.flatMap(identity) match {
+        case Success(rowTransformer) =>
+          val actor = context.actorOf(RowFlowActor.props(rowTransformer, flow), s"row-stream-$streamId")
+          context.watch(actor)
 
-      streamId += 1
-      rowFlowLookup += (flow.spec -> actor)
-      rowFlowSpecLookup += (actor -> flow.spec)
+          streamId += 1
+          rowFlowLookup += (flow.spec -> actor)
+          rowFlowSpecLookup += (actor -> flow.spec)
 
-      actor
-    })
+          Some(actor)
+        case Failure(err) =>
+          sender ! Status.Failure(err)
+          None
+      }
+    }
 
-    (actor ? RFMessages.GetRowTransformer)(flow.config.initTimeout).
-      mapTo[(RowTransformer, Future[Done])].
-      map(rt => (actor, rt)).
-      pipeTo(sender)
+    for (actor <- actorOpt) {
+      (actor ? RFMessages.GetRowTransformer) (flow.config.initTimeout).
+        mapTo[(RowTransformer, Future[Done])].
+        map(rt => (actor, rt)).
+        pipeTo(sender)
+    }
   }
 
   def unload(unload: TMessages.Unload, sender: ActorRef): Unit = {

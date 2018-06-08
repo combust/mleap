@@ -9,7 +9,7 @@ import akka.stream.{FlowShape, KillSwitches, UniqueKillSwitch}
 import akka.stream.scaladsl.{Flow, GraphDSL, Keep, Sink, Source, Zip}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.executor.{BundleMeta, StreamConfig, StreamRowSpec, TransformFrameRequest}
-import ml.combust.mleap.executor.service.LocalTransformServiceActor.Messages.RowFlow
+import ml.combust.mleap.executor.service.LocalTransformServiceActor.Messages.{FrameFlow, RowFlow}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
 import scala.concurrent.Future
@@ -35,7 +35,62 @@ class LocalTransformService(loader: RepositoryBundleLoader)
   }
 
   override def frameFlow[Tag](uri: URI,
-                              config: StreamConfig): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = ???
+                              config: StreamConfig): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+    val actorSource = Source.lazily(
+      () =>
+        Source.fromFutureSource {
+          val streamActor = (actor ? FrameFlow(uri, config))(config.initTimeout).
+            mapTo[(ActorRef, Future[Done])]
+
+          streamActor.map(_._1).map {
+            actor => Source.repeat(actor).mapMaterializedValue(_ => streamActor.flatMap(_._2))
+          }
+        }.mapMaterializedValue(_.flatMap(identity))
+    ).mapMaterializedValue(_.flatMap(identity)).viaMat(KillSwitches.single)(Keep.both)
+
+    Flow.fromGraph(GraphDSL.create(actorSource) {
+      implicit builder =>
+        actorSource =>
+        import GraphDSL.Implicits._
+
+          val doneFlow = builder.add {
+            Flow[(Future[Done], UniqueKillSwitch)].mapAsync(1) {
+              case (f, ks) =>
+                f.map(Try(_)).
+                  recover {
+                    case err => Failure(err)
+                  }.map(done => (done, ks))
+            }.to(Sink.foreach {
+              case (done, ks) =>
+                done match {
+                  case Success(_) => ks.shutdown()
+                  case Failure(err) => ks.abort(err)
+                }
+            })
+          }
+
+          val inFlow = builder.add {
+            Flow[(TransformFrameRequest, Tag)]
+          }
+
+          val queueFlow = builder.add {
+            Flow[((TransformFrameRequest, Tag), ActorRef)].mapAsync(config.parallelism) {
+              case ((req, tag), actor) =>
+                (actor ? FrameFlowActor.Messages.TransformFrame(req, tag))(config.transformTimeout).
+                  mapTo[(Try[DefaultLeapFrame], Tag)]
+            }
+          }
+
+          val zip = builder.add { Zip[(TransformFrameRequest, Tag), ActorRef] }
+
+          builder.materializedValue ~> doneFlow
+          inFlow ~> zip.in0
+          actorSource ~> zip.in1
+          zip.out ~> queueFlow
+
+          FlowShape(inFlow.in, queueFlow.out)
+    }).mapMaterializedValue(_ => NotUsed)
+  }
 
   override def rowFlow[Tag](uri: URI,
                             spec: StreamRowSpec,

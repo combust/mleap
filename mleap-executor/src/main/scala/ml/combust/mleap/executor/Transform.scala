@@ -7,7 +7,7 @@ import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, Transformer}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 /** Used to execute a frame transform operation.
   *
@@ -22,7 +22,7 @@ object ExecuteTransform {
     */
   def apply(transformer: Transformer,
             request: TransformFrameRequest)
-           (implicit ec: ExecutionContext): Future[DefaultLeapFrame] = {
+           (implicit ec: ExecutionContext): Future[Try[DefaultLeapFrame]] = {
     Future.fromTry(request.frame.map {
       frame =>
       transformer.transformAsync(frame).flatMap {
@@ -37,7 +37,9 @@ object ExecuteTransform {
             }.getOrElse(Try(frame))
           }
       }
-    }).flatMap(identity)
+    }).flatMap(identity).map(Try(_)).recover {
+      case err => Failure(err)
+    }
   }
 }
 

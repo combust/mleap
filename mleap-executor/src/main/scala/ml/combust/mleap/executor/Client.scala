@@ -53,13 +53,12 @@ trait Client {
   def transform(uri: URI, request: TransformFrameRequest)
                (implicit timeout: FiniteDuration = Client.defaultTimeout): Future[DefaultLeapFrame]
 
-  def rowTransformClient(uri: URI, spec: StreamRowSpec): RowTransformClient = ???
+  def rowTransformClient(uri: URI, spec: StreamRowSpec, config: StreamConfig): RowTransformClient = ???
 
-  def frameFlow[Tag: TagBytes](uri: URI, options: TransformOptions = TransformOptions.default)
-                              (implicit timeout: FiniteDuration = Client.defaultTimeout,
-                               parallelism: Parallelism = Client.defaultParallelism): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
+  def frameFlow[Tag: TagBytes](uri: URI,
+                               config: StreamConfig): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
 
-  def rowFlow[Tag: TagBytes](uri: URI, spec: StreamRowSpec)
-                            (implicit timeout: FiniteDuration = Client.defaultTimeout,
-                             parallelism: Parallelism = Client.defaultParallelism): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed]
+  def rowFlow[Tag: TagBytes](uri: URI,
+                             spec: StreamRowSpec,
+                             config: StreamConfig): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed]
 }

@@ -79,7 +79,7 @@ class GrpcServer(executor: MleapExecutor)
           case None =>
             val frameReader = FrameReader(value.format)
 
-            val frameFlow = executor.frameFlow[ByteString](URI.create(value.uri))(getTimeout(value.timeout), value.parallelism)
+            val frameFlow = executor.frameFlow[ByteString](URI.create(value.uri), value.streamConfig.get)
             val source = GrpcAkkaStreams.source[TransformFrameRequest].map {
               request =>
                 val r = mleap.executor.TransformFrameRequest(
@@ -137,7 +137,7 @@ class GrpcServer(executor: MleapExecutor)
             val reader = RowReader(schema, value.format)
 
             val _source = GrpcAkkaStreams.source[TransformRowRequest]
-            val _rowFlow = executor.rowFlow[ByteString](URI.create(value.uri), spec)(getTimeout(value.timeout), value.parallelism)
+            val _rowFlow = executor.rowFlow[ByteString](URI.create(value.uri), spec, value.streamConfig.get)
 
             val graph = RunnableGraph.fromGraph(GraphDSL.create(_source, _rowFlow)(Keep.both) {
               implicit builder =>

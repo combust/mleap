@@ -5,21 +5,19 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, KillSwitches}
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.stream.testkit.scaladsl.TestSink
 import akka.testkit.TestKit
 import io.grpc.{ManagedChannel, Server, Status, StatusRuntimeException}
-import ml.combust.mleap.executor.{Client, StreamRowSpec, TransformFrameRequest, TransformOptions}
+import ml.combust.mleap.executor._
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSpecLike}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures
 
 import scala.concurrent.duration._
 import ml.combust.mleap.grpc.server.TestUtil._
-import org.scalatest.time.Span
 
-import scala.concurrent.Await
 import scala.util.Try
 
 class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
@@ -32,6 +30,13 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
   var client : Client = _
   var channel : ManagedChannel = _
   implicit val timeout = FiniteDuration(5, TimeUnit.SECONDS)
+  val streamConfig = StreamConfig(
+    initTimeout = 10.seconds,
+    inactivityTimeout = 10.seconds,
+    transformTimeout = 10.seconds,
+    parallelism = 4,
+    bufferSize = 1024
+  )
 
   override def beforeEach() = {
     channel = inProcessChannel
@@ -70,7 +75,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
     it("transforms a row using row flow") {
       val uuid = UUID.randomUUID()
       val stream = Source.fromIterator(() => frame.get.dataset.iterator.map(row => (Try(row), uuid)))
-        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema)))
+        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema), streamConfig))
         .toMat(TestSink.probe(system))(Keep.right)
         .run()(ActorMaterializer.create(system))
 
@@ -87,7 +92,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
       val uuid = UUID.randomUUID()
 
       val done = Source.single((Try(frame.get.dataset.head), uuid))
-        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema)))
+        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema), streamConfig))
         .watchTermination()(Keep.right)
         .to(Sink.ignore)
         .run()(ActorMaterializer.create(system))
@@ -97,7 +102,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
 
     it("returns error with the right exception when using row flow"){
       val ex = Source.fromIterator(() => frame.get.dataset.iterator.map(row => (Try(row), UUID.randomUUID())))
-        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema, TransformOptions(Some(Seq("dummy1", "dummy2"))))))
+        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema, TransformOptions(Some(Seq("dummy1", "dummy2")))), streamConfig))
         .runWith(TestSink.probe(system))(ActorMaterializer.create(system))
         .request(1)
         .expectError()
@@ -112,7 +117,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
       val uuid = UUID.randomUUID()
       val source = Source.fromIterator(() => Iterator.apply(frame).map(f => (TransformFrameRequest(f), uuid)))
       val result = source
-        .via(client.frameFlow(uri = lrUri))
+        .via(client.frameFlow(lrUri, streamConfig))
         .runWith(TestSink.probe(system))(ActorMaterializer.create(system))
         .request(1)
         .expectNext() // throws exception, might need same fixes from rowFlow?
@@ -125,7 +130,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
     it("shuts down the frame flow when upstream completes") {
       val uuid = UUID.randomUUID()
       val done = Source.single((TransformFrameRequest(frame), uuid))
-        .via(client.frameFlow(uri = lrUri))
+        .via(client.frameFlow(lrUri, streamConfig))
         .watchTermination()(Keep.right)
         .to(Sink.ignore)
         .run()(ActorMaterializer.create(system))

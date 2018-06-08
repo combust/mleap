@@ -4,19 +4,18 @@ import akka.actor.{Actor, Props, Status}
 import akka.pattern.pipe
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
-import ml.combust.mleap.executor.SelectMode
 import ml.combust.mleap.executor.service.LocalTransformServiceActor.{Messages => TMessages}
-import ml.combust.mleap.runtime.frame.{Row, RowTransformer, Transformer}
+import ml.combust.mleap.runtime.frame.{Row, RowTransformer}
 
 import scala.concurrent.{Future, Promise}
 import scala.util.Try
 
 object RowFlowActor {
 
-  def props(transformer: Transformer,
+  def props(rowTransformer: RowTransformer,
             flow: TMessages.RowFlow)
            (implicit materializer: Materializer): Props = {
-    Props(new RowFlowActor(transformer, flow))
+    Props(new RowFlowActor(rowTransformer, flow))
   }
 
   object Messages {
@@ -26,35 +25,24 @@ object RowFlowActor {
   }
 }
 
-class RowFlowActor(transformer: Transformer,
+class RowFlowActor(rowTransformer: RowTransformer,
                    flow: TMessages.RowFlow)
                   (implicit materializer: Materializer) extends Actor {
   import RowFlowActor.Messages
   import context.dispatcher
 
-  private val rowTransformer: RowTransformer = {
-    transformer.transform(RowTransformer(flow.spec.schema)).flatMap {
-      rt =>
-        flow.spec.options.select.map {
-          s =>
-            flow.spec.options.selectMode match {
-              case SelectMode.Strict => rt.select(s: _*)
-              case SelectMode.Relaxed => Try(rt.relaxedSelect(s: _*))
-            }
-        }.getOrElse(Try(rt))
-    }.get
-  }
-
   private val queue = {
     val source = Source.queue[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])](flow.config.bufferSize, OverflowStrategy.backpressure)
-    val transform = Flow[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])].map {
+    val transform = Flow[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])].mapAsyncUnordered(flow.config.parallelism) {
       case (tRow, promise) =>
-        val row = tRow.row.map {
-          row =>
-            rowTransformer.transformOption(row)
-        }
+        Future {
+          val row = tRow.row.map {
+            row =>
+              rowTransformer.transformOption(row)
+          }
 
-        (row, tRow.tag, promise)
+          (row, tRow.tag, promise)
+        }
     }.to(Sink.foreach {
       case (row, tag, promise) => promise.success((row, tag))
     })

@@ -14,7 +14,6 @@ import TypeConverters._
 import akka.stream.FlowShape
 import com.google.protobuf.ByteString
 import io.grpc.stub.StreamObserver
-import io.grpc.Context
 import ml.combust.bundle.dsl.BundleInfo
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.grpc.stream.GrpcAkkaStreams
@@ -47,11 +46,11 @@ class GrpcClient(stub: MleapStub)
         bytes =>
           stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
             transformFrame(pb.TransformFrameRequest(
-            uri = uri.toString,
-            format = format,
-            frame = ByteString.copyFrom(bytes),
-            options = Some(request.options)
-          )).flatMap {
+              uri = uri.toString,
+              format = format,
+              frame = ByteString.copyFrom(bytes),
+              options = Some(request.options)
+            )).flatMap {
             response =>
               Future.fromTry {
                 if (response.error.nonEmpty) {
@@ -66,9 +65,7 @@ class GrpcClient(stub: MleapStub)
   }
 
   override def frameFlow[Tag: TagBytes](uri: URI,
-                                        options: TransformOptions = TransformOptions.default)
-                                       (implicit timeout: FiniteDuration = Client.defaultTimeout,
-                                        parallelism: Parallelism = Client.defaultParallelism): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+                                        config: StreamConfig): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
     val frameReader = FrameReader(BuiltinFormats.binary)
 
     val responseSource = GrpcAkkaStreams.source[TransformFrameResponse].mapMaterializedValue {
@@ -78,9 +75,7 @@ class GrpcClient(stub: MleapStub)
         // Initialize the stream
         requestObserver.onNext(pb.TransformFrameRequest(
           uri = uri.toString,
-          options = Some(options),
-          timeout = timeout.toMillis,
-          parallelism = parallelism,
+          streamConfig = Some(config),
           format = BuiltinFormats.binary
         ))
         requestObserver
@@ -142,9 +137,9 @@ class GrpcClient(stub: MleapStub)
     }.mapMaterializedValue(_ => NotUsed)
   }
 
-  override def rowFlow[Tag: TagBytes](uri: URI, spec: StreamRowSpec)
-                                     (implicit timeout: FiniteDuration = Client.defaultTimeout,
-                                      parallelism: Parallelism = Client.defaultParallelism): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {
+  override def rowFlow[Tag: TagBytes](uri: URI,
+                                      spec: StreamRowSpec,
+                                      config: StreamConfig): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), NotUsed] = {
     val rowWriter = RowWriter(spec.schema, BuiltinFormats.binary)
 
     val _responseSource = GrpcAkkaStreams.source[TransformRowResponse].mapMaterializedValue {
@@ -156,8 +151,7 @@ class GrpcClient(stub: MleapStub)
           uri = uri.toString,
           schema = Some(spec.schema),
           options = Some(spec.options),
-          timeout = timeout.toMillis,
-          parallelism = parallelism,
+          streamConfig = Some(config),
           format = BuiltinFormats.binary
         ))
         requestObserver

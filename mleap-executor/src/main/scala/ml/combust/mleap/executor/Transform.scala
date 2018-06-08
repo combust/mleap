@@ -23,7 +23,7 @@ object ExecuteTransform {
     */
   def apply(transformer: Transformer,
             frame: DefaultLeapFrame,
-            options: TransformOptions)
+            options: TransformOptions = TransformOptions.default)
            (implicit ec: ExecutionContext): Future[Try[DefaultLeapFrame]] = {
     transformer.transformAsync(frame).
       map(Try(_)).recover {

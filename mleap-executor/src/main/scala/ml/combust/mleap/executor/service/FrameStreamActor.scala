@@ -1,13 +1,14 @@
 package ml.combust.mleap.executor.service
 
 import akka.pattern.pipe
-import akka.actor.{Actor, Props, Status}
+import akka.actor.{Actor, Props, ReceiveTimeout, Status}
 import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import ml.combust.mleap.executor._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
 
 import scala.concurrent.{Future, Promise}
+import scala.concurrent.duration._
 import scala.util.Try
 
 object FrameStreamActor {
@@ -30,6 +31,8 @@ class FrameStreamActor(transformer: Transformer,
   import FrameStreamActor.Messages
   import context.dispatcher
 
+  context.setReceiveTimeout(1.minute)
+
   val frameStream: FrameStream = FrameStream(request.modelName,
     request.streamName,
     request.streamConfig)
@@ -48,6 +51,7 @@ class FrameStreamActor(transformer: Transformer,
 
     case r: CreateFrameFlowRequest => createFrameFlow(r)
 
+    case ReceiveTimeout => receiveTimeout()
     case Status.Failure(err) => throw err
   }
 
@@ -77,6 +81,7 @@ class FrameStreamActor(transformer: Transformer,
         pipeTo(self)
 
       queueF = Some(Future(queue.get))
+      context.setReceiveTimeout(Duration.Inf)
     }
 
     sender ! frameStream
@@ -110,5 +115,9 @@ class FrameStreamActor(transformer: Transformer,
       case Some(q) => sender ! (self, q.watchCompletion())
       case None => sender ! Status.Failure(new IllegalStateException(s"frame stream not initialized ${frameStream.modelName}/frame/${frameStream.streamName}"))
     }
+  }
+
+  def receiveTimeout(): Unit = {
+    if (queue.isEmpty) { context.stop(self) }
   }
 }

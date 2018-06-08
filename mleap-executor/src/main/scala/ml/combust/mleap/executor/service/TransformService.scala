@@ -36,10 +36,10 @@ trait TransformService {
                        (implicit timeout: FiniteDuration): Future[RowStream]
 
   def transform(request: TransformFrameRequest)
-               (implicit timeout: FiniteDuration): Future[DefaultLeapFrame]
+               (implicit timeout: FiniteDuration): Future[Try[DefaultLeapFrame]]
 
   def transform(request: TransformFrameRequest,
-                timeout: Int): Future[DefaultLeapFrame] = {
+                timeout: Int): Future[Try[DefaultLeapFrame]] = {
     transform(request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 

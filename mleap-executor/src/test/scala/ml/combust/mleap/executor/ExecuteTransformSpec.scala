@@ -13,6 +13,7 @@ import ml.combust.mleap.core.types._
 import org.scalatest.concurrent.ScalaFutures
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.{Success, Try}
 
 class ExecuteTransformSpec extends FunSpec with ScalaFutures with Matchers {
@@ -33,8 +34,8 @@ class ExecuteTransformSpec extends FunSpec with ScalaFutures with Matchers {
       Seq(Row(20.0, 10.0)))
 
     it("transforms successfully a leap frame in strict mode") {
-      val request = TransformFrameRequest(Success(input), TransformOptions(Some(Seq("features", "prediction")), SelectMode.Strict))
-      val result = ExecuteTransform(pipeline , request)
+      val result = ExecuteTransform(pipeline, input, TransformOptions(Some(Seq("features", "prediction")), SelectMode.Strict)).
+        flatMap(Future.fromTry)
 
       whenReady(result) {
          frame => {
@@ -49,15 +50,15 @@ class ExecuteTransformSpec extends FunSpec with ScalaFutures with Matchers {
     }
 
     it("transforms successfully a leap frame with default options") {
-      val result = ExecuteTransform(pipeline, Try(input))
+      val result = ExecuteTransform(pipeline, input).flatMap(Future.fromTry)
       whenReady(result) {
         frame => assert(frame.schema.hasField("prediction"))
       }
     }
 
     it("throws exception when transforming and selecting a missing field in strict mode") {
-      val request = TransformFrameRequest(Success(input), TransformOptions(Some(Seq("features", "prediction", "does-not-exist")), SelectMode.Strict))
-      val result = ExecuteTransform(pipeline , request)
+      val result = ExecuteTransform(pipeline, input, TransformOptions(Some(Seq("features", "prediction", "does-not-exist")), SelectMode.Strict)).
+        flatMap(Future.fromTry)
 
       whenReady(result.failed) {
         ex => ex shouldBe a [IllegalArgumentException]
@@ -65,8 +66,8 @@ class ExecuteTransformSpec extends FunSpec with ScalaFutures with Matchers {
     }
 
     it("transforms successfully a leap frame in relaxed mode, ignoring unknown fields") {
-      val request = TransformFrameRequest(Success(input), TransformOptions(Some(Seq("features", "prediction", "does-not-exist")), SelectMode.Relaxed))
-      val result = ExecuteTransform(pipeline , request)
+      val result = ExecuteTransform(pipeline, input, TransformOptions(Some(Seq("features", "prediction", "does-not-exist")), SelectMode.Relaxed)).
+        flatMap(Future.fromTry)
 
       whenReady(result) {
         frame => {
@@ -90,7 +91,7 @@ class ExecuteTransformSpec extends FunSpec with ScalaFutures with Matchers {
           LinearRegression(shape = NodeShape.regression(),
             // missing coefficient for LR
             model = LinearRegressionModel(Vectors.dense(2.0), 5.0)))))
-      val result = ExecuteTransform(invalidPipeline ,Try(input))
+      val result = ExecuteTransform(invalidPipeline, input).flatMap(Future.fromTry)
 
       whenReady(result.failed) {
         ex => ex shouldBe a [IllegalArgumentException]

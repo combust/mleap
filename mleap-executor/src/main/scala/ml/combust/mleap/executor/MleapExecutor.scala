@@ -1,6 +1,5 @@
 package ml.combust.mleap.executor
 
-import java.net.URI
 import java.util.concurrent.{Executors, TimeUnit}
 
 import akka.NotUsed
@@ -9,7 +8,7 @@ import akka.stream.scaladsl.Flow
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.Logger
 import ml.combust.mleap.executor.repository.{Repository, RepositoryBundleLoader}
-import ml.combust.mleap.executor.service.LocalTransformService
+import ml.combust.mleap.executor.service.{LocalTransformService, TransformService}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
 import scala.concurrent.duration.FiniteDuration
@@ -25,7 +24,7 @@ object MleapExecutor extends ExtensionId[MleapExecutor] with ExtensionIdProvider
 }
 
 class MleapExecutor(tConfig: Config)
-                   (implicit system: ExtendedActorSystem) extends Extension {
+                   (implicit system: ExtendedActorSystem) extends Extension with TransformService {
   private val logger = Logger(classOf[MleapExecutor])
 
   private val loadThreadPool = Executors.newFixedThreadPool(4)
@@ -46,34 +45,45 @@ class MleapExecutor(tConfig: Config)
     repository.awaitTermination(30, TimeUnit.SECONDS)
   }
 
-  def getBundleMeta(uri: URI)
-                   (implicit timeout: FiniteDuration): Future[BundleMeta] = {
-    transformService.getBundleMeta(uri)
+  override def getBundleMeta(request: GetBundleMetaRequest)
+                            (implicit timeout: FiniteDuration): Future[BundleMeta] = {
+    transformService.getBundleMeta(request)
   }
 
-  def getBundleMeta(uri: URI, timeout: Int): Future[BundleMeta] = {
-    transformService.getBundleMeta(uri, timeout)
+  override def loadModel(request: LoadModelRequest)
+                        (implicit timeout: FiniteDuration): Future[Model] = {
+    transformService.loadModel(request)
   }
 
-  def transform(uri: URI, request: TransformFrameRequest)
-               (implicit timeout: FiniteDuration): Future[DefaultLeapFrame] = {
-    transformService.transform(uri, request)
+  override def unloadModel(request: UnloadModelRequest)
+                          (implicit timeout: FiniteDuration): Future[Model] = {
+    transformService.unloadModel(request)
   }
 
-  def transform(uri: URI,
-                request: TransformFrameRequest,
-                timeout: Int): Future[DefaultLeapFrame] = {
-    transformService.transform(uri, request, timeout)
+  override def createFrameStream(request: CreateFrameStreamRequest)
+                                (implicit timeout: FiniteDuration): Future[FrameStream] = {
+    transformService.createFrameStream(request)
   }
 
-  def frameFlow[Tag](uri: URI,
-                     config: StreamConfig): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
-    transformService.frameFlow(uri, config)
+  override def createRowStream(request: CreateRowStreamRequest)
+                              (implicit timeout: FiniteDuration): Future[RowStream] = {
+    transformService.createRowStream(request)
   }
 
-  def rowFlow[Tag](uri: URI,
-                   spec: StreamRowSpec,
-                   config: StreamConfig): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
-    transformService.rowFlow(uri, spec, config)
+  override def transform(request: TransformFrameRequest)
+                        (implicit timeout: FiniteDuration): Future[Try[DefaultLeapFrame]] = {
+    transformService.transform(request)
   }
+
+  override def frameFlow[Tag](request: CreateFrameFlowRequest)
+                             (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+    transformService.frameFlow(request)
+  }
+
+  override def rowFlow[Tag](request: CreateRowFlowRequest)
+                           (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
+    transformService.rowFlow(request)
+  }
+
+  override def close(): Unit = { }
 }

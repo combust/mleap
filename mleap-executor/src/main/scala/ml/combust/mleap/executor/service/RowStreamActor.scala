@@ -1,6 +1,6 @@
 package ml.combust.mleap.executor.service
 
-import akka.actor.{Actor, Props, Status}
+import akka.actor.{Actor, Props, ReceiveTimeout, Status}
 import akka.pattern.pipe
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
@@ -8,6 +8,7 @@ import ml.combust.mleap.executor._
 import ml.combust.mleap.runtime.frame.{Row, RowTransformer, Transformer}
 
 import scala.concurrent.{Future, Promise}
+import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
 object RowStreamActor {
@@ -30,6 +31,8 @@ class RowStreamActor(transformer: Transformer,
                     (implicit materializer: Materializer) extends Actor {
   import RowStreamActor.Messages
   import context.dispatcher
+
+  context.setReceiveTimeout(1.minute)
 
   val rowStream: RowStream = RowStream(request.modelName,
     request.streamName,
@@ -62,6 +65,7 @@ class RowStreamActor(transformer: Transformer,
 
     case r: CreateRowFlowRequest => createRowFlow(r)
 
+    case ReceiveTimeout => receiveTimeout()
     case Status.Failure(err) => throw err
   }
 
@@ -129,5 +133,9 @@ class RowStreamActor(transformer: Transformer,
         }
       case None => sender ! Status.Failure(new IllegalStateException(s"row stream not initialized ${rowStream.modelName}/row/${rowStream.streamName}"))
     }
+  }
+
+  def receiveTimeout(): Unit = {
+    if (queue.isEmpty) { context.stop(self) }
   }
 }

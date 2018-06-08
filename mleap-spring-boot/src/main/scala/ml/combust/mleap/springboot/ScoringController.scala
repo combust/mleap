@@ -20,7 +20,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 import org.json4s.jackson.JsonMethods
 import org.slf4j.LoggerFactory
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 import scalapb.json4s.{Parser, Printer}
 
 @RestController

@@ -1,11 +1,9 @@
 package ml.combust.mleap.executor.service
 
-import java.net.URI
-
-import akka.actor.{Actor, ActorRef, Props, Terminated}
+import akka.actor.{Actor, ActorRef, Props, Status, Terminated}
 import akka.stream.{ActorMaterializer, Materializer}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
-import ml.combust.mleap.executor.{StreamConfig, StreamRowSpec, TransformFrameRequest}
+import ml.combust.mleap.executor._
 
 object LocalTransformServiceActor {
   def props(loader: RepositoryBundleLoader): Props = {
@@ -13,11 +11,6 @@ object LocalTransformServiceActor {
   }
 
   object Messages {
-    case class GetBundleMeta(uri: URI)
-    case class Transform(uri: URI, request: TransformFrameRequest)
-    case class FrameFlow(uri: URI, config: StreamConfig)
-    case class RowFlow(uri: URI, spec: StreamRowSpec, config: StreamConfig)
-    case class Unload(uri: URI)
     case object Close
   }
 }
@@ -28,8 +21,8 @@ class LocalTransformServiceActor(loader: RepositoryBundleLoader) extends Actor {
 
   private implicit val materializer: Materializer = ActorMaterializer()(context.system)
 
-  private var lookup: Map[URI, ActorRef] = Map()
-  private var uriLookup: Map[ActorRef, URI] = Map()
+  private var lookup: Map[String, ActorRef] = Map()
+  private var modelNameLookup: Map[ActorRef, String] = Map()
 
   override def postStop(): Unit = {
     for (child <- context.children) {
@@ -39,50 +32,43 @@ class LocalTransformServiceActor(loader: RepositoryBundleLoader) extends Actor {
   }
 
   override def receive: Receive = {
-    case request: Messages.GetBundleMeta => getBundleMeta(request)
-    case request: Messages.Transform => transform(request)
-    case request: Messages.FrameFlow => frameFlow(request)
-    case request: Messages.RowFlow => rowFlow(request)
-    case request: Messages.Unload => unload(request)
+    case request: GetBundleMetaRequest => handleModelRequest(request)
+    case request: GetModelRequest => handleModelRequest(request)
+    case request: TransformFrameRequest => handleModelRequest(request)
+    case request: CreateFrameStreamRequest => handleModelRequest(request)
+    case request: CreateRowStreamRequest => handleModelRequest(request)
+    case request: CreateFrameFlowRequest => handleModelRequest(request)
+    case request: CreateRowFlowRequest => handleModelRequest(request)
+    case request: UnloadModelRequest => handleModelRequest(request)
+    case request: LoadModelRequest => loadModel(request)
     case Messages.Close => context.stop(self)
 
     case Terminated(actor) => terminated(actor)
   }
 
-  def getBundleMeta(meta: Messages.GetBundleMeta): Unit = {
-    ensureActor(meta.uri).tell(meta, sender)
+  def handleModelRequest(request: ModelRequest): Unit = {
+    lookup.get(request.modelName) match {
+      case Some(actor) => actor.tell(request, sender)
+      case None => sender ! Status.Failure(new NoSuchElementException(s"no model with name ${request.modelName}"))
+    }
   }
 
-  def transform(transform: Messages.Transform): Unit = {
-    ensureActor(transform.uri).tell(transform, sender)
-  }
-
-  def frameFlow(flow: Messages.FrameFlow): Unit = {
-    ensureActor(flow.uri).tell(flow, sender)
-  }
-
-  def rowFlow(flow: Messages.RowFlow): Unit = {
-    ensureActor(flow.uri).tell(flow, sender)
-  }
-
-  def unload(unload: Messages.Unload): Unit = {
-    ensureActor(unload.uri).tell(unload, sender)
-  }
-
-  private def ensureActor(uri: URI): ActorRef = {
-    lookup.getOrElse(uri, {
-      val actor = context.actorOf(BundleActor.props(uri, loader), s"bundle-$id")
-      id += 1
-      lookup += (uri -> actor)
-      uriLookup += (actor -> uri)
-      context.watch(actor)
-      actor
-    })
+  def loadModel(request: LoadModelRequest): Unit = {
+    lookup.get(request.modelName) match {
+      case Some(_) => sender ! Status.Failure
+      case None =>
+        val actor = context.actorOf(BundleActor.props(request, loader), s"bundle-$id")
+        id += 1
+        lookup += (request.modelName -> actor)
+        modelNameLookup += (actor -> request.modelName)
+        context.watch(actor)
+        actor.tell(request, sender)
+    }
   }
 
   private def terminated(ref: ActorRef): Unit = {
-    val uri = uriLookup(ref)
-    uriLookup -= ref
+    val uri = modelNameLookup(ref)
+    modelNameLookup -= ref
     lookup -= uri
   }
 }

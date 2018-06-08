@@ -4,6 +4,7 @@ import akka.actor.{Actor, Props, Status}
 import akka.pattern.pipe
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
+import ml.combust.mleap.executor.StreamTransformRowRequest
 import ml.combust.mleap.executor.service.LocalTransformServiceActor.{Messages => TMessages}
 import ml.combust.mleap.runtime.frame.{Row, RowTransformer}
 
@@ -20,7 +21,7 @@ object RowFlowActor {
 
   object Messages {
     case object GetRowTransformer
-    case class TransformRow(row: Try[Row], tag: Any)
+    case class TransformRow(row: StreamTransformRowRequest, tag: Any)
     case object StreamClosed
   }
 }

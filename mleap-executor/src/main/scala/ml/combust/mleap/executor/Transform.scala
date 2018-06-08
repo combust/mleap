@@ -1,6 +1,6 @@
 package ml.combust.mleap.executor
 
-import java.util.UUID
+import java.net.URI
 
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, Transformer}
@@ -25,18 +25,18 @@ object ExecuteTransform {
            (implicit ec: ExecutionContext): Future[Try[DefaultLeapFrame]] = {
     Future.fromTry(request.frame.map {
       frame =>
-      transformer.transformAsync(frame).flatMap {
-        frame =>
-          Future.fromTry {
-            request.options.select.map {
-              s =>
-                request.options.selectMode match {
-                  case SelectMode.Strict => frame.select(s: _*)
-                  case SelectMode.Relaxed => Try(frame.relaxedSelect(s: _*))
-                }
-            }.getOrElse(Try(frame))
-          }
-      }
+        transformer.transformAsync(frame).flatMap {
+          frame =>
+            Future.fromTry {
+              request.options.select.map {
+                s =>
+                  request.options.selectMode match {
+                    case SelectMode.Strict => frame.select(s: _*)
+                    case SelectMode.Relaxed => Try(frame.relaxedSelect(s: _*))
+                  }
+              }.getOrElse(Try(frame))
+            }
+        }
     }).flatMap(identity).map(Try(_)).recover {
       case err => Failure(err)
     }
@@ -45,17 +45,25 @@ object ExecuteTransform {
 
 /** Specifies options for streams of transforms.
   *
-  * @param initTimeout timeout for stream initialization
   * @param idleTimeout timeout for stream inactivity
   * @param transformTimeout timeout for transforming individual elements
   * @param parallelism parallelism of transforms
   * @param bufferSize size of buffer for transform elements
   */
-case class StreamConfig(initTimeout: FiniteDuration,
-                        idleTimeout: FiniteDuration,
+case class StreamConfig(idleTimeout: FiniteDuration,
                         transformTimeout: FiniteDuration,
                         parallelism: Parallelism,
                         bufferSize: Int)
+
+/** Specifies options for streams of transforms.
+  *
+  * @param idleTimeout timeout for stream inactivity
+  * @param transformTimeout timeout for transforming individual elements
+  * @param parallelism parallelism of transforms
+  */
+case class FlowConfig(idleTimeout: FiniteDuration,
+                        transformTimeout: FiniteDuration,
+                        parallelism: Parallelism)
 
 /** Specifies the schema and transform options for
   * a row transformer.
@@ -66,28 +74,69 @@ case class StreamConfig(initTimeout: FiniteDuration,
 case class StreamRowSpec(schema: StructType,
                          options: TransformOptions = TransformOptions.default)
 
-object TransformFrameRequest {
-  import scala.language.implicitConversions
-
-  implicit def apply(frame: Try[DefaultLeapFrame]): TransformFrameRequest = {
-    TransformFrameRequest(frame, TransformOptions.default)
-  }
+sealed trait ModelRequest {
+  def modelName: String
 }
 
 /** Request to transform a leap frame.
   *
+  * @param modelName name of the model
   * @param frame leap frame to transform
   * @param options transform options
   */
-case class TransformFrameRequest(frame: Try[DefaultLeapFrame],
-                                 options: TransformOptions = TransformOptions.default)
+case class TransformFrameRequest(modelName: String,
+                                 frame: DefaultLeapFrame,
+                                 options: TransformOptions = TransformOptions.default) extends ModelRequest
 
-/** Request to transform a row using a row transformer.
-  *
-  * @param id id of the stream
-  * @param row row to transform
-  */
-case class TransformRowRequest(id: UUID, row: Try[Row])
+case class StreamTransformFrameRequest(frame: DefaultLeapFrame,
+                                       options: TransformOptions)
+case class StreamTransformRowRequest(row: Row)
+
+case class Model(name: String,
+                 uri: URI)
+
+case class FrameStream(modelName: String,
+                       streamName: String)
+
+case class RowStream(modelName: String,
+                     streamName: String)
+
+case class ModelConfig(memoryTimeout: FiniteDuration,
+                       diskTimeout: FiniteDuration)
+
+case class LoadModelRequest(modelName: String,
+                            uri: URI,
+                            config: ModelConfig,
+                            force: Boolean = false) extends ModelRequest
+
+case class GetBundleMetaRequest(modelName: String) extends ModelRequest
+
+case class GetModelRequest(modelName: String) extends ModelRequest
+
+case class UnloadModelRequest(modelName: String) extends ModelRequest
+
+case class CreateFrameStreamRequest(modelName: String,
+                                    streamName: String,
+                                    streamConfig: StreamConfig) extends ModelRequest
+
+case class CreateFrameFlowRequest(modelName: String,
+                                  streamName: String,
+                                  flowConfig: FlowConfig) extends ModelRequest
+
+case class GetFrameStreamRequest(modelName: String,
+                                 streamName: String) extends ModelRequest
+
+case class CreateRowStreamRequest(modelName: String,
+                                  streamName: String,
+                                  streamConfig: StreamConfig,
+                                  spec: StreamRowSpec) extends ModelRequest
+
+case class CreateRowFlowRequest(modelName: String,
+                                streamName: String,
+                                flowConfig: FlowConfig) extends ModelRequest
+
+case class GetRowStreamRequest(modelName: String,
+                               streamName: String) extends ModelRequest
 
 /** Select mode is either strict or relaxed.
   *

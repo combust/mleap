@@ -42,6 +42,7 @@ object TypeConverters {
 
   implicit def mleapToPbStreamConfig(config: executor.StreamConfig): StreamConfig = {
     StreamConfig(
+      name = config.name.getOrElse(""),
       initTimeout = config.initTimeout.toMillis,
       idleTimeout = config.idleTimeout.toMillis,
       transformTimeout = config.transformTimeout.toMillis,
@@ -51,7 +52,10 @@ object TypeConverters {
   }
 
   implicit def pbToMleapStreamConfig(config: StreamConfig): executor.StreamConfig = {
+    val name = if (config.name.isEmpty) None else Some(config.name)
+
     executor.StreamConfig(
+      name = name,
       initTimeout = config.initTimeout.millis,
       idleTimeout = config.idleTimeout.millis,
       transformTimeout = config.transformTimeout.millis,

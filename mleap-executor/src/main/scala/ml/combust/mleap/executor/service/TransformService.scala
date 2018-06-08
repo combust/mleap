@@ -16,36 +16,41 @@ import scala.util.Try
 trait TransformService {
   def close(): Unit
 
-  def getBundleMeta(uri: URI)
+  def getBundleMeta(request: GetBundleMetaRequest)
                    (implicit timeout: FiniteDuration): Future[BundleMeta]
 
-  def getBundleMeta(uri: URI, timeout: Int): Future[BundleMeta] = {
-    getBundleMeta(uri)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
+  def getBundleMeta(request: GetBundleMetaRequest, timeout: Int): Future[BundleMeta] = {
+    getBundleMeta(request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 
-  def transform(uri: URI, request: TransformFrameRequest)
+  def loadModel(request: LoadModelRequest)
+               (implicit timeout: FiniteDuration): Future[Model]
+
+  def unloadModel(request: UnloadModelRequest)
+                 (implicit timeout: FiniteDuration): Future[Model]
+
+  def createFrameStream(request: CreateFrameStreamRequest)
+                       (implicit timeout: FiniteDuration): Future[FrameStream]
+
+  def createRowStream(request: CreateRowStreamRequest)
+                       (implicit timeout: FiniteDuration): Future[RowStream]
+
+  def transform(request: TransformFrameRequest)
                (implicit timeout: FiniteDuration): Future[DefaultLeapFrame]
 
-  def transform(uri: URI,
-                request: TransformFrameRequest,
+  def transform(request: TransformFrameRequest,
                 timeout: Int): Future[DefaultLeapFrame] = {
-    transform(uri, request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
+    transform(request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 
-  def frameFlow[Tag](uri: URI,
-                     config: StreamConfig): Flow[(TransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
+  def frameFlow[Tag](request: CreateFrameFlowRequest)
+                    (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
 
-  def rowFlow[Tag](uri: URI,
-                   spec: StreamRowSpec,
-                   config: StreamConfig): Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]]
+  def rowFlow[Tag](request: CreateRowFlowRequest)
+                  (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), Future[RowTransformer]]
 
-  def javaRowFlow[Tag](uri: URI,
-                       spec: StreamRowSpec,
-                       config: StreamConfig): javadsl.Flow[(Try[Row], Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
-    rowFlow(uri,
-      spec,
-      config).asJava
+  def javaRowFlow[Tag](request: CreateRowFlowRequest)
+                      (implicit timeout: FiniteDuration): javadsl.Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
+    rowFlow(request).asJava
   }
-
-  def unload(uri: URI): Unit
 }

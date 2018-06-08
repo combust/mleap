@@ -5,7 +5,7 @@ import akka.actor.{Actor, Props, Status}
 import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import ml.combust.mleap.executor.service.LocalTransformServiceActor.{Messages => TMessages}
-import ml.combust.mleap.executor.{ExecuteTransform, TransformFrameRequest}
+import ml.combust.mleap.executor.{ExecuteTransform, StreamTransformFrameRequest, TransformFrameRequest}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
 
 import scala.concurrent.{Future, Promise}
@@ -19,7 +19,7 @@ object FrameFlowActor {
   }
   
   object Messages {
-    case class TransformFrame(request: TransformFrameRequest, tag: Any)
+    case class TransformFrame(request: StreamTransformFrameRequest, tag: Any)
     case object GetDone
     case object StreamClosed
   }

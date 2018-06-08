@@ -1,13 +1,11 @@
 package ml.combust.mleap.executor.service
 
-import java.net.URI
-
 import akka.Done
 import akka.pattern.{ask, pipe}
 import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Status, Terminated}
 import akka.stream.Materializer
 import ml.combust.bundle.dsl.Bundle
-import ml.combust.mleap.executor.{BundleMeta, ExecuteTransform, SelectMode, StreamRowSpec}
+import ml.combust.mleap.executor._
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.runtime.frame.{RowTransformer, Transformer}
 
@@ -19,10 +17,10 @@ import scala.util.{Failure, Success, Try}
 case class RequestWithSender(request: Any, sender: ActorRef)
 
 object BundleActor {
-  def props(uri: URI,
+  def props(request: LoadModelRequest,
             loader: RepositoryBundleLoader)
            (implicit materializer: Materializer): Props = {
-    Props(new BundleActor(uri, loader))
+    Props(new BundleActor(request, loader))
   }
 
   object Messages {
@@ -30,7 +28,7 @@ object BundleActor {
   }
 }
 
-class BundleActor(uri: URI,
+class BundleActor(request: LoadModelRequest,
                   loader: RepositoryBundleLoader)
                  (implicit materializer: Materializer) extends Actor {
   import BundleActor.Messages

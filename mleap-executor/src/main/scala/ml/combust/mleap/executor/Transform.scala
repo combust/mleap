@@ -69,10 +69,12 @@ case class FlowConfig(idleTimeout: FiniteDuration,
 /** Specifies the schema and transform options for
   * a row transformer.
   *
+  * @param format format used for serde
   * @param schema input schema of the rows
   * @param options transform options to apply for transform
   */
-case class StreamRowSpec(schema: StructType,
+case class RowStreamSpec(format: String,
+                         schema: StructType,
                          options: TransformOptions = TransformOptions.default)
 
 sealed trait ModelRequest {
@@ -104,7 +106,8 @@ case class FrameStream(modelName: String,
 case class RowStream(modelName: String,
                      streamName: String,
                      streamConfig: StreamConfig,
-                     spec: StreamRowSpec)
+                     spec: RowStreamSpec,
+                     outputSchema: StructType)
 
 case class ModelConfig(memoryTimeout: FiniteDuration,
                        diskTimeout: FiniteDuration)
@@ -126,6 +129,7 @@ case class CreateFrameStreamRequest(modelName: String,
 
 case class CreateFrameFlowRequest(modelName: String,
                                   streamName: String,
+                                  format: String,
                                   flowConfig: FlowConfig) extends ModelRequest
 
 case class GetFrameStreamRequest(modelName: String,
@@ -134,11 +138,14 @@ case class GetFrameStreamRequest(modelName: String,
 case class CreateRowStreamRequest(modelName: String,
                                   streamName: String,
                                   streamConfig: StreamConfig,
-                                  spec: StreamRowSpec) extends ModelRequest
+                                  spec: RowStreamSpec) extends ModelRequest
 
 case class CreateRowFlowRequest(modelName: String,
                                 streamName: String,
-                                flowConfig: FlowConfig) extends ModelRequest
+                                format: String,
+                                flowConfig: FlowConfig,
+                                inputSchema: StructType,
+                                outputSchema: StructType) extends ModelRequest
 
 case class GetRowStreamRequest(modelName: String,
                                streamName: String) extends ModelRequest

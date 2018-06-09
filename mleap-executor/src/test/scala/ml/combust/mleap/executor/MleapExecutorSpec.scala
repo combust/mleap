@@ -39,7 +39,7 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
     parallelism = 4,
     bufferSize = 1024
   )
-  val spec = StreamRowSpec(frame.schema)
+  val spec = RowStreamSpec(frame.schema)
 
   Await.result(
     executor.createRowStream(CreateRowStreamRequest(

@@ -51,8 +51,8 @@ class LocalTransformService(loader: RepositoryBundleLoader)
     (actor ? request)(timeout).mapTo[Try[DefaultLeapFrame]]
   }
 
-  override def frameFlow[Tag](request: CreateFrameFlowRequest)
-                             (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+  override def frameFlow[Tag: TagBytes](request: CreateFrameFlowRequest)
+                                       (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
     val actorSource = Source.lazily(
       () =>
         Source.fromFutureSource {
@@ -109,8 +109,8 @@ class LocalTransformService(loader: RepositoryBundleLoader)
     }).mapMaterializedValue(_ => NotUsed)
   }
 
-  override def rowFlow[Tag](request: CreateRowFlowRequest)
-                           (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
+  override def rowFlow[Tag: TagBytes](request: CreateRowFlowRequest)
+                                     (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
     val actorSource = Source.lazily(
       () =>
         Source.fromFutureSource {
@@ -165,7 +165,7 @@ class LocalTransformService(loader: RepositoryBundleLoader)
           zip.out ~> queueFlow
 
           FlowShape(inFlow.in, queueFlow.out)
-    }).mapMaterializedValue(_._1.map(_._1))
+    }).mapMaterializedValue(_ => NotUsed)
   }
 
   override def close(): Unit = actor ! Messages.Close

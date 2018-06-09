@@ -4,7 +4,7 @@ import java.net.URI
 import java.util.concurrent.TimeUnit
 
 import io.grpc.stub.StreamObserver
-import ml.combust.mleap.executor.{MleapExecutor, StreamRowSpec}
+import ml.combust.mleap.executor.{MleapExecutor, RowStreamSpec}
 import ml.combust.mleap.pb._
 import ml.combust.mleap.pb.MleapGrpc.Mleap
 import ml.combust.mleap.runtime.serialization.{FrameReader, FrameWriter, RowReader, RowWriter}
@@ -133,7 +133,7 @@ class GrpcServer(executor: MleapExecutor)
           case None =>
             val options: mleap.executor.TransformOptions = value.options
             val schema: StructType = value.schema.get
-            val spec: StreamRowSpec = StreamRowSpec(schema, options)
+            val spec: RowStreamSpec = RowStreamSpec(schema, options)
             val reader = RowReader(schema, value.format)
 
             val _source = GrpcAkkaStreams.source[TransformRowRequest]

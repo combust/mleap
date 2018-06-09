@@ -9,7 +9,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.Logger
 import ml.combust.mleap.executor.repository.{Repository, RepositoryBundleLoader}
 import ml.combust.mleap.executor.service.{LocalTransformService, TransformService}
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
@@ -75,13 +75,13 @@ class MleapExecutor(tConfig: Config)
     transformService.transform(request)
   }
 
-  override def frameFlow[Tag](request: CreateFrameFlowRequest)
+  override def frameFlow[Tag: TagBytes](request: CreateFrameFlowRequest)
                              (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
     transformService.frameFlow(request)
   }
 
-  override def rowFlow[Tag](request: CreateRowFlowRequest)
-                           (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
+  override def rowFlow[Tag: TagBytes](request: CreateRowFlowRequest)
+                           (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
     transformService.rowFlow(request)
   }
 

@@ -34,11 +34,6 @@ class RowStreamActor(transformer: Transformer,
 
   context.setReceiveTimeout(1.minute)
 
-  val rowStream: RowStream = RowStream(request.modelName,
-    request.streamName,
-    request.streamConfig,
-    request.spec)
-
   val rowTransformer: Try[RowTransformer] = transformer.transform(RowTransformer(request.spec.schema)).flatMap {
     rt =>
       request.spec.options.select.map {
@@ -50,6 +45,7 @@ class RowStreamActor(transformer: Transformer,
       }.getOrElse(Try(rt))
   }
 
+  private var rowStream: Option[RowStream] = None
   private var queue: Option[SourceQueueWithComplete[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])]] = None
   private var queueF: Option[Future[SourceQueueWithComplete[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])]]] = None
 
@@ -73,16 +69,22 @@ class RowStreamActor(transformer: Transformer,
     rowTransformer match {
       case Success(rt) =>
         if (queue.isEmpty) {
+          rowStream = Some(RowStream(request.modelName,
+            request.streamName,
+            request.streamConfig,
+            request.spec,
+            rt.outputSchema))
+
           queue = Some {
-            val source = Source.queue[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])](rowStream.streamConfig.bufferSize, OverflowStrategy.backpressure)
-            val transform = Flow[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])].mapAsyncUnordered(rowStream.streamConfig.parallelism) {
+            val source = Source.queue[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])](rowStream.get.streamConfig.bufferSize, OverflowStrategy.backpressure)
+            val transform = Flow[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])].mapAsyncUnordered(rowStream.get.streamConfig.parallelism) {
               case (Messages.TransformRow(tRow, tag), promise) =>
                 Future {
                   val row = Try(rt.transformOption(tRow.row))
 
                   (row, tag, promise)
                 }
-            }.idleTimeout(rowStream.streamConfig.idleTimeout).to(Sink.foreach {
+            }.idleTimeout(rowStream.get.streamConfig.idleTimeout).to(Sink.foreach {
               case (row, tag, promise) => promise.success((row, tag))
             })
 
@@ -96,7 +98,7 @@ class RowStreamActor(transformer: Transformer,
           queueF = Some(Future(queue.get))
         }
 
-        sender ! rowStream
+        sender ! rowStream.get
       case Failure(err) => sender ! Status.Failure(err)
     }
   }
@@ -131,7 +133,7 @@ class RowStreamActor(transformer: Transformer,
           case Success(rt) => sender ! (self, rt, q.watchCompletion())
           case Failure(err) => sender ! Status.Failure(err)
         }
-      case None => sender ! Status.Failure(new IllegalStateException(s"row stream not initialized ${rowStream.modelName}/row/${rowStream.streamName}"))
+      case None => sender ! Status.Failure(new IllegalStateException(s"row stream not initialized ${rowStream.get.modelName}/row/${rowStream.get.streamName}"))
     }
   }
 

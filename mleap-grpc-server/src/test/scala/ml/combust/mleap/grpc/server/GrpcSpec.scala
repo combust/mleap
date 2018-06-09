@@ -75,7 +75,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
     it("transforms a row using row flow") {
       val uuid = UUID.randomUUID()
       val stream = Source.fromIterator(() => frame.get.dataset.iterator.map(row => (Try(row), uuid)))
-        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema), streamConfig))
+        .via(client.rowFlow(lrUri, RowStreamSpec(frame.get.schema), streamConfig))
         .toMat(TestSink.probe(system))(Keep.right)
         .run()(ActorMaterializer.create(system))
 
@@ -92,7 +92,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
       val uuid = UUID.randomUUID()
 
       val done = Source.single((Try(frame.get.dataset.head), uuid))
-        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema), streamConfig))
+        .via(client.rowFlow(lrUri, RowStreamSpec(frame.get.schema), streamConfig))
         .watchTermination()(Keep.right)
         .to(Sink.ignore)
         .run()(ActorMaterializer.create(system))
@@ -102,7 +102,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
 
     it("returns error with the right exception when using row flow"){
       val ex = Source.fromIterator(() => frame.get.dataset.iterator.map(row => (Try(row), UUID.randomUUID())))
-        .via(client.rowFlow(lrUri, StreamRowSpec(frame.get.schema, TransformOptions(Some(Seq("dummy1", "dummy2")))), streamConfig))
+        .via(client.rowFlow(lrUri, RowStreamSpec(frame.get.schema, TransformOptions(Some(Seq("dummy1", "dummy2")))), streamConfig))
         .runWith(TestSink.probe(system))(ActorMaterializer.create(system))
         .request(1)
         .expectError()

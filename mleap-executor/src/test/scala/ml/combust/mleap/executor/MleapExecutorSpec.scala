@@ -69,7 +69,7 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
     it("retrieves info for bundle") {
       val result = executor.getBundleMeta(GetBundleMetaRequest("rf_model"))(5.second)
       whenReady(result, Timeout(5.seconds)) {
-        info => assert(info.info.name == "pipeline_ed5135e9ca49")
+        info => assert(info.info.name == "pipeline_8d2ca5c4dd62")
       }
     }
   }

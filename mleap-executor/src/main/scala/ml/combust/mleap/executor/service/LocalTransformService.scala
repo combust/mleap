@@ -112,60 +112,60 @@ class LocalTransformService(loader: RepositoryBundleLoader)
   override def rowFlow[Tag](request: CreateRowFlowRequest)
                            (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), Future[RowTransformer]] = {
     val actorSource = Source.lazily(
-          () =>
-            Source.fromFutureSource {
-              val streamActor = (actor ? request)(timeout).mapTo[(ActorRef, RowTransformer, Future[Done])]
+      () =>
+        Source.fromFutureSource {
+          val streamActor = (actor ? request)(timeout).mapTo[(ActorRef, RowTransformer, Future[Done])]
 
-              streamActor.map(_._1).map {
-                actor => Source.repeat(actor).mapMaterializedValue(_ => streamActor.map(m => (m._2, m._3)))
-              }
-            }.mapMaterializedValue(_.flatMap(identity))
-        ).mapMaterializedValue(_.flatMap(identity)).viaMat(KillSwitches.single)(Keep.both)
+          streamActor.map(_._1).map {
+            actor => Source.repeat(actor).mapMaterializedValue(_ => streamActor.map(m => (m._2, m._3)))
+          }
+        }.mapMaterializedValue(_.flatMap(identity))
+    ).mapMaterializedValue(_.flatMap(identity)).viaMat(KillSwitches.single)(Keep.both)
 
-        Flow.fromGraph(GraphDSL.create(actorSource) {
-          implicit builder =>
-            actorSource =>
-              import GraphDSL.Implicits._
+    Flow.fromGraph(GraphDSL.create(actorSource) {
+      implicit builder =>
+        actorSource =>
+          import GraphDSL.Implicits._
 
-              val doneFlow = builder.add {
-                Flow[(Future[(RowTransformer, Future[Done])], UniqueKillSwitch)].mapAsync(1) {
-                  case (f, ks) =>
-                    f.map(_._2).
-                      flatMap(identity).
-                      map(Try(_)).
-                      recover {
-                        case err => Failure(err)
-                      }.map(done => (done, ks))
-                }.to(Sink.foreach {
-                  case (done, ks) =>
-                    done match {
-                      case Success(_) => ks.shutdown()
-                      case Failure(err) => ks.abort(err)
-                    }
-                })
-              }
-
-              val inFlow = builder.add {
-                Flow[(StreamTransformRowRequest, Tag)].idleTimeout(request.flowConfig.idleTimeout)
-              }
-
-              val queueFlow = builder.add {
-                Flow[((StreamTransformRowRequest, Tag), ActorRef)].mapAsync(request.flowConfig.parallelism) {
-                  case ((r, tag), actor) =>
-                    (actor ? RowStreamActor.Messages.TransformRow(r, tag))(request.flowConfig.transformTimeout).
-                      mapTo[(Try[Option[Row]], Tag)]
+          val doneFlow = builder.add {
+            Flow[(Future[(RowTransformer, Future[Done])], UniqueKillSwitch)].mapAsync(1) {
+              case (f, ks) =>
+                f.map(_._2).
+                  flatMap(identity).
+                  map(Try(_)).
+                  recover {
+                    case err => Failure(err)
+                  }.map(done => (done, ks))
+            }.to(Sink.foreach {
+              case (done, ks) =>
+                done match {
+                  case Success(_) => ks.shutdown()
+                  case Failure(err) => ks.abort(err)
                 }
-              }
+            })
+          }
 
-              val zip = builder.add { Zip[(StreamTransformRowRequest, Tag), ActorRef] }
+          val inFlow = builder.add {
+            Flow[(StreamTransformRowRequest, Tag)].idleTimeout(request.flowConfig.idleTimeout)
+          }
 
-              builder.materializedValue ~> doneFlow
-              inFlow ~> zip.in0
-              actorSource ~> zip.in1
-              zip.out ~> queueFlow
+          val queueFlow = builder.add {
+            Flow[((StreamTransformRowRequest, Tag), ActorRef)].mapAsync(request.flowConfig.parallelism) {
+              case ((r, tag), actor) =>
+                (actor ? RowStreamActor.Messages.TransformRow(r, tag))(request.flowConfig.transformTimeout).
+                  mapTo[(Try[Option[Row]], Tag)]
+            }
+          }
 
-              FlowShape(inFlow.in, queueFlow.out)
-        }).mapMaterializedValue(_._1.map(_._1))
+          val zip = builder.add { Zip[(StreamTransformRowRequest, Tag), ActorRef] }
+
+          builder.materializedValue ~> doneFlow
+          inFlow ~> zip.in0
+          actorSource ~> zip.in1
+          zip.out ~> queueFlow
+
+          FlowShape(inFlow.in, queueFlow.out)
+    }).mapMaterializedValue(_._1.map(_._1))
   }
 
   override def close(): Unit = actor ! Messages.Close

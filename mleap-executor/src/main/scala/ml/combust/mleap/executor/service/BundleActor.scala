@@ -32,7 +32,6 @@ class BundleActor(request: LoadModelRequest,
                   loader: RepositoryBundleLoader)
                  (implicit materializer: Materializer) extends Actor {
   import BundleActor.Messages
-  import LocalTransformServiceActor.{Messages => TMessages}
   import RowStreamActor.{Messages => RFMessages}
   import FrameStreamActor.{Messages => FFMessages}
   import context.dispatcher
@@ -69,6 +68,7 @@ class BundleActor(request: LoadModelRequest,
     case request: CreateFrameFlowRequest => maybeHandleRequest(RequestWithSender(request, sender))
     case request: CreateRowFlowRequest => maybeHandleRequest(RequestWithSender(request, sender))
     case request: UnloadModelRequest => unloadModel(request, sender)
+    case request: LoadModelRequest => loadModel(request, sender)
 
     case request: Messages.Loaded => loaded(request)
 
@@ -128,13 +128,13 @@ class BundleActor(request: LoadModelRequest,
   def transform(request: TransformFrameRequest, sender: ActorRef): Unit = {
     for (bundle <- this.bundle;
          transformer = bundle.root;
-         frame = ExecuteTransform(transformer, request.frame, request.options)) {
-      frame.flatMap(Future.fromTry).pipeTo(sender)
+         frame = ExecuteTransform(transformer, request.frame, request.options)) yield {
+      frame.pipeTo(sender)
     }
   }
 
-  def createFrameStream(request: CreateFrameStreamRequest, ref: ActorRef): Unit = {
-    Try(context.actorOf(FrameStreamActor.props(bundle.get.root, request), s"frame/${request.streamName}")) match {
+  def createFrameStream(request: CreateFrameStreamRequest, sender: ActorRef): Unit = {
+    Try(context.actorOf(FrameStreamActor.props(bundle.get.root, request), request.streamName)) match {
       case Success(actor) =>
         context.watch(actor)
         frameStreamLookup += (request.streamName -> actor)
@@ -144,35 +144,41 @@ class BundleActor(request: LoadModelRequest,
     }
   }
 
-  def createRowStream(request: CreateRowStreamRequest, ref: ActorRef): Unit = {
-    Try(context.actorOf(RowStreamActor.props(bundle.get.root, request), s"frame/${request.streamName}")) match {
+  def createRowStream(request: CreateRowStreamRequest, sender: ActorRef): Unit = {
+    Try(context.actorOf(RowStreamActor.props(bundle.get.root, request), request.streamName)) match {
       case Success(actor) =>
         context.watch(actor)
-        frameStreamLookup += (request.streamName -> actor)
-        frameStreamNameLookup += (actor -> request.streamName)
+        rowStreamLookup += (request.streamName -> actor)
+        rowStreamNameLookup += (actor -> request.streamName)
         actor.tell(RFMessages.Initialize, sender)
-      case Failure(err) => sender ! Status.Failure(err)
+      case Failure(err) =>
+        err.printStackTrace()
+        sender ! Status.Failure(err)
     }
   }
-
 
   def createFrameFlow(request: CreateFrameFlowRequest, sender: ActorRef): Unit = {
     frameStreamLookup.get(request.streamName) match {
       case Some(actor) => actor.tell(request, sender)
-      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/frame/${request.streamName}"))
+      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/${request.streamName}"))
     }
   }
 
   def createRowFlow(request: CreateRowFlowRequest, sender: ActorRef): Unit = {
     rowStreamLookup.get(request.streamName) match {
       case Some(actor) => actor.tell(request, sender)
-      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/row/${request.streamName}"))
+      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/${request.streamName}"))
     }
   }
 
   def unloadModel(request: UnloadModelRequest, sender: ActorRef): Unit = {
-    sender ! Done
+    sender ! model
     context.stop(self)
+  }
+
+  def loadModel(request: LoadModelRequest, sender: ActorRef): Unit = {
+    maybeLoad()
+    sender ! model
   }
 
   def receiveTimeout(): Unit = {

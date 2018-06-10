@@ -1,9 +1,10 @@
 package ml.combust.mleap.grpc
 
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
 
 import akka.NotUsed
-import akka.stream.scaladsl.{Flow, GraphDSL, Sink, Source, Zip}
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Sink, Source, Zip}
 import ml.combust.mleap.executor._
 import ml.combust.mleap.pb.{TransformFrameResponse, TransformRowResponse, TransformStatus}
 import ml.combust.mleap.pb.MleapGrpc.MleapStub
@@ -17,6 +18,7 @@ import ml.combust.mleap.grpc.stream.GrpcAkkaStreams
 import ml.combust.mleap.{executor, pb}
 import ml.combust.mleap.runtime.serialization._
 
+import scala.collection.concurrent.TrieMap
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
@@ -31,6 +33,27 @@ class GrpcClient(stub: MleapStub)
     stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
       getBundleMeta(request).
       map(pbToMleapBundleMeta)
+  }
+
+  override def getModel(request: GetModelRequest)
+                       (implicit timeout: FiniteDuration): Future[Model] = {
+    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+      getModel(request).
+      map(pbToMleapModel)
+  }
+
+  override def getFrameStream(request: GetFrameStreamRequest)
+                             (implicit timeout: FiniteDuration): Future[FrameStream] = {
+    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+      getFrameStream(request).
+      map(pbToMleapFrameStream)
+  }
+
+  override def getRowStream(request: GetRowStreamRequest)
+                           (implicit timeout: FiniteDuration): Future[RowStream] = {
+    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+      getRowStream(request).
+      map(pbToMleapRowStream)
   }
 
   override def loadModel(request: LoadModelRequest)
@@ -84,8 +107,10 @@ class GrpcClient(stub: MleapStub)
     }
   }
 
-  override def frameFlow[Tag: TagBytes](request: CreateFrameFlowRequest)
-                                       (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+  override def createFrameFlow[Tag](request: CreateFrameFlowRequest)
+                                   (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+    val lookup = TrieMap[Long, Tag]()
+    val atomicIndex = new AtomicLong(0)
     val frameReader = FrameReader(request.format)
 
     val responseSource = GrpcAkkaStreams.source[TransformFrameResponse].mapMaterializedValue {
@@ -115,18 +140,29 @@ class GrpcClient(stub: MleapStub)
               }
             }
 
-            val frameFlow = builder.add(Flow[(StreamTransformFrameRequest, Tag)])
-            val zip = builder.add(Zip[StreamObserver[pb.TransformFrameRequest], (StreamTransformFrameRequest, Tag)])
+            val inFlow = builder.add {
+              Flow[(StreamTransformFrameRequest, Tag)].map {
+                case (r, tag) =>
+                  val index = atomicIndex.incrementAndGet()
+                  lookup += index -> tag
+
+                  (r, index)
+              }
+            }
+            val zip = builder.add(Zip[StreamObserver[pb.TransformFrameRequest], (StreamTransformFrameRequest, Long)])
 
             val transformFlow = builder.add {
-              Flow[(StreamObserver[pb.TransformFrameRequest], (StreamTransformFrameRequest, Tag))].to {
-                Sink.foreachParallel[(StreamObserver[pb.TransformFrameRequest], (StreamTransformFrameRequest, Tag))](8) {
+              Flow[(StreamObserver[pb.TransformFrameRequest], (StreamTransformFrameRequest, Long))].to {
+                Sink.foreach[(StreamObserver[pb.TransformFrameRequest], (StreamTransformFrameRequest, Long))] {
                   case (observer, (r, tag)) =>
                     Future {
-                      FrameWriter(r.frame, request.format).toBytes().map {
+                      r.frame.flatMap {
+                        frame =>
+                          FrameWriter(frame, request.format).toBytes()
+                      }.map {
                         frame =>
                           observer.onNext(pb.TransformFrameRequest(
-                            tag = ByteString.copyFrom(implicitly[TagBytes[Tag]].toBytes(tag)),
+                            tag = tag,
                             frame = ByteString.copyFrom(frame)
                           ))
                       }
@@ -144,23 +180,25 @@ class GrpcClient(stub: MleapStub)
                     frameReader.fromBytes(response.frame.toByteArray)
                   }
 
-                  (tryRow, implicitly[TagBytes[Tag]].fromBytes(response.tag.toByteArray))
+                  (tryRow, lookup.remove(response.tag).get)
               }
             }
 
             responseSource ~> responseFlow
             builder.materializedValue ~> iteratorFlatten
             iteratorFlatten ~> zip.in0
-            frameFlow ~> zip.in1
+            inFlow ~> zip.in1
             zip.out ~> transformFlow
 
-            FlowShape(frameFlow.in, responseFlow.out)
+            FlowShape(inFlow.in, responseFlow.out)
       }
     }.mapMaterializedValue(_ => NotUsed)
   }
 
-  override def rowFlow[Tag: TagBytes](request: CreateRowFlowRequest)
-                                     (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
+  override def createRowFlow[Tag](request: CreateRowFlowRequest)
+                                 (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
+    val lookup = TrieMap[Long, Tag]()
+    val atomicIndex = new AtomicLong(0)
     val reader = RowReader(request.inputSchema, request.format)
     val writer = RowWriter(request.outputSchema, request.format)
 
@@ -191,20 +229,31 @@ class GrpcClient(stub: MleapStub)
               }
             }
 
-            val rowFlow = builder.add(Flow[(StreamTransformRowRequest, Tag)])
-            val zip = builder.add(Zip[StreamObserver[pb.TransformRowRequest], (StreamTransformRowRequest, Tag)])
+            val inFlow = builder.add {
+              Flow[(StreamTransformRowRequest, Tag)].map {
+                case (r, tag) =>
+                  val index = atomicIndex.incrementAndGet()
+                  lookup += index -> tag
+
+                  (r, index)
+              }
+            }
+            val zip = builder.add(Zip[StreamObserver[pb.TransformRowRequest], (StreamTransformRowRequest, Long)])
 
             val transformFlow = builder.add {
-              Flow[(StreamObserver[pb.TransformRowRequest], (StreamTransformRowRequest, Tag))].to {
-                Sink.foreachParallel[(StreamObserver[pb.TransformRowRequest], (StreamTransformRowRequest, Tag))](8) {
+              Flow[(StreamObserver[pb.TransformRowRequest], (StreamTransformRowRequest, Long))].to {
+                Sink.foreach[(StreamObserver[pb.TransformRowRequest], (StreamTransformRowRequest, Long))] {
                   case (observer, (r, tag)) =>
                     Future {
-                      writer.toBytes(r.row).map {
+                      r.row.flatMap {
                         row =>
-                          observer.onNext(pb.TransformRowRequest(
-                            tag = ByteString.copyFrom(implicitly[TagBytes[Tag]].toBytes(tag)),
-                            row = ByteString.copyFrom(row)
-                          ))
+                          writer.toBytes(row).map {
+                            row =>
+                              observer.onNext(pb.TransformRowRequest(
+                                tag = tag,
+                                row = ByteString.copyFrom(row)
+                              ))
+                          }
                       }
                     }
                 }
@@ -221,17 +270,17 @@ class GrpcClient(stub: MleapStub)
                     Failure(new RuntimeException(response.error))
                   }
 
-                  (r, implicitly[TagBytes[Tag]].fromBytes(response.tag.toByteArray))
+                  (r, lookup.remove(response.tag).get)
               }
             }
 
             responseSource ~> responseFlow
             builder.materializedValue ~> iteratorFlatten
             iteratorFlatten ~> zip.in0
-            rowFlow ~> zip.in1
+            inFlow ~> zip.in1
             zip.out ~> transformFlow
 
-            FlowShape(rowFlow.in, responseFlow.out)
+            FlowShape(inFlow.in, responseFlow.out)
       }
     }.mapMaterializedValue(_ => NotUsed)
   }

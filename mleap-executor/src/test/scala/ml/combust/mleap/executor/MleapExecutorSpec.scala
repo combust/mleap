@@ -1,10 +1,13 @@
 package ml.combust.mleap.executor
 
+import java.util.UUID
+
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.testkit.TestKit
 import ml.combust.mleap.runtime.frame.Row
+import ml.combust.mleap.runtime.serialization.BuiltinFormats
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, FunSpecLike}
@@ -37,11 +40,12 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
     idleTimeout = 15.minutes,
     transformTimeout = 15.minutes,
     parallelism = 4,
+    throttle = None,
     bufferSize = 1024
   )
-  val spec = RowStreamSpec(frame.schema)
+  val spec = RowStreamSpec(BuiltinFormats.binary, frame.schema)
 
-  Await.result(
+  val rowStream = Await.result(
     executor.createRowStream(CreateRowStreamRequest(
       "rf_model",
       "stream1",
@@ -76,17 +80,25 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
 
   describe("transform stream") {
     it("transforms rows in a stream") {
-      val rowsSource = Source.fromIterator(() => frame.dataset.iterator.map(row => StreamTransformRowRequest(row)).zipWithIndex)
-      val rowsSink = Sink.seq[(Try[Option[Row]], Int)]
+      val rowsSource = Source.fromIterator(() => frame.dataset.iterator.map(row => (StreamTransformRowRequest(Try(row)), UUID.randomUUID())))
+      val rowsSink = Sink.seq[(Try[Option[Row]], UUID)]
       val testFlow = Flow.fromSinkAndSourceMat(rowsSink, rowsSource)(Keep.left)
 
       val config = FlowConfig(
         idleTimeout = 15.minutes,
         transformTimeout = 15.minutes,
-        parallelism = 4
+        parallelism = 4,
+        throttle = None
       )
 
-      val (done, transformedRows) = executor.rowFlow(CreateRowFlowRequest("rf_model", "stream1", config))(10.seconds).
+      val rowFlow = executor.createRowFlow[UUID](CreateRowFlowRequest("rf_model",
+        "stream1",
+        BuiltinFormats.binary,
+        config,
+        rowStream.spec.schema,
+        rowStream.outputSchema))(10.seconds)
+
+      val (done, transformedRows) = rowFlow.
         watchTermination()(Keep.right).
         joinMat(testFlow)(Keep.both).
         run()

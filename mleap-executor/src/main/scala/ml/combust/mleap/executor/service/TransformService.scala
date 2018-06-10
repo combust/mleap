@@ -8,6 +8,7 @@ import akka.stream.scaladsl.Flow
 import ml.combust.mleap.executor._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 
+import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
@@ -22,6 +23,9 @@ trait TransformService {
     getBundleMeta(request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 
+  def getModel(request: GetModelRequest)
+              (implicit timeout: FiniteDuration): Future[Model]
+
   def loadModel(request: LoadModelRequest)
                (implicit timeout: FiniteDuration): Future[Model]
 
@@ -31,8 +35,14 @@ trait TransformService {
   def createFrameStream(request: CreateFrameStreamRequest)
                        (implicit timeout: FiniteDuration): Future[FrameStream]
 
+  def getFrameStream(request: GetFrameStreamRequest)
+                    (implicit timeout: FiniteDuration): Future[FrameStream]
+
   def createRowStream(request: CreateRowStreamRequest)
-                       (implicit timeout: FiniteDuration): Future[RowStream]
+                     (implicit timeout: FiniteDuration): Future[RowStream]
+
+  def getRowStream(request: GetRowStreamRequest)
+                  (implicit timeout: FiniteDuration): Future[RowStream]
 
   def transform(request: TransformFrameRequest)
                (implicit timeout: FiniteDuration): Future[Try[DefaultLeapFrame]]
@@ -42,14 +52,14 @@ trait TransformService {
     transform(request)(FiniteDuration(timeout, TimeUnit.MILLISECONDS))
   }
 
-  def frameFlow[Tag: TagBytes](request: CreateFrameFlowRequest)
-                    (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
+  def createFrameFlow[Tag](request: CreateFrameFlowRequest)
+                          (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed]
 
-  def rowFlow[Tag: TagBytes](request: CreateRowFlowRequest)
-                  (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed]
+  def createRowFlow[Tag](request: CreateRowFlowRequest)
+                        (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed]
 
-  def javaRowFlow[Tag: TagBytes](request: CreateRowFlowRequest)
-                      (implicit timeout: FiniteDuration): javadsl.Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
-    rowFlow(request).asJava
+  def javaRowFlow[Tag](request: CreateRowFlowRequest,
+                       timeout: Long): javadsl.Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
+    createRowFlow(request)(timeout.millis).asJava
   }
 }

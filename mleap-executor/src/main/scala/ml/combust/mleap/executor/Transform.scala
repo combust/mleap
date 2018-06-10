@@ -2,6 +2,7 @@ package ml.combust.mleap.executor
 
 import java.net.URI
 
+import akka.stream.ThrottleMode
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, Transformer}
 
@@ -23,7 +24,7 @@ object ExecuteTransform {
     */
   def apply(transformer: Transformer,
             frame: DefaultLeapFrame,
-            options: TransformOptions = TransformOptions.default)
+            options: TransformOptions)
            (implicit ec: ExecutionContext): Future[Try[DefaultLeapFrame]] = {
     transformer.transformAsync(frame).
       map(Try(_)).recover {
@@ -32,28 +33,64 @@ object ExecuteTransform {
       tFrame =>
         tFrame.flatMap {
           frame =>
-          options.select.map {
-            s =>
-              options.selectMode match {
-                case SelectMode.Strict => frame.select(s: _*)
-                case SelectMode.Relaxed => Try(frame.relaxedSelect(s: _*))
-              }
-          }.getOrElse(tFrame)
+            options.select.map {
+              s =>
+                options.selectMode match {
+                  case SelectMode.Strict => frame.select(s: _*)
+                  case SelectMode.Relaxed => Try(frame.relaxedSelect(s: _*))
+                }
+            }.getOrElse(tFrame)
         }
     }
   }
+
+  /** Uses a transformer to transform a leap frame.
+    *
+    * @param transformer transformer to run
+    * @param tFrame try leap frame
+    * @param options transform options
+    * @param ec execution context
+    * @return a future of the transformed leap frame
+    */
+  def apply(transformer: Transformer,
+            tFrame: Try[DefaultLeapFrame],
+            options: TransformOptions)
+           (implicit ec: ExecutionContext): Future[Try[DefaultLeapFrame]] = {
+    Future.fromTry {
+      tFrame.map {
+        frame =>
+          transformer.transformAsync(frame).map {
+            frame =>
+              options.select.map {
+                s =>
+                  options.selectMode match {
+                    case SelectMode.Strict => frame.select(s: _*)
+                    case SelectMode.Relaxed => Try(frame.relaxedSelect(s: _*))
+                  }
+              }.getOrElse(Try(frame))
+          }
+      }
+    }.flatMap(identity)
+  }
 }
+
+case class Throttle(elements: Int,
+                    duration: FiniteDuration,
+                    maxBurst: Int,
+                    mode: ThrottleMode)
 
 /** Specifies options for streams of transforms.
   *
   * @param idleTimeout timeout for stream inactivity
   * @param transformTimeout timeout for transforming individual elements
   * @param parallelism parallelism of transforms
+  * @param throttle optionally throttle the stream
   * @param bufferSize size of buffer for transform elements
   */
 case class StreamConfig(idleTimeout: FiniteDuration,
                         transformTimeout: FiniteDuration,
                         parallelism: Parallelism,
+                        throttle: Option[Throttle],
                         bufferSize: Int)
 
 /** Specifies options for streams of transforms.
@@ -61,10 +98,12 @@ case class StreamConfig(idleTimeout: FiniteDuration,
   * @param idleTimeout timeout for stream inactivity
   * @param transformTimeout timeout for transforming individual elements
   * @param parallelism parallelism of transforms
+  * @param throttle optionally throttle the stream
   */
 case class FlowConfig(idleTimeout: FiniteDuration,
-                        transformTimeout: FiniteDuration,
-                        parallelism: Parallelism)
+                      transformTimeout: FiniteDuration,
+                      parallelism: Parallelism,
+                      throttle: Option[Throttle])
 
 /** Specifies the schema and transform options for
   * a row transformer.
@@ -91,9 +130,9 @@ case class TransformFrameRequest(modelName: String,
                                  frame: DefaultLeapFrame,
                                  options: TransformOptions = TransformOptions.default) extends ModelRequest
 
-case class StreamTransformFrameRequest(frame: DefaultLeapFrame,
+case class StreamTransformFrameRequest(frame: Try[DefaultLeapFrame],
                                        options: TransformOptions)
-case class StreamTransformRowRequest(row: Row)
+case class StreamTransformRowRequest(row: Try[Row])
 
 case class Model(name: String,
                  uri: URI,

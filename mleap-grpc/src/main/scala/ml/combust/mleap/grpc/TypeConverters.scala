@@ -51,6 +51,36 @@ object TypeConverters {
     )
   }
 
+  implicit def mleapToPbThrottleMode(mode: akka.stream.ThrottleMode): ThrottleMode = mode match {
+    case akka.stream.ThrottleMode.Enforcing => ThrottleMode.THROTTLE_ENFORCING
+    case akka.stream.ThrottleMode.Shaping => ThrottleMode.THROTTLE_SHAPING
+    case _ => ThrottleMode.THROTTLE_SHAPING
+  }
+
+  implicit def pbToMleapThrottleMode(mode: ThrottleMode): akka.stream.ThrottleMode = mode match {
+    case ThrottleMode.THROTTLE_SHAPING => akka.stream.ThrottleMode.Shaping
+    case ThrottleMode.THROTTLE_ENFORCING => akka.stream.ThrottleMode.Enforcing
+    case _ => akka.stream.ThrottleMode.Shaping
+  }
+
+  implicit def mleapToPbThrottle(throttle: executor.Throttle): Throttle = {
+    Throttle(
+      elements = throttle.elements,
+      duration = throttle.duration.toMillis,
+      maximumBurst = throttle.maxBurst,
+      mode = throttle.mode
+    )
+  }
+
+  implicit def pbToMleapThrottle(throttle: Throttle): executor.Throttle = {
+    executor.Throttle(
+      elements = throttle.elements,
+      duration = throttle.duration.millis,
+      maxBurst = throttle.maximumBurst,
+      mode = throttle.mode
+    )
+  }
+
   implicit def mleapToPbBundleMeta(meta: executor.BundleMeta): BundleMeta = {
     BundleMeta(
       bundle = Some(meta.info.asBundle),
@@ -80,6 +110,17 @@ object TypeConverters {
       idleTimeout = config.idleTimeout.toMillis,
       transformTimeout = config.transformTimeout.toMillis,
       parallelism = config.parallelism,
+      throttle = config.throttle.map(mleapToPbThrottle),
+      bufferSize = config.bufferSize
+    )
+  }
+
+  implicit def pbToMleapStreamConfig(config: StreamConfig): executor.StreamConfig = {
+    executor.StreamConfig(
+      idleTimeout = config.idleTimeout.millis,
+      transformTimeout = config.transformTimeout.millis,
+      parallelism = config.parallelism,
+      throttle = config.throttle.map(pbToMleapThrottle),
       bufferSize = config.bufferSize
     )
   }
@@ -122,20 +163,12 @@ object TypeConverters {
     )
   }
 
-    implicit def pbToMleapStreamConfig(config: StreamConfig): executor.StreamConfig = {
-    executor.StreamConfig(
-      idleTimeout = config.idleTimeout.millis,
-      transformTimeout = config.transformTimeout.millis,
-      parallelism = config.parallelism,
-      bufferSize = config.bufferSize
-    )
-  }
-
   implicit def mleapToPbFlowConfig(config: executor.FlowConfig): FlowConfig = {
     FlowConfig(
       idleTimeout = config.idleTimeout.toMillis,
       transformTimeout = config.transformTimeout.toMillis,
-      parallelism = config.parallelism
+      parallelism = config.parallelism,
+      throttle = config.throttle.map(mleapToPbThrottle)
     )
   }
 
@@ -143,7 +176,8 @@ object TypeConverters {
     executor.FlowConfig(
       idleTimeout = config.idleTimeout.millis,
       transformTimeout = config.transformTimeout.millis,
-      parallelism = config.parallelism
+      parallelism = config.parallelism,
+      throttle = config.throttle.map(pbToMleapThrottle)
     )
   }
 

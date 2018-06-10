@@ -50,7 +50,7 @@ class ExecuteTransformSpec extends FunSpec with ScalaFutures with Matchers {
     }
 
     it("transforms successfully a leap frame with default options") {
-      val result = ExecuteTransform(pipeline, input).flatMap(Future.fromTry)
+      val result = ExecuteTransform(pipeline, input, TransformOptions.default).flatMap(Future.fromTry)
       whenReady(result) {
         frame => assert(frame.schema.hasField("prediction"))
       }
@@ -91,7 +91,7 @@ class ExecuteTransformSpec extends FunSpec with ScalaFutures with Matchers {
           LinearRegression(shape = NodeShape.regression(),
             // missing coefficient for LR
             model = LinearRegressionModel(Vectors.dense(2.0), 5.0)))))
-      val result = ExecuteTransform(invalidPipeline, input).flatMap(Future.fromTry)
+      val result = ExecuteTransform(invalidPipeline, input, TransformOptions.default).flatMap(Future.fromTry)
 
       whenReady(result.failed) {
         ex => ex shouldBe a [IllegalArgumentException]

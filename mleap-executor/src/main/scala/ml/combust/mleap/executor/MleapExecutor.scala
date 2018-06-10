@@ -50,6 +50,12 @@ class MleapExecutor(tConfig: Config)
     transformService.getBundleMeta(request)
   }
 
+  override def getModel(request: GetModelRequest)
+                       (implicit timeout: FiniteDuration): Future[Model] = {
+    transformService.getModel(request)
+
+  }
+
   override def loadModel(request: LoadModelRequest)
                         (implicit timeout: FiniteDuration): Future[Model] = {
     transformService.loadModel(request)
@@ -75,14 +81,25 @@ class MleapExecutor(tConfig: Config)
     transformService.transform(request)
   }
 
-  override def frameFlow[Tag: TagBytes](request: CreateFrameFlowRequest)
-                             (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
-    transformService.frameFlow(request)
+  override def createFrameFlow[Tag](request: CreateFrameFlowRequest)
+                                             (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+    transformService.createFrameFlow(request)
   }
 
-  override def rowFlow[Tag: TagBytes](request: CreateRowFlowRequest)
-                           (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
-    transformService.rowFlow(request)
+  override def createRowFlow[Tag](request: CreateRowFlowRequest)
+                                           (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
+    transformService.createRowFlow(request)
+  }
+
+  override def getFrameStream(request: GetFrameStreamRequest)
+                             (implicit timeout: FiniteDuration): Future[FrameStream] = {
+    transformService.getFrameStream(request)
+
+  }
+
+  override def getRowStream(request: GetRowStreamRequest)
+                           (implicit timeout: FiniteDuration): Future[RowStream] = {
+    transformService.getRowStream(request)
   }
 
   override def close(): Unit = { }

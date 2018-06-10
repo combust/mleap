@@ -44,7 +44,7 @@ object TransformStream {
     Flow[(StreamTransformRowRequest, Tag)].mapAsyncUnordered(parallelism) {
       case (request, tag) =>
         Future {
-          val result = Try(rowTransformer.transformOption(request.row))
+          val result = request.row.map(rowTransformer.transformOption)
 
           (result, tag)
         }

@@ -26,6 +26,11 @@ class LocalTransformService(loader: RepositoryBundleLoader)
     (actor ? request)(timeout).mapTo[BundleMeta]
   }
 
+  override def getModel(request: GetModelRequest)
+                       (implicit timeout: FiniteDuration): Future[Model] = {
+    (actor ? request)(timeout).mapTo[Model]
+  }
+
   override def loadModel(request: LoadModelRequest)
                         (implicit timeout: FiniteDuration): Future[Model] = {
     (actor ? request)(timeout).mapTo[Model]
@@ -51,8 +56,19 @@ class LocalTransformService(loader: RepositoryBundleLoader)
     (actor ? request)(timeout).mapTo[Try[DefaultLeapFrame]]
   }
 
-  override def frameFlow[Tag: TagBytes](request: CreateFrameFlowRequest)
-                                       (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
+  override def getFrameStream(request: GetFrameStreamRequest)
+                             (implicit timeout: FiniteDuration): Future[FrameStream] = {
+    (actor ? request)(timeout).mapTo[FrameStream]
+  }
+
+  override def getRowStream(request: GetRowStreamRequest)
+                           (implicit timeout: FiniteDuration): Future[RowStream] = {
+    (actor ? request)(timeout).mapTo[RowStream]
+  }
+
+
+  override def createFrameFlow[Tag](request: CreateFrameFlowRequest)
+                                   (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
     val actorSource = Source.lazily(
       () =>
         Source.fromFutureSource {
@@ -87,7 +103,11 @@ class LocalTransformService(loader: RepositoryBundleLoader)
           }
 
           val inFlow = builder.add {
-            Flow[(StreamTransformFrameRequest, Tag)].idleTimeout(request.flowConfig.idleTimeout)
+            var flow = Flow[(StreamTransformFrameRequest, Tag)].idleTimeout(request.flowConfig.idleTimeout)
+            flow = request.flowConfig.throttle.map {
+              throttle => flow.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
+            }.getOrElse(flow)
+            flow
           }
 
           val queueFlow = builder.add {
@@ -109,8 +129,8 @@ class LocalTransformService(loader: RepositoryBundleLoader)
     }).mapMaterializedValue(_ => NotUsed)
   }
 
-  override def rowFlow[Tag: TagBytes](request: CreateRowFlowRequest)
-                                     (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
+  override def createRowFlow[Tag](request: CreateRowFlowRequest)
+                                 (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
     val actorSource = Source.lazily(
       () =>
         Source.fromFutureSource {
@@ -146,7 +166,11 @@ class LocalTransformService(loader: RepositoryBundleLoader)
           }
 
           val inFlow = builder.add {
-            Flow[(StreamTransformRowRequest, Tag)].idleTimeout(request.flowConfig.idleTimeout)
+            var flow = Flow[(StreamTransformRowRequest, Tag)].idleTimeout(request.flowConfig.idleTimeout)
+            flow = request.flowConfig.throttle.map {
+              throttle => flow.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
+            }.getOrElse(flow)
+            flow
           }
 
           val queueFlow = builder.add {

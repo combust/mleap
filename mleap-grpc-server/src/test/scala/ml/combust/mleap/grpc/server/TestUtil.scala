@@ -36,7 +36,7 @@ object TestUtil {
     server
   }
 
-  def createClient(channel: ManagedChannel): Client = new GrpcClient(new MleapStub(channel))
+  def createClient(channel: ManagedChannel): GrpcClient = new GrpcClient(new MleapStub(channel))
 
   def inProcessChannel : ManagedChannel = InProcessChannelBuilder.forName(uniqueServerName).directExecutor.build
 

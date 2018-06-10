@@ -11,6 +11,7 @@ import akka.stream.testkit.scaladsl.TestSink
 import akka.testkit.TestKit
 import io.grpc.{ManagedChannel, Server, Status, StatusRuntimeException}
 import ml.combust.mleap.executor._
+import ml.combust.mleap.grpc.GrpcClient
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSpecLike}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures
@@ -27,11 +28,10 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
   with ScalaFutures {
 
   var server : Server = _
-  var client : Client = _
+  var client : GrpcClient = _
   var channel : ManagedChannel = _
   implicit val timeout = FiniteDuration(5, TimeUnit.SECONDS)
   val streamConfig = StreamConfig(
-    initTimeout = 10.seconds,
     idleTimeout = 10.seconds,
     transformTimeout = 10.seconds,
     parallelism = 4,
@@ -55,7 +55,7 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
 
   describe("grpc server and client") {
     it("retrieves bundle metadata") {
-      val response = client.getBundleMeta(lrUri)
+      val response = client.getBundleMeta(GetBundleMetaRequest())
       whenReady(response, Timeout(5.seconds)) {
         meta => assert(meta.info.name == "pipeline_ed5135e9ca49")
       }

@@ -2,7 +2,7 @@ package ml.combust.mleap.executor.service
 
 import akka.pattern.pipe
 import akka.actor.{Actor, Props, ReceiveTimeout, Status}
-import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult, ThrottleMode}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import ml.combust.mleap.executor._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
@@ -58,9 +58,14 @@ class FrameStreamActor(transformer: Transformer,
   def initialize(): Unit = {
     if (queue.isEmpty) {
       queue = Some {
-        val source = Source.queue[(Messages.TransformFrame, Promise[(Try[DefaultLeapFrame], Any)])](
+        var source = Source.queue[(Messages.TransformFrame, Promise[(Try[DefaultLeapFrame], Any)])](
           frameStream.streamConfig.bufferSize,
           OverflowStrategy.backpressure)
+
+        source = frameStream.streamConfig.throttle.map {
+          throttle =>
+            source.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
+        }.getOrElse(source)
 
         val transform = Flow[(Messages.TransformFrame, Promise[(Try[DefaultLeapFrame], Any)])].
           mapAsyncUnordered(frameStream.streamConfig.parallelism) {

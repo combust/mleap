@@ -76,11 +76,16 @@ class RowStreamActor(transformer: Transformer,
             rt.outputSchema))
 
           queue = Some {
-            val source = Source.queue[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])](rowStream.get.streamConfig.bufferSize, OverflowStrategy.backpressure)
+            var source = Source.queue[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])](rowStream.get.streamConfig.bufferSize, OverflowStrategy.backpressure)
+            source = rowStream.get.streamConfig.throttle.map {
+              throttle =>
+                source.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
+            }.getOrElse(source)
+
             val transform = Flow[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])].mapAsyncUnordered(rowStream.get.streamConfig.parallelism) {
               case (Messages.TransformRow(tRow, tag), promise) =>
                 Future {
-                  val row = Try(rt.transformOption(tRow.row))
+                  val row = tRow.row.map(rt.transformOption)
 
                   (row, tag, promise)
                 }

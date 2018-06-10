@@ -7,9 +7,10 @@ import akka.stream.{FlowShape, KillSwitches, UniqueKillSwitch}
 import akka.stream.scaladsl.{Flow, GraphDSL, Keep, Sink, Source, Zip}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.executor._
+import ml.combust.mleap.executor.error.{ExecutorException, TimeoutException}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
 import scala.util.{Failure, Success, Try}
 
@@ -20,50 +21,60 @@ class LocalTransformService(loader: RepositoryBundleLoader)
 
   private val actor: ActorRef = arf.actorOf(LocalTransformServiceActor.props(loader), "transform")
 
+  private def wrapExceptions(err: Throwable): ExecutorException = err match {
+    case err: akka.pattern.AskTimeoutException => new TimeoutException(err)
+    case err: ExecutorException => err
+    case _ => new ExecutorException(err)
+  }
+
+  private def wrapExceptions[T](f: Future[T])
+                               (implicit ec: ExecutionContext): Future[T] = {
+    f.transform(identity, wrapExceptions)
+  }
 
   override def getBundleMeta(request: GetBundleMetaRequest)
                             (implicit timeout: FiniteDuration): Future[BundleMeta] = {
-    (actor ? request)(timeout).mapTo[BundleMeta]
+    wrapExceptions((actor ? request)(timeout).mapTo[BundleMeta])
   }
 
   override def getModel(request: GetModelRequest)
                        (implicit timeout: FiniteDuration): Future[Model] = {
-    (actor ? request)(timeout).mapTo[Model]
+    wrapExceptions((actor ? request)(timeout).mapTo[Model])
   }
 
   override def loadModel(request: LoadModelRequest)
                         (implicit timeout: FiniteDuration): Future[Model] = {
-    (actor ? request)(timeout).mapTo[Model]
+    wrapExceptions((actor ? request)(timeout).mapTo[Model])
   }
 
   override def unloadModel(request: UnloadModelRequest)
                           (implicit timeout: FiniteDuration): Future[Model] = {
-    (actor ? request)(timeout).mapTo[Model]
+    wrapExceptions((actor ? request)(timeout).mapTo[Model])
   }
 
   override def createFrameStream(request: CreateFrameStreamRequest)
                                 (implicit timeout: FiniteDuration): Future[FrameStream] = {
-    (actor ? request)(timeout).mapTo[FrameStream]
+    wrapExceptions((actor ? request)(timeout).mapTo[FrameStream])
   }
 
   override def createRowStream(request: CreateRowStreamRequest)
                               (implicit timeout: FiniteDuration): Future[RowStream] = {
-    (actor ? request)(timeout).mapTo[RowStream]
+    wrapExceptions((actor ? request)(timeout).mapTo[RowStream])
   }
 
   override def transform(request: TransformFrameRequest)
                         (implicit timeout: FiniteDuration): Future[Try[DefaultLeapFrame]] = {
-    (actor ? request)(timeout).mapTo[Try[DefaultLeapFrame]]
+    wrapExceptions((actor ? request)(timeout).mapTo[Try[DefaultLeapFrame]])
   }
 
   override def getFrameStream(request: GetFrameStreamRequest)
                              (implicit timeout: FiniteDuration): Future[FrameStream] = {
-    (actor ? request)(timeout).mapTo[FrameStream]
+    wrapExceptions((actor ? request)(timeout).mapTo[FrameStream])
   }
 
   override def getRowStream(request: GetRowStreamRequest)
                            (implicit timeout: FiniteDuration): Future[RowStream] = {
-    (actor ? request)(timeout).mapTo[RowStream]
+    wrapExceptions((actor ? request)(timeout).mapTo[RowStream])
   }
 
 
@@ -72,7 +83,7 @@ class LocalTransformService(loader: RepositoryBundleLoader)
     val actorSource = Source.lazily(
       () =>
         Source.fromFutureSource {
-          val streamActor = (actor ? request)(timeout).
+          val streamActor = wrapExceptions((actor ? request)(timeout)).
             mapTo[(ActorRef, Future[Done])]
 
           streamActor.map(_._1).map {
@@ -113,8 +124,10 @@ class LocalTransformService(loader: RepositoryBundleLoader)
           val queueFlow = builder.add {
             Flow[((StreamTransformFrameRequest, Tag), ActorRef)].mapAsync(request.flowConfig.parallelism) {
               case ((req, tag), actor) =>
-                (actor ? FrameStreamActor.Messages.TransformFrame(req, tag))(request.flowConfig.transformTimeout).
-                  mapTo[(Try[DefaultLeapFrame], Tag)]
+                wrapExceptions(
+                  (actor ? FrameStreamActor.Messages.TransformFrame(req, tag))(request.flowConfig.transformTimeout).
+                    mapTo[(Try[DefaultLeapFrame], Tag)]
+                )
             }
           }
 
@@ -134,7 +147,9 @@ class LocalTransformService(loader: RepositoryBundleLoader)
     val actorSource = Source.lazily(
       () =>
         Source.fromFutureSource {
-          val streamActor = (actor ? request)(timeout).mapTo[(ActorRef, RowTransformer, Future[Done])]
+          val streamActor = wrapExceptions(
+            (actor ? request)(timeout).mapTo[(ActorRef, RowTransformer, Future[Done])]
+          )
 
           streamActor.map(_._1).map {
             actor => Source.repeat(actor).mapMaterializedValue(_ => streamActor.map(m => (m._2, m._3)))
@@ -176,8 +191,10 @@ class LocalTransformService(loader: RepositoryBundleLoader)
           val queueFlow = builder.add {
             Flow[((StreamTransformRowRequest, Tag), ActorRef)].mapAsync(request.flowConfig.parallelism) {
               case ((r, tag), actor) =>
-                (actor ? RowStreamActor.Messages.TransformRow(r, tag))(request.flowConfig.transformTimeout).
-                  mapTo[(Try[Option[Row]], Tag)]
+                wrapExceptions(
+                  (actor ? RowStreamActor.Messages.TransformRow(r, tag))(request.flowConfig.transformTimeout).
+                    mapTo[(Try[Option[Row]], Tag)]
+                )
             }
           }
 

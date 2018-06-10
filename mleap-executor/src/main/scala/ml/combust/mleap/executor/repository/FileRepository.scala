@@ -7,6 +7,7 @@ import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
 import com.typesafe.config.{Config, ConfigFactory}
+import ml.combust.mleap.executor.error.BundleException
 
 import scala.concurrent.duration.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}

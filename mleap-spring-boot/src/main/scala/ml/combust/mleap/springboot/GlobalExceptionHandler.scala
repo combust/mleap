@@ -1,10 +1,9 @@
 package ml.combust.mleap.springboot
 
 import javax.servlet.http.HttpServletRequest
-
 import akka.pattern.AskTimeoutException
 import com.fasterxml.jackson.core.JsonParseException
-import ml.combust.mleap.executor.repository.BundleException
+import ml.combust.mleap.executor.error.BundleException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.{ConversionNotSupportedException, TypeMismatchException}
 import org.springframework.http.{HttpStatus, ResponseEntity}

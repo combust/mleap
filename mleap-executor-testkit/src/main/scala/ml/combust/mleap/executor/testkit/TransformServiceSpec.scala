@@ -5,8 +5,9 @@ import java.util.UUID
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import ml.combust.mleap.executor._
+import ml.combust.mleap.executor.error.{AlreadyExistsException, NotFoundException}
 import ml.combust.mleap.executor.service.TransformService
-import ml.combust.mleap.runtime.frame.Row
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.serialization.BuiltinFormats
 import org.scalatest.FunSpecLike
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
@@ -52,6 +53,12 @@ trait TransformServiceSpec extends FunSpecLike
     outputSchema = TestUtil.rfRowTransformer.outputSchema
   )
 
+  private val frameStream1 = FrameStream(
+    modelName = "model1",
+    streamName = "stream2",
+    streamConfig = streamConfig1
+  )
+
   describe("when rf model is loaded") {
     val model = Await.result(transformService.loadModel(LoadModelRequest(
       modelName = "model1",
@@ -69,12 +76,22 @@ trait TransformServiceSpec extends FunSpecLike
       spec = rowStreamSpec1
     ))(10.seconds), 10.seconds)
 
+    val frameStream = Await.result(transformService.createFrameStream(CreateFrameStreamRequest(
+      modelName = "model1",
+      streamName = "stream2",
+      streamConfig = streamConfig1
+    ))(10.seconds), 10.seconds)
+
     it("returns the model") {
       assert(model == model1)
     }
 
     it("returns the row stream") {
       assert(rowStream == rowStream1)
+    }
+
+    it("returns the frame stream") {
+      assert(frameStream == frameStream1)
     }
 
     describe("get bundle meta") {
@@ -103,6 +120,65 @@ trait TransformServiceSpec extends FunSpecLike
 
         whenReady(result, Timeout(5.seconds)) {
           rowStream => assert(rowStream == rowStream1)
+        }
+      }
+
+      describe("when row stream does not exist") {
+        it("throws a NotFoundException") {
+          val ex = transformService.getRowStream(GetRowStreamRequest("model1", "unknown"))(5.seconds).failed
+
+          whenReady(ex) {
+            e => assert(e.isInstanceOf[NotFoundException])
+          }
+        }
+      }
+    }
+
+    describe("trying to create a row stream with the same name") {
+      it("throws an AlreadyExistsException") {
+        val ex = transformService.createRowStream(CreateRowStreamRequest(
+          modelName = "model1",
+          streamName = "stream1",
+          streamConfig = streamConfig1,
+          spec = rowStreamSpec1
+        ))(5.seconds).failed
+
+        whenReady(ex) {
+          e => assert(e.isInstanceOf[AlreadyExistsException])
+        }
+      }
+    }
+
+    describe("get the frame stream") {
+      it("retrieves the frame stream information") {
+        val result = transformService.getFrameStream(GetFrameStreamRequest("model1", "stream2"))(5.second)
+
+        whenReady(result, Timeout(5.seconds)) {
+          frameStream => assert(frameStream == frameStream1)
+        }
+      }
+
+      describe("when frame stream does not exist") {
+        it("throws a NotFoundException") {
+          val ex = transformService.getFrameStream(GetFrameStreamRequest("model1", "unknown"))(5.seconds).failed
+
+          whenReady(ex) {
+            e => assert(e.isInstanceOf[NotFoundException])
+          }
+        }
+      }
+    }
+
+    describe("trying to create a frame stream with the same name") {
+      it("throws an AlreadyExistsException") {
+        val ex = transformService.createFrameStream(CreateFrameStreamRequest(
+          modelName = "model1",
+          streamName = "stream2",
+          streamConfig = streamConfig1
+        ))(5.seconds).failed
+
+        whenReady(ex) {
+          e => assert(e.isInstanceOf[AlreadyExistsException])
         }
       }
     }
@@ -151,6 +227,73 @@ trait TransformServiceSpec extends FunSpecLike
         }
 
         done.isReadyWithin(1.second)
+      }
+    }
+
+    describe("transform frame stream") {
+      it("transforms frames in a stream") {
+        val uuid = UUID.randomUUID()
+        val rowSource = Source.single((StreamTransformFrameRequest(Try(frame), TransformOptions.default), uuid))
+        val rowsSink = Sink.head[(Try[DefaultLeapFrame], UUID)]
+        val testFlow = Flow.fromSinkAndSourceMat(rowsSink, rowSource)(Keep.left)
+
+        val config = FlowConfig(
+          idleTimeout = 15.minutes,
+          transformTimeout = 15.minutes,
+          parallelism = 4,
+          throttle = None
+        )
+
+        val frameFlow = transformService.createFrameFlow[UUID](CreateFrameFlowRequest("model1",
+          "stream2",
+          BuiltinFormats.binary,
+          config))(10.seconds)
+
+        val (done, transformedFrame) = frameFlow.
+          watchTermination()(Keep.right).
+          joinMat(testFlow)(Keep.both).
+          run()
+
+        whenReady(transformedFrame, Timeout(10.seconds)) {
+          frame =>
+            assert(frame._1.get.dataset.head.getDouble(21) == 218.2767196535019)
+            assert(frame._2 == uuid)
+        }
+
+        done.isReadyWithin(1.second)
+      }
+    }
+  }
+
+  describe("when model not loaded") {
+    describe("get model") {
+      it("returns a NotFoundException") {
+        val ex = transformService.getModel(GetModelRequest("unknown"))(10.seconds).failed
+
+        whenReady(ex) {
+          e =>
+            assert(e.isInstanceOf[NotFoundException])
+        }
+      }
+    }
+
+    describe("get frame stream") {
+      it("returns a NotFoundException") {
+        val ex = transformService.getFrameStream(GetFrameStreamRequest("unknown", "unknown"))(10.seconds).failed
+
+        whenReady(ex) {
+          e => assert(e.isInstanceOf[NotFoundException])
+        }
+      }
+    }
+
+    describe("get row stream") {
+      it("returns a NotFoundException") {
+        val ex = transformService.getRowStream(GetRowStreamRequest("unknown", "unknown"))(10.seconds).failed
+
+        whenReady(ex) {
+          e => assert(e.isInstanceOf[NotFoundException])
+        }
       }
     }
   }

@@ -1,17 +1,15 @@
 package ml.combust.mleap.executor.service
 
-import akka.Done
-import akka.pattern.{ask, pipe}
+import akka.pattern.pipe
 import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Status, Terminated}
 import akka.stream.Materializer
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.mleap.executor._
+import ml.combust.mleap.executor.error.{AlreadyExistsException, ExecutorException, NotFoundException}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
-import ml.combust.mleap.runtime.frame.{RowTransformer, Transformer}
+import ml.combust.mleap.runtime.frame.Transformer
 
-import scala.concurrent.duration._
 import scala.collection.mutable
-import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 case class RequestWithSender(request: Any, sender: ActorRef)
@@ -97,7 +95,7 @@ class BundleActor(request: LoadModelRequest,
     case r: GetFrameStreamRequest => getFrameStream(r, request.sender)
     case r: CreateFrameFlowRequest => createFrameFlow(r, request.sender)
     case r: CreateRowFlowRequest => createRowFlow(r, request.sender)
-    case _ => request.sender ! Status.Failure(new IllegalArgumentException(s"unknown request $request"))
+    case _ => request.sender ! Status.Failure(new ExecutorException(s"unknown request $request"))
   }
 
   def maybeLoad(): Unit = {
@@ -144,54 +142,64 @@ class BundleActor(request: LoadModelRequest,
   }
 
   def createFrameStream(request: CreateFrameStreamRequest, sender: ActorRef): Unit = {
-    Try(context.actorOf(FrameStreamActor.props(bundle.get.root, request), request.streamName)) match {
-      case Success(actor) =>
-        context.watch(actor)
-        frameStreamLookup += (request.streamName -> actor)
-        frameStreamNameLookup += (actor -> request.streamName)
-        actor.tell(FFMessages.Initialize, sender)
-      case Failure(err) => sender ! Status.Failure(err)
+    context.child(request.streamName) match {
+      case Some(_) =>
+        sender ! Status.Failure(new AlreadyExistsException(s"stream already exists ${request.modelName}/${request.streamName}"))
+      case None =>
+        Try(context.actorOf(FrameStreamActor.props(bundle.get.root, request), request.streamName)) match {
+          case Success(actor) =>
+            context.watch(actor)
+            frameStreamLookup += (request.streamName -> actor)
+            frameStreamNameLookup += (actor -> request.streamName)
+            actor.tell(FFMessages.Initialize, sender)
+          case Failure(err) => sender ! Status.Failure(err)
+        }
     }
   }
 
   def createRowStream(request: CreateRowStreamRequest, sender: ActorRef): Unit = {
-    Try(context.actorOf(RowStreamActor.props(bundle.get.root, request), request.streamName)) match {
-      case Success(actor) =>
-        context.watch(actor)
-        rowStreamLookup += (request.streamName -> actor)
-        rowStreamNameLookup += (actor -> request.streamName)
-        actor.tell(RFMessages.Initialize, sender)
-      case Failure(err) =>
-        err.printStackTrace()
-        sender ! Status.Failure(err)
+    context.child(request.streamName) match {
+      case Some(_) =>
+        sender ! Status.Failure(new AlreadyExistsException(s"stream already exists ${request.modelName}/${request.streamName}"))
+      case None =>
+        Try(context.actorOf(RowStreamActor.props(bundle.get.root, request), request.streamName)) match {
+          case Success(actor) =>
+            context.watch(actor)
+            rowStreamLookup += (request.streamName -> actor)
+            rowStreamNameLookup += (actor -> request.streamName)
+            actor.tell(RFMessages.Initialize, sender)
+          case Failure(err) =>
+            err.printStackTrace()
+            sender ! Status.Failure(err)
+        }
     }
   }
 
   def getRowStream(request: GetRowStreamRequest, sender: ActorRef): Unit = {
     rowStreamLookup.get(request.streamName) match {
       case Some(actor) => actor.tell(request, sender)
-      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/${request.streamName}"))
+      case None => sender ! Status.Failure(new NotFoundException(s"could not find stream ${request.modelName}/${request.streamName}"))
     }
   }
 
   def getFrameStream(request: GetFrameStreamRequest, sender: ActorRef): Unit = {
     frameStreamLookup.get(request.streamName) match {
       case Some(actor) => actor.tell(request, sender)
-      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/${request.streamName}"))
+      case None => sender ! Status.Failure(new NotFoundException(s"could not find stream ${request.modelName}/${request.streamName}"))
     }
   }
 
   def createFrameFlow(request: CreateFrameFlowRequest, sender: ActorRef): Unit = {
     frameStreamLookup.get(request.streamName) match {
       case Some(actor) => actor.tell(request, sender)
-      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/${request.streamName}"))
+      case None => sender ! Status.Failure(new NotFoundException(s"could not find stream ${request.modelName}/${request.streamName}"))
     }
   }
 
   def createRowFlow(request: CreateRowFlowRequest, sender: ActorRef): Unit = {
     rowStreamLookup.get(request.streamName) match {
       case Some(actor) => actor.tell(request, sender)
-      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/${request.streamName}"))
+      case None => sender ! Status.Failure(new NotFoundException(s"could not find stream ${request.modelName}/${request.streamName}"))
     }
   }
 

@@ -2,9 +2,10 @@ package ml.combust.mleap.executor.service
 
 import akka.pattern.pipe
 import akka.actor.{Actor, Props, ReceiveTimeout, Status}
-import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult, ThrottleMode}
+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import ml.combust.mleap.executor._
+import ml.combust.mleap.executor.error.ExecutorException
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
 
 import scala.concurrent.{Future, Promise}
@@ -107,10 +108,10 @@ class FrameStreamActor(transformer: Transformer,
             promise.failure(err)
             q
           case QueueOfferResult.Dropped =>
-            promise.failure(new IllegalStateException("item dropped"))
+            promise.failure(new ExecutorException("item dropped"))
             q
           case QueueOfferResult.QueueClosed =>
-            promise.failure(new IllegalStateException("queue closed"))
+            promise.failure(new ExecutorException("queue closed"))
             q
         }
     })
@@ -123,7 +124,7 @@ class FrameStreamActor(transformer: Transformer,
   def createFrameFlow(request: CreateFrameFlowRequest): Unit = {
     queue match {
       case Some(q) => sender ! (self, q.watchCompletion())
-      case None => sender ! Status.Failure(new IllegalStateException(s"frame stream not initialized ${frameStream.modelName}/frame/${frameStream.streamName}"))
+      case None => sender ! Status.Failure(new ExecutorException(s"frame stream not initialized ${frameStream.modelName}/frame/${frameStream.streamName}"))
     }
   }
 

@@ -5,6 +5,7 @@ import akka.pattern.pipe
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
 import ml.combust.mleap.executor._
+import ml.combust.mleap.executor.error.ExecutorException
 import ml.combust.mleap.runtime.frame.{Row, RowTransformer, Transformer}
 
 import scala.concurrent.{Future, Promise}
@@ -123,10 +124,10 @@ class RowStreamActor(transformer: Transformer,
             promise.failure(err)
             q
           case QueueOfferResult.Dropped =>
-            promise.failure(new IllegalStateException("item dropped"))
+            promise.failure(new ExecutorException("item dropped"))
             q
           case QueueOfferResult.QueueClosed =>
-            promise.failure(new IllegalStateException("queue closed"))
+            promise.failure(new ExecutorException("queue closed"))
             q
         }
     })
@@ -135,7 +136,7 @@ class RowStreamActor(transformer: Transformer,
   def getRowStream(): Unit = {
     rowStream match {
       case Some(rs) => sender ! rs
-      case None => sender ! Status.Failure(new IllegalStateException("stream not yet loaded"))
+      case None => sender ! Status.Failure(new ExecutorException("stream not yet loaded"))
     }
   }
 
@@ -146,7 +147,7 @@ class RowStreamActor(transformer: Transformer,
           case Success(rt) => sender ! (self, rt, q.watchCompletion())
           case Failure(err) => sender ! Status.Failure(err)
         }
-      case None => sender ! Status.Failure(new IllegalStateException(s"row stream not initialized ${rowStream.get.modelName}/row/${rowStream.get.streamName}"))
+      case None => sender ! Status.Failure(new ExecutorException(s"row stream not initialized ${rowStream.get.modelName}/row/${rowStream.get.streamName}"))
     }
   }
 

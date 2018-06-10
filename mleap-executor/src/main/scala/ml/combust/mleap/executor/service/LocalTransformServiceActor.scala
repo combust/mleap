@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorRef, Props, Status, Terminated}
 import akka.stream.{ActorMaterializer, Materializer}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.executor._
+import ml.combust.mleap.executor.error.NotFoundException
 
 import scala.util.{Failure, Success, Try}
 
@@ -52,7 +53,7 @@ class LocalTransformServiceActor(loader: RepositoryBundleLoader) extends Actor {
   def handleModelRequest(request: ModelRequest): Unit = {
     lookup.get(request.modelName) match {
       case Some(actor) => actor.tell(request, sender)
-      case None => sender ! Status.Failure(new NoSuchElementException(s"no model with name ${request.modelName}"))
+      case None => sender ! Status.Failure(new NotFoundException(s"no model with name ${request.modelName}"))
     }
   }
 

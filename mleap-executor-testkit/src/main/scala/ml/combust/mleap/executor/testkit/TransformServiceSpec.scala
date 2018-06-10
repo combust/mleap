@@ -1,9 +1,10 @@
-package ml.combust.mleap.executor
+package ml.combust.mleap.executor.testkit
 
 import java.util.UUID
 
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
+import ml.combust.mleap.executor._
 import ml.combust.mleap.executor.service.TransformService
 import ml.combust.mleap.runtime.frame.Row
 import ml.combust.mleap.runtime.serialization.BuiltinFormats
@@ -11,9 +12,9 @@ import org.scalatest.FunSpecLike
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 import scala.util.Try
 
 trait TransformServiceSpec extends FunSpecLike

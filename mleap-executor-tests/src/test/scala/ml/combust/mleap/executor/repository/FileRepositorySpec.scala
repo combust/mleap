@@ -4,7 +4,7 @@ import java.io.File
 import java.net.URI
 import java.nio.file.Files
 
-import ml.combust.mleap.executor.TestUtil
+import ml.combust.mleap.executor.testkit.TestUtil
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 

@@ -36,6 +36,9 @@ object Dependencies {
       "org.tensorflow" % "libtensorflow_jni" % tensorflowVersion
     )
 
+    val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
+    val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion
+
     val akkaStream = "com.typesafe.akka" %% "akka-stream" % akkaVersion
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
@@ -99,6 +102,8 @@ object Dependencies {
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 
   val executor = l ++= Seq(akkaStream, config, Test.scalaTest, Test.akkaTestKit) ++ logging
+
+  val executorTestKit = l ++= Seq(scalaTest, akkaTestKit, akkaStreamTestKit)
 
   val grpcServer = l ++= Seq(scopt) ++ Seq(Test.scalaTest, Test.akkaStreamTestKit)
 

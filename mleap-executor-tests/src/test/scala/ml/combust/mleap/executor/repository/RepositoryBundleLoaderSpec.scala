@@ -1,12 +1,12 @@
 package ml.combust.mleap.executor.repository
 
-import ml.combust.mleap.executor.TestUtil
+import ml.combust.mleap.executor.testkit.TestUtil
 import ml.combust.mleap.runtime.transformer.Pipeline
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 
 class RepositoryBundleLoaderSpec extends FunSpec with ScalaFutures with Matchers {

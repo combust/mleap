@@ -121,6 +121,18 @@ object MleapProject {
     dependencies = Seq(runtime)
   )
 
+  lazy val executorTestKit = Project(
+    id = "mleap-executor-testkit",
+    base = file("mleap-executor-testkit"),
+    dependencies = Seq(executor)
+  )
+
+  lazy val executorTests = Project(
+    id = "mleap-executor-tests",
+    base = file("mleap-executor-tests"),
+    dependencies = Seq(executor, executorTestKit % "test")
+  )
+
   lazy val grpc = Project(
     id = "mleap-grpc",
     base = file("mleap-grpc"),
@@ -130,9 +142,8 @@ object MleapProject {
   lazy val grpcServer = Project(
     id = "mleap-grpc-server",
     base = file("mleap-grpc-server"),
-    dependencies = Seq(`grpc`)
+    dependencies = Seq(grpc, executorTestKit % "test")
   )
-
 
   lazy val springBootServing = Project(
     id = "mleap-spring-boot",

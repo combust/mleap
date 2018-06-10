@@ -1,4 +1,4 @@
-package ml.combust.mleap.executor
+package ml.combust.mleap.executor.testkit
 
 import java.io.File
 import java.net.URI
@@ -6,10 +6,10 @@ import java.net.URI
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, RowTransformer, Transformer}
 import ml.combust.mleap.runtime.serialization.FrameReader
 import resource.managed
-import ml.combust.mleap.runtime.MleapSupport._
 
 object TestUtil {
   lazy val rfUri: URI = {

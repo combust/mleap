@@ -59,6 +59,7 @@ class RowStreamActor(transformer: Transformer,
     case Messages.Initialize => initialize()
     case Messages.StreamClosed => context.stop(self)
 
+    case r: GetRowStreamRequest => getRowStream()
     case r: CreateRowFlowRequest => createRowFlow(r)
 
     case ReceiveTimeout => receiveTimeout()
@@ -129,6 +130,13 @@ class RowStreamActor(transformer: Transformer,
             q
         }
     })
+  }
+
+  def getRowStream(): Unit = {
+    rowStream match {
+      case Some(rs) => sender ! rs
+      case None => sender ! Status.Failure(new IllegalStateException("stream not yet loaded"))
+    }
   }
 
   def createRowFlow(request: CreateRowFlowRequest): Unit = {

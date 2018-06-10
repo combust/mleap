@@ -49,6 +49,7 @@ class FrameStreamActor(transformer: Transformer,
     case Messages.Initialize => initialize()
     case Messages.StreamClosed => context.stop(self)
 
+    case r: GetFrameStreamRequest => getFrameStream(r)
     case r: CreateFrameFlowRequest => createFrameFlow(r)
 
     case ReceiveTimeout => receiveTimeout()
@@ -113,6 +114,10 @@ class FrameStreamActor(transformer: Transformer,
             q
         }
     })
+  }
+
+  def getFrameStream(request: GetFrameStreamRequest): Unit = {
+    sender ! frameStream
   }
 
   def createFrameFlow(request: CreateFrameFlowRequest): Unit = {

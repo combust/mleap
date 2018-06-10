@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
 import akka.NotUsed
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Sink, Source, Zip}
+import akka.stream.scaladsl.{Flow, GraphDSL, Sink, Source, Zip}
 import ml.combust.mleap.executor._
 import ml.combust.mleap.pb.{TransformFrameResponse, TransformRowResponse, TransformStatus}
 import ml.combust.mleap.pb.MleapGrpc.MleapStub
@@ -14,6 +14,7 @@ import akka.stream.FlowShape
 import com.google.protobuf.ByteString
 import io.grpc.stub.StreamObserver
 import ml.combust.mleap.executor.service.TransformService
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 import ml.combust.mleap.grpc.stream.GrpcAkkaStreams
 import ml.combust.mleap.{executor, pb}
 import ml.combust.mleap.runtime.serialization._
@@ -95,8 +96,7 @@ class GrpcClient(stub: MleapStub)
           options = Some(request.options)
         )
     }).flatMap {
-      r =>
-        stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).transform(r)
+      r => stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).transform(r)
     }.flatMap {
       response =>
         if (response.status == TransformStatus.STATUS_OK) {
@@ -199,8 +199,8 @@ class GrpcClient(stub: MleapStub)
                                  (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
     val lookup = TrieMap[Long, Tag]()
     val atomicIndex = new AtomicLong(0)
-    val reader = RowReader(request.inputSchema, request.format)
-    val writer = RowWriter(request.outputSchema, request.format)
+    val reader = RowReader(request.outputSchema, request.format)
+    val writer = RowWriter(request.inputSchema, request.format)
 
     val _responseSource = GrpcAkkaStreams.source[TransformRowResponse].mapMaterializedValue {
       observer =>
@@ -212,7 +212,9 @@ class GrpcClient(stub: MleapStub)
           streamName = request.streamName,
           format = request.format,
           flowConfig = Some(request.flowConfig),
-          initTimeout = timeout.toMillis
+          initTimeout = timeout.toMillis,
+          inputSchema = Some(request.inputSchema),
+          outputSchema = Some(request.outputSchema)
         ))
         requestObserver
     }

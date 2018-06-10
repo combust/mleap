@@ -61,16 +61,19 @@ class BundleActor(request: LoadModelRequest,
   }
 
   override def receive: Receive = {
+    case request: TransformFrameRequest => maybeHandleRequest(RequestWithSender(request, sender))
     case request: GetBundleMetaRequest => maybeHandleRequest(RequestWithSender(request, sender))
     case request: CreateFrameStreamRequest => maybeHandleRequest(RequestWithSender(request, sender))
     case request: CreateRowStreamRequest => maybeHandleRequest(RequestWithSender(request, sender))
-    case request: TransformFrameRequest => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: GetRowStreamRequest => maybeHandleRequest(RequestWithSender(request, sender))
+    case request: GetFrameStreamRequest => maybeHandleRequest(RequestWithSender(request, sender))
     case request: CreateFrameFlowRequest => maybeHandleRequest(RequestWithSender(request, sender))
     case request: CreateRowFlowRequest => maybeHandleRequest(RequestWithSender(request, sender))
     case request: UnloadModelRequest => unloadModel(request, sender)
     case request: LoadModelRequest => loadModel(request, sender)
 
     case request: Messages.Loaded => loaded(request)
+    case request: GetModelRequest => getModel(request)
 
     case ReceiveTimeout => receiveTimeout()
     case Terminated(actor) => terminated(actor)
@@ -86,12 +89,15 @@ class BundleActor(request: LoadModelRequest,
   }
 
   def handleRequest(request: RequestWithSender): Unit = request.request match {
-    case r: GetBundleMetaRequest => getBundleMeta(r, request.sender)
     case r: TransformFrameRequest => transform(r, request.sender)
+    case r: GetBundleMetaRequest => getBundleMeta(r, request.sender)
     case r: CreateFrameStreamRequest => createFrameStream(r, request.sender)
     case r: CreateRowStreamRequest => createRowStream(r, request.sender)
+    case r: GetRowStreamRequest => getRowStream(r, request.sender)
+    case r: GetFrameStreamRequest => getFrameStream(r, request.sender)
     case r: CreateFrameFlowRequest => createFrameFlow(r, request.sender)
     case r: CreateRowFlowRequest => createRowFlow(r, request.sender)
+    case _ => request.sender ! Status.Failure(new IllegalArgumentException(s"unknown request $request"))
   }
 
   def maybeLoad(): Unit = {
@@ -125,6 +131,10 @@ class BundleActor(request: LoadModelRequest,
     }
   }
 
+  def getModel(request: GetModelRequest): Unit = {
+    sender ! model
+  }
+
   def transform(request: TransformFrameRequest, sender: ActorRef): Unit = {
     for (bundle <- this.bundle;
          transformer = bundle.root;
@@ -154,6 +164,20 @@ class BundleActor(request: LoadModelRequest,
       case Failure(err) =>
         err.printStackTrace()
         sender ! Status.Failure(err)
+    }
+  }
+
+  def getRowStream(request: GetRowStreamRequest, sender: ActorRef): Unit = {
+    rowStreamLookup.get(request.streamName) match {
+      case Some(actor) => actor.tell(request, sender)
+      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/${request.streamName}"))
+    }
+  }
+
+  def getFrameStream(request: GetFrameStreamRequest, sender: ActorRef): Unit = {
+    frameStreamLookup.get(request.streamName) match {
+      case Some(actor) => actor.tell(request, sender)
+      case None => sender ! Status.Failure(new NoSuchElementException(s"could not find stream ${request.modelName}/${request.streamName}"))
     }
   }
 

@@ -7,7 +7,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import io.grpc.{ManagedChannel, Server}
 import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
-import ml.combust.mleap.executor.{Client, MleapExecutor}
+import ml.combust.mleap.executor.MleapExecutor
 import ml.combust.mleap.grpc.GrpcClient
 import ml.combust.mleap.pb.MleapGrpc
 import ml.combust.mleap.pb.MleapGrpc.MleapStub

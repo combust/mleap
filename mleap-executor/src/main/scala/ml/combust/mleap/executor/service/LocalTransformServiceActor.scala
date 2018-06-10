@@ -33,12 +33,14 @@ class LocalTransformServiceActor(loader: RepositoryBundleLoader) extends Actor {
   }
 
   override def receive: Receive = {
+    case request: TransformFrameRequest => handleModelRequest(request)
     case request: GetBundleMetaRequest => handleModelRequest(request)
     case request: GetModelRequest => handleModelRequest(request)
-    case request: TransformFrameRequest => handleModelRequest(request)
     case request: CreateFrameStreamRequest => handleModelRequest(request)
     case request: CreateRowStreamRequest => handleModelRequest(request)
+    case request: GetRowStreamRequest => handleModelRequest(request)
     case request: CreateFrameFlowRequest => handleModelRequest(request)
+    case request: GetFrameStreamRequest => handleModelRequest(request)
     case request: CreateRowFlowRequest => handleModelRequest(request)
     case request: UnloadModelRequest => handleModelRequest(request)
     case request: LoadModelRequest => loadModel(request)

@@ -113,7 +113,7 @@ class GrpcClient(stub: MleapStub)
     val atomicIndex = new AtomicLong(0)
     val frameReader = FrameReader(request.format)
 
-    val responseSource = GrpcAkkaStreams.source[TransformFrameResponse].mapMaterializedValue {
+    val _responseSource = GrpcAkkaStreams.source[TransformFrameResponse].mapMaterializedValue {
       observer =>
         val requestObserver = stub.transformFrameStream(observer)
 
@@ -125,11 +125,12 @@ class GrpcClient(stub: MleapStub)
           format = request.format,
           initTimeout = timeout.toMillis
         ))
+
         requestObserver
     }
 
     Flow.fromGraph {
-      GraphDSL.create(responseSource) {
+      GraphDSL.create(_responseSource) {
         implicit builder =>
           responseSource =>
             import GraphDSL.Implicits._
@@ -216,6 +217,7 @@ class GrpcClient(stub: MleapStub)
           inputSchema = Some(request.inputSchema),
           outputSchema = Some(request.outputSchema)
         ))
+
         requestObserver
     }
 

@@ -120,9 +120,10 @@ trait TransformServiceSpec extends FunSpecLike
 
     describe("transform row stream") {
       it("transforms rows in a stream") {
-        val rowsSource = Source.fromIterator(() => frame.dataset.iterator.map(row => (StreamTransformRowRequest(Try(row)), UUID.randomUUID())))
-        val rowsSink = Sink.seq[(Try[Option[Row]], UUID)]
-        val testFlow = Flow.fromSinkAndSourceMat(rowsSink, rowsSource)(Keep.left)
+        val uuid = UUID.randomUUID()
+        val rowSource = Source.single((StreamTransformRowRequest(Try(frame.dataset.head)), uuid))
+        val rowsSink = Sink.head[(Try[Option[Row]], UUID)]
+        val testFlow = Flow.fromSinkAndSourceMat(rowsSink, rowSource)(Keep.left)
 
         val config = FlowConfig(
           idleTimeout = 15.minutes,
@@ -138,18 +139,15 @@ trait TransformServiceSpec extends FunSpecLike
           rowStream.spec.schema,
           rowStream.outputSchema))(10.seconds)
 
-        val (done, transformedRows) = rowFlow.
+        val (done, transformedRow) = rowFlow.
           watchTermination()(Keep.right).
           joinMat(testFlow)(Keep.both).
           run()
 
-        whenReady(transformedRows, Timeout(10.seconds)) {
-          rows =>
-            assert(rows.size == 1)
-
-            for ((row, _) <- rows) {
-              assert(row.isSuccess)
-            }
+        whenReady(transformedRow, Timeout(10.seconds)) {
+          row =>
+            assert(row._1.get.get.getDouble(21) == 218.2767196535019)
+            assert(row._2 == uuid)
         }
 
         done.isReadyWithin(1.second)

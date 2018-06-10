@@ -3,7 +3,7 @@ package ml.combust.mleap.executor.service
 import akka.actor.{Actor, Props, ReceiveTimeout, Status}
 import akka.pattern.pipe
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
-import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
+import akka.stream.{DelayOverflowStrategy, Materializer, OverflowStrategy, QueueOfferResult}
 import ml.combust.mleap.executor._
 import ml.combust.mleap.executor.error.ExecutorException
 import ml.combust.mleap.runtime.frame.{Row, RowTransformer, Transformer}
@@ -79,9 +79,20 @@ class RowStreamActor(transformer: Transformer,
 
           queue = Some {
             var source = Source.queue[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])](rowStream.get.streamConfig.bufferSize, OverflowStrategy.backpressure)
+
+            source = rowStream.get.streamConfig.idleTimeout.map {
+              timeout =>
+                source.idleTimeout(timeout)
+            }.getOrElse(source)
+
             source = rowStream.get.streamConfig.throttle.map {
               throttle =>
                 source.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
+            }.getOrElse(source)
+
+            source = rowStream.get.streamConfig.transformDelay.map {
+              delay =>
+                source.delay(delay, DelayOverflowStrategy.backpressure)
             }.getOrElse(source)
 
             val transform = Flow[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])].mapAsyncUnordered(rowStream.get.streamConfig.parallelism) {
@@ -91,7 +102,7 @@ class RowStreamActor(transformer: Transformer,
 
                   (row, tag, promise)
                 }
-            }.idleTimeout(rowStream.get.streamConfig.idleTimeout).to(Sink.foreach {
+            }.to(Sink.foreach {
               case (row, tag, promise) => promise.success((row, tag))
             })
 

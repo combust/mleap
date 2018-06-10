@@ -2,10 +2,12 @@ package ml.combust.mleap.executor.testkit
 
 import java.util.UUID
 
-import akka.stream.Materializer
+import akka.actor.ActorSystem
+import akka.stream.{Materializer, ThrottleMode}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
+import akka.stream.testkit.scaladsl.TestSink
 import ml.combust.mleap.executor._
-import ml.combust.mleap.executor.error.{AlreadyExistsException, NotFoundException}
+import ml.combust.mleap.executor.error.{AlreadyExistsException, NotFoundException, TimeoutException}
 import ml.combust.mleap.executor.service.TransformService
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.serialization.BuiltinFormats
@@ -16,11 +18,12 @@ import org.scalatest.concurrent.ScalaFutures
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 trait TransformServiceSpec extends FunSpecLike
   with ScalaFutures {
   def transformService: TransformService
+  implicit def system: ActorSystem
   implicit def materializer: Materializer
 
   private val frame = TestUtil.frame
@@ -34,8 +37,8 @@ trait TransformServiceSpec extends FunSpecLike
   )
 
   private val streamConfig1 = StreamConfig(
-    idleTimeout = 15.minutes,
-    transformTimeout = 15.minutes,
+    idleTimeout = None,
+    transformDelay = Some(20.millis),
     parallelism = 4,
     throttle = None,
     bufferSize = 1024
@@ -57,6 +60,14 @@ trait TransformServiceSpec extends FunSpecLike
     modelName = "model1",
     streamName = "stream2",
     streamConfig = streamConfig1
+  )
+
+  private val flowConfig = FlowConfig(
+    idleTimeout = None,
+    transformTimeout = 15.minutes,
+    transformDelay = None,
+    parallelism = 4,
+    throttle = None
   )
 
   describe("when rf model is loaded") {
@@ -201,17 +212,10 @@ trait TransformServiceSpec extends FunSpecLike
         val rowsSink = Sink.head[(Try[Option[Row]], UUID)]
         val testFlow = Flow.fromSinkAndSourceMat(rowsSink, rowSource)(Keep.left)
 
-        val config = FlowConfig(
-          idleTimeout = 15.minutes,
-          transformTimeout = 15.minutes,
-          parallelism = 4,
-          throttle = None
-        )
-
         val rowFlow = transformService.createRowFlow[UUID](CreateRowFlowRequest("model1",
           "stream1",
           BuiltinFormats.binary,
-          config,
+          flowConfig,
           rowStream.spec.schema,
           rowStream.outputSchema))(10.seconds)
 
@@ -228,6 +232,112 @@ trait TransformServiceSpec extends FunSpecLike
 
         done.isReadyWithin(1.second)
       }
+
+      describe("throttling") {
+        it("throttles elements through the flow") {
+          Source.fromIterator(
+            () => Seq(
+              (StreamTransformRowRequest(Try(frame.dataset.head)), 2),
+              (StreamTransformRowRequest(Try(frame.dataset.head)), 3)
+            ).iterator
+          ).via(transformService.createRowFlow[Int](
+            CreateRowFlowRequest("model1",
+              "stream1",
+              BuiltinFormats.binary,
+              flowConfig.copy(throttle = Some(
+                Throttle(
+                  elements = 1,
+                  duration = 1.day,
+                  maxBurst = 1,
+                  mode = ThrottleMode.shaping
+                )
+              )),
+              rowStream.spec.schema,
+              rowStream.outputSchema)
+          )(10.seconds)).map(_._2).
+            runWith(TestSink.probe[Int]).
+            request(2).
+            expectNext(2).
+            expectNoMessage(100.millis).
+            cancel()
+        }
+      }
+
+      describe("idling") {
+        it("closes the flow") {
+          val err = Source.fromIterator(
+            () => Seq(
+              (StreamTransformRowRequest(Try(frame.dataset.head)), 2),
+              (StreamTransformRowRequest(Try(frame.dataset.head)), 3)
+            ).iterator
+          ).initialDelay(100.millis).via(transformService.createRowFlow[Int](
+            CreateRowFlowRequest("model1",
+              "stream1",
+              BuiltinFormats.binary,
+              flowConfig.copy(idleTimeout = Some(10.millis)),
+              rowStream.spec.schema,
+              rowStream.outputSchema)
+          )(10.seconds)).map(_._2).
+            runWith(TestSink.probe[Int]).
+            request(2).
+            expectError()
+
+          assert(err.isInstanceOf[TimeoutException])
+          assert(err.getMessage.contains("No elements passed in the last"))
+        }
+      }
+
+      describe("transform delay") {
+        it("delays the transform operation") {
+          Source.fromIterator(
+            () => Seq(
+              (StreamTransformRowRequest(Try(frame.dataset.head)), 2),
+              (StreamTransformRowRequest(Try(frame.dataset.head)), 3)
+            ).iterator
+          ).via(transformService.createRowFlow[Int](
+            CreateRowFlowRequest("model1",
+              "stream1",
+              BuiltinFormats.binary,
+              flowConfig.copy(transformDelay = Some(1.day)),
+              rowStream.spec.schema,
+              rowStream.outputSchema)
+          )(10.seconds)).map(_._2).
+            runWith(TestSink.probe[Int]).
+            request(2).
+            expectNoMessage(100.millis).
+            cancel()
+        }
+      }
+
+      describe("transform timeout") {
+        it("returns an error") {
+          val probe = Source.fromIterator(
+            () => Seq(
+              (StreamTransformRowRequest(Try(frame.dataset.head)), 2),
+              (StreamTransformRowRequest(Try(frame.dataset.head)), 3)
+            ).iterator
+          ).via(transformService.createRowFlow[Int](
+            CreateRowFlowRequest("model1",
+              "stream1",
+              BuiltinFormats.binary,
+              flowConfig.copy(transformTimeout = 1.millis),
+              rowStream.spec.schema,
+              rowStream.outputSchema)
+          )(10.seconds)).map(_._1).
+            runWith(TestSink.probe[Try[Option[Row]]]).
+            request(2)
+
+          probe.expectNextPF {
+            case Failure(err) =>
+              assert(err.isInstanceOf[TimeoutException])
+          }
+
+          probe.expectNextPF {
+            case Failure(err) =>
+              assert(err.isInstanceOf[TimeoutException])
+          }
+        }
+      }
     }
 
     describe("transform frame stream") {
@@ -237,17 +347,10 @@ trait TransformServiceSpec extends FunSpecLike
         val rowsSink = Sink.head[(Try[DefaultLeapFrame], UUID)]
         val testFlow = Flow.fromSinkAndSourceMat(rowsSink, rowSource)(Keep.left)
 
-        val config = FlowConfig(
-          idleTimeout = 15.minutes,
-          transformTimeout = 15.minutes,
-          parallelism = 4,
-          throttle = None
-        )
-
         val frameFlow = transformService.createFrameFlow[UUID](CreateFrameFlowRequest("model1",
           "stream2",
           BuiltinFormats.binary,
-          config))(10.seconds)
+          flowConfig))(10.seconds)
 
         val (done, transformedFrame) = frameFlow.
           watchTermination()(Keep.right).
@@ -261,6 +364,106 @@ trait TransformServiceSpec extends FunSpecLike
         }
 
         done.isReadyWithin(1.second)
+      }
+
+      describe("throttling") {
+        it("throttles elements through the flow") {
+          Source.fromIterator(
+            () => Seq(
+              (StreamTransformFrameRequest(Try(frame), TransformOptions.default), 1),
+              (StreamTransformFrameRequest(Try(frame), TransformOptions.default), 2)
+            ).iterator
+          ).via(transformService.createFrameFlow[Int](
+            CreateFrameFlowRequest("model1",
+              "stream2",
+              BuiltinFormats.binary,
+              flowConfig.copy(
+                throttle = Some(
+                  Throttle(
+                    elements = 1,
+                    duration = 1.day,
+                    maxBurst = 1,
+                    mode = ThrottleMode.shaping
+                  )
+                )
+              ))
+          )(10.seconds)).map(_._2).
+            runWith(TestSink.probe[Int]).
+            request(2).
+            expectNext(1).
+            expectNoMessage(100.millis).
+            cancel()
+        }
+      }
+
+      describe("idling") {
+        it("closes the flow") {
+          val err = Source.fromIterator(
+            () => Seq(
+              (StreamTransformFrameRequest(Try(frame), TransformOptions.default), 1),
+              (StreamTransformFrameRequest(Try(frame), TransformOptions.default), 2)
+            ).iterator
+          ).initialDelay(100.millis).via(transformService.createFrameFlow[Int](
+            CreateFrameFlowRequest("model1",
+              "stream2",
+              BuiltinFormats.binary,
+              flowConfig.copy(idleTimeout = Some(10.millis)))
+          )(10.seconds)).map(_._2).
+            runWith(TestSink.probe[Int]).
+            request(2).
+            expectError()
+
+          assert(err.isInstanceOf[TimeoutException])
+          assert(err.getMessage.contains("No elements passed in the last"))
+        }
+      }
+
+      describe("transform delay") {
+        it("delays the transform operation") {
+          Source.fromIterator(
+            () => Seq(
+              (StreamTransformFrameRequest(Try(frame), TransformOptions.default), 1),
+              (StreamTransformFrameRequest(Try(frame), TransformOptions.default), 2)
+            ).iterator
+          ).via(transformService.createFrameFlow[Int](
+            CreateFrameFlowRequest("model1",
+              "stream2",
+              BuiltinFormats.binary,
+              flowConfig.copy(transformDelay = Some(1.day)))
+          )(10.seconds)).map(_._2).
+            runWith(TestSink.probe[Int]).
+            request(2).
+            expectNoMessage(100.millis).
+            cancel()
+        }
+      }
+
+      describe("transform timeout") {
+        it("returns an error") {
+          val probe = Source.fromIterator(
+            () => Seq(
+              (StreamTransformFrameRequest(Try(frame), TransformOptions.default), 1),
+              (StreamTransformFrameRequest(Try(frame), TransformOptions.default), 2)
+            ).iterator
+          ).via(transformService.createFrameFlow[Int](
+            CreateFrameFlowRequest("model1",
+              "stream2",
+              BuiltinFormats.binary,
+              flowConfig.copy(transformTimeout = 1.millis))
+          )(10.seconds)).map(_._1).
+            runWith(TestSink.probe[Try[DefaultLeapFrame]]).
+            request(2)
+
+          probe.expectNextPF {
+            case Failure(err) =>
+              assert(err.isInstanceOf[TimeoutException])
+          }
+
+          probe.expectNextPF {
+            case Failure(err) =>
+              assert(err.isInstanceOf[TimeoutException])
+          }
+        }
       }
     }
   }

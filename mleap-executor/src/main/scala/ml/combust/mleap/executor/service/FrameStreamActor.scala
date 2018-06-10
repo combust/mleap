@@ -2,7 +2,7 @@ package ml.combust.mleap.executor.service
 
 import akka.pattern.pipe
 import akka.actor.{Actor, Props, ReceiveTimeout, Status}
-import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
+import akka.stream.{DelayOverflowStrategy, Materializer, OverflowStrategy, QueueOfferResult}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import ml.combust.mleap.executor._
 import ml.combust.mleap.executor.error.ExecutorException
@@ -64,9 +64,19 @@ class FrameStreamActor(transformer: Transformer,
           frameStream.streamConfig.bufferSize,
           OverflowStrategy.backpressure)
 
+        source = frameStream.streamConfig.idleTimeout.map {
+          timeout =>
+            source.idleTimeout(timeout)
+        }.getOrElse(source)
+
         source = frameStream.streamConfig.throttle.map {
           throttle =>
             source.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
+        }.getOrElse(source)
+
+        source = frameStream.streamConfig.transformDelay.map {
+          delay =>
+            source.delay(delay, DelayOverflowStrategy.backpressure)
         }.getOrElse(source)
 
         val transform = Flow[(Messages.TransformFrame, Promise[(Try[DefaultLeapFrame], Any)])].
@@ -75,8 +85,7 @@ class FrameStreamActor(transformer: Transformer,
               ExecuteTransform(transformer, req.frame, req.options).map {
                 frame => (frame, tag, promise)
               }
-          }.idleTimeout(frameStream.streamConfig.idleTimeout).
-          to(Sink.foreach {
+          }.to(Sink.foreach {
             case (frame, tag, promise) => promise.success((frame, tag))
           })
 

@@ -3,7 +3,7 @@ package ml.combust.mleap.executor.service
 import akka.pattern.ask
 import akka.{Done, NotUsed}
 import akka.actor.{ActorRef, ActorRefFactory}
-import akka.stream.{FlowShape, KillSwitches, UniqueKillSwitch}
+import akka.stream.{DelayOverflowStrategy, FlowShape, KillSwitches, UniqueKillSwitch}
 import akka.stream.scaladsl.{Flow, GraphDSL, Keep, Sink, Source, Zip}
 import ml.combust.mleap.executor.repository.RepositoryBundleLoader
 import ml.combust.mleap.executor._
@@ -114,10 +114,22 @@ class LocalTransformService(loader: RepositoryBundleLoader)
           }
 
           val inFlow = builder.add {
-            var flow = Flow[(StreamTransformFrameRequest, Tag)].idleTimeout(request.flowConfig.idleTimeout)
+            var flow = Flow[(StreamTransformFrameRequest, Tag)]
+
+            flow = request.flowConfig.idleTimeout.map {
+              timeout => flow.idleTimeout(timeout)
+            }.getOrElse(flow).mapError {
+              case err: java.util.concurrent.TimeoutException => new TimeoutException(err)
+            }
+
             flow = request.flowConfig.throttle.map {
               throttle => flow.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
             }.getOrElse(flow)
+
+            flow = request.flowConfig.transformDelay.map {
+              delay => flow.delay(delay, DelayOverflowStrategy.backpressure)
+            }.getOrElse(flow)
+
             flow
           }
 
@@ -126,7 +138,12 @@ class LocalTransformService(loader: RepositoryBundleLoader)
               case ((req, tag), actor) =>
                 wrapExceptions(
                   (actor ? FrameStreamActor.Messages.TransformFrame(req, tag))(request.flowConfig.transformTimeout).
-                    mapTo[(Try[DefaultLeapFrame], Tag)]
+                    recover {
+                      case err: java.util.concurrent.TimeoutException =>
+                        (Failure(new TimeoutException(err)), tag)
+                      case err =>
+                        (Failure(err), tag)
+                    }.mapTo[(Try[DefaultLeapFrame], Tag)]
                 )
             }
           }
@@ -181,10 +198,22 @@ class LocalTransformService(loader: RepositoryBundleLoader)
           }
 
           val inFlow = builder.add {
-            var flow = Flow[(StreamTransformRowRequest, Tag)].idleTimeout(request.flowConfig.idleTimeout)
+            var flow = Flow[(StreamTransformRowRequest, Tag)]
+
+            flow = request.flowConfig.idleTimeout.map {
+              timeout => flow.idleTimeout(timeout)
+            }.getOrElse(flow).mapError {
+              case err: java.util.concurrent.TimeoutException => new TimeoutException(err)
+            }
+
             flow = request.flowConfig.throttle.map {
               throttle => flow.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
             }.getOrElse(flow)
+
+            flow = request.flowConfig.transformDelay.map {
+              delay => flow.delay(delay, DelayOverflowStrategy.backpressure)
+            }.getOrElse(flow)
+
             flow
           }
 
@@ -193,7 +222,12 @@ class LocalTransformService(loader: RepositoryBundleLoader)
               case ((r, tag), actor) =>
                 wrapExceptions(
                   (actor ? RowStreamActor.Messages.TransformRow(r, tag))(request.flowConfig.transformTimeout).
-                    mapTo[(Try[Option[Row]], Tag)]
+                    recover {
+                      case err: java.util.concurrent.TimeoutException =>
+                        (Failure(new TimeoutException(err)), tag)
+                      case err =>
+                        (Failure(err), tag)
+                    }.mapTo[(Try[Option[Row]], Tag)]
                 )
             }
           }

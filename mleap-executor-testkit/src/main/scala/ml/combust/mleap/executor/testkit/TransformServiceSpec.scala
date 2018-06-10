@@ -18,7 +18,7 @@ import org.scalatest.concurrent.ScalaFutures
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 trait TransformServiceSpec extends FunSpecLike
   with ScalaFutures {
@@ -64,7 +64,6 @@ trait TransformServiceSpec extends FunSpecLike
 
   private val flowConfig = FlowConfig(
     idleTimeout = None,
-    transformTimeout = 15.minutes,
     transformDelay = None,
     parallelism = 4,
     throttle = None
@@ -308,36 +307,6 @@ trait TransformServiceSpec extends FunSpecLike
             cancel()
         }
       }
-
-      describe("transform timeout") {
-        it("returns an error") {
-          val probe = Source.fromIterator(
-            () => Seq(
-              (StreamTransformRowRequest(Try(frame.dataset.head)), 2),
-              (StreamTransformRowRequest(Try(frame.dataset.head)), 3)
-            ).iterator
-          ).via(transformService.createRowFlow[Int](
-            CreateRowFlowRequest("model1",
-              "stream1",
-              BuiltinFormats.binary,
-              flowConfig.copy(transformTimeout = 1.millis),
-              rowStream.spec.schema,
-              rowStream.outputSchema)
-          )(10.seconds)).map(_._1).
-            runWith(TestSink.probe[Try[Option[Row]]]).
-            request(2)
-
-          probe.expectNextPF {
-            case Failure(err) =>
-              assert(err.isInstanceOf[TimeoutException])
-          }
-
-          probe.expectNextPF {
-            case Failure(err) =>
-              assert(err.isInstanceOf[TimeoutException])
-          }
-        }
-      }
     }
 
     describe("transform frame stream") {
@@ -435,34 +404,6 @@ trait TransformServiceSpec extends FunSpecLike
             request(2).
             expectNoMessage(100.millis).
             cancel()
-        }
-      }
-
-      describe("transform timeout") {
-        it("returns an error") {
-          val probe = Source.fromIterator(
-            () => Seq(
-              (StreamTransformFrameRequest(Try(frame), TransformOptions.default), 1),
-              (StreamTransformFrameRequest(Try(frame), TransformOptions.default), 2)
-            ).iterator
-          ).via(transformService.createFrameFlow[Int](
-            CreateFrameFlowRequest("model1",
-              "stream2",
-              BuiltinFormats.binary,
-              flowConfig.copy(transformTimeout = 1.millis))
-          )(10.seconds)).map(_._1).
-            runWith(TestSink.probe[Try[DefaultLeapFrame]]).
-            request(2)
-
-          probe.expectNextPF {
-            case Failure(err) =>
-              assert(err.isInstanceOf[TimeoutException])
-          }
-
-          probe.expectNextPF {
-            case Failure(err) =>
-              assert(err.isInstanceOf[TimeoutException])
-          }
         }
       }
     }

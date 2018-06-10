@@ -21,7 +21,7 @@ object FrameStreamActor {
 
   object Messages {
     case object Initialize
-    case class TransformFrame(request: StreamTransformFrameRequest, tag: Any)
+    case class TransformFrame(request: StreamTransformFrameRequest, promise: Promise[Try[DefaultLeapFrame]])
     case object StreamClosed
   }
 }
@@ -38,8 +38,8 @@ class FrameStreamActor(transformer: Transformer,
     request.streamName,
     request.streamConfig)
 
-  private var queue: Option[SourceQueueWithComplete[(Messages.TransformFrame, Promise[(Try[DefaultLeapFrame], Any)])]] = None
-  private var queueF: Option[Future[SourceQueueWithComplete[(Messages.TransformFrame, Promise[(Try[DefaultLeapFrame], Any)])]]] = None
+  private var queue: Option[SourceQueueWithComplete[Messages.TransformFrame]] = None
+  private var queueF: Option[Future[SourceQueueWithComplete[Messages.TransformFrame]]] = None
 
   override def postStop(): Unit = {
     for (q <- queue) { q.complete() }
@@ -60,7 +60,7 @@ class FrameStreamActor(transformer: Transformer,
   def initialize(): Unit = {
     if (queue.isEmpty) {
       queue = Some {
-        var source = Source.queue[(Messages.TransformFrame, Promise[(Try[DefaultLeapFrame], Any)])](
+        var source = Source.queue[Messages.TransformFrame](
           frameStream.streamConfig.bufferSize,
           OverflowStrategy.backpressure)
 
@@ -79,14 +79,14 @@ class FrameStreamActor(transformer: Transformer,
             source.delay(delay, DelayOverflowStrategy.backpressure)
         }.getOrElse(source)
 
-        val transform = Flow[(Messages.TransformFrame, Promise[(Try[DefaultLeapFrame], Any)])].
+        val transform = Flow[Messages.TransformFrame].
           mapAsyncUnordered(frameStream.streamConfig.parallelism) {
-            case (Messages.TransformFrame(req, tag), promise) =>
+            case Messages.TransformFrame(req, promise) =>
               ExecuteTransform(transformer, req.frame, req.options).map {
-                frame => (frame, tag, promise)
+                frame => (frame, promise)
               }
           }.to(Sink.foreach {
-            case (frame, tag, promise) => promise.success((frame, tag))
+            case (frame, promise) => promise.success(frame)
           })
 
         source.toMat(transform)(Keep.left).run()
@@ -104,23 +104,18 @@ class FrameStreamActor(transformer: Transformer,
   }
 
   def transformFrame(frame: Messages.TransformFrame): Unit = {
-    val promise: Promise[(Try[DefaultLeapFrame], Any)] = Promise()
-    val s = sender
-
     queueF = Some(queueF.get.flatMap {
       q =>
-        q.offer((frame, promise)).map {
-          case QueueOfferResult.Enqueued =>
-            promise.future.pipeTo(s)
-            q
+        q.offer(frame).map {
+          case QueueOfferResult.Enqueued => q
           case QueueOfferResult.Failure(err) =>
-            promise.failure(err)
+            frame.promise.failure(err)
             q
           case QueueOfferResult.Dropped =>
-            promise.failure(new ExecutorException("item dropped"))
+            frame.promise.failure(new ExecutorException("item dropped"))
             q
           case QueueOfferResult.QueueClosed =>
-            promise.failure(new ExecutorException("queue closed"))
+            frame.promise.failure(new ExecutorException("queue closed"))
             q
         }
     })

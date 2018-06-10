@@ -22,7 +22,7 @@ object RowStreamActor {
 
   object Messages {
     case object Initialize
-    case class TransformRow(row: StreamTransformRowRequest, tag: Any)
+    case class TransformRow(row: StreamTransformRowRequest, promise: Promise[Try[Option[Row]]])
     case object StreamClosed
   }
 }
@@ -47,8 +47,8 @@ class RowStreamActor(transformer: Transformer,
   }
 
   private var rowStream: Option[RowStream] = None
-  private var queue: Option[SourceQueueWithComplete[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])]] = None
-  private var queueF: Option[Future[SourceQueueWithComplete[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])]]] = None
+  private var queue: Option[SourceQueueWithComplete[Messages.TransformRow]] = None
+  private var queueF: Option[Future[SourceQueueWithComplete[Messages.TransformRow]]] = None
 
 
   override def postStop(): Unit = {
@@ -60,7 +60,7 @@ class RowStreamActor(transformer: Transformer,
     case Messages.Initialize => initialize()
     case Messages.StreamClosed => context.stop(self)
 
-    case r: GetRowStreamRequest => getRowStream()
+    case r: GetRowStreamRequest => getRowStream(r)
     case r: CreateRowFlowRequest => createRowFlow(r)
 
     case ReceiveTimeout => receiveTimeout()
@@ -78,7 +78,7 @@ class RowStreamActor(transformer: Transformer,
             rt.outputSchema))
 
           queue = Some {
-            var source = Source.queue[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])](rowStream.get.streamConfig.bufferSize, OverflowStrategy.backpressure)
+            var source = Source.queue[Messages.TransformRow](rowStream.get.streamConfig.bufferSize, OverflowStrategy.backpressure)
 
             source = rowStream.get.streamConfig.idleTimeout.map {
               timeout =>
@@ -95,15 +95,15 @@ class RowStreamActor(transformer: Transformer,
                 source.delay(delay, DelayOverflowStrategy.backpressure)
             }.getOrElse(source)
 
-            val transform = Flow[(Messages.TransformRow, Promise[(Try[Option[Row]], Any)])].mapAsyncUnordered(rowStream.get.streamConfig.parallelism) {
-              case (Messages.TransformRow(tRow, tag), promise) =>
+            val transform = Flow[Messages.TransformRow].mapAsyncUnordered(rowStream.get.streamConfig.parallelism) {
+              case Messages.TransformRow(tRow, promise) =>
                 Future {
                   val row = tRow.row.map(rt.transformOption)
 
-                  (row, tag, promise)
+                  (row, promise)
                 }
             }.to(Sink.foreach {
-              case (row, tag, promise) => promise.success((row, tag))
+              case (row, promise) => promise.success(row)
             })
 
             source.toMat(transform)(Keep.left).run()
@@ -122,29 +122,24 @@ class RowStreamActor(transformer: Transformer,
   }
 
   def transformRow(row: Messages.TransformRow): Unit = {
-    val promise: Promise[(Try[Option[Row]], Any)] = Promise()
-    val s = sender
-
     queueF = Some(queueF.get.flatMap {
       q =>
-        q.offer((row, promise)).map {
-          case QueueOfferResult.Enqueued =>
-            promise.future.pipeTo(s)
-            q
+        q.offer(row).map {
+          case QueueOfferResult.Enqueued => q
           case QueueOfferResult.Failure(err) =>
-            promise.failure(err)
+            row.promise.failure(err)
             q
           case QueueOfferResult.Dropped =>
-            promise.failure(new ExecutorException("item dropped"))
+            row.promise.failure(new ExecutorException("item dropped"))
             q
           case QueueOfferResult.QueueClosed =>
-            promise.failure(new ExecutorException("queue closed"))
+            row.promise.failure(new ExecutorException("queue closed"))
             q
         }
     })
   }
 
-  def getRowStream(): Unit = {
+  def getRowStream(request: GetRowStreamRequest): Unit = {
     rowStream match {
       case Some(rs) => sender ! rs
       case None => sender ! Status.Failure(new ExecutorException("stream not yet loaded"))

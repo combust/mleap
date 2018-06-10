@@ -96,13 +96,11 @@ case class StreamConfig(idleTimeout: Option[FiniteDuration],
 /** Specifies options for streams of transforms.
   *
   * @param idleTimeout timeout for stream inactivity
-  * @param transformTimeout timeout for transforming individual elements
   * @param transformDelay delay to add to transform operation
   * @param parallelism parallelism of transforms
   * @param throttle optionally throttle the stream
   */
 case class FlowConfig(idleTimeout: Option[FiniteDuration],
-                      transformTimeout: FiniteDuration,
                       transformDelay: Option[FiniteDuration],
                       parallelism: Parallelism,
                       throttle: Option[Throttle])

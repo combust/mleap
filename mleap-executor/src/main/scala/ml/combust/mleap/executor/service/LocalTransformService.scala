@@ -10,7 +10,7 @@ import ml.combust.mleap.executor._
 import ml.combust.mleap.executor.error.{ExecutorException, TimeoutException}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.concurrent.duration.FiniteDuration
 import scala.util.{Failure, Success, Try}
 
@@ -135,16 +135,10 @@ class LocalTransformService(loader: RepositoryBundleLoader)
 
           val queueFlow = builder.add {
             Flow[((StreamTransformFrameRequest, Tag), ActorRef)].mapAsync(request.flowConfig.parallelism) {
-              case ((req, tag), actor) =>
-                wrapExceptions(
-                  (actor ? FrameStreamActor.Messages.TransformFrame(req, tag))(request.flowConfig.transformTimeout).
-                    recover {
-                      case err: java.util.concurrent.TimeoutException =>
-                        (Failure(new TimeoutException(err)), tag)
-                      case err =>
-                        (Failure(err), tag)
-                    }.mapTo[(Try[DefaultLeapFrame], Tag)]
-                )
+              case ((req, tag), streamActor) =>
+                val promise: Promise[Try[DefaultLeapFrame]] = Promise()
+                streamActor ! FrameStreamActor.Messages.TransformFrame(req, promise)
+                wrapExceptions(promise.future.map(frame => (frame, tag)))
             }
           }
 
@@ -220,15 +214,9 @@ class LocalTransformService(loader: RepositoryBundleLoader)
           val queueFlow = builder.add {
             Flow[((StreamTransformRowRequest, Tag), ActorRef)].mapAsync(request.flowConfig.parallelism) {
               case ((r, tag), actor) =>
-                wrapExceptions(
-                  (actor ? RowStreamActor.Messages.TransformRow(r, tag))(request.flowConfig.transformTimeout).
-                    recover {
-                      case err: java.util.concurrent.TimeoutException =>
-                        (Failure(new TimeoutException(err)), tag)
-                      case err =>
-                        (Failure(err), tag)
-                    }.mapTo[(Try[Option[Row]], Tag)]
-                )
+                val promise: Promise[Try[Option[Row]]] = Promise()
+                actor ! RowStreamActor.Messages.TransformRow(r, promise)
+                wrapExceptions(promise.future.map(row => (row, tag)))
             }
           }
 

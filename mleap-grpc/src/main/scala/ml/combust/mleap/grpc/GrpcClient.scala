@@ -12,7 +12,9 @@ import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import TypeConverters._
 import akka.stream.FlowShape
 import com.google.protobuf.ByteString
+import io.grpc.Status
 import io.grpc.stub.StreamObserver
+import ml.combust.mleap.executor.error.{AlreadyExistsException, ExecutorException, NotFoundException, TimeoutException}
 import ml.combust.mleap.executor.service.TransformService
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 import ml.combust.mleap.grpc.stream.GrpcAkkaStreams
@@ -29,82 +31,115 @@ class GrpcClient(stub: MleapStub)
   private val format: String = BuiltinFormats.binary
   private val reader: FrameReader = FrameReader(format)
 
+  private def unwrapError(err: Throwable): Throwable = err match {
+    case err: io.grpc.StatusRuntimeException =>
+      err.getStatus.getCode match {
+        case Status.Code.NOT_FOUND => new NotFoundException(err)
+        case Status.Code.ALREADY_EXISTS => new AlreadyExistsException(err)
+        case Status.Code.DEADLINE_EXCEEDED => new TimeoutException(err)
+        case _ => new ExecutorException(err)
+      }
+    case _ => new ExecutorException(err)
+  }
+
+  private def unwrapError[T](f: Future[T]): Future[T] = {
+    f.transform(identity, unwrapError)
+  }
+
   override def getBundleMeta(request: executor.GetBundleMetaRequest)
                             (implicit timeout: FiniteDuration): Future[BundleMeta] = {
-    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
-      getBundleMeta(request).
-      map(pbToMleapBundleMeta)
+    unwrapError(
+      stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+        getBundleMeta(request).
+        map(pbToMleapBundleMeta)
+    )
   }
 
   override def getModel(request: GetModelRequest)
                        (implicit timeout: FiniteDuration): Future[Model] = {
-    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
-      getModel(request).
-      map(pbToMleapModel)
+    unwrapError(
+      stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+        getModel(request).
+        map(pbToMleapModel)
+    )
   }
 
   override def getFrameStream(request: GetFrameStreamRequest)
                              (implicit timeout: FiniteDuration): Future[FrameStream] = {
-    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
-      getFrameStream(request).
-      map(pbToMleapFrameStream)
+    unwrapError(
+      stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+        getFrameStream(request).
+        map(pbToMleapFrameStream)
+    )
   }
 
   override def getRowStream(request: GetRowStreamRequest)
                            (implicit timeout: FiniteDuration): Future[RowStream] = {
-    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
-      getRowStream(request).
-      map(pbToMleapRowStream)
+    unwrapError(
+      stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+        getRowStream(request).
+        map(pbToMleapRowStream)
+    )
   }
 
   override def loadModel(request: LoadModelRequest)
                         (implicit timeout: FiniteDuration): Future[Model] = {
-    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
-      loadModel(request).
-      map(pbToMleapModel)
+    unwrapError(
+      stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+        loadModel(request).
+        map(pbToMleapModel)
+    )
   }
 
   override def unloadModel(request: UnloadModelRequest)
                           (implicit timeout: FiniteDuration): Future[Model] = {
-    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
-      unloadModel(request).
-      map(pbToMleapModel)
+    unwrapError(
+      stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+        unloadModel(request).
+        map(pbToMleapModel)
+    )
   }
 
   override def createFrameStream(request: CreateFrameStreamRequest)
                                 (implicit timeout: FiniteDuration): Future[FrameStream] = {
-    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
-      createFrameStream(request).
-      map(pbToMleapFrameStream)
+    unwrapError(
+      stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+        createFrameStream(request).
+        map(pbToMleapFrameStream)
+    )
   }
 
   override def createRowStream(request: CreateRowStreamRequest)
                               (implicit timeout: FiniteDuration): Future[RowStream] = {
-    stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
-      createRowStream(request).
-      map(pbToMleapRowStream)
+    unwrapError(
+      stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).
+        createRowStream(request).
+        map(pbToMleapRowStream)
+    )
   }
 
   override def transform(request: TransformFrameRequest)
                         (implicit timeout: FiniteDuration): Future[Try[DefaultLeapFrame]] = {
-    Future.fromTry(FrameWriter(request.frame, format).toBytes().map {
-      bytes =>
-        pb.TransformFrameRequest(
-          modelName = request.modelName,
-          format = format,
-          frame = ByteString.copyFrom(bytes),
-          options = Some(request.options)
-        )
-    }).flatMap {
-      r => stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).transform(r)
-    }.flatMap {
-      response =>
-        if (response.status == TransformStatus.STATUS_OK) {
-          Future.successful(reader.fromBytes(response.frame.toByteArray))
-        } else {
-          Future.failed(new RuntimeException(response.error))
-        }
-    }
+    unwrapError(
+      Future.fromTry(FrameWriter(request.frame, format).toBytes().map {
+        bytes =>
+          pb.TransformFrameRequest(
+            modelName = request.modelName,
+            format = format,
+            frame = ByteString.copyFrom(bytes),
+            options = Some(request.options)
+          )
+      }).flatMap {
+        r => stub.withDeadlineAfter(timeout.toMillis, TimeUnit.MILLISECONDS).transform(r)
+      }.flatMap {
+        response =>
+          if (response.status == TransformStatus.STATUS_OK) {
+            Future.successful(reader.fromBytes(response.frame.toByteArray))
+          } else {
+            Future.failed(new RuntimeException(response.error))
+          }
+      }
+    )
   }
 
   override def createFrameFlow[Tag](request: CreateFrameFlowRequest)
@@ -115,7 +150,12 @@ class GrpcClient(stub: MleapStub)
 
     val _responseSource = GrpcAkkaStreams.source[TransformFrameResponse].mapMaterializedValue {
       observer =>
-        val requestObserver = stub.transformFrameStream(observer)
+        val unwrapObserver = new StreamObserver[TransformFrameResponse] {
+          override def onError(t: Throwable): Unit = observer.onError(unwrapError(t))
+          override def onCompleted(): Unit = observer.onCompleted()
+          override def onNext(value: TransformFrameResponse): Unit = observer.onNext(value)
+        }
+        val requestObserver = stub.transformFrameStream(unwrapObserver)
 
         // Initialize the stream
         requestObserver.onNext(pb.TransformFrameRequest(
@@ -205,7 +245,12 @@ class GrpcClient(stub: MleapStub)
 
     val _responseSource = GrpcAkkaStreams.source[TransformRowResponse].mapMaterializedValue {
       observer =>
-        val requestObserver = stub.transformRowStream(observer)
+        val unwrapObserver = new StreamObserver[TransformRowResponse] {
+          override def onError(t: Throwable): Unit = observer.onError(unwrapError(t))
+          override def onCompleted(): Unit = observer.onCompleted()
+          override def onNext(value: TransformRowResponse): Unit = observer.onNext(value)
+        }
+        val requestObserver = stub.transformRowStream(unwrapObserver)
 
         // Initialize the stream
         requestObserver.onNext(pb.TransformRowRequest(

@@ -12,6 +12,11 @@ import scala.concurrent.duration._
 object TypeConverters {
   import scala.language.implicitConversions
 
+  private def timeoutOption(duration: FiniteDuration): Option[FiniteDuration] = {
+    if (duration.length > 0) { Some(duration) }
+    else { None }
+  }
+
   implicit def pbToMleapSelectMode(sm: SelectMode): executor.SelectMode = {
     if (sm.isSelectModeRelaxed) {
       executor.SelectMode.Relaxed
@@ -107,8 +112,8 @@ object TypeConverters {
 
   implicit def mleapToPbStreamConfig(config: executor.StreamConfig): StreamConfig = {
     StreamConfig(
-      idleTimeout = config.idleTimeout.toMillis,
-      transformTimeout = config.transformTimeout.toMillis,
+      idleTimeout = config.idleTimeout.map(_.toMillis).getOrElse(0),
+      transformDelay = config.transformDelay.map(_.toMillis).getOrElse(0),
       parallelism = config.parallelism,
       throttle = config.throttle.map(mleapToPbThrottle),
       bufferSize = config.bufferSize
@@ -117,8 +122,8 @@ object TypeConverters {
 
   implicit def pbToMleapStreamConfig(config: StreamConfig): executor.StreamConfig = {
     executor.StreamConfig(
-      idleTimeout = config.idleTimeout.millis,
-      transformTimeout = config.transformTimeout.millis,
+      idleTimeout = timeoutOption(config.idleTimeout.millis),
+      transformDelay = timeoutOption(config.transformDelay.millis),
       parallelism = config.parallelism,
       throttle = config.throttle.map(pbToMleapThrottle),
       bufferSize = config.bufferSize
@@ -165,8 +170,8 @@ object TypeConverters {
 
   implicit def mleapToPbFlowConfig(config: executor.FlowConfig): FlowConfig = {
     FlowConfig(
-      idleTimeout = config.idleTimeout.toMillis,
-      transformTimeout = config.transformTimeout.toMillis,
+      idleTimeout = config.idleTimeout.map(_.toMillis).getOrElse(0),
+      transformDelay = config.transformDelay.map(_.toMillis).getOrElse(0),
       parallelism = config.parallelism,
       throttle = config.throttle.map(mleapToPbThrottle)
     )
@@ -174,8 +179,8 @@ object TypeConverters {
 
   implicit def pbToMleapFlowConfig(config: FlowConfig): executor.FlowConfig = {
     executor.FlowConfig(
-      idleTimeout = config.idleTimeout.millis,
-      transformTimeout = config.transformTimeout.millis,
+      idleTimeout = timeoutOption(config.idleTimeout.millis),
+      transformDelay = timeoutOption(config.transformDelay.millis),
       parallelism = config.parallelism,
       throttle = config.throttle.map(pbToMleapThrottle)
     )

@@ -309,6 +309,30 @@ trait TransformServiceSpec extends FunSpecLike
       }
     }
 
+    describe("RowTransformClient") {
+      it("transforms rows") {
+        val client = transformService.createTransformRowClient(
+          CreateRowFlowRequest("model1",
+            "stream1",
+            BuiltinFormats.binary,
+            flowConfig,
+            rowStream.spec.schema,
+            rowStream.outputSchema),
+          1024
+        )(10.seconds, materializer, system.dispatcher)
+
+        whenReady(client.transform(frame.dataset.head)) {
+          row =>
+            assert(row.isSuccess)
+        }
+
+        whenReady(client.transform(frame.dataset.head)) {
+          row =>
+            assert(row.isSuccess)
+        }
+      }
+    }
+
     describe("transform frame stream") {
       it("transforms frames in a stream") {
         val uuid = UUID.randomUUID()

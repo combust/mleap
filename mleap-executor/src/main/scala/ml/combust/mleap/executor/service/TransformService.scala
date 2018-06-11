@@ -3,15 +3,48 @@ package ml.combust.mleap.executor.service
 import java.util.concurrent.TimeUnit
 
 import akka.NotUsed
-import akka.stream.javadsl
-import akka.stream.scaladsl.Flow
+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult, javadsl}
+import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import ml.combust.mleap.executor._
+import ml.combust.mleap.executor.error.ExecutorException
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 
 import scala.concurrent.duration._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
+
+class TransformRowClient(private var queue: Future[SourceQueueWithComplete[(StreamTransformRowRequest, Promise[Try[Option[Row]]])]])
+                        (implicit ec: ExecutionContext) {
+  def transform(request: StreamTransformRowRequest): Future[Try[Option[Row]]] = {
+    val promise: Promise[Try[Option[Row]]] = Promise()
+
+    synchronized {
+      queue = queue.flatMap {
+        q =>
+          q.offer((request, promise)).map {
+            case QueueOfferResult.Enqueued => q
+            case QueueOfferResult.QueueClosed =>
+              promise.failure(new ExecutorException("queue closed"))
+              q
+            case QueueOfferResult.Dropped =>
+              promise.failure(new ExecutorException("element dropped"))
+              q
+            case QueueOfferResult.Failure(err) =>
+              promise.failure(new ExecutorException(err))
+              q
+            case _ =>
+              promise.failure(new ExecutorException("unknown transform error"))
+              q
+          }
+      }
+
+      promise.future
+    }
+  }
+
+  def transform(row: Row): Future[Try[Option[Row]]] = transform(StreamTransformRowRequest(Try(row)))
+}
 
 trait TransformService {
   def close(): Unit
@@ -61,5 +94,19 @@ trait TransformService {
   def javaRowFlow[Tag](request: CreateRowFlowRequest,
                        timeout: Long): javadsl.Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
     createRowFlow(request)(timeout.millis).asJava
+  }
+
+  def createTransformRowClient(request: CreateRowFlowRequest,
+                               bufferSize: Int)
+                              (implicit timeout: FiniteDuration,
+                               materializer: Materializer,
+                               ec: ExecutionContext): TransformRowClient = {
+    val queue = Source.queue[(StreamTransformRowRequest, Promise[Try[Option[Row]]])](bufferSize, OverflowStrategy.backpressure)
+    val q = queue.viaMat(createRowFlow[Promise[Try[Option[Row]]]](request))(Keep.left).
+      toMat(Sink.foreach {
+        case (response, promise) => promise.success(response)
+      })(Keep.left).run()
+
+    new TransformRowClient(Future.successful(q))
   }
 }

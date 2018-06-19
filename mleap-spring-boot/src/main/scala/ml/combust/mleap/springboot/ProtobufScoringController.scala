@@ -72,7 +72,7 @@ class ProtobufScoringController(@Autowired val actorSystem : ActorSystem,
         case Success(resp) => TransformFrameResponse(tag = request.getTag,
           frame = ByteString.copyFrom(FrameWriter(resp.get, request.getFormat).toBytes().get))
         case Failure(ex) => {
-          JsonScoringController.logger.error("Transform error due to ", ex)
+          ProtobufScoringController.logger.error("Transform error due to ", ex)
           TransformFrameResponse(tag = request.getTag, status = STATUS_ERROR,
             error = ExceptionUtils.getMessage(ex), backtrace = ExceptionUtils.getStackTrace(ex))
         }

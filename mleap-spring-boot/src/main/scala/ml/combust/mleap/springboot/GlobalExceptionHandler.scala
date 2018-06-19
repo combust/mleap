@@ -1,9 +1,9 @@
 package ml.combust.mleap.springboot
 
 import javax.servlet.http.HttpServletRequest
-import akka.pattern.AskTimeoutException
+
+import akka.actor.InvalidActorNameException
 import com.fasterxml.jackson.core.JsonParseException
-import ml.combust.mleap.executor.error.BundleException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.{ConversionNotSupportedException, TypeMismatchException}
 import org.springframework.http.{HttpStatus, ResponseEntity}
@@ -21,15 +21,10 @@ import org.springframework.web.servlet.NoHandlerFoundException
 @Component
 class GlobalExceptionHandler {
 
-  @ExceptionHandler(Array(classOf[BundleException]))
+  @ExceptionHandler(Array(classOf[InvalidActorNameException]))
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   def handleBundleException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
     errorResponse(ex, HttpStatus.BAD_REQUEST)
-
-  @ExceptionHandler(Array(classOf[AskTimeoutException]))
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  def handleAskTimeoutException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
-    errorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR)
 
   // returning the same status code as SpringBoot for Spring-related exceptions
   @ExceptionHandler(Array(classOf[HttpRequestMethodNotSupportedException]))

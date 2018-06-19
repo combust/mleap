@@ -7,7 +7,6 @@ import java.nio.file.{Files, Path, StandardCopyOption}
 import ml.combust.mleap.core.types.{ScalarType, StructField, StructType}
 import ml.combust.mleap.executor.{LoadModelRequest, ModelConfig}
 import ml.combust.mleap.pb
-import ml.combust.mleap.pb.Model
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.javadsl.LeapFrameBuilder
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
@@ -56,11 +55,15 @@ object TestUtil {
     Seq(Row(44.5, 98.2))),
     BuiltinFormats.binary).toBytes().get
 
-  def buildLoadModelJsonRequest(modelName: String, uri:URI) = {
-    val tmpFile: Path = createTempFile(uri)
-
+  def buildLoadModelJsonRequest(modelName: String, uri:URI, createTemp: Boolean) = {
+    var tmpFileUri : URI = null
+    if (createTemp) {
+      tmpFileUri = createTempFile(uri).toUri
+    } else {
+      tmpFileUri = uri
+    }
     val loadModelRequest = LoadModelRequest(modelName = modelName,
-                            uri = tmpFile.toUri,
+                            uri = tmpFileUri,
                             config = ModelConfig(memoryTimeout = 15.minutes, diskTimeout = 15.minutes))
 
     val protoRequest = pb.LoadModelRequest(modelName = loadModelRequest.modelName,
@@ -78,6 +81,4 @@ object TestUtil {
     tmpFile.toFile.deleteOnExit()
     tmpFile
   }
-
-  def extractModelResponse(response: String) = TypeConverters.pbToExecutorModel(parser.fromJsonString[Model](response))
 }

@@ -15,10 +15,8 @@ class StarterConfiguration {
   @Bean
   def actorSystem() = ActorSystem("MleapSpringBootScoring")
 
-
   @Bean
   def mleapExecutor(actorSystem: ActorSystem) = MleapExecutor(actorSystem)
-
 
   @Bean
   def protobufHttpMessageConverter() = new ProtobufHttpMessageConverter

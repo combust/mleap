@@ -59,7 +59,7 @@ class ProtobufScoringController(@Autowired val actorSystem : ActorSystem,
               @RequestHeader(value = "timeout", defaultValue = "60000") timeout: Int) : CompletionStage[Mleap.BundleMeta] =
     mleapExecutor
       .getBundleMeta(GetBundleMetaRequest(modelName))(timeout)
-      .map(model => BundleMeta.toJavaProto(model))(executor).toJava
+      .map(meta => BundleMeta.toJavaProto(meta))(executor).toJava
 
   @PostMapping(path = Array("/models/{model_name}/transform"),
     consumes = Array("application/x-protobuf; charset=UTF-8"),

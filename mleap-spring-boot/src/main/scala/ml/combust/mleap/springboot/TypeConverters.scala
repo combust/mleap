@@ -42,13 +42,11 @@ object TypeConverters {
   implicit def executorToPbModel(model: executor.Model): Model =
     Model(name = model.name, uri = model.uri.toString, config = Some(model.config))
 
-  implicit def pbToExecutorModel(model: Model): executor.Model = {
+  implicit def pbToExecutorModel(model: Model): executor.Model =
     executor.Model(name = model.name, uri = URI.create(model.uri), config = model.config.get)
-  }
 
   implicit def executorToPbBundleMeta(meta: executor.BundleMeta): BundleMeta =
     BundleMeta(bundle = Some(meta.info.asBundle), inputSchema = Some(meta.inputSchema), outputSchema = Some(meta.outputSchema))
-
 
   implicit def pbToExecutorTransformOptions(options: TransformOptions): executor.TransformOptions =
     executor.TransformOptions(select = options.select, selectMode = options.selectMode)

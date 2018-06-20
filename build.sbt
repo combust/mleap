@@ -18,6 +18,7 @@ lazy val serving = MleapProject.serving
 lazy val executor = MleapProject.executor
 lazy val executorTestKit = MleapProject.executorTestKit
 lazy val executorTests = MleapProject.executorTests
+lazy val repositoryS3 = MleapProject.repositoryS3
 lazy val grpc = MleapProject.grpc
 lazy val grpcServer = MleapProject.grpcServer
 lazy val benchmarks = MleapProject.benchmark

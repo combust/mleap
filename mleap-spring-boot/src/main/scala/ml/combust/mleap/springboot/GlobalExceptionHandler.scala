@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.{ControllerAdvice, ExceptionHandl
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException
 import org.springframework.web.multipart.support.MissingServletRequestPartException
 import org.springframework.web.servlet.NoHandlerFoundException
+import scalapb.json4s.JsonFormatException
 
 @ControllerAdvice
 @Component
@@ -28,6 +29,10 @@ class GlobalExceptionHandler {
 
   @ExceptionHandler(Array(classOf[InvalidActorNameException]))
   def handleBundleException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
+    errorResponse(ex, HttpStatus.BAD_REQUEST)
+
+  @ExceptionHandler(Array(classOf[JsonParseException], classOf[JsonFormatException]))
+  def handleJsonParseException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
     errorResponse(ex, HttpStatus.BAD_REQUEST)
 
   // returning the same status code as SpringBoot for Spring-related exceptions
@@ -91,10 +96,6 @@ class GlobalExceptionHandler {
   @ExceptionHandler(Array(classOf[AsyncRequestTimeoutException]))
   def handleAsyncRequestTimeoutException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
     errorResponse(ex, HttpStatus.SERVICE_UNAVAILABLE)
-
-  @ExceptionHandler(Array(classOf[JsonParseException]))
-  def handleJsonParseException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
-    errorResponse(ex, HttpStatus.BAD_REQUEST)
 
   private def errorResponse(ex: Exception, status: HttpStatus): ResponseEntity[Unit] = {
     GlobalExceptionHandler.logger.warn("Returned error due to ", ex)

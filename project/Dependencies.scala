@@ -15,6 +15,7 @@ object Dependencies {
   lazy val logbackVersion = "1.2.3"
   lazy val loggingVersion = "3.9.0"
   lazy val slf4jVersion = "1.7.25"
+  lazy val awsSdkVersion = "1.11.349"
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
@@ -49,6 +50,8 @@ object Dependencies {
     val springBoot = "org.springframework.boot" % "spring-boot-starter-web" % springBootVersion
     val commonsLang = "org.apache.commons" % "commons-lang3" % "3.7"
     val scalpbJson = "com.thesamet.scalapb" %% "scalapb-json4s" % "0.7.0"
+
+    val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion
 
     lazy val logging = Seq(
       "ch.qos.logback" % "logback-core" % logbackVersion,
@@ -106,6 +109,8 @@ object Dependencies {
   val executorTestKit = l ++= Seq(scalaTest, akkaTestKit, akkaStreamTestKit)
 
   val grpcServer = l ++= Seq(scopt) ++ Seq(Test.scalaTest, Test.akkaStreamTestKit)
+
+  val repositoryS3 = l ++= Seq(awsS3)
 
   val grpc = l ++= Seq(
     "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,

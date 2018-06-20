@@ -145,6 +145,12 @@ object MleapProject {
     dependencies = Seq(grpc, executorTestKit % "test")
   )
 
+  lazy val repositoryS3 = Project(
+    id = "mleap-repository-s3",
+    base = file("mleap-repository-s3"),
+    dependencies = Seq(executor)
+  )
+
   lazy val springBootServing = Project(
     id = "mleap-spring-boot",
     base = file("mleap-spring-boot"),

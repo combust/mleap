@@ -3,7 +3,7 @@ package ml.combust.mleap.springboot
 import java.net.URI
 
 import com.google.protobuf.ByteString
-import ml.combust.mleap.pb.{LoadModelRequest, Mleap, ModelConfig, TransformFrameRequest}
+import ml.combust.mleap.pb._
 import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import org.junit.runner.RunWith
@@ -23,12 +23,12 @@ class ProtobufScoringControllerSpec extends ScoringBase[Mleap.LoadModelRequest, 
     new HttpEntity[Mleap.LoadModelRequest](LoadModelRequest.toJavaProto(request), ProtobufScoringControllerSpec.protoHeaders)
   }
 
-  override def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame): HttpEntity[Mleap.TransformFrameRequest] = {
+  override def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame, options: Option[TransformOptions]): HttpEntity[Mleap.TransformFrameRequest] = {
     val request = TransformFrameRequest(modelName = modelName,
       format = BuiltinFormats.binary,
       initTimeout = 35000L,
       frame = ByteString.copyFrom(FrameWriter(frame, BuiltinFormats.binary).toBytes().get),
-      options = None
+      options = options
     )
 
     new HttpEntity[Mleap.TransformFrameRequest](TransformFrameRequest.toJavaProto(request),

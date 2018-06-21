@@ -32,12 +32,12 @@ class JsonScoringControllerSpec extends ScoringBase[String, String, String, Stri
     new HttpEntity[String](JsonMethods.compact(printer.toJson(request)), JsonScoringControllerSpec.jsonHeaders)
   }
 
-  override def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame): HttpEntity[String] = {
+  override def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame, options: Option[TransformOptions]): HttpEntity[String] = {
     val request = TransformFrameRequest(modelName = modelName,
       format = BuiltinFormats.json,
       initTimeout = 35000L,
       frame = ByteString.copyFrom(FrameWriter(frame, BuiltinFormats.json).toBytes().get),
-      options = None
+      options = options
     )
     new HttpEntity[String](JsonMethods.compact(printer.toJson(request)), JsonScoringControllerSpec.jsonHeaders)
   }

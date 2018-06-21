@@ -4,7 +4,8 @@ import java.net.URI
 import java.util
 import java.util.UUID
 
-import ml.combust.mleap.pb.Mleap
+import ml.combust.mleap.pb.SelectMode.{SELECT_MODE_RELAXED, SELECT_MODE_STRICT}
+import ml.combust.mleap.pb.{Mleap, TransformOptions}
 import ml.combust.mleap.springboot.TestUtil._
 import org.scalatest.{FunSpec, Matchers}
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,7 +35,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
 
   def extractBundleMetaResponse(response: ResponseEntity[_ <: Any]): Mleap.BundleMeta
 
-  def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame) : HttpEntity[X]
+  def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame, options: Option[TransformOptions]) : HttpEntity[X]
 
   def extractTransformResponse(response: ResponseEntity[_ <: Any]): Mleap.TransformFrameResponse
 
@@ -210,7 +211,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
-      val request = createTransformFrameRequest(modelName, validFrame)
+      val request = createTransformFrameRequest(modelName, validFrame, None)
       val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
       val transformResponse = extractTransformResponse(response)
       assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_OK)
@@ -219,9 +220,49 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       assert(data(0).getDouble(5) == -67.78953193834998)
     }
 
+    it("transforms request successfully with valid strict selecting") {
+      val modelName = UUID.randomUUID().toString
+      val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
+      restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
+
+      // wait until it's been loaded
+      if (!waitUntilModelLoaded(modelName, 10)) {
+        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
+      }
+
+      val request = createTransformFrameRequest(modelName, validFrame,
+        Some(TransformOptions(select = Seq("demo:prediction"), selectMode = SELECT_MODE_STRICT)))
+      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      val transformResponse = extractTransformResponse(response)
+      assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_OK)
+
+      val data = FrameReader(leapFrameFormat()).fromBytes(transformResponse.getFrame.toByteArray).get.dataset.toArray
+      assert(data(0).getDouble(0) == -67.78953193834998)
+    }
+
+    it("transforms request successfully with some valid and some invalid relaxed selecting") {
+      val modelName = UUID.randomUUID().toString
+      val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
+      restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
+
+      // wait until it's been loaded
+      if (!waitUntilModelLoaded(modelName, 10)) {
+        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
+      }
+
+      val request = createTransformFrameRequest(modelName, validFrame,
+        Some(TransformOptions(select = Seq("demo:prediction", "dummy"), selectMode = SELECT_MODE_RELAXED)))
+      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      val transformResponse = extractTransformResponse(response)
+      assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_OK)
+
+      val data = FrameReader(leapFrameFormat()).fromBytes(transformResponse.getFrame.toByteArray).get.dataset.toArray
+      assert(data(0).getDouble(0) == -67.78953193834998)
+    }
+
     it("returns 200 response with error wrapped in TransformFrameResponse when no model loaded previously") {
       val modelName = UUID.randomUUID().toString
-      val request = createTransformFrameRequest(modelName, validFrame)
+      val request = createTransformFrameRequest(modelName, validFrame, None)
       val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
       assert(response.getStatusCode == HttpStatus.OK)
       val transformResponse = extractTransformResponse(response)

@@ -17,6 +17,7 @@ import ml.combust.mleap.runtime.serialization.{FrameReader, FrameWriter}
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.json4s.jackson.JsonMethods
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 
 import scala.util.{Failure, Success}
 import scalapb.json4s.{Parser, Printer}
@@ -33,6 +34,7 @@ class JsonScoringController(@Autowired val actorSystem : ActorSystem,
   @PostMapping(path = Array("/models"),
               consumes = Array("application/json; charset=UTF-8"),
               produces = Array("application/json; charset=UTF-8"))
+  @ResponseStatus(HttpStatus.ACCEPTED)
   def loadModel(@RequestBody request: String,
                 @RequestHeader(value = "timeout", defaultValue = "60000") timeout: Int) : CompletionStage[String] =
     mleapExecutor

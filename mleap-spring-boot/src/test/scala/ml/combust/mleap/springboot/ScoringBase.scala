@@ -46,7 +46,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val modelName = UUID.randomUUID().toString
       val request = createLoadModelRequest(modelName, demoUri, true)
       val response = restTemplate.exchange("/models", HttpMethod.POST, request, cu.runtimeClass)
-      assert(response.getStatusCode == HttpStatus.OK)
+      assert(response.getStatusCode == HttpStatus.ACCEPTED)
       val model = extractModelResponse(response)
       assert(model.getName == modelName)
       assert(model.getUri.contains("demo"))
@@ -79,7 +79,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val modelName = UUID.randomUUID().toString
       val request = createLoadModelRequest(modelName, URI.create(""), false)
       val response = restTemplate.exchange("/models", HttpMethod.POST, request, cu.runtimeClass)
-      assert(response.getStatusCode == HttpStatus.OK)
+      assert(response.getStatusCode == HttpStatus.ACCEPTED)
       val model = extractModelResponse(response)
       assert(model.getName == modelName)
     }
@@ -88,7 +88,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val modelName = UUID.randomUUID().toString
       val request = createLoadModelRequest(modelName, URI.create("file://dummy"), false)
       val response = restTemplate.exchange("/models", HttpMethod.POST, request, cu.runtimeClass)
-      assert(response.getStatusCode == HttpStatus.OK)
+      assert(response.getStatusCode == HttpStatus.ACCEPTED)
       val model = extractModelResponse(response)
       assert(model.getName == modelName)
     }
@@ -97,7 +97,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val modelName = UUID.randomUUID().toString
       val request = createLoadModelRequest(modelName, URI.create("dummy"), false)
       val response = restTemplate.exchange("/models", HttpMethod.POST, request, cu.runtimeClass)
-      assert(response.getStatusCode == HttpStatus.OK)
+      assert(response.getStatusCode == HttpStatus.ACCEPTED)
       val model =extractModelResponse(response)
       assert(model.getName == modelName)
     }
@@ -188,7 +188,6 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       }
 
       val response = restTemplate.exchange("/models/" + modelName + "/meta", HttpMethod.GET, createEmptyBodyRequest(), cv.runtimeClass)
-//      println(response)
       assert(response.getStatusCode == HttpStatus.OK)
       val meta = extractBundleMetaResponse(response)
       assert(meta.getBundle.getName == "pipeline_7a70bdf8-bd53-11e7-bcd7-6c40089417e6")

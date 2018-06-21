@@ -3,7 +3,7 @@ package ml.combust.mleap.springboot
 import javax.servlet.http.HttpServletRequest
 
 import akka.actor.InvalidActorNameException
-import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.core.JsonProcessingException
 import ml.combust.mleap.executor.error.NotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.{ConversionNotSupportedException, TypeMismatchException}
@@ -31,7 +31,7 @@ class GlobalExceptionHandler {
   def handleBundleException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
     errorResponse(ex, HttpStatus.BAD_REQUEST)
 
-  @ExceptionHandler(Array(classOf[JsonParseException], classOf[JsonFormatException]))
+  @ExceptionHandler(Array(classOf[JsonProcessingException], classOf[JsonFormatException]))
   def handleJsonParseException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
     errorResponse(ex, HttpStatus.BAD_REQUEST)
 

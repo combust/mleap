@@ -5,7 +5,7 @@ import java.util
 import java.util.UUID
 
 import ml.combust.mleap.pb.Mleap
-import ml.combust.mleap.springboot.TestUtil.demoUri
+import ml.combust.mleap.springboot.TestUtil._
 import org.scalatest.{FunSpec, Matchers}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -13,9 +13,12 @@ import org.springframework.http.{HttpEntity, HttpMethod, HttpStatus, ResponseEnt
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter
 import org.springframework.test.context.TestContextManager
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
+import ml.combust.mleap.runtime.serialization.FrameReader
+
 import scala.reflect._
 
-abstract class ScoringBase[T, U, V](implicit cu: ClassTag[U], cv: ClassTag[V]) extends FunSpec with Matchers {
+abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag[V], cy: ClassTag[Y]) extends FunSpec with Matchers {
 
   @Autowired
   var restTemplate: TestRestTemplate = _
@@ -30,6 +33,12 @@ abstract class ScoringBase[T, U, V](implicit cu: ClassTag[U], cv: ClassTag[V]) e
   def createEmptyBodyRequest(): HttpEntity[Unit]
 
   def extractBundleMetaResponse(response: ResponseEntity[_ <: Any]): Mleap.BundleMeta
+
+  def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame) : HttpEntity[X]
+
+  def extractTransformResponse(response: ResponseEntity[_ <: Any]): Mleap.TransformFrameResponse
+
+  def leapFrameFormat(): String
 
   describe("scoring controller - load model endpoint") {
     it("loading model is successful") {
@@ -55,7 +64,7 @@ abstract class ScoringBase[T, U, V](implicit cu: ClassTag[U], cv: ClassTag[V]) e
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
       // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 4)) {
+      if (!waitUntilModelLoaded(modelName, 10)) {
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
@@ -101,7 +110,7 @@ abstract class ScoringBase[T, U, V](implicit cu: ClassTag[U], cv: ClassTag[V]) e
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
       // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 4)) {
+      if (!waitUntilModelLoaded(modelName, 10)) {
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
@@ -123,7 +132,7 @@ abstract class ScoringBase[T, U, V](implicit cu: ClassTag[U], cv: ClassTag[V]) e
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
       // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 4)) {
+      if (!waitUntilModelLoaded(modelName, 10)) {
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
@@ -149,7 +158,7 @@ abstract class ScoringBase[T, U, V](implicit cu: ClassTag[U], cv: ClassTag[V]) e
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
       // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 4)) {
+      if (!waitUntilModelLoaded(modelName, 10)) {
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
@@ -166,18 +175,19 @@ abstract class ScoringBase[T, U, V](implicit cu: ClassTag[U], cv: ClassTag[V]) e
   }
 
   describe("scoring controller - get bundle META endpoint") {
-    it("gets model successfully") {
+    it("gets bundle meta successfully") {
       val modelName = UUID.randomUUID().toString
       // load model first
       val loadModelRequest1 = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
       // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 4)) {
+      if (!waitUntilModelLoaded(modelName, 10)) {
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
       val response = restTemplate.exchange("/models/" + modelName + "/meta", HttpMethod.GET, createEmptyBodyRequest(), cv.runtimeClass)
+//      println(response)
       assert(response.getStatusCode == HttpStatus.OK)
       val meta = extractBundleMetaResponse(response)
       assert(meta.getBundle.getName == "pipeline_7a70bdf8-bd53-11e7-bcd7-6c40089417e6")
@@ -189,10 +199,33 @@ abstract class ScoringBase[T, U, V](implicit cu: ClassTag[U], cv: ClassTag[V]) e
     }
   }
 
+  describe("scoring controller - transform endpoint") {
+    it("transforms request successfully") {
+      val modelName = UUID.randomUUID().toString
+      val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
+      restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
+
+      // wait until it's been loaded
+      if (!waitUntilModelLoaded(modelName, 10)) {
+        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
+      }
+
+      val request = createTransformFrameRequest(modelName, validFrame)
+      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      val transformResponse = extractTransformResponse(response)
+      assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_OK)
+
+      val data = FrameReader(leapFrameFormat()).fromBytes(transformResponse.getFrame.toByteArray).get.dataset.toArray
+      assert(data(0).getDouble(5) == -67.78953193834998)
+    }
+  }
+
   def waitUntilModelLoaded(modelName: String, retries: Int): Boolean = {
     for (_ <- 1 to retries) {
       val response = restTemplate.exchange("/models/" + modelName, HttpMethod.GET, JsonScoringControllerSpec.httpEntityWithJsonHeaders, classOf[String])
       if (response.getStatusCode == HttpStatus.OK) {
+        // pause a bit to ensure model has finished loaded
+        Thread.sleep(500)
         return true
       } else {
         // pause a bit to allow the model to load

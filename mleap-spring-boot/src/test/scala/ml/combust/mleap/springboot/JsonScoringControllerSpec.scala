@@ -1,6 +1,7 @@
 package ml.combust.mleap.springboot
 
 import java.net.URI
+import java.util.UUID
 
 import com.google.protobuf.ByteString
 import org.junit.runner.RunWith
@@ -11,6 +12,7 @@ import org.springframework.http._
 import ml.combust.mleap.pb._
 import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
+import ml.combust.mleap.springboot.TestUtil.demoUri
 import org.json4s.jackson.JsonMethods
 
 import scalapb.json4s.{Parser, Printer}
@@ -63,6 +65,38 @@ class JsonScoringControllerSpec extends ScoringBase[String, String, String, Stri
 
     it("returns BAD_REQUEST error when request is not valid json") {
       val response = restTemplate.exchange("/models", HttpMethod.POST,
+        new HttpEntity[String]("{invalid json}", JsonScoringControllerSpec.jsonHeaders), classOf[String])
+      assert(response.getStatusCode == HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  describe("json scoring controller - transform endpoint") {
+    it("returns BAD_REQUEST error with empty request") {
+      val modelName = UUID.randomUUID().toString
+      val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
+      restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, classOf[String])
+
+      // wait until it's been loaded
+      if (!waitUntilModelLoaded(modelName, 10)) {
+        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
+      }
+
+      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST,
+        new HttpEntity[String]("", JsonScoringControllerSpec.jsonHeaders), classOf[String])
+      assert(response.getStatusCode == HttpStatus.BAD_REQUEST)
+    }
+
+    it("returns BAD_REQUEST error when request is not valid json") {
+      val modelName = UUID.randomUUID().toString
+      val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
+      restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, classOf[String])
+
+      // wait until it's been loaded
+      if (!waitUntilModelLoaded(modelName, 10)) {
+        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
+      }
+
+      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST,
         new HttpEntity[String]("{invalid json}", JsonScoringControllerSpec.jsonHeaders), classOf[String])
       assert(response.getStatusCode == HttpStatus.BAD_REQUEST)
     }

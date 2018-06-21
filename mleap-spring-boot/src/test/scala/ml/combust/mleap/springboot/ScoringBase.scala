@@ -218,6 +218,17 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val data = FrameReader(leapFrameFormat()).fromBytes(transformResponse.getFrame.toByteArray).get.dataset.toArray
       assert(data(0).getDouble(5) == -67.78953193834998)
     }
+
+    it("returns 200 response with error wrapped in TransformFrameResponse when no model loaded previously") {
+      val modelName = UUID.randomUUID().toString
+      val request = createTransformFrameRequest(modelName, validFrame)
+      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      assert(response.getStatusCode == HttpStatus.OK)
+      val transformResponse = extractTransformResponse(response)
+      assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_ERROR)
+      assert(!transformResponse.getError.isEmpty)
+      assert(!transformResponse.getBacktrace.isEmpty)
+    }
   }
 
   def waitUntilModelLoaded(modelName: String, retries: Int): Boolean = {

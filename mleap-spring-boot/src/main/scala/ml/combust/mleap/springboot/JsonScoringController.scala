@@ -19,6 +19,7 @@ import org.json4s.jackson.JsonMethods
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import scalapb.json4s.{Parser, Printer}
 
@@ -78,25 +79,29 @@ class JsonScoringController(@Autowired val actorSystem : ActorSystem,
   def transform(@RequestBody body: String,
                 @RequestHeader(value = "timeout", defaultValue = "60000") timeout: Int) : CompletionStage[String] = {
     val request = jsonParser.fromJsonString[pb.TransformFrameRequest](body)
-    mleapExecutor.transform(TransformFrameRequest(request.modelName,
-      FrameReader(request.format).fromBytes(request.frame.toByteArray).get, request.getOptions))(timeout)
-      .mapAll {
-        case Success(resp) => resp match {
-          case Success(frame) => TransformFrameResponse(tag = request.tag,
-                                frame = ByteString.copyFrom(FrameWriter(frame, request.format).toBytes().get))
-          case Failure(ex) => {
-            JsonScoringController.logger.error("Transform error due to ", ex)
-            TransformFrameResponse(tag = request.tag, status = STATUS_ERROR,
-              error = ExceptionUtils.getMessage(ex), backtrace = ExceptionUtils.getStackTrace(ex))
-            }
+    FrameReader(request.format).fromBytes(request.frame.toByteArray) match {
+      case Success(frame) => mleapExecutor.transform(TransformFrameRequest(request.modelName, frame, request.getOptions))(timeout)
+        .mapAll {
+          case Success(resp) => resp match {
+            case Success(frame) => TransformFrameResponse(tag = request.tag,
+              frame = ByteString.copyFrom(FrameWriter(frame, request.format).toBytes().get))
+            case Failure(ex) => handleTransformFailure(request.tag, ex)
           }
-        case Failure(ex) => {
-                            JsonScoringController.logger.error("Transform error due to ", ex)
-                            TransformFrameResponse(tag = request.tag, status = STATUS_ERROR,
-                              error = ExceptionUtils.getMessage(ex), backtrace = ExceptionUtils.getStackTrace(ex))
-                            }
-      }(executor)
-      .map(resp => JsonMethods.compact(jsonPrinter.toJson(resp)))(executor).toJava
+          case Failure(ex) => handleTransformFailure(request.tag, ex)
+
+        }(executor)
+        .map(resp => JsonMethods.compact(jsonPrinter.toJson(resp)))(executor).toJava
+
+      case Failure(ex) => Future {
+          JsonMethods.compact(jsonPrinter.toJson(handleTransformFailure(request.tag, ex)))
+        }(executor).toJava
+    }
+  }
+
+  private def handleTransformFailure(tag: Long, ex: Throwable): TransformFrameResponse = {
+    JsonScoringController.logger.error("Transform error due to ", ex)
+    TransformFrameResponse(tag = tag, status = STATUS_ERROR,
+      error = ExceptionUtils.getMessage(ex), backtrace = ExceptionUtils.getStackTrace(ex))
   }
 }
 

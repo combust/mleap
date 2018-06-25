@@ -44,6 +44,18 @@ class ProtobufScoringControllerSpec extends ScoringBase[Mleap.LoadModelRequest, 
   override def extractTransformResponse(response: ResponseEntity[_]): Mleap.TransformFrameResponse = response.getBody.asInstanceOf[Mleap.TransformFrameResponse]
 
   override def leapFrameFormat(): String = BuiltinFormats.binary
+
+  override def createInvalidTransformFrameRequest(modelName: String, bytes: Array[Byte]): HttpEntity[Mleap.TransformFrameRequest] = {
+    val request = TransformFrameRequest(modelName = modelName,
+      format = BuiltinFormats.binary,
+      initTimeout = 35000L,
+      frame = ByteString.copyFrom(bytes),
+      options = None
+    )
+
+    new HttpEntity[Mleap.TransformFrameRequest](TransformFrameRequest.toJavaProto(request),
+      ProtobufScoringControllerSpec.protoHeaders)
+  }
 }
 
 object ProtobufScoringControllerSpec {

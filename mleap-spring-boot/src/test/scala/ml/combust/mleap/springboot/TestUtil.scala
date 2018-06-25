@@ -22,6 +22,8 @@ object TestUtil {
       StructField("demo:d", ScalarType.Double))).get,
     Seq(Row(44.5, 98.2)))
 
+  lazy val failingBytes = Array[Byte](69, 121, 101, 45, 62, 118, 101, 114, 61, 101, 98)
+
   def getBundle(uri: URI, createTmp: Boolean): URI = {
     if (createTmp) {
       val tmpFile = Files.createTempFile("demo", ".bundle.zip")

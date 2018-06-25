@@ -37,6 +37,8 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
 
   def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame, options: Option[TransformOptions]) : HttpEntity[X]
 
+  def createInvalidTransformFrameRequest(modelName: String, bytes: Array[Byte]) : HttpEntity[X]
+
   def extractTransformResponse(response: ResponseEntity[_ <: Any]): Mleap.TransformFrameResponse
 
   def leapFrameFormat(): String
@@ -297,7 +299,22 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
 
       val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
       assertTransformError(response)
+    }
 
+    it("returns OK response with error wrapped in TransformFrameResponse when leapframe parsing fails") {
+      val modelName = UUID.randomUUID().toString
+      val request = createInvalidTransformFrameRequest(modelName, failingBytes)
+
+      val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
+      restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
+
+      // wait until it's been loaded
+      if (!waitUntilModelLoaded(modelName, 10)) {
+        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
+      }
+
+      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      assertTransformError(response)
     }
   }
 

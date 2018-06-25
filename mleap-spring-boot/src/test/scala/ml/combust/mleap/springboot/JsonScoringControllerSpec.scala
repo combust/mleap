@@ -53,6 +53,17 @@ class JsonScoringControllerSpec extends ScoringBase[String, String, String, Stri
   override def extractTransformResponse(response: ResponseEntity[_]): Mleap.TransformFrameResponse =
     TransformFrameResponse.toJavaProto(parser.fromJsonString[TransformFrameResponse](response.getBody.asInstanceOf[String]))
 
+  override def createInvalidTransformFrameRequest(modelName: String, bytes: Array[Byte]): HttpEntity[String] = {
+    val request = TransformFrameRequest(modelName = modelName,
+      format = BuiltinFormats.json,
+      initTimeout = 35000L,
+      frame = ByteString.copyFrom(bytes),
+      options = None
+    )
+    new HttpEntity[String](JsonMethods.compact(printer.toJson(request)), JsonScoringControllerSpec.jsonHeaders)
+  }
+
+
   override def leapFrameFormat(): String = BuiltinFormats.json
 
   describe("json scoring controller - load model endpoint") {

@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation._
 
 import scala.compat.java8.FutureConverters._
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @RestController
@@ -68,25 +69,28 @@ class ProtobufScoringController(@Autowired val actorSystem : ActorSystem,
     produces = Array("application/x-protobuf; charset=UTF-8"))
   def transform(@RequestBody request: Mleap.TransformFrameRequest,
                 @RequestHeader(value = "timeout", defaultValue = "60000") timeout: Int) : CompletionStage[Mleap.TransformFrameResponse] = {
-    mleapExecutor.transform(TransformFrameRequest(request.getModelName,
-      FrameReader(request.getFormat).fromBytes(request.getFrame.toByteArray).get, request.getOptions))(timeout)
-      .mapAll {
-        case Success(resp) => resp match {
-          case Success(frame) => TransformFrameResponse(tag = request.getTag,
-            frame = ByteString.copyFrom(FrameWriter(frame, request.getFormat).toBytes().get))
-          case Failure(ex) => {
-            JsonScoringController.logger.error("Transform error due to ", ex)
-            TransformFrameResponse(tag = request.getTag, status = STATUS_ERROR,
-              error = ExceptionUtils.getMessage(ex), backtrace = ExceptionUtils.getStackTrace(ex))
+    FrameReader(request.getFormat).fromBytes(request.getFrame.toByteArray) match {
+      case Success(frame) =>
+        mleapExecutor.transform(TransformFrameRequest(request.getModelName, frame, request.getOptions))(timeout)
+        .mapAll {
+          case Success(resp) => resp match {
+            case Success(frame) => TransformFrameResponse(tag = request.getTag,
+              frame = ByteString.copyFrom(FrameWriter(frame, request.getFormat).toBytes().get))
+            case Failure(ex) => handleTransformFailure(request.getTag, ex)
           }
-        }
-        case Failure(ex) => {
-          ProtobufScoringController.logger.error("Transform error due to ", ex)
-          TransformFrameResponse(tag = request.getTag, status = STATUS_ERROR,
-            error = ExceptionUtils.getMessage(ex), backtrace = ExceptionUtils.getStackTrace(ex))
-        }
-      }(executor)
-      .map(response => TransformFrameResponse.toJavaProto(response))(executor).toJava
+          case Failure(ex) => handleTransformFailure(request.getTag, ex)
+        }(executor)
+        .map(response => TransformFrameResponse.toJavaProto(response))(executor).toJava
+      case Failure(ex) => Future {
+          TransformFrameResponse.toJavaProto(handleTransformFailure(request.getTag, ex))
+        }(executor).toJava
+    }
+  }
+
+  private def handleTransformFailure(tag: Long, ex: Throwable): TransformFrameResponse = {
+    ProtobufScoringController.logger.error("Transform error due to ", ex)
+    TransformFrameResponse(tag = tag, status = STATUS_ERROR,
+      error = ExceptionUtils.getMessage(ex), backtrace = ExceptionUtils.getStackTrace(ex))
   }
 }
 

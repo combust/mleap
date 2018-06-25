@@ -71,8 +71,15 @@ class ProtobufScoringController(@Autowired val actorSystem : ActorSystem,
     mleapExecutor.transform(TransformFrameRequest(request.getModelName,
       FrameReader(request.getFormat).fromBytes(request.getFrame.toByteArray).get, request.getOptions))(timeout)
       .mapAll {
-        case Success(resp) => TransformFrameResponse(tag = request.getTag,
-          frame = ByteString.copyFrom(FrameWriter(resp.get, request.getFormat).toBytes().get))
+        case Success(resp) => resp match {
+          case Success(frame) => TransformFrameResponse(tag = request.getTag,
+            frame = ByteString.copyFrom(FrameWriter(frame, request.getFormat).toBytes().get))
+          case Failure(ex) => {
+            JsonScoringController.logger.error("Transform error due to ", ex)
+            TransformFrameResponse(tag = request.getTag, status = STATUS_ERROR,
+              error = ExceptionUtils.getMessage(ex), backtrace = ExceptionUtils.getStackTrace(ex))
+          }
+        }
         case Failure(ex) => {
           ProtobufScoringController.logger.error("Transform error due to ", ex)
           TransformFrameResponse(tag = request.getTag, status = STATUS_ERROR,

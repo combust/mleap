@@ -81,8 +81,15 @@ class JsonScoringController(@Autowired val actorSystem : ActorSystem,
     mleapExecutor.transform(TransformFrameRequest(request.modelName,
       FrameReader(request.format).fromBytes(request.frame.toByteArray).get, request.getOptions))(timeout)
       .mapAll {
-        case Success(resp) => TransformFrameResponse(tag = request.tag,
-              frame = ByteString.copyFrom(FrameWriter(resp.get, request.format).toBytes().get))
+        case Success(resp) => resp match {
+          case Success(frame) => TransformFrameResponse(tag = request.tag,
+                                frame = ByteString.copyFrom(FrameWriter(frame, request.format).toBytes().get))
+          case Failure(ex) => {
+            JsonScoringController.logger.error("Transform error due to ", ex)
+            TransformFrameResponse(tag = request.tag, status = STATUS_ERROR,
+              error = ExceptionUtils.getMessage(ex), backtrace = ExceptionUtils.getStackTrace(ex))
+            }
+          }
         case Failure(ex) => {
                             JsonScoringController.logger.error("Transform error due to ", ex)
                             TransformFrameResponse(tag = request.tag, status = STATUS_ERROR,

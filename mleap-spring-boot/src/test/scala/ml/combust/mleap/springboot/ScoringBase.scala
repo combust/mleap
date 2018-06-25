@@ -259,16 +259,54 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       assert(data(0).getDouble(0) == -67.78953193834998)
     }
 
-    it("returns 200 response with error wrapped in TransformFrameResponse when no model loaded previously") {
+    it("returns OK response with error wrapped in TransformFrameResponse with some valid and some invalid strict selecting") {
+      val modelName = UUID.randomUUID().toString
+      val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
+      restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
+
+      // wait until it's been loaded
+      if (!waitUntilModelLoaded(modelName, 10)) {
+        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
+      }
+
+      val request = createTransformFrameRequest(modelName, validFrame,
+        Some(TransformOptions(select = Seq("demo:prediction", "dummy"), selectMode = SELECT_MODE_STRICT)))
+      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      assertTransformError(response)
+
+    }
+
+    it("returns OK response with error wrapped in TransformFrameResponse when no model loaded previously") {
       val modelName = UUID.randomUUID().toString
       val request = createTransformFrameRequest(modelName, validFrame, None)
       val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
-      assert(response.getStatusCode == HttpStatus.OK)
-      val transformResponse = extractTransformResponse(response)
-      assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_ERROR)
-      assert(!transformResponse.getError.isEmpty)
-      assert(!transformResponse.getBacktrace.isEmpty)
+      assertTransformError(response)
     }
+
+    it("returns OK response with error wrapped in TransformFrameResponse when transform fails") {
+      val modelName = UUID.randomUUID().toString
+      val request = createTransformFrameRequest(modelName, incompleteFrame, None)
+
+      val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
+      restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
+
+      // wait until it's been loaded
+      if (!waitUntilModelLoaded(modelName, 10)) {
+        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
+      }
+
+      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      assertTransformError(response)
+
+    }
+  }
+
+  private def assertTransformError(response: ResponseEntity[_ <: Any]) = {
+    assert(response.getStatusCode == HttpStatus.OK)
+    val transformResponse = extractTransformResponse(response)
+    assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_ERROR)
+    assert(!transformResponse.getError.isEmpty)
+    assert(!transformResponse.getBacktrace.isEmpty)
   }
 
   def waitUntilModelLoaded(modelName: String, retries: Int): Boolean = {

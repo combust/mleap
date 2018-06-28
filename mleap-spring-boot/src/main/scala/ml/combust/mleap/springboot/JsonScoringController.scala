@@ -73,7 +73,7 @@ class JsonScoringController(@Autowired val actorSystem : ActorSystem,
       .map(executorToPbBundleMeta)(executor)
       .map(meta => JsonMethods.compact(jsonPrinter.toJson(meta)))(executor).toJava
 
-  @PostMapping(path = Array("/models/{model_name}/transform"),
+  @PostMapping(path = Array("/models/transform"),
               consumes = Array("application/json; charset=UTF-8"),
               produces = Array("application/json; charset=UTF-8"))
   def transform(@RequestBody body: String,

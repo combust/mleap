@@ -213,7 +213,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       }
 
       val request = createTransformFrameRequest(modelName, validFrame, None)
-      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
       val transformResponse = extractTransformResponse(response)
       assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_OK)
 
@@ -233,7 +233,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
 
       val request = createTransformFrameRequest(modelName, validFrame,
         Some(TransformOptions(select = Seq("demo:prediction"), selectMode = SELECT_MODE_STRICT)))
-      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
       val transformResponse = extractTransformResponse(response)
       assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_OK)
 
@@ -253,7 +253,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
 
       val request = createTransformFrameRequest(modelName, validFrame,
         Some(TransformOptions(select = Seq("demo:prediction", "dummy"), selectMode = SELECT_MODE_RELAXED)))
-      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
       val transformResponse = extractTransformResponse(response)
       assert(transformResponse.getStatus == Mleap.TransformStatus.STATUS_OK)
 
@@ -273,7 +273,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
 
       val request = createTransformFrameRequest(modelName, validFrame,
         Some(TransformOptions(select = Seq("demo:prediction", "dummy"), selectMode = SELECT_MODE_STRICT)))
-      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
       assertTransformError(response)
 
     }
@@ -281,7 +281,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
     it("returns OK response with error wrapped in TransformFrameResponse when no model loaded previously") {
       val modelName = UUID.randomUUID().toString
       val request = createTransformFrameRequest(modelName, validFrame, None)
-      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
       assertTransformError(response)
     }
 
@@ -297,7 +297,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
-      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
       assertTransformError(response)
     }
 
@@ -313,7 +313,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
-      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, cy.runtimeClass)
+      val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
       assertTransformError(response)
     }
   }

@@ -64,7 +64,7 @@ class ProtobufScoringController(@Autowired val actorSystem : ActorSystem,
       .getBundleMeta(GetBundleMetaRequest(modelName))(timeout)
       .map(meta => BundleMeta.toJavaProto(meta))(executor).toJava
 
-  @PostMapping(path = Array("/models/{model_name}/transform"),
+  @PostMapping(path = Array("/models/transform"),
     consumes = Array("application/x-protobuf; charset=UTF-8"),
     produces = Array("application/x-protobuf; charset=UTF-8"))
   def transform(@RequestBody request: Mleap.TransformFrameRequest,

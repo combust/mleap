@@ -92,7 +92,7 @@ class JsonScoringControllerSpec extends ScoringBase[String, String, String, Stri
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
-      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST,
+      val response = restTemplate.exchange("/models/transform", HttpMethod.POST,
         new HttpEntity[String]("", JsonScoringControllerSpec.jsonHeaders), classOf[String])
       assert(response.getStatusCode == HttpStatus.BAD_REQUEST)
     }
@@ -107,7 +107,7 @@ class JsonScoringControllerSpec extends ScoringBase[String, String, String, Stri
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
-      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST,
+      val response = restTemplate.exchange("/models/transform", HttpMethod.POST,
         new HttpEntity[String]("{invalid json}", JsonScoringControllerSpec.jsonHeaders), classOf[String])
       assert(response.getStatusCode == HttpStatus.BAD_REQUEST)
     }

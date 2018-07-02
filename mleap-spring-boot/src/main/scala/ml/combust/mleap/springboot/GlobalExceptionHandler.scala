@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest
 
 import akka.actor.InvalidActorNameException
 import com.fasterxml.jackson.core.JsonProcessingException
-import ml.combust.mleap.executor.error.NotFoundException
+import ml.combust.mleap.executor.error.{NotFoundException, TimeoutException}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.{ConversionNotSupportedException, TypeMismatchException}
 import org.springframework.http.{HttpStatus, ResponseEntity}
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.{ControllerAdvice, ExceptionHandl
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException
 import org.springframework.web.multipart.support.MissingServletRequestPartException
 import org.springframework.web.servlet.NoHandlerFoundException
+
 import scalapb.json4s.JsonFormatException
 
 @ControllerAdvice
@@ -26,6 +27,10 @@ class GlobalExceptionHandler {
   @ExceptionHandler(Array(classOf[NotFoundException]))
   def handleNotFoundException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
     errorResponse(ex, HttpStatus.NOT_FOUND)
+
+  @ExceptionHandler(Array(classOf[TimeoutException]))
+  def handleTimeoutException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =
+    errorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR)
 
   @ExceptionHandler(Array(classOf[InvalidActorNameException]))
   def handleBundleException(req: HttpServletRequest, ex: Exception): ResponseEntity[Unit] =

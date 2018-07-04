@@ -11,7 +11,7 @@ import org.scalatest.{FunSpec, Matchers}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.{HttpEntity, HttpMethod, HttpStatus, ResponseEntity}
-import org.springframework.http.converter.StringHttpMessageConverter
+import org.springframework.http.converter.{ByteArrayHttpMessageConverter, StringHttpMessageConverter}
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter
 import org.springframework.test.context.TestContextManager
 import ml.combust.mleap.runtime.frame.DefaultLeapFrame
@@ -25,7 +25,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
   var restTemplate: TestRestTemplate = _
   new TestContextManager(this.getClass).prepareTestInstance(this)
   restTemplate.getRestTemplate.setMessageConverters(util.Arrays.asList(new ProtobufHttpMessageConverter(),
-    new StringHttpMessageConverter()))
+    new StringHttpMessageConverter(), new ByteArrayHttpMessageConverter()))
 
   def createLoadModelRequest(modelName: String, uri:URI, createTmpFile: Boolean): HttpEntity[T]
 
@@ -36,6 +36,8 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
   def extractBundleMetaResponse(response: ResponseEntity[_ <: Any]): Mleap.BundleMeta
 
   def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame, options: Option[TransformOptions]) : HttpEntity[X]
+
+  def createTransformFrameRequest(frame: DefaultLeapFrame): HttpEntity[Array[Byte]]
 
   def createInvalidTransformFrameRequest(modelName: String, bytes: Array[Byte]) : HttpEntity[X]
 
@@ -316,6 +318,24 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
       assertTransformError(response)
     }
+
+    it("transforms leap frame directly successfully") {
+      val modelName = UUID.randomUUID().toString
+      val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
+      restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
+
+      // wait until it's been loaded
+      if (!waitUntilModelLoaded(modelName, 10)) {
+        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
+      }
+
+      val request = createTransformFrameRequest(validFrame)
+      val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, classOf[Array[Byte]])
+      assert(response.getStatusCode == HttpStatus.OK)
+
+      val data = FrameReader(leapFrameFormat()).fromBytes(response.getBody).get.dataset.toArray
+      assert(data(0).getDouble(5) == -67.78953193834998)
+    }
   }
 
   private def assertTransformError(response: ResponseEntity[_ <: Any]) = {
@@ -328,7 +348,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
 
   def waitUntilModelLoaded(modelName: String, retries: Int): Boolean = {
     for (_ <- 1 to retries) {
-      val response = restTemplate.exchange("/models/" + modelName, HttpMethod.GET, JsonScoringControllerSpec.httpEntityWithJsonHeaders, classOf[String])
+      val response = restTemplate.exchange("/models/" + modelName, HttpMethod.GET, JsonScoringSpec.httpEntityWithJsonHeaders, classOf[String])
       if (response.getStatusCode == HttpStatus.OK) {
         // pause a bit to ensure model has finished loaded
         Thread.sleep(500)

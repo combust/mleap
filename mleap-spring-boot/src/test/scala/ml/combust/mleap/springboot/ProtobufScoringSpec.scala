@@ -6,6 +6,7 @@ import com.google.protobuf.ByteString
 import ml.combust.mleap.pb._
 import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
+import ml.combust.mleap.springboot.TestUtil.validFrame
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -14,13 +15,13 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(classOf[SpringRunner])
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-class ProtobufScoringControllerSpec extends ScoringBase[Mleap.LoadModelRequest, Mleap.Model, Mleap.BundleMeta, Mleap.TransformFrameRequest, Mleap.TransformFrameResponse] {
+class ProtobufScoringSpec extends ScoringBase[Mleap.LoadModelRequest, Mleap.Model, Mleap.BundleMeta, Mleap.TransformFrameRequest, Mleap.TransformFrameResponse] {
 
   override def createLoadModelRequest(modelName: String, uri: URI, createTmpFile: Boolean): HttpEntity[Mleap.LoadModelRequest] = {
     val request = LoadModelRequest(modelName = modelName,
       uri = TestUtil.getBundle(uri, createTmpFile).toString,
       config = Some(ModelConfig(900L, 900L)))
-    new HttpEntity[Mleap.LoadModelRequest](LoadModelRequest.toJavaProto(request), ProtobufScoringControllerSpec.protoHeaders)
+    new HttpEntity[Mleap.LoadModelRequest](LoadModelRequest.toJavaProto(request), ProtobufScoringSpec.protoHeaders)
   }
 
   override def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame, options: Option[TransformOptions]): HttpEntity[Mleap.TransformFrameRequest] = {
@@ -32,12 +33,15 @@ class ProtobufScoringControllerSpec extends ScoringBase[Mleap.LoadModelRequest, 
     )
 
     new HttpEntity[Mleap.TransformFrameRequest](TransformFrameRequest.toJavaProto(request),
-      ProtobufScoringControllerSpec.protoHeaders)
+      ProtobufScoringSpec.protoHeaders)
   }
+
+  override def createTransformFrameRequest(frame: DefaultLeapFrame): HttpEntity[Array[Byte]] =
+    new HttpEntity[Array[Byte]](FrameWriter(validFrame, leapFrameFormat()).toBytes().get, ProtobufScoringSpec.protoHeaders)
 
   override def extractModelResponse(response: ResponseEntity[_ <: Any]): Mleap.Model = response.getBody.asInstanceOf[Mleap.Model]
 
-  override def createEmptyBodyRequest(): HttpEntity[Unit] = ProtobufScoringControllerSpec.httpEntityWithProtoHeaders
+  override def createEmptyBodyRequest(): HttpEntity[Unit] = ProtobufScoringSpec.httpEntityWithProtoHeaders
 
   override def extractBundleMetaResponse(response: ResponseEntity[_]): Mleap.BundleMeta = response.getBody.asInstanceOf[Mleap.BundleMeta]
 
@@ -54,11 +58,11 @@ class ProtobufScoringControllerSpec extends ScoringBase[Mleap.LoadModelRequest, 
     )
 
     new HttpEntity[Mleap.TransformFrameRequest](TransformFrameRequest.toJavaProto(request),
-      ProtobufScoringControllerSpec.protoHeaders)
+      ProtobufScoringSpec.protoHeaders)
   }
 }
 
-object ProtobufScoringControllerSpec {
+object ProtobufScoringSpec {
   lazy val httpEntityWithProtoHeaders = new HttpEntity[Unit](protoHeaders)
 
   lazy val protoHeaders = {

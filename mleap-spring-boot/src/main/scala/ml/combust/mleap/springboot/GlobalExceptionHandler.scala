@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.{ConversionNotSupportedException, TypeMismatchException}
 import org.springframework.http.{HttpStatus, ResponseEntity}
 import org.springframework.http.converter.{HttpMessageNotReadableException, HttpMessageNotWritableException}
-import org.springframework.stereotype.Component
 import org.springframework.validation.BindException
 import org.springframework.web.bind.{MethodArgumentNotValidException, MissingPathVariableException, MissingServletRequestParameterException, ServletRequestBindingException}
 import org.springframework.web.{HttpMediaTypeNotAcceptableException, HttpMediaTypeNotSupportedException, HttpRequestMethodNotSupportedException}
@@ -21,7 +20,6 @@ import org.springframework.web.servlet.NoHandlerFoundException
 import scalapb.json4s.JsonFormatException
 
 @ControllerAdvice
-@Component
 class GlobalExceptionHandler {
 
   @ExceptionHandler(Array(classOf[NotFoundException]))

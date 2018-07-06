@@ -16,7 +16,10 @@ class MultiLayerPerceptronClassifierModelSpec extends FunSpec {
 
     it("has the right output schema") {
       assert(model.outputSchema.fields ==
-        Seq(StructField("prediction", ScalarType.Double.nonNullable)))
+        Seq(StructField("raw_prediction", TensorType.Double(1)),
+          StructField("probability", TensorType.Double(1)),
+          StructField("prediction", ScalarType.Double.nonNullable)
+        ))
     }
   }
 

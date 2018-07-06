@@ -50,9 +50,9 @@ object SparkParityBase extends FunSpec {
 }
 
 abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
-  val baseDataset: DataFrame = SparkParityBase.dataset(spark)
-  val textDataset: DataFrame = SparkParityBase.textDataset(spark)
-  val recommendationDataset: DataFrame = SparkParityBase.recommendationDataset(spark)
+  lazy val baseDataset: DataFrame = SparkParityBase.dataset(spark)
+  lazy val textDataset: DataFrame = SparkParityBase.textDataset(spark)
+  lazy val recommendationDataset: DataFrame = SparkParityBase.recommendationDataset(spark)
 
   val dataset: DataFrame
   val sparkTransformer: Transformer
@@ -129,7 +129,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
   def equalityTest(sparkDataset: DataFrame,
                    mleapDataset: DataFrame): Unit = {
-    assert(sparkDataset.collect() sameElements mleapDataset.collect())
+    val sparkElems = sparkDataset.collect()
+    val mleapElems = mleapDataset.collect()
+    assert(sparkElems sameElements mleapElems)
   }
 
   def parityTransformer(): Unit = {

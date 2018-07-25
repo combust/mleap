@@ -21,6 +21,22 @@ class LogisticRegressionModelSpec extends FunSpec {
       }
     }
 
+    describe("issue386:Wrong Binary LogisticRegression predictions") {
+      it("compare binary logisticRegression prediction with the transform api predictions") {
+        val features = Vectors.dense(-1.0, 1.0, -0.5)
+        assert(lr.predict(features) == lr.probabilityToPrediction(lr.rawToProbability(lr.predictRaw(features))))
+        assert(lr.predict(features) == 1.0)
+      }
+    }
+
+    describe("issue386: Binary logisticRegression rawToPrediction produces correct result") {
+      it("compare binary logisticRegression prediction with rawToPrediction() results") {
+        val features = Vectors.dense(-1.0, 1.0, -0.5)
+        assert(lr.predict(features) == lr.rawToPrediction(lr.predictRaw(features)))
+        assert(lr.predict(features) == 1.0)
+      }
+    }
+
     describe("input/output schema"){
       it("has the right input schema") {
         assert(lr.inputSchema.fields == Seq(StructField("features", TensorType.Double(3))))

@@ -2,19 +2,25 @@ package org.apache.spark.sql.mleap
 
 import ml.combust.mleap.core.types
 import ml.combust.mleap.core.types.{BasicType, Casting}
-import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
-import org.apache.spark.ml.linalg.{Matrices, Matrix, MatrixUDT, Vector, VectorUDT, Vectors}
+import ml.combust.mleap.tensor.{DenseTensor, Tensor}
+import org.apache.spark.ml.linalg.{Matrix, MatrixUDT, Vector, VectorUDT}
 import ml.combust.mleap.core.util.VectorConverters._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types._
 
 import scala.collection.mutable
 import scala.language.implicitConversions
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 10/22/16.
   */
 trait TypeConverters {
+  private def getVectorSize(dataset: DataFrame, field: StructField): Int = {
+    Try(field.metadata.getMetadata("ml_attr").getLong("num_attrs").toInt)
+      .getOrElse(dataset.select(field.name).head.getAs[Vector](0).size)
+  }
+
   def sparkToMleapValue(dataType: DataType): (Any) => Any = dataType match {
     case _: DecimalType =>
       (v: Any) => v.asInstanceOf[BigDecimal].toDouble
@@ -60,7 +66,7 @@ trait TypeConverters {
       case ArrayType(StringType, _) => types.ListType.String
       case ArrayType(ArrayType(ByteType, _), _) => types.ListType.ByteString
       case _: VectorUDT =>
-        val size = dataset.select(field.name).head.getAs[Vector](0).size
+        val size = getVectorSize(dataset, field)
         types.TensorType.Double(size)
       case _: MatrixUDT =>
         val m = dataset.select(field.name).head.getAs[Matrix](0)
@@ -163,7 +169,7 @@ trait TypeConverters {
     case _: DecimalType => types.ScalarShape(field.nullable)
     case ArrayType(_, false) => types.ListShape(field.nullable)
     case vu: VectorUDT =>
-      val size = dataset.select(field.name).head.getAs[Vector](0).size
+      val size = getVectorSize(dataset, field)
       types.TensorShape(Some(Seq(size)), field.nullable)
     case mu: MatrixUDT =>
       val m = dataset.select(field.name).head.getAs[Matrix](0)

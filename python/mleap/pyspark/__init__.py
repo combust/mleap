@@ -1,4 +1,4 @@
-import mleap.pyspark.feature
+import mleap.pyspark
 import sys
 
 sys.modules['pyspark.ml.mleap'] = mleap

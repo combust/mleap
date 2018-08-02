@@ -38,6 +38,21 @@ case class BinaryLogisticRegressionModel(coefficients: Vector,
       dv
     case _ => throw new RuntimeException(s"unsupported vector type ${raw.getClass}")
   }
+
+  override def probabilityToPrediction(probability: Vector): Double = {
+    if (probability(1) > threshold) 1 else 0
+  }
+
+  override def rawToPrediction(rawPrediction: Vector): Double = {
+    val rawThreshold = if (threshold == 0.0) {
+      Double.NegativeInfinity
+    } else if (threshold == 1.0) {
+      Double.PositiveInfinity
+    } else {
+      math.log(threshold / (1.0 - threshold))
+    }
+    if (rawPrediction(1) > rawThreshold) 1 else 0
+  }
 }
 
 case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix,
@@ -110,4 +125,8 @@ case class LogisticRegressionModel(impl: AbstractLogisticRegressionModel) extend
   override def predictRaw(features: Vector): Vector = impl.predictRaw(features)
 
   override def rawToProbabilityInPlace(raw: Vector): Vector = impl.rawToProbabilityInPlace(raw)
+
+  override def probabilityToPrediction(probability: Vector): Double = impl.probabilityToPrediction(probability)
+
+  override def rawToPrediction(raw: Vector): Double = impl.rawToPrediction(raw)
 }

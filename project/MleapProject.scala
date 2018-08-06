@@ -120,4 +120,25 @@ object MleapProject {
     base = file("mleap-benchmark"),
     dependencies = Seq(runtime, spark, avro)
   )
+
+  // Create underlying fat jar project as per: https://github.com/sbt/sbt-assembly#q-despite-the-concerned-friends-i-still-want-publish-fat-jars-what-advice-do-you-have
+  lazy val databricksRuntimeFat = Project(
+    id = "mleap-databricks-runtime-fat",
+    base = file("mleap-databricks-runtime-fat"),
+    dependencies = Seq(baseProject,
+      tensor,
+      core,
+      runtime,
+      bundleMl,
+      spark,
+      sparkExtension,
+      xgboostSpark,
+      tensorflow)
+  )
+
+  lazy val databricksRuntime = Project(
+    id = "mleap-databricks-runtime",
+    base = file("mleap-databricks-runtime"),
+    dependencies = Seq()
+  )
 }

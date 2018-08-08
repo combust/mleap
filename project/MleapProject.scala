@@ -131,9 +131,7 @@ object MleapProject {
       runtime,
       bundleMl,
       spark,
-      sparkExtension,
-      xgboostSpark,
-      tensorflow)
+      sparkExtension)
   ).settings(projectDependencies := {
     Seq(
       (projectID in tensorflow).value.exclude("org.tensorflow", "*")
@@ -144,5 +142,14 @@ object MleapProject {
     id = "mleap-databricks-runtime",
     base = file("mleap-databricks-runtime"),
     dependencies = Seq()
+  )
+
+  lazy val databricksRuntimeTestkit = Project(
+    id = "mleap-databricks-runtime-testkit",
+    base = file("mleap-databricks-runtime-testkit"),
+    dependencies = Seq(spark % "provided",
+      sparkExtension % "provided",
+      xgboostSpark % "provided",
+      tensorflow % "provided")
   )
 }

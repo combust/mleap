@@ -1,6 +1,8 @@
 import ml.combust.mleap.Common
+import sbtassembly.AssemblyPlugin.autoImport.ShadeRule
 
 Common.defaultMleapSettings
+Common.noPublishSettings
 
 enablePlugins(AssemblyPlugin)
 

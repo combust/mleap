@@ -134,7 +134,11 @@ object MleapProject {
       sparkExtension,
       xgboostSpark,
       tensorflow)
-  )
+  ).settings(projectDependencies := {
+    Seq(
+      (projectID in tensorflow).value.exclude("org.tensorflow", "*")
+    )
+  })
 
   lazy val databricksRuntime = Project(
     id = "mleap-databricks-runtime",

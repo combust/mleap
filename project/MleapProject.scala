@@ -131,7 +131,8 @@ object MleapProject {
       runtime,
       bundleMl,
       spark,
-      sparkExtension)
+      sparkExtension,
+      tensorflow)
   ).settings(projectDependencies := {
     Seq(
       (projectID in tensorflow).value.exclude("org.tensorflow", "*")

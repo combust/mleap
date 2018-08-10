@@ -10,7 +10,6 @@ assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeSca
 assemblyShadeRules in assembly := Seq(
   ShadeRule.rename("spray.json.**" -> "ml.combust.mleap.shaded.@0").inAll,
   ShadeRule.rename("com.google.protobuf.**" -> "ml.combust.mleap.shaded.@0").inAll,
-  ShadeRule.rename("breeze.**" -> "ml.combust.mleap.shaded.@0").inAll,
   ShadeRule.rename("com.trueaccord.**" -> "ml.combust.mleap.shaded.@0").inAll,
   ShadeRule.rename("au.com.**" -> "ml.combust.mleap.shaded.@0").inAll,
   ShadeRule.rename("com.github.**" -> "ml.combust.mleap.shaded.@0").inAll,

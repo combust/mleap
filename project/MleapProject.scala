@@ -5,18 +5,18 @@ import sbt._
 
 object MleapProject {
   lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
-      tensor,
-      tensorflow,
-      bundleMl,
-      core,
-      runtime,
-      avro,
-      sparkBase,
-      sparkTestkit,
-      spark,
-      sparkExtension,
-      xgboostJava,
-      tensorflow)
+    tensor,
+    tensorflow,
+    bundleMl,
+    core,
+    runtime,
+    avro,
+    sparkBase,
+    sparkTestkit,
+    spark,
+    sparkExtension,
+    xgboostJava,
+    tensorflow)
 
   var rootSettings = Release.settings ++
     Common.buildSettings ++
@@ -133,11 +133,10 @@ object MleapProject {
       spark,
       sparkExtension,
       tensorflow)
-  ).settings(projectDependencies := {
-    Seq(
-      (projectID in tensorflow).value.exclude("org.tensorflow", "*")
-    )
-  })
+  ).settings(excludeDependencies ++= Seq(
+    SbtExclusionRule("org.tensorflow"),
+    SbtExclusionRule("org.apache.spark")
+  ))
 
   lazy val databricksRuntime = Project(
     id = "mleap-databricks-runtime",

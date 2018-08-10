@@ -5,10 +5,12 @@ import java.nio.file.{Files, StandardCopyOption}
 
 import ml.combust.bundle.BundleFile
 import org.apache.spark.ml.bundle.SparkBundleContext
-import org.apache.spark.ml.feature.StringIndexer
+import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.sql.SparkSession
 import com.databricks.spark.avro._
 import ml.combust.mleap.spark.SparkSupport._
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.classification.LogisticRegression
 
 class TestSparkMl(session: SparkSession) extends Runnable {
   override def run(): Unit = {
@@ -27,7 +29,18 @@ class TestSparkMl(session: SparkSession) extends Runnable {
       setInputCol("fico_score_group_fnl").
       setOutputCol("fico_index")
 
-    val model = stringIndexer.fit(sampleData)
+    val featureAssembler = new VectorAssembler().
+      setInputCols(Array(stringIndexer.getOutputCol, "dti", "loan_amount")).
+      setOutputCol("features")
+
+    val logisticRegression = new LogisticRegression().
+      setFeaturesCol(featureAssembler.getOutputCol).
+      setLabelCol("approved").
+      setPredictionCol("prediction")
+
+    val pipeline = new Pipeline().setStages(Array(stringIndexer, featureAssembler, logisticRegression))
+
+    val model = pipeline.fit(sampleData)
 
     val modelPath = Files.createTempFile("mleap-databricks-runtime-testkit", ".zip")
     Files.delete(modelPath)

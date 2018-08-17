@@ -32,11 +32,12 @@ class XGBoostClassificationOp extends MleapOp[XGBoostClassification, XGBoostClas
       val booster = XGBoost.loadModel(Files.newInputStream(context.file("xgboost.model")))
       val numClasses = model.value("num_classes").getInt
       val numFeatures = model.value("num_features").getInt
+      val treeLimit = model.value("tree_limit").getInt
 
       val impl = if(numClasses == 2) {
-        XGBoostBinaryClassificationModel(booster, numFeatures)
+        XGBoostBinaryClassificationModel(booster, numFeatures, treeLimit)
       } else {
-        XGBoostMultinomialClassificationModel(booster, numClasses, numFeatures)
+        XGBoostMultinomialClassificationModel(booster, numClasses, numFeatures, treeLimit)
       }
 
       XGBoostClassificationModel(impl)

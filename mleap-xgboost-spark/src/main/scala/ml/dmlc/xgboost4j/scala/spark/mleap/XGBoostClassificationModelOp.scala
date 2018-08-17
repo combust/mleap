@@ -36,7 +36,8 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList)).
         withValue("num_classes", Value.int(obj.numClasses)).
-        withValue("num_features", Value.int(numFeatures))
+        withValue("num_features", Value.int(numFeatures)).
+        withValue("tree_limit", Value.int(obj.getTreeLimit.toInt))
     }
 
     override def load(model: Model)
@@ -62,6 +63,8 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
   override def sparkOutputs(obj: XGBoostClassificationModel): Seq[SimpleParamSpec] = {
     Seq("raw_prediction" -> obj.rawPredictionCol,
       "prediction" -> obj.predictionCol,
-      "probability" -> obj.probabilityCol)
+      "probability" -> obj.probabilityCol,
+      "leaf_prediction" -> obj.leafPredictionCol,
+      "contrib_prediction" -> obj.contribPredictionCol)
   }
 }

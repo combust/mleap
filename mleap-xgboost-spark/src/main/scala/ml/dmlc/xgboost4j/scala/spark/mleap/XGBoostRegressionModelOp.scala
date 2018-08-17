@@ -1,6 +1,5 @@
 package ml.dmlc.xgboost4j.scala.spark.mleap
 
-import java.io.{ByteArrayOutputStream, File}
 import java.nio.file.Files
 
 import ml.combust.bundle.BundleContext
@@ -30,7 +29,8 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
       Files.write(context.file("xgboost.model"), obj._booster.toByteArray)
 
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
-      model.withValue("num_features", Value.int(numFeatures))
+      model.withValue("num_features", Value.int(numFeatures)).
+        withValue("tree_limit", Value.int(obj.getTreeLimit.toInt))
     }
 
     override def load(model: Model)
@@ -54,6 +54,8 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
   }
 
   override def sparkOutputs(obj: XGBoostRegressionModel): Seq[SimpleParamSpec] = {
-    Seq("prediction" -> obj.predictionCol)
+    Seq("prediction" -> obj.predictionCol,
+      "leaf_prediction" -> obj.leafPredictionCol,
+      "contrib_prediction" -> obj.contribPredictionCol)
   }
 }

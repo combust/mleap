@@ -12,6 +12,7 @@ import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.ml.mleap.SparkUtil
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import resource.managed
@@ -50,13 +51,19 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   }
 
   val sparkTransformer: Transformer = {
-    new Pipeline().setStages(Array( new VectorAssembler()
+    val featureAssembler = new VectorAssembler()
       .setInputCols(Array("AT", "V", "AP", "RH"))
-      .setOutputCol("features"),
-      new XGBoostRegressor(xgboostParams).
-        setFeaturesCol("features").
-        setLabelCol("PE").
-        setPredictionCol("prediction"))).fit(dataset)
+      .setOutputCol("features")
+    val regressor = new XGBoostRegressor(xgboostParams).
+      setFeaturesCol("features").
+      setLabelCol("PE").
+      setPredictionCol("prediction").
+      fit(featureAssembler.transform(dataset)).
+      setLeafPredictionCol("leaf_prediction").
+      setContribPredictionCol("contrib_prediction").
+      setTreeLimit(2)
+
+    SparkUtil.createPipelineModel(Array(featureAssembler, regressor))
   }
 
   def equalityTest(sparkDataset: DataFrame,

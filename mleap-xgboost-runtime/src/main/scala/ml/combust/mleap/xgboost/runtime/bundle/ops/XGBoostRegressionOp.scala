@@ -1,5 +1,6 @@
 package ml.combust.mleap.xgboost.runtime.bundle.ops
 
+import java.io.ByteArrayInputStream
 import java.nio.file.Files
 
 import ml.combust.bundle.BundleContext
@@ -29,9 +30,8 @@ class XGBoostRegressionOp extends MleapOp[XGBoostRegression, XGBoostRegressionMo
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): XGBoostRegressionModel = {
-      val booster = (for(in <- managed(Files.newInputStream(context.file("xgboost.model")))) yield {
-        XGBoost.loadModel(in)
-      }).tried.get
+      val bytes = Files.readAllBytes(context.file("xgboost.model"))
+      val booster = XGBoost.loadModel(new ByteArrayInputStream(bytes))
 
       XGBoostRegressionModel(booster,
         numFeatures = model.value("num_features").getInt)

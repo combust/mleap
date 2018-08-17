@@ -9,7 +9,6 @@ import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.xgboost.runtime.{XGBoostBinaryClassificationModel, XGBoostClassification, XGBoostClassificationModel, XGBoostMultinomialClassificationModel}
 import ml.dmlc.xgboost4j.scala.XGBoost
-import resource.managed
 
 /**
   * Created by hollinwilkins on 9/16/17.
@@ -30,9 +29,7 @@ class XGBoostClassificationOp extends MleapOp[XGBoostClassification, XGBoostClas
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): XGBoostClassificationModel = {
-      val booster = (for(in <- managed(Files.newInputStream(context.file("xgboost.model")))) yield {
-        XGBoost.loadModel(in)
-      }).tried.get
+      val booster = XGBoost.loadModel(Files.newInputStream(context.file("xgboost.model")))
       val numClasses = model.value("num_classes").getInt
       val numFeatures = model.value("num_features").getInt
 

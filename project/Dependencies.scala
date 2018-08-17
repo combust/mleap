@@ -75,7 +75,7 @@ object Dependencies {
 
   val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
-  val xgboostRuntime = l ++= Seq(xgboostDep)
+  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(Test.scalaTest)
 
   val xgboostSpark = l ++= Seq(Provided.xgboostSparkDep) ++ Provided.spark
 

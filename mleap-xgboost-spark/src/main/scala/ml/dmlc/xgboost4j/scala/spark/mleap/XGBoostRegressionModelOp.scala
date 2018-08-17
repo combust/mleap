@@ -1,5 +1,6 @@
 package ml.dmlc.xgboost4j.scala.spark.mleap
 
+import java.io.{ByteArrayOutputStream, File}
 import java.nio.file.Files
 
 import ml.combust.bundle.BundleContext
@@ -26,8 +27,7 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
-      val out = Files.newOutputStream(context.file("xgboost.model"))
-      obj._booster.saveModel(out)
+      Files.write(context.file("xgboost.model"), obj._booster.toByteArray)
 
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("num_features", Value.int(numFeatures))

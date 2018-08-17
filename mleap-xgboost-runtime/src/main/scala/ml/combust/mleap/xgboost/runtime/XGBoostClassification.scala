@@ -17,7 +17,7 @@ case class XGBoostClassification(override val uid: String = Transformer.uniqueNa
       case (Some(_), Some(_)) =>
         (features: Tensor[Double]) => {
           val rawPrediction = model.predictRaw(features)
-          val probability = model.rawToProbability(rawPrediction)
+          val probability = model.predictProbabilities(features)
           val prediction = model.probabilityToPrediction(probability)
           Row(rawPrediction: Tensor[Double], probability: Tensor[Double], prediction)
         }

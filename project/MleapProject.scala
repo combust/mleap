@@ -15,7 +15,7 @@ object MleapProject {
       sparkTestkit,
       spark,
       sparkExtension,
-      xgboostJava,
+      xgboostRuntime,
       tensorflow)
 
   var rootSettings = Release.settings ++
@@ -94,9 +94,9 @@ object MleapProject {
     dependencies = Seq(runtime)
   )
 
-  lazy val xgboostJava = Project(
-    id = "mleap-xgboost-java",
-    base = file("mleap-xgboost-java"),
+  lazy val xgboostRuntime = Project(
+    id = "mleap-xgboost-runtime",
+    base = file("mleap-xgboost-runtime"),
     dependencies = Seq(runtime)
   )
 
@@ -104,7 +104,7 @@ object MleapProject {
     id = "mleap-xgboost-spark",
     base = file("mleap-xgboost-spark"),
     dependencies = Seq(sparkBase % "provided",
-      xgboostJava % "test",
+      xgboostRuntime % "test",
       spark % "test",
       sparkTestkit % "test")
   )
@@ -112,7 +112,7 @@ object MleapProject {
   lazy val serving = Project(
     id = "mleap-serving",
     base = file("mleap-serving"),
-    dependencies = Seq(runtime, avro, xgboostJava)
+    dependencies = Seq(runtime, avro, xgboostRuntime)
   )
 
   lazy val benchmark = Project(

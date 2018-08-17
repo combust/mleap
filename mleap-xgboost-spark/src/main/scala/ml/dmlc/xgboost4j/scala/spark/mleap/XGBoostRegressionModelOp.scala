@@ -27,7 +27,7 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
       assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
       val out = Files.newOutputStream(context.file("xgboost.model"))
-      obj.booster.saveModel(out)
+      obj._booster.saveModel(out)
 
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("num_features", Value.int(numFeatures))
@@ -39,14 +39,14 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
         SXGBoost.loadModel(in)
       }).tried.get
 
-      new XGBoostRegressionModel(booster)
+      new XGBoostRegressionModel("", booster)
     }
   }
 
   override def sparkLoad(uid: String,
                          shape: NodeShape,
                          model: XGBoostRegressionModel): XGBoostRegressionModel = {
-    new XGBoostRegressionModel(uid, model.booster)
+    new XGBoostRegressionModel(uid, model._booster)
   }
 
   override def sparkInputs(obj: XGBoostRegressionModel): Seq[ParamSpec] = {

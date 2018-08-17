@@ -31,11 +31,10 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
       } else None
 
       val out = Files.newOutputStream(context.file("xgboost.model"))
-      obj.booster.saveModel(out)
+      obj._booster.saveModel(out)
 
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
-      model.withValue("output_margin", Value.boolean(obj.getOrDefault(obj.outputMargin))).
-        withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList)).
+      model.withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList)).
         withValue("num_classes", Value.int(obj.numClasses)).
         withValue("num_features", Value.int(numFeatures))
     }
@@ -46,14 +45,14 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
         SXGBoost.loadModel(in)
       }).tried.get
 
-      new XGBoostClassificationModel(booster)
+      new XGBoostClassificationModel("", model.value("num_classes").getInt, booster)
     }
   }
 
   override def sparkLoad(uid: String,
                          shape: NodeShape,
                          model: XGBoostClassificationModel): XGBoostClassificationModel = {
-    new XGBoostClassificationModel(uid, model.booster)
+    new XGBoostClassificationModel(uid, model.numClasses, model._booster)
   }
 
   override def sparkInputs(obj: XGBoostClassificationModel): Seq[ParamSpec] = {
@@ -62,6 +61,7 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
 
   override def sparkOutputs(obj: XGBoostClassificationModel): Seq[SimpleParamSpec] = {
     Seq("raw_prediction" -> obj.rawPredictionCol,
-      "prediction" -> obj.predictionCol)
+      "prediction" -> obj.predictionCol,
+      "probability" -> obj.probabilityCol)
   }
 }

@@ -1,18 +1,18 @@
-package ml.combust.mleap.xgboost
+package ml.combust.mleap.xgboost.runtime
 
-import biz.k11i.xgboost.Predictor
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import ml.combust.mleap.tensor.Tensor
+import ml.dmlc.xgboost4j.scala.{Booster, DMatrix}
 
 /**
   * Created by hollinwilkins on 9/16/17.
   */
-case class XGBoostRegressionModel(predictor: Predictor,
-                                  booster: Option[Array[Byte]] = None,
+case class XGBoostRegressionModel(booster: Booster,
                                   numFeatures: Int) extends Model {
   def predictDouble(tensor: Tensor[Double]): Double = {
-    predictor.predictSingle(FVecTensorImpl(tensor))
+    val data = new DMatrix(tensor.toDense.rawValues.map(_.toFloat), tensor.dimensions.head, 1)
+    booster.predict(data).head(0)
   }
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get

@@ -1,4 +1,4 @@
-package ml.combust.mleap.xgboost
+package ml.combust.mleap.xgboost.runtime
 
 import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.function.UserDefinedFunction

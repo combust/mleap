@@ -1,6 +1,6 @@
 package ml.dmlc.xgboost4j.scala.spark.mleap
 
-import ml.dmlc.xgboost4j.scala.spark.XGBoostEstimator
+import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressor
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer, VectorAssembler}
@@ -36,7 +36,7 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
     new Pipeline().setStages(Array( new VectorAssembler()
       .setInputCols(Array("AT", "V", "AP", "RH"))
       .setOutputCol("features"),
-      new XGBoostEstimator(xgboostParams).
+      new XGBoostRegressor(xgboostParams).
         setFeaturesCol("features").
         setLabelCol("PE").
         setPredictionCol("prediction"))).fit(dataset)
@@ -53,13 +53,12 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
 
     sparkDataset.collect().zip(mleapDataset.collect()).foreach {
       case (sp, ml) =>
-        val v1 = sp.getFloat(sparkPredictionCol)
+        val v1 = sp.getDouble(sparkPredictionCol)
         val v2 = ml.getDouble(mleapPredictionCol)
 
         assert(sp.getAs[Vector](sparkFeaturesCol) == ml.getAs[Vector](mleapFeaturesCol))
 
         assert(Math.abs(v2 - v1) < 0.0001)
-        // println(Math.abs(v2 - v1)) // < 0.0000001)
     }
   }
 }

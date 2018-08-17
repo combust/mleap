@@ -1,11 +1,12 @@
 package ml.dmlc.xgboost4j.scala.spark.mleap
 
-import ml.dmlc.xgboost4j.scala.spark.XGBoostEstimator
+import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.functions.col
 
 /**
   * Created by hollinwilkins on 9/16/17.
@@ -20,19 +21,23 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
     "nworkers" -> 2
   )
 
-  override val dataset: DataFrame = baseDataset.select("fico_score_group_fnl", "dti", "approved")
+  override val dataset: DataFrame = {
+    val d = baseDataset.select("fico_score_group_fnl", "dti").
+      filter(col("fico_score_group_fnl") === "500 - 550" ||
+      col("fico_score_group_fnl") === "600 - 650")
+    d.select("fico_score_group_fnl").distinct().show()
+    d
+  }
   override val sparkTransformer: Transformer = new Pipeline().setStages(Array(new StringIndexer().
     setInputCol("fico_score_group_fnl").
     setOutputCol("fico_index"),
     new VectorAssembler().
-      setInputCols(Array("fico_index", "dti")).
+      setInputCols(Array("dti")).
       setOutputCol("features"),
-    new StringIndexer().
-      setInputCol("approved").
-      setOutputCol("label"),
-    new XGBoostEstimator(xgboostParams).
+    new XGBoostClassifier(xgboostParams).
       setFeaturesCol("features").
-      setLabelCol("label"))).fit(dataset)
+      setProbabilityCol("probabilities").
+      setLabelCol("fico_index"))).fit(dataset)
 
   override def equalityTest(sparkDataset: DataFrame,
                             mleapDataset: DataFrame): Unit = {
@@ -50,6 +55,10 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
 
         sparkProbabilities.zip(mleapProbabilities).foreach {
           case (v1, v2) =>
+            if (Math.abs(v2 - v1) > 0.0000001) {
+              println("SPARK: " + sparkProbabilities.mkString(","))
+              println("MLEAP: " + mleapProbabilities.mkString(","))
+            }
             assert(Math.abs(v2 - v1) < 0.0000001)
         }
 

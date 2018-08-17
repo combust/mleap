@@ -5,18 +5,19 @@ import sbt._
 
 object MleapProject {
   lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
-      tensor,
-      tensorflow,
-      bundleMl,
-      core,
-      runtime,
-      avro,
-      sparkBase,
-      sparkTestkit,
-      spark,
-      sparkExtension,
-      xgboostRuntime,
-      tensorflow)
+    tensor,
+    tensorflow,
+    bundleMl,
+    core,
+    runtime,
+    avro,
+    sparkBase,
+    sparkTestkit,
+    spark,
+    sparkExtension,
+    xgboostRuntime,
+    xgboostSpark,
+    tensorflow)
 
   var rootSettings = Release.settings ++
     Common.buildSettings ++

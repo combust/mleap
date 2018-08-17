@@ -11,12 +11,15 @@ import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.mleap.SparkUtil
 import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.mleap.TypeConverters
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import resource.managed
+
+import scala.collection.mutable
 
 /**
   * Created by hollinwilkins on 9/16/17.
@@ -49,25 +52,42 @@ class XGBoostClassificationModelParitySpec extends FunSpec
         col("fico_score_group_fnl") === "600 - 650")
   }
 
-  val sparkTransformer: Transformer = new Pipeline().setStages(Array(new StringIndexer().
-    setInputCol("fico_score_group_fnl").
-    setOutputCol("fico_index"),
-    new VectorAssembler().
-      setInputCols(Array("dti")).
-      setOutputCol("features"),
-    new XGBoostClassifier(xgboostParams).
+  val sparkTransformer: Transformer = {
+    val featurePipeline = new Pipeline().setStages(Array(new StringIndexer().
+      setInputCol("fico_score_group_fnl").
+      setOutputCol("fico_index"),
+      new VectorAssembler().
+        setInputCols(Array("dti")).
+        setOutputCol("features"))).fit(dataset)
+
+    val classifier = new XGBoostClassifier(xgboostParams).
       setFeaturesCol("features").
       setProbabilityCol("probabilities").
-      setLabelCol("fico_index"))).fit(dataset)
+      setLabelCol("fico_index").
+      fit(featurePipeline.transform(dataset)).
+      setLeafPredictionCol("leaf_prediction").
+      setContribPredictionCol("contrib_prediction").
+      setTreeLimit(2)
+
+    SparkUtil.createPipelineModel(Array(featurePipeline, classifier))
+  }
 
   def equalityTest(sparkDataset: DataFrame,
                    mleapDataset: DefaultLeapFrame): Unit = {
     val sparkFeaturesCol = sparkDataset.schema.fieldIndex("features")
     val mleapFeaturesCol = mleapDataset.schema.indexOf("features").get
+
     val sparkProbabilityCol = sparkDataset.schema.fieldIndex("probabilities")
     val mleapProbabilityCol = mleapDataset.schema.indexOf("probabilities").get
+
     val sparkPredictionCol = sparkDataset.schema.fieldIndex("prediction")
     val mleapPredictionCol = mleapDataset.schema.indexOf("prediction").get
+
+    val sparkLeafPredictionCol = sparkDataset.schema.fieldIndex("leaf_prediction")
+    val mleapLeafPredictionCol = mleapDataset.schema.indexOf("leaf_prediction").get
+
+    val sparkContribPredictionCol = sparkDataset.schema.fieldIndex("contrib_prediction")
+    val mleapContribPredictionCol = mleapDataset.schema.indexOf("contrib_prediction").get
 
     assert(sparkDataset.schema.fields.length == mleapDataset.schema.fields.length)
 
@@ -89,8 +109,15 @@ class XGBoostClassificationModelParitySpec extends FunSpec
 
         val sparkPrediction = sp.getDouble(sparkPredictionCol)
         val mleapPrediction = ml.getDouble(mleapPredictionCol)
-
         assert(sparkPrediction == mleapPrediction)
+
+        val sparkLeafPrediction = sp.getAs[mutable.WrappedArray[Double]](sparkLeafPredictionCol)
+        val mleapLeafPrediction = ml.getSeq[Double](mleapLeafPredictionCol)
+        assert(sparkLeafPrediction == mleapLeafPrediction)
+
+        val sparkContribPrediction = sp.getAs[mutable.WrappedArray[Double]](sparkContribPredictionCol)
+        val mleapContribPrediction = ml.getSeq[Double](mleapContribPredictionCol)
+        assert(sparkContribPrediction == mleapContribPrediction)
     }
   }
 

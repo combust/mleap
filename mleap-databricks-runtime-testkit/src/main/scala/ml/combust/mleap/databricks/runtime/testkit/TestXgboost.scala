@@ -9,7 +9,7 @@ import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.sql.SparkSession
 import com.databricks.spark.avro._
 import ml.combust.mleap.spark.SparkSupport._
-import ml.dmlc.xgboost4j.scala.spark.XGBoostEstimator
+import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
 import org.apache.spark.ml.Pipeline
 
 class TestXgboost(session: SparkSession) extends Runnable {
@@ -42,7 +42,7 @@ class TestXgboost(session: SparkSession) extends Runnable {
       setInputCols(Array(stringIndexer.getOutputCol, "dti", "loan_amount")).
       setOutputCol("features")
 
-    val logisticRegression = new XGBoostEstimator(xgboostParams).
+    val logisticRegression = new XGBoostClassifier(xgboostParams).
       setFeaturesCol("features").
       setLabelCol("approved").
       setPredictionCol("prediction")

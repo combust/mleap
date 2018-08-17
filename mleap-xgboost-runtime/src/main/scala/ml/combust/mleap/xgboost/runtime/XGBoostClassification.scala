@@ -1,4 +1,4 @@
-package ml.combust.mleap.xgboost
+package ml.combust.mleap.xgboost.runtime
 
 import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.function.UserDefinedFunction
@@ -13,14 +13,27 @@ case class XGBoostClassification(override val uid: String = Transformer.uniqueNa
                                  override val shape: NodeShape,
                                  override val model: XGBoostClassificationModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = {
-    val f = shape.getOutput("raw_prediction") match {
-      case Some(_) =>
+    val f = (shape.getOutput("raw_prediction"), shape.getOutput("probability")) match {
+      case (Some(_), Some(_)) =>
+        (features: Tensor[Double]) => {
+          val rawPrediction = model.predictRaw(features)
+          val probability = model.predictProbabilities(features)
+          val prediction = model.probabilityToPrediction(probability)
+          Row(rawPrediction: Tensor[Double], probability: Tensor[Double], prediction)
+        }
+      case (Some(_), None) =>
         (features: Tensor[Double]) => {
           val rawPrediction = model.predictRaw(features)
           val prediction = model.rawToPrediction(rawPrediction)
           Row(rawPrediction: Tensor[Double], prediction)
         }
-      case None =>
+      case (None, Some(_)) =>
+        (features: Tensor[Double]) => {
+          val probability = model.predictProbabilities(features)
+          val prediction = model.probabilityToPrediction(probability)
+          Row(probability: Tensor[Double], prediction)
+        }
+      case (None, None) =>
         (features: Tensor[Double]) => Row(model(features))
     }
 

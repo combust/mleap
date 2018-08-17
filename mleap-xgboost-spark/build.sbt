@@ -1,7 +1,5 @@
 import ml.combust.mleap.{Dependencies, Common}
 
-resolvers += Resolver.mavenLocal
-
 Common.defaultMleapXgboostSparkSettings
 Dependencies.xgboostSpark
 

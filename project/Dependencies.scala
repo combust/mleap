@@ -83,7 +83,7 @@ object Dependencies {
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 
-  val databricksRuntimeTestkit = l ++= Provided.spark ++ Seq(Provided.xgboostSparkDep, sparkAvro)
+  val databricksRuntimeTestkit = l ++= Provided.spark ++ Seq(xgboostSparkDep, sparkAvro)
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

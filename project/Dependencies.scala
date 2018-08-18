@@ -38,6 +38,7 @@ object Dependencies {
     val scalameter = "com.storm-enroute" %% "scalameter" % "0.8.2"
     val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
     val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion
+    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion
   }
 
   object Test {
@@ -47,7 +48,6 @@ object Dependencies {
 
   object Provided {
     val spark = Compile.spark.map(_.excludeAll(ExclusionRule(organization = "org.scalatest"))).map(_ % "provided")
-    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion % "provided"
   }
 
   import Compile._
@@ -77,7 +77,7 @@ object Dependencies {
 
   val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(Test.scalaTest)
 
-  val xgboostSpark = l ++= Seq(Provided.xgboostSparkDep) ++ Provided.spark
+  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

@@ -463,10 +463,9 @@ class FeedForwardModel private(
       new BDV[Double](weights.toArray, offset, 1, layers(i).weightSize))
     offset += layers(i).weightSize
   }
-  private var outputs: Array[BDM[Double]] = null
-  private var deltas: Array[BDM[Double]] = null
 
   override def forward(data: BDM[Double], includeLastLayer: Boolean): Array[BDM[Double]] = {
+    var outputs: Array[BDM[Double]] = null
     // Initialize output arrays for all layers. Special treatment for InPlace
     val currentBatchSize = data.cols
     // TODO: allocate outputs as one big array and then create BDMs from it
@@ -496,6 +495,7 @@ class FeedForwardModel private(
                                 target: BDM[Double],
                                 cumGradient: Vector,
                                 realBatchSize: Int): Double = {
+    var deltas: Array[BDM[Double]] = null
     val outputs = forward(data, true)
     val currentBatchSize = data.cols
     // TODO: allocate deltas as one big array and then create BDMs from it

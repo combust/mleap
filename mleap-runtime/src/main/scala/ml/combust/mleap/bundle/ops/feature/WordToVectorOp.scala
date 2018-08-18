@@ -29,7 +29,11 @@ class WordToVectorOp extends MleapOp[WordToVector, WordToVectorModel] {
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): WordToVectorModel = {
       val words = model.value("words").getStringList
-      val indices = model.value("indices").getLongList.map(_.toInt)
+
+      // If indices list is not set explicitly, assume words are ordered 0 to n
+      val indices = model.getValue("indices").
+        map(_.getLongList.map(_.toInt)).
+        getOrElse(words.indices)
       val map = words.zip(indices).toMap
       val wordVectors = model.value("word_vectors").getDoubleList.toArray
       val kernel = model.getValue("kernel").

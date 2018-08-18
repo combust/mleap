@@ -17,8 +17,12 @@ import scala.util.Try
   */
 trait TypeConverters {
   private def getVectorSize(dataset: DataFrame, field: StructField): Int = {
-    Try(field.metadata.getMetadata("ml_attr").getLong("num_attrs").toInt)
-      .getOrElse(dataset.select(field.name).head.getAs[Vector](0).size)
+    val sizeInMeta = Try(field.metadata.getMetadata("ml_attr").getLong("num_attrs").toInt)
+    if (sizeInMeta.isSuccess) {
+      sizeInMeta.get
+    } else {
+      dataset.select(field.name).head().getAs[Vector](0).size
+    }
   }
 
   def sparkToMleapValue(dataType: DataType): (Any) => Any = dataType match {

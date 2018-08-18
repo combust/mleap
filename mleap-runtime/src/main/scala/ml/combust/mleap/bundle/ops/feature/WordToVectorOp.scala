@@ -5,8 +5,11 @@ import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.{WordToVectorKernel, WordToVectorModel}
+import ml.combust.mleap.core.types.ListShape
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.WordToVector
+
+import scala.util.Try
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -35,7 +38,8 @@ class WordToVectorOp extends MleapOp[WordToVector, WordToVectorModel] {
         map(_.getLongList.map(_.toInt)).
         getOrElse(words.indices)
       val map = words.zip(indices).toMap
-      val wordVectors = model.value("word_vectors").getDoubleList.toArray
+      val wv = model.value("word_vectors")
+      val wordVectors = Try(wv.getDoubleList.toArray).orElse(Try(wv.getTensor[Double].rawValues)).get
       val kernel = model.getValue("kernel").
         map(_.getString).
         map(WordToVectorKernel.forName).

@@ -10,8 +10,15 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
   */
 sealed trait WordToVectorKernel {
   def apply(size: Int, vectors: Iterator[Vector]): Vector
+  def name: String
 }
 object WordToVectorKernel {
+  private val lookup: Map[String, WordToVectorKernel] = Seq(Default, Sqrt).map {
+    k => (k.name, k)
+  }.toMap
+
+  def forName(name: String): WordToVectorKernel = lookup(name)
+
   case object Default extends WordToVectorKernel {
     override def apply(size: Int, vectors: Iterator[Vector]): Vector = {
       val sum = Vectors.zeros(size)
@@ -21,6 +28,8 @@ object WordToVectorKernel {
       BLAS.scal(1.0 / vectors.size, sum)
       sum
     }
+
+    override def name: String = "default"
   }
 
   case object Sqrt extends WordToVectorKernel {
@@ -45,6 +54,8 @@ object WordToVectorKernel {
 
       sum
     }
+
+    override def name: String = "sqrt"
   }
 }
 

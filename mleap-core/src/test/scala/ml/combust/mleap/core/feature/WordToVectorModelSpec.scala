@@ -22,6 +22,15 @@ class WordToVectorModelSpec extends FunSpec {
     }
   }
 
+  describe("WordToVectorKernel") {
+    describe("for name") {
+      it("returns the kernel for string") {
+        assert(WordToVectorKernel.forName("default") == WordToVectorKernel.Default)
+        assert(WordToVectorKernel.forName("sqrt") == WordToVectorKernel.Sqrt)
+      }
+    }
+  }
+
   describe("Sqrt kernel") {
     it("produces results using the sqrt kernel (division by sqrt(dot(vec, vec)))") {
       val hello = Vectors.dense(-0.02743354,  0.13925314, -0.41874424,  0.05635237, -1.01364303,

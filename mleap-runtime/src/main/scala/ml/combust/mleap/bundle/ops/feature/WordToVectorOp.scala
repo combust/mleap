@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
-import ml.combust.mleap.core.feature.WordToVectorModel
+import ml.combust.mleap.core.feature.{WordToVectorKernel, WordToVectorModel}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.WordToVector
 
@@ -22,7 +22,8 @@ class WordToVectorOp extends MleapOp[WordToVector, WordToVectorModel] {
       val (words, indices) = obj.wordIndex.toSeq.unzip
       model.withValue("words", Value.stringList(words)).
         withValue("indices", Value.longList(indices.map(_.toLong))).
-        withValue("word_vectors", Value.doubleList(obj.wordVectors))
+        withValue("word_vectors", Value.doubleList(obj.wordVectors)).
+        withValue("kernel", Value.string(obj.kernel.name))
     }
 
     override def load(model: Model)
@@ -31,8 +32,14 @@ class WordToVectorOp extends MleapOp[WordToVector, WordToVectorModel] {
       val indices = model.value("indices").getLongList.map(_.toInt)
       val map = words.zip(indices).toMap
       val wordVectors = model.value("word_vectors").getDoubleList.toArray
+      val kernel = model.getValue("kernel").
+        map(_.getString).
+        map(WordToVectorKernel.forName).
+        getOrElse(WordToVectorKernel.Default)
 
-      WordToVectorModel(wordIndex = map, wordVectors = wordVectors)
+      WordToVectorModel(wordIndex = map,
+        wordVectors = wordVectors,
+        kernel = kernel)
     }
   }
 

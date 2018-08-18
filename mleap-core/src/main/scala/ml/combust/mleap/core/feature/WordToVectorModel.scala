@@ -9,7 +9,7 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
   * Created by hollinwilkins on 12/28/16.
   */
 sealed trait WordToVectorKernel {
-  def apply(size: Int, vectors: Iterator[Vector]): Vector
+  def apply(size: Int, sentenceSize: Int, vectors: Iterator[Vector]): Vector
   def name: String
 }
 object WordToVectorKernel {
@@ -20,12 +20,12 @@ object WordToVectorKernel {
   def forName(name: String): WordToVectorKernel = lookup(name)
 
   case object Default extends WordToVectorKernel {
-    override def apply(size: Int, vectors: Iterator[Vector]): Vector = {
+    override def apply(size: Int, sentenceSize: Int, vectors: Iterator[Vector]): Vector = {
       val sum = Vectors.zeros(size)
       for (v <- vectors) {
         BLAS.axpy(1.0, v, sum)
       }
-      BLAS.scal(1.0 / vectors.size, sum)
+      BLAS.scal(1.0 / sentenceSize, sum)
       sum
     }
 
@@ -33,7 +33,7 @@ object WordToVectorKernel {
   }
 
   case object Sqrt extends WordToVectorKernel {
-    override def apply(size: Int, vectors: Iterator[Vector]): Vector = {
+    override def apply(size: Int, sentenceSize: Int, vectors: Iterator[Vector]): Vector = {
       val sum = Vectors.zeros(size)
       for (v <- vectors) {
         BLAS.axpy(1.0, v, sum)
@@ -77,7 +77,7 @@ case class WordToVectorModel(wordIndex: Map[String, Int],
       val vs = sentence.iterator.map(vectors.get).
         filter(_.isDefined).
         map(_.get)
-      kernel(vectorSize, vs)
+      kernel(vectorSize, sentence.size, vs)
     }
   }
 

@@ -17,7 +17,8 @@ object MleapProject {
     sparkExtension,
     xgboostRuntime,
     xgboostSpark,
-    tensorflow)
+    tensorflow,
+    databricksRuntime)
 
   var rootSettings = Release.settings ++
     Common.buildSettings ++

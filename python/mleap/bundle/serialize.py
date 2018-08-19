@@ -67,7 +67,7 @@ class MLeapSerializer(object):
                     "type": "list",
                     "double": value.values
                 }
-            elif isinstance(value, list) and (isinstance(value[0], np.float64) or isinstance(value[0], float)):
+            elif isinstance(value, list) and (isinstance(value[0], np.float64) or isinstance(value[0], np.float32) or isinstance(value[0], float)):
                 base = type(value[0])
                 attributes[name] = {
                     _type_map[base]: value,

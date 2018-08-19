@@ -74,6 +74,7 @@ object Bundle {
       val word_to_vector = "word_to_vector"
       val multinomial_labeler = "multinomial_labeler"
       val regex_tokenizer = "regex_tokenizer"
+      val regex_indexer = "regex_indexer"
       val word_filter = "word_filter"
       val interaction = "interaction"
     }

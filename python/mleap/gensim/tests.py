@@ -66,8 +66,6 @@ class TransformerTests(unittest.TestCase):
 
         res = model_.sent2vec(['call', 'me', 'on', 'my', 'cell', 'phone'])
 
-        print("KAZAA: {}".format(type(res)))
-
         self.assertEqual(5, res.size)
 
 

@@ -23,3 +23,6 @@ lazy val grpc = MleapProject.grpc
 lazy val grpcServer = MleapProject.grpcServer
 lazy val benchmarks = MleapProject.benchmark
 lazy val springBoot = MleapProject.springBootServing
+lazy val databricksRuntimeFat = MleapProject.databricksRuntimeFat
+lazy val databricksRuntime = MleapProject.databricksRuntime
+lazy val databricksRuntimeTestkit = MleapProject.databricksRuntimeTestkit

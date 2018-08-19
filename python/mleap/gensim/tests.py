@@ -19,7 +19,7 @@ import unittest
 import shutil
 import uuid
 import os
-import numpy as np
+import json
 
 from mleap.gensim.word2vec import Word2Vec
 
@@ -35,7 +35,7 @@ class TransformerTests(unittest.TestCase):
         os.makedirs(self.tmp_dir)
 
     def tearDown(self):
-        #shutil.rmtree(self.tmp_dir)
+        shutil.rmtree(self.tmp_dir)
         pass
 
     def test_word2vec(self):
@@ -60,13 +60,24 @@ class TransformerTests(unittest.TestCase):
         window_ = 2
 
         model_ = Word2Vec(sentences4word2vec_, min_count=2, size=size_, window=window_)
-        model_.mlinit(input_features=['sentence'], prediction_column = 'sentence_vector')
+        model_.mlinit(input_features=['input'], prediction_column = 'sentence_vector')
 
         model_.serialize_to_bundle(self.tmp_dir, model_.name)
 
         res = model_.sent2vec(['call', 'me', 'on', 'my', 'cell', 'phone'])
 
+
+        with open('{}/{}.node/node.json'.format(self.tmp_dir, model_.name)) as node_json:
+            node = json.load(node_json)
+
+        with open('{}/{}.node/model.json'.format(self.tmp_dir, model_.name)) as model_json:
+            model = json.load(model_json)
+
+
         self.assertEqual(5, res.size)
+        self.assertEqual(node['shape']['inputs'][0]['name'], ['input'])
+        self.assertEqual(node['shape']['outputs'][0]['name'], 'sentence_vector')
+        self.assertEqual(model['op'], 'word2vec')
 
 
 

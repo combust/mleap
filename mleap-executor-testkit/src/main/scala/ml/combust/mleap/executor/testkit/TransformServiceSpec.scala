@@ -243,7 +243,9 @@ trait TransformServiceSpec extends FunSpecLike
             CreateRowFlowRequest("model1",
               "stream1",
               BuiltinFormats.binary,
-              flowConfig.copy(throttle = Some(
+              flowConfig.copy(
+                parallelism = 1,
+                throttle = Some(
                 Throttle(
                   elements = 1,
                   duration = 1.day,
@@ -371,6 +373,7 @@ trait TransformServiceSpec extends FunSpecLike
               "stream2",
               BuiltinFormats.binary,
               flowConfig.copy(
+                parallelism = 1,
                 throttle = Some(
                   Throttle(
                     elements = 1,

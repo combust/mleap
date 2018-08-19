@@ -1,5 +1,5 @@
 import ml.combust.mleap.{Dependencies, Common, Protobuf}
 
 Dependencies.springBootServing
-Common.defaultMleapServingSettings
+Common.defaultMleapSettings
 Protobuf.springBootSettings

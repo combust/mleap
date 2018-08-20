@@ -15,7 +15,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.existentials
 import scala.util.{Failure, Success, Try}
 
-class RunServer(config: Config) {
+class RunServer(config: Config)
+               (implicit system: ActorSystem) {
   private val logger = Logger(classOf[RunServer])
 
   private var coordinator: Option[CoordinatedShutdown] = None
@@ -24,12 +25,12 @@ class RunServer(config: Config) {
     Try {
       logger.info("Starting MLeap gRPC Server")
 
-      implicit val system: ActorSystem = ActorSystem("Propel")
       val coordinator = CoordinatedShutdown(system)
       this.coordinator = Some(coordinator)
 
       implicit val materializer: Materializer = ActorMaterializer()
 
+      val mleapExecutor = MleapExecutor(system)
       val port: Int = config.getInt("port")
       val threads: Option[Int] = if (config.hasPath("threads")) Some(config.getInt("threads")) else None
       val threadCount = threads.getOrElse {
@@ -52,8 +53,7 @@ class RunServer(config: Config) {
       }
 
       logger.info(s"Creating executor service")
-      val executor: MleapExecutor = MleapExecutor(system)
-      val grpcService: GrpcServer = new GrpcServer(executor)
+      val grpcService: GrpcServer = new GrpcServer(mleapExecutor)
       val builder = ServerBuilder.forPort(port)
       builder.intercept(new ErrorInterceptor)
       builder.addService(MleapGrpc.bindService(grpcService, ec))

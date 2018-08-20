@@ -8,15 +8,29 @@ import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter
 
 import scalapb.json4s.{Parser, Printer}
 
+object StarterConfiguration {
+  private var actorSystem: Option[ActorSystem] = None
+
+  def setActorSystem(system: ActorSystem): Unit = {
+    this.actorSystem = Option(system)
+  }
+
+  def getActorSystem: ActorSystem = this.actorSystem.getOrElse {
+    ActorSystem("MleapSpringBoot")
+  }
+
+  def getMleapExecutor: MleapExecutor = MleapExecutor(getActorSystem)
+}
+
 @Configuration
 @EnableConfigurationProperties
 class StarterConfiguration {
 
   @Bean
-  def actorSystem() = ActorSystem("MleapSpringBootScoring")
+  def actorSystem: ActorSystem = StarterConfiguration.getActorSystem
 
   @Bean
-  def mleapExecutor(actorSystem: ActorSystem) = MleapExecutor(actorSystem)
+  def mleapExecutor(actorSystem: ActorSystem) = StarterConfiguration.getMleapExecutor
 
   @Bean
   def protobufHttpMessageConverter() = new ProtobufHttpMessageConverter

@@ -1,5 +1,6 @@
 package ml.combust.mleap.grpc.server
 
+import akka.actor.ActorSystem
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 import ml.combust.mleap.BuildInfo
 
@@ -16,7 +17,9 @@ object Boot extends App {
   }
 
   parser.parse(args, ConfigFactory.load().getConfig("ml.combust.mleap.grpc.server")) match {
-    case Some(config) => new RunServer(config).run()
+    case Some(config) =>
+      implicit val system: ActorSystem = ActorSystem("Propel")
+      new RunServer(config).run()
     case None =>
   }
 }

@@ -24,6 +24,7 @@ object MleapProject {
     grpcServer,
     repositoryS3,
     springBootServing,
+    serving,
     databricksRuntime)
 
   var rootSettings = Release.settings ++
@@ -120,7 +121,7 @@ object MleapProject {
   lazy val serving = Project(
     id = "mleap-serving",
     base = file("mleap-serving"),
-    dependencies = Seq(runtime, avro, xgboostRuntime)
+    dependencies = Seq(springBootServing, grpcServer)
   )
 
   lazy val executor = Project(

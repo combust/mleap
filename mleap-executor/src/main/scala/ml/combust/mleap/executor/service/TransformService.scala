@@ -3,13 +3,12 @@ package ml.combust.mleap.executor.service
 import java.util.concurrent.TimeUnit
 
 import akka.NotUsed
-import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult, javadsl}
+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import ml.combust.mleap.executor._
 import ml.combust.mleap.executor.error.ExecutorException
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 
-import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
@@ -90,11 +89,6 @@ trait TransformService {
 
   def createRowFlow[Tag](request: CreateRowFlowRequest)
                         (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed]
-
-  def javaRowFlow[Tag](request: CreateRowFlowRequest,
-                       timeout: Long): javadsl.Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
-    createRowFlow(request)(timeout.millis).asJava
-  }
 
   def createTransformRowClient(request: CreateRowFlowRequest,
                                bufferSize: Int)

@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.NormalizerModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.{LeapFrame, LocalDataset, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
 
@@ -11,11 +11,11 @@ import org.scalatest.FunSpec
   */
 class NormalizerSpec extends FunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
-  val dataset = LocalDataset(Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 40.0)))))
-  val frame = LeapFrame(schema, dataset)
+  val dataset = Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 40.0))))
+  val frame = DefaultLeapFrame(schema, dataset)
 
   val normalizer = Normalizer(
-    shape = NodeShape.vector(3, 3, inputCol = "test_vec", outputCol = "test_norm"),
+    shape = NodeShape.feature(inputCol = "test_vec", outputCol = "test_norm"),
     model = NormalizerModel(20.0, 3))
 
   describe("#transform") {
@@ -30,7 +30,7 @@ class NormalizerSpec extends FunSpec {
     }
 
     describe("with invalid input column") {
-      val normalizer2 = normalizer.copy(shape = NodeShape.vector(3, 3, inputCol = "bad_input"))
+      val normalizer2 = normalizer.copy(shape = NodeShape.feature(inputCol = "bad_input"))
 
       it("returns a Failure") { assert(normalizer2.transform(frame).isFailure) }
     }

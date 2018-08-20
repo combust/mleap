@@ -31,54 +31,53 @@ case class StandardScalerModel(std: Option[Vector],
     * @return scaled feature vector
     */
   def apply(vector: Vector): Vector = {
-    (std, mean) match {
-      case (None, None) => throw new IllegalStateException("need to scale with mean and/or with stdev")
-      case (Some(stdV), None) =>
-        vector match {
-          case DenseVector(values) =>
-            val vs = values.clone()
-            val size = vs.length
-            var i = 0
-            while (i < size) {
-              vs(i) *= (if (stdV(i) != 0.0) 1.0 / stdV(i) else 0.0)
-              i += 1
-            }
-            Vectors.dense(vs)
-          case SparseVector(size, indices, values) =>
-            val vs = values.clone()
-            val nnz = vs.length
-            var i = 0
-            while (i < nnz) {
-              vs(i) *= (if (stdV(indices(i)) != 0.0) 1.0 / stdV(indices(i)) else 0.0)
-              i += 1
-            }
-            Vectors.sparse(size, indices, vs)
+    if (mean.nonEmpty) {
+      val shift = mean.get.toArray
+      val values = vector match {
+        // specially handle DenseVector because its toArray does not clone already
+        case d: DenseVector => d.values.clone()
+        case v: SparseVector => v.toArray
+      }
+      val size = values.length
+      if (std.nonEmpty) {
+        val stdDev = std.get
+        var i = 0
+        while (i < size) {
+          values(i) = if (stdDev(i) != 0.0) (values(i) - shift(i)) * (1.0 / stdDev(i)) else 0.0
+          i += 1
         }
-      case (None, Some(meanV)) =>
-        vector match {
-          case DenseVector(values) =>
-            val vs = values.clone()
-            val size = vs.length
-            var i = 0
-            while(i < size) {
-              vs(i) -= meanV(i)
-              i += 1
-            }
-            Vectors.dense(vs)
+      } else {
+        var i = 0
+        while (i < size) {
+          values(i) -= shift(i)
+          i += 1
         }
-      case (Some(stdV), Some(meanV)) =>
-        vector match {
-          case DenseVector(values) =>
-            val vs = values.clone()
-            val size = vs.length
-
-            var i = 0
-            while(i < size) {
-              vs(i) = if(stdV(i) != 0.0) (vs(i) - meanV(i)) * (1.0 / stdV(i)) else 0.0
-              i += 1
-            }
-            Vectors.dense(vs)
-        }
+      }
+      Vectors.dense(values)
+    } else if (std.nonEmpty) {
+      val stdDev = std.get
+      vector match {
+        case DenseVector(vs) =>
+          val values = vs.clone()
+          val size = values.length
+          var i = 0
+          while(i < size) {
+            values(i) *= (if (stdDev(i) != 0.0) 1.0 / stdDev(i) else 0.0)
+            i += 1
+          }
+          Vectors.dense(values)
+        case SparseVector(size, indices, vs) =>
+          val values = vs.clone()
+          val nnz = values.length
+          var i = 0
+          while (i < nnz) {
+            values(i) *= (if (stdDev(indices(i)) != 0.0) 1.0 / stdDev(indices(i)) else 0.0)
+            i += 1
+          }
+          Vectors.sparse(size, indices, values)
+      }
+    } else {
+      throw new IllegalStateException("need to scale with mean and/or with stdev")
     }
   }
 

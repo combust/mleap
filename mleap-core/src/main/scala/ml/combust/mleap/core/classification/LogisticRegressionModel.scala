@@ -38,6 +38,21 @@ case class BinaryLogisticRegressionModel(coefficients: Vector,
       dv
     case _ => throw new RuntimeException(s"unsupported vector type ${raw.getClass}")
   }
+
+  override def probabilityToPrediction(probability: Vector): Double = {
+    if (probability(1) > threshold) 1 else 0
+  }
+
+  override def rawToPrediction(rawPrediction: Vector): Double = {
+    val rawThreshold = if (threshold == 0.0) {
+      Double.NegativeInfinity
+    } else if (threshold == 1.0) {
+      Double.PositiveInfinity
+    } else {
+      math.log(threshold / (1.0 - threshold))
+    }
+    if (rawPrediction(1) > rawThreshold) 1 else 0
+  }
 }
 
 case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix,
@@ -45,22 +60,6 @@ case class ProbabilisticLogisticsRegressionModel(coefficientMatrix: Matrix,
                                                  override val thresholds: Option[Array[Double]]) extends AbstractLogisticRegressionModel {
   override val numClasses: Int = interceptVector.size
   override val numFeatures: Int = coefficientMatrix.numCols
-
-  lazy val binaryModel: BinaryLogisticRegressionModel = {
-    val coefficients = {
-      require(coefficientMatrix.isTransposed,
-        "LogisticRegressionModel coefficients should be row major.")
-      coefficientMatrix match {
-        case dm: DenseMatrix => Vectors.dense(dm.values)
-        case sm: SparseMatrix => Vectors.sparse(coefficientMatrix.numCols, sm.rowIndices, sm.values)
-      }
-    }
-    val intercept = interceptVector(0)
-
-    BinaryLogisticRegressionModel(coefficients = coefficients,
-      intercept = intercept,
-      threshold = thresholds.get(0))
-  }
 
   private def margins(features: Vector): Vector = {
     val m = interceptVector.toDense.copy
@@ -126,4 +125,8 @@ case class LogisticRegressionModel(impl: AbstractLogisticRegressionModel) extend
   override def predictRaw(features: Vector): Vector = impl.predictRaw(features)
 
   override def rawToProbabilityInPlace(raw: Vector): Vector = impl.rawToProbabilityInPlace(raw)
+
+  override def probabilityToPrediction(probability: Vector): Double = impl.probabilityToPrediction(probability)
+
+  override def rawToPrediction(raw: Vector): Double = impl.rawToPrediction(raw)
 }

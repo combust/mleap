@@ -10,7 +10,7 @@ class AFTSurvivalRegressionSpec extends FunSpec {
   describe("input/output schema") {
 
     it("has the correct inputs and outputs") {
-      val transformer = AFTSurvivalRegression(shape = NodeShape.regression(3)
+      val transformer = AFTSurvivalRegression(shape = NodeShape.regression()
         .withOutput("quantiles", "quantiles"),
         model = new AFTSurvivalRegressionModel(Vectors.dense(1, 3, 4), 23, Array(1, 2, 3, 4, 5), 5))
       assert(transformer.schema.fields ==

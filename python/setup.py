@@ -40,7 +40,6 @@ numpy_version = "1.8.2"
 REQUIRED_PACKAGES = [
       'numpy >= %s' % numpy_version,
       'six >= 1.10.0',
-      'argparse>=1.1',
       'scipy>=0.13.0b1',
       'pandas>=0.18.1',
       'scikit-learn>=0.18.dev0',

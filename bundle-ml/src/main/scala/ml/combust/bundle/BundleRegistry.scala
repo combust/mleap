@@ -2,7 +2,7 @@ package ml.combust.bundle
 
 import com.typesafe.config.{Config, ConfigFactory}
 import ml.combust.bundle.op.{OpModel, OpNode}
-import ml.combust.bundle.util.ClassLoaderUtil
+import ml.combust.mleap.ClassLoaderUtil
 
 import scala.collection.JavaConverters._
 

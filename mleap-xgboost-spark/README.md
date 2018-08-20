@@ -43,14 +43,14 @@ Once you have installed to either ivy2 or maven, the next step is to include `ml
 
 ```
 // Make sure to set mleapVersion, at the time of this writing
-// mleapVersion should be "0.8.0"
+// mleapVersion should be "0.9.0"
 libraryDependencies += "ml.combust.mleap" %% "mleap-xgboost-spark" % mleapVersion
 ```
 
 ### Maven Dependency
 
 Make sure to set `ml.combust.mleap.version` to the desired MLeap version.
-As of the time of this writing, the value should be `0.8.0`.
+As of the time of this writing, the value should be `0.9.0`.
 
 ```
 <dependency>
@@ -73,3 +73,9 @@ To use `mleap-xgboost-spark` from a notebook, make sure you include all required
 3. `xgboost4j-spark` - Required by `mleap-xgboost-spark`, as it is marked as a provided dependency
 4. `mleap-runtime` - Support for all out-of-the-box MLeap transformers
 5. `mleap-xgboost-java` - Support for XGBoost MLeap runtime transformers
+
+## Thank You
+
+Thank you to [Swoop](https://www.swoop.com/) for supporting this
+integration.
+

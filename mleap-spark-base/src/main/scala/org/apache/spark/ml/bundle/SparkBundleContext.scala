@@ -1,8 +1,8 @@
 package org.apache.spark.ml.bundle
 
 import com.typesafe.config.ConfigFactory
-import ml.combust.bundle.util.ClassLoaderUtil
 import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
+import ml.combust.mleap.ClassLoaderUtil
 import org.apache.spark.sql.DataFrame
 
 /**
@@ -19,6 +19,8 @@ object SparkBundleContext {
       "ml.combust.mleap.spark.registry.v21"
     } else if(sparkVersion.startsWith("2.2")) {
       "ml.combust.mleap.spark.registry.v22"
+    } else if(sparkVersion.startsWith("2.3")) {
+      "ml.combust.mleap.spark.registry.v23"
     } else {
       throw new IllegalStateException(s"unsupported Spark version: $sparkVersion")
     }

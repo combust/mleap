@@ -2,12 +2,13 @@ package ml.combust.bundle.serializer
 
 import java.net.URI
 
-import ml.combust.bundle.{BundleFile, BundleRegistry, TestUtil}
+import ml.bundle.Attributes
+import ml.combust.bundle.dsl.Bundle
+import ml.combust.bundle.test.TestSupport._
 import ml.combust.bundle.test._
 import ml.combust.bundle.test.ops._
+import ml.combust.bundle.{BundleFile, BundleRegistry, TestUtil, dsl}
 import org.scalatest.FunSpec
-import TestSupport._
-import ml.combust.bundle.dsl.Bundle
 import resource._
 
 import scala.util.Random
@@ -18,6 +19,7 @@ import scala.util.Random
 sealed trait FSType
 case object ZipFS extends FSType
 case object DirFS extends FSType
+case object DirInJarFS extends FSType
 
 class BundleSerializationSpec extends FunSpec {
   implicit val testContext = TestContext(BundleRegistry("test-registry"))
@@ -28,6 +30,9 @@ class BundleSerializationSpec extends FunSpec {
   it should behave like bundleSerializer("Serializing/Deserializing json a bundle as a zip",
     SerializationFormat.Json,
     ZipFS)
+  it should behave like bundleSerializer("Serializing/Deserializing json a bundle as a dir in zip",
+    SerializationFormat.Json,
+    DirInJarFS)
 
   it should behave like bundleSerializer("Serializing/Deserializing proto a bundle as a dir",
     SerializationFormat.Protobuf,
@@ -35,11 +40,15 @@ class BundleSerializationSpec extends FunSpec {
   it should behave like bundleSerializer("Serializing/Deserializing proto a bundle as a zip",
     SerializationFormat.Protobuf,
     DirFS)
+  it should behave like bundleSerializer("Serializing/Deserializing proto a bundle as a dir in zip",
+    SerializationFormat.Protobuf,
+    DirInJarFS)
 
   def bundleSerializer(description: String, format: SerializationFormat, fsType: FSType) = {
     val (prefix, suffix) = fsType match {
       case DirFS => ("file", "")
       case ZipFS => ("jar:file", ".zip")
+      case DirInJarFS => ("jar:file", ".jar!custom/path")
     }
 
     describe(description) {
@@ -104,6 +113,44 @@ class BundleSerializationSpec extends FunSpec {
             val bundleRead: Bundle[Transformer] = file.loadBundle().get
 
             assert(pipeline == bundleRead.root)
+          }
+        }
+      }
+
+      describe("with a backslash'd path for a linear regression") {
+        it("serializes and deserializes from a path containing '\\' separators") {
+          val uri = s"$prefix:${TestUtil.baseDir}/lr_bundle.$format$suffix".replace('/', '\\')
+          for(file <- managed(BundleFile(uri))) {
+            lr.writeBundle.name("my_bundle").
+              format(format).
+              save(file)
+
+            val bundleRead = file.loadBundle().get
+
+            assert(lr == bundleRead.root)
+          }
+        }
+      }
+
+      describe("with metadata") {
+        it("serializes and deserializes any metadata we want to send along with the bundle") {
+          val uri = new URI(s"$prefix:${TestUtil.baseDir}/lr_bundle_meta.$format$suffix")
+          val meta = new Attributes().withList(Map(
+            "keyA" → dsl.Value.string("valA").value,
+            "keyB" → dsl.Value.double(1.2).value,
+            "keyC" → dsl.Value.stringList(Seq("listValA", "listValB")).value
+          ))
+          for(file <- managed(BundleFile(uri))) {
+            lr.writeBundle.name("my_bundle").
+              format(format).
+              meta(meta).
+              save(file)
+
+            val bundleRead = file.loadBundle().get
+
+            // These are written this way explicitly for compatibility with Scala 2.10
+            assert(!bundleRead.info.meta.isEmpty)
+            assert(bundleRead.info.meta.get.equals(meta))
           }
         }
       }

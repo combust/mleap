@@ -1,12 +1,14 @@
 package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
+import ml.combust.mleap.core.types.{DataShape, ScalarShape}
 import org.apache.spark.ml.attribute.{Attribute, BinaryAttribute, NominalAttribute, NumericAttribute}
 import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.IndexToString
 import org.apache.spark.sql.types.StructField
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 import scala.util.{Failure, Try}
 
@@ -48,11 +50,17 @@ class ReverseStringIndexerOp extends SimpleSparkOp[IndexToString] {
         ReverseStringIndexerOp.labelsForField(df.schema(obj.getInputCol))
       }
 
-      model.withValue("labels", Value.stringList(labels))
+      model.withValue("labels", Value.stringList(labels)).
+        withValue("input_shape", Value.dataShape(ScalarShape(false)))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): IndexToString = {
+      model.getValue("input_shape").map(_.getDataShape: DataShape).foreach {
+        shape =>
+          require(shape.isScalar, "cannot deserialize non-scalar input to Spark IndexToString model")
+      }
+      
       new IndexToString(uid = "").setLabels(model.value("labels").getStringList.toArray)
     }
   }

@@ -15,13 +15,13 @@ object MleapProject {
       sparkTestkit,
       spark,
       sparkExtension,
-      xgboostJava)
+      xgboostJava,
+      tensorflow)
 
-  lazy val rootSettings = Release.settings ++
+  var rootSettings = Release.settings ++
     Common.buildSettings ++
     Common.sonatypeSettings ++
-    Seq(publishArtifact := false) ++
-    Seq(test in tensorflow := false) // skip tests because of JNI library requirement
+    Seq(publishArtifact := false)
 
   lazy val root = Project(
     id = "mleap",

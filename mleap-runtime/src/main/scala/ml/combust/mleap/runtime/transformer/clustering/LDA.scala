@@ -4,7 +4,7 @@ import ml.combust.mleap.core.clustering.LocalLDAModel
 import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.{SimpleTransformer, Transformer}
+import ml.combust.mleap.runtime.frame.{SimpleTransformer, Transformer}
 import ml.combust.mleap.tensor.Tensor
 
 /**

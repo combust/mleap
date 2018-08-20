@@ -52,6 +52,7 @@ object Bundle {
       val chi_sq_selector = "chi_sq_selector"
       val reverse_string_indexer = "reverse_string_indexer"
       val hashing_term_frequency = "hashing_term_frequency"
+      val feature_hasher = "feature_hasher"
       val imputer = "imputer"
       val standard_scaler = "standard_scaler"
       val tokenizer = "tokenizer"
@@ -73,6 +74,7 @@ object Bundle {
       val word_to_vector = "word_to_vector"
       val multinomial_labeler = "multinomial_labeler"
       val regex_tokenizer = "regex_tokenizer"
+      val regex_indexer = "regex_indexer"
       val word_filter = "word_filter"
       val interaction = "interaction"
     }
@@ -95,18 +97,24 @@ object Bundle {
       val lda = "lda_local_model_op"
     }
 
+    object recommendation {
+      val als = "als"
+    }
+
     val pipeline = "pipeline"
     val tensorflow = "tensorflow"
   }
 
   def apply[Transformer <: AnyRef](name: String,
                                    format: SerializationFormat,
-                                   root: Transformer): Bundle[Transformer] = {
+                                   root: Transformer,
+                                   meta: Option[ml.bundle.Attributes] = None): Bundle[Transformer] = {
     apply(BundleInfo(uid = UUID.randomUUID(),
       name = name,
       format = format,
       version = Bundle.version,
-      timestamp = LocalDateTime.now().toString), root)
+      timestamp = LocalDateTime.now().toString,
+      meta = meta), root)
   }
 }
 
@@ -116,7 +124,8 @@ object BundleInfo {
       name = bundle.name,
       format = SerializationFormat.fromBundle(bundle.format),
       version = bundle.version,
-      timestamp = bundle.timestamp)
+      timestamp = bundle.timestamp,
+      meta = bundle.meta)
   }
 }
 
@@ -132,13 +141,16 @@ case class BundleInfo(uid: UUID,
                       name: String,
                       format: SerializationFormat,
                       version: String,
-                      timestamp: String) {
+                      timestamp: String,
+                      meta: Option[ml.bundle.Attributes]) {
   def asBundle: ml.bundle.Bundle = {
     ml.bundle.Bundle(uid = uid.toString,
       name = name,
       format = format.asBundle,
       version = version,
-      timestamp = timestamp)
+      timestamp = timestamp,
+      meta = meta
+    )
   }
 }
 

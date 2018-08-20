@@ -14,7 +14,7 @@ case class RegexTokenizerModel(regex: Regex, matchGaps: Boolean = true, tokenMin
     tokens.filter(_.length >= tokenMinLength)
   }
 
-  override def inputSchema: StructType = StructType("input" -> ScalarType.String).get
+  override def inputSchema: StructType = StructType("input" -> ScalarType.String.nonNullable).get
 
   override def outputSchema: StructType = StructType("output" -> ListType(BasicType.String)).get
 }

@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.javadsl
 
 import ml.combust.mleap.core.types.BasicType
-import ml.combust.mleap.runtime.ArrayRow
+import ml.combust.mleap.runtime.frame.ArrayRow
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -28,4 +28,8 @@ class LeapFrameBuilderSupport {
   def createDouble(): BasicType = BasicType.Double
   def createString(): BasicType = BasicType.String
   def createByteString(): BasicType = BasicType.ByteString
+
+  def createTensorDimensions(dims : java.util.List[Integer]): Option[Seq[Int]] = {
+    Some(dims.asScala.map(_.intValue()))
+  }
 }

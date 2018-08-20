@@ -11,7 +11,7 @@ MLeap serving is a Docker image hosted on [Docker Hub](https://hub.docker.com/r/
 To get started, pull the image to your local machine:
 
 ```
-docker pull combustml/mleap-serving:0.6.0-SNAPSHOT
+docker pull combustml/mleap-serving:0.9.0-SNAPSHOT
 ```
 
 ## Usage
@@ -31,10 +31,22 @@ models in `/tmp/models` and mounting it in the container at `/models`.
 
 ```
 mkdir /tmp/models
-docker run -p 65327:65327 -v /tmp/models:/models combustml/mleap-serving:0.6.0-SNAPSHOT
+docker run -p 65327:65327 -v /tmp/models:/models combustml/mleap-serving:0.9.0-SNAPSHOT
 ```
 
 This will expose the model server locally on port `65327`.
+
+NOTE: Outside of Docker, you can utilize the `MLEAP_SERVER_HOSTNAME`
+and the `MLEAP_SERVER_PORT` environment variables to explicitly control
+where MLeap serving listens. The below example will bind the RESTful
+web interface to the 127.0.0.1 interface on TCP port 12345, rather than
+the default, all interfaces (0.0.0.0) on TCP port 65327.
+
+```
+export MLEAP_SERVER_HOSTNAME=127.0.0.1
+export MLEAP_SERVER_PORT=12345
+/path/to/mleap-serving # update this with the real path to the mleap-serving binary
+```
 
 ### Load Model
 
@@ -42,8 +54,8 @@ Use curl to load the model into memory. If you don't have your own
 model, download one of our example models. Make sure to place it in the
 models directory you mounted when starting the server.
 
-1. [AirBnB Linear Regression](https://s3-us-west-2.amazonaws.com/mleap-demo/airbnb.model.lr-0.6.0-SNAPSHOT.zip)
-2. [AirBnB Random Forest](https://s3-us-west-2.amazonaws.com/mleap-demo/airbnb.model.rf-0.6.0-SNAPSHOT.zip)
+1. [AirBnB Linear Regression](https://github.com/combust/mleap/raw/master/mleap-benchmark/src/main/resources/models/airbnb.model.lr.zip)
+2. [AirBnB Random Forest](https://github.com/combust/mleap/raw/master/mleap-benchmark/src/main/resources/models/airbnb.model.rf.zip)
 
 ```
 curl -XPUT -H "content-type: application/json" \

@@ -21,7 +21,7 @@ case class TensorflowModel(graph: tensorflow.Graph,
   private var session: Option[tensorflow.Session] = None
 
   def apply(values: Tensor[_] *): Seq[Any] = {
-    val garbage: mutable.ArrayBuilder[tensorflow.Tensor] = mutable.ArrayBuilder.make[tensorflow.Tensor]()
+    val garbage: mutable.ArrayBuilder[tensorflow.Tensor[_]] = mutable.ArrayBuilder.make[tensorflow.Tensor[_]]()
 
     val result = Try {
       val tensors = values.zip(inputs).map {

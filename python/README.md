@@ -24,10 +24,10 @@ feature_pipeline = [string_indexer, feature_assembler]
 featurePipeline = Pipeline(stages=feature_pipeline)
 
 # Fit your pipeline
-featurePipeline.fit(df)
+fittedPipeline = featurePipeline.fit(df)
 
 # Serialize your pipeline
-featurePipeline.serializeToBundle("jar:file:/tmp/pyspark.example.zip")
+fittedPipeline.serializeToBundle("jar:file:/tmp/pyspark.example.zip", fittedPipeline.transform(df))
 ```
 
 ## Scikit-Learn Integration

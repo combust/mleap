@@ -3,13 +3,9 @@ package ml.combust.mleap.runtime.transformer.classification
 import ml.combust.mleap.core.classification.NaiveBayesModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.transformer.{MultiTransformer, Transformer}
-import ml.combust.mleap.runtime.transformer.builder.TransformBuilder
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.core.util.VectorConverters._
-import ml.combust.mleap.runtime.Row
-
-import scala.util.{Success, Try}
+import ml.combust.mleap.runtime.frame.{MultiTransformer, Row, Transformer}
 
 /**
   * Created by fshabbir on 12/24/16.

@@ -40,23 +40,17 @@ Our goals for this project are:
 
 ## Requirements
 
-MLeap is cross-compiled for Scala 2.10 and 2.11. Because we depend
-heavily on Typesafe config for MLeap, we only support Java 8 at the
-moment. This means the following configurations should be possible:
-
-2. Scala 2.10 and Java 8
-4. Scala 2.11 and Java 8
+MLeap is built against Scala 2.11 and Java 8.  Because we depend heavily on Typesafe config for MLeap, we only support Java 8 at the
+moment.
 
 ## Setup
 
 ### Link with Maven or SBT
 
-MLeap is cross-compiled for Scala 2.10 and 2.11, so just replace 2.10 with 2.11 wherever you see it if you are running Scala version 2.11 and using a POM file for dependency management. Otherwise, use the `%%` operator if you are using SBT and the correct Scala version will be used.
-
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.7.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.10.0"
 ```
 
 #### Maven
@@ -64,8 +58,8 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.7.0"
 ```pom
 <dependency>
     <groupId>ml.combust.mleap</groupId>
-    <artifactId>mleap-runtime_2.10</artifactId>
-    <version>0.7.0</version>
+    <artifactId>mleap-runtime_2.11</artifactId>
+    <version>0.10.0</version>
 </dependency>
 ```
 
@@ -74,7 +68,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.7.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.7.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.10.0"
 ```
 
 #### Maven
@@ -82,15 +76,15 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.7.0"
 ```pom
 <dependency>
     <groupId>ml.combust.mleap</groupId>
-    <artifactId>mleap-spark_2.10</artifactId>
-    <version>0.7.0</version>
+    <artifactId>mleap-spark_2.11</artifactId>
+    <version>0.10.0</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.7.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.10.0
 ```
 
 ### PySpark Integration
@@ -103,7 +97,7 @@ $ pip install mleap
 
 ## Using the Library
 
-For more complete examples, see our other Git repository: [MLeap Demos](https://github.com/combust-ml/mleap-demo)
+For more complete examples, see our other Git repository: [MLeap Demos](https://github.com/combust/mleap-demo)
 
 ### Create and Export a Spark Pipeline
 
@@ -167,29 +161,21 @@ from mleap.pyspark.spark_support import SimpleSparkSerializer
 ```python
 import pandas as pd
 
-# Load scikit-learn mleap extensions
-import mleap.sklearn.pipeline
-import mleap.sklearn.preprocessing.data
-from mleap.sklearn.preprocessing.data import NDArrayToDataFrame
-
-# Load the LabelEncoder from Mleap
+from mleap.sklearn.pipeline import Pipeline
 from mleap.sklearn.preprocessing.data import FeatureExtractor, LabelEncoder, ReshapeArrayToN1
-
-# Load scikit-learn transformers and models
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.pipeline import Pipeline
 
 data = pd.DataFrame(['a', 'b', 'c'], columns=['col_a'])
 
-continuous_features = ['col_a']
+categorical_features = ['col_a']
 
-feature_extractor_tf = FeatureExtractor(input_scalars=continuous_features, 
+feature_extractor_tf = FeatureExtractor(input_scalars=categorical_features, 
                                          output_vector='imputed_features', 
-                                         output_vector_items=continuous_features)
+                                         output_vector_items=categorical_features)
 
 # Label Encoder for x1 Label 
 label_encoder_tf = LabelEncoder(input_features=feature_extractor_tf.output_vector_items,
-                               output_features='{}_label_le'.format(continuous_features[0]))
+                               output_features='{}_label_le'.format(categorical_features[0]))
 
 # Reshape the output of the LabelEncoder to N-by-1 array
 reshape_le_tf = ReshapeArrayToN1()
@@ -197,7 +183,7 @@ reshape_le_tf = ReshapeArrayToN1()
 # Vector Assembler for x1 One Hot Encoder
 one_hot_encoder_tf = OneHotEncoder(sparse=False)
 one_hot_encoder_tf.mlinit(prior_tf = label_encoder_tf, 
-                          output_features = '{}_label_one_hot_encoded'.format(continuous_features[0]))
+                          output_features = '{}_label_one_hot_encoded'.format(categorical_features[0]))
 
 one_hot_encoder_pipeline_x0 = Pipeline([
                                          (feature_extractor_tf.name, feature_extractor_tf),
@@ -217,7 +203,7 @@ one_hot_encoder_pipeline_x0.serialize_to_bundle('/tmp', 'mleap-scikit-test-pipel
 
 ### Load and Transform Using MLeap
 
-Becuase we export Spark and Scikit-learn pipelines to a standard format, we can use either our Spark-trained pipeline or our Scikit-learn pipeline from the previous steps to demonstrate usage of MLeap in this section. The choice is yours!
+Because we export Spark and Scikit-learn pipelines to a standard format, we can use either our Spark-trained pipeline or our Scikit-learn pipeline from the previous steps to demonstrate usage of MLeap in this section. The choice is yours!
 
 ```scala
 import ml.combust.bundle.BundleFile
@@ -229,15 +215,14 @@ val bundle = (for(bundleFile <- managed(BundleFile("jar:file:/tmp/simple-spark-p
 }).opt.get
 
 // create a simple LeapFrame to transform
-import ml.combust.mleap.runtime.{Row, LeapFrame, LocalDataset}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.core.types._
 
 // MLeap makes extensive use of monadic types like Try
 val schema = StructType(StructField("test_string", ScalarType.String),
   StructField("test_double", ScalarType.Double)).get
-val data = LocalDataset(Row("hello", 0.6),
-  Row("MLeap", 0.2))
-val frame = LeapFrame(schema, data)
+val data = Seq(Row("hello", 0.6), Row("MLeap", 0.2))
+val frame = DefaultLeapFrame(schema, data)
 
 // transform the dataframe using our pipeline
 val mleapPipeline = bundle.root
@@ -245,27 +230,27 @@ val frame2 = mleapPipeline.transform(frame).get
 val data2 = frame2.dataset
 
 // get data from the transformed rows and make some assertions
-assert(data2(0).getDouble(2) == 0.0) // string indexer output
+assert(data2(0).getDouble(2) == 1.0) // string indexer output
 assert(data2(0).getDouble(3) == 1.0) // binarizer output
 
 // the second row
-assert(data2(1).getDouble(2) == 1.0)
+assert(data2(1).getDouble(2) == 2.0)
 assert(data2(1).getDouble(3) == 0.0)
 ```
 
 ## Documentation
 
-For more documentation, please see our [wiki](https://github.com/combust-ml/mleap/wiki), where you can learn to:
+For more documentation, please see our [documentation](http://mleap-docs.combust.ml), where you can learn to:
 
-1. implement custom transformers that will work with Spark, MLeap and Scikit-learn
-2. implement custom data types to transform with Spark and MLeap pipelines
-3. transform with blazing fast speeds using optimized row-based transformers
-4. serialize MLeap data frames to various formats like avro, json, and a custom binary format
-5. implement new serialization formats for MLeap data frames
-6. work through several demonstration pipelines which use real-world data to create predictive pipelines
-7. supported Spark transformers
-8. supported Scikit-learn transformers
-9. custom transformers provided by MLeap
+1. Implement custom transformers that will work with Spark, MLeap and Scikit-learn
+2. Implement custom data types to transform with Spark and MLeap pipelines
+3. Transform with blazing fast speeds using optimized row-based transformers
+4. Serialize MLeap data frames to various formats like avro, json, and a custom binary format
+5. Implement new serialization formats for MLeap data frames
+6. Work through several demonstration pipelines which use real-world data to create predictive pipelines
+7. Supported Spark transformers
+8. Supported Scikit-learn transformers
+9. Custom transformers provided by MLeap
 
 ## Contributing
 
@@ -277,11 +262,16 @@ For more documentation, please see our [wiki](https://github.com/combust-ml/mlea
 * Make a pull request for an existing feature request or bug report
 * Join the discussion of how to get MLeap into Spark as a dependency. Talk with us on Gitter (see link at top of README.md)
 
+## Thank You
+
+Thank you to [Swoop](https://www.swoop.com/) for supporting the XGboost
+integration.
+
 ## Contact Information
 
 * Hollin Wilkins (hollin@combust.ml)
 * Mikhail Semeniuk (mikhail@combust.ml)
-* Ram Sriharsha (ram@databricks.com)
+* Anca Sarb (sarb.anca@gmail.com)
 
 ## License
 

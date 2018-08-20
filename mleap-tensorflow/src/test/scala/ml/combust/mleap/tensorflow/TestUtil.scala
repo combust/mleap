@@ -1,5 +1,7 @@
 package ml.combust.mleap.tensorflow
 
+import java.io.File
+
 import org.tensorflow
 
 /**
@@ -20,6 +22,14 @@ object TestUtil {
       addInput(inputB.output(0)).
       build()
     graph
+  }
+
+  val baseDir = new File("/tmp/mleap-tensorflow")
+  TestUtil.delete(baseDir)
+  baseDir.mkdirs()
+
+  def delete(file: File): Array[(String, Boolean)] = {
+    Option(file.listFiles).map(_.flatMap(f => delete(f))).getOrElse(Array()) :+ (file.getPath -> file.delete)
   }
 
   def createMultiplyGraph(): tensorflow.Graph = {

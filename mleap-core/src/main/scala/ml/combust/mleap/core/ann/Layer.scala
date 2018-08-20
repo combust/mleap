@@ -3,7 +3,7 @@ package ml.combust.mleap.core.ann
 /** NOTE: this code was taken from Spark and adopted for
   * use by MLeap outside of a Spark Context
   *
-  * https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/ann/Layer.scala
+  * https://github.com/apache/spark/blob/v2.3.0/mllib/src/main/scala/org/apache/spark/ml/ann/Layer.scala
   */
 
 import java.util.Random
@@ -340,17 +340,42 @@ trait TopologyModel extends Serializable {
     * Forward propagation
     *
     * @param data input data
+    * @param includeLastLayer Include the last layer in the output. In
+    *                         MultilayerPerceptronClassifier, the last layer is always softmax;
+    *                         the last layer of outputs is needed for class predictions, but not
+    *                         for rawPrediction.
+    *
     * @return array of outputs for each of the layers
     */
-  def forward(data: BDM[Double]): Array[BDM[Double]]
+  def forward(data: BDM[Double], includeLastLayer: Boolean): Array[BDM[Double]]
 
   /**
-    * Prediction of the model
+    * Prediction of the model. See {@link ProbabilisticClassificationModel}
     *
-    * @param data input data
+    * @param features input features
     * @return prediction
     */
-  def predict(data: Vector): Vector
+  def predict(features: Vector): Vector
+
+  /**
+    * Raw prediction of the model. See {@link ProbabilisticClassificationModel}
+    *
+    * @param features input features
+    * @return raw prediction
+    *
+    * Note: This interface is only used for classification Model.
+    */
+  def predictRaw(features: Vector): Vector
+
+  /**
+    * Probability of the model. See {@link ProbabilisticClassificationModel}
+    *
+    * @param rawPrediction raw prediction vector
+    * @return probability
+    *
+    * Note: This interface is only used for classification Model.
+    */
+  def raw2ProbabilityInPlace(rawPrediction: Vector): Vector
 
   /**
     * Computes gradient for the network
@@ -433,22 +458,21 @@ class FeedForwardModel private(
   val layers = topology.layers
   val layerModels = new Array[LayerModel](layers.length)
   private var offset = 0
-  for (i <- layers.indices) {
+  for (i <- 0 until layers.length) {
     layerModels(i) = layers(i).createModel(
       new BDV[Double](weights.toArray, offset, 1, layers(i).weightSize))
     offset += layers(i).weightSize
   }
-  private var outputs: Array[BDM[Double]] = null
-  private var deltas: Array[BDM[Double]] = null
 
-  override def forward(data: BDM[Double]): Array[BDM[Double]] = {
+  override def forward(data: BDM[Double], includeLastLayer: Boolean): Array[BDM[Double]] = {
+    var outputs: Array[BDM[Double]] = null
     // Initialize output arrays for all layers. Special treatment for InPlace
     val currentBatchSize = data.cols
     // TODO: allocate outputs as one big array and then create BDMs from it
     if (outputs == null || outputs(0).cols != currentBatchSize) {
       outputs = new Array[BDM[Double]](layers.length)
       var inputSize = data.rows
-      for (i <- layers.indices) {
+      for (i <- 0 until layers.length) {
         if (layers(i).inPlace) {
           outputs(i) = outputs(i - 1)
         } else {
@@ -459,7 +483,8 @@ class FeedForwardModel private(
       }
     }
     layerModels(0).eval(data, outputs(0))
-    for (i <- 1 until layerModels.length) {
+    val end = if (includeLastLayer) layerModels.length else layerModels.length - 1
+    for (i <- 1 until end) {
       layerModels(i).eval(outputs(i - 1), outputs(i))
     }
     outputs
@@ -470,7 +495,8 @@ class FeedForwardModel private(
                                 target: BDM[Double],
                                 cumGradient: Vector,
                                 realBatchSize: Int): Double = {
-    val outputs = forward(data)
+    var deltas: Array[BDM[Double]] = null
+    val outputs = forward(data, true)
     val currentBatchSize = data.cols
     // TODO: allocate deltas as one big array and then create BDMs from it
     if (deltas == null || deltas(0).cols != currentBatchSize) {
@@ -494,7 +520,7 @@ class FeedForwardModel private(
     }
     val cumGradientArray = cumGradient.toArray
     var offset = 0
-    for (i <- layers.indices) {
+    for (i <- 0 until layerModels.length) {
       val input = if (i == 0) data else outputs(i - 1)
       layerModels(i).grad(deltas(i), input,
         new BDV[Double](cumGradientArray, offset, 1, layers(i).weightSize))
@@ -505,8 +531,19 @@ class FeedForwardModel private(
 
   override def predict(data: Vector): Vector = {
     val size = data.size
-    val result = forward(new BDM[Double](size, 1, data.toArray))
+    val result = forward(new BDM[Double](size, 1, data.toArray), true)
     Vectors.dense(result.last.toArray)
+  }
+
+  override def predictRaw(data: Vector): Vector = {
+    val result = forward(new BDM[Double](data.size, 1, data.toArray), false)
+    Vectors.dense(result(result.length - 2).toArray)
+  }
+
+  override def raw2ProbabilityInPlace(data: Vector): Vector = {
+    val dataMatrix = new BDM[Double](data.size, 1, data.toArray)
+    layerModels.last.eval(dataMatrix, dataMatrix)
+    data
   }
 }
 
@@ -550,4 +587,3 @@ object FeedForwardModel {
     new FeedForwardModel(mleap.VectorUtil.fromBreeze(weights), topology)
   }
 }
-

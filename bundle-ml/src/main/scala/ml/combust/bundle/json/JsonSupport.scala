@@ -39,7 +39,7 @@ trait JsonSupport {
       case JsString("double") => BasicType.DOUBLE
       case JsString("string") => BasicType.STRING
       case JsString("byte_string") => BasicType.BYTE_STRING
-      case JsString("unknown") => BasicType.Unrecognized(100)
+      case JsString("unknown") => BasicType.UNDEFINED
       case _ => deserializationError("invalid basic type")
     }
 
@@ -129,7 +129,7 @@ trait JsonSupport {
       if(obj.s != "") { fb += ("string" -> obj.s.toJson) }
       if(obj.bs != ByteString.EMPTY) { fb += ("byte_string" -> obj.bs.toJson) }
       obj.t.foreach(t => fb += ("tensor" -> t.toJson))
-      if(obj.bt != BasicType.BOOLEAN) { fb += ("basic_type" -> obj.bt.toJson) }
+      if(obj.bt != BasicType.UNDEFINED) { fb += ("basic_type" -> obj.bt.toJson) }
       obj.ds.foreach(ds => fb += ("data_shape" -> ds.toJson))
       obj.m.foreach(m => fb += ("model" -> m.toJson))
 
@@ -216,7 +216,7 @@ trait JsonSupport {
       if(obj.s.nonEmpty) { fb += ("string" -> obj.s.toJson) }
       if(obj.bs.nonEmpty) { fb += ("byte_string" -> obj.bs.toJson) }
       if(obj.t.nonEmpty) { fb += ("tensor" -> obj.t.toJson) }
-      if(obj.bt.nonEmpty) { fb += ("byte_string" -> obj.bt.toJson) }
+      if(obj.bt.nonEmpty) { fb += ("basic_type" -> obj.bt.toJson) }
       if(obj.ds.nonEmpty) { fb += ("data_shape" -> obj.ds.toJson) }
       if(obj.m.nonEmpty) { fb += ("model" -> obj.m.toJson) }
 
@@ -290,6 +290,6 @@ trait JsonSupport {
 
   implicit val bundleNodeFormat: RootJsonFormat[Node] = jsonFormat2(Node.apply)
   implicit val bundleModelFormat: RootJsonFormat[Model] = jsonFormat2(Model.apply)
-  implicit val bundleBundleInfoFormat: RootJsonFormat[Bundle] = jsonFormat5(Bundle.apply)
+  implicit val bundleBundleInfoFormat: RootJsonFormat[Bundle] = jsonFormat6(Bundle.apply)
 }
 object JsonSupport extends JsonSupport

@@ -47,9 +47,13 @@ class LogisticRegressionOp extends MleapOp[LogisticRegression, LogisticRegressio
           interceptVector = Vectors.dense(model.value("intercept_vector").getTensor[Double].toArray),
           thresholds = model.getValue("thresholds").map(_.getDoubleList.toArray))
       } else {
+        // default threshold is 0.5 for both Spark and Scikit-learn
+        val threshold = model.getValue("threshold")
+                              .map(value => value.getDouble)
+                              .getOrElse(0.5)
         BinaryLogisticRegressionModel(coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
           intercept = model.value("intercept").getDouble,
-          threshold = model.value("threshold").getDouble)
+          threshold = threshold)
       }
 
       LogisticRegressionModel(lm)

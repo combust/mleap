@@ -108,12 +108,10 @@ case class FlowConfig(idleTimeout: Option[FiniteDuration] = None,
 /** Specifies the schema and transform options for
   * a row transformer.
   *
-  * @param format format used for serde
   * @param schema input schema of the rows
   * @param options transform options to apply for transform
   */
-case class RowStreamSpec(format: String,
-                         schema: StructType,
+case class RowStreamSpec(schema: StructType,
                          options: TransformOptions = TransformOptions.default)
 
 sealed trait ModelRequest {

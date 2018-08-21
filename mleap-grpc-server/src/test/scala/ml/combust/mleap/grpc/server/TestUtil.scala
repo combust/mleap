@@ -5,6 +5,7 @@ import java.net.URI
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import com.typesafe.config.ConfigFactory
 import io.grpc.{ManagedChannel, Server}
 import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
 import ml.combust.mleap.executor.MleapExecutor
@@ -28,7 +29,8 @@ object TestUtil {
   lazy val uniqueServerName : String = "in-process server for " + getClass
 
   def createServer(system: ActorSystem) : Server = {
-    val ssd = MleapGrpc.bindService(new GrpcServer(MleapExecutor(system))(global, ActorMaterializer.create(system)), global)
+    val config = new GrpcServerConfig(ConfigFactory.load().getConfig("ml.combust.mleap.grpc.server.default"))
+    val ssd = MleapGrpc.bindService(new GrpcServer(MleapExecutor(system), config)(global, ActorMaterializer.create(system)), global)
     val builder = InProcessServerBuilder.forName(uniqueServerName)
     builder.directExecutor().addService(ssd).intercept(new ErrorInterceptor)
     val server = builder.build

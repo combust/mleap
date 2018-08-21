@@ -27,7 +27,7 @@ class JsonScoringSpec extends ScoringBase[String, String, String, String, String
   override def createLoadModelRequest(modelName: String, uri:URI, createTmpFile: Boolean): HttpEntity[String] = {
     val request = LoadModelRequest(modelName = modelName,
       uri = TestUtil.getBundle(uri, createTmpFile).toString,
-      config = Some(ModelConfig(900L, 900L)))
+      config = Some(ModelConfig(Some(900L), Some(900L))))
 
     new HttpEntity[String](JsonMethods.compact(printer.toJson(request)), JsonScoringSpec.jsonHeaders)
   }
@@ -35,7 +35,7 @@ class JsonScoringSpec extends ScoringBase[String, String, String, String, String
   override def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame, options: Option[TransformOptions]): HttpEntity[String] = {
     val request = TransformFrameRequest(modelName = modelName,
       format = BuiltinFormats.json,
-      initTimeout = 35000L,
+      initTimeout = Some(35000L),
       frame = ByteString.copyFrom(FrameWriter(frame, BuiltinFormats.json).toBytes().get),
       options = options
     )
@@ -60,7 +60,7 @@ class JsonScoringSpec extends ScoringBase[String, String, String, String, String
   override def createInvalidTransformFrameRequest(modelName: String, bytes: Array[Byte]): HttpEntity[String] = {
     val request = TransformFrameRequest(modelName = modelName,
       format = BuiltinFormats.json,
-      initTimeout = 35000L,
+      initTimeout = Some(35000L),
       frame = ByteString.copyFrom(bytes),
       options = None
     )

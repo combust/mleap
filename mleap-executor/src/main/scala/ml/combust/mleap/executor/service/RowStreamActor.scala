@@ -15,9 +15,10 @@ import scala.util.{Failure, Success, Try}
 object RowStreamActor {
 
   def props(transformer: Transformer,
-            request: CreateRowStreamRequest)
+            request: CreateRowStreamRequest,
+            config: ExecutorStreamConfig)
            (implicit materializer: Materializer): Props = {
-    Props(new RowStreamActor(transformer, request))
+    Props(new RowStreamActor(transformer, request, config))
   }
 
   object Messages {
@@ -28,7 +29,8 @@ object RowStreamActor {
 }
 
 class RowStreamActor(transformer: Transformer,
-                     request: CreateRowStreamRequest)
+                     request: CreateRowStreamRequest,
+                     config: ExecutorStreamConfig)
                     (implicit materializer: Materializer) extends Actor {
   import RowStreamActor.Messages
   import context.dispatcher
@@ -73,29 +75,29 @@ class RowStreamActor(transformer: Transformer,
         if (queue.isEmpty) {
           rowStream = Some(RowStream(request.modelName,
             request.streamName,
-            request.streamConfig,
+            request.streamConfig.getOrElse(StreamConfig()),
             request.spec,
             rt.outputSchema))
 
           queue = Some {
-            var source = Source.queue[Messages.TransformRow](rowStream.get.streamConfig.bufferSize, OverflowStrategy.backpressure)
+            var source = Source.queue[Messages.TransformRow](rowStream.get.streamConfig.bufferSize.getOrElse(config.defaultBufferSize), OverflowStrategy.backpressure)
 
-            source = rowStream.get.streamConfig.idleTimeout.map {
+            source = rowStream.get.streamConfig.idleTimeout.orElse(config.defaultIdleTimeout).map {
               timeout =>
                 source.idleTimeout(timeout)
             }.getOrElse(source)
 
-            source = rowStream.get.streamConfig.throttle.map {
+            source = rowStream.get.streamConfig.throttle.orElse(config.defaultThrottle).map {
               throttle =>
                 source.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
             }.getOrElse(source)
 
-            source = rowStream.get.streamConfig.transformDelay.map {
+            source = rowStream.get.streamConfig.transformDelay.orElse(config.defaultTransformDelay).map {
               delay =>
                 source.delay(delay, DelayOverflowStrategy.backpressure)
             }.getOrElse(source)
 
-            val transform = Flow[Messages.TransformRow].mapAsyncUnordered(rowStream.get.streamConfig.parallelism) {
+            val transform = Flow[Messages.TransformRow].mapAsyncUnordered(rowStream.get.streamConfig.parallelism.getOrElse(config.defaultParallelism).get) {
               case Messages.TransformRow(tRow, promise) =>
                 Future {
                   val row = tRow.row.map(rt.transformOption)

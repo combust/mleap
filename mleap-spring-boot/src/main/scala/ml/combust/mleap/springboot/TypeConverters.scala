@@ -21,11 +21,11 @@ object TypeConverters {
   implicit def pbToExecutorLoadModelRequest(request: LoadModelRequest): executor.LoadModelRequest =
     executor.LoadModelRequest(modelName = request.modelName,
                               uri = URI.create(request.uri),
-                              config = pbToExecutorModelConfig(request.config.getOrElse(ModelConfig())),
+                              config = request.config.map(pbToExecutorModelConfig),
                               force = request.force)
 
   implicit def javaPbToExecutorLoadModelRequest(request: Mleap.LoadModelRequest): executor.LoadModelRequest = {
-    val modelConfig = Option(request.getConfig).map(javaPbToExecutorModelConfig).getOrElse(pbToExecutorModelConfig(ModelConfig()))
+    val modelConfig = Option(request.getConfig).map(javaPbToExecutorModelConfig)
 
     executor.LoadModelRequest(modelName = request.getModelName,
       uri = URI.create(request.getUri),
@@ -34,24 +34,18 @@ object TypeConverters {
   }
 
   implicit def pbToExecutorModelConfig(config: ModelConfig): executor.ModelConfig = {
-    val memoryTimeout = if (config.memoryTimeout > 0) { Some(config.memoryTimeout.millis) } else { None }
-    val diskTimeout = if (config.diskTimeout > 0) { Some(config.diskTimeout.millis) } else { None }
-
-    executor.ModelConfig(memoryTimeout = memoryTimeout,
-      diskTimeout = diskTimeout)
+    executor.ModelConfig(memoryTimeout = config.memoryTimeout.map(_.millis),
+      diskTimeout = config.diskTimeout.map(_.millis))
   }
 
   implicit def javaPbToExecutorModelConfig(config: Mleap.ModelConfig): executor.ModelConfig = {
-    val memoryTimeout = if (config.getMemoryTimeout > 0) { Some(config.getMemoryTimeout.millis) } else { None }
-    val diskTimeout = if (config.getDiskTimeout > 0) { Some(config.getDiskTimeout.millis) } else { None }
-
-    executor.ModelConfig(memoryTimeout = memoryTimeout,
-      diskTimeout = diskTimeout)
+    executor.ModelConfig(memoryTimeout = Option(config.getMemoryTimeout).map(_.getValue.millis),
+      diskTimeout = Option(config.getDiskTimeout).map(_.getValue.millis))
   }
 
   implicit def executorToPbModelConfig(config: executor.ModelConfig): ModelConfig =
-    ModelConfig(memoryTimeout = config.memoryTimeout.map(_.toMillis).getOrElse(0),
-      diskTimeout = config.diskTimeout.map(_.toMillis).getOrElse(0))
+    ModelConfig(memoryTimeout = config.memoryTimeout.map(_.toMillis),
+      diskTimeout = config.diskTimeout.map(_.toMillis))
 
   implicit def executorToPbModel(model: executor.Model): Model =
     Model(name = model.name, uri = model.uri.toString, config = Some(model.config))

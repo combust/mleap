@@ -4,6 +4,7 @@ import java.net.URI
 
 import ml.combust.bundle.dsl.BundleInfo
 import ml.combust.mleap.executor
+import ml.combust.mleap.executor.Parallelism
 import ml.combust.mleap.pb._
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
@@ -112,9 +113,9 @@ object TypeConverters {
 
   implicit def mleapToPbStreamConfig(config: executor.StreamConfig): StreamConfig = {
     StreamConfig(
-      idleTimeout = config.idleTimeout.map(_.toMillis).getOrElse(0),
-      transformDelay = config.transformDelay.map(_.toMillis).getOrElse(0),
-      parallelism = config.parallelism,
+      idleTimeout = config.idleTimeout.map(_.toMillis),
+      transformDelay = config.transformDelay.map(_.toMillis),
+      parallelism = config.parallelism.map(_.get),
       throttle = config.throttle.map(mleapToPbThrottle),
       bufferSize = config.bufferSize
     )
@@ -122,9 +123,9 @@ object TypeConverters {
 
   implicit def pbToMleapStreamConfig(config: StreamConfig): executor.StreamConfig = {
     executor.StreamConfig(
-      idleTimeout = timeoutOption(config.idleTimeout.millis),
-      transformDelay = timeoutOption(config.transformDelay.millis),
-      parallelism = config.parallelism,
+      idleTimeout = config.idleTimeout.map(_.millis),
+      transformDelay = config.transformDelay.map(_.millis),
+      parallelism = config.parallelism.map(Parallelism(_)),
       throttle = config.throttle.map(pbToMleapThrottle),
       bufferSize = config.bufferSize
     )
@@ -156,35 +157,32 @@ object TypeConverters {
 
   implicit def mleapToPbModelConfig(config: executor.ModelConfig): ModelConfig = {
     ModelConfig(
-      memoryTimeout = config.memoryTimeout.map(_.toMillis).getOrElse(0),
-      diskTimeout = config.diskTimeout.map(_.toMillis).getOrElse(0)
+      memoryTimeout = config.memoryTimeout.map(_.toMillis),
+      diskTimeout = config.diskTimeout.map(_.toMillis)
     )
   }
 
   implicit def pbToMleapModelConfig(config: ModelConfig): executor.ModelConfig = {
-    val memoryTimeout = if (config.memoryTimeout > 0) { Some(config.memoryTimeout.millis) } else { None }
-    val diskTimeout = if (config.diskTimeout > 0) { Some(config.diskTimeout.millis) } else { None }
-
     executor.ModelConfig(
-      memoryTimeout = memoryTimeout,
-      diskTimeout = diskTimeout
+      memoryTimeout = config.memoryTimeout.map(_.millis),
+      diskTimeout = config.diskTimeout.map(_.millis)
     )
   }
 
   implicit def mleapToPbFlowConfig(config: executor.FlowConfig): FlowConfig = {
     FlowConfig(
-      idleTimeout = config.idleTimeout.map(_.toMillis).getOrElse(0),
-      transformDelay = config.transformDelay.map(_.toMillis).getOrElse(0),
-      parallelism = config.parallelism,
+      idleTimeout = config.idleTimeout.map(_.toMillis),
+      transformDelay = config.transformDelay.map(_.toMillis),
+      parallelism = config.parallelism.map(_.get),
       throttle = config.throttle.map(mleapToPbThrottle)
     )
   }
 
   implicit def pbToMleapFlowConfig(config: FlowConfig): executor.FlowConfig = {
     executor.FlowConfig(
-      idleTimeout = timeoutOption(config.idleTimeout.millis),
-      transformDelay = timeoutOption(config.transformDelay.millis),
-      parallelism = config.parallelism,
+      idleTimeout = config.idleTimeout.map(_.millis),
+      transformDelay = config.transformDelay.map(_.millis),
+      parallelism = config.parallelism.map(Parallelism(_)),
       throttle = config.throttle.map(pbToMleapThrottle)
     )
   }
@@ -193,7 +191,7 @@ object TypeConverters {
     LoadModelRequest(
       modelName = request.modelName,
       uri = request.uri.toString,
-      config = Some(request.config),
+      config = request.config.map(mleapToPbModelConfig),
       force = request.force
     )
   }
@@ -202,7 +200,7 @@ object TypeConverters {
     executor.LoadModelRequest(
       modelName = request.modelName,
       uri = URI.create(request.uri),
-      config = request.config.get,
+      config = request.config.map(pbToMleapModelConfig),
       force = request.force
     )
   }
@@ -227,7 +225,7 @@ object TypeConverters {
     CreateFrameStreamRequest(
       modelName = request.modelName,
       streamName = request.streamName,
-      streamConfig = Some(request.streamConfig)
+      streamConfig = request.streamConfig.map(mleapToPbStreamConfig)
     )
   }
 
@@ -235,7 +233,7 @@ object TypeConverters {
     executor.CreateFrameStreamRequest(
       modelName = request.modelName,
       streamName = request.streamName,
-      streamConfig = request.streamConfig.get
+      streamConfig = request.streamConfig.map(pbToMleapStreamConfig)
     )
   }
 
@@ -251,7 +249,7 @@ object TypeConverters {
     CreateRowStreamRequest(
       modelName = request.modelName,
       streamName = request.streamName,
-      streamConfig = Some(request.streamConfig),
+      streamConfig = request.streamConfig.map(mleapToPbStreamConfig),
       spec = Some(request.spec)
     )
   }
@@ -260,7 +258,7 @@ object TypeConverters {
     executor.CreateRowStreamRequest(
       modelName = request.modelName,
       streamName = request.streamName,
-      streamConfig = request.streamConfig.get,
+      streamConfig = request.streamConfig.map(pbToMleapStreamConfig),
       spec = request.spec.get
     )
   }

@@ -14,9 +14,10 @@ import scala.util.Try
 
 object FrameStreamActor {
   def props(transformer: Transformer,
-            request: CreateFrameStreamRequest)
+            request: CreateFrameStreamRequest,
+            config: ExecutorStreamConfig)
            (implicit materializer: Materializer): Props = {
-    Props(new FrameStreamActor(transformer, request))
+    Props(new FrameStreamActor(transformer, request, config))
   }
 
   object Messages {
@@ -27,7 +28,8 @@ object FrameStreamActor {
 }
 
 class FrameStreamActor(transformer: Transformer,
-                       request: CreateFrameStreamRequest)
+                       request: CreateFrameStreamRequest,
+                       config: ExecutorStreamConfig)
                       (implicit materializer: Materializer) extends Actor {
   import FrameStreamActor.Messages
   import context.dispatcher
@@ -36,7 +38,7 @@ class FrameStreamActor(transformer: Transformer,
 
   val frameStream: FrameStream = FrameStream(request.modelName,
     request.streamName,
-    request.streamConfig)
+    request.streamConfig.getOrElse(StreamConfig()))
 
   private var queue: Option[SourceQueueWithComplete[Messages.TransformFrame]] = None
   private var queueF: Option[Future[SourceQueueWithComplete[Messages.TransformFrame]]] = None
@@ -61,26 +63,24 @@ class FrameStreamActor(transformer: Transformer,
     if (queue.isEmpty) {
       queue = Some {
         var source = Source.queue[Messages.TransformFrame](
-          frameStream.streamConfig.bufferSize,
+          frameStream.streamConfig.bufferSize.getOrElse(config.defaultBufferSize),
           OverflowStrategy.backpressure)
 
-        source = frameStream.streamConfig.idleTimeout.map {
-          timeout =>
-            source.idleTimeout(timeout)
+        source = frameStream.streamConfig.idleTimeout.orElse(config.defaultIdleTimeout).map {
+          timeout => source.idleTimeout(timeout)
         }.getOrElse(source)
 
-        source = frameStream.streamConfig.throttle.map {
-          throttle =>
-            source.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
+        source = frameStream.streamConfig.throttle.orElse(config.defaultThrottle).map {
+          throttle => source.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
         }.getOrElse(source)
 
-        source = frameStream.streamConfig.transformDelay.map {
+        source = frameStream.streamConfig.transformDelay.orElse(config.defaultTransformDelay).map {
           delay =>
             source.delay(delay, DelayOverflowStrategy.backpressure)
         }.getOrElse(source)
 
         val transform = Flow[Messages.TransformFrame].
-          mapAsyncUnordered(frameStream.streamConfig.parallelism) {
+          mapAsyncUnordered(frameStream.streamConfig.parallelism.getOrElse(config.defaultParallelism).get) {
             case Messages.TransformFrame(req, promise) =>
               ExecuteTransform(transformer, req.frame, req.options).map {
                 frame => (frame, promise)

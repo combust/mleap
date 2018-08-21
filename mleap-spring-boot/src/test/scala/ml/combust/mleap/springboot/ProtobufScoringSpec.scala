@@ -20,14 +20,14 @@ class ProtobufScoringSpec extends ScoringBase[Mleap.LoadModelRequest, Mleap.Mode
   override def createLoadModelRequest(modelName: String, uri: URI, createTmpFile: Boolean): HttpEntity[Mleap.LoadModelRequest] = {
     val request = LoadModelRequest(modelName = modelName,
       uri = TestUtil.getBundle(uri, createTmpFile).toString,
-      config = Some(ModelConfig(900L, 900L)))
+      config = Some(ModelConfig(Some(900L), Some(900L))))
     new HttpEntity[Mleap.LoadModelRequest](LoadModelRequest.toJavaProto(request), ProtobufScoringSpec.protoHeaders)
   }
 
   override def createTransformFrameRequest(modelName: String, frame: DefaultLeapFrame, options: Option[TransformOptions]): HttpEntity[Mleap.TransformFrameRequest] = {
     val request = TransformFrameRequest(modelName = modelName,
       format = BuiltinFormats.binary,
-      initTimeout = 35000L,
+      initTimeout = Some(35000L),
       frame = ByteString.copyFrom(FrameWriter(frame, BuiltinFormats.binary).toBytes().get),
       options = options
     )
@@ -52,7 +52,7 @@ class ProtobufScoringSpec extends ScoringBase[Mleap.LoadModelRequest, Mleap.Mode
   override def createInvalidTransformFrameRequest(modelName: String, bytes: Array[Byte]): HttpEntity[Mleap.TransformFrameRequest] = {
     val request = TransformFrameRequest(modelName = modelName,
       format = BuiltinFormats.binary,
-      initTimeout = 35000L,
+      initTimeout = Some(35000L),
       frame = ByteString.copyFrom(bytes),
       options = None
     )

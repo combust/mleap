@@ -161,9 +161,9 @@ class GrpcClient(stub: MleapStub)
         requestObserver.onNext(pb.TransformFrameRequest(
           modelName = request.modelName,
           streamName = request.streamName,
-          flowConfig = Some(request.flowConfig),
+          flowConfig = request.flowConfig.map(mleapToPbFlowConfig),
           format = request.format,
-          initTimeout = timeout.toMillis
+          initTimeout = Some(timeout.toMillis)
         ))
 
         requestObserver
@@ -257,8 +257,8 @@ class GrpcClient(stub: MleapStub)
           modelName = request.modelName,
           streamName = request.streamName,
           format = request.format,
-          flowConfig = Some(request.flowConfig),
-          initTimeout = timeout.toMillis,
+          flowConfig = request.flowConfig.map(mleapToPbFlowConfig),
+          initTimeout = Some(timeout.toMillis),
           inputSchema = Some(request.inputSchema),
           outputSchema = Some(request.outputSchema)
         ))

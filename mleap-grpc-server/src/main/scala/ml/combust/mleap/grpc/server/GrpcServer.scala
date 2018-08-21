@@ -26,7 +26,8 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-class GrpcServer(mleapExecutor: MleapExecutor)
+class GrpcServer(mleapExecutor: MleapExecutor,
+                 config: GrpcServerConfig)
                 (implicit ec: ExecutionContext,
                  materializer: Materializer) extends Mleap {
   private val DEFAULT_TIMEOUT: FiniteDuration = FiniteDuration(5, TimeUnit.SECONDS)
@@ -126,8 +127,8 @@ class GrpcServer(mleapExecutor: MleapExecutor)
               modelName = value.modelName,
               streamName = value.streamName,
               format = value.format,
-              flowConfig = value.flowConfig.get
-            ))(value.initTimeout.millis)
+              flowConfig = value.flowConfig.map(pbToMleapFlowConfig)
+            ))(value.initTimeout.map(_.millis).getOrElse(config.defaultStreamInitTimeout))
 
             val source = GrpcAkkaStreams.source[TransformFrameRequest].map {
               request =>
@@ -188,10 +189,10 @@ class GrpcServer(mleapExecutor: MleapExecutor)
               modelName = value.modelName,
               streamName = value.streamName,
               format = value.format,
-              flowConfig = value.flowConfig.get,
+              flowConfig = value.flowConfig.map(pbToMleapFlowConfig),
               inputSchema = inputSchema,
               outputSchema = outputSchema
-            ))(value.initTimeout.millis)
+            ))(value.initTimeout.map(_.millis).getOrElse(config.defaultStreamInitTimeout))
 
             val source = GrpcAkkaStreams.source[TransformRowRequest].map {
               request =>

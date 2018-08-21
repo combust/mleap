@@ -49,7 +49,11 @@ object Dependencies {
 
     val springBoot = "org.springframework.boot" % "spring-boot-starter-web" % springBootVersion
     val commonsLang = "org.apache.commons" % "commons-lang3" % "3.7"
-    val scalpbJson = "com.thesamet.scalapb" %% "scalapb-json4s" % "0.7.0"
+    val scalaPb = Seq(
+      "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
+      "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion,
+      "com.thesamet.scalapb" %% "scalapb-json4s" % scalapb.compiler.Version.scalapbVersion
+    )
 
     val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion
 
@@ -114,10 +118,9 @@ object Dependencies {
   val repositoryS3 = l ++= Seq(awsS3)
 
   val grpc = l ++= Seq(
-    "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
-    "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion)
+    "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion) ++ scalaPb
 
-  val springBootServing = l ++= Seq(springBoot, commonsLang, scalpbJson, Test.scalaTest, Test.springBootTest)
+  val springBootServing = l ++= Seq(springBoot, commonsLang, Test.scalaTest, Test.springBootTest) ++ scalaPb
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 

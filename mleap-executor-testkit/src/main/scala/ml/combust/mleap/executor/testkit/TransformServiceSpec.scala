@@ -39,9 +39,9 @@ trait TransformServiceSpec extends FunSpecLike
   private val streamConfig1 = StreamConfig(
     idleTimeout = None,
     transformDelay = Some(20.millis),
-    parallelism = 4,
+    parallelism = Some(4),
     throttle = None,
-    bufferSize = 1024
+    bufferSize = Some(1024)
   )
   private val rowStreamSpec1 = RowStreamSpec(
     format = BuiltinFormats.binary,
@@ -65,7 +65,7 @@ trait TransformServiceSpec extends FunSpecLike
   private val flowConfig = FlowConfig(
     idleTimeout = None,
     transformDelay = None,
-    parallelism = 4,
+    parallelism = Some(4),
     throttle = None
   )
 
@@ -73,23 +73,23 @@ trait TransformServiceSpec extends FunSpecLike
     val model = Await.result(transformService.loadModel(LoadModelRequest(
       modelName = "model1",
       uri = TestUtil.rfUri,
-      config = ModelConfig(
+      config = Some(ModelConfig(
         memoryTimeout = Some(15.minutes),
         diskTimeout = Some(15.minutes)
-      )
+      ))
     ))(10.seconds), 10.seconds)
 
     val rowStream = Await.result(transformService.createRowStream(CreateRowStreamRequest(
       modelName = "model1",
       streamName = "stream1",
-      streamConfig = streamConfig1,
+      streamConfig = Some(streamConfig1),
       spec = rowStreamSpec1
     ))(10.seconds), 10.seconds)
 
     val frameStream = Await.result(transformService.createFrameStream(CreateFrameStreamRequest(
       modelName = "model1",
       streamName = "stream2",
-      streamConfig = streamConfig1
+      streamConfig = Some(streamConfig1)
     ))(10.seconds), 10.seconds)
 
     it("returns the model") {
@@ -149,7 +149,7 @@ trait TransformServiceSpec extends FunSpecLike
         val ex = transformService.createRowStream(CreateRowStreamRequest(
           modelName = "model1",
           streamName = "stream1",
-          streamConfig = streamConfig1,
+          streamConfig = Some(streamConfig1),
           spec = rowStreamSpec1
         ))(5.seconds).failed
 
@@ -184,7 +184,7 @@ trait TransformServiceSpec extends FunSpecLike
         val ex = transformService.createFrameStream(CreateFrameStreamRequest(
           modelName = "model1",
           streamName = "stream2",
-          streamConfig = streamConfig1
+          streamConfig = Some(streamConfig1)
         ))(5.seconds).failed
 
         whenReady(ex) {
@@ -214,7 +214,7 @@ trait TransformServiceSpec extends FunSpecLike
         val rowFlow = transformService.createRowFlow[UUID](CreateRowFlowRequest("model1",
           "stream1",
           BuiltinFormats.binary,
-          flowConfig,
+          Some(flowConfig),
           rowStream.spec.schema,
           rowStream.outputSchema))(10.seconds)
 
@@ -243,16 +243,16 @@ trait TransformServiceSpec extends FunSpecLike
             CreateRowFlowRequest("model1",
               "stream1",
               BuiltinFormats.binary,
-              flowConfig.copy(
-                parallelism = 1,
+              Some(flowConfig.copy(
+                parallelism = Some(1),
                 throttle = Some(
-                Throttle(
-                  elements = 1,
-                  duration = 1.day,
-                  maxBurst = 1,
-                  mode = ThrottleMode.shaping
-                )
-              )),
+                  Throttle(
+                    elements = 1,
+                    duration = 1.day,
+                    maxBurst = 1,
+                    mode = ThrottleMode.shaping
+                  )
+                ))),
               rowStream.spec.schema,
               rowStream.outputSchema)
           )(10.seconds)).map(_._2).
@@ -275,7 +275,7 @@ trait TransformServiceSpec extends FunSpecLike
             CreateRowFlowRequest("model1",
               "stream1",
               BuiltinFormats.binary,
-              flowConfig.copy(idleTimeout = Some(10.millis)),
+              Some(flowConfig.copy(idleTimeout = Some(10.millis))),
               rowStream.spec.schema,
               rowStream.outputSchema)
           )(10.seconds)).map(_._2).
@@ -299,7 +299,7 @@ trait TransformServiceSpec extends FunSpecLike
             CreateRowFlowRequest("model1",
               "stream1",
               BuiltinFormats.binary,
-              flowConfig.copy(transformDelay = Some(1.day)),
+              Some(flowConfig.copy(transformDelay = Some(1.day))),
               rowStream.spec.schema,
               rowStream.outputSchema)
           )(10.seconds)).map(_._2).
@@ -317,7 +317,7 @@ trait TransformServiceSpec extends FunSpecLike
           CreateRowFlowRequest("model1",
             "stream1",
             BuiltinFormats.binary,
-            flowConfig,
+            Some(flowConfig),
             rowStream.spec.schema,
             rowStream.outputSchema),
           1024
@@ -345,7 +345,7 @@ trait TransformServiceSpec extends FunSpecLike
         val frameFlow = transformService.createFrameFlow[UUID](CreateFrameFlowRequest("model1",
           "stream2",
           BuiltinFormats.binary,
-          flowConfig))(10.seconds)
+          Some(flowConfig)))(10.seconds)
 
         val (done, transformedFrame) = frameFlow.
           watchTermination()(Keep.right).
@@ -372,8 +372,8 @@ trait TransformServiceSpec extends FunSpecLike
             CreateFrameFlowRequest("model1",
               "stream2",
               BuiltinFormats.binary,
-              flowConfig.copy(
-                parallelism = 1,
+              Some(flowConfig.copy(
+                parallelism = Some(1),
                 throttle = Some(
                   Throttle(
                     elements = 1,
@@ -381,7 +381,7 @@ trait TransformServiceSpec extends FunSpecLike
                     maxBurst = 1,
                     mode = ThrottleMode.shaping
                   )
-                )
+                ))
               ))
           )(10.seconds)).map(_._2).
             runWith(TestSink.probe[Int]).
@@ -403,7 +403,7 @@ trait TransformServiceSpec extends FunSpecLike
             CreateFrameFlowRequest("model1",
               "stream2",
               BuiltinFormats.binary,
-              flowConfig.copy(idleTimeout = Some(10.millis)))
+              Some(flowConfig.copy(idleTimeout = Some(10.millis))))
           )(10.seconds)).map(_._2).
             runWith(TestSink.probe[Int]).
             request(2).
@@ -425,7 +425,7 @@ trait TransformServiceSpec extends FunSpecLike
             CreateFrameFlowRequest("model1",
               "stream2",
               BuiltinFormats.binary,
-              flowConfig.copy(transformDelay = Some(1.day)))
+              Some(flowConfig.copy(transformDelay = Some(1.day))))
           )(10.seconds)).map(_._2).
             runWith(TestSink.probe[Int]).
             request(2).

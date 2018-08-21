@@ -38,7 +38,7 @@ class BundleActor(request: LoadModelRequest,
 
   private val model: Model = Model(request.modelName,
     request.uri,
-    request.config)
+    request.config.getOrElse(ModelConfig.default))
 
   context.setReceiveTimeout(model.config.memoryTimeout.getOrElse(config.defaultMemoryTimeout))
 
@@ -148,7 +148,7 @@ class BundleActor(request: LoadModelRequest,
       case Some(_) =>
         sender ! Status.Failure(new AlreadyExistsException(s"stream already exists ${request.modelName}/${request.streamName}"))
       case None =>
-        Try(context.actorOf(FrameStreamActor.props(bundle.get.root, request), request.streamName)) match {
+        Try(context.actorOf(FrameStreamActor.props(bundle.get.root, request, config.stream), request.streamName)) match {
           case Success(actor) =>
             context.watch(actor)
             frameStreamLookup += (request.streamName -> actor)
@@ -164,7 +164,7 @@ class BundleActor(request: LoadModelRequest,
       case Some(_) =>
         sender ! Status.Failure(new AlreadyExistsException(s"stream already exists ${request.modelName}/${request.streamName}"))
       case None =>
-        Try(context.actorOf(RowStreamActor.props(bundle.get.root, request), request.streamName)) match {
+        Try(context.actorOf(RowStreamActor.props(bundle.get.root, request, config.stream), request.streamName)) match {
           case Success(actor) =>
             context.watch(actor)
             rowStreamLookup += (request.streamName -> actor)

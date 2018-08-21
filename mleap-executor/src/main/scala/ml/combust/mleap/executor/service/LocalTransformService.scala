@@ -20,6 +20,7 @@ class LocalTransformService(loader: RepositoryBundleLoader,
   import LocalTransformServiceActor.Messages
   import arf.dispatcher
 
+  private val flowConfig: ExecutorFlowConfig = config.flow
   private val actor: ActorRef = arf.actorOf(LocalTransformServiceActor.props(loader, config), "transform")
 
   private def wrapExceptions(err: Throwable): ExecutorException = err match {
@@ -114,20 +115,22 @@ class LocalTransformService(loader: RepositoryBundleLoader,
             })
           }
 
+          val fc = request.flowConfig.getOrElse(FlowConfig())
+
           val inFlow = builder.add {
             var flow = Flow[(StreamTransformFrameRequest, Tag)]
 
-            flow = request.flowConfig.idleTimeout.map {
+            flow = fc.idleTimeout.orElse(flowConfig.defaultIdleTimeout).map {
               timeout => flow.idleTimeout(timeout)
             }.getOrElse(flow).mapError {
               case err: java.util.concurrent.TimeoutException => new TimeoutException(err)
             }
 
-            flow = request.flowConfig.throttle.map {
+            flow = fc.throttle.orElse(flowConfig.defaultThrottle).map {
               throttle => flow.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
             }.getOrElse(flow)
 
-            flow = request.flowConfig.transformDelay.map {
+            flow = fc.transformDelay.orElse(flowConfig.defaultTransformDelay).map {
               delay => flow.delay(delay, DelayOverflowStrategy.backpressure)
             }.getOrElse(flow)
 
@@ -135,7 +138,7 @@ class LocalTransformService(loader: RepositoryBundleLoader,
           }
 
           val queueFlow = builder.add {
-            Flow[((StreamTransformFrameRequest, Tag), ActorRef)].mapAsync(request.flowConfig.parallelism) {
+            Flow[((StreamTransformFrameRequest, Tag), ActorRef)].mapAsync(fc.parallelism.getOrElse(flowConfig.defaultParallelism).get) {
               case ((req, tag), streamActor) =>
                 val promise: Promise[Try[DefaultLeapFrame]] = Promise()
                 streamActor ! FrameStreamActor.Messages.TransformFrame(req, promise)
@@ -192,20 +195,22 @@ class LocalTransformService(loader: RepositoryBundleLoader,
             })
           }
 
+          val fc = request.flowConfig.getOrElse(FlowConfig())
+
           val inFlow = builder.add {
             var flow = Flow[(StreamTransformRowRequest, Tag)]
 
-            flow = request.flowConfig.idleTimeout.map {
+            flow = fc.idleTimeout.orElse(flowConfig.defaultIdleTimeout).map {
               timeout => flow.idleTimeout(timeout)
             }.getOrElse(flow).mapError {
               case err: java.util.concurrent.TimeoutException => new TimeoutException(err)
             }
 
-            flow = request.flowConfig.throttle.map {
+            flow = fc.throttle.orElse(flowConfig.defaultThrottle).map {
               throttle => flow.throttle(throttle.elements, throttle.duration, throttle.maxBurst, throttle.mode)
             }.getOrElse(flow)
 
-            flow = request.flowConfig.transformDelay.map {
+            flow = fc.transformDelay.orElse(flowConfig.defaultTransformDelay).map {
               delay => flow.delay(delay, DelayOverflowStrategy.backpressure)
             }.getOrElse(flow)
 
@@ -213,7 +218,7 @@ class LocalTransformService(loader: RepositoryBundleLoader,
           }
 
           val queueFlow = builder.add {
-            Flow[((StreamTransformRowRequest, Tag), ActorRef)].mapAsync(request.flowConfig.parallelism) {
+            Flow[((StreamTransformRowRequest, Tag), ActorRef)].mapAsync(fc.parallelism.getOrElse(flowConfig.defaultParallelism).get) {
               case ((r, tag), actor) =>
                 val promise: Promise[Try[Option[Row]]] = Promise()
                 actor ! RowStreamActor.Messages.TransformRow(r, promise)

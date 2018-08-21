@@ -30,6 +30,7 @@ class RunServer(config: Config)
 
       implicit val materializer: Materializer = ActorMaterializer()
 
+      val grpcServerConfig = new GrpcServerConfig(config.getConfig("default"))
       val mleapExecutor = MleapExecutor(system)
       val port: Int = config.getInt("port")
       val threads: Option[Int] = if (config.hasPath("threads")) Some(config.getInt("threads")) else None
@@ -53,7 +54,7 @@ class RunServer(config: Config)
       }
 
       logger.info(s"Creating executor service")
-      val grpcService: GrpcServer = new GrpcServer(mleapExecutor)
+      val grpcService: GrpcServer = new GrpcServer(mleapExecutor, grpcServerConfig)
       val builder = ServerBuilder.forPort(port)
       builder.intercept(new ErrorInterceptor)
       builder.addService(MleapGrpc.bindService(grpcService, ec))

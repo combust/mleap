@@ -87,11 +87,11 @@ case class Throttle(elements: Int,
   * @param throttle optionally throttle the stream
   * @param bufferSize size of buffer for transform elements
   */
-case class StreamConfig(idleTimeout: Option[FiniteDuration],
-                        transformDelay: Option[FiniteDuration],
-                        parallelism: Parallelism,
-                        throttle: Option[Throttle],
-                        bufferSize: Int)
+case class StreamConfig(idleTimeout: Option[FiniteDuration] = None,
+                        transformDelay: Option[FiniteDuration] = None,
+                        parallelism: Option[Parallelism] = None,
+                        throttle: Option[Throttle] = None,
+                        bufferSize: Option[Int] = None)
 
 /** Specifies options for streams of transforms.
   *
@@ -100,10 +100,10 @@ case class StreamConfig(idleTimeout: Option[FiniteDuration],
   * @param parallelism parallelism of transforms
   * @param throttle optionally throttle the stream
   */
-case class FlowConfig(idleTimeout: Option[FiniteDuration],
-                      transformDelay: Option[FiniteDuration],
-                      parallelism: Parallelism,
-                      throttle: Option[Throttle])
+case class FlowConfig(idleTimeout: Option[FiniteDuration] = None,
+                      transformDelay: Option[FiniteDuration] = None,
+                      parallelism: Option[Parallelism] = None,
+                      throttle: Option[Throttle] = None)
 
 /** Specifies the schema and transform options for
   * a row transformer.
@@ -148,12 +148,15 @@ case class RowStream(modelName: String,
                      spec: RowStreamSpec,
                      outputSchema: StructType)
 
-case class ModelConfig(memoryTimeout: Option[FiniteDuration],
-                       diskTimeout: Option[FiniteDuration])
+object ModelConfig {
+  lazy val default: ModelConfig = ModelConfig()
+}
+case class ModelConfig(memoryTimeout: Option[FiniteDuration] = None,
+                       diskTimeout: Option[FiniteDuration] = None)
 
 case class LoadModelRequest(modelName: String,
                             uri: URI,
-                            config: ModelConfig,
+                            config: Option[ModelConfig] = None,
                             force: Boolean = false) extends ModelRequest
 
 case class GetBundleMetaRequest(modelName: String) extends ModelRequest
@@ -164,25 +167,25 @@ case class UnloadModelRequest(modelName: String) extends ModelRequest
 
 case class CreateFrameStreamRequest(modelName: String,
                                     streamName: String,
-                                    streamConfig: StreamConfig) extends ModelRequest
+                                    streamConfig: Option[StreamConfig] = None) extends ModelRequest
 
 case class CreateFrameFlowRequest(modelName: String,
                                   streamName: String,
                                   format: String,
-                                  flowConfig: FlowConfig) extends ModelRequest
+                                  flowConfig: Option[FlowConfig] = None) extends ModelRequest
 
 case class GetFrameStreamRequest(modelName: String,
                                  streamName: String) extends ModelRequest
 
 case class CreateRowStreamRequest(modelName: String,
                                   streamName: String,
-                                  streamConfig: StreamConfig,
+                                  streamConfig: Option[StreamConfig] = None,
                                   spec: RowStreamSpec) extends ModelRequest
 
 case class CreateRowFlowRequest(modelName: String,
                                 streamName: String,
                                 format: String,
-                                flowConfig: FlowConfig,
+                                flowConfig: Option[FlowConfig] = None,
                                 inputSchema: StructType,
                                 outputSchema: StructType) extends ModelRequest
 

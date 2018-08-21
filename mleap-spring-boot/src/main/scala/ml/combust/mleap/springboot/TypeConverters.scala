@@ -21,14 +21,17 @@ object TypeConverters {
   implicit def pbToExecutorLoadModelRequest(request: LoadModelRequest): executor.LoadModelRequest =
     executor.LoadModelRequest(modelName = request.modelName,
                               uri = URI.create(request.uri),
-                              config = request.config.get,
+                              config = pbToExecutorModelConfig(request.config.getOrElse(ModelConfig())),
                               force = request.force)
 
-  implicit def javaPbToExecutorLoadModelRequest(request: Mleap.LoadModelRequest): executor.LoadModelRequest =
+  implicit def javaPbToExecutorLoadModelRequest(request: Mleap.LoadModelRequest): executor.LoadModelRequest = {
+    val modelConfig = Option(request.getConfig).map(javaPbToExecutorModelConfig).getOrElse(pbToExecutorModelConfig(ModelConfig()))
+
     executor.LoadModelRequest(modelName = request.getModelName,
-                              uri = URI.create(request.getUri),
-                              config = request.getConfig,
-                              force = request.getForce)
+      uri = URI.create(request.getUri),
+      config = modelConfig,
+      force = request.getForce)
+  }
 
   implicit def pbToExecutorModelConfig(config: ModelConfig): executor.ModelConfig = {
     val memoryTimeout = if (config.memoryTimeout > 0) { Some(config.memoryTimeout.millis) } else { None }

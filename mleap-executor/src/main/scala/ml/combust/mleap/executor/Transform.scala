@@ -148,8 +148,8 @@ case class RowStream(modelName: String,
                      spec: RowStreamSpec,
                      outputSchema: StructType)
 
-case class ModelConfig(memoryTimeout: FiniteDuration,
-                       diskTimeout: FiniteDuration)
+case class ModelConfig(memoryTimeout: Option[FiniteDuration],
+                       diskTimeout: Option[FiniteDuration])
 
 case class LoadModelRequest(modelName: String,
                             uri: URI,

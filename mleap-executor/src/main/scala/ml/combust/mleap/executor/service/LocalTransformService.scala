@@ -14,12 +14,13 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.concurrent.duration.FiniteDuration
 import scala.util.{Failure, Success, Try}
 
-class LocalTransformService(loader: RepositoryBundleLoader)
+class LocalTransformService(loader: RepositoryBundleLoader,
+                            config: ExecutorConfig)
                            (implicit arf: ActorRefFactory) extends TransformService {
   import LocalTransformServiceActor.Messages
   import arf.dispatcher
 
-  private val actor: ActorRef = arf.actorOf(LocalTransformServiceActor.props(loader), "transform")
+  private val actor: ActorRef = arf.actorOf(LocalTransformServiceActor.props(loader, config), "transform")
 
   private def wrapExceptions(err: Throwable): ExecutorException = err match {
     case err: akka.pattern.AskTimeoutException => new TimeoutException(err)

@@ -156,15 +156,18 @@ object TypeConverters {
 
   implicit def mleapToPbModelConfig(config: executor.ModelConfig): ModelConfig = {
     ModelConfig(
-      memoryTimeout = config.memoryTimeout.toMillis,
-      diskTimeout = config.diskTimeout.toMillis
+      memoryTimeout = config.memoryTimeout.map(_.toMillis).getOrElse(0),
+      diskTimeout = config.diskTimeout.map(_.toMillis).getOrElse(0)
     )
   }
 
   implicit def pbToMleapModelConfig(config: ModelConfig): executor.ModelConfig = {
+    val memoryTimeout = if (config.memoryTimeout > 0) { Some(config.memoryTimeout.millis) } else { None }
+    val diskTimeout = if (config.diskTimeout > 0) { Some(config.diskTimeout.millis) } else { None }
+
     executor.ModelConfig(
-      memoryTimeout = config.memoryTimeout.millis,
-      diskTimeout = config.diskTimeout.millis
+      memoryTimeout = memoryTimeout,
+      diskTimeout = diskTimeout
     )
   }
 

@@ -30,14 +30,25 @@ object TypeConverters {
                               config = request.getConfig,
                               force = request.getForce)
 
-  implicit def pbToExecutorModelConfig(config: ModelConfig): executor.ModelConfig =
-    executor.ModelConfig(memoryTimeout = config.memoryTimeout.millis, diskTimeout = config.diskTimeout.millis)
+  implicit def pbToExecutorModelConfig(config: ModelConfig): executor.ModelConfig = {
+    val memoryTimeout = if (config.memoryTimeout > 0) { Some(config.memoryTimeout.millis) } else { None }
+    val diskTimeout = if (config.diskTimeout > 0) { Some(config.diskTimeout.millis) } else { None }
 
-  implicit def javaPbToExecutorModelConfig(config: Mleap.ModelConfig): executor.ModelConfig =
-    executor.ModelConfig(memoryTimeout = config.getMemoryTimeout.millis, diskTimeout = config.getDiskTimeout.millis)
+    executor.ModelConfig(memoryTimeout = memoryTimeout,
+      diskTimeout = diskTimeout)
+  }
+
+  implicit def javaPbToExecutorModelConfig(config: Mleap.ModelConfig): executor.ModelConfig = {
+    val memoryTimeout = if (config.getMemoryTimeout > 0) { Some(config.getMemoryTimeout.millis) } else { None }
+    val diskTimeout = if (config.getDiskTimeout > 0) { Some(config.getDiskTimeout.millis) } else { None }
+
+    executor.ModelConfig(memoryTimeout = memoryTimeout,
+      diskTimeout = diskTimeout)
+  }
 
   implicit def executorToPbModelConfig(config: executor.ModelConfig): ModelConfig =
-    ModelConfig(memoryTimeout = config.memoryTimeout.toMillis, diskTimeout = config.diskTimeout.toMillis)
+    ModelConfig(memoryTimeout = config.memoryTimeout.map(_.toMillis).getOrElse(0),
+      diskTimeout = config.diskTimeout.map(_.toMillis).getOrElse(0))
 
   implicit def executorToPbModel(model: executor.Model): Model =
     Model(name = model.name, uri = model.uri.toString, config = Some(model.config))

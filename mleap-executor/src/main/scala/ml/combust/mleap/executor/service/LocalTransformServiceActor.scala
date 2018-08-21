@@ -9,8 +9,9 @@ import ml.combust.mleap.executor.error.NotFoundException
 import scala.util.{Failure, Success, Try}
 
 object LocalTransformServiceActor {
-  def props(loader: RepositoryBundleLoader): Props = {
-    Props(new LocalTransformServiceActor(loader))
+  def props(loader: RepositoryBundleLoader,
+            config: ExecutorConfig): Props = {
+    Props(new LocalTransformServiceActor(loader, config))
   }
 
   object Messages {
@@ -18,7 +19,8 @@ object LocalTransformServiceActor {
   }
 }
 
-class LocalTransformServiceActor(loader: RepositoryBundleLoader) extends Actor {
+class LocalTransformServiceActor(loader: RepositoryBundleLoader,
+                                 config: ExecutorConfig) extends Actor {
   import LocalTransformServiceActor.Messages
 
   private implicit val materializer: Materializer = ActorMaterializer()(context.system)
@@ -58,7 +60,7 @@ class LocalTransformServiceActor(loader: RepositoryBundleLoader) extends Actor {
   }
 
   def loadModel(request: LoadModelRequest): Unit = {
-    Try(context.actorOf(BundleActor.props(request, loader), request.modelName)) match {
+    Try(context.actorOf(BundleActor.props(request, loader, config), request.modelName)) match {
       case Success(actor) =>
         lookup += (request.modelName -> actor)
         modelNameLookup += (actor -> request.modelName)

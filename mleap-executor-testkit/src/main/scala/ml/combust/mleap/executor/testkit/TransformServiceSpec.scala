@@ -31,8 +31,8 @@ trait TransformServiceSpec extends FunSpecLike
     name = "model1",
     uri = TestUtil.rfUri,
     config = ModelConfig(
-      memoryTimeout = 15.minutes,
-      diskTimeout = 15.minutes
+      memoryTimeout = Some(15.minutes),
+      diskTimeout = Some(15.minutes)
     )
   )
 
@@ -74,8 +74,8 @@ trait TransformServiceSpec extends FunSpecLike
       modelName = "model1",
       uri = TestUtil.rfUri,
       config = ModelConfig(
-        memoryTimeout = 15.minutes,
-        diskTimeout = 15.minutes
+        memoryTimeout = Some(15.minutes),
+        diskTimeout = Some(15.minutes)
       )
     ))(10.seconds), 10.seconds)
 

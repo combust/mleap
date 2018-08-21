@@ -27,11 +27,13 @@ class MleapExecutor(tConfig: Config)
                    (implicit system: ExtendedActorSystem) extends Extension with TransformService {
   private val logger = Logger(classOf[MleapExecutor])
 
+  val executorConfig: ExecutorConfig = new ExecutorConfig(tConfig.getConfig("default"))
+
   private val loadThreadPool = Executors.newFixedThreadPool(4)
   private val loadEc = ExecutionContext.fromExecutor(loadThreadPool)
   private val repository: Repository = Repository.fromConfig(tConfig.getConfig("repository"))
   private val loader: RepositoryBundleLoader = new RepositoryBundleLoader(repository, loadEc)
-  private val transformService: LocalTransformService = new LocalTransformService(loader)(system)
+  private val transformService: LocalTransformService = new LocalTransformService(loader, executorConfig)(system)
 
   system.registerOnTermination {
     logger.info("Shutting down executor")

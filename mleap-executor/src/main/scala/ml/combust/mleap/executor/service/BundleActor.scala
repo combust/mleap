@@ -16,9 +16,10 @@ case class RequestWithSender(request: Any, sender: ActorRef)
 
 object BundleActor {
   def props(request: LoadModelRequest,
-            loader: RepositoryBundleLoader)
+            loader: RepositoryBundleLoader,
+            config: ExecutorConfig)
            (implicit materializer: Materializer): Props = {
-    Props(new BundleActor(request, loader))
+    Props(new BundleActor(request, loader, config))
   }
 
   object Messages {
@@ -27,7 +28,8 @@ object BundleActor {
 }
 
 class BundleActor(request: LoadModelRequest,
-                  loader: RepositoryBundleLoader)
+                  loader: RepositoryBundleLoader,
+                  config: ExecutorConfig)
                  (implicit materializer: Materializer) extends Actor {
   import BundleActor.Messages
   import RowStreamActor.{Messages => RFMessages}
@@ -38,7 +40,7 @@ class BundleActor(request: LoadModelRequest,
     request.uri,
     request.config)
 
-  context.setReceiveTimeout(model.config.memoryTimeout)
+  context.setReceiveTimeout(model.config.memoryTimeout.getOrElse(config.defaultMemoryTimeout))
 
   private val buffer: mutable.Queue[RequestWithSender] = mutable.Queue()
   private var bundle: Option[Bundle[Transformer]] = None

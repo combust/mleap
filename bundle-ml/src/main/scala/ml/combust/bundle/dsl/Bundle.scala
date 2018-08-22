@@ -79,6 +79,10 @@ object Bundle {
       val interaction = "interaction"
     }
 
+    object ensemble {
+      val categorical_drilldown = "categorical_drilldown"
+    }
+
     object classification {
       val naive_bayes = "naive_bayes"
       val logistic_regression = "logistic_regression"

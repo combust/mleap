@@ -1,15 +1,15 @@
-package ml.combust.mleap.xgboost.bundle.ops
+package ml.combust.mleap.xgboost.runtime.bundle.ops
 
 import java.io.ByteArrayInputStream
 import java.nio.file.Files
 
-import biz.k11i.xgboost.Predictor
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl.{Model, Value}
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.xgboost.{XGBoostRegression, XGBoostRegressionModel}
+import ml.combust.mleap.xgboost.runtime.{XGBoostRegression, XGBoostRegressionModel}
+import ml.dmlc.xgboost4j.scala.XGBoost
 import resource._
 
 /**
@@ -23,22 +23,20 @@ class XGBoostRegressionOp extends MleapOp[XGBoostRegression, XGBoostRegressionMo
 
     override def store(model: Model, obj: XGBoostRegressionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      assert(obj.booster.isDefined, "must provide the bytes containing the booster")
-
-      Files.write(context.file("xgboost.model"), obj.booster.get)
+      val out = Files.newOutputStream(context.file("xgboost.model"))
+      obj.booster.saveModel(out)
       model.withValue("num_features", Value.int(obj.numFeatures))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): XGBoostRegressionModel = {
-      val booster = Files.readAllBytes(context.file("xgboost.model"))
-      val predictor = (for(in <- managed(new ByteArrayInputStream(booster))) yield {
-        new Predictor(in)
-      }).tried.get
+      val bytes = Files.readAllBytes(context.file("xgboost.model"))
+      val booster = XGBoost.loadModel(new ByteArrayInputStream(bytes))
+      val treeLimit = model.value("tree_limit").getInt
 
-      XGBoostRegressionModel(predictor,
-        Some(booster),
-        numFeatures = model.value("num_features").getInt)
+      XGBoostRegressionModel(booster,
+        numFeatures = model.value("num_features").getInt,
+        treeLimit = treeLimit)
     }
   }
 

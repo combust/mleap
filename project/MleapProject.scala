@@ -5,18 +5,20 @@ import sbt._
 
 object MleapProject {
   lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
-      tensor,
-      tensorflow,
-      bundleMl,
-      core,
-      runtime,
-      avro,
-      sparkBase,
-      sparkTestkit,
-      spark,
-      sparkExtension,
-      xgboostJava,
-      tensorflow)
+    tensor,
+    tensorflow,
+    bundleMl,
+    core,
+    runtime,
+    avro,
+    sparkBase,
+    sparkTestkit,
+    spark,
+    sparkExtension,
+    xgboostRuntime,
+    xgboostSpark,
+    tensorflow,
+    databricksRuntime)
 
   var rootSettings = Release.settings ++
     Common.buildSettings ++
@@ -94,9 +96,9 @@ object MleapProject {
     dependencies = Seq(runtime)
   )
 
-  lazy val xgboostJava = Project(
-    id = "mleap-xgboost-java",
-    base = file("mleap-xgboost-java"),
+  lazy val xgboostRuntime = Project(
+    id = "mleap-xgboost-runtime",
+    base = file("mleap-xgboost-runtime"),
     dependencies = Seq(runtime)
   )
 
@@ -104,7 +106,7 @@ object MleapProject {
     id = "mleap-xgboost-spark",
     base = file("mleap-xgboost-spark"),
     dependencies = Seq(sparkBase % "provided",
-      xgboostJava % "test",
+      xgboostRuntime % "test",
       spark % "test",
       sparkTestkit % "test")
   )
@@ -112,12 +114,46 @@ object MleapProject {
   lazy val serving = Project(
     id = "mleap-serving",
     base = file("mleap-serving"),
-    dependencies = Seq(runtime, avro, xgboostJava)
+    dependencies = Seq(runtime, avro, xgboostRuntime)
   )
 
   lazy val benchmark = Project(
     id = "mleap-benchmark",
     base = file("mleap-benchmark"),
     dependencies = Seq(runtime, spark, avro)
+  )
+
+  // Create underlying fat jar project as per: https://github.com/sbt/sbt-assembly#q-despite-the-concerned-friends-i-still-want-publish-fat-jars-what-advice-do-you-have
+  lazy val databricksRuntimeFat = Project(
+    id = "mleap-databricks-runtime-fat",
+    base = file("mleap-databricks-runtime-fat"),
+    dependencies = Seq(baseProject,
+      tensor,
+      core,
+      runtime,
+      bundleMl,
+      spark,
+      sparkExtension,
+      tensorflow,
+      xgboostSpark)
+  ).settings(excludeDependencies ++= Seq(
+    SbtExclusionRule("org.tensorflow"),
+    SbtExclusionRule("org.apache.spark"),
+    SbtExclusionRule("ml.dmlc")
+  ))
+
+  lazy val databricksRuntime = Project(
+    id = "mleap-databricks-runtime",
+    base = file("mleap-databricks-runtime"),
+    dependencies = Seq()
+  )
+
+  lazy val databricksRuntimeTestkit = Project(
+    id = "mleap-databricks-runtime-testkit",
+    base = file("mleap-databricks-runtime-testkit"),
+    dependencies = Seq(spark % "provided",
+      sparkExtension % "provided",
+      xgboostSpark % "provided",
+      tensorflow % "provided")
   )
 }

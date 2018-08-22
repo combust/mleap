@@ -1,9 +1,13 @@
 package ml.combust.bundle
 
+import java.nio.file.Files
+
 import ml.combust.bundle.dsl.Bundle
+import ml.combust.bundle.fs.BundleFileSystem
 import ml.combust.bundle.serializer.{BundleSerializer, SerializationFormat}
 
 import scala.util.Try
+import resource._
 
 /**
   * Created by hollinwilkins on 12/24/16.
@@ -27,5 +31,18 @@ Transformer <: AnyRef](root: Transformer,
       format = format,
       root = root,
       meta = meta))
+  }
+
+  def save(fs: BundleFileSystem, path: String)
+          (implicit context: Context): Try[Bundle[Transformer]] = {
+    val tmp = Files.createTempFile("bundle", ".zip")
+
+    (for (bf <- managed(BundleFile(tmp.toFile))) yield {
+      save(bf)
+    }).tried.flatMap(identity).map {
+      r =>
+        fs.save(path, tmp.toFile)
+        r
+    }
   }
 }

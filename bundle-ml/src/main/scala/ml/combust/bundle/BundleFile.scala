@@ -6,6 +6,7 @@ import java.nio.file.{FileSystem, FileSystems, Files, Path}
 import java.util.stream.Collectors
 
 import ml.combust.bundle.dsl.{Bundle, BundleInfo}
+import ml.combust.bundle.fs.BundleFileSystem
 import ml.combust.bundle.serializer.BundleSerializer
 import ml.combust.bundle.json.JsonSupport._
 import spray.json._
@@ -22,7 +23,6 @@ object BundleFile {
   implicit def apply(uri: String): BundleFile = {
     apply(new URI(unbackslash(uri)))
   }
-
 
   implicit def apply(file: File): BundleFile = {
     val uri: String = if (file.getPath.endsWith(".zip")) {
@@ -56,6 +56,11 @@ object BundleFile {
     }
 
     apply(fs, path)
+  }
+
+  def apply(fs: BundleFileSystem, path: String): BundleFile = {
+    // Copy contents from the bundle file system to the local file system
+    apply(fs.load(path).get)
   }
 
   /** Replace all backslashes with forward slashes, to handle Windows file paths in URI construction

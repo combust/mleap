@@ -101,6 +101,11 @@ object Bundle {
       val als = "als"
     }
 
+    object tuning {
+      val cross_validator = "cross_validator"
+      val train_validation_split = "train_validation_split"
+    }
+
     val pipeline = "pipeline"
     val tensorflow = "tensorflow"
   }

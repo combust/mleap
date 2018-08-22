@@ -58,6 +58,7 @@ object Bundle {
       val tokenizer = "tokenizer"
       val vector_assembler = "vector_assembler"
       val one_hot_encoder = "one_hot_encoder"
+      val one_hot_encoder_v23 = "one_hot_encoder_v23"
       val min_max_scaler = "min_max_scaler"
       val max_abs_scaler = "max_abs_scaler"
       val bucketizer = "bucketizer"

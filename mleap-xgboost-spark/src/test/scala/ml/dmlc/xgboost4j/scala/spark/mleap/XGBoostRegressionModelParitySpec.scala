@@ -1,11 +1,11 @@
 package ml.dmlc.xgboost4j.scala.spark.mleap
 
 import ml.dmlc.xgboost4j.scala.spark.XGBoostEstimator
+import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.linalg.Vector
-import org.apache.spark.ml.{Pipeline, Transformer}
-import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer, VectorAssembler}
 import org.apache.spark.ml.parity.SparkParityBase
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.ml.{Pipeline, Transformer}
+import org.apache.spark.sql.DataFrame
 
 /**
   * Created by hollinwilkins on 9/16/17.

@@ -13,5 +13,5 @@ import ml.combust.mleap.runtime.frame.{SimpleTransformer, Transformer}
 case class OneHotEncoder(override val uid: String = Transformer.uniqueName("one_hot_encoder"),
                          override val shape: NodeShape,
                          override val model: OneHotEncoderModel) extends SimpleTransformer {
-  override val exec: UserDefinedFunction = (value: Double) => model(value): Tensor[Double]
+  override val exec: UserDefinedFunction = (value: Double) => model(Array(value)).head: Tensor[Double]
 }

@@ -16,3 +16,6 @@ lazy val xgboostRuntime = MleapProject.xgboostRuntime
 lazy val xgboostSpark = MleapProject.xgboostSpark
 lazy val serving = MleapProject.serving
 lazy val benchmarks = MleapProject.benchmark
+lazy val databricksRuntimeFat = MleapProject.databricksRuntimeFat
+lazy val databricksRuntime = MleapProject.databricksRuntime
+lazy val databricksRuntimeTestkit = MleapProject.databricksRuntimeTestkit

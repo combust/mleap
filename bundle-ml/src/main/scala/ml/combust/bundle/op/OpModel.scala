@@ -19,6 +19,20 @@ trait OpModel[Context, M] {
     */
   def opName: String
 
+  /** Get the name of the model.
+    *
+    * This version uses the bundle context, in case the name is being
+    * deferred to another op.
+    *
+    * Defaults to returning the opName.
+    *
+    * @param obj the model
+    * @param context bundle context
+    * @return
+    */
+  def modelOpName(obj: M)
+                 (implicit context: BundleContext[Context]): String = opName
+
   /** Store the model.
     *
     * Store all standard parameters to the model's attribute list.

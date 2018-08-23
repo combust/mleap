@@ -6,9 +6,9 @@ import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.{HandleInvalid, OneHotEncoderModel}
 import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.runtime.transformer.feature.OneHotEncoderV23
+import ml.combust.mleap.runtime.transformer.feature.OneHotEncoder
 
-class OneHotEncoderOpV23 extends MleapOp[OneHotEncoderV23, OneHotEncoderModel] {
+class OneHotEncoderOpV23 extends MleapOp[OneHotEncoder, OneHotEncoderModel] {
   override val Model: OpModel[MleapContext, OneHotEncoderModel] = new OpModel[MleapContext, OneHotEncoderModel] {
     override val klazz: Class[OneHotEncoderModel] = classOf[OneHotEncoderModel]
 
@@ -31,5 +31,5 @@ class OneHotEncoderOpV23 extends MleapOp[OneHotEncoderV23, OneHotEncoderModel] {
     }
   }
 
-  override def model(node: OneHotEncoderV23): OneHotEncoderModel = node.model
+  override def model(node: OneHotEncoder): OneHotEncoderModel = node.model
 }

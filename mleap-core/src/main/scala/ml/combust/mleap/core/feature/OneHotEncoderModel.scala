@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
-import ml.combust.mleap.core.types.{ScalarType, StructField, StructType, TensorType}
+import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 /** Class for a one hot encoder model.

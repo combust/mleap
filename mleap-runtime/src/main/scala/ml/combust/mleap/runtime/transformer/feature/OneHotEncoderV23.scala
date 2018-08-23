@@ -2,63 +2,36 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.OneHotEncoderModel
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.runtime.frame.{MultiTransformer, Row, Transformer}
-import ml.combust.mleap.runtime.function.UserDefinedFunction
+import ml.combust.mleap.runtime.frame._
+import ml.combust.mleap.runtime.function.{StructSelector, UserDefinedFunction}
 import ml.combust.mleap.core.util.VectorConverters
+
+import scala.util.Try
 
 case class OneHotEncoderV23(override val uid: String =
                               Transformer.uniqueName("one_hot_encoder_v23"),
                             override val shape: NodeShape,
                             override val model: OneHotEncoderModel)
     extends MultiTransformer {
-  override val exec: UserDefinedFunction = {
-    // UGLY: I don't like this.  It's the best way forward from my current vantage point though.
-    // This stems from the fact that anonymous functions in scala cannot have varargs parameters.
-    shape.inputs.keys.size match {
-      case 1 ⇒
-        UserDefinedFunction(
-          (v1: Double) =>
-            Row(
-              model(Array(v1))
-                .map(VectorConverters.sparkVectorToMleapTensor): _*),
-          outputSchema,
-          inputSchema)
-      case 2 ⇒
-        UserDefinedFunction(
-          (v1: Double, v2: Double) =>
-            Row(
-              model(Array(v1, v2))
-                .map(VectorConverters.sparkVectorToMleapTensor): _*),
-          outputSchema,
-          inputSchema)
-      case 3 ⇒
-        UserDefinedFunction(
-          (v1: Double, v2: Double, v3: Double) =>
-            Row(
-              model(Array(v1, v2, v3))
-                .map(VectorConverters.sparkVectorToMleapTensor): _*),
-          outputSchema,
-          inputSchema)
-      case 4 ⇒
-        UserDefinedFunction(
-          (v1: Double, v2: Double, v3: Double, v4: Double) =>
-            Row(
-              model(Array(v1, v2, v3, v4))
-                .map(VectorConverters.sparkVectorToMleapTensor): _*),
-          outputSchema,
-          inputSchema)
-      case 5 ⇒
-        UserDefinedFunction(
-          (v1: Double, v2: Double, v3: Double, v4: Double, v5: Double) =>
-            Row(
-              model(Array(v1, v2, v3, v4, v5))
-                .map(VectorConverters.sparkVectorToMleapTensor): _*),
-          outputSchema,
-          inputSchema
-        )
-      case _ ⇒
-        throw new IllegalArgumentException(
-          "invalid number of inputs. unfortunately the current implementation of OneHotEncoder in mleap only supports 1-5 inputs.")
-    }
+
+  // Lot of things going on here:
+  // o Convert values into an array
+  // o Invoke 1HE model
+  // o Convert spark tensor results to mleap tensors
+  // o Spread results and use as input to new Row
+  private val f = (values: Row) => {
+    val v = values.toSeq.asInstanceOf[Seq[Double]].toArray
+    val res = model(v).map(VectorConverters.sparkVectorToMleapTensor)
+    Row(res: _*)
+  }
+  val exec: UserDefinedFunction =
+    UserDefinedFunction(f, outputSchema, Seq(SchemaSpec(inputSchema)))
+
+  val outputCols: Seq[String] = outputSchema.fields.map(_.name)
+  val inputCols: Seq[String] = inputSchema.fields.map(_.name)
+  private val inputSelector: StructSelector = StructSelector(inputCols)
+
+  override def transform[TB <: FrameBuilder[TB]](builder: TB): Try[TB] = {
+    builder.withColumns(outputCols, inputSelector)(exec)
   }
 }

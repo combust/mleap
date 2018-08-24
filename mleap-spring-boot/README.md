@@ -16,19 +16,38 @@ The following endpoints are available:
 
 1. POST /models : Loading a model, replacing the path to your model and the chosen model name
 
-TODO add example
+```
+body='{"modelName":"{YOUR_MODEL_NAME}","uri":"file:{PATH_TO_BUNDLE_ZIP}","config":{"memoryTimeout":900000,"diskTimeout":900000},"force":false}'
+
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data "$body" http://localhost:8080/models
+```
 
 2. DELETE /models/{MODEL_NAME} : Unloading a model, replacing the chosen model name
 
-TODO add example
+```
+  curl --header "Content-Type: application/json" \
+    --request DELETE \
+    http://localhost:8080/models/{YOUR_MODEL_NAME}
+```
 
 3. GET /models/{MODEL_NAME} : Retrieving a loaded model, replacing the chosen model name
 
-TODO add example
+```
+curl --header "Content-Type: application/json" \
+    --request GET \
+    http://localhost:8080/models/{YOUR_MODEL_NAME}
+```
 
 4. GET /models/{MODEL_NAME}/meta : Retrieving a loaded model meta information, replacing the chosen model name
 
-TODO add example
+```
+  curl --header "Content-Type: application/json" \
+    --request GET \
+    http://localhost:8080/models/{YOUR_MODEL_NAME}/meta
+
+```
 
 5. POST /models/{MODEL_NAME}/transform: Transform or scoring request, replacing the chosen model name
 

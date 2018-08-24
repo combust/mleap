@@ -49,9 +49,8 @@ class OneHotEncoderOp extends SimpleSparkOp[OneHotEncoder] {
       val df = context.context.dataset.get
       val size = OneHotEncoderOp.sizeForField(df.schema(obj.getInputCol))
       val dropLast = obj.getDropLast
-      val arrSize = if(dropLast) { size - 1 } else { size }
 
-      model.withValue("size", Value.long(arrSize)).
+      model.withValue("size", Value.long(size)).
         withValue("drop_last", Value.boolean(dropLast))
     }
 
@@ -66,10 +65,10 @@ class OneHotEncoderOp extends SimpleSparkOp[OneHotEncoder] {
   }
 
   override def sparkInputs(obj: OneHotEncoder): Seq[ParamSpec] = {
-    Seq("input" -> obj.inputCol)
+    Seq("input0" -> obj.inputCol)
   }
 
   override def sparkOutputs(obj: OneHotEncoder): Seq[SimpleParamSpec] = {
-    Seq("output" -> obj.outputCol)
+    Seq("output0" -> obj.outputCol)
   }
 }

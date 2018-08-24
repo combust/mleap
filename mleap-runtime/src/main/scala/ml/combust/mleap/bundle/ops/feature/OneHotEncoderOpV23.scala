@@ -12,7 +12,7 @@ class OneHotEncoderOpV23 extends MleapOp[OneHotEncoder, OneHotEncoderModel] {
   override val Model: OpModel[MleapContext, OneHotEncoderModel] = new OpModel[MleapContext, OneHotEncoderModel] {
     override val klazz: Class[OneHotEncoderModel] = classOf[OneHotEncoderModel]
 
-    override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder_v23
+    override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder
 
     override def store(model: Model, obj: OneHotEncoderModel)
                       (implicit context: BundleContext[MleapContext]): Model = {

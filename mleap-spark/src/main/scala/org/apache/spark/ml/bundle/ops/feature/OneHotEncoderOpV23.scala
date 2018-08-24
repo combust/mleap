@@ -37,7 +37,7 @@ class OneHotEncoderOpV23 extends SimpleSparkOp[OneHotEncoderModel] {
   override val Model: OpModel[SparkBundleContext, OneHotEncoderModel] = new OpModel[SparkBundleContext, OneHotEncoderModel] {
     override val klazz: Class[OneHotEncoderModel] = classOf[OneHotEncoderModel]
 
-    override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder_v23
+    override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder
 
     override def store(model: Model, obj: OneHotEncoderModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {

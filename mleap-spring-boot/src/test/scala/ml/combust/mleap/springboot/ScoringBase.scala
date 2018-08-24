@@ -69,7 +69,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
       // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 15)) {
+      if (!waitUntilModelLoaded(modelName, 10)) {
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
 
@@ -351,11 +351,11 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val response = restTemplate.exchange("/models/" + modelName, HttpMethod.GET, JsonScoringSpec.httpEntityWithJsonHeaders, classOf[String])
       if (response.getStatusCode == HttpStatus.OK) {
         // pause a bit to ensure model has finished loaded
-        Thread.sleep(1000)
+        Thread.sleep(750)
         return true
       } else {
         // pause a bit to allow the model to load
-        Thread.sleep(1000)
+        Thread.sleep(500)
       }
     }
 

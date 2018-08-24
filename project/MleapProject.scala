@@ -21,9 +21,9 @@ object MleapProject {
     executor,
     executorTestKit,
     grpc,
-    springBootServing,
     grpcServer,
     repositoryS3,
+    springBootServing,
     serving,
     databricksRuntime)
 

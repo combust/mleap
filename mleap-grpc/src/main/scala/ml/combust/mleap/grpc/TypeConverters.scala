@@ -141,7 +141,6 @@ object TypeConverters {
 
   implicit def mleapToPbRowStreamSpec(config: executor.RowStreamSpec): RowStreamSpec = {
     RowStreamSpec(
-      format = config.format,
       schema = Some(config.schema),
       options = Some(config.options)
     )
@@ -149,7 +148,6 @@ object TypeConverters {
 
   implicit def pbToMleapRowStreamSpec(config: RowStreamSpec): executor.RowStreamSpec = {
     executor.RowStreamSpec(
-      format = config.format,
       schema = config.schema.get,
       options = config.options.get
     )

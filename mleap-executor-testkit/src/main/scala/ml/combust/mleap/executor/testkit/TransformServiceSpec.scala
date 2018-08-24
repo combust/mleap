@@ -44,7 +44,6 @@ trait TransformServiceSpec extends FunSpecLike
     bufferSize = Some(1024)
   )
   private val rowStreamSpec1 = RowStreamSpec(
-    format = BuiltinFormats.binary,
     schema = frame.schema
   )
 

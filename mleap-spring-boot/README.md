@@ -49,11 +49,19 @@ curl --header "Content-Type: application/json" \
 
 ```
 
-5. POST /models/{MODEL_NAME}/transform: Transform or scoring request, replacing the chosen model name
+5. POST /models/{MODEL_NAME}/transform: Transform or scoring request, replacing the chosen model name, format and encoded leap frame
 
-TODO add example
+```
+body='{"modelName":"{YOUR_MODEL_NAME}","format":"{YOUR_FORMAT}","initTimeout":"35000","tag":0,"frame":"{ENCODED_LEAP_FRAME}"}'
 
-These endpoints are available either using: 
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data "$body" http://localhost:8080/models/transform
+```
+
+Format can be either `ml.combust.mleap.binary` or `ml.combust.mleap.json` and your leap frame needs to be encoded with that format.
+
+Note: The above endpoints are available either using: 
 - JSON (`Content-Type` header set to `application/json `)
 - Protobuf (`Content-Type` header set to `application/x-protobuf`).
 

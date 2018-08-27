@@ -16,6 +16,13 @@ class Vector(object):
         self.values = values
 
 
+class EncoderNumpySupport(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.number):
+            return np.asscalar(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
 class MLeapSerializer(object):
     """
     Base class to serialize transformers and estimators to a bundle.ml file. Main components that get serialized are:
@@ -156,12 +163,12 @@ class MLeapSerializer(object):
         if model:
             # Write bundle file
             with open("{}/{}".format(model_dir, 'model.json'), 'w') as outfile:
-                json.dump(self.get_mleap_model(transformer, attributes), outfile, indent=3)
+                json.dump(self.get_mleap_model(transformer, attributes), outfile, indent=3, cls=EncoderNumpySupport)
 
         if node:
             # Write node file
             with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
-                json.dump(self.get_mleap_node(transformer, inputs, outputs), outfile, indent=3)
+                json.dump(self.get_mleap_node(transformer, inputs, outputs), outfile, indent=3, cls=EncoderNumpySupport)
 
 
 class MLeapDeserializer(object):

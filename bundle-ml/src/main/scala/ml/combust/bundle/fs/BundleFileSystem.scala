@@ -1,10 +1,12 @@
 package ml.combust.bundle.fs
 
 import java.io.File
+import java.net.URI
 
 import scala.util.Try
 
 trait BundleFileSystem {
-  def load(path: String): Try[File]
-  def save(path: String, localFile: File): Unit
+  def scheme: String
+  def load(uri: URI): Try[File]
+  def save(uri: URI, localFile: File): Unit
 }

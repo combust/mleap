@@ -1,5 +1,6 @@
 package ml.combust.bundle
 
+import java.net.URI
 import java.nio.file.Files
 
 import ml.combust.bundle.dsl.Bundle
@@ -33,7 +34,7 @@ Transformer <: AnyRef](root: Transformer,
       meta = meta))
   }
 
-  def save(fs: BundleFileSystem, path: String)
+  def save(fs: BundleFileSystem, uri: URI)
           (implicit context: Context): Try[Bundle[Transformer]] = {
     val tmp = Files.createTempFile("bundle", ".zip")
 
@@ -41,7 +42,7 @@ Transformer <: AnyRef](root: Transformer,
       save(bf)
     }).tried.flatMap(identity).map {
       r =>
-        fs.save(path, tmp.toFile)
+        fs.save(uri, tmp.toFile)
         r
     }
   }

@@ -28,14 +28,14 @@ object SparkShapeSaver {
 case class SparkShapeSaver(dataset: DataFrame,
                            params: Params,
                            inputs: Seq[ParamSpec],
-                           outputs: Seq[SimpleParamSpec]) {
+                           outputs: Seq[ParamSpec]) {
   private implicit val ds = dataset
 
   def withInputs(is: ParamSpec *): SparkShapeSaver = {
     copy(inputs = inputs ++ is)
   }
 
-  def withOutputs(os: SimpleParamSpec *): SparkShapeSaver = {
+  def withOutputs(os: ParamSpec *): SparkShapeSaver = {
     copy(outputs = outputs ++ os)
   }
 
@@ -57,10 +57,21 @@ case class SparkShapeSaver(dataset: DataFrame,
         } else { Seq() }
     }
 
-    val os = outputs.filter(pp => params.isDefined(pp.param) && params.getOrDefault(pp.param).nonEmpty).map {
+    val os = outputs.flatMap {
       case SimpleParamSpec(port, param) =>
-        val field = dataset.schema(params.getOrDefault(param))
-        Socket(port, field.name)
+        if(params.isDefined(param) && params.getOrDefault(param).nonEmpty) {
+          val field = dataset.schema(params.getOrDefault(param))
+          Seq(Socket(port, field.name))
+        }
+        else { Seq() }
+      case ArrayParamSpec(portPrefix, param) =>
+        if(params.isDefined(param) && params.getOrDefault(param).nonEmpty) {
+          params.get(param).get.zipWithIndex.map {
+            case (name, i) =>
+              val field = dataset.schema(name)
+              Socket(s"$portPrefix$i", field.name)
+          }.toSeq
+        } else { Seq() }
     }
 
     NodeShape(inputs = is, outputs = os)
@@ -70,7 +81,7 @@ case class SparkShapeSaver(dataset: DataFrame,
 case class SparkShapeLoader(shape: NodeShape,
                             params: Params,
                             inputs: Seq[ParamSpec] = Seq(),
-                            outputs: Seq[SimpleParamSpec] = Seq()) {
+                            outputs: Seq[ParamSpec] = Seq()) {
   def withInputs(is: ParamSpec *): SparkShapeLoader = {
     copy(inputs = inputs ++ is)
   }
@@ -92,9 +103,15 @@ case class SparkShapeLoader(shape: NodeShape,
       }
     }
 
-    for(SimpleParamSpec(port, param) <- outputs) {
-      for(socket <- shape.getOutput(port)) {
-        params.set(param, socket.name)
+    for(output ← outputs) {
+      output match {
+        case SimpleParamSpec(port, param) =>
+          for(socket <- shape.getOutput(port)) {
+            params.set(param, socket.name)
+          }
+        case ArrayParamSpec(portPrefix, param) =>
+          val names = shape.outputs.filter(_.port.startsWith(portPrefix)).map(_.name).toArray
+          params.set(param, names)
       }
     }
   }

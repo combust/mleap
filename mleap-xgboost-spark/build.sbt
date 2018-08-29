@@ -1,8 +1,6 @@
 import ml.combust.mleap.{Dependencies, Common}
 
-resolvers += Resolver.mavenLocal
-
-Common.defaultMleapXgboostSparkSettings
+Common.defaultMleapSettings
 Dependencies.xgboostSpark
 
 javaOptions in Test ++= sys.env.get("XGBOOST_JNI").map {

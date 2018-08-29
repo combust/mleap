@@ -79,6 +79,10 @@ object Bundle {
       val interaction = "interaction"
     }
 
+    object ensemble {
+      val categorical_drilldown = "categorical_drilldown"
+    }
+
     object classification {
       val naive_bayes = "naive_bayes"
       val logistic_regression = "logistic_regression"
@@ -99,6 +103,11 @@ object Bundle {
 
     object recommendation {
       val als = "als"
+    }
+
+    object tuning {
+      val cross_validator = "cross_validator"
+      val train_validation_split = "train_validation_split"
     }
 
     val pipeline = "pipeline"

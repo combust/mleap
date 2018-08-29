@@ -83,7 +83,7 @@ case class ModelSerializer[Context](bundleContext: BundleContext[Context]) {
   def write(obj: Any): Try[Any] = Try {
     Files.createDirectories(bundleContext.path)
     val m = bundleContext.bundleRegistry.modelForObj[Context, Any](obj)
-    val model = Model(op = m.opName)
+    val model = Model(op = m.modelOpName(obj))
     m.store(model, obj)(bundleContext)
   }.flatMap {
     model => Try(FormatModelSerializer.serializer.write(bundleContext.file(Bundle.modelFile), model))

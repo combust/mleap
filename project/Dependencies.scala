@@ -11,6 +11,7 @@ object Dependencies {
   val tensorflowVersion = "1.7.0"
   val akkaVersion = "2.4.16"
   val akkaHttpVersion = "10.0.3"
+  val xgboostVersion = "0.80"
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
@@ -36,7 +37,8 @@ object Dependencies {
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
     val scalameter = "com.storm-enroute" %% "scalameter" % "0.8.2"
     val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
-    val jafama = "net.jafama" % "jafama" % "2.1.0"
+    val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion
+    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion
   }
 
   object Test {
@@ -46,7 +48,6 @@ object Dependencies {
 
   object Provided {
     val spark = Compile.spark.map(_.excludeAll(ExclusionRule(organization = "org.scalatest"))).map(_ % "provided")
-    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % "0.7" % "provided"
   }
 
   import Compile._
@@ -74,13 +75,15 @@ object Dependencies {
 
   val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
-  val xgboostJava = l ++= Seq(jafama)
+  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(Test.scalaTest)
 
-  val xgboostSpark = l ++= Seq(Provided.xgboostSparkDep) ++ Provided.spark
+  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
+
+  val databricksRuntimeTestkit = l ++= Provided.spark ++ Seq(xgboostSparkDep, sparkAvro)
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

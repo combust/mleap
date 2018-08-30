@@ -68,10 +68,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest1 = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       // try to load model with the same name again
       val loadModelRequest2 = createLoadModelRequest(modelName, demoUri, true)
@@ -114,10 +111,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest1 = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val response = restTemplate.exchange("/models/" + modelName, HttpMethod.DELETE, createEmptyBodyRequest(), cu.runtimeClass)
       assert(response.getStatusCode == HttpStatus.OK)
@@ -136,10 +130,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest1 = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val response = restTemplate.exchange("/models/" + modelName, HttpMethod.DELETE, createEmptyBodyRequest(), cu.runtimeClass)
       assert(response.getStatusCode == HttpStatus.OK)
@@ -162,10 +153,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest1 = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val response = restTemplate.exchange("/models/" + modelName, HttpMethod.GET, createEmptyBodyRequest(), cu.runtimeClass)
       assert(response.getStatusCode == HttpStatus.OK)
@@ -186,10 +174,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest1 = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest1, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val response = restTemplate.exchange("/models/" + modelName + "/meta", HttpMethod.GET, createEmptyBodyRequest(), cv.runtimeClass)
       assert(response.getStatusCode == HttpStatus.OK)
@@ -209,10 +194,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val request = createTransformFrameRequest(modelName, validFrame, None)
       val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
@@ -228,10 +210,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val request = createTransformFrameRequest(modelName, validFrame,
         Some(TransformOptions(select = Seq("demo:prediction"), selectMode = SELECT_MODE_STRICT)))
@@ -248,7 +227,6 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
 
-      // wait until it's been loaded
       if (!waitUntilModelLoaded(modelName, 10)) {
         fail("model hasn't been loaded successfully the first time, the test cannot succeed")
       }
@@ -268,10 +246,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val request = createTransformFrameRequest(modelName, validFrame,
         Some(TransformOptions(select = Seq("demo:prediction", "dummy"), selectMode = SELECT_MODE_STRICT)))
@@ -294,10 +269,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
       assertTransformError(response)
@@ -310,10 +282,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val response = restTemplate.exchange("/models/transform", HttpMethod.POST, request, cy.runtimeClass)
       assertTransformError(response)
@@ -324,10 +293,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, cu.runtimeClass)
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val request = createTransformFrameRequest(validFrame)
       val response = restTemplate.exchange("/models/" + modelName + "/transform", HttpMethod.POST, request, classOf[Array[Byte]])
@@ -351,7 +317,7 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       val response = restTemplate.exchange("/models/" + modelName, HttpMethod.GET, JsonScoringSpec.httpEntityWithJsonHeaders, classOf[String])
       if (response.getStatusCode == HttpStatus.OK) {
         // pause a bit to ensure model has finished loaded
-        Thread.sleep(750)
+        Thread.sleep(500)
         return true
       } else {
         // pause a bit to allow the model to load
@@ -359,6 +325,6 @@ abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag
       }
     }
 
-    return false
+    fail("model hasn't been loaded successfully the first time, the test cannot succeed")
   }
 }

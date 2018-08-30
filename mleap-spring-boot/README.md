@@ -62,7 +62,7 @@ curl --header "Content-Type: application/json" \
 Format can be either `ml.combust.mleap.binary` or `ml.combust.mleap.json` and your leap frame needs to be encoded with that format.
 
 Note: The above endpoints are available either using: 
-- JSON (`Content-Type` header set to `application/json `)
+- JSON (`Content-Type` header set to `application/json`)
 - Protobuf (`Content-Type` header set to `application/x-protobuf`).
 
 Check out the available Swagger API documentation `mleap_serving_1.0.0_swagger.yaml` for more information or trying out the API.

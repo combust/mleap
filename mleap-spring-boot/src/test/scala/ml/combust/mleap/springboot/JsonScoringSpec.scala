@@ -27,7 +27,7 @@ class JsonScoringSpec extends ScoringBase[String, String, String, String, String
   override def createLoadModelRequest(modelName: String, uri:URI, createTmpFile: Boolean): HttpEntity[String] = {
     val request = LoadModelRequest(modelName = modelName,
       uri = TestUtil.getBundle(uri, createTmpFile).toString,
-      config = Some(ModelConfig(Some(900L), Some(900L))))
+      config = Some(ModelConfig(Some(9000L), Some(9000L))))
 
     new HttpEntity[String](JsonMethods.compact(printer.toJson(request)), JsonScoringSpec.jsonHeaders)
   }
@@ -91,10 +91,7 @@ class JsonScoringSpec extends ScoringBase[String, String, String, String, String
       val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, classOf[String])
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val response = restTemplate.exchange("/models/transform", HttpMethod.POST,
         new HttpEntity[String]("", JsonScoringSpec.jsonHeaders), classOf[String])
@@ -106,10 +103,7 @@ class JsonScoringSpec extends ScoringBase[String, String, String, String, String
       val loadModelRequest = createLoadModelRequest(modelName, demoUri, true)
       restTemplate.exchange("/models", HttpMethod.POST, loadModelRequest, classOf[String])
 
-      // wait until it's been loaded
-      if (!waitUntilModelLoaded(modelName, 10)) {
-        fail("model hasn't been loaded successfully the first time, the test cannot succeed")
-      }
+      waitUntilModelLoaded(modelName, 10)
 
       val response = restTemplate.exchange("/models/transform", HttpMethod.POST,
         new HttpEntity[String]("{invalid json}", JsonScoringSpec.jsonHeaders), classOf[String])

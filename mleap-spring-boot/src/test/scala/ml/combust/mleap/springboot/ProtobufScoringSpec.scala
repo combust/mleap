@@ -20,7 +20,7 @@ class ProtobufScoringSpec extends ScoringBase[Mleap.LoadModelRequest, Mleap.Mode
   override def createLoadModelRequest(modelName: String, uri: URI, createTmpFile: Boolean): HttpEntity[Mleap.LoadModelRequest] = {
     val request = LoadModelRequest(modelName = modelName,
       uri = TestUtil.getBundle(uri, createTmpFile).toString,
-      config = Some(ModelConfig(Some(900L), Some(900L))))
+      config = Some(ModelConfig(Some(9000L), Some(9000L))))
     new HttpEntity[Mleap.LoadModelRequest](LoadModelRequest.toJavaProto(request), ProtobufScoringSpec.protoHeaders)
   }
 

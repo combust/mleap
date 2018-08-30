@@ -9,20 +9,19 @@ import org.scalatest.FunSpec
 class OneHotEncoderModelSpec extends FunSpec {
   describe("encoder model") {
 
-    val encoder = OneHotEncoderModel(5)
+    val encoder = OneHotEncoderModel(Array(5))
 
     it("encodes the value as a vector") {
-
-      assert(encoder(1.0).toArray.sameElements(Array(0.0, 1.0, 0.0, 0.0, 0.0)))
-      assert(encoder(3.0).toArray.sameElements(Array(0.0, 0.0, 0.0, 1.0, 0.0)))
+      assert(encoder(Array(1.0)).head.toArray.sameElements(Array(0.0, 1.0, 0.0, 0.0)))
+      assert(encoder(Array(3.0)).head.toArray.sameElements(Array(0.0, 0.0, 0.0, 1.0)))
     }
 
     it("has the right input schema") {
-      assert(encoder.inputSchema.fields == Seq(StructField("input", ScalarType.Double.nonNullable)))
+      assert(encoder.inputSchema.fields == Seq(StructField("input0", ScalarType.Double.nonNullable)))
     }
 
     it("has the right output schema") {
-      assert(encoder.outputSchema.fields == Seq(StructField("output", TensorType.Double(5))))
+      assert(encoder.outputSchema.fields == Seq(StructField("output0", TensorType.Double(5))))
     }
   }
 }

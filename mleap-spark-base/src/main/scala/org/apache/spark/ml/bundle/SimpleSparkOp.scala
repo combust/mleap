@@ -14,7 +14,7 @@ abstract class SimpleSparkOp[N <: Transformer](implicit ct: ClassTag[N]) extends
   override val klazz: Class[N] = ct.runtimeClass.asInstanceOf[Class[N]]
 
   def sparkInputs(obj: N): Seq[ParamSpec]
-  def sparkOutputs(obj: N): Seq[SimpleParamSpec]
+  def sparkOutputs(obj: N): Seq[ParamSpec]
 
   override def name(node: N): String = node.uid
   override def model(node: N): N = node

@@ -50,6 +50,7 @@ object Dependencies {
 
   object Provided {
     val spark = Compile.spark.map(_.excludeAll(ExclusionRule(organization = "org.scalatest"))).map(_ % "provided")
+    val hadoop = Compile.hadoop % "provided"
   }
 
   import Compile._
@@ -59,7 +60,7 @@ object Dependencies {
 
   val bundleMl = l ++= Seq(arm, config, sprayJson, Test.scalaTest)
 
-  val bundleHdfs = l ++= Seq(hadoop)
+  val bundleHdfs = l ++= Seq(Provided.hadoop, Test.scalaTest)
 
   val base = l ++= Seq()
 

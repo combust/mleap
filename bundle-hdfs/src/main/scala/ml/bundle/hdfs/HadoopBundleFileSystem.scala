@@ -13,6 +13,8 @@ import scala.util.Try
 import scala.collection.JavaConverters._
 
 object HadoopBundleFileSystem {
+  lazy val defaultSchemes: Seq[String] = Seq("hdfs")
+
   def createHadoopConfiguration(config: Config): Configuration = {
     val options: Map[String, String] = if(config.hasPath("options")) {
       config.getConfig("options").entrySet().asScala.map {
@@ -26,14 +28,18 @@ object HadoopBundleFileSystem {
     for ((key, value) <- options) { c.set(key, value) }
     c
   }
+
+  def createSchemes(config: Config): Seq[String] = if (config.hasPath("schemes")) {
+    config.getStringList("schemes").asScala
+  } else { Seq("hdfs") }
 }
 
-class HadoopBundleFileSystem(fs: FileSystem) extends BundleFileSystem {
+class HadoopBundleFileSystem(fs: FileSystem,
+                             override val schemes: Seq[String] = HadoopBundleFileSystem.defaultSchemes) extends BundleFileSystem {
   def this(config: Config) = {
-    this(FileSystem.get(HadoopBundleFileSystem.createHadoopConfiguration(config)))
+    this(FileSystem.get(HadoopBundleFileSystem.createHadoopConfiguration(config)),
+      HadoopBundleFileSystem.createSchemes(config))
   }
-
-  override def scheme: String = "hdfs"
 
   override def load(uri: URI): Try[File] = Try {
     val tmpDir = Files.createTempDirectory("hdfs-bundle")

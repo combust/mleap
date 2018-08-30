@@ -6,7 +6,7 @@ import java.net.URI
 import scala.util.Try
 
 trait BundleFileSystem {
-  def scheme: String
+  def schemes: Seq[String]
   def load(uri: URI): Try[File]
   def save(uri: URI, localFile: File): Unit
 }

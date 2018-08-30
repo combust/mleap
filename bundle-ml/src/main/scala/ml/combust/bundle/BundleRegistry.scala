@@ -152,7 +152,7 @@ case class BundleRegistry private (classLoader: ClassLoader) extends HasBundleRe
     * @return this
     */
   def registerFileSystem(fileSystem: BundleFileSystem): this.type = {
-    fileSystems += (fileSystem.scheme -> fileSystem)
+    for (scheme <- fileSystem.schemes) { fileSystems += (scheme -> fileSystem) }
     this
   }
 }

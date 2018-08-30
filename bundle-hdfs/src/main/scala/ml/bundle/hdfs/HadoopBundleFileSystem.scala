@@ -10,10 +10,27 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 
 import scala.util.Try
+import scala.collection.JavaConverters._
+
+object HadoopBundleFileSystem {
+  def createHadoopConfiguration(config: Config): Configuration = {
+    val options: Map[String, String] = if(config.hasPath("options")) {
+      config.getConfig("options").entrySet().asScala.map {
+        entry => (entry.getKey, entry.getValue.unwrapped().toString)
+      }.toMap
+    } else {
+      Map()
+    }
+
+    val c = new Configuration()
+    for ((key, value) <- options) { c.set(key, value) }
+    c
+  }
+}
 
 class HadoopBundleFileSystem(fs: FileSystem) extends BundleFileSystem {
   def this(config: Config) = {
-    this(FileSystem.get(new Configuration()))
+    this(FileSystem.get(HadoopBundleFileSystem.createHadoopConfiguration(config)))
   }
 
   override def scheme: String = "hdfs"

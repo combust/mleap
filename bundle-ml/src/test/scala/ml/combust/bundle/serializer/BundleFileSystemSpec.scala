@@ -29,10 +29,7 @@ class BundleFileSystemSpec extends FunSpec {
       val uri = new URI(s"test://$tmpDir/test.zip")
 
       lr.writeBundle.name("my_bundle").save(uri)
-
-      val loaded = (for (bf <- managed(BundleFile(uri))) yield {
-        bf.loadBundle().get
-      }).tried.get
+      val loaded = uri.loadBundle().get
 
       assert(loaded.root == lr)
     }

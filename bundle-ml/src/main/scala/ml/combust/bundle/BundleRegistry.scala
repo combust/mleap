@@ -146,6 +146,15 @@ case class BundleRegistry private (classLoader: ClassLoader) extends HasBundleRe
     fileSystems(uri.getScheme)
   }
 
+  /** Get the bundle file system for a URI.
+    *
+    * @param uri uri of the bundle in the file system
+    * @return the file system
+    */
+  def getFileSystemForUri(uri: URI): Option[BundleFileSystem] = {
+    fileSystems.get(uri.getScheme)
+  }
+
   /** Register a file system for loading/saving bundles.
     *
     * @param fileSystem file system to register

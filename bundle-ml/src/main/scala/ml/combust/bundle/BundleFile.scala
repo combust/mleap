@@ -20,13 +20,27 @@ import scala.util.Try
   * Created by hollinwilkins on 12/24/16.
   */
 object BundleFile {
-  implicit def apply[Context <: HasBundleRegistry](uri: String)
-                                                  (implicit context: Context): BundleFile = {
+  def load[Context <: HasBundleRegistry](uri: String)
+                                        (implicit context: Context): BundleFile = {
+    load(new URI(uri))
+  }
+
+  def load[Context <: HasBundleRegistry](uri: URI)
+                                        (implicit context: Context): BundleFile = {
+      uri.getScheme match {
+        case "file" => apply(uri)
+        case "jar" => apply(uri)
+        case _ =>
+          // look in the bundle registry for a file system
+          apply(context.bundleRegistry.fileSystemForUri(uri).load(uri).get)
+      }
+  }
+
+  implicit def apply(uri: String): BundleFile = {
     apply(new URI(unbackslash(uri)))
   }
 
-  implicit def apply[Context <: HasBundleRegistry](file: File)
-                                                  (implicit context: Context): BundleFile = {
+  implicit def apply(file: File): BundleFile = {
     val uri: String = if (file.getPath.endsWith(".zip")) {
       s"jar:${file.toURI.toString}"
     } else {
@@ -36,8 +50,7 @@ object BundleFile {
     apply(uri)
   }
 
-  implicit def apply[Context <: HasBundleRegistry](uri: URI)
-                                                  (implicit context: Context): BundleFile = {
+  implicit def apply(uri: URI): BundleFile = {
     val env = Map("create" -> "true").asJava
     val uriSafe = new URI(unbackslash(uri.toString))
 
@@ -56,14 +69,10 @@ object BundleFile {
 
         val zfs = FileSystems.newFileSystem(filesystemUri, env)
         apply(zfs, zfs.getPath(path))
-      case _ =>
-        // look in the bundle registry for a file system
-        apply(context.bundleRegistry.fileSystemForUri(uri).load(uri).get)
     }
   }
 
-  def apply[Context <: HasBundleRegistry](fs: BundleFileSystem, uri: URI)
-                                         (implicit context: Context): BundleFile = {
+  def apply[Context <: HasBundleRegistry](fs: BundleFileSystem, uri: URI): BundleFile = {
     // Copy contents from the bundle file system to the local file system
     apply(fs.load(uri).get)
   }

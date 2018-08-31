@@ -2,15 +2,15 @@
 
 This module is a Spring Boot project that provides a HTTP interface to an MLeap executor.
 
-Once built, you can run 
+To package, run
 
-```java -jar mleap-spring-boot.jar```
+```sbt mleap-spring-boot/assemby```
+
+Once built, you can run the following command, replacing the version
+
+```java -jar mleap-spring-boot/target/scala-2.11/mleap-spring-boot-assembly-{VERSION}.jar```
 
 to start the server. This will start the server on port 8080, by default.
-
-To change the port, for example to 9000, you can run
-
-```java -jar mleap-spring-boot.jar --server.port=9000```
 
 The following endpoints are available:
 

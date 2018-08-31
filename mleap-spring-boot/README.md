@@ -83,4 +83,4 @@ Note: The above endpoint is available either using:
 
 Check out the available Swagger API documentation `mleap_serving_1.0.0_swagger.yaml` for more information or trying out the API.
 
-See the README.md file in `mleap-serving` about starting both a gRPC and HTTP server using a single MLeap executor.
+See the README.md in `mleap-serving` about starting both a gRPC and HTTP server using a single MLeap executor.

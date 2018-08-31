@@ -65,6 +65,22 @@ Note: The above endpoints are available either using:
 - JSON (`Content-Type` header set to `application/json`)
 - Protobuf (`Content-Type` header set to `application/x-protobuf`).
 
+The previous scoring endpoints require you to encode the leap frame, either as JSON or protobuf. If you'd like to try out scoring without having to
+encode the leap frame, you can use the following endpoint, replacing the chosen model name and your leap frame:
+
+```
+body='{YOUR_LEAP_FRAME_JSON}'
+
+curl --header "Content-Type: application/json" \
+  --header "timeout: 1000" \
+  --request POST \
+  --data "$body" http://localhost:8080/models/{YOUR_MODEL_NAME}/transform
+```
+
+Note: The above endpoint is available either using: 
+- JSON (`Content-Type` header set to `application/json`) with a JSON leap frame.
+- Protobuf (`Content-Type` header set to `application/x-protobuf`) with a protobuf leap frame.
+
 Check out the available Swagger API documentation `mleap_serving_1.0.0_swagger.yaml` for more information or trying out the API.
 
 See the README.md file in `mleap-serving` about starting both a gRPC and HTTP server using a single MLeap executor.

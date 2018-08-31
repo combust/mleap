@@ -11,7 +11,7 @@ object Dependencies {
   val akkaVersion = "2.5.12"
   val tensorflowVersion = "1.7.0"
   val akkaHttpVersion = "10.0.3"
-  val springBootVersion = "2.0.1.RELEASE"
+  val springBootVersion = "2.0.4.RELEASE"
   lazy val logbackVersion = "1.2.3"
   lazy val loggingVersion = "3.9.0"
   lazy val slf4jVersion = "1.7.25"

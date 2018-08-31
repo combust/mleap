@@ -35,13 +35,18 @@ Transformer <: AnyRef](root: Transformer,
   }
 
   def save(uri: URI)
-          (implicit context: Context): Try[Bundle[Transformer]] = {
+          (implicit context: Context): Try[Bundle[Transformer]] = uri.getScheme match {
+    case "jar" | "file" =>
+        (for (bf <- managed(BundleFile(uri))) yield {
+          save(bf).get
+        }).tried
+    case _ =>
     val tmpDir = Files.createTempDirectory("bundle")
     val tmp = Paths.get(tmpDir.toString, "tmp.zip")
 
     (for (bf <- managed(BundleFile(tmp.toFile))) yield {
-      save(bf)
-    }).tried.flatMap(identity).map {
+      save(bf).get
+    }).tried.map {
       r =>
         context.bundleRegistry.fileSystemForUri(uri).save(uri, tmp.toFile)
         r

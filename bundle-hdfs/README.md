@@ -41,7 +41,7 @@ implicit val sbc: SparkBundleContext = SparkBundleContext.
 stringIndexerModel.writeBundle.save(new URI("hdfs:///tmp/test.bundle.zip"))
     
 // Load the bundle using a URI
-val loadedStringIndexerModel = new URI("hdfs:///tmp/test.bundle.zip").loadMleapBundle()
+val loadedStringIndexerModel = new URI("hdfs:///tmp/test.bundle.zip").loadMleapBundle().get.root
 ```
 
 ## Import Using MLeap Runtime
@@ -72,7 +72,7 @@ val bundleUri = new URI("hdfs:///tmp/test.bundle.zip")
 stringIndexer.writeBundle.save(bundleUri)
     
 // Load the bundle
-val loadedStringIndexer = bundleUri.loadMleapBundle()
+val loadedStringIndexer = bundleUri.loadMleapBundle().get.root
 ```
 
 ## Custom Configuration

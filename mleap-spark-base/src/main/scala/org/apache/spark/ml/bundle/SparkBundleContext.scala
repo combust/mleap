@@ -44,10 +44,13 @@ object SparkBundleContext {
 
 case class SparkBundleContext(dataset: Option[DataFrame],
                               override val bundleRegistry: BundleRegistry) extends HasBundleRegistry {
-  def withDataset(dataset: DataFrame): SparkBundleContext = {
-    val bundleRegistry2 = bundleRegistry.registerFileSystem(
-      new HadoopBundleFileSystem(FileSystem.get(
-      dataset.sqlContext.sparkSession.sparkContext.hadoopConfiguration)))
+  def withDataset(dataset: DataFrame, registerHdfs: Boolean = true): SparkBundleContext = {
+    val bundleRegistry2 = if (registerHdfs) {
+      bundleRegistry.registerFileSystem(
+        new HadoopBundleFileSystem(FileSystem.get(
+          dataset.sqlContext.sparkSession.sparkContext.hadoopConfiguration)))
+    } else { bundleRegistry }
+
     copy(dataset = Some(dataset),
       bundleRegistry = bundleRegistry2)
   }

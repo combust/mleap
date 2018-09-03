@@ -2,6 +2,6 @@ numpy>=1.8.2
 six>=1.10.0
 scipy>=0.13.0b1
 pandas>=0.18.1
-scikit-learn>=0.18.dev0
+scikit-learn>0.18.dev0
 nose-exclude>=0.5.0
 gensim>=1.0.1

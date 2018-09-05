@@ -1,5 +1,7 @@
 package ml.combust.mleap.spark
 
+import java.net.URI
+
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.{BundleFile, BundleWriter}
 import ml.combust.mleap.core.types
@@ -10,6 +12,7 @@ import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.mleap.TypeConverters
 import org.apache.spark.sql.types.StructType
+import resource._
 
 import scala.util.Try
 
@@ -24,6 +27,15 @@ trait SparkSupport {
   implicit class SparkBundleFileOps(file: BundleFile) {
     def loadSparkBundle()
                        (implicit context: SparkBundleContext): Try[Bundle[Transformer]] = file.load()
+  }
+
+  implicit class URIBundleFileOps(uri: URI) {
+    def loadMleapBundle()
+                       (implicit context: SparkBundleContext): Try[Bundle[Transformer]] = {
+      (for (bf <- managed(BundleFile.load(uri))) yield {
+        bf.load[SparkBundleContext, Transformer]().get
+      }).tried
+    }
   }
 
   implicit class MleapSparkTransformerOps[T <: frame.Transformer](transformer: T) {

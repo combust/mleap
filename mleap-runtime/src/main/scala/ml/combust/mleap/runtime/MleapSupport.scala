@@ -1,10 +1,13 @@
 package ml.combust.mleap.runtime
 
+import java.net.URI
+
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.{BundleFile, BundleWriter}
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.frame.{LeapFrameConverter, Transformer}
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter, RowReader, RowWriter}
+import resource._
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
@@ -22,17 +25,26 @@ trait MleapSupport {
                        (implicit context: MleapContext): Try[Bundle[Transformer]] = file.load()
   }
 
+  implicit class URIBundleFileOps(uri: URI) {
+    def loadMleapBundle()
+                       (implicit context: MleapContext): Try[Bundle[Transformer]] = {
+      (for (bf <- managed(BundleFile.load(uri))) yield {
+        bf.load[MleapContext, Transformer]().get
+      }).tried
+    }
+  }
+
   implicit class MleapCaseClassOps[T <: Product](data: T)(implicit tag: TypeTag[T]) {
-    def toLeapFrame: DefaultLeapFrame = LeapFrameConverter.convert(data)
+    def toLeapFrame: frame.DefaultLeapFrame = LeapFrameConverter.convert(data)
   }
 
   implicit class MleapCaseClassSeqOps[T <: Product](data: Seq[T])(implicit tag: TypeTag[T]) {
-    def toLeapFrame: DefaultLeapFrame = LeapFrameConverter.convert(data)
+    def toLeapFrame: frame.DefaultLeapFrame = LeapFrameConverter.convert(data)
   }
 
-  implicit class MleapLeapFrameOps[LF <: LeapFrame[LF]](frame: LF) {
+  implicit class MleapLeapFrameOps[LF <: frame.LeapFrame[LF]](lf: LF) {
     def to[T <: Product](implicit tag: TypeTag[T]): Seq[T] =
-      LeapFrameConverter.convert(frame)
+      LeapFrameConverter.convert(lf)
 
     /** Writer for this leap frame
       *
@@ -41,7 +53,7 @@ trait MleapSupport {
       * @return writer for this leap frame with specified format
       */
     def writer(format: String = BuiltinFormats.json)
-              (implicit ct: ClassTag[LF]): FrameWriter = FrameWriter(frame, format)
+              (implicit ct: ClassTag[LF]): FrameWriter = FrameWriter(lf, format)
   }
 
   implicit class StructTypeOps(schema: StructType) {

@@ -14,12 +14,16 @@ import resource._
   */
 class BundleBuilderSupport {
   def load(file: File, context: MleapContext): Bundle[Transformer] = {
+    implicit val c: MleapContext = context
+
     (for(bf <- managed(BundleFile(file))) yield {
       bf.loadMleapBundle()(context).get
     }).tried.get
   }
 
   def save(transformer: Transformer, file: File, context: MleapContext): Unit = {
+    implicit val c: MleapContext = context
+    
     (for(bf <- managed(BundleFile(file))) yield {
       transformer.writeBundle.save(bf)(context).get
     }).tried.get

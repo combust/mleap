@@ -44,7 +44,9 @@ object SparkBundleContext {
 
 case class SparkBundleContext(dataset: Option[DataFrame],
                               override val bundleRegistry: BundleRegistry) extends HasBundleRegistry {
-  def withDataset(dataset: DataFrame, registerHdfs: Boolean = true): SparkBundleContext = {
+  def withDataset(dataset: DataFrame): SparkBundleContext = withDataset(dataset, registerHdfs = true)
+
+    def withDataset(dataset: DataFrame, registerHdfs: Boolean): SparkBundleContext = {
     val bundleRegistry2 = if (registerHdfs) {
       bundleRegistry.registerFileSystem(
         new HadoopBundleFileSystem(FileSystem.get(

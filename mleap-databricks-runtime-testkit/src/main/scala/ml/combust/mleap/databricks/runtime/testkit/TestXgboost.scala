@@ -9,6 +9,7 @@ import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.sql.SparkSession
 import com.databricks.spark.avro._
 import ml.combust.mleap.spark.SparkSupport._
+import ml.combust.mleap.runtime.MleapSupport._
 import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
 import org.apache.spark.ml.Pipeline
 
@@ -53,10 +54,19 @@ class TestXgboost(session: SparkSession) extends Runnable {
 
     val modelPath = Files.createTempFile("mleap-databricks-runtime-testkit", ".zip")
     Files.delete(modelPath)
-    println("Writing model to...", modelPath)
-    implicit val sbc = SparkBundleContext.defaultContext.withDataset(model.transform(sampleData))
-    val bf = BundleFile(new File(modelPath.toString))
-    model.writeBundle.save(bf).get
-    bf.close()
+
+    {
+      println("Writing model to...", modelPath)
+      implicit val sbc = SparkBundleContext.defaultContext.withDataset(model.transform(sampleData))
+      val bf = BundleFile(new File(modelPath.toString))
+      model.writeBundle.save(bf).get
+      bf.close()
+    }
+
+    {
+      val bf = BundleFile(new File(modelPath.toString))
+      bf.loadMleapBundle()
+      bf.close()
+    }
   }
 }

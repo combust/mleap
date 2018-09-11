@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
-import ml.combust.mleap.core.feature.OneHotEncoderModel
+import ml.combust.mleap.core.feature.{HandleInvalid, OneHotEncoderModel}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.OneHotEncoder
 
@@ -19,14 +19,25 @@ class OneHotEncoderOp extends MleapOp[OneHotEncoder, OneHotEncoderModel] {
 
     override def store(model: Model, obj: OneHotEncoderModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withValue("size", Value.long(obj.categorySizes.head)).
-        withValue("drop_last", Value.boolean(obj.dropLast))
+      model
+        .withValue("category_sizes", Value.intList(obj.categorySizes))
+        .withValue("handle_invalid", Value.string(obj.handleInvalid.asParamString))
+        .withValue("drop_last", Value.boolean(obj.dropLast))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): OneHotEncoderModel = {
-      OneHotEncoderModel(categorySizes = Array(model.value("size").getLong.toInt),
-        dropLast = model.value("drop_last").getBoolean)
+      if (model.getValue("size").nonEmpty) {
+        // Old version of 1HE.
+        OneHotEncoderModel(categorySizes = Array(model.value("size").getLong.toInt),
+          dropLast = model.value("drop_last").getBoolean)
+      } else {
+        // New version of 1HE.
+        OneHotEncoderModel(
+          categorySizes = model.value("category_sizes").getIntList.toArray,
+          handleInvalid = HandleInvalid.fromString(model.value("handle_invalid").getString),
+          dropLast = model.value("drop_last").getBoolean)
+      }
     }
   }
 

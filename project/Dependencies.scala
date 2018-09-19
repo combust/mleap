@@ -12,6 +12,7 @@ object Dependencies {
   val akkaVersion = "2.4.16"
   val akkaHttpVersion = "10.0.3"
   val xgboostVersion = "0.80"
+  val hadoopVersion = "2.6.5" // matches spark version
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
@@ -39,6 +40,7 @@ object Dependencies {
     val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
     val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion
     val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion
+    val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
 
   object Test {
@@ -48,6 +50,7 @@ object Dependencies {
 
   object Provided {
     val spark = Compile.spark.map(_.excludeAll(ExclusionRule(organization = "org.scalatest"))).map(_ % "provided")
+    val hadoop = Compile.hadoop % "provided"
   }
 
   import Compile._
@@ -56,6 +59,8 @@ object Dependencies {
   val tensor = l ++= Seq(sprayJson, Test.scalaTest)
 
   val bundleMl = l ++= Seq(arm, config, sprayJson, Test.scalaTest)
+
+  val bundleHdfs = l ++= Seq(Provided.hadoop, Test.scalaTest)
 
   val base = l ++= Seq()
 

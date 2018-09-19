@@ -1,8 +1,10 @@
 package org.apache.spark.ml.bundle
 
 import com.typesafe.config.ConfigFactory
+import ml.bundle.hdfs.HadoopBundleFileSystem
 import ml.combust.bundle.{BundleRegistry, HasBundleRegistry}
 import ml.combust.mleap.ClassLoaderUtil
+import org.apache.hadoop.fs.FileSystem
 import org.apache.spark.sql.DataFrame
 
 /**
@@ -42,5 +44,16 @@ object SparkBundleContext {
 
 case class SparkBundleContext(dataset: Option[DataFrame],
                               override val bundleRegistry: BundleRegistry) extends HasBundleRegistry {
-  def withDataset(dataset: DataFrame): SparkBundleContext = copy(dataset = Some(dataset))
+  def withDataset(dataset: DataFrame): SparkBundleContext = withDataset(dataset, registerHdfs = true)
+
+    def withDataset(dataset: DataFrame, registerHdfs: Boolean): SparkBundleContext = {
+    val bundleRegistry2 = if (registerHdfs) {
+      bundleRegistry.registerFileSystem(
+        new HadoopBundleFileSystem(FileSystem.get(
+          dataset.sqlContext.sparkSession.sparkContext.hadoopConfiguration)))
+    } else { bundleRegistry }
+
+    copy(dataset = Some(dataset),
+      bundleRegistry = bundleRegistry2)
+  }
 }

@@ -40,7 +40,8 @@ object HandleInvalid {
   *                      or 'keep' (put invalid data in a special bucket at index labels.size
   */
 case class StringIndexerModel(labels: Seq[String],
-                              handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
+                              handleInvalid: HandleInvalid = HandleInvalid.Error,
+                              stringOrderType: String = "frequencyDesc") extends Model {
   val stringToIndex: Map[String, Int] = labels.zipWithIndex.toMap
   private val keepInvalid = handleInvalid == HandleInvalid.Keep
 

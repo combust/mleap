@@ -9,6 +9,7 @@ import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.sql.SparkSession
 import com.databricks.spark.avro._
 import ml.combust.mleap.spark.SparkSupport._
+import ml.combust.mleap.runtime.MleapSupport._
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.LogisticRegression
 
@@ -44,10 +45,21 @@ class TestSparkMl(session: SparkSession) extends Runnable {
 
     val modelPath = Files.createTempFile("mleap-databricks-runtime-testkit", ".zip")
     Files.delete(modelPath)
-    println("Writing model to...", modelPath)
-    implicit val sbc = SparkBundleContext.defaultContext.withDataset(model.transform(sampleData))
-    val bf = BundleFile(new File(modelPath.toString))
-    model.writeBundle.save(bf).get
-    bf.close()
+
+    // Save the model
+    {
+      println("Writing model to...", modelPath)
+      implicit val sbc = SparkBundleContext.defaultContext.withDataset(model.transform(sampleData))
+      val bf = BundleFile(new File(modelPath.toString))
+      model.writeBundle.save(bf).get
+      bf.close()
+    }
+
+    // Load the model
+    {
+      val bf = BundleFile(new File(modelPath.toString))
+      bf.loadMleapBundle().get
+      bf.close()
+    }
   }
 }

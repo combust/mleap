@@ -21,17 +21,15 @@ class StringIndexerOp extends MleapOp[StringIndexer, StringIndexerModel] {
                       (implicit context: BundleContext[MleapContext]): Model = {
         model.withValue("labels", Value.stringList(obj.labels)).
           withValue("handle_invalid", Value.string(obj.handleInvalid.asParamString))
-          .withValue("string_order_type", Value.string(obj.stringOrderType))
 
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): StringIndexerModel = {
       val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString).getOrElse(HandleInvalid.default)
-      val stringOrderType = model.getValue("string_order_type").map(value => value.getString).getOrElse("frequencyDesc")
 
       StringIndexerModel(labels = model.value("labels").getStringList,
-        handleInvalid = handleInvalid, stringOrderType = stringOrderType)
+        handleInvalid = handleInvalid)
     }
   }
 

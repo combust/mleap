@@ -9,7 +9,7 @@ import org.apache.spark.ml.feature.StringIndexerModel
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class StringIndexerOpV22 extends SimpleSparkOp[StringIndexerModel] {
+class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] {
   override val Model: OpModel[SparkBundleContext, StringIndexerModel] = new OpModel[SparkBundleContext, StringIndexerModel] {
     override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
 

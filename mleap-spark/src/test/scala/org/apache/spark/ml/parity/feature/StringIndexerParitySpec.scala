@@ -18,7 +18,7 @@ class StringIndexerParitySpec extends SparkParityBase {
     setOutputCol("state_index").setHandleInvalid("keep").
     fit(dataset)
 
-  override def extractSparkParamsToVerify(deserializedSparkModel: Transformer): Array[(Param[_], Param[_])] = {
+  override def extractSparkTransformerParamsToVerify(deserializedSparkModel: Transformer): Array[(Param[_], Param[_])] = {
     sparkTransformer.params
       .zip(deserializedSparkModel.params)
       .filterNot(params => "stringOrderType".equals(params._1.name))

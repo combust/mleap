@@ -2,7 +2,7 @@ package org.apache.spark.ml.bundle.ops.classification
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.OpModel
+import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.serializer.ModelSerializer
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.classification.GBTClassificationModel
@@ -11,7 +11,7 @@ import org.apache.spark.ml.regression.DecisionTreeRegressionModel
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-class GBTClassifierOpV20 extends SimpleSparkOp[GBTClassificationModel] {
+class GBTClassifierOp extends SimpleSparkOp[GBTClassificationModel] {
   override val Model: OpModel[SparkBundleContext, GBTClassificationModel] = new OpModel[SparkBundleContext, GBTClassificationModel] {
     override val klazz: Class[GBTClassificationModel] = classOf[GBTClassificationModel]
 
@@ -30,7 +30,8 @@ class GBTClassifierOpV20 extends SimpleSparkOp[GBTClassificationModel] {
       model.withValue("num_features", Value.long(obj.numFeatures)).
         withValue("num_classes", Value.long(2)).
         withValue("tree_weights", Value.doubleList(obj.treeWeights)).
-        withValue("trees", Value.stringList(trees))
+        withValue("trees", Value.stringList(trees)).
+        withValue("thresholds", obj.get(obj.thresholds).map(Value.doubleList(_)))
     }
 
     override def load(model: Model)
@@ -46,18 +47,24 @@ class GBTClassifierOpV20 extends SimpleSparkOp[GBTClassificationModel] {
         tree => ModelSerializer(context.bundleContext(tree)).read().get.asInstanceOf[DecisionTreeRegressionModel]
       }.toArray
 
-      new GBTClassificationModel(uid = "",
+      val gbt = new GBTClassificationModel(uid = "",
         _trees = models,
         _treeWeights = treeWeights,
         numFeatures = numFeatures)
+
+      model.getValue("thresholds")
+        .map(t => gbt.setThresholds(t.getDoubleList.toArray))
+        .getOrElse(gbt)
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: GBTClassificationModel): GBTClassificationModel = {
-    new GBTClassificationModel(uid = uid,
+    val r = new GBTClassificationModel(uid = uid,
       _trees = model.trees,
       _treeWeights = model.treeWeights,
       numFeatures = model.numFeatures)
+    if(r.isDefined(r.thresholds)) { r.setThresholds(r.getThresholds) }
+    r
   }
 
   override def sparkInputs(obj: GBTClassificationModel): Seq[ParamSpec] = {
@@ -65,6 +72,8 @@ class GBTClassifierOpV20 extends SimpleSparkOp[GBTClassificationModel] {
   }
 
   override def sparkOutputs(obj: GBTClassificationModel): Seq[SimpleParamSpec] = {
-    Seq("prediction" -> obj.predictionCol)
+    Seq("raw_prediction" -> obj.rawPredictionCol,
+      "probability" -> obj.probabilityCol,
+      "prediction" -> obj.predictionCol)
   }
 }

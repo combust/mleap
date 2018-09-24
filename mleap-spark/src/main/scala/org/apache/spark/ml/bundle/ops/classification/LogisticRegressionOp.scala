@@ -11,7 +11,7 @@ import org.apache.spark.ml.linalg.{Matrices, Vectors}
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class LogisticRegressionOpV21 extends SimpleSparkOp[LogisticRegressionModel] {
+class LogisticRegressionOp extends SimpleSparkOp[LogisticRegressionModel] {
   override val Model: OpModel[SparkBundleContext, LogisticRegressionModel] = new OpModel[SparkBundleContext, LogisticRegressionModel] {
     override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 

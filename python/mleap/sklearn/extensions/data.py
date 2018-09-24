@@ -25,6 +25,7 @@ from sklearn.preprocessing import Imputer as SklearnImputer
 from mleap.sklearn.preprocessing.data import ImputerSerializer
 import pandas as pd
 
+
 class OneHotEncoder(OneHotEncoder, MLeapSerializer):
     def __init__(self, input_features, output_features, drop_last=False, n_values="auto", categorical_features="all",
                  dtype=np.float, sparse=True, handle_unknown='error'):
@@ -39,6 +40,29 @@ class OneHotEncoder(OneHotEncoder, MLeapSerializer):
         self.handle_unknown = handle_unknown
         self.input_features = input_features
         self.output_features = output_features
+
+    def transform(self, X):
+        """Transform X using one-hot encoding.
+
+        Parameters
+        ----------
+        X : array-like, shape [n_samples, n_features]
+            Input array of type int.
+
+        Returns
+        -------
+        X_out : sparse matrix if sparse=True else a 2-d array, dtype=int
+            Transformed input.
+        """
+        res = _transform_selected(X, self._transform,
+                                   self.categorical_features, copy=True)
+        if self.drop_last:
+            res = res[:,:-1]
+
+        if self.sparse:
+            return res.todense()
+
+        return res
 
     def fit_transform(self, X, y=None):
         res = _transform_selected(X, self._fit_transform, self.categorical_features, copy=True)
@@ -99,18 +123,17 @@ class DefineEstimator(BaseEstimator, TransformerMixin):
         return self.transformer.predict(X[:,:-1])
 
 
-"""
-Wrapper around the sklearn Imputer so that it can be used in pipelines. 
-Delegates fit() and transform() methods to the sklearn transformer and uses the ImputerSerializer to serialize to bundle.
-
-Instead of putting a FeatureExtractor ahead of the Imputer, we add the equivalent of FeatureExtractor's transform() method
-in the fit() and transform() methods.
-
-This is because the Imputer both in Spark and MLeap operates on a scalar value and if we were to add a feature extractor in
-front of it, then it would serialize as operating on a tensor and thus, fail at scoring time. 
-"""
 class Imputer(SklearnImputer):
+    """
+    Wrapper around the sklearn Imputer so that it can be used in pipelines.
+    Delegates fit() and transform() methods to the sklearn transformer and uses the ImputerSerializer to serialize to bundle.
 
+    Instead of putting a FeatureExtractor ahead of the Imputer, we add the equivalent of FeatureExtractor's transform() method
+    in the fit() and transform() methods.
+
+    This is because the Imputer both in Spark and MLeap operates on a scalar value and if we were to add a feature extractor in
+    front of it, then it would serialize as operating on a tensor and thus, fail at scoring time.
+    """
     def __init__(self, missing_values="NaN", strategy="mean",
                  axis=0, verbose=0, copy=True, input_features=None, output_features=None):
         self.name = "{}_{}".format(self.op, uuid.uuid1())

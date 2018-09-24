@@ -24,6 +24,7 @@ import uuid
 import zipfile
 import datetime
 
+
 def serialize_to_bundle(self, path, model_name, init=False):
     serializer = SimpleSerializer()
     serializer.serialize_to_bundle(self, path, model_name, init)
@@ -50,6 +51,9 @@ class SimpleSerializer(object):
         super(SimpleSerializer, self).__init__()
 
     def serialize_to_bundle(self, transformer, path, model_name, init=False):
+
+        if not hasattr(transformer, 'name'):
+            transformer.name = "{}_{}".format(transformer.op, uuid.uuid1())
 
         model_dir = path
         if init:
@@ -162,6 +166,8 @@ class SimpleSerializer(object):
                 union_steps = [x[1].name for x in step.transformer_list if hasattr(x[1], 'serialize_to_bundle') and x[1].serializable]
                 pipeline_steps += union_steps
             elif hasattr(step, 'serialize_to_bundle') and step.serializable:
+                if not hasattr(step, 'name'):
+                    step.name = name
                 pipeline_steps.append(step.name)
         return pipeline_steps
 

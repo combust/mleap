@@ -149,7 +149,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     it("serializes/deserializes the Spark model properly") {
       val deserializedSparkModel = deserializedSparkTransformer(sparkTransformer)
 
-      extractSparkParamsToVerify(deserializedSparkModel).foreach {
+      extractSparkTransformerParamsToVerify(deserializedSparkModel).foreach {
         case (param1, param2) =>
           assert(sparkTransformer.isDefined(param1) == deserializedSparkModel.isDefined(param2),
             s"spark transformer is define ${sparkTransformer.isDefined(param1)} deserialized is ${deserializedSparkModel.isDefined(param2)}")
@@ -193,7 +193,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
    }
   }
 
-  protected def extractSparkParamsToVerify(deserializedSparkModel: Transformer): Array[(Param[_], Param[_])] = {
+  protected def extractSparkTransformerParamsToVerify(deserializedSparkModel: Transformer): Array[(Param[_], Param[_])] = {
     sparkTransformer.params.zip(deserializedSparkModel.params)
   }
 

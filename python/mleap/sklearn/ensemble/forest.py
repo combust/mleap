@@ -19,7 +19,7 @@ from sklearn.ensemble.forest import RandomForestRegressor
 from sklearn.ensemble.forest import RandomForestClassifier
 from mleap.bundle.serialize import MLeapSerializer
 from mleap.bundle.serialize import Vector
-import mleap.sklearn.tree.tree
+
 import uuid
 
 

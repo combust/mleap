@@ -141,12 +141,10 @@ object MleapProject {
       bundleMl,
       spark,
       sparkExtension,
-      tensorflow,
-      xgboostSpark)
+      tensorflow)
   ).settings(excludeDependencies ++= Seq(
     SbtExclusionRule("org.tensorflow"),
-    SbtExclusionRule("org.apache.spark"),
-    SbtExclusionRule("ml.dmlc")
+    SbtExclusionRule("org.apache.spark")
   ))
 
   lazy val databricksRuntime = Project(

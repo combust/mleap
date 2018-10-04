@@ -17,8 +17,8 @@
 
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing.data import _transform_selected
-from mleap.sklearn.preprocessing.base import MLeapSerializer, FeatureExtractor
+from sklearn.preprocessing.base import _transform_selected
+from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
 import numpy as np
 import uuid
 from sklearn.preprocessing import Imputer as SklearnImputer

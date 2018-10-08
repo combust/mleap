@@ -17,6 +17,7 @@ object Dependencies {
   lazy val slf4jVersion = "1.7.25"
   lazy val awsSdkVersion = "1.11.349"
   val xgboostVersion = "0.80"
+  val hadoopVersion = "2.6.5" // matches spark version
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
@@ -64,6 +65,7 @@ object Dependencies {
     )
     val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion
     val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion
+    val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
 
   object Test {
@@ -76,6 +78,7 @@ object Dependencies {
 
   object Provided {
     val spark = Compile.spark.map(_.excludeAll(ExclusionRule(organization = "org.scalatest"))).map(_ % "provided")
+    val hadoop = Compile.hadoop % "provided"
   }
 
   import Compile._
@@ -84,6 +87,8 @@ object Dependencies {
   val tensor = l ++= Seq(sprayJson, Test.scalaTest)
 
   val bundleMl = l ++= Seq(arm, config, sprayJson, Test.scalaTest)
+
+  val bundleHdfs = l ++= Seq(Provided.hadoop, Test.scalaTest)
 
   val base = l ++= Seq()
 

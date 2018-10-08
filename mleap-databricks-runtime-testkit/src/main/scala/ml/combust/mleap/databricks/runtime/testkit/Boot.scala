@@ -11,7 +11,6 @@ object Boot extends App {
 
   new TestSparkMl(session).run()
   new TestTensorflow(session).run()
-  new TestXgboost(session).run()
 
   session.close()
 }

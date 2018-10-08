@@ -23,9 +23,18 @@ class TestTensorflow(session: SparkSession) extends Runnable {
 
     val modelPath = Files.createTempFile("mleap-databricks-runtime-testkit", ".zip")
     Files.delete(modelPath)
-    println("Writing model to...", modelPath)
-    val bf = BundleFile(new File(modelPath.toString))
-    transformer.writeBundle.save(bf).get
-    bf.close()
+
+    {
+      println("Writing model to...", modelPath)
+      val bf = BundleFile(new File(modelPath.toString))
+      transformer.writeBundle.save(bf).get
+      bf.close()
+    }
+
+    {
+      val bf = BundleFile(new File(modelPath.toString))
+      bf.loadMleapBundle()
+      bf.close()
+    }
   }
 }

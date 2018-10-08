@@ -8,6 +8,7 @@ object MleapProject {
     tensor,
     tensorflow,
     bundleMl,
+    bundleHdfs,
     core,
     runtime,
     avro,
@@ -55,6 +56,12 @@ object MleapProject {
     dependencies = Seq(baseProject, tensor)
   )
 
+  lazy val bundleHdfs = Project(
+    id = "bundle-hdfs",
+    base = file("bundle-hdfs"),
+    dependencies = Seq(bundleMl)
+  )
+
   lazy val core = Project(
     id = "mleap-core",
     base = file("mleap-core"),
@@ -76,7 +83,7 @@ object MleapProject {
   lazy val sparkBase = Project(
     id = "mleap-spark-base",
     base = file("mleap-spark-base"),
-    dependencies = Seq(runtime)
+    dependencies = Seq(runtime, bundleHdfs)
   )
 
   lazy val sparkTestkit = Project(
@@ -183,12 +190,10 @@ object MleapProject {
       bundleMl,
       spark,
       sparkExtension,
-      tensorflow,
-      xgboostSpark)
+      tensorflow)
   ).settings(excludeDependencies ++= Seq(
     SbtExclusionRule("org.tensorflow"),
-    SbtExclusionRule("org.apache.spark"),
-    SbtExclusionRule("ml.dmlc")
+    SbtExclusionRule("org.apache.spark")
   ))
 
   lazy val databricksRuntime = Project(
@@ -202,7 +207,6 @@ object MleapProject {
     base = file("mleap-databricks-runtime-testkit"),
     dependencies = Seq(spark % "provided",
       sparkExtension % "provided",
-      xgboostSpark % "provided",
       tensorflow % "provided")
   )
 }

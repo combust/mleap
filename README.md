@@ -43,6 +43,17 @@ Our goals for this project are:
 MLeap is built against Scala 2.11 and Java 8.  Because we depend heavily on Typesafe config for MLeap, we only support Java 8 at the
 moment.
 
+### MLeap/Spark Version
+
+Choose the right verison of the `mleap-spark` module to export your pipeline. The serialization format is backwards compatible between different versions of MLeap. So if you export a pipeline using MLeap 0.11.0 and Spark 2.1, you can still load that pipeline using MLeap runtime version 0.12.0.
+
+| MLeap Version | Spark Version |
+|---------------|---------------|
+| 0.12.0        | 2.3           |
+| 0.11.0        | 2.2           |
+| 0.11.0        | 2.1           |
+| 0.11.0        | 2.0           |
+
 ## Setup
 
 ### Link with Maven or SBT

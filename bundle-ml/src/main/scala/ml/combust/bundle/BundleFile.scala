@@ -6,6 +6,7 @@ import java.nio.file.{FileSystem, FileSystems, Files, Path}
 import java.util.stream.Collectors
 
 import ml.combust.bundle.dsl.{Bundle, BundleInfo}
+import ml.combust.bundle.fs.BundleFileSystem
 import ml.combust.bundle.serializer.BundleSerializer
 import ml.combust.bundle.json.JsonSupport._
 import spray.json._
@@ -19,10 +20,25 @@ import scala.util.Try
   * Created by hollinwilkins on 12/24/16.
   */
 object BundleFile {
+  def load[Context <: HasBundleRegistry](uri: String)
+                                        (implicit context: Context): BundleFile = {
+    load(new URI(uri))
+  }
+
+  def load[Context <: HasBundleRegistry](uri: URI)
+                                        (implicit context: Context): BundleFile = {
+      uri.getScheme match {
+        case "file" => apply(uri)
+        case "jar" => apply(uri)
+        case _ =>
+          // look in the bundle registry for a file system
+          apply(context.bundleRegistry.fileSystemForUri(uri).load(uri).get)
+      }
+  }
+
   implicit def apply(uri: String): BundleFile = {
     apply(new URI(unbackslash(uri)))
   }
-
 
   implicit def apply(file: File): BundleFile = {
     val uri: String = if (file.getPath.endsWith(".zip")) {
@@ -38,9 +54,9 @@ object BundleFile {
     val env = Map("create" -> "true").asJava
     val uriSafe = new URI(unbackslash(uri.toString))
 
-    val (fs, path) = uriSafe.getScheme match {
+    uriSafe.getScheme match {
       case "file" =>
-        (FileSystems.getDefault, FileSystems.getDefault.getPath(uriSafe.getPath))
+        apply(FileSystems.getDefault, FileSystems.getDefault.getPath(uriSafe.getPath))
       case "jar" =>
         // handle resource in JAR path
         val (filesystemUri: URI, path: String) = if (uriSafe.toString.contains("!")) {
@@ -52,10 +68,13 @@ object BundleFile {
         }
 
         val zfs = FileSystems.newFileSystem(filesystemUri, env)
-        (zfs, zfs.getPath(path))
+        apply(zfs, zfs.getPath(path))
     }
+  }
 
-    apply(fs, path)
+  def apply[Context <: HasBundleRegistry](fs: BundleFileSystem, uri: URI): BundleFile = {
+    // Copy contents from the bundle file system to the local file system
+    apply(fs.load(uri).get)
   }
 
   /** Replace all backslashes with forward slashes, to handle Windows file paths in URI construction

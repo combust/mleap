@@ -1,6 +1,9 @@
 package ml.combust.bundle
 
+import java.net.URI
+
 import com.typesafe.config.{Config, ConfigFactory}
+import ml.combust.bundle.fs.BundleFileSystem
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.ClassLoaderUtil
 
@@ -34,12 +37,25 @@ object BundleRegistry {
       opsPath => config.getStringList(opsPath).asScala
     }
 
-    ops.foldLeft(Map[String, OpNode[_, _, _]]()) {
+    val br = ops.foldLeft(Map[String, OpNode[_, _, _]]()) {
       (m, opClass) =>
         val opNode = cl.loadClass(opClass).newInstance().asInstanceOf[OpNode[_, _, _]]
         m + (opNode.Model.opName -> opNode)
     }.values.foldLeft(BundleRegistry(cl)) {
       (br, opNode) => br.register(opNode)
+    }
+
+    val fsConfigs = if (config.hasPath("file-systems")) {
+      registryConfig.getConfigList("file-systems").asScala
+    } else { Seq() }
+
+    fsConfigs.foldLeft(br) {
+      (br, fsConfig) =>
+        val fs = cl.loadClass(fsConfig.getString("class")).
+          getConstructor(classOf[Config]).
+          newInstance(fsConfig).
+          asInstanceOf[BundleFileSystem]
+        br.registerFileSystem(fs)
     }
   }
 }
@@ -60,6 +76,8 @@ case class BundleRegistry private (classLoader: ClassLoader) extends HasBundleRe
 
   var models: Map[String, OpModel[_, _]] = Map()
   var modelAlias: Map[String, String] = Map()
+
+  var fileSystems: Map[String, BundleFileSystem] = Map()
 
   override def bundleRegistry: BundleRegistry = this
 
@@ -116,6 +134,34 @@ case class BundleRegistry private (classLoader: ClassLoader) extends HasBundleRe
     opAlias = opAlias + (op.klazz.getCanonicalName -> op.Model.opName)
     models = models + (op.Model.opName -> op.Model)
     modelAlias = modelAlias + (op.Model.klazz.getCanonicalName -> op.Model.opName)
+    this
+  }
+
+  /** Get the bundle file system for a URI.
+    *
+    * @param uri uri of the bundle in the file system
+    * @return the file system
+    */
+  def fileSystemForUri(uri: URI): BundleFileSystem = {
+    fileSystems(uri.getScheme)
+  }
+
+  /** Get the bundle file system for a URI.
+    *
+    * @param uri uri of the bundle in the file system
+    * @return the file system
+    */
+  def getFileSystemForUri(uri: URI): Option[BundleFileSystem] = {
+    fileSystems.get(uri.getScheme)
+  }
+
+  /** Register a file system for loading/saving bundles.
+    *
+    * @param fileSystem file system to register
+    * @return this
+    */
+  def registerFileSystem(fileSystem: BundleFileSystem): this.type = {
+    for (scheme <- fileSystem.schemes) { fileSystems += (scheme -> fileSystem) }
     this
   }
 }

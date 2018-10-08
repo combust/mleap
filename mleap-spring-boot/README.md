@@ -2,22 +2,34 @@
 
 This module is a Spring Boot project that provides a HTTP interface to an MLeap executor.
 
-To package, run
+## Installation
 
-```sbt mleap-spring-boot/assemby```
+MLeap Spring Boot is a Docker image hosted on [Docker Hub](https://hub.docker.com/r/combustml/mleap-serving/).
 
-Once built, you can run the following command, replacing the version
-
-```java -jar mleap-spring-boot/target/scala-2.11/mleap-spring-boot-assembly-{VERSION}.jar```
-
-to start the server. This will start the server on port 8080, by default.
-
-The following endpoints are available:
-
-1. POST /models : Loading a model, replacing the path to your model and the chosen model name
+To get started, pull the image to your local machine, replacing the version with the desired one.
 
 ```
-body='{"modelName":"{YOUR_MODEL_NAME}","uri":"file:{PATH_TO_BUNDLE_ZIP}","config":{"memoryTimeout":900000,"diskTimeout":900000},"force":false}'
+docker pull combustml/mleap-spring-boot:{VERSION}
+```
+
+## Start Server
+
+First let's start the Docker image. Make sure to mount a directory containing your models on the host
+machine into the container. In this example, we will be storing our models in `/tmp/models` and mounting it in the container at `/models`.
+
+```
+mkdir /tmp/models
+docker run -p 8080:8080 -v /tmp/models:/models combustml/mleap-spring-boot:{VERSION}
+```
+
+This will expose the model server locally on port `8080`.
+
+## Available Endpoints
+
+1. POST /models : Loading a model, replacing the name of your bundle zip and the chosen model name
+
+```
+body='{"modelName":"{YOUR_MODEL_NAME}","uri":"file:/models/{BUNDLE_ZIP}","config":{"memoryTimeout":900000,"diskTimeout":900000},"force":false}'
 
 curl --header "Content-Type: application/json" \
   --request POST \

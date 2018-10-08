@@ -1,5 +1,6 @@
 package ml.combust.mleap.bundle.ops.feature
 
+import ml.bundle.Socket
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
@@ -7,6 +8,7 @@ import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.feature.{HandleInvalid, OneHotEncoderModel}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.OneHotEncoder
+import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 /**
   * Created by hollinwilkins on 10/24/16.
@@ -42,4 +44,18 @@ class OneHotEncoderOp extends MleapOp[OneHotEncoder, OneHotEncoderModel] {
   }
 
   override def model(node: OneHotEncoder): OneHotEncoderModel = node.model
+
+  override def shape(node: OneHotEncoder)
+                    (implicit context: BundleContext[MleapContext]): NodeShape = {
+
+    node.shape.getInput(NodeShape.standardInputPort) match {
+        // Old version of 1HE -- need to translate serialized port names to new expectation (input -> input0)
+      case Some(_) ⇒
+        val i = node.shape.getInput(NodeShape.standardInputPort).get
+        val o = node.shape.getOutput(NodeShape.standardOutputPort).get
+        NodeShape(inputs = Seq(Socket(i.port + "0", i.name)), outputs = Seq(Socket(o.port + "0", o.name)))
+        // New version of 1HE
+      case None ⇒ NodeShape.fromBundle(node.shape)
+    }
+  }
 }

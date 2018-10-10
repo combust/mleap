@@ -3,6 +3,7 @@ package org.apache.spark.ml.parity.feature
 import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.feature.StringIndexer
+import org.apache.spark.ml.param.Param
 import org.apache.spark.sql.DataFrame
 
 /**
@@ -16,4 +17,11 @@ class StringIndexerParitySpec extends SparkParityBase {
     setInputCol("state").
     setOutputCol("state_index").setHandleInvalid("keep").
     fit(dataset)
+
+  override def extractSparkTransformerParamsToVerify(deserializedSparkModel: Transformer): Array[(Param[_], Param[_])] = {
+    sparkTransformer.params
+      .zip(deserializedSparkModel.params)
+      .filterNot(params => "stringOrderType".equals(params._1.name))
+  }
+
 }

@@ -17,6 +17,7 @@ import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.bundle.SparkBundleContext
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
+import org.apache.spark.ml.param.Param
 import resource._
 
 /**
@@ -148,7 +149,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     it("serializes/deserializes the Spark model properly") {
       val deserializedSparkModel = deserializedSparkTransformer(sparkTransformer)
 
-      sparkTransformer.params.zip(deserializedSparkModel.params).foreach {
+      extractSparkTransformerParamsToVerify(deserializedSparkModel).foreach {
         case (param1, param2) =>
           assert(sparkTransformer.isDefined(param1) == deserializedSparkModel.isDefined(param2),
             s"spark transformer is define ${sparkTransformer.isDefined(param1)} deserialized is ${deserializedSparkModel.isDefined(param2)}")
@@ -190,6 +191,10 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
         case _ => // no udf to check against
       }
    }
+  }
+
+  protected def extractSparkTransformerParamsToVerify(deserializedSparkModel: Transformer): Array[(Param[_], Param[_])] = {
+    sparkTransformer.params.zip(deserializedSparkModel.params)
   }
 
   it should behave like parityTransformer()

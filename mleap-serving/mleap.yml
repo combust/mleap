@@ -1,0 +1,9 @@
+version: '2'
+services:
+    melap-app:
+        image: combustml/mleap-serving:0.13.0-SNAPSHOT
+        restart: always
+        volumes:
+              - /tmp/aihello/models:/models
+        ports:
+            - 65327:65327

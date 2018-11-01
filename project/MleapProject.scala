@@ -160,6 +160,7 @@ object MleapProject {
     base = file("mleap-databricks-runtime-testkit"),
     dependencies = Seq(spark % "provided",
       sparkExtension % "provided",
+      xgboostSpark % "provided",
       tensorflow % "provided")
   )
 }

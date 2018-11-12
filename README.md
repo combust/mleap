@@ -95,7 +95,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.10.0"
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.10.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.12.0,ml.combust.bundle:bundle-ml_2.11:0.12.0,com.jsuereth:scala-arm_2.11:2.0
 ```
 
 ### PySpark Integration

@@ -16,7 +16,7 @@ install:
   pip install --user -r ./python/requirements.txt
 
 script:
-  - nosetests ./python -v
+  - nosetests ./python -v --exclude-dir=./python/mleap/pyspark
   - travis/travis.sh
 
 notifications:

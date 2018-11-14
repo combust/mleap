@@ -10,7 +10,7 @@ scala:
   - 2.11.8
 
 python:
-  - "2.7"
+  - "2.7.15"
 
 install:
   pip install --user -r ./python/requirements.txt

@@ -32,7 +32,7 @@ There are three supported TransformService implementation for open-source MLeap:
 
 ## Instructions
 
-Here are usage instructions for using a `TransformService`. The easiest way to get up and running with a `TransformSerivce` is to use the `MleapExecutor` Actor System extension.
+Here are usage instructions for using a `TransformService`. The easiest way to get up and running with a `TransformService` is to use the `MleapExecutor` Actor System extension.
 
 ### Initializing MleapExecutor
 
@@ -44,7 +44,7 @@ import ml.combust.mleap.executor.MleapExecutor
 implicit val actorSystem: ActorSystem = ActorSystem("MleapExecutor")
 
 // Initialize the MleapExecutor extension
-val executor: MleapExecutor = MleapExecutor(actorSystem)
+val transformService: MleapExecutor = MleapExecutor(actorSystem)
 ```
 
 ### Loading a Model
@@ -108,11 +108,11 @@ val frame = FrameReader().read(frameFile).get
 
 // Transform the leap frame using the airbnb model we loaded earlier
 val transformedFrame = Await.result(
-  executor.transform(TransformFrameRequest("airbnb_rf", frame))
+  transformService.transform(TransformFrameRequest("airbnb_rf", frame))
 )(1.second)
 
 // Show the results
-transformedFrame.show()
+transformedFrame.get().show()
 ```
 
 ### Creating a Row Stream
@@ -172,8 +172,8 @@ val rowStream = Await.result(transformService.createRowStream(CreateRowStreamReq
   
   // The stream specification defines the input
   // schema and the serialization format of the data
-  spec = StreamSpec(
-  
+  spec = RowStreamSpec(
+
     // Input schema of the data
     schema = frame.schema,
     

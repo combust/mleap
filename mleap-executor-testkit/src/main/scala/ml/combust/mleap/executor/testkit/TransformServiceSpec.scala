@@ -337,7 +337,7 @@ trait TransformServiceSpec extends FunSpecLike
     describe("transform frame stream") {
       it("transforms frames in a stream") {
         val uuid = UUID.randomUUID()
-        val rowSource = Source.single((StreamTransformFrameRequest(Try(frame), TransformOptions.default), uuid))
+        val rowSource = Source.single(StreamTransformFrameRequest(Try(frame), TransformOptions.default), uuid)
         val rowsSink = Sink.head[(Try[DefaultLeapFrame], UUID)]
         val testFlow = Flow.fromSinkAndSourceMat(rowsSink, rowSource)(Keep.left)
 

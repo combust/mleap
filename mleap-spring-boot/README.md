@@ -26,7 +26,7 @@ This will expose the model server locally on port `8080`.
 
 ## Available Endpoints
 
-1. POST /models : Loading a model, replacing the name of your bundle zip and the chosen model name
+1. POST /models : Loading a model, replacing the name of your bundle zip ```{BUNDLE_ZIP}``` and the chosen model name ```{YOUR_MODEL_NAME}```
 
 ```
 body='{"modelName":"{YOUR_MODEL_NAME}","uri":"file:/models/{BUNDLE_ZIP}","config":{"memoryTimeout":900000,"diskTimeout":900000},"force":false}'
@@ -36,7 +36,7 @@ curl --header "Content-Type: application/json" \
   --data "$body" http://localhost:8080/models
 ```
 
-2. DELETE /models/{MODEL_NAME} : Unloading a model, replacing the chosen model name
+2. DELETE /models/{YOUR_MODEL_NAME} : Unloading a model, replacing the chosen model name ```{YOUR_MODEL_NAME}```
 
 ```
   curl --header "Content-Type: application/json" \
@@ -44,7 +44,7 @@ curl --header "Content-Type: application/json" \
     http://localhost:8080/models/{YOUR_MODEL_NAME}
 ```
 
-3. GET /models/{MODEL_NAME} : Retrieving a loaded model, replacing the chosen model name
+3. GET /models/{YOUR_MODEL_NAME} : Retrieving a loaded model, replacing the chosen model name ```{YOUR_MODEL_NAME}```
 
 ```
 curl --header "Content-Type: application/json" \
@@ -52,7 +52,7 @@ curl --header "Content-Type: application/json" \
     http://localhost:8080/models/{YOUR_MODEL_NAME}
 ```
 
-4. GET /models/{MODEL_NAME}/meta : Retrieving a loaded model meta information, replacing the chosen model name
+4. GET /models/{YOUR_MODEL_NAME}/meta : Retrieving a loaded model meta information, replacing the chosen model name ```{YOUR_MODEL_NAME}```
 
 ```
   curl --header "Content-Type: application/json" \
@@ -61,7 +61,7 @@ curl --header "Content-Type: application/json" \
 
 ```
 
-5. POST /models/{MODEL_NAME}/transform: Transform or scoring request, replacing the chosen model name, format and encoded leap frame
+5. POST /models/{YOUR_MODEL_NAME}/transform: Transform or scoring request, replacing the chosen model name ```{YOUR_MODEL_NAME}```, format ```{YOUR_FORMAT}``` and the appropriately encoded leap frame ```{ENCODED_LEAP_FRAME}```
 
 ```
 body='{"modelName":"{YOUR_MODEL_NAME}","format":"{YOUR_FORMAT}","initTimeout":"35000","tag":0,"frame":"{ENCODED_LEAP_FRAME}"}'

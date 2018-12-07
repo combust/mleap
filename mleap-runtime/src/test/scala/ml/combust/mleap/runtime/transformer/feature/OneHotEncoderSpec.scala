@@ -1,8 +1,15 @@
 package ml.combust.mleap.runtime.transformer.feature
 
+import java.io.File
+
+import ml.combust.bundle.BundleFile
 import ml.combust.mleap.core.feature.OneHotEncoderModel
 import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
+import resource.managed
+import ml.combust.mleap.runtime.MleapSupport._
+import ml.combust.mleap.runtime.test.TestUtil
+import ml.combust.mleap.runtime.transformer.Pipeline
 
 class OneHotEncoderSpec extends FunSpec {
 
@@ -27,6 +34,17 @@ class OneHotEncoderSpec extends FunSpec {
       assert(transformer.schema.fields ==
         Seq(StructField("input0", ScalarType.Double.nonNullable),
           StructField("output0", TensorType.Double(5))))
+    }
+  }
+
+  describe("one hot encoder pre Spark 2.3.0") {
+    it ("loads correctly in mleap") {
+      val file = new File(getClass.getResource("/one_hot_encoder_pipeline.zip").toURI)
+      val pipeline = (for (bf <- managed(BundleFile(file))) yield {
+        bf.loadMleapBundle().get.root
+      }).tried.get.asInstanceOf[Pipeline]
+
+      assert(pipeline.model.transformers.size == 2)
     }
   }
 }

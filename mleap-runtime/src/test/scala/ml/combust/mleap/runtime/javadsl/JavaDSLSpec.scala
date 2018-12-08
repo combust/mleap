@@ -8,7 +8,8 @@ import ml.combust.mleap.core.feature.StringIndexerModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
-import ml.combust.mleap.tensor.{ByteString, Tensor}
+import ml.combust.mleap.tensor.ByteString
+import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
 
 import scala.collection.JavaConverters._
@@ -22,7 +23,7 @@ class JavaDSLSpec extends FunSpec {
   val row = builder.createRow(true, "hello", Byte.box(1),
     Short.box(2), Int.box(3), Long.box(4),
     Float.box(34.5f), Double.box(44.5), ByteString("hello_there".getBytes()),
-    Seq[Long](23, 44, 55).asJava, Tensor.denseVector[Byte](Array[Byte](23, 3, 4)))
+    Seq[Long](23, 44, 55).asJava, Vectors.dense(Array[Double](23, 3, 4)))
 
   val stringIndexer = StringIndexer(shape = NodeShape().
     withStandardInput("string").

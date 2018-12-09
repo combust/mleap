@@ -2,7 +2,6 @@ package ml.combust.mleap.runtime.javadsl
 
 import ml.combust.mleap.core.types.{StructField, StructType}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import ml.combust.mleap.tensor.Tensor
 
 import scala.collection.JavaConverters._
 
@@ -22,9 +21,5 @@ class LeapFrameSupport {
 
   def getFields(schema: StructType): java.util.List[StructField]  = {
     schema.fields.asJava
-  }
-
-  def toArray[T](tensor: Tensor[T]): java.util.List[T] = {
-    tensor.toArray.toSeq.asJava
   }
 }

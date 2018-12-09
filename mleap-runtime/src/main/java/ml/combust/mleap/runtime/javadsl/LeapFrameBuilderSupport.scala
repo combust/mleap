@@ -5,8 +5,6 @@ import ml.combust.mleap.runtime.frame.ArrayRow
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import  org.apache.spark.ml.linalg.Vector
-import ml.combust.mleap.core.util.VectorConverters
 /**
   * Created by hollinwilkins on 4/21/17.
   */
@@ -14,7 +12,6 @@ class LeapFrameBuilderSupport {
   def createRowFromIterable(iterable: java.lang.Iterable[Any]): ArrayRow = {
     val values = iterable.asScala.map {
       case s: java.util.List[_] => s.asScala
-      case vec: Vector => VectorConverters.sparkVectorToMleapTensor(vec)
       case v => v
     }.toArray
 

@@ -31,6 +31,7 @@ public class JavaDSLSpec {
     LeapFrameBuilder frameBuilder = new LeapFrameBuilder();
     LeapFrameSupport leapFrameSupport = new LeapFrameSupport();
     RowTransformerSupport rowTransformerSupport = new RowTransformerSupport();
+    TensorSupport tensorSupport = new TensorSupport();
 
     Row row = frameBuilder.createRow(true, "hello", (byte) 1,
             (short) 2, 3, (long) 4, 34.5f, 44.5, new ByteString("hello_there".getBytes()),
@@ -88,7 +89,7 @@ public class JavaDSLSpec {
         assertEquals(row.getDouble(7), 44.5, 0.0000000000001);
         assertEquals(row.getByteString(8), new ByteString("hello_there".getBytes()));
         assertEquals(row.getList(9), Arrays.asList(23, 44, 55));
-        List<Double> tensorValues = leapFrameSupport.toArray(row.getTensor(10));
+        List<Double> tensorValues = tensorSupport.toArray(row.getTensor(10));
         assertEquals(tensorValues, Arrays.asList(23d, 3d, 4d));
     }
 

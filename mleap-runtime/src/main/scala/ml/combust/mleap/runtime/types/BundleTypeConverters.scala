@@ -65,6 +65,9 @@ trait BundleTypeConverters {
   implicit def mleapToBundleField(field: StructField): bundle.Field = bundle.Field(field.name, Some(field.dataType))
   implicit def bundleToMleapField(field: bundle.Field): StructField = StructField(field.name, field.dataType.get)
 
+  implicit def mleapToBundleSchema(schema: StructType): bundle.Schema = bundle.Schema(schema.fields.map(mleapToBundleField))
+  implicit def bundleToMleapSchema(schema: bundle.Schema): StructType = StructType(schema.fields.map(bundleToMleapField)).get
+
   implicit def mleapToBundleSocket(socket: Socket): bundle.Socket = bundle.Socket(socket.port, socket.name)
   implicit def bundleToMleapSocket(socket: bundle.Socket): Socket = Socket(socket.port, socket.name)
 

@@ -1,0 +1,398 @@
+openapi: 3.0.0
+info:
+  description: |
+    This documentation covers the MLeap Serving API. You can findout more about MLeap at
+    [http://mleap-docs.combust.ml/](http://mleap-docs.combust.ml/) or on Gitter
+    [Combust/mleap](https://gitter.im/combust/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge).
+  version: "1.0.0"
+  title: Swagger MLeap Serving
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: models
+    description: Serving machine learning models
+paths:
+  /models:
+    post:
+      tags:
+        - models
+      summary: Load a new model to serve
+      operationId: loadModel
+      parameters:
+        - name: timeout
+          in: header
+          required: false
+          schema:
+            type: integer
+      requestBody:
+        $ref: '#/components/requestBodies/LoadModelRequest'
+      responses:
+        '202':
+          description: accepted operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+            application/x-protobuf:
+              schema:
+                $ref: '#/components/schemas/Model'      
+        '400':
+          description: Invalid input e.g. model name is empty or model with the same name is loaded twice
+  
+  '/models/{modelName}':
+    get:
+      tags:
+        - models
+      summary: Find model by name
+      description: Returns a single model
+      operationId: getModelByName
+      parameters:
+        - name: timeout
+          in: header
+          required: false
+          schema:
+            type: integer
+        - name: modelName
+          in: path
+          description: name of model to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+            application/x-protobuf:
+              schema:
+                $ref: '#/components/schemas/Model'
+        '404':
+          description: Not found, model not loaded previously
+    delete:
+      tags:
+        - models
+      summary: Delete model by name
+      description: Deletes a model
+      operationId: deleteModel
+      parameters:
+        - name: timeout
+          in: header
+          required: false
+          schema:
+            type: integer      
+        - name: modelName
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+            application/x-protobuf:
+              schema:
+                $ref: '#/components/schemas/Model'      
+        '404':
+          description: Model not found 
+  
+  '/models/{modelName}/meta':
+    get:
+      tags:
+        - models
+      summary: Retrieve model meta by name
+      description: Returns the meta a single model
+      operationId: getModelMetaByName
+      parameters:
+        - name: timeout
+          in: header
+          required: false
+          schema:
+            type: integer      
+        - name: modelName
+          in: path
+          description: name of model to retrieve meta for 
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BundleMeta'
+            application/x-protobuf:
+              schema:
+                $ref: '#/components/schemas/BundleMeta'
+        '404':
+          description: Not found, model not loaded previously  
+  '/models/transform':
+    post:
+      tags:
+        - models
+      summary: Transform an input request
+      description: Scores request using loaded model
+      operationId: transform
+      parameters:
+        - name: timeout
+          in: header
+          required: false
+          schema:
+            type: integer        
+      requestBody:
+        $ref: '#/components/requestBodies/TransformFrameRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransformFrameResponse'
+            application/x-protobuf:
+              schema:
+                $ref: '#/components/schemas/TransformFrameResponse'
+  '/models/{modelName}/transform':
+    post:
+      tags:
+        - models
+      summary: Transform an input frame
+      description: Scores frame using loaded model
+      operationId: transformFrame
+      parameters:
+        - name: timeout
+          in: header
+          required: false
+          schema:
+            type: integer 
+        - name: modelName
+          in: path
+          description: name of model to retrieve meta for 
+          required: true
+          schema:
+            type: string            
+      requestBody:
+        $ref: '#/components/requestBodies/DefaultLeapFrame'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/DefaultLeapFrame'
+            application/x-protobuf:
+              schema:
+                $ref: '#/components/schemas/DefaultLeapFrame'
+components:
+  schemas:
+    LoadModelRequest:
+      type: object
+      properties:
+        modelName: 
+          type: string
+        uri:
+          type: string
+        config:
+          $ref: '#/components/schemas/ModelConfig'
+        force:
+          type: boolean
+          default: false  
+    Model:
+      type: object
+      properties:
+        modelName: 
+          type: string
+        uri:
+          type: string
+        config:
+          $ref: '#/components/schemas/ModelConfig'
+    BundleMeta:
+      type: object
+      properties:
+        bundle:
+          $ref: '#/components/schemas/Bundle'
+        inputSchema:
+          $ref: '#/components/schemas/Schema'
+        outputSchema:
+          $ref: '#/components/schemas/Schema'
+    TransformFrameRequest:
+      type: object
+      properties:
+        modelName: 
+          type: string
+        format:
+          type: string
+        tag:
+          type: integer
+          format: uint64
+        frame:
+          type: string
+        options:
+          $ref: '#/components/schemas/TransformOptions'  
+    TransformFrameResponse:
+      type: object
+      properties:
+        tag:
+          type: integer
+          format: uint64
+        format:
+          type: string
+        frame:
+          type: string
+        status:
+          type: string
+          enum:
+            - STATUS_OK
+            - STATUS_ERROR
+        error:
+          type: string
+        backtrace: 
+          type: string
+    TransformOptions:
+      type: object
+      properties:
+        select:
+          type: array
+          items:
+            type: string
+        selectMode:
+          type: string
+          enum: 
+            - SELECT_MODE_STRICT
+            - SELECT_MODE_RELAXED
+    ModelConfig:
+      type: object  
+      properties:
+        memoryTimeout:
+          type: integer
+          format: uint64
+        diskTimeout:
+          type: integer
+          format: uint64      
+    Bundle:
+      type: object
+      properties:
+        uid: 
+          type: string
+        name: 
+          type: string
+        format:
+          $ref: '#/components/schemas/Format'
+        version: 
+          type: string
+        timestamp: 
+          type: string
+    Format:
+      type: string
+      enum:
+        - JSON
+        - PROTOBUF
+    Schema:
+      type: object
+      properties:
+        fields:
+          type: array
+          items:
+              $ref: '#/components/schemas/Field'
+    Field:
+      type: object
+      properties:
+        name:
+          type: string
+        dataType:
+          $ref: '#/components/schemas/DataType'
+    DataType:
+      type: object
+      properties:
+        base: 
+          type: string
+          enum:
+            - BOOLEAN
+            - BYTE
+            - SHORT
+            - INT
+            - LONG
+            - FLOAT
+            - DOUBLE
+            - STRING
+            - BYTE_STRING
+        shape:
+          $ref: '#/components/schemas/DataShape'
+    DataShape:
+      type: object
+      required: [ base, isNullable]
+      properties: 
+        base: 
+          type: string
+          enum:
+            - SCALAR
+            - LIST
+            - TENSOR
+        isNullable:
+          type: boolean
+        tensorShape:
+          $ref: '#/components/schemas/TensorShape'
+    TensorShape:
+      type: array
+      items:
+        $ref: '#/components/schemas/TensorDimension'
+    TensorDimension:
+      type: object
+      properties:
+        size: 
+          type: integer
+          format: int32
+        name:
+          type: string
+    DefaultLeapFrame:
+      type: object
+      properties:
+        schema:
+          $ref: '#/components/schemas/Schema'
+        rows:
+          type: array
+          items:
+            type: array
+            items: 
+              type: object
+  requestBodies:
+    LoadModelRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoadModelRequest'
+        application/x-protobuf:
+          schema:
+            $ref: '#/components/schemas/LoadModelRequest'
+      description: Request object to load a model
+      required: true
+    TransformFrameRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TransformFrameRequest'
+        application/x-protobuf:
+          schema:
+            $ref: '#/components/schemas/TransformFrameRequest'
+      description: Request object to transform a model
+      required: true  
+    DefaultLeapFrame:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DefaultLeapFrame'
+        application/x-protobuf:
+          schema:
+            $ref: '#/components/schemas/DefaultLeapFrame'
+      description: Frame to transform a model
+      required: true          
+# Added by API Auto Mocking Plugin
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/asarb/mleap/1.0.0

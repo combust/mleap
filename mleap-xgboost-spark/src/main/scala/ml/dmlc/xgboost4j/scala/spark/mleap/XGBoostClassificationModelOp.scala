@@ -37,7 +37,7 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
       model.withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList)).
         withValue("num_classes", Value.int(obj.numClasses)).
         withValue("num_features", Value.int(numFeatures)).
-        withValue("tree_limit", Value.int(obj.getTreeLimit.toInt))
+        withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit)))
     }
 
     override def load(model: Model)

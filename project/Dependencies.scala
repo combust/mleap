@@ -8,10 +8,10 @@ object Dependencies {
 
   val sparkVersion = "2.3.0"
   val scalaTestVersion = "3.0.0"
-  val tensorflowVersion = "1.7.0"
+  val tensorflowVersion = "1.11.0"
   val akkaVersion = "2.4.16"
   val akkaHttpVersion = "10.0.3"
-  val xgboostVersion = "0.80"
+  val xgboostVersion = "0.81"
   val hadoopVersion = "2.6.5" // matches spark version
 
   object Compile {
@@ -46,6 +46,8 @@ object Dependencies {
   object Test {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
     val akkaHttpTestkit =  "com.typesafe.akka" % "akka-http-testkit_2.11" % akkaHttpVersion % "test"
+    val junit = "junit" % "junit" % "4.12" % "test"
+    val junitInterface = "com.novocode" % "junit-interface" % "0.10" % "test"
   }
 
   object Provided {
@@ -66,7 +68,7 @@ object Dependencies {
 
   val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)
 
-  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest) ++ scalaReflect.modules(scalaVersion.value))
+  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface) ++ scalaReflect.modules(scalaVersion.value))
 
   val sparkBase = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
@@ -88,7 +90,7 @@ object Dependencies {
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 
-  val databricksRuntimeTestkit = l ++= Provided.spark ++ Seq(xgboostSparkDep, sparkAvro)
+  val databricksRuntimeTestkit = l ++= Provided.spark ++ Seq(sparkAvro)
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

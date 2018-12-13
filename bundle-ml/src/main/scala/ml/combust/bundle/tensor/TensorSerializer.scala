@@ -41,9 +41,9 @@ object TensorSerializer {
       case tensor.Tensor.DoubleClass =>
         (BasicType.DOUBLE, DoubleArraySerializer.write(t.rawValues.asInstanceOf[Array[Double]]))
       case tensor.Tensor.StringClass =>
-        (BasicType.DOUBLE, StringArraySerializer.write(t.rawValues.asInstanceOf[Array[String]]))
+        (BasicType.STRING, StringArraySerializer.write(t.rawValues.asInstanceOf[Array[String]]))
       case tensor.Tensor.ByteStringClass =>
-        (BasicType.DOUBLE, ByteStringArraySerializer.write(t.rawValues.asInstanceOf[Array[ByteString]]))
+        (BasicType.BYTE_STRING, ByteStringArraySerializer.write(t.rawValues.asInstanceOf[Array[ByteString]]))
       case _ => throw new IllegalArgumentException(s"unsupported tensor type ${t.base}")
     }
 

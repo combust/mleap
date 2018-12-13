@@ -11,7 +11,7 @@ object Dependencies {
   val tensorflowVersion = "1.7.0"
   val akkaVersion = "2.4.16"
   val akkaHttpVersion = "10.0.3"
-  val xgboostVersion = "0.80"
+  val xgboostVersion = "0.81"
   val hadoopVersion = "2.6.5" // matches spark version
 
   object Compile {

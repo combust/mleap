@@ -1,4 +1,4 @@
 import ml.combust.mleap.{Dependencies, Common}
 
-Common.defaultMleapServingSettings
+Common.defaultMleapSettings
 Dependencies.executorTestKit

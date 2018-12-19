@@ -2,6 +2,6 @@ import ml.combust.mleap.{Dependencies, Common}
 
 enablePlugins(DockerPlugin, JavaAppPackaging)
 
-Common.defaultMleapServingSettings
+Common.defaultMleapSettings
 Dependencies.serving
 DockerConfig.baseSettings

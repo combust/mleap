@@ -75,12 +75,23 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
         inputs = [{
                   "name": transformer.input_features,
                   "port": "features"
-                }]
+                  }]
 
-        outputs = [{
-                  "name": transformer.prediction_column,
-                  "port": "prediction"
-                }]
+        outputs = list()
+        outputs.append({
+            "name": transformer.prediction_column,
+            "port": "prediction"
+        })
+
+        outputs.append({
+            "name": "raw_prediction",
+            "port": "raw_prediction"
+        })
+
+        outputs.append({
+            "name": "probability",
+            "port": "probability"
+        })
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 

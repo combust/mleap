@@ -73,7 +73,7 @@ curl --header "Content-Type: application/json" \
 
 Format can be either `ml.combust.mleap.binary` or `ml.combust.mleap.json` and your leap frame needs to be encoded with that format.
 
-Note: The above endpoints are available either using: 
+Note: The above endpoints are available either using:
 - JSON (`Content-Type` header set to `application/json`)
 - Protobuf (`Content-Type` header set to `application/x-protobuf`).
 
@@ -89,9 +89,16 @@ curl --header "Content-Type: application/json" \
   --data "$body" http://localhost:8080/models/{YOUR_MODEL_NAME}/transform
 ```
 
-Note: The above endpoint is available either using: 
+Note: The above endpoint is available either using:
 - JSON (`Content-Type` header set to `application/json`) with a JSON leap frame.
 - Protobuf (`Content-Type` header set to `application/x-protobuf`) with a protobuf leap frame.
+
+6. GET /actuator/* : exposes health and info endpoints for monitoring
+```
+curl --request GET http://localhost:8080/actuator
+curl --request GET http://localhost:8080/actuator/health
+curl --request GET http://localhost:8080/actuator/info
+```
 
 Check out the available Swagger API documentation `mleap_serving_1.0.0_swagger.yaml` for more information or trying out the API.
 

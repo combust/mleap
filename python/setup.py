@@ -42,7 +42,7 @@ REQUIRED_PACKAGES = [
       'six >= 1.10.0',
       'scipy>=0.13.0b1',
       'pandas>=0.18.1',
-      'scikit-learn>=0.18.dev0',
+      'scikit-learn>=0.17',
       'nose-exclude>=0.5.0'
 ]
 

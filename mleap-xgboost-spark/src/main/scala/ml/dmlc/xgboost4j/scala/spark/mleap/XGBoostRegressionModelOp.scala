@@ -30,7 +30,7 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
 
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("num_features", Value.int(numFeatures)).
-        withValue("tree_limit", Value.int(obj.getTreeLimit.toInt))
+        withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit)))
     }
 
     override def load(model: Model)

@@ -1,7 +1,6 @@
 package ml.combust.mleap.runtime.frame
 
 import ml.combust.mleap.core.types.{StructField, StructType}
-import ml.combust.mleap.runtime._
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 
 import scala.util.Try

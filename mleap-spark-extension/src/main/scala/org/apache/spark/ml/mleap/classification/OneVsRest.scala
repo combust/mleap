@@ -278,7 +278,7 @@ object OneVsRestModel extends MLReadable[OneVsRestModel] {
         DefaultParamsReader.loadParamsInstance[ClassificationModel[_, _]](modelPath, sc)
       }
       val ovrModel = new OneVsRestModel(metadata.uid, labelMetadata, models)
-      DefaultParamsReader.getAndSetParams(ovrModel, metadata)
+      metadata.getAndSetParams(ovrModel)
       ovrModel.set("classifier", classifier)
       ovrModel
     }

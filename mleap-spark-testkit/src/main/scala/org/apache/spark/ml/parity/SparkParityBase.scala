@@ -34,6 +34,10 @@ object SparkParityBase extends FunSpec {
     spark.sqlContext.read.format("avro").load(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").toString)
   }
 
+  def multiClassClassificationDataset(spark: SparkSession): DataFrame = {
+    spark.sqlContext.read.format("libsvm").load(getClass.getClassLoader.getResource("datasources/sample_multiclass_classification_data.txt").toString)
+  }
+
   case class Rating(userId: Int, movieId: Int, rating: Float, timestamp: Long)
   def parseRating(str: String): Rating = {
     val fields = str.split("::")
@@ -53,6 +57,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   lazy val baseDataset: DataFrame = SparkParityBase.dataset(spark)
   lazy val textDataset: DataFrame = SparkParityBase.textDataset(spark)
   lazy val recommendationDataset: DataFrame = SparkParityBase.recommendationDataset(spark)
+  lazy val multiClassClassificationDataset: DataFrame = SparkParityBase.multiClassClassificationDataset(spark)
 
   val dataset: DataFrame
   val sparkTransformer: Transformer

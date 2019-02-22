@@ -23,5 +23,6 @@ class MultiLayerPerceptronClassifierParitySpec extends SparkParityBase {
     new MultilayerPerceptronClassifier(uid = "mlp").
       setLayers(Array(2, 5, 4, 3)).
       setFeaturesCol("features").
-      setPredictionCol("prediction"))).fit(dataset)
+      setPredictionCol("prediction")
+  )).fit(dataset)
 }

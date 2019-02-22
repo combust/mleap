@@ -6,7 +6,6 @@ import org.apache.spark.ml.Transformer
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import ml.combust.mleap.runtime.MleapSupport._
-import com.databricks.spark.avro._
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.Model
@@ -32,7 +31,7 @@ object SparkParityBase extends FunSpec {
       withColumnRenamed("value", "text")
   }
   def dataset(spark: SparkSession): DataFrame = {
-    spark.sqlContext.read.avro(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").toString)
+    spark.sqlContext.read.format("avro").load(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").toString)
   }
 
   case class Rating(userId: Int, movieId: Int, rating: Float, timestamp: Long)

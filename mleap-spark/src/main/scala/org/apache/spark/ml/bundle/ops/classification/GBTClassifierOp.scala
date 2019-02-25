@@ -63,7 +63,7 @@ class GBTClassifierOp extends SimpleSparkOp[GBTClassificationModel] {
       _trees = model.trees,
       _treeWeights = model.treeWeights,
       numFeatures = model.numFeatures)
-    if(r.isDefined(r.thresholds)) { r.setThresholds(r.getThresholds) }
+    if(model.isDefined(model.thresholds)) { r.setThresholds(model.getThresholds) }
     r
   }
 

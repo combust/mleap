@@ -885,7 +885,7 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
     Inputs need to be floats.
     """
     def __init__(self, input_features=None, output_features=None, transform_type=None):
-        self.valid_transforms = ['log', 'exp', 'sqrt', 'sin', 'cos', 'tan']
+        self.valid_transforms = ['log', 'exp', 'sqrt', 'sin', 'cos', 'tan', 'abs']
         self.op = 'math_unary'
         self.name = "{}_{}".format(self.op, uuid.uuid4())
         self.input_features = input_features
@@ -922,6 +922,8 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
             return np.cos(y)
         elif self.transform_type == 'tan':
             return np.tan(y)
+        elif self.transform_type == 'abs':
+             return np.abs(y)
 
     def fit_transform(self, X, y=None, **fit_params):
         """

@@ -28,8 +28,11 @@ object UnaryOperation {
   case object Tan extends UnaryOperation {
     override def name: String = "tan"
   }
+  case object Abs extends UnaryOperation {
+    override def name: String = "abs"
+  }
 
-  val all = Set(Log, Exp, Sqrt, Sin, Cos, Tan)
+  val all = Set(Log, Exp, Sqrt, Sin, Cos, Tan, Abs)
   val forName: Map[String, UnaryOperation] = all.map(o => (o.name, o)).toMap
 }
 
@@ -43,6 +46,7 @@ case class MathUnaryModel(operation: UnaryOperation) extends Model {
     case Sin => Math.sin(a)
     case Cos => Math.cos(a)
     case Tan => Math.tan(a)
+    case Abs => Math.abs(a)
     case _ => throw new RuntimeException(s"unsupported unary operation: $operation")
   }
 

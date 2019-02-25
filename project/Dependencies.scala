@@ -49,6 +49,8 @@ object Dependencies {
     val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
 
     val springBoot = "org.springframework.boot" % "spring-boot-starter-web" % springBootVersion
+    val springBootActuator = "org.springframework.boot" % "spring-boot-starter-actuator" % springBootVersion
+
     val commonsLang = "org.apache.commons" % "commons-lang3" % "3.7"
     val scalaPb = Seq(
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
@@ -127,7 +129,7 @@ object Dependencies {
   val grpc = l ++= Seq(
     "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion) ++ scalaPb
 
-  val springBootServing = l ++= Seq(springBoot, commonsLang, Test.scalaTest, Test.springBootTest) ++ scalaPb
+  val springBootServing = l ++= Seq(springBoot, springBootActuator, commonsLang, Test.scalaTest, Test.springBootTest) ++ scalaPb
 
   val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
 

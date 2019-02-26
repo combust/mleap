@@ -49,7 +49,7 @@ Choose the right verison of the `mleap-spark` module to export your pipeline. Th
 
 | MLeap Version | Spark Version |
 |---------------|---------------|
-| 0.14.0        | 2.3           |
+| 0.14.0        | 2.4           |
 | 0.13.0        | 2.3           |
 | 0.12.0        | 2.3           |
 | 0.11.0        | 2.2           |

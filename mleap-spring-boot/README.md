@@ -4,7 +4,7 @@ This module is a Spring Boot project that provides a HTTP interface to an MLeap 
 
 ## Installation
 
-MLeap Spring Boot is a Docker image hosted on [Docker Hub](https://hub.docker.com/r/combustml/mleap-serving/).
+MLeap Spring Boot is a Docker image hosted on [Docker Hub](https://hub.docker.com/r/combustml/mleap-spring-boot/).
 
 To get started, pull the image to your local machine, replacing the version with the desired one.
 

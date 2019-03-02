@@ -73,7 +73,7 @@ object Dependencies {
 
   object Test {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
-    val akkaHttpTestkit =  "com.typesafe.akka" % "akka-http-testkit_2.11" % akkaHttpVersion % "test"
+    val akkaHttpTestkit =  "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % "test"
     val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test"
     val springBootTest = "org.springframework.boot" % "spring-boot-starter-test" % springBootVersion % "test"
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"

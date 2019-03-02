@@ -22,13 +22,13 @@ case class OneHotEncoder(override val uid: String =
 // o Invoke 1HE model
 // o Convert spark tensor results to mleap tensors
 // o Spread results and use as input to new Row
-  private val f = (values: Row) => {
-    val v = values.toSeq.asInstanceOf[Seq[Double]].toArray
-    val res = model(v).map(VectorConverters.sparkVectorToMleapTensor)
-    Row(res: _*)
-  }
   val exec: UserDefinedFunction =
-    UserDefinedFunction(f, outputSchema, Seq(SchemaSpec(inputSchema)))
+    UserDefinedFunction((values: Row) => {
+      val v = values.toSeq.asInstanceOf[Seq[Double]].toArray
+      val res = model(v).map(VectorConverters.sparkVectorToMleapTensor)
+      Row(res: _*)
+    }
+      , outputSchema, Seq(SchemaSpec(inputSchema)))
 
   val outputCols: Seq[String] = outputSchema.fields.map(_.name)
   val inputCols: Seq[String] = inputSchema.fields.map(_.name)

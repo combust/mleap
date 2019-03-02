@@ -15,9 +15,8 @@ import scala.util.Try
 case class Interaction(override val uid: String = Transformer.uniqueName("interaction"),
                        override val shape: NodeShape,
                        override val model: InteractionModel) extends BaseTransformer {
-  private val f = (row: Row) => model(row.toSeq): Tensor[Double]
   val exec: UserDefinedFunction = {
-    UserDefinedFunction(f,
+    UserDefinedFunction((row: Row) => model(row.toSeq): Tensor[Double],
       TensorType(BasicType.Double, Seq(model.outputSize)),
       Seq(SchemaSpec(inputSchema)))
   }

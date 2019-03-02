@@ -5,7 +5,7 @@ import org.apache.spark.ml.evaluation.RegressionEvaluator
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.ml.regression.RandomForestRegressor
-import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder, TrainValidationSplit}
+import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
 import org.apache.spark.sql.DataFrame
 
 class TrainValidationSplitParitySpec extends SparkParityBase {

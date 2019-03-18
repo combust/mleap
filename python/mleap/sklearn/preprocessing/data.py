@@ -257,7 +257,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
                     shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": len(vector.input_features)}]}}
                     self.input_shapes['data_shape'].append(shape)
                 elif vector.op == ops.ONE_HOT_ENCODER:
-                    shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": vector.n_values_[0] - 1}]}}
+                    shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": int(vector.n_values_[0] - 1)}]}}
                     self.input_shapes['data_shape'].append(shape)
         return self
 

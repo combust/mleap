@@ -36,7 +36,7 @@ object HandleInvalid {
   *
   * @param labels list of labels that can be indexed
   * @param handleInvalid how to handle invalid values (unseen or NULL labels): 'error' (throw an error),
-  *                      'skip' (skips invalid data)
+  *                      'skip' (doesn't work in MLeap Runtime and also throws an error)
   *                      or 'keep' (put invalid data in a special bucket at index labels.size
   */
 case class StringIndexerModel(labels: Seq[String],

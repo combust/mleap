@@ -1,10 +1,6 @@
 package org.apache.spark.sql.mleap
 
-import ml.combust.mleap.core.types
-import ml.combust.mleap.core.types.{BasicType, Casting}
-import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import org.apache.spark.ml.linalg.{Matrix, MatrixUDT, Vector, VectorUDT}
-import ml.combust.mleap.core.util.VectorConverters._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types._
 
@@ -179,6 +175,49 @@ trait TypeConverters {
       val m = dataset.select(field.name).head.getAs[Matrix](0)
       types.TensorShape(Some(Seq(m.numRows, m.numCols)), field.nullable)
     case _ => throw new IllegalArgumentException(s"invalid struct field for shape: $field")
+  }
+
+  /**
+    * Spark to Mleap schema conversion. Please note that this is with basic data types.
+    *
+    * Any custom data type conversion is not supported with it.
+    * @param schema
+    * @return
+    */
+  def sparkSchemaToMleapSchema(schema: StructType): types.StructType = {
+    val fields = schema.fields.map(f => sparkFieldToMleapField(f))
+    types.StructType(fields).get
+  }
+
+  /**
+    * Basi Field converversion from Spark Field to Mleap Field.
+    * @param field
+    * @return
+    */
+  def sparkFieldToMleapField(field: StructField): types.StructField = {
+    val dt = field.dataType match {
+      case BooleanType => types.ScalarType.Boolean
+      case ByteType => types.ScalarType.Byte
+      case ShortType => types.ScalarType.Short
+      case IntegerType => types.ScalarType.Int
+      case LongType => types.ScalarType.Long
+      case FloatType => types.ScalarType.Float
+      case DoubleType => types.ScalarType.Double
+      case _: DecimalType => types.ScalarType.Double
+      case StringType => types.ScalarType.String.setNullable(field.nullable)
+      case ArrayType(ByteType, _) => types.ListType.Byte
+      case ArrayType(BooleanType, _) => types.ListType.Boolean
+      case ArrayType(ShortType, _) => types.ListType.Short
+      case ArrayType(IntegerType, _) => types.ListType.Int
+      case ArrayType(LongType, _) => types.ListType.Long
+      case ArrayType(FloatType, _) => types.ListType.Float
+      case ArrayType(DoubleType, _) => types.ListType.Double
+      case ArrayType(StringType, _) => types.ListType.String
+      case ArrayType(ArrayType(ByteType, _), _) => types.ListType.ByteString
+      case _ => throw new RuntimeException("Field Type not handled" + field.dataType)
+    }
+
+    types.StructField(field.name, dt.setNullable(field.nullable))
   }
 }
 

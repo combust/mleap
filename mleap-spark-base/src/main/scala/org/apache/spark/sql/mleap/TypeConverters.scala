@@ -181,21 +181,21 @@ trait TypeConverters {
     * Spark to Mleap schema conversion. Please note that this is with basic data types.
     *
     * Any custom data type conversion is not supported with it.
-    * @param schema
+    * @param sparkSchema
     * @return
     */
-  def sparkSchemaToMleapSchema(schema: StructType): types.StructType = {
-    val fields = schema.fields.map(f => sparkFieldToMleapField(f))
+  def sparkSchemaToMleapSchema(sparkSchema: StructType): types.StructType = {
+    val fields = sparkSchema.fields.map(f => sparkFieldToMleapField(f))
     types.StructType(fields).get
   }
 
   /**
     * Basi Field converversion from Spark Field to Mleap Field.
-    * @param field
+    * @param sparkField
     * @return
     */
-  def sparkFieldToMleapField(field: StructField): types.StructField = {
-    val dt = field.dataType match {
+  def sparkFieldToMleapField(sparkField: StructField): types.StructField = {
+    val dt = sparkField.dataType match {
       case BooleanType => types.ScalarType.Boolean
       case ByteType => types.ScalarType.Byte
       case ShortType => types.ScalarType.Short
@@ -204,7 +204,7 @@ trait TypeConverters {
       case FloatType => types.ScalarType.Float
       case DoubleType => types.ScalarType.Double
       case _: DecimalType => types.ScalarType.Double
-      case StringType => types.ScalarType.String.setNullable(field.nullable)
+      case StringType => types.ScalarType.String.setNullable(sparkField.nullable)
       case ArrayType(ByteType, _) => types.ListType.Byte
       case ArrayType(BooleanType, _) => types.ListType.Boolean
       case ArrayType(ShortType, _) => types.ListType.Short
@@ -214,10 +214,10 @@ trait TypeConverters {
       case ArrayType(DoubleType, _) => types.ListType.Double
       case ArrayType(StringType, _) => types.ListType.String
       case ArrayType(ArrayType(ByteType, _), _) => types.ListType.ByteString
-      case _ => throw new RuntimeException("Field Type not handled" + field.dataType)
+      case _ => throw new RuntimeException("Field Type not handled" + sparkField.dataType)
     }
 
-    types.StructField(field.name, dt.setNullable(field.nullable))
+    types.StructField(sparkField.name, dt.setNullable(sparkField.nullable))
   }
 }
 

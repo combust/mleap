@@ -33,6 +33,8 @@ class OneHotEncoderOp extends MleapOp[OneHotEncoder, OneHotEncoderModel] {
       if (model.getValue("size").nonEmpty) {
         // Old version of 1HE.
         OneHotEncoderModel(categorySizes = Array(model.value("size").getLong.toInt),
+          // assume HandleInvalid.Keep always since old version of 1HE didn't have a way to specify this
+          handleInvalid = HandleInvalid.Keep,
           dropLast = model.value("drop_last").getBoolean)
       } else {
         // New version of 1HE.

@@ -16,4 +16,6 @@ class MinMaxScalerParitySpec extends SparkParityBase {
     new MinMaxScaler().
       setInputCol("features").
       setOutputCol("scaled_features"))).fit(dataset)
+
+  override val unserializedParams = Set("min", "max")
 }

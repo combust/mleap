@@ -1,9 +1,8 @@
 package org.apache.spark.ml.parity.feature
 
-import org.apache.spark.ml.parity.SparkParityBase
-import org.apache.spark.ml.{Pipeline, PipelineModel, Transformer}
 import org.apache.spark.ml.feature.{IndexToString, StringIndexer}
-import org.apache.spark.ml.param.Param
+import org.apache.spark.ml.parity.SparkParityBase
+import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.sql.DataFrame
 
 /**
@@ -23,7 +22,5 @@ class ReverseStringIndexerParitySpec extends SparkParityBase {
     new Pipeline().setStages(Array(stringIndexer, reverseStringIndexer)).fit(dataset)
   }
 
-//  override def extractSparkTransformerParamsToVerify(deserializedSparkModel: Transformer): Array[(Param[_], Param[_])] = {
-//    sparkTransformer.asInstanceOf[PipelineModel].stages(1).params.zip(deserializedSparkModel.asInstanceOf[PipelineModel].stages(1).params)
-//  }
+  override val unserializedParams = Set("stringOrderType")
 }

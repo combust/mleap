@@ -25,4 +25,6 @@ class NaiveBayesClassifierParitySpec extends SparkParityBase {
       setModelType("multinomial").
       setFeaturesCol("features").
       setLabelCol("label"))).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType", "labelCol", "smoothing")
 }

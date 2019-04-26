@@ -39,8 +39,7 @@ class MinHashLSHOp extends SimpleSparkOp[MinHashLSHModel] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: MinHashLSHModel): MinHashLSHModel = {
-    new MinHashLSHModel(uid = uid,
-      randCoefficients = model.randCoefficients)
+    new MinHashLSHModel(uid = uid, randCoefficients = model.randCoefficients)
   }
 
   override def sparkInputs(obj: MinHashLSHModel): Seq[ParamSpec] = {

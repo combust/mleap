@@ -146,9 +146,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
 
     def checkParamsEquality(original: Transformer, deserialized: Transformer): Unit = {
-      //TODO: call extractSparkTransformerParamsToVerify?
-      //only thing it does is say stringOrderType is not important for StringIndexer
-      val ignoredParams = "stringOrderType"
+      val ignoredParams = unserializedParams
       assert(original.params.length == deserialized.params.length)
       original.params.zip(deserialized.params).foreach {
         case (param1, param2) => if(!ignoredParams.contains(param1.name)) {
@@ -182,8 +180,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
 
     it("serializes/deserializes the Spark model properly") {
-      val deserializedSparkModel = deserializedSparkTransformer(sparkTransformer)
-      checkEquality(sparkTransformer, deserializedSparkModel)
+      if (!ignoreSerializationTest) {
+        checkEquality(sparkTransformer, deserializedSparkTransformer(sparkTransformer))
+      }
     }
 
     it("model input/output schema matches transformer UDF") {
@@ -211,10 +210,15 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
    }
   }
 
-  //TODO: does not work anymore
-  protected def extractSparkTransformerParamsToVerify(deserializedSparkModel: Transformer): Array[(Param[_], Param[_])] = {
-    sparkTransformer.params.zip(deserializedSparkModel.params)
-  }
+  /**
+    * Params that are only relevant during training and are not serialized
+    */
+  protected def unserializedParams: Set[String] = Set.empty
+
+  /**
+    * Can be set to true for models that are not serialized
+    */
+  protected def ignoreSerializationTest: Boolean = false
 
   it should behave like parityTransformer()
 }

@@ -32,4 +32,5 @@ class TrainValidationSplitParitySpec extends SparkParityBase {
         setEstimator(regressor).
         setEstimatorParamMaps(paramGrid))).fit(dataset)
   }
+  override val ignoreSerializationTest = true
 }

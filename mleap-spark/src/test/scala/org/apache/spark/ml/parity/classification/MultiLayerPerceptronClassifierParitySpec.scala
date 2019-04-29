@@ -24,4 +24,6 @@ class MultiLayerPerceptronClassifierParitySpec extends SparkParityBase {
       setLayers(Array(2, 5, 4, 3)).
       setFeaturesCol("features").
       setPredictionCol("prediction"))).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType")
 }

@@ -30,7 +30,7 @@ class HashingTermFrequencyOp extends SimpleSparkOp[HashingTF] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: HashingTF): HashingTF = {
-    new HashingTF(uid = uid)
+    new HashingTF(uid = uid).setBinary(model.getBinary).setNumFeatures(model.getNumFeatures)
   }
 
   override def sparkInputs(obj: HashingTF): Seq[ParamSpec] = {

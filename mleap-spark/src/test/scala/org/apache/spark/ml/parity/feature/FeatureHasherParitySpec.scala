@@ -20,18 +20,23 @@ class FeatureHasherParitySpec extends SparkParityBase {
     "together"
   )
 
-  def randomRow(): Row = Row(Random.nextDouble(), Random.nextBoolean(), Random.nextInt(20).toString, Random.shuffle(categories).head)
+  def randomRow(): Row = Row(Random.nextDouble(), Random.nextBoolean(), Random.nextInt(20), Random.nextInt(20).toString,
+    Random.shuffle(categories).head)
 
   val rows = spark.sparkContext.parallelize(Seq.tabulate(100) { _ => randomRow() })
   val schema = new StructType()
     .add("real", DoubleType, nullable = false)
     .add("bool", BooleanType, nullable = false)
+    .add("int", IntegerType, nullable = false)
     .add("stringNum", StringType, nullable = true)
     .add("string", StringType, nullable = true)
 
   override val dataset: DataFrame = spark.sqlContext.createDataFrame(rows, schema)
 
   override val sparkTransformer: Transformer = new FeatureHasher()
-    .setInputCols("real", "bool", "stringNum", "string")
+    .setInputCols("real", "bool", "int", "stringNum", "string")
     .setOutputCol("features")
+    .setNumFeatures(1 << 17)
+    .setCategoricalCols(Array("int"))
+
 }

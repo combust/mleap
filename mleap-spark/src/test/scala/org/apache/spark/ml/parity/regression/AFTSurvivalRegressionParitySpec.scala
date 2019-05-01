@@ -22,6 +22,7 @@ class AFTSurvivalRegressionParitySpec extends SparkParityBase {
       setInputCols(Array("fico", "dti")).
       setOutputCol("features"),
     new AFTSurvivalRegression().
+      setQuantileProbabilities(Array(0.5)).
       setFeaturesCol("features").
       setLabelCol("loan_amount").
       setQuantilesCol("quant").

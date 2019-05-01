@@ -34,7 +34,7 @@ class DCTOp extends SimpleSparkOp[DCT] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: DCT): DCT = {
-    new DCT(uid = uid)
+    new DCT(uid = uid).setInverse(model.getInverse)
   }
 
   override def sparkInputs(obj: DCT): Seq[ParamSpec] = {

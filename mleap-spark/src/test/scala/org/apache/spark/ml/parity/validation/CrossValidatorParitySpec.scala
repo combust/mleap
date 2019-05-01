@@ -33,5 +33,5 @@ class CrossValidatorParitySpec extends SparkParityBase {
         setEstimatorParamMaps(paramGrid))).fit(dataset)
   }
 
-  override def ignoreSerializationTest = true
+  override val ignoreSerializationTest = true
 }

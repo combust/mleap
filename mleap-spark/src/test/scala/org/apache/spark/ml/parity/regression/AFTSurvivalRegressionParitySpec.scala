@@ -27,5 +27,5 @@ class AFTSurvivalRegressionParitySpec extends SparkParityBase {
       setQuantilesCol("quant").
       setPredictionCol("prediction"))).fit(dataset)
 
-  override val unserializedParams = Set("featuresCol", "labelCol", "quantilesCol", "predictionCol", "stringOrderType", "maxIter", "tol")
+  override val unserializedParams = Set("labelCol", "stringOrderType", "maxIter", "tol")
 }

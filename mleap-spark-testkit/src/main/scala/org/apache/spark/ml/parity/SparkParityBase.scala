@@ -213,12 +213,12 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   /**
     * Params that are only relevant during training and are not serialized
     */
-  protected def unserializedParams: Set[String] = Set.empty
+  protected val unserializedParams: Set[String] = Set.empty
 
   /**
     * Can be set to true for models that are not serialized
     */
-  protected def ignoreSerializationTest: Boolean = false
+  protected val ignoreSerializationTest: Boolean = false
 
   it should behave like parityTransformer()
 }

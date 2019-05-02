@@ -43,6 +43,9 @@ REQUIRED_PACKAGES = [
       'scipy>=0.13.0b1',
       'pandas>=0.18.1',
       'scikit-learn>=0.18.dev0',
+]
+
+TESTS_REQUIRED_PACKAGES = [
       'nose-exclude>=0.5.0'
 ]
 
@@ -55,6 +58,7 @@ setup(name='mleap',
       packages=find_packages(),
       zip_safe=False,
       install_requires=REQUIRED_PACKAGES,
+      tests_require=TESTS_REQUIRED_PACKAGES,
       classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

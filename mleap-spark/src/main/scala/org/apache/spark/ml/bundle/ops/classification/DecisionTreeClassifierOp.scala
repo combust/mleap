@@ -23,17 +23,25 @@ class DecisionTreeClassifierOp extends SimpleSparkOp[DecisionTreeClassificationM
     override def store(model: Model, obj: DecisionTreeClassificationModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       TreeSerializer[tree.Node](context.file("tree"), withImpurities = true).write(obj.rootNode)
+      val thresholds = if(obj.isSet(obj.thresholds)) {
+        Some(obj.getThresholds)
+      } else None
+
       model.withValue("num_features", Value.long(obj.numFeatures)).
-        withValue("num_classes", Value.long(obj.numClasses))
+        withValue("num_classes", Value.long(obj.numClasses)).
+        withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): DecisionTreeClassificationModel = {
       val rootNode = TreeSerializer[tree.Node](context.file("tree"), withImpurities = true).read().get
-      new DecisionTreeClassificationModel(uid = "",
+      val dt = new DecisionTreeClassificationModel(uid = "",
         rootNode = rootNode,
         numClasses = model.value("num_classes").getLong.toInt,
         numFeatures = model.value("num_features").getLong.toInt)
+      model.getValue("thresholds").
+        map(t => dt.setThresholds(t.getDoubleList.toArray)).
+        getOrElse(dt)
     }
   }
 

@@ -48,7 +48,7 @@ class RandomForestClassifierOp extends MleapOp[RandomForestClassifier, RandomFor
       }
       val thresholds = model.getValue("thresholds").map(_.getDoubleList.toArray)
       require(thresholds.isEmpty || thresholds.get.length == numClasses,
-        "DecisionTreeClassifierModel loaded with non-matching numClasses and thresholds.length. " +
+        "RandomForestClassifierModel loaded with non-matching numClasses and thresholds.length. " +
           s" numClasses=$numClasses, but thresholds has length ${thresholds.get.length}")
 
       RandomForestClassifierModel(numFeatures = numFeatures,

@@ -46,7 +46,7 @@ class GeneralizedLinearRegressionOp extends SimpleSparkOp[GeneralizedLinearRegre
       coefficients = model.coefficients,
       intercept = model.intercept)
     m.set(m.family, model.getFamily)
-    m.set(m.link, model.getLink)
+    if (model.isSet(model.link)) m.set(m.link, model.getLink)
     m
   }
 

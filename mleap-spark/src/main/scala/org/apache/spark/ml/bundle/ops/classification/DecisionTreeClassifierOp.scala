@@ -50,7 +50,7 @@ class DecisionTreeClassifierOp extends SimpleSparkOp[DecisionTreeClassificationM
       rootNode = model.rootNode,
       numFeatures = model.numFeatures,
       numClasses = model.numClasses)
-    if(model.isDefined(model.thresholds)) { r.setThresholds(model.getThresholds) }
+    if (model.isDefined(model.thresholds)) { r.setThresholds(model.getThresholds) }
     r
   }
 

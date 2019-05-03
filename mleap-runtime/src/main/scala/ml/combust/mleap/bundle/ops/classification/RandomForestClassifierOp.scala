@@ -34,7 +34,8 @@ class RandomForestClassifierOp extends MleapOp[RandomForestClassifier, RandomFor
       model.withValue("num_features", Value.long(obj.numFeatures)).
         withValue("num_classes", Value.long(obj.numClasses)).
         withValue("tree_weights", Value.doubleList(obj.treeWeights)).
-        withValue("trees", Value.stringList(trees))
+        withValue("trees", Value.stringList(trees)).
+        withValue("thresholds", obj.thresholds.map(Value.doubleList(_)))
     }
 
     override def load(model: Model)
@@ -42,15 +43,19 @@ class RandomForestClassifierOp extends MleapOp[RandomForestClassifier, RandomFor
       val numFeatures = model.value("num_features").getLong.toInt
       val numClasses = model.value("num_classes").getLong.toInt
       val treeWeights = model.value("tree_weights").getDoubleList
-
       val models = model.value("trees").getStringList.map {
         tree => ModelSerializer(context.bundleContext(tree)).read().get.asInstanceOf[DecisionTreeClassifierModel]
       }
+      val thresholds = model.getValue("thresholds").map(_.getDoubleList.toArray)
+      require(thresholds.isEmpty || thresholds.get.length == numClasses,
+        "DecisionTreeClassifierModel loaded with non-matching numClasses and thresholds.length. " +
+          s" numClasses=$numClasses, but thresholds has length ${thresholds.get.length}")
 
       RandomForestClassifierModel(numFeatures = numFeatures,
         numClasses = numClasses,
         trees = models,
-        treeWeights = treeWeights)
+        treeWeights = treeWeights,
+        thresholds = thresholds)
     }
   }
 

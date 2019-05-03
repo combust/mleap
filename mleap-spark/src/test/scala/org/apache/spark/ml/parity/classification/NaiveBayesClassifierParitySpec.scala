@@ -23,6 +23,7 @@ class NaiveBayesClassifierParitySpec extends SparkParityBase {
       setOutputCol("label"),
     new NaiveBayes(uid = "nb").
       setModelType("multinomial").
+      setThresholds(Array(0.4)).
       setFeaturesCol("features").
       setLabelCol("label"))).fit(dataset)
 

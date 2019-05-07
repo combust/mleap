@@ -66,7 +66,7 @@ class ReverseStringIndexerOp extends SimpleSparkOp[IndexToString] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: IndexToString): IndexToString = {
-    new IndexToString(uid = uid)
+    new IndexToString(uid = uid).setLabels(model.getLabels)
   }
 
   override def sparkInputs(obj: IndexToString): Seq[ParamSpec] = {

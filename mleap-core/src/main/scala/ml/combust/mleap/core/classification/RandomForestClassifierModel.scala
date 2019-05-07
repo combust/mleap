@@ -25,7 +25,8 @@ object RandomForestClassifierModel {
 case class RandomForestClassifierModel(override val trees: Seq[DecisionTreeClassifierModel],
                                        override val treeWeights: Seq[Double],
                                        numFeatures: Int,
-                                       override val numClasses: Int)
+                                       override val numClasses: Int,
+                                       override val thresholds: Option[Array[Double]] = None)
   extends ProbabilisticClassificationModel with TreeEnsemble with Serializable {
   override def predictRaw(raw: Vector): Vector = {
     val votes = Array.fill[Double](numClasses)(0.0)

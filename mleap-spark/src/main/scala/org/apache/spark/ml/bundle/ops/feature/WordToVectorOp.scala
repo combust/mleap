@@ -33,12 +33,14 @@ class WordToVectorOp extends SimpleSparkOp[Word2VecModel] {
       val wordVectors = model.value("word_vectors").getDoubleList.toArray
 
       val wv = new feature.Word2VecModel(map, wordVectors.map(_.toFloat))
-      new Word2VecModel(uid = "", wordVectors = wv)
+      val m = new Word2VecModel(uid = "", wordVectors = wv)
+      m.set(m.vectorSize, wordVectors.size / indices.length)
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: Word2VecModel): Word2VecModel = {
-    new Word2VecModel(uid = uid, wordVectors = getWordVectors(model))
+    val m = new Word2VecModel(uid = uid, wordVectors = getWordVectors(model))
+    m.set(m.vectorSize, model.getVectorSize)
   }
 
   override def sparkInputs(obj: Word2VecModel): Seq[ParamSpec] = {

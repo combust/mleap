@@ -23,4 +23,6 @@ class OneHotEncoderParitySpec extends SparkParityBase {
             .setOutputCols(Array("state_oh", "state_oh2"))
         ))
         .fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType")
 }

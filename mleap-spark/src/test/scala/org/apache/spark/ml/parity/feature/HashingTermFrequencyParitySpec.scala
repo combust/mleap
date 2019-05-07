@@ -15,6 +15,7 @@ class HashingTermFrequencyParitySpec extends SparkParityBase {
     setInputCol("loan_title").
     setOutputCol("loan_title_tokens"),
     new HashingTF().
+      setNumFeatures(1 << 17).
       setInputCol("loan_title_tokens").
       setOutputCol("loan_title_tf"))).fit(dataset)
 }

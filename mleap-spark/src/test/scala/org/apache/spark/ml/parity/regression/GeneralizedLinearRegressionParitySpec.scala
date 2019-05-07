@@ -26,4 +26,6 @@ class GeneralizedLinearRegressionParitySpec extends SparkParityBase {
       setFeaturesCol("features").
       setLabelCol("loan_amount").
       setPredictionCol("prediction"))).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType", "labelCol", "maxIter", "tol", "regParam", "solver", "variancePower")
 }

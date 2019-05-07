@@ -24,4 +24,5 @@ class MultinomialLabelerParitySpec extends SparkParityBase {
       setProbabilitiesCol("probabilities").
       setLabelsCol("labels"))).fit(dataset)
 
+  override val unserializedParams = Set("stringOrderType")
 }

@@ -2,7 +2,7 @@ package org.apache.spark.ml.parity
 
 import java.io.File
 
-import org.apache.spark.ml.Transformer
+import org.apache.spark.ml.{PipelineModel, Transformer}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import ml.combust.mleap.runtime.MleapSupport._
@@ -16,7 +16,6 @@ import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.bundle.SparkBundleContext
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
-import org.apache.spark.ml.param.Param
 import resource._
 
 /**
@@ -132,8 +131,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  def equalityTest(sparkDataset: DataFrame,
-                   mleapDataset: DataFrame): Unit = {
+  def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit = {
     val sparkElems = sparkDataset.collect()
     val mleapElems = mleapDataset.collect()
     assert(sparkElems sameElements mleapElems)
@@ -150,25 +148,43 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       equalityTest(sparkDataset, mleapDataset)
     }
 
-    it("serializes/deserializes the Spark model properly") {
-      val deserializedSparkModel = deserializedSparkTransformer(sparkTransformer)
+    def checkParamsEquality(original: Transformer, deserialized: Transformer): Unit = {
+      val ignoredParams = unserializedParams
+      assert(original.params.length == deserialized.params.length)
+      original.params.zip(deserialized.params).foreach {
+        case (param1, param2) => if(!ignoredParams.contains(param1.name)) {
+          assert(original.isDefined(param1) == deserialized.isDefined(param2),
+            s"spark transformer param ${param1.name} is defined ${original.isDefined(param1)} deserialized is ${deserialized.isDefined(param2)}")
 
-      extractSparkTransformerParamsToVerify(deserializedSparkModel).foreach {
-        case (param1, param2) =>
-          assert(sparkTransformer.isDefined(param1) == deserializedSparkModel.isDefined(param2),
-            s"spark transformer is define ${sparkTransformer.isDefined(param1)} deserialized is ${deserializedSparkModel.isDefined(param2)}")
-
-          if(sparkTransformer.isDefined(param1)) {
-            val v1Value = sparkTransformer.getOrDefault(param1)
-            val v2Value = deserializedSparkModel.getOrDefault(param1)
+          if (original.isDefined(param1)) {
+            val v1Value = original.getOrDefault(param1)
+            val v2Value = deserialized.getOrDefault(param1)
 
             v1Value match {
-              case v1Value: Array[_] =>
-                assert(v1Value sameElements v2Value.asInstanceOf[Array[_]])
-              case _ =>
-                assert(v1Value == v2Value, s"$param1 is not equivalent")
+              case v1Value: Array[_] => assert(v1Value sameElements v2Value.asInstanceOf[Array[_]])
+              case _ => assert(v1Value == v2Value, s"$param1 is not equivalent")
             }
           }
+        }
+      }
+    }
+    def checkEquality(original: Transformer, deserialized: Transformer): Unit = {
+      assert(original.getClass == deserialized.getClass)
+      checkParamsEquality(original, deserialized)
+      original match {
+        case original: PipelineModel =>
+          val deStages = deserialized.asInstanceOf[PipelineModel].stages
+          assert(original.stages.length == deStages.length)
+          original.stages.zip(deStages).foreach {
+            case (o, d) => checkEquality(o, d)
+          }
+        case _ =>
+      }
+    }
+
+    it("serializes/deserializes the Spark model properly") {
+      if (!ignoreSerializationTest) {
+        checkEquality(sparkTransformer, deserializedSparkTransformer(sparkTransformer))
       }
     }
 
@@ -197,9 +213,15 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
    }
   }
 
-  protected def extractSparkTransformerParamsToVerify(deserializedSparkModel: Transformer): Array[(Param[_], Param[_])] = {
-    sparkTransformer.params.zip(deserializedSparkModel.params)
-  }
+  /**
+    * Params that are only relevant during training and are not serialized
+    */
+  protected val unserializedParams: Set[String] = Set.empty
+
+  /**
+    * Can be set to true for models that are not serialized
+    */
+  protected val ignoreSerializationTest: Boolean = false
 
   it should behave like parityTransformer()
 }

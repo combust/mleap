@@ -17,11 +17,14 @@ import resource.managed
   * Created by hollinwilkins on 1/13/17.
   */
 class TensorflowTransformerSpec extends FunSpec {
+
   describe("with a scaling tensorflow model") {
     it("scales the vector using the model and returns the result") {
-      val model = TensorflowModel(TestUtil.createAddGraph(),
+      val graph = TestUtil.createAddGraph()
+      val model = TensorflowModel(graph = Some(graph),
         inputs = Seq(("InputA", TensorType.Float()), ("InputB", TensorType.Float())),
-        outputs = Seq(("MyResult", TensorType.Float())))
+        outputs = Seq(("MyResult", TensorType.Float())),
+        graphBytes = graph.toGraphDef)
       val shape = NodeShape().withInput("InputA", "input_a").
         withInput("InputB", "input_b").
         withOutput("MyResult", "my_result")
@@ -51,8 +54,8 @@ class TensorflowTransformerSpec extends FunSpec {
 
     it("can create transformer & bundle from a TF frozen graph") {
 
-      val model = TensorflowModel(graph, inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
-        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))))
+      val model = TensorflowModel(graph = Some(graph), inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
+        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))), graphBytes = graph.toGraphDef)
       val shape = NodeShape().withInput("dense_1_input", "features").withOutput("dense_3/Sigmoid", "score")
       val transformer = TensorflowTransformer(uid = "wine_quality", shape = shape, model = model)
 

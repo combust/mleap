@@ -20,4 +20,6 @@ class MathUnaryParitySpec extends SparkParityBase {
       setInputCol("dti").
       setOutputCol("dti_tan")
   )).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType")
 }

@@ -34,10 +34,11 @@ trait FrameReader {
 
   def read(in: InputStream): Try[DefaultLeapFrame] = read(in, BuiltinFormats.charset)
   def read(in: InputStream, charset: Charset): Try[DefaultLeapFrame] = {
-    val buffer = new Array[Byte](1024)
     (for(out <- managed(new ByteArrayOutputStream())) yield {
-      while(in.read(buffer) != -1) {
-        out.write(buffer)
+      var value = in.read()
+      while(value != -1) {
+        out.write(value)
+        value = in.read()
       }
       out.toByteArray
     }).tried.flatMap(bytes => fromBytes(bytes, charset))

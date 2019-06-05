@@ -7,12 +7,12 @@ import org.apache.spark.ml.linalg.Vector
 /** Class for multinomial one vs rest models.
   *
   * One vs rest models are comprised of a series of
-  * [[ProbabilisticClassificationModel]]s which are used to
+  * [[ClassificationModel]]s which are used to
   * predict each class.
   *
   * @param classifiers binary classification models
   */
-case class OneVsRestModel(classifiers: Array[ProbabilisticClassificationModel],
+case class OneVsRestModel(classifiers: Array[ClassificationModel],
                           numFeatures: Int) extends Model {
   /** Alias for [[ml.combust.mleap.core.classification.OneVsRestModel#predict]].
     *
@@ -41,8 +41,11 @@ case class OneVsRestModel(classifiers: Array[ProbabilisticClassificationModel],
     */
   def predictWithProbability(features: Vector): (Double, Double) = {
     val (prediction, probability) = classifiers.zipWithIndex.map {
-      case (c, i) =>
+      case (c: ProbabilisticClassificationModel, i) =>
         val raw = c.predictProbabilities(features)(1)
+        (i.toDouble, raw)
+      case (c, i) =>
+        val raw = c.predict(features)
         (i.toDouble, raw)
     }.maxBy(_._2)
 

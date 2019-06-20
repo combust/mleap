@@ -226,7 +226,7 @@ object ImputerModel extends MLReadable[ImputerModel] {
       val model = new ImputerModel(metadata.uid, surrogateValue).
         setMissingValue(missingValue).
         setStrategy(strategy)
-      DefaultParamsReader.getAndSetParams(model, metadata)
+      metadata.getAndSetParams(model)
       model
     }
   }

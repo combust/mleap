@@ -27,7 +27,7 @@ trait TypeConverters {
 
   def sparkToMleapValue(dataType: DataType): (Any) => Any = dataType match {
     case _: DecimalType =>
-      (v: Any) => v.asInstanceOf[BigDecimal].toDouble
+      (v: Any) => v.asInstanceOf[java.math.BigDecimal].doubleValue()
     case _: VectorUDT =>
       (v: Any) =>
         v.asInstanceOf[Vector]: Tensor[Double]

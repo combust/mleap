@@ -21,4 +21,6 @@ class LogisticRegressionParitySpec extends SparkParityBase {
     new LogisticRegressionModel(uid = "logr",
       coefficients = Vectors.dense(0.44, 0.77),
       intercept = 0.66).setThreshold(0.7).setFeaturesCol("features"))).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType")
 }

@@ -21,6 +21,10 @@ class RandomForestClassifierParitySpec extends SparkParityBase {
       setInputCol("approved").
       setOutputCol("label"),
     new RandomForestClassifier().
+      setThresholds(Array(0.4)).
       setFeaturesCol("features").
       setLabelCol("label"))).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType", "seed")
+
 }

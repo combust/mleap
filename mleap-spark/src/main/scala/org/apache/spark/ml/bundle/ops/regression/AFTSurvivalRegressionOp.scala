@@ -39,7 +39,7 @@ class AFTSurvivalRegressionOp extends SimpleSparkOp[AFTSurvivalRegressionModel] 
     new AFTSurvivalRegressionModel(uid = uid,
       coefficients = model.coefficients,
       intercept = model.intercept,
-      scale = model.scale)
+      scale = model.scale).setQuantileProbabilities(model.getQuantileProbabilities)
   }
 
   override def sparkInputs(obj: AFTSurvivalRegressionModel): Seq[ParamSpec] = {

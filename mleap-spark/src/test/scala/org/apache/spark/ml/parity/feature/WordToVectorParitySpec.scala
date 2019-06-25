@@ -16,4 +16,6 @@ class WordToVectorParitySpec extends SparkParityBase {
     new Word2Vec(uid = "words").
       setInputCol("loan_title_tokens").
       setOutputCol("loan_title_token_counts"))).fit(dataset)
+
+  override val unserializedParams = Set("seed")
 }

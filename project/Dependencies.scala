@@ -6,7 +6,7 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "2.3.0"
+  val sparkVersion = "2.4.0"
   val scalaTestVersion = "3.0.0"
   val akkaVersion = "2.5.12"
   val akkaHttpVersion = "10.0.3"
@@ -25,13 +25,14 @@ object Dependencies {
       "org.apache.spark" %% "spark-sql" % sparkVersion,
       "org.apache.spark" %% "spark-mllib" % sparkVersion,
       "org.apache.spark" %% "spark-mllib-local" % sparkVersion,
-      "org.apache.spark" %% "spark-catalyst" % sparkVersion)
+      "org.apache.spark" %% "spark-catalyst" % sparkVersion,
+      "org.apache.spark" %% "spark-avro" % sparkVersion
+    )
     val avroDep = "org.apache.avro" % "avro" % "1.8.1"
     val sprayJson = "io.spray" %% "spray-json" % "1.3.2"
     val arm = "com.jsuereth" %% "scala-arm" % "2.0"
     val config = "com.typesafe" % "config" % "1.3.0"
     val scalaReflect = ScalaVersionDependentModuleID.versioned("org.scala-lang" % "scala-reflect" % _)
-    val sparkAvro = "com.databricks" %% "spark-avro" % "3.0.1"
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
     val tensorflowDeps = Seq(
@@ -72,7 +73,7 @@ object Dependencies {
 
   object Test {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
-    val akkaHttpTestkit =  "com.typesafe.akka" % "akka-http-testkit_2.11" % akkaHttpVersion % "test"
+    val akkaHttpTestkit =  "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % "test"
     val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test"
     val springBootTest = "org.springframework.boot" % "spring-boot-starter-test" % springBootVersion % "test"
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
@@ -102,7 +103,7 @@ object Dependencies {
 
   val sparkBase = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
-  val sparkTestkit = l ++= Provided.spark ++ Seq(sparkAvro, scalaTest)
+  val sparkTestkit = l ++= Provided.spark ++ Seq(scalaTest)
 
   val spark = l ++= Provided.spark
 
@@ -131,9 +132,9 @@ object Dependencies {
 
   val springBootServing = l ++= Seq(springBoot, springBootActuator, commonsLang, Test.scalaTest, Test.springBootTest) ++ scalaPb
 
-  val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
+  val benchmark = l ++= Seq(scalameter, scopt) ++ Compile.spark
 
-  val databricksRuntimeTestkit = l ++= Provided.spark ++ Seq(sparkAvro)
+  val databricksRuntimeTestkit = l ++= Provided.spark
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

@@ -2,7 +2,7 @@ package org.apache.spark.ml.bundle.extension.ops.classification
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.ModelSerializer
 import org.apache.spark.ml.attribute.NominalAttribute
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}

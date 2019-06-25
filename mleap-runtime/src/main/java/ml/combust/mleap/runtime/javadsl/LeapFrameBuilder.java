@@ -24,6 +24,10 @@ public class LeapFrameBuilder {
         return StructType$.MODULE$.apply(fields).get();
     }
 
+    public StructType createSchema(String json) {
+        return support.createSchema(json);
+    }
+
     public StructField createField(String name, DataType dt) {
         return new StructField(name, dt);
     }

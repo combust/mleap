@@ -49,5 +49,5 @@ case class LinearSVCModel(coefficients: Vector,
     override def inputSchema: StructType =  StructType("features" -> TensorType.Double(numFeatures)).get
 
     override def outputSchema: StructType = StructType("raw_prediction" -> TensorType.Double(numClasses),
-        "prediction" -> ScalarType.Double).get
+        "prediction" -> ScalarType.Double.nonNullable).get
 }

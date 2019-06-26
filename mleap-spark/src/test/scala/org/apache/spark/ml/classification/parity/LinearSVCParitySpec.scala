@@ -10,14 +10,18 @@ import org.apache.spark.sql.DataFrame
 class LinearSVCParitySpec extends SparkParityBase
 {
     override val dataset: DataFrame = baseDataset.select("fico_score_group_fnl", "dti")
-    override val sparkTransformer: Transformer = new Pipeline().setStages(Array(new StringIndexer().
+    override val sparkTransformer: Transformer = new Pipeline()
+      .setStages(Array(
+        new StringIndexer().
             setInputCol("fico_score_group_fnl").
             setOutputCol("fico_index"),
         new VectorAssembler().
                 setInputCols(Array("fico_index", "dti")).
                 setOutputCol("features"),
-        new LinearSVCModel("logr",
+        new LinearSVCModel("linear_svc",
             Vectors.dense(0.44, 0.77),
-            0.66).setThreshold(0.7).setFeaturesCol("features"))).fit(dataset)
+            0.66).setThreshold(0.5).setFeaturesCol("features")))
+      .fit(dataset)
+    override val unserializedParams: Set[String] = Set("stringOrderType")
 }
 

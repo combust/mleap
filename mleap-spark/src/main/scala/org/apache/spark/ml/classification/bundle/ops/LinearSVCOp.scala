@@ -37,7 +37,8 @@ class LinearSVCOp extends SimpleSparkOp[LinearSVCModel]
         {
             new LinearSVCModel(uid = "",
                 coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
-                intercept = model.value("intercept").getDouble)
+                intercept = model.value("intercept").getDouble
+              ).setThreshold(model.value("threshold").getDouble)
         }
     }
 
@@ -54,6 +55,6 @@ class LinearSVCOp extends SimpleSparkOp[LinearSVCModel]
 
     override def sparkLoad(uid: String, shape: NodeShape, model: LinearSVCModel): LinearSVCModel =
     {
-        new LinearSVCModel(uid = uid, coefficients = model.coefficients, intercept = model.intercept)
+        new LinearSVCModel(uid = uid, coefficients = model.coefficients, intercept = model.intercept).setThreshold(model.getThreshold)
     }
 }

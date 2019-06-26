@@ -19,7 +19,7 @@ class LinearSVCSpec extends FunSpec
                 model = new LinearSVCModel(Vectors.dense(1, 2, 3), 2))
             assert(transformer.schema.fields ==
                     Seq(StructField("features", TensorType.Double(3)),
-                        StructField("prediction", ScalarType.Double)))
+                        StructField("prediction", ScalarType.Double.nonNullable)))
         }
 
         it("has the correct inputs and outputs with prediction column")
@@ -29,7 +29,7 @@ class LinearSVCSpec extends FunSpec
             assert(transformer.schema.fields ==
                     Seq(StructField("features", TensorType.Double(3)),
                         StructField("rp", TensorType.Double(2)),
-                        StructField("pred", ScalarType.Double)))
+                        StructField("pred", ScalarType.Double.nonNullable)))
         }
 
     }

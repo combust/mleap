@@ -22,6 +22,9 @@ class LinearSVCParitySpec extends SparkParityBase
             Vectors.dense(0.44, 0.77),
             0.66).setThreshold(0.5).setFeaturesCol("features")))
       .fit(dataset)
+
+    // The string order type is ignored, because once the transformer is built based on some order type, we need to serialize only the string to index map
+    // but not the order in which it has to index. This value we can ignore while we check the transformer values.
     override val unserializedParams: Set[String] = Set("stringOrderType")
 }
 

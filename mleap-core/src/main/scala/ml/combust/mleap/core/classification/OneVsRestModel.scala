@@ -36,9 +36,9 @@ case class OneVsRestModel(classifiers: Array[ClassificationModel],
 
         (i.toDouble, probability)
       case (c,i) =>
-        val raw = c.predict(features)
-        predArray(i) = raw
-        (i.toDouble,raw)
+        val raw = c.predictRaw(features)
+        predArray(i) = raw(1)
+        (i.toDouble,raw(1))
 
     }.maxBy(_._2)
 

@@ -35,7 +35,7 @@ case class LinearSVCModel(coefficients: Vector,
         if (margin(features) > threshold) 1.0 else 0.0
     }
 
-    def predictRaw(features: Vector): Vector =
+    override def predictRaw(features: Vector): Vector =
     {
         val m = margin(features)
         Vectors.dense(-m, m)

@@ -21,6 +21,8 @@ trait ClassificationModel extends Model {
     * @return predicted class or probability
     */
   def predict(features: Vector): Double
+
+  def predictRaw(features: Vector): Vector
 }
 
 @SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/classification/ProbabilisticClassifier.scala")

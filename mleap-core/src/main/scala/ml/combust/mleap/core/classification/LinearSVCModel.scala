@@ -19,7 +19,7 @@ case class LinearSVCModel(coefficients: Vector,
     val numClasses: Int = 2
     val numFeatures: Int = coefficients.size
 
-    private val margin: Vector => Double = (features) =>
+    private val margin: Vector => Double = features =>
     {
         BLAS.dot(features, coefficients) + intercept
     }

@@ -7,7 +7,7 @@ import ml.combust.mleap.pb
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
-import scala.io.Source
+import java.nio.file.{Paths, Files}
 import scalapb.json4s.Parser
 
 @Component
@@ -23,19 +23,21 @@ class ModelLoader {
   def loadModel(): Unit = {
     if (modelConfigPath == null) {
       logger.info("Skipping loading model on startup")
-    } else {
-      logger.info(s"Loading model from $modelConfigPath")
-
-      val fileSource = Source.fromFile(modelConfigPath)
-
-      val request = try {
-        fileSource.getLines.mkString
-      } finally {
-        fileSource.close()
-      }
-
-      StarterConfiguration.getMleapExecutor
-        .loadModel(jsonParser.fromJsonString[pb.LoadModelRequest](request))(timeout)
+      return
     }
+
+    val configPath = Paths.get(modelConfigPath)
+
+    if (!Files.exists(configPath)) {
+      logger.warn(s"Model path does not exist: $modelConfigPath")
+      return
+    }
+
+    logger.info(s"Loading model from $modelConfigPath")
+
+    val request = new String(Files.readAllBytes(configPath))
+
+    StarterConfiguration.getMleapExecutor
+      .loadModel(jsonParser.fromJsonString[pb.LoadModelRequest](request))(timeout)
   }
 }

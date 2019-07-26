@@ -7,7 +7,8 @@ import ml.combust.mleap.pb
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
-import java.nio.file.{Paths, Files}
+import scala.collection.JavaConverters._
+import java.nio.file.{Paths, Files, Path}
 import scalapb.json4s.Parser
 
 @Component
@@ -33,11 +34,19 @@ class ModelLoader {
       return
     }
 
-    logger.info(s"Loading model from $modelConfigPath")
+    val configFiles: List[Path] = if (Files.isDirectory(configPath)) {
+      Files.list(configPath).iterator().asScala.toList
+    } else {
+      List(configPath)
+    }
 
-    val request = new String(Files.readAllBytes(configPath))
+    for (configFile <- configFiles) {
+      logger.info(s"Loading model from ${configFile.toString}")
 
-    StarterConfiguration.getMleapExecutor
-      .loadModel(jsonParser.fromJsonString[pb.LoadModelRequest](request))(timeout)
+      val request = new String(Files.readAllBytes(configFile))
+
+      StarterConfiguration.getMleapExecutor
+        .loadModel(jsonParser.fromJsonString[pb.LoadModelRequest](request))(timeout)
+    }
   }
 }

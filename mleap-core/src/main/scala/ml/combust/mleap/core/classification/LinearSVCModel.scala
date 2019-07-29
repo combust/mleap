@@ -7,10 +7,10 @@ import org.apache.spark.ml.linalg.mleap.BLAS
 
 object LinearSVCModel
 {
-    val defaultThreshold = 0.5
+    val defaultThreshold = 0.0
 }
 
-@SparkCode(uri = "")
+@SparkCode(uri = "https://github.com/apache/spark/blob/master/mllib/src/main/scala/org/apache/spark/ml/classification/LinearSVC.scala")
 case class LinearSVCModel(coefficients: Vector,
                             intercept: Double,
                             threshold: Double = LinearSVCModel.defaultThreshold

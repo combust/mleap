@@ -100,9 +100,7 @@ trait ProbabilisticClassificationModel extends ClassificationModel {
   }
 
   def rawToProbabilityInPlace(raw: Vector): Vector
-
-  def predictRaw(features: Vector): Vector
-
+  
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get
 
   override def outputSchema: StructType = StructType("raw_prediction" -> TensorType.Double(numClasses),

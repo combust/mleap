@@ -2,7 +2,6 @@ package ml.combust.mleap.bundle.ops.classification
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.op.OpModel
-import ml.combust.bundle.serializer.ModelSerializer
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.core.classification.LinearSVCModel
@@ -23,11 +22,11 @@ class LinearSVCOp extends MleapOp[LinearSVC, LinearSVCModel]
         override def store(model: Model, obj: LinearSVCModel)
                           (implicit context: BundleContext[MleapContext]): Model =
         {
-            val m = model.withValue("num_classes", Value.long(obj.numClasses))
-            // Set the rest of the parameters
-            m.withValue("coefficients", Value.vector(obj.coefficients.toArray))
-                    .withValue("intercept", Value.double(obj.intercept))
-                    .withValue("threshold", Value.double(obj.threshold))
+            model
+              .withValue("num_classes", Value.long(obj.numClasses))
+              .withValue("coefficients", Value.vector(obj.coefficients.toArray))
+              .withValue("intercept", Value.double(obj.intercept))
+              .withValue("threshold", Value.double(obj.threshold))
         }
 
         override def load(model: Model)
@@ -35,7 +34,7 @@ class LinearSVCOp extends MleapOp[LinearSVC, LinearSVCModel]
         {
             val numClasses = model.value("num_classes").getLong.toInt
             if(numClasses != 2)
-                throw new IllegalArgumentException("MLeap only supports binary SVM")
+                throw new IllegalArgumentException("Spark only supports binary SVM and so as Mleap")
 
             LinearSVCModel(
                 coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),

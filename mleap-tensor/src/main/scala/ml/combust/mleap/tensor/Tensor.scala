@@ -59,6 +59,8 @@ case class DenseTensor[T](values: Array[T],
   override def toDense: DenseTensor[T] = this
   override def toArray: Array[T] = values
 
+  override def size: Int = rawValues.length
+
   override def rawValues: Array[T] = values
   override def rawValuesIterator: Iterator[T] = values.iterator
   override def mapValues[T2: ClassTag](f: (T) => T2): Tensor[T2] = {
@@ -133,20 +135,28 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
   }
 
   override def get(is: Int *): Option[T] = {
-    val index = util.Arrays.binarySearch(indices.toArray, is, new Comparator[Seq[Int]] {
-      override def compare(o1: Seq[Int], o2: Seq[Int]): Int = {
-        for((v1, v2) <- o1.zip(o2)) {
-          val c = v1.compareTo(v2)
-          if(c != 0) { return c }
+
+    if (is.size == dimensions.size & is.zip(dimensions).forall(x => x._1 < x._2)) {
+      val index = util.Arrays.binarySearch(indices.toArray, is, new Comparator[Seq[Int]] {
+        override def compare(o1: Seq[Int], o2: Seq[Int]): Int = {
+          for ((v1, v2) <- o1.zip(o2)) {
+            val c = v1.compareTo(v2)
+            if (c != 0) {
+              return c
+            }
+          }
+
+          0
         }
+      })
 
-        0
+      if (index >= 0) {
+        Some(values(index))
+      } else {
+        Some(null.asInstanceOf[T])
       }
-    })
-
-    if(index >= 0) {
-      Some(values(index))
-    } else { None }
+    } else
+      None
   }
 
   private def denseIndex(index: Seq[Int]): Int = {
@@ -167,8 +177,7 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
           if (obj.values.isEmpty) { true }
           else { false }
         } else if(indices.length == obj.indices.length && indices == obj.indices) {
-          ((dimensions == obj.dimensions) ||
-            ((dimensions.head == -1 || obj.dimensions.head == -1) && dimensions.tail == obj.dimensions.tail)) &&
+          (dimensions == obj.dimensions) &&
               (values sameElements obj.asInstanceOf[SparseTensor[T]].values)
         } else { false }
       } else { false }

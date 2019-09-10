@@ -92,6 +92,7 @@ object Bundle {
       val decision_tree_classifier = "decision_tree_classifier"
       val support_vector_machine = "support_vector_machine"
       val one_vs_rest = "one_vs_rest"
+      val linear_svc = "linear_svc"
     }
 
     object clustering {

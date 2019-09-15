@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
-import ml.combust.mleap.core.feature.StringMapModel
+import ml.combust.mleap.core.feature.{StringMapHandleInvalid, StringMapModel}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.StringMap
 
@@ -28,8 +28,10 @@ class StringMapOp extends MleapOp[StringMap, StringMapModel] {
 
       // add the labels and values to the Bundle model that
       // will be serialized to our MLeap bundle
-      model.withValue("labels", Value.stringList(labels)).
-        withValue("values", Value.doubleList(values))
+      model.withValue("labels", Value.stringList(labels))
+        .withValue("values", Value.doubleList(values))
+        .withValue("handle_invalid", Value.string(obj.handleInvalid.asParamString))
+        .withValue("default_value", Value.double(obj.defaultValue))
     }
 
     override def load(model: Model)
@@ -40,8 +42,11 @@ class StringMapOp extends MleapOp[StringMap, StringMapModel] {
       // retrieve our list of values
       val values = model.value("values").getDoubleList
 
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(StringMapHandleInvalid.fromString).getOrElse(StringMapHandleInvalid.default)
+      val defaultValue = model.getValue("default_value").map(_.getDouble).getOrElse(StringMapHandleInvalid.defaultValue)
+
       // reconstruct the model using the parallel labels and values
-      StringMapModel(labels.zip(values).toMap)
+      StringMapModel(labels.zip(values).toMap, handleInvalid = handleInvalid, defaultValue = defaultValue)
     }
   }
 

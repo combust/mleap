@@ -35,6 +35,7 @@ object Dependencies {
     val scalaReflect = ScalaVersionDependentModuleID.versioned("org.scala-lang" % "scala-reflect" % _)
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
+    val commonsIo = "commons-io" % "commons-io" % "2.5"
     val tensorflowDeps = Seq(
       "org.tensorflow" % "libtensorflow" % tensorflowVersion,
       "org.tensorflow" % "libtensorflow_jni" % tensorflowVersion
@@ -99,7 +100,7 @@ object Dependencies {
 
   val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)
 
-  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface) ++ scalaReflect.modules(scalaVersion.value))
+  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface) ++ commonsIo ++ scalaReflect.modules(scalaVersion.value))
 
   val sparkBase = l ++= Provided.spark ++ Seq(Test.scalaTest)
 

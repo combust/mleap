@@ -5,6 +5,7 @@ import java.nio.charset.Charset
 
 import ml.combust.mleap.ClassLoaderUtil
 import ml.combust.mleap.runtime.frame.DefaultLeapFrame
+import org.apache.commons.io.IOUtils
 import resource._
 
 import scala.util.Try
@@ -34,13 +35,7 @@ trait FrameReader {
 
   def read(in: InputStream): Try[DefaultLeapFrame] = read(in, BuiltinFormats.charset)
   def read(in: InputStream, charset: Charset): Try[DefaultLeapFrame] = {
-    (for(out <- managed(new ByteArrayOutputStream())) yield {
-      var value = in.read()
-      while(value != -1) {
-        out.write(value)
-        value = in.read()
-      }
-      out.toByteArray
-    }).tried.flatMap(bytes => fromBytes(bytes, charset))
+    Try(IOUtils.toByteArray(in)).flatMap(bytes => fromBytes(bytes, charset))
   }
-}
+
+  }

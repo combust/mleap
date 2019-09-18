@@ -126,7 +126,7 @@ class TfidfVectorizerSerializer(MLeapSerializer):
         num_features = transformer.idf_.shape[0]
         vocabulary = [None] * num_features
 
-        for term, termidx in transformer.vocabulary_.iteritems():
+        for term, termidx in transformer.vocabulary_.items():
             vocabulary[termidx] = str(term)
 
         tf_attributes = [

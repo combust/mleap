@@ -330,8 +330,8 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(le.op, model['op'])
-        self.assertEqual('nullable_input', model['attributes'].keys()[0])
-        self.assertEqual('labels', model['attributes'].keys()[1])
+        self.assertTrue('nullable_input' in model['attributes'])
+        self.assertTrue('labels' in model['attributes'])
 
         # Test node.json
         with open("{}/{}.node/node.json".format(self.tmp_dir, le.name)) as json_data:
@@ -344,7 +344,6 @@ class TransformerTests(unittest.TestCase):
     def label_encoder_deserializer_test(self):
 
         labels = ['a', 'b', 'c']
-
         le = LabelEncoder(input_features=['label_feature'],
                           output_features='label_feature_le_encoded')
 

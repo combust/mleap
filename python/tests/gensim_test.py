@@ -78,7 +78,3 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(node['shape']['inputs'][0]['name'], ['input'])
         self.assertEqual(node['shape']['outputs'][0]['name'], 'sentence_vector')
         self.assertEqual(model['op'], 'word2vec')
-
-
-
-

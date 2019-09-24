@@ -14,7 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import os
+import json
+import shutil
+import uuid
+import warnings
+from collections import OrderedDict
 
+import numpy as np
+import pandas as pd
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer, Binarizer, PolynomialFeatures
 from sklearn.preprocessing.data import OneHotEncoder
@@ -23,13 +31,6 @@ from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer, Vector
 from sklearn.utils import column_or_1d
 from sklearn.utils.validation import check_is_fitted
 from sklearn.utils.fixes import np_version
-import warnings
-import numpy as np
-import pandas as pd
-import uuid
-import os
-import shutil
-import json
 
 
 class ops(object):
@@ -1079,6 +1080,10 @@ class StringMap(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
         self.serializable = True
         self.labels = labels
         if labels is not None:
+            if not isinstance(self.labels, OrderedDict):
+                self.labels = OrderedDict(
+                    sorted(self.labels.items(), key=lambda x: x[0])
+                )
             self.label_keys = self.labels.keys
             self.label_values = self.labels.values
 

@@ -64,8 +64,8 @@ class StringMapTest(unittest.TestCase):
 
     def test_validate_labels_key_fails(self):
         with self.assertRaises(AssertionError):
-            StringMap(None, {'valid_key_type': 'invalid_value_type'})
+            StringMap(None, {False: 0.0})
 
     def test_validate_labels_value_fails(self):
         with self.assertRaises(AssertionError):
-            StringMap(None, {False: 0.0})
+            StringMap(None, {'valid_key_type': 'invalid_value_type'})

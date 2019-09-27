@@ -1,4 +1,4 @@
-import sys
+import six
 from pyspark.ml.util import JavaMLReadable, JavaMLWritable, _jvm
 from pyspark.ml.wrapper import JavaTransformer
 from pyspark.ml.param.shared import HasInputCol, HasOutputCol
@@ -26,9 +26,8 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
             assert handleInvalid in ['error', 'keep'], 'Invalid value for handleInvalid: {}'.format(handleInvalid)
             assert isinstance(labels, dict), 'labels must be a dict or a DataFrame, got: {}'.format(type(labels))
             for (key, value) in labels.items():
-                # py2 compatibility: DataFrame keys are typically unicode
-                key_types = (str) if sys.version_info > (3, 0) else (str, unicode)
-                assert isinstance(key, key_types), 'label keys must be {}, got: {}'.format(key_types, type(key))
+                assert isinstance(key, six.string_types), \
+                    'label keys must be a string type, got: {}'.format(type(key))
                 assert isinstance(value, float), 'label values must be float, got: {}'.format(type(key))
 
         validate_args()

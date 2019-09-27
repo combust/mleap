@@ -13,5 +13,7 @@ writeRuntimeClasspathToFile := {
       .value.map(_.data)))
 }
 
+// TODO this didn't work exactly as intended.. requires explicitly calling 'sbt compile'. eg. 'sbt test' skips this
+//  how to make sbt always run this always, for example as part of 'sbt test'?
 // run writeRuntimeClasspathToFile as part of 'compile' of this module
-compile := {(compile in Compile) dependsOn writeRuntimeClasspathToFile}.value
+//compile := {(compile in Compile) dependsOn writeRuntimeClasspathToFile}.value

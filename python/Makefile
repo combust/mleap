@@ -17,6 +17,7 @@ clean:
 	find . -name '*~' -exec rm -f {} \;
 
 test:
+	cd .. && sbt mleap-spark-extension/writeRuntimeClasspathToFile && cd -
 	tox
 
 build: clean

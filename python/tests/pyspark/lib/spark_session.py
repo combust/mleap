@@ -30,7 +30,7 @@ def _mleap_classpath():
     """
     Read classpath for mleap-spark-extension with the locally compiled classes.
 
-    Classpath file can be refreshed by running `sbt mleap-spark-extension/compile`.
+    Classpath file can be refreshed by running `sbt mleap-spark-extension/writeRuntimeClasspathToFile`.
     However, that's only needed if making changes to dependencies.
     """
     classpath_file = os.path.join(

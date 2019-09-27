@@ -9,7 +9,7 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
     def __init__(self, labels, inputCol=None, outputCol=None, handleInvalid='error', defaultValue=0.0):
         """
         __init__(self, labels, inputCol=None, outputCol=None, handleInvalid='error', defaultValue=0.0)
-        labels is a dict {string: double}
+        labels must be a dict {string: double} or a spark DataFrame with columns inputCol & outputCol
         handleInvalid: how to handle missing labels: 'error' (throw an error), or 'keep' (map to the default value)
         """
         super(StringMap, self).__init__()

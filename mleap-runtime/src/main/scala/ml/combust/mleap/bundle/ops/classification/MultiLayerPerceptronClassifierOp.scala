@@ -21,13 +21,15 @@ class MultiLayerPerceptronClassifierOp extends MleapOp[MultiLayerPerceptronClass
     override def store(model: Model, obj: MultiLayerPerceptronClassifierModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
       model.withValue("layers", Value.longList(obj.layers.map(_.toLong))).
-        withValue("weights", Value.vector(obj.weights.toArray))
+        withValue("weights", Value.vector(obj.weights.toArray)).
+        withValue("thresholds", obj.thresholds.map(Value.doubleList(_)))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): MultiLayerPerceptronClassifierModel = {
       MultiLayerPerceptronClassifierModel(layers = model.value("layers").getLongList.map(_.toInt),
-        weights = Vectors.dense(model.value("weights").getTensor[Double].toArray))
+        weights = Vectors.dense(model.value("weights").getTensor[Double].toArray),
+        thresholds = model.getValue("thresholds").map(_.getDoubleList.toArray))
     }
   }
 

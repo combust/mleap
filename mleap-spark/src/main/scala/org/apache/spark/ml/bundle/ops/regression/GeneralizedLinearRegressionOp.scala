@@ -42,9 +42,12 @@ class GeneralizedLinearRegressionOp extends SimpleSparkOp[GeneralizedLinearRegre
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: GeneralizedLinearRegressionModel): GeneralizedLinearRegressionModel = {
-    new GeneralizedLinearRegressionModel(uid = uid,
+    val m = new GeneralizedLinearRegressionModel(uid = uid,
       coefficients = model.coefficients,
       intercept = model.intercept)
+    m.set(m.family, model.getFamily)
+    if (model.isSet(model.link)) m.set(m.link, model.getLink)
+    m
   }
 
   override def sparkInputs(obj: GeneralizedLinearRegressionModel): Seq[ParamSpec] = {

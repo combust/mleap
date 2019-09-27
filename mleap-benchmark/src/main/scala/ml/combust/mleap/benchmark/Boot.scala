@@ -4,8 +4,6 @@ import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.config.ConfigValueFactory.fromAnyRef
 import ml.combust.mleap.BuildInfo
 
-import scala.collection.JavaConverters._
-
 /**
   * Created by hollinwilkins on 2/4/17.
   */

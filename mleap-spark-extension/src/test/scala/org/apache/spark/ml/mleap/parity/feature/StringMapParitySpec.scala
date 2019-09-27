@@ -1,6 +1,6 @@
 package org.apache.spark.ml.mleap.parity.feature
 
-import ml.combust.mleap.core.feature.StringMapModel
+import ml.combust.mleap.core.feature.{StringMapHandleInvalid, StringMapModel}
 import org.apache.spark.ml.mleap.feature.StringMap
 import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.ml.{Pipeline, Transformer}
@@ -17,5 +17,12 @@ class StringMapParitySpec extends SparkParityBase {
   override val sparkTransformer: Transformer = new Pipeline().setStages(Array(
     new StringMap(uid = "string_map", model = new StringMapModel(
       Map("alice" -> 0, "andy" -> 1, "kevin" -> 2)
-    )).setInputCol("name").setOutputCol("index"))).fit(dataset)
+    )).setInputCol("name").setOutputCol("index"),
+    new StringMap(uid = "string_map2", model = new StringMapModel(
+      // This map is missing the label "kevin". Exception is thrown unless StringMapHandleInvalid.Keep is set.
+      Map("alice" -> 0, "andy" -> 1),
+      handleInvalid = StringMapHandleInvalid.Keep, defaultValue = 1.0
+    )).setInputCol("name").setOutputCol("index2")
+
+  )).fit(dataset)
 }

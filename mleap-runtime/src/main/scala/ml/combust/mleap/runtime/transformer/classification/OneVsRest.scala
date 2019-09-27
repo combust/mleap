@@ -14,13 +14,25 @@ case class OneVsRest(override val uid: String = Transformer.uniqueName("one_vs_r
                      override val shape: NodeShape,
                      override val model: OneVsRestModel) extends MultiTransformer {
   override val exec: UserDefinedFunction = {
-    val f = shape.getOutput("probability") match {
-      case Some(_) =>
+    val f = (shape.getOutput("raw_prediction"), shape.getOutput("probability")) match {
+      case (Some(_), Some(_)) =>
         (features: Tensor[Double]) => {
-          val (prediction, probability) = model.predictWithProbability(features)
+          val (probability, rawPrediction, prediction) = model.predictAll(features)
+          Row(probability, rawPrediction: Tensor[Double], prediction)
+        }
+      case (None, Some(_)) =>
+        (features: Tensor[Double]) => {
+          val (probability, _, prediction) = model.predictAll(features)
           Row(probability, prediction)
         }
-      case None =>
+
+      case (Some(_), None) =>
+        (features: Tensor[Double]) => {
+          val (_, rawPrediction, prediction) = model.predictAll(features)
+          Row(rawPrediction: Tensor[Double], prediction)
+        }
+
+      case (None, None) =>
         (features: Tensor[Double]) => Row(model(features))
     }
 

@@ -1,33 +1,23 @@
 
 help:
 	@echo "  env         create a development environment using virtualenv"
-	@echo "  deps        install dependencies"
 	@echo "  clean       remove unwanted stuff"
-	@echo "  coverage    run tests with code coverage"
-	@echo "  test        run tests"
+	@echo "  test        run tests with code coverage"
 
 env:
-	sudo easy_install pip && \
-	pip install virtualenv && \
-	virtualenv env && \
-	. env/bin/activate && \
-	make deps
-
-deps:
-	pip install -r requirements.txt --use-mirrors
+	tox -e venv
 
 clean:
 	rm -fr build
 	rm -fr dist
+	rm -fr .tox
+	rm -fr venv
 	find . -name '*.pyc' -exec rm -f {} \;
 	find . -name '*.pyo' -exec rm -f {} \;
 	find . -name '*~' -exec rm -f {} \;
 
-coverage:
-    nosetests --with-coverage --cover-package=mleap --nologcapture --exclude-dir=mleap/pyspark --verbose --where ./
-
 test:
-	nosetests
+	tox
 
 build: clean
 	python setup.py sdist

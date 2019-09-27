@@ -30,7 +30,7 @@ class StopWordsRemoverOp extends SimpleSparkOp[StopWordsRemover] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: StopWordsRemover): StopWordsRemover = {
-    new StopWordsRemover(uid = uid)
+    new StopWordsRemover(uid = uid).setStopWords(model.getStopWords).setCaseSensitive(model.getCaseSensitive)
   }
 
   override def sparkInputs(obj: StopWordsRemover): Seq[ParamSpec] = {

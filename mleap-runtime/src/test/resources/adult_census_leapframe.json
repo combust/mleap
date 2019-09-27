@@ -1,0 +1,50 @@
+{
+    "schema": {
+        "fields": [
+            {
+                "name": "age",
+                "type": "integer"
+            },
+            {
+                "name": "workclass",
+                "type": "string"
+            },
+            {
+                "name": "fnlwgt",
+                "type": "integer"
+            },
+            {
+                "name": "education",
+                "type": "string"
+            },
+            {
+                "name": "marital_status",
+                "type": "string"
+            },
+            {
+                "name": "capital_gain",
+                "type": "integer"
+            },
+            {
+                "name": "hours_per_week",
+                "type": "integer"
+            },
+            {
+                "name": "income",
+                "type": "string"
+            }
+        ]
+    },
+    "rows": [
+        [
+            17,
+            "Private",
+            340,
+            "12th",
+            "Never-married",
+            0,
+            25,
+            "<=50K"
+        ]
+    ]
+}

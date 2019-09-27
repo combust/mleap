@@ -33,7 +33,7 @@ class BinarizerOp extends SimpleSparkOp[Binarizer] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: Binarizer): Binarizer = {
-    new Binarizer(uid = uid)
+    new Binarizer(uid = uid).setThreshold(model.getThreshold)
   }
 
   override def sparkInputs(obj: Binarizer): Seq[ParamSpec] = {

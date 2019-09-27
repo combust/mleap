@@ -154,7 +154,7 @@ val config = new Configuration()
 val fs = FileSystem.get(config)
   
 // Create the hadoop bundle file system
-val bundleFs = HadoopBundleFileSystem(fs)
+val bundleFs = new HadoopBundleFileSystem(fs)
   
 // Create an implicit custom mleap context for saving/loading
 implicit val customMleapContext = MleapContext.defaultContext.copy(

@@ -44,9 +44,9 @@ class StringMapTest(unittest.TestCase):
             StringMap({'z': 1.0}, 'key_col', 'value_col').transform(self.input).collect()
         self.assertIn('java.util.NoSuchElementException: Missing label: a', str(error.exception))
 
-    def test_map_created_from_dataframe(self):
+    def test_map_from_dataframe(self):
         labels_df = self.spark.createDataFrame([['a', 1.0]], 'key_col: string, value_col: double')
-        result = StringMap(labels_df, 'key_col', 'value_col').transform(self.input)
+        result = StringMap.from_dataframe(labels_df, 'key_col', 'value_col').transform(self.input)
         expected = self.spark.createDataFrame([['a', 'b', 1.0]], OUTPUT_SCHEMA)
         assert_df(expected, result)
 

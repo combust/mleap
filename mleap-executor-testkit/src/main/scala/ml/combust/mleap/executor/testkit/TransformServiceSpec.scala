@@ -11,7 +11,7 @@ import ml.combust.mleap.executor.error.{AlreadyExistsException, NotFoundExceptio
 import ml.combust.mleap.executor.service.TransformService
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.serialization.BuiltinFormats
-import org.scalatest.{FunSpecLike, Ignore}
+import org.scalatest.{FunSpecLike}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures
 
@@ -232,7 +232,9 @@ trait TransformServiceSpec extends FunSpecLike
       }
 
       describe("throttling") {
-        it("throttles elements through the flow") {
+        // TODO this test fails randomly on Travis, so temporarily replaced it() with ignore()
+        //  https://github.com/combust/mleap/issues/573
+        ignore("throttles elements through the flow") {
           Source.fromIterator(
             () => Seq(
               (StreamTransformRowRequest(Try(frame.dataset.head)), 2),
@@ -362,6 +364,7 @@ trait TransformServiceSpec extends FunSpecLike
 
       describe("throttling") {
         // TODO this test fails randomly on Travis, so temporarily replaced it() with ignore()
+        //  https://github.com/combust/mleap/issues/573
         ignore("throttles elements through the flow") {
           Source.fromIterator(
             () => Seq(

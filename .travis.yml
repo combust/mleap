@@ -17,7 +17,7 @@ install:
     -   pip install --user tox
 script:
   - tox -c python/tox.ini -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .) -v
-  - travis/travis.sh
+  - SCALA_VERSION=$TRAVIS_SCALA_VERSION travis/travis.sh
 
 notifications:
   on_success: change

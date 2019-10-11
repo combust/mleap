@@ -25,10 +25,8 @@ class IDFOp extends SimpleSparkOp[IDFModel] {
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): IDFModel = {
-      val idfModel = new feature.IDFModel(
-        Vectors.dense(model.value("idf").getTensor[Double].toArray),
-        model.value("docFreq").getTensor[Long].toArray,
-        model.value("numDocs").getLong)
+      val idf = Vectors.dense(model.value("idf").getTensor[Double].toArray)
+      val idfModel = new feature.IDFModel(idf, new Array[Long](idf.size),0)
       new IDFModel(uid = "", idfModel = idfModel)
     }
   }

@@ -7,7 +7,7 @@ import org.scalatest.FunSpec
 class IDFModelSpec extends FunSpec {
 
   describe("idf model") {
-    val model = IDFModel(Vectors.dense(Array(1.0, 2.0)))
+    val model = IDFModel(Vectors.dense(Array(1.0)), Array(1L), 1)
 
     it("has the right input schema") {
       assert(model.inputSchema.fields ==

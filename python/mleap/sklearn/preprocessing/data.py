@@ -1102,8 +1102,8 @@ class StringMap(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
     def serialize_to_bundle(self, path, model_name):
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(("labels", self.labels.keys()))
-        attributes.append(("values", Vector(self.labels.values())))
+        attributes.append(("labels", list(self.labels.keys())))
+        attributes.append(("values", Vector(list(self.labels.values()))))
 
         # define node inputs and outputs
         inputs = [{

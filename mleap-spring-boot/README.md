@@ -61,7 +61,7 @@ curl --header "Content-Type: application/json" \
 
 ```
 
-5. POST /models/{YOUR_MODEL_NAME}/transform: Transform or scoring request, replacing the chosen model name ```{YOUR_MODEL_NAME}```, format ```{YOUR_FORMAT}``` and the appropriately encoded leap frame ```{ENCODED_LEAP_FRAME}```
+5. POST /models/transform: Transform or scoring request, replacing the chosen model name ```{YOUR_MODEL_NAME}```, format ```{YOUR_FORMAT}``` and the appropriately encoded leap frame ```{ENCODED_LEAP_FRAME}```
 
 ```
 body='{"modelName":"{YOUR_MODEL_NAME}","format":"{YOUR_FORMAT}","initTimeout":"35000","tag":0,"frame":"{ENCODED_LEAP_FRAME}"}'

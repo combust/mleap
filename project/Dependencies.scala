@@ -16,7 +16,7 @@ object Dependencies {
   lazy val slf4jVersion = "1.7.25"
   lazy val awsSdkVersion = "1.11.349"
   val tensorflowVersion = "1.11.0"
-  val xgboostVersion = "0.9"
+  val xgboostVersion = "0.90"
   val hadoopVersion = "2.6.5" // matches spark version
 
   object Compile {

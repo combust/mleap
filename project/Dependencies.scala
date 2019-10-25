@@ -67,8 +67,8 @@ object Dependencies {
       "ch.qos.logback" % "logback-classic" % logbackVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
-    val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion // scala 2.11 only
-    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion // scala 2.11 only
+    val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion // scala 2.12 only
+    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion // scala 2.12 only
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
 

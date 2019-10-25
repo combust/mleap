@@ -17,7 +17,7 @@ object Dependencies {
   lazy val awsSdkVersion = "1.11.349"
   val tensorflowVersion = "1.11.0"
   val xgboostVersion = "0.90"
-  val hadoopVersion = "2.6.5" // matches spark version
+  val hadoopVersion = "2.7.4" // matches spark version
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))

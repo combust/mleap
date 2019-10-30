@@ -20,7 +20,8 @@ writeRuntimeClasspathToFile <<= Def.task {
   // Fix for triggeredBy is only available in 0.13.14, see https://github.com/sbt/sbt/issues/1444
   val file = reflect.io.File("mleap-spark-extension/target/classpath-runtime.txt")
   println(f"writeRuntimeClasspathToFile -> ${file.toAbsolute}")
-  file
-    .writeAll(Path.makeString((dependencyClasspath in Runtime)
-      .value.map(_.data)))
+  val classPathString = Path.makeString((dependencyClasspath in Runtime)
+    .value.map(_.data))
+  println(f"classPathString: ${classPathString}")
+  file.writeAll(classPathString)
 }.triggeredBy(compile in Compile)

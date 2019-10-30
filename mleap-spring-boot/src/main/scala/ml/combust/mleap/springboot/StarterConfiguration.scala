@@ -10,6 +10,7 @@ import scalapb.json4s.{Parser, Printer}
 
 object StarterConfiguration {
   private var actorSystem: Option[ActorSystem] = None
+  private var mleapExecutor: Option[MleapExecutor] = None
 
   def setActorSystem(system: ActorSystem): Unit = {
     this.actorSystem = Option(system)
@@ -19,7 +20,11 @@ object StarterConfiguration {
     ActorSystem("MleapSpringBoot")
   }
 
-  def getMleapExecutor: MleapExecutor = MleapExecutor(getActorSystem)
+  def getMleapExecutor: MleapExecutor = this.mleapExecutor.getOrElse {
+    val executor = MleapExecutor(getActorSystem)
+    this.mleapExecutor = Option(executor)
+    executor
+  }
 }
 
 @Configuration

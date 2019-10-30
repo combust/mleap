@@ -4,20 +4,23 @@ import TypeConverters._
 import javax.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import ml.combust.mleap.pb
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Component
 
 import scala.collection.JavaConverters._
-import java.nio.file.{Paths, Files, Path}
+import java.nio.file.{Files, Path, Paths}
+
+import ml.combust.mleap.executor.MleapExecutor
 import scalapb.json4s.Parser
 
 @Component
-class ModelLoader {
+class ModelLoader(@Autowired val mleapExecutor: MleapExecutor,
+                  @Autowired val jsonParser: Parser) {
+
   @Value("${mleap.model.config:#{null}}")
   private val modelConfigPath: String = null
 
   private val logger = LoggerFactory.getLogger(classOf[ModelLoader])
-  private val jsonParser = new Parser()
   private val timeout = 60000
 
   @PostConstruct
@@ -45,8 +48,7 @@ class ModelLoader {
 
       val request = new String(Files.readAllBytes(configFile))
 
-      StarterConfiguration.getMleapExecutor
-        .loadModel(jsonParser.fromJsonString[pb.LoadModelRequest](request))(timeout)
+      mleapExecutor.loadModel(jsonParser.fromJsonString[pb.LoadModelRequest](request))(timeout)
     }
   }
 }

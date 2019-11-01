@@ -258,7 +258,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
                     shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": len(vector.input_features)}]}}
                     self.input_shapes['data_shape'].append(shape)
                 elif vector.op == ops.ONE_HOT_ENCODER:
-                    shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": vector.n_values_[0] - 1}]}}
+                    shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": int(vector.n_values_[0] - 1)}]}}
                     self.input_shapes['data_shape'].append(shape)
         return self
 
@@ -1102,8 +1102,8 @@ class StringMap(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
     def serialize_to_bundle(self, path, model_name):
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(("labels", self.labels.keys()))
-        attributes.append(("values", Vector(self.labels.values())))
+        attributes.append(("labels", list(self.labels.keys())))
+        attributes.append(("values", Vector(list(self.labels.values()))))
 
         # define node inputs and outputs
         inputs = [{

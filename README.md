@@ -49,6 +49,7 @@ Choose the right verison of the `mleap-spark` module to export your pipeline. Th
 
 | MLeap Version | Spark Version |
 |---------------|---------------|
+| 0.15.0        | 2.4           |
 | 0.14.0        | 2.4           |
 | 0.13.0        | 2.3           |
 | 0.12.0        | 2.3           |
@@ -63,7 +64,7 @@ Choose the right verison of the `mleap-spark` module to export your pipeline. Th
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.14.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.15.0"
 ```
 
 #### Maven
@@ -72,7 +73,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.14.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.11</artifactId>
-    <version>0.14.0</version>
+    <version>0.15.0</version>
 </dependency>
 ```
 
@@ -81,7 +82,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.14.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.14.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.15.0"
 ```
 
 #### Maven
@@ -90,23 +91,22 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.14.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.11</artifactId>
-    <version>0.14.0</version>
+    <version>0.15.0</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.14.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.15.0
 ```
 
 ### PySpark Integration
 
-Install MLeap from pypy
+Install MLeap from [PyPI](https://pypi.org/project/mleap/)
 ```bash
 $ pip install mleap
 ```
-
 
 ## Using the Library
 

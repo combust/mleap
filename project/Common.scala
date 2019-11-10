@@ -21,7 +21,6 @@ object Common {
     fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
     resolvers += Resolver.mavenLocal,
-    resolvers += "Spark snapshot repository" at "https://repository.apache.org/snapshots/",
     resolvers ++= {
       // Only add Sonatype Snapshots if this version itself is a snapshot version
       if(isSnapshot.value) {

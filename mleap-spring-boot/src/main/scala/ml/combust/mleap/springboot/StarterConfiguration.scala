@@ -20,6 +20,7 @@ object StarterConfiguration {
   }
 
   def getMleapExecutor: MleapExecutor = MleapExecutor(getActorSystem)
+
 }
 
 @Configuration

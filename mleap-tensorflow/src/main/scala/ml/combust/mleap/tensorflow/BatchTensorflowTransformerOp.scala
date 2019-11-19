@@ -16,7 +16,7 @@ class BatchTensorflowTransformerOp extends MleapOp[BatchTensorflowTransformer, B
   override val Model: OpModel[MleapContext, BatchTensorflowModel] = new OpModel[MleapContext, BatchTensorflowModel] {
     override val klazz: Class[BatchTensorflowModel] = classOf[BatchTensorflowModel]
 
-    override def opName: String = Bundle.BuiltinOps.batchTensorflow
+    override def opName: String = Bundle.BuiltinOps.batch_tensorflow
 
     override def store(model: Model, obj: BatchTensorflowModel)
                       (implicit context: BundleContext[MleapContext]): Model = {

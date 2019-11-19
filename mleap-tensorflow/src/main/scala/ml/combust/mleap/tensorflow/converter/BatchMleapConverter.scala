@@ -14,35 +14,35 @@ object BatchMleapConverter {
     tt.base match {
       case BasicType.ByteString =>
         val x: Array[Array[Byte]] = value
-          .flatMap(_.asInstanceOf[Tensor[ByteString]].mapValues(_.bytes).toDense.values)
+          .flatMap(_.mapValues(_.asInstanceOf[ByteString].bytes).toDense.values)
           .toArray
         tensorflow.Tensor.create(x)
       case BasicType.Byte =>
         val x: Array[Byte] = value
-          .flatMap(_.asInstanceOf[Tensor[Byte]].mapValues(_.toByte).toDense.values)
+          .flatMap(_.toDense.values.map(_.asInstanceOf[Byte]))
           .toArray
         tensorflow.Tensor.create(x)
       case BasicType.Int =>
         val x: Array[Int] = value
-          .flatMap(_.asInstanceOf[Tensor[Int]].mapValues(_.toInt).toDense.values)
+          .flatMap(_.toDense.values.map(_.asInstanceOf[Int]))
           .toArray
         tensorflow.Tensor.create(dimensions,
           IntBuffer.wrap(x))
       case BasicType.Long =>
         val x: Array[Long] = value
-          .flatMap(_.asInstanceOf[Tensor[Long]].mapValues(_.toLong).toDense.values)
+          .flatMap(_.toDense.values.map(_.asInstanceOf[Long]))
           .toArray
         tensorflow.Tensor.create(dimensions,
           LongBuffer.wrap(x))
       case BasicType.Float =>
         val x: Array[Float] = value
-          .flatMap(_.asInstanceOf[Tensor[Float]].mapValues(_.toFloat).toDense.values)
+          .flatMap(_.toDense.values.map(_.asInstanceOf[Float]))
           .toArray
         tensorflow.Tensor.create(dimensions,
           FloatBuffer.wrap(x))
       case BasicType.Double =>
         val x: Array[Double] = value
-          .flatMap(_.asInstanceOf[Tensor[Double]].mapValues(_.toDouble).toDense.values)
+          .flatMap(_.toDense.values.map(_.asInstanceOf[Double]))
           .toArray
         tensorflow.Tensor.create(dimensions,
           DoubleBuffer.wrap(x))

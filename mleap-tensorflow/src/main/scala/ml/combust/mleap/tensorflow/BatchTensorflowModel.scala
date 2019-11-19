@@ -56,8 +56,7 @@ case class BatchTensorflowModel(graph: tensorflow.Graph,
     }
 
     garbage.result.foreach(_.close())
-    result.get
-
+    result.get.transpose
   }
 
   private def withSession[T](f: (tensorflow.Session) => T): T = {

@@ -7,3 +7,4 @@ metastore_db/
 *.iml
 unsafe.*
 /python/**/*.pyc
+.sbtopts

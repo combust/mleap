@@ -34,14 +34,17 @@ class StandardScalerOp extends SimpleSparkOp[StandardScalerModel] {
       val m = new StandardScalerModel(uid = "",
         std = std.getOrElse(Vectors.sparse(size, Array(), Array())),
         mean = mean.getOrElse(Vectors.sparse(size, Array(), Array())))
-      std.foreach(_ => m.set(m.withStd, true))
-      mean.foreach(_ => m.set(m.withMean, true))
+      if (std.isEmpty) { m.set(m.withStd, false)} else {m.set(m.withStd, true)}
+      if (mean.isEmpty) { m.set(m.withMean, false)} else {m.set(m.withMean, true)}
       m
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: StandardScalerModel): StandardScalerModel = {
-    new StandardScalerModel(uid = uid, std = model.std, mean = model.mean)
+    val m = new StandardScalerModel(uid = uid, std = model.std, mean = model.mean)
+    if (model.isDefined(model.withMean)) { m.set(m.withMean, model.getWithMean) }
+    if (model.isDefined(model.withStd)) { m.set(m.withStd, model.getWithStd) }
+    m
   }
 
   override def sparkInputs(obj: StandardScalerModel): Seq[ParamSpec] = {

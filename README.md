@@ -40,23 +40,31 @@ Our goals for this project are:
 
 ## Requirements
 
-MLeap is cross-compiled for Scala 2.10 and 2.11. Because we depend
-heavily on Typesafe config for MLeap, we only support Java 8 at the
-moment. This means the following configurations should be possible:
+MLeap is built against Scala 2.11 and Java 8.  Because we depend heavily on Typesafe config for MLeap, we only support Java 8 at the
+moment.
 
-2. Scala 2.10 and Java 8
-4. Scala 2.11 and Java 8
+### MLeap/Spark Version
+
+Choose the right verison of the `mleap-spark` module to export your pipeline. The serialization format is backwards compatible between different versions of MLeap. So if you export a pipeline using MLeap 0.11.0 and Spark 2.1, you can still load that pipeline using MLeap runtime version 0.12.0.
+
+| MLeap Version | Spark Version |
+|---------------|---------------|
+| 0.15.0        | 2.4           |
+| 0.14.0        | 2.4           |
+| 0.13.0        | 2.3           |
+| 0.12.0        | 2.3           |
+| 0.11.0        | 2.2           |
+| 0.11.0        | 2.1           |
+| 0.11.0        | 2.0           |
 
 ## Setup
 
 ### Link with Maven or SBT
 
-MLeap is cross-compiled for Scala 2.10 and 2.11, so just replace 2.10 with 2.11 wherever you see it if you are running Scala version 2.11 and using a POM file for dependency management. Otherwise, use the `%%` operator if you are using SBT and the correct Scala version will be used.
-
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.9.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.15.0"
 ```
 
 #### Maven
@@ -64,8 +72,8 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.9.0"
 ```pom
 <dependency>
     <groupId>ml.combust.mleap</groupId>
-    <artifactId>mleap-runtime_2.10</artifactId>
-    <version>0.9.0</version>
+    <artifactId>mleap-runtime_2.11</artifactId>
+    <version>0.15.0</version>
 </dependency>
 ```
 
@@ -74,7 +82,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.9.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.9.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.15.0"
 ```
 
 #### Maven
@@ -82,24 +90,23 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.9.0"
 ```pom
 <dependency>
     <groupId>ml.combust.mleap</groupId>
-    <artifactId>mleap-spark_2.10</artifactId>
-    <version>0.9.0</version>
+    <artifactId>mleap-spark_2.11</artifactId>
+    <version>0.15.0</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.9.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.15.0
 ```
 
 ### PySpark Integration
 
-Install MLeap from pypy
+Install MLeap from [PyPI](https://pypi.org/project/mleap/)
 ```bash
 $ pip install mleap
 ```
-
 
 ## Using the Library
 
@@ -209,7 +216,7 @@ one_hot_encoder_pipeline_x0.serialize_to_bundle('/tmp', 'mleap-scikit-test-pipel
 
 ### Load and Transform Using MLeap
 
-Becuase we export Spark and Scikit-learn pipelines to a standard format, we can use either our Spark-trained pipeline or our Scikit-learn pipeline from the previous steps to demonstrate usage of MLeap in this section. The choice is yours!
+Because we export Spark and Scikit-learn pipelines to a standard format, we can use either our Spark-trained pipeline or our Scikit-learn pipeline from the previous steps to demonstrate usage of MLeap in this section. The choice is yours!
 
 ```scala
 import ml.combust.bundle.BundleFile

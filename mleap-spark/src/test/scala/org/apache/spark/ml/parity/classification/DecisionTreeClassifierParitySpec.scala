@@ -21,6 +21,9 @@ class DecisionTreeClassifierParitySpec extends SparkParityBase {
       setInputCol("approved").
       setOutputCol("label"),
     new DecisionTreeClassifier().
+      setThresholds(Array(0.4)).
       setFeaturesCol("features").
       setLabelCol("label"))).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType", "labelCol", "seed")
 }

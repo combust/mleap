@@ -26,11 +26,11 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
-      val out = Files.newOutputStream(context.file("xgboost.model"))
-      obj.booster.saveModel(out)
+      Files.write(context.file("xgboost.model"), obj._booster.toByteArray)
 
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
-      model.withValue("num_features", Value.int(numFeatures))
+      model.withValue("num_features", Value.int(numFeatures)).
+        withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit)))
     }
 
     override def load(model: Model)
@@ -39,14 +39,14 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
         SXGBoost.loadModel(in)
       }).tried.get
 
-      new XGBoostRegressionModel(booster)
+      new XGBoostRegressionModel("", booster)
     }
   }
 
   override def sparkLoad(uid: String,
                          shape: NodeShape,
                          model: XGBoostRegressionModel): XGBoostRegressionModel = {
-    new XGBoostRegressionModel(uid, model.booster)
+    new XGBoostRegressionModel(uid, model._booster)
   }
 
   override def sparkInputs(obj: XGBoostRegressionModel): Seq[ParamSpec] = {
@@ -54,6 +54,8 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
   }
 
   override def sparkOutputs(obj: XGBoostRegressionModel): Seq[SimpleParamSpec] = {
-    Seq("prediction" -> obj.predictionCol)
+    Seq("prediction" -> obj.predictionCol,
+      "leaf_prediction" -> obj.leafPredictionCol,
+      "contrib_prediction" -> obj.contribPredictionCol)
   }
 }

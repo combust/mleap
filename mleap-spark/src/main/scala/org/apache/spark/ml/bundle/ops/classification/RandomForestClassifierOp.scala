@@ -29,10 +29,14 @@ class RandomForestClassifierOp extends SimpleSparkOp[RandomForestClassificationM
           i = i + 1
           name
       }
+      val thresholds = if(obj.isSet(obj.thresholds)) {
+        Some(obj.getThresholds)
+      } else None
       model.withValue("num_features", Value.long(obj.numFeatures)).
         withValue("num_classes", Value.long(obj.numClasses)).
         withValue("tree_weights", Value.doubleList(obj.treeWeights)).
-        withValue("trees", Value.stringList(trees))
+        withValue("trees", Value.stringList(trees)).
+        withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
     }
 
     override def load(model: Model)
@@ -48,10 +52,13 @@ class RandomForestClassifierOp extends SimpleSparkOp[RandomForestClassificationM
         tree => ModelSerializer(context.bundleContext(tree)).read().get.asInstanceOf[DecisionTreeClassificationModel]
       }.toArray
 
-      new RandomForestClassificationModel(uid = "",
+      val m = new RandomForestClassificationModel(uid = "",
         numFeatures = numFeatures,
         numClasses = numClasses,
         _trees = models)
+      model.getValue("thresholds").
+        map(t => m.setThresholds(t.getDoubleList.toArray)).
+        getOrElse(m)
     }
   }
 
@@ -60,7 +67,7 @@ class RandomForestClassifierOp extends SimpleSparkOp[RandomForestClassificationM
       _trees = model.trees,
       numFeatures = model.numFeatures,
       numClasses = model.numClasses)
-    if(r.isDefined(r.thresholds)) { r.setThresholds(r.getThresholds) }
+    if (model.isDefined(model.thresholds)) { r.setThresholds(model.getThresholds) }
     r
   }
 

@@ -16,5 +16,5 @@ class PolynomialExpansionParitySpec extends SparkParityBase {
     new PolynomialExpansion().
       setInputCol("features").
       setOutputCol("poly").
-      setDegree(2))).fit(dataset)
+      setDegree(3))).fit(dataset)
 }

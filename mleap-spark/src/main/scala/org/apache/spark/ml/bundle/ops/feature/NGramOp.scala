@@ -28,7 +28,7 @@ class NGramOp extends SimpleSparkOp[NGram] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: NGram): NGram = {
-    new NGram(uid = uid)
+    new NGram(uid = uid).setN(model.getN)
   }
 
   override def sparkInputs(obj: NGram): Seq[ParamSpec] = {

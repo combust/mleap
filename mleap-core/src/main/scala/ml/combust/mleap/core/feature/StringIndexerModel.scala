@@ -1,7 +1,7 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
-import ml.combust.mleap.core.types.{BasicType, ScalarType, StructType}
+import ml.combust.mleap.core.types.{ScalarType, StructType}
 
 sealed trait HandleInvalid {
   def asParamString: String

@@ -18,28 +18,40 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
 
     override def store(model: Model, obj: MultilayerPerceptronClassificationModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      val thresholds = if(obj.isSet(obj.thresholds)) {
+        Some(obj.getThresholds)
+      } else None
       model.withValue("layers", Value.longList(obj.layers.map(_.toLong))).
-        withValue("weights", Value.vector(obj.weights.toArray))
+        withValue("weights", Value.vector(obj.weights.toArray)).
+        withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): MultilayerPerceptronClassificationModel = {
-      new MultilayerPerceptronClassificationModel(uid = "",
+      val m = new MultilayerPerceptronClassificationModel(uid = "",
         layers = model.value("layers").getLongList.map(_.toInt).toArray,
         weights = Vectors.dense(model.value("weights").getTensor[Double].toArray))
+      model.getValue("thresholds").
+        map(t => m.setThresholds(t.getDoubleList.toArray)).
+        getOrElse(m)
     }
+
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: MultilayerPerceptronClassificationModel): MultilayerPerceptronClassificationModel = {
-    new MultilayerPerceptronClassificationModel(uid = uid,layers = model.layers, weights = model.weights)
+    val m = new MultilayerPerceptronClassificationModel(uid = uid,layers = model.layers, weights = model.weights)
+    if (model.isSet(model.thresholds)) m.setThresholds(model.getThresholds)
+    m
   }
 
   override def sparkInputs(obj: MultilayerPerceptronClassificationModel): Seq[ParamSpec] = {
     Seq("features" -> obj.featuresCol)
   }
 
-  override def sparkOutputs(obj: MultilayerPerceptronClassificationModel): Seq[SimpleParamSpec] = {
-    Seq("prediction" -> obj.predictionCol)
+  override def sparkOutputs(obj: MultilayerPerceptronClassificationModel):  Seq[SimpleParamSpec] = {
+    Seq("raw_prediction" -> obj.rawPredictionCol,
+      "probability" -> obj.probabilityCol,
+      "prediction" -> obj.predictionCol)
   }
 }
 

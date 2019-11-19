@@ -52,6 +52,7 @@ object Bundle {
       val chi_sq_selector = "chi_sq_selector"
       val reverse_string_indexer = "reverse_string_indexer"
       val hashing_term_frequency = "hashing_term_frequency"
+      val feature_hasher = "feature_hasher"
       val imputer = "imputer"
       val standard_scaler = "standard_scaler"
       val tokenizer = "tokenizer"
@@ -73,8 +74,13 @@ object Bundle {
       val word_to_vector = "word_to_vector"
       val multinomial_labeler = "multinomial_labeler"
       val regex_tokenizer = "regex_tokenizer"
+      val regex_indexer = "regex_indexer"
       val word_filter = "word_filter"
       val interaction = "interaction"
+    }
+
+    object ensemble {
+      val categorical_drilldown = "categorical_drilldown"
     }
 
     object classification {
@@ -86,6 +92,7 @@ object Bundle {
       val decision_tree_classifier = "decision_tree_classifier"
       val support_vector_machine = "support_vector_machine"
       val one_vs_rest = "one_vs_rest"
+      val linear_svc = "linear_svc"
     }
 
     object clustering {
@@ -97,6 +104,11 @@ object Bundle {
 
     object recommendation {
       val als = "als"
+    }
+
+    object tuning {
+      val cross_validator = "cross_validator"
+      val train_validation_split = "train_validation_split"
     }
 
     val pipeline = "pipeline"

@@ -1,7 +1,7 @@
 package ml.combust.mleap.bundle.ops.classification
 
 import ml.combust.bundle.BundleContext
-import ml.combust.mleap.core.classification.{OneVsRestModel, ProbabilisticClassificationModel}
+import ml.combust.mleap.core.classification.{ClassificationModel, OneVsRestModel}
 import ml.combust.mleap.runtime.transformer.classification.OneVsRest
 import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.ModelSerializer
@@ -38,7 +38,7 @@ class OneVsRestOp extends MleapOp[OneVsRest, OneVsRestModel] {
       val numFeatures = model.value("num_features").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
-        i => ModelSerializer(context.bundleContext(s"model$i")).read().get.asInstanceOf[ProbabilisticClassificationModel]
+        i => ModelSerializer(context.bundleContext(s"model$i")).read().get.asInstanceOf[ClassificationModel]
       }
 
       OneVsRestModel(classifiers = models, numFeatures = numFeatures)

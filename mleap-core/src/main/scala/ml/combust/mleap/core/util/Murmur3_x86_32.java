@@ -69,6 +69,20 @@ public final class Murmur3_x86_32 {
         return fmix(h1, lengthInBytes);
     }
 
+    public static int hashUnsafeBytes2(Object base, long offset, int lengthInBytes, int seed) {
+        // This is compatible with original and another implementations.
+        // Use this method for new components after Spark 2.3.
+        assert (lengthInBytes >= 0): "lengthInBytes cannot be negative";
+        int lengthAligned = lengthInBytes - lengthInBytes % 4;
+        int h1 = hashBytesByInt(base, offset, lengthAligned, seed);
+        int k1 = 0;
+        for (int i = lengthAligned, shift = 0; i < lengthInBytes; i++, shift += 8) {
+            k1 ^= (Platform.getByte(base, offset + i) & 0xFF) << shift;
+        }
+        h1 ^= mixK1(k1);
+        return fmix(h1, lengthInBytes);
+    }
+
     private static int hashBytesByInt(Object base, long offset, int lengthInBytes, int seed) {
         assert (lengthInBytes % 4 == 0);
         int h1 = seed;

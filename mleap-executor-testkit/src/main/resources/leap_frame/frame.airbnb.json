@@ -1,0 +1,45 @@
+{
+  "schema": {
+    "fields": [{
+      "name": "state",
+      "type": "string"
+    }, {
+      "name": "bathrooms",
+      "type": "double"
+    }, {
+      "name": "square_feet",
+      "type": "double"
+    }, {
+      "name": "bedrooms",
+      "type": "double"
+    }, {
+      "name": "security_deposit",
+      "type": "double"
+    }, {
+      "name": "cleaning_fee",
+      "type": "double"
+    }, {
+      "name": "extra_people",
+      "type": "double"
+    }, {
+      "name": "number_of_reviews",
+      "type": "double"
+    }, {
+      "name": "review_scores_rating",
+      "type": "double"
+    }, {
+      "name": "room_type",
+      "type": "string"
+    }, {
+      "name": "host_is_superhost",
+      "type": "string"
+    }, {
+      "name": "cancellation_policy",
+      "type": "string"
+    }, {
+      "name": "instant_bookable",
+      "type": "string"
+    }]
+  },
+  "rows": [["NY", 2.0, 1250.0, 3.0, 50.0, 30.0, 2.0, 56.0, 90.0, "Entire home/apt", "1.0", "strict", "1.0"]]
+}

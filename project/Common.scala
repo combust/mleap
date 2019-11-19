@@ -10,14 +10,14 @@ import xerial.sbt.Sonatype.autoImport._
 object Common {
   lazy val defaultMleapSettings = defaultSettings ++ mleapSettings ++ sonatypeSettings
   lazy val defaultBundleSettings = defaultSettings ++ bundleSettings ++ sonatypeSettings
-  lazy val defaultMleapServingSettings = defaultMleapSettings ++ noPublishSettings ++ Seq(crossScalaVersions := Seq("2.11.8"))
-  lazy val defaultMleapXgboostSparkSettings = defaultMleapSettings ++ noPublishSettings
+  lazy val defaultMleapXgboostSparkSettings = defaultMleapSettings ++ sonatypeSettings
+  lazy val defaultMleapServingSettings = defaultMleapSettings ++ noPublishSettings
 
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
     scalaVersion := "2.11.8",
-    crossScalaVersions := Seq("2.10.6", "2.11.8"),
+    crossScalaVersions := Seq("2.11.8", "2.12.8"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),

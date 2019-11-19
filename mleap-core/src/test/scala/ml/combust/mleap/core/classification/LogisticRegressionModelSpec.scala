@@ -11,9 +11,9 @@ class LogisticRegressionModelSpec extends FunSpec {
   describe("BinaryLogisticRegression") {
     val weights = Vectors.dense(1.0, 2.0, 4.0)
     val intercept = 0.7
-    val lr = BinaryLogisticRegressionModel(weights, intercept, 0.4)
 
     describe("issue210: Logistic function not being applied") {
+      val lr = BinaryLogisticRegressionModel(weights, intercept, 0.4)
       it("applies the logistic function for prediction") {
         val features = Vectors.dense(-1.0, 1.0, -0.5)
 
@@ -21,7 +21,41 @@ class LogisticRegressionModelSpec extends FunSpec {
       }
     }
 
+    describe("issue386:Wrong Binary LogisticRegression predictions") {
+      val lr = BinaryLogisticRegressionModel(weights, intercept, 0.4)
+      it("compare binary logisticRegression prediction with the transform api predictions") {
+        val features = Vectors.dense(-1.0, 1.0, -0.5)
+        assert(lr.predict(features) == lr.probabilityToPrediction(lr.rawToProbability(lr.predictRaw(features))))
+        assert(lr.predict(features) == 1.0)
+      }
+
+      it("compare binary logisticRegression prediction with rawToPrediction() results") {
+        val features = Vectors.dense(-1.0, 1.0, -0.5)
+        assert(lr.predict(features) == lr.rawToPrediction(lr.predictRaw(features)))
+        assert(lr.predict(features) == 1.0)
+      }
+    }
+
+    describe("issue386:Binary LogisticRegression predictions with 1.0 threshold"){
+      val lr = BinaryLogisticRegressionModel(weights, intercept, 1.0)
+      it("binary logisticRegression prediction equals zero for 1.0 threshold") {
+        val features = Vectors.dense(-1.0, 1.0, -0.5)
+        assert(lr.predict(features) == lr.probabilityToPrediction(lr.rawToProbability(lr.predictRaw(features))))
+        assert(lr.predict(features) == 0.0)
+      }
+    }
+
+    describe("issue386:Binary LogisticRegression predictions with 0.0 threshold"){
+      val lr = BinaryLogisticRegressionModel(weights, intercept, 0.0)
+      it("binary logisticRegression prediction equals 1 for zero threshold") {
+        val features = Vectors.dense(-1.0, 1.0, -0.5)
+        assert(lr.predict(features) == lr.rawToPrediction(lr.predictRaw(features)))
+        assert(lr.predict(features) == 1.0)
+      }
+    }
+
     describe("input/output schema"){
+      val lr = BinaryLogisticRegressionModel(weights, intercept, 0.4)
       it("has the right input schema") {
         assert(lr.inputSchema.fields == Seq(StructField("features", TensorType.Double(3))))
       }

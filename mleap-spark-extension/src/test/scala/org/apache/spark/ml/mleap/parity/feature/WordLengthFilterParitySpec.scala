@@ -23,4 +23,6 @@ class WordLengthFilterParitySpec extends SparkParityBase {
   val filterWords = new WordLengthFilter().setInputCol("words_filtered").setOutputCol("filteredWords").setWordLength(3)
 
   override val sparkTransformer: Transformer = new Pipeline().setStages(Array(tokenizer, remover, cv, filterWords)).fit(dataset)
+
+  override val unserializedParams = Set("vocabSize")
 }

@@ -7,7 +7,6 @@ import ml.combust.bundle.BundleFile
 import ml.combust.mleap.spark.SparkSupport._
 import org.apache.spark.sql.SparkSession
 import org.scalameter._
-import com.databricks.spark.avro._
 import org.scalameter.Key._
 
 import scala.collection.JavaConverters._
@@ -27,7 +26,7 @@ class SparkTransformBenchmark extends Benchmark {
       master("local[1]").
       getOrCreate()
 
-    val slowFrame = spark.sqlContext.read.avro(new File(config.getString("frame-path")).getAbsolutePath)
+    val slowFrame = spark.sqlContext.read.format("avro").load(new File(config.getString("frame-path")).getAbsolutePath)
     val data = slowFrame.collect().toSeq
     val frame = spark.sqlContext.createDataFrame(data.asJava, slowFrame.schema)
 

@@ -1,9 +1,8 @@
 package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
-import org.apache.avro.generic.GenericData.StringType
+import ml.combust.bundle.op.OpModel
 import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.StringIndexerModel
 

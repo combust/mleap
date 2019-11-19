@@ -45,6 +45,18 @@ trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
         }
       }
 
+      describe("#select relaxed") {
+        it("creates a new LeapFrame from selected fields, ignoring unknown fields") {
+          val frame2 = frame.relaxedSelect("test_double", "dummy", "does_not_exist")
+          val data = frame2.collect()
+
+          assert(frame2.schema.fields.length == 1)
+          assert(frame2.schema.indexOf("test_double").get == 0)
+          assert(data.head.getDouble(0) == 42.13)
+          assert(data(1).getDouble(0) == 13.42)
+        }
+      }
+
       describe("#withColumn") {
         it("creates a new LeapFrame with column added") {
           val frame2 = frame.withColumn("test_double_2", "test_double") {

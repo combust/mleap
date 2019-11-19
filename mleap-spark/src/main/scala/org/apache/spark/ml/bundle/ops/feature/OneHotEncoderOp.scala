@@ -1,18 +1,15 @@
 package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
+import ml.combust.bundle.op.OpModel
 import org.apache.spark.ml.attribute.{Attribute, BinaryAttribute, NominalAttribute, NumericAttribute}
 import org.apache.spark.ml.bundle._
-import org.apache.spark.ml.feature.OneHotEncoder
+import org.apache.spark.ml.feature.OneHotEncoderModel
 import org.apache.spark.sql.types.StructField
 
 import scala.util.{Failure, Try}
 
-/**
-  * Created by hollinwilkins on 8/21/16.
-  */
 object OneHotEncoderOp {
   def sizeForField(field: StructField): Int = {
     val attr = Attribute.fromStructField(field)
@@ -36,40 +33,42 @@ object OneHotEncoderOp {
   }
 }
 
-class OneHotEncoderOp extends SimpleSparkOp[OneHotEncoder] {
-  override val Model: OpModel[SparkBundleContext, OneHotEncoder] = new OpModel[SparkBundleContext, OneHotEncoder] {
-    override val klazz: Class[OneHotEncoder] = classOf[OneHotEncoder]
+class OneHotEncoderOp extends SimpleSparkOp[OneHotEncoderModel] {
+  override val Model: OpModel[SparkBundleContext, OneHotEncoderModel] = new OpModel[SparkBundleContext, OneHotEncoderModel] {
+    override val klazz: Class[OneHotEncoderModel] = classOf[OneHotEncoderModel]
 
     override def opName: String = Bundle.BuiltinOps.feature.one_hot_encoder
 
-    override def store(model: Model, obj: OneHotEncoder)
+    override def store(model: Model, obj: OneHotEncoderModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
 
       val df = context.context.dataset.get
-      val size = OneHotEncoderOp.sizeForField(df.schema(obj.getInputCol))
+      val categorySizes = obj.getInputCols.map { f ⇒ OneHotEncoderOp.sizeForField(df.schema(f)) }
       val dropLast = obj.getDropLast
-      val arrSize = if(dropLast) { size - 1 } else { size }
 
-      model.withValue("size", Value.long(arrSize)).
-        withValue("drop_last", Value.boolean(dropLast))
+      model.withValue("category_sizes", Value.intList(categorySizes))
+        .withValue("drop_last", Value.boolean(obj.getDropLast))
+        .withValue("handle_invalid", Value.string(obj.getHandleInvalid))
+
     }
 
     override def load(model: Model)
-                     (implicit context: BundleContext[SparkBundleContext]): OneHotEncoder = {
-      new OneHotEncoder(uid = "")
+                     (implicit context: BundleContext[SparkBundleContext]): OneHotEncoderModel = {
+      new OneHotEncoderModel(uid = "", categorySizes = model.value("category_sizes").getIntList.toArray)
+          .setDropLast(model.value("drop_last").getBoolean)
+          .setHandleInvalid(model.value("handle_invalid").getString)
     }
   }
 
-  override def sparkLoad(uid: String, shape: NodeShape, model: OneHotEncoder): OneHotEncoder = {
-    new OneHotEncoder(uid = uid)
+  override def sparkLoad(uid: String, shape: NodeShape, model: OneHotEncoderModel): OneHotEncoderModel = {
+    new OneHotEncoderModel(uid = uid, categorySizes = model.categorySizes)
+      .setDropLast(model.getDropLast)
+      .setHandleInvalid(model.getHandleInvalid)
   }
 
-  override def sparkInputs(obj: OneHotEncoder): Seq[ParamSpec] = {
-    Seq("input" -> obj.inputCol)
-  }
+  override def sparkInputs(obj: OneHotEncoderModel): Seq[ParamSpec] = Seq(ParamSpec("input", obj.inputCols))
 
-  override def sparkOutputs(obj: OneHotEncoder): Seq[SimpleParamSpec] = {
-    Seq("output" -> obj.outputCol)
-  }
+  override def sparkOutputs(obj: OneHotEncoderModel): Seq[ParamSpec] = Seq(ParamSpec("output", obj.outputCols))
+
 }

@@ -89,7 +89,7 @@ class SVMModel(override val uid: String,
     BLAS.dot(model.weights, Vectors.dense(features.toArray)) + model.intercept
   }
 
-  protected override def predict(features: linalg.Vector): Double = {
+  override def predict(features: linalg.Vector): Double = {
     if(margin(features) > getThreshold) 1.0 else 0.0
   }
 

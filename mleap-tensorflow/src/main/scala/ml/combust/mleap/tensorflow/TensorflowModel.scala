@@ -13,12 +13,12 @@ import scala.util.Try
 /**
   * Created by hollinwilkins on 1/12/17.
   */
-case class TensorflowModel(graph: tensorflow.Graph,
+case class TensorflowModel(@transient var graph: Option[tensorflow.Graph] = None,
+                           @transient var session: Option[tensorflow.Session] = None,
                            inputs: Seq[(String, TensorType)],
                            outputs: Seq[(String, TensorType)],
-                           nodes: Option[Seq[String]] = None) extends Model with AutoCloseable {
-  @transient
-  private var session: Option[tensorflow.Session] = None
+                           nodes: Option[Seq[String]] = None,
+                           graphBytes: Array[Byte]) extends Model with AutoCloseable {
 
   def apply(values: Tensor[_] *): Seq[Any] = {
     val garbage: mutable.ArrayBuilder[tensorflow.Tensor[_]] = mutable.ArrayBuilder.make[tensorflow.Tensor[_]]()
@@ -64,9 +64,22 @@ case class TensorflowModel(graph: tensorflow.Graph,
   }
 
   private def withSession[T](f: (tensorflow.Session) => T): T = {
-    val s = session.getOrElse {
-      session = Some(new tensorflow.Session(graph))
-      session.get
+    val g = graph match {
+      case Some(gg) => gg
+      case _ => { // can also be null at deserialization time, not just empty
+        val gg = new tensorflow.Graph()
+        gg.importGraphDef(graphBytes)
+        graph = Some(gg)
+        graph.get
+      }
+    }
+
+    val s = session match {
+      case Some(sess) => sess
+      case _ => { // can also be null at deserialization time, not just empty
+        session = Some(new tensorflow.Session(g))
+        session.get
+      }
     }
 
     f(s)
@@ -74,7 +87,7 @@ case class TensorflowModel(graph: tensorflow.Graph,
 
   override def close(): Unit = {
     session.foreach(_.close())
-    graph.close()
+    graph.foreach(_.close())
   }
 
   override def finalize(): Unit = {

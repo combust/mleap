@@ -32,7 +32,7 @@ class PolynomialExpansionOp extends SimpleSparkOp[PolynomialExpansion] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: PolynomialExpansion): PolynomialExpansion = {
-    new PolynomialExpansion(uid = uid)
+    new PolynomialExpansion(uid = uid).setDegree(model.getDegree)
   }
 
   override def sparkInputs(obj: PolynomialExpansion): Seq[ParamSpec] = {

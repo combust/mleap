@@ -54,7 +54,7 @@ case class MinMaxScalerModel(originalMin: Vector,
           } else {
             0.5
           }
-          vs(i) *= raw
+          vs(i) = raw
           i += 1
         }
         Vectors.sparse(size, indices, vs)

@@ -16,9 +16,6 @@ object MleapProject {
     sparkTestkit,
     spark,
     sparkExtension,
-    xgboostRuntime,
-    xgboostSpark,
-    tensorflow,
     executor,
     executorTestKit,
     grpc,
@@ -191,6 +188,7 @@ object MleapProject {
       spark,
       sparkExtension,
       tensorflow,
+      xgboostRuntime,
       xgboostSpark)
   ).settings(excludeDependencies ++= Seq(
     SbtExclusionRule("org.tensorflow"),

@@ -17,4 +17,6 @@ class PcaParitySpec extends SparkParityBase {
       setInputCol("features").
       setOutputCol("pca_features").
       setK(2))).fit(dataset)
+
+  override val unserializedParams = Set("k")
 }

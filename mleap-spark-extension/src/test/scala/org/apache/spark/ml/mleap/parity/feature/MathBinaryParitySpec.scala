@@ -21,4 +21,6 @@ class MathBinaryParitySpec extends SparkParityBase {
       setInputB("dti").
       setOutputCol("bin_out")
   )).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType")
 }

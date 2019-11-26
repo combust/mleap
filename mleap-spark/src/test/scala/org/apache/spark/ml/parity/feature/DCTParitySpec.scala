@@ -14,6 +14,7 @@ class DCTParitySpec extends SparkParityBase {
     setInputCols(Array("dti", "loan_amount")).
     setOutputCol("features"),
     new DCT(uid = "dct").
+      setInverse(true).
       setInputCol("features").
       setOutputCol("filter_features"))).fit(dataset)
 }

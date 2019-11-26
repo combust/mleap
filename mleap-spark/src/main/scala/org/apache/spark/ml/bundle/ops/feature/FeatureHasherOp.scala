@@ -41,7 +41,7 @@ class FeatureHasherOp extends SimpleSparkOp[FeatureHasher] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: FeatureHasher): FeatureHasher = {
-    new FeatureHasher(uid = uid)
+    new FeatureHasher(uid = uid).setNumFeatures(model.getNumFeatures).setCategoricalCols(model.getCategoricalCols)
   }
 
   override def sparkInputs(obj: FeatureHasher): Seq[ParamSpec] = {

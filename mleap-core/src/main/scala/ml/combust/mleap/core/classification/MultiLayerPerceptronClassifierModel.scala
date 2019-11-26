@@ -48,7 +48,8 @@ object MultiLayerPerceptronClassifierModel {
 
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.3.0/mllib/src/main/scala/org/apache/spark/ml/classification/MultilayerPerceptronClassifier.scala")
 case class MultiLayerPerceptronClassifierModel(layers: Seq[Int],
-                                               weights: Vector) extends ProbabilisticClassificationModel {
+                                               weights: Vector,
+                                               override val thresholds: Option[Array[Double]] = None) extends ProbabilisticClassificationModel {
   val numFeatures: Int = layers.head
 
   private val mlpModel = FeedForwardTopology

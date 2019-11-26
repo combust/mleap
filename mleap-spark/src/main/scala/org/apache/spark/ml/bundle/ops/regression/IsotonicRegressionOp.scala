@@ -50,8 +50,7 @@ class IsotonicRegressionOp extends SimpleSparkOp[IsotonicRegressionModel] {
     val oldModel = new regression.IsotonicRegressionModel(boundaries = model.boundaries.toArray,
       predictions = model.predictions.toArray,
       isotonic = model.getIsotonic)
-    new IsotonicRegressionModel(uid = uid,
-      oldModel = oldModel)
+    new IsotonicRegressionModel(uid = uid, oldModel = oldModel).setFeatureIndex(model.getFeatureIndex)
   }
 
   override def sparkInputs(obj: IsotonicRegressionModel): Seq[ParamSpec] = {

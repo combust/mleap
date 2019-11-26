@@ -33,7 +33,7 @@ class NormalizerOp extends SimpleSparkOp[Normalizer] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: Normalizer): Normalizer = {
-    new Normalizer(uid = uid)
+    new Normalizer(uid = uid).setP(model.getP)
   }
 
   override def sparkInputs(obj: Normalizer): Seq[ParamSpec] = {

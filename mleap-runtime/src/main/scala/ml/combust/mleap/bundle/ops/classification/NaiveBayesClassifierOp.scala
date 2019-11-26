@@ -26,17 +26,24 @@ class NaiveBayesClassifierOp extends MleapOp[NaiveBayesClassifier, NaiveBayesMod
         withValue("num_classes", Value.long(obj.numClasses)).
         withValue("pi", Value.vector(obj.pi.toArray)).
         withValue("theta", Value.tensor(DenseTensor(obj.theta.toArray, Seq(obj.theta.numRows, obj.theta.numCols)))).
-        withValue("model_type", Value.string(obj.modelType.toString))
+        withValue("model_type", Value.string(obj.modelType.toString)).
+        withValue("thresholds", obj.thresholds.map(Value.doubleList(_)))
     }
 
     override def load(model: Model)(implicit context: BundleContext[MleapContext]): NaiveBayesModel = {
       val theta = model.value("theta").getTensor[Double]
       val modelType = NaiveBayesModel.forName(model.value("model_type").getString)
+      val numClasses = model.value("num_classes").getLong.toInt
+      val thresholds = model.getValue("thresholds").map(_.getDoubleList.toArray)
+      require(thresholds.isEmpty || thresholds.get.length == numClasses,
+        "NaiveBayesModel loaded with non-matching numClasses and thresholds.length. " +
+          s" numClasses=$numClasses, but thresholds has length ${thresholds.get.length}")
       new NaiveBayesModel(numFeatures = model.value("num_features").getLong.toInt,
-        numClasses = model.value("num_classes").getLong.toInt,
+        numClasses = numClasses,
         pi = Vectors.dense(model.value("pi").getTensor[Double].toArray),
         theta = Matrices.dense(theta.dimensions.head, theta.dimensions(1), theta.toArray),
-        modelType = modelType)
+        modelType = modelType,
+        thresholds = thresholds)
     }
 
   }

@@ -47,7 +47,7 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
     } else {
       null
     }
-    new tree.LeafNode(prediction = node.values.indexOf(node.values.max),
+    new tree.LeafNode(prediction = node.values.max,
       impurity = 0.0,
       impurityStats = calc)
   }

@@ -14,6 +14,7 @@ class NormalizerParitySpec extends SparkParityBase {
     setInputCols(Array("dti", "loan_amount")).
     setOutputCol("features"),
     new Normalizer().
+      setP(3d).
       setInputCol("features").
       setOutputCol("scaled_features"))).fit(dataset)
 }

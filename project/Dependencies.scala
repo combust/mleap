@@ -6,7 +6,7 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "2.3.0"
+  val sparkVersion = "2.4.0"
   val scalaTestVersion = "3.0.0"
   val akkaVersion = "2.5.12"
   val akkaHttpVersion = "10.0.3"
@@ -16,7 +16,7 @@ object Dependencies {
   lazy val slf4jVersion = "1.7.25"
   lazy val awsSdkVersion = "1.11.349"
   val tensorflowVersion = "1.11.0"
-  val xgboostVersion = "0.81"
+  val xgboostVersion = "0.90"
   val hadoopVersion = "2.6.5" // matches spark version
 
   object Compile {
@@ -25,15 +25,17 @@ object Dependencies {
       "org.apache.spark" %% "spark-sql" % sparkVersion,
       "org.apache.spark" %% "spark-mllib" % sparkVersion,
       "org.apache.spark" %% "spark-mllib-local" % sparkVersion,
-      "org.apache.spark" %% "spark-catalyst" % sparkVersion)
+      "org.apache.spark" %% "spark-catalyst" % sparkVersion,
+      "org.apache.spark" %% "spark-avro" % sparkVersion
+    )
     val avroDep = "org.apache.avro" % "avro" % "1.8.1"
     val sprayJson = "io.spray" %% "spray-json" % "1.3.2"
     val arm = "com.jsuereth" %% "scala-arm" % "2.0"
     val config = "com.typesafe" % "config" % "1.3.0"
     val scalaReflect = ScalaVersionDependentModuleID.versioned("org.scala-lang" % "scala-reflect" % _)
-    val sparkAvro = "com.databricks" %% "spark-avro" % "3.0.1"
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
+    val commonsIo = "commons-io" % "commons-io" % "2.5"
     val tensorflowDeps = Seq(
       "org.tensorflow" % "libtensorflow" % tensorflowVersion,
       "org.tensorflow" % "libtensorflow_jni" % tensorflowVersion
@@ -49,6 +51,8 @@ object Dependencies {
     val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
 
     val springBoot = "org.springframework.boot" % "spring-boot-starter-web" % springBootVersion
+    val springBootActuator = "org.springframework.boot" % "spring-boot-starter-actuator" % springBootVersion
+
     val commonsLang = "org.apache.commons" % "commons-lang3" % "3.7"
     val scalaPb = Seq(
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
@@ -63,14 +67,14 @@ object Dependencies {
       "ch.qos.logback" % "logback-classic" % logbackVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
-    val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion
-    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion
+    val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion // scala 2.11 only
+    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion // scala 2.11 only
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
 
   object Test {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
-    val akkaHttpTestkit =  "com.typesafe.akka" % "akka-http-testkit_2.11" % akkaHttpVersion % "test"
+    val akkaHttpTestkit =  "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % "test"
     val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test"
     val springBootTest = "org.springframework.boot" % "spring-boot-starter-test" % springBootVersion % "test"
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
@@ -96,11 +100,11 @@ object Dependencies {
 
   val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)
 
-  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface) ++ scalaReflect.modules(scalaVersion.value))
+  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface, commonsIo) ++ scalaReflect.modules(scalaVersion.value))
 
   val sparkBase = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
-  val sparkTestkit = l ++= Provided.spark ++ Seq(sparkAvro, scalaTest)
+  val sparkTestkit = l ++= Provided.spark ++ Seq(scalaTest)
 
   val spark = l ++= Provided.spark
 
@@ -127,11 +131,11 @@ object Dependencies {
   val grpc = l ++= Seq(
     "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion) ++ scalaPb
 
-  val springBootServing = l ++= Seq(springBoot, commonsLang, Test.scalaTest, Test.springBootTest) ++ scalaPb
+  val springBootServing = l ++= Seq(springBoot, springBootActuator, commonsLang, Test.scalaTest, Test.springBootTest) ++ scalaPb
 
-  val benchmark = l ++= Seq(scalameter, scopt, sparkAvro) ++ Compile.spark
+  val benchmark = l ++= Seq(scalameter, scopt) ++ Compile.spark
 
-  val databricksRuntimeTestkit = l ++= Provided.spark ++ Seq(sparkAvro)
+  val databricksRuntimeTestkit = l ++= Provided.spark
 
   object DependencyHelpers {
     case class ScalaVersionDependentModuleID(modules: String => Seq[ModuleID]) {

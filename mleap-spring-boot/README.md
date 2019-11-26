@@ -4,7 +4,7 @@ This module is a Spring Boot project that provides a HTTP interface to an MLeap 
 
 ## Installation
 
-MLeap Spring Boot is a Docker image hosted on [Docker Hub](https://hub.docker.com/r/combustml/mleap-serving/).
+MLeap Spring Boot is a Docker image hosted on [Docker Hub](https://hub.docker.com/r/combustml/mleap-spring-boot/).
 
 To get started, pull the image to your local machine, replacing the version with the desired one.
 
@@ -61,7 +61,7 @@ curl --header "Content-Type: application/json" \
 
 ```
 
-5. POST /models/{YOUR_MODEL_NAME}/transform: Transform or scoring request, replacing the chosen model name ```{YOUR_MODEL_NAME}```, format ```{YOUR_FORMAT}``` and the appropriately encoded leap frame ```{ENCODED_LEAP_FRAME}```
+5. POST /models/transform: Transform or scoring request, replacing the chosen model name ```{YOUR_MODEL_NAME}```, format ```{YOUR_FORMAT}``` and the appropriately encoded leap frame ```{ENCODED_LEAP_FRAME}```
 
 ```
 body='{"modelName":"{YOUR_MODEL_NAME}","format":"{YOUR_FORMAT}","initTimeout":"35000","tag":0,"frame":"{ENCODED_LEAP_FRAME}"}'
@@ -73,7 +73,7 @@ curl --header "Content-Type: application/json" \
 
 Format can be either `ml.combust.mleap.binary` or `ml.combust.mleap.json` and your leap frame needs to be encoded with that format.
 
-Note: The above endpoints are available either using: 
+Note: The above endpoints are available either using:
 - JSON (`Content-Type` header set to `application/json`)
 - Protobuf (`Content-Type` header set to `application/x-protobuf`).
 
@@ -89,10 +89,91 @@ curl --header "Content-Type: application/json" \
   --data "$body" http://localhost:8080/models/{YOUR_MODEL_NAME}/transform
 ```
 
-Note: The above endpoint is available either using: 
+Note: The above endpoint is available either using:
 - JSON (`Content-Type` header set to `application/json`) with a JSON leap frame.
 - Protobuf (`Content-Type` header set to `application/x-protobuf`) with a protobuf leap frame.
+
+6. GET /actuator/* : exposes health and info endpoints for monitoring
+```
+curl --request GET http://localhost:8080/actuator
+curl --request GET http://localhost:8080/actuator/health
+curl --request GET http://localhost:8080/actuator/info
+```
 
 Check out the available Swagger API documentation `mleap_serving_1.0.0_swagger.yaml` for more information or trying out the API.
 
 See the README.md in `mleap-serving` about starting both a gRPC and HTTP server using a single MLeap executor.
+
+
+## Loading models at startup
+
+This functionality can be activated by passing the configuration property `mleap.model.config`. Specifying a path to a single config will load that single config, while specifying a path to a directory will load all files from that directory.
+
+### Example Docker workflow
+
+The project directory is assumed to look like this:
+
+```
+├── Dockerfile
+├── config
+│   ├── application.properties
+│   └── startup
+│       ├── airbnb-lr.json
+│       └── airbnb-rf.json
+└── models
+    ├── airbnb.model.lr.zip
+    └── airbnb.model.rf.zip
+```
+
+#### config/application.properties
+
+```
+mleap.model.config=/opt/docker/config/startup
+```
+
+#### Dockerfile
+
+```Dockerfile
+FROM combustml/mleap-spring-boot
+
+# Override default server port if needed
+ENV SERVER_PORT=8080
+EXPOSE 8080
+
+# Copy models
+COPY models/*.zip models/
+
+# Copy application.properties
+COPY config/application.properties ./application.properties
+
+# Copy startup configs
+COPY config/startup/*.json ./config/startup/
+```
+
+#### config/startup/airbnb-lr.json
+
+```json
+{
+    "config": {
+        "diskTimeout": 525600000,
+        "memoryTimeout": 525600000
+    },
+    "modelName": "airbnb-lr",
+    "uri": "file:/opt/docker/models/airbnb.model.lr.zip"
+}
+```
+
+#### config/startup/airbnb-lr.json
+
+```json
+{
+    "config": {
+        "diskTimeout": 525600000,
+        "memoryTimeout": 525600000
+    },
+    "modelName": "airbnb-rf",
+    "uri": "file:/opt/docker/models/airbnb.model.rf.zip"
+}
+```
+
+After building the docker image and starting the container, you can verify both models are loaded by querying their respective `/meta` endpoints.

@@ -17,7 +17,7 @@ object Common {
 
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
     scalaVersion := "2.11.8",
-    crossScalaVersions := Seq("2.11.8"),
+    crossScalaVersions := Seq("2.11.8", "2.12.8"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),

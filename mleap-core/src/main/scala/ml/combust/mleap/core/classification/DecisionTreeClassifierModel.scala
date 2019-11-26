@@ -11,7 +11,8 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
   */
 case class DecisionTreeClassifierModel(override val rootNode: Node,
                                        numFeatures: Int,
-                                       override val numClasses: Int)
+                                       override val numClasses: Int,
+                                       override val thresholds: Option[Array[Double]] = None)
   extends ProbabilisticClassificationModel with DecisionTree with Serializable {
   override def predictRaw(features: Vector): Vector = {
     rootNode.predictImpl(features).impurities
@@ -23,7 +24,7 @@ case class DecisionTreeClassifierModel(override val rootNode: Node,
         ProbabilisticClassificationModel.normalizeToProbabilitiesInPlace(dv)
         dv
       case sv: SparseVector =>
-        throw new RuntimeException("Unexpected error in RandomForestClassificationModel:" +
+        throw new RuntimeException("Unexpected error in DecisionTreeClassifierModel:" +
           " raw2probabilityInPlace encountered SparseVector")
     }
   }

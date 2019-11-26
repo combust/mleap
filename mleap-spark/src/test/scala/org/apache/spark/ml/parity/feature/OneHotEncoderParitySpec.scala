@@ -1,10 +1,7 @@
 package org.apache.spark.ml.parity.feature
 
 import org.apache.spark.ml.parity.SparkParityBase
-import org.apache.spark.ml.feature.{
-  OneHotEncoderEstimator,
-  StringIndexer
-}
+import org.apache.spark.ml.feature.{OneHotEncoderEstimator, StringIndexer}
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.sql.DataFrame
 
@@ -23,4 +20,6 @@ class OneHotEncoderParitySpec extends SparkParityBase {
             .setOutputCols(Array("state_oh", "state_oh2"))
         ))
         .fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType")
 }

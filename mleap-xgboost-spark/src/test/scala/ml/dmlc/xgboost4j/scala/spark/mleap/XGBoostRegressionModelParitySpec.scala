@@ -82,7 +82,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
         val v1 = sp.getDouble(sparkPredictionCol)
         val v2 = ml.getDouble(mleapPredictionCol)
 
-        assert(sp.getAs[Vector](sparkFeaturesCol).toDense.values sameElements ml.getTensor[Double](mleapFeaturesCol).rawValues)
+        assert(sp.getAs[Vector](sparkFeaturesCol).toDense.values sameElements ml.getTensor[Double](mleapFeaturesCol).toDense.rawValues)
         assert(Math.abs(v2 - v1) < 0.0001)
     }
   }

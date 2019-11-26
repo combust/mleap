@@ -103,11 +103,10 @@ $ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.15.0
 
 ### PySpark Integration
 
-Install MLeap from pypy
+Install MLeap from [PyPI](https://pypi.org/project/mleap/)
 ```bash
 $ pip install mleap
 ```
-
 
 ## Using the Library
 

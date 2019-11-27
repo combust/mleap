@@ -26,15 +26,23 @@ class DecisionTreeClassifierOp extends MleapOp[DecisionTreeClassifier, DecisionT
                       (implicit context: BundleContext[MleapContext]): Model = {
       TreeSerializer[tree.Node](context.file("nodes"), withImpurities = true).write(obj.rootNode)
       model.withValue("num_features", Value.long(obj.numFeatures)).
-        withValue("num_classes", Value.long(obj.numClasses))
+        withValue("num_classes", Value.long(obj.numClasses)).
+        withValue("thresholds", obj.thresholds.map(Value.doubleList(_)))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): DecisionTreeClassifierModel = {
       val rootNode = TreeSerializer[tree.Node](context.file("tree"), withImpurities = true).read().get
+      val numClasses = model.value("num_classes").getLong.toInt
+      val thresholds = model.getValue("thresholds").map(_.getDoubleList.toArray)
+      require(thresholds.isEmpty || thresholds.get.length == numClasses,
+        "DecisionTreeClassifierModel loaded with non-matching numClasses and thresholds.length. " +
+          s" numClasses=$numClasses, but thresholds has length ${thresholds.get.length}")
+
       DecisionTreeClassifierModel(rootNode,
-        numClasses = model.value("num_classes").getLong.toInt,
-        numFeatures = model.value("num_features").getLong.toInt)
+        numFeatures = model.value("num_features").getLong.toInt,
+        numClasses = numClasses,
+        thresholds = thresholds)
     }
   }
 

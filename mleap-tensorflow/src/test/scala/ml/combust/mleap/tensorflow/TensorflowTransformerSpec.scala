@@ -17,11 +17,14 @@ import resource.managed
   * Created by hollinwilkins on 1/13/17.
   */
 class TensorflowTransformerSpec extends FunSpec {
+
   describe("with a scaling tensorflow model") {
     it("scales the vector using the model and returns the result") {
-      val model = TensorflowModel(TestUtil.createAddGraph(),
+      val graph = TestUtil.createAddGraph()
+      val model = TensorflowModel(graph = Some(graph),
         inputs = Seq(("InputA", TensorType.Float()), ("InputB", TensorType.Float())),
-        outputs = Seq(("MyResult", TensorType.Float())))
+        outputs = Seq(("MyResult", TensorType.Float())),
+        graphBytes = graph.toGraphDef)
       val shape = NodeShape().withInput("InputA", "input_a").
         withInput("InputB", "input_b").
         withOutput("MyResult", "my_result")
@@ -49,10 +52,10 @@ class TensorflowTransformerSpec extends FunSpec {
     val graph = new org.tensorflow.Graph()
     graph.importGraphDef(graphBytes)
 
-    it("can create transformer & bundle from a TF frozen graph") {
+    it("can create transformer and bundle from a TF frozen graph") {
 
-      val model = TensorflowModel(graph, inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
-        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))))
+      val model = TensorflowModel(graph = Some(graph), inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
+        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))), graphBytes = graph.toGraphDef)
       val shape = NodeShape().withInput("dense_1_input", "features").withOutput("dense_3/Sigmoid", "score")
       val transformer = TensorflowTransformer(uid = "wine_quality", shape = shape, model = model)
 
@@ -82,6 +85,25 @@ class TensorflowTransformerSpec extends FunSpec {
       val actualData = tfTransformer.transform(frame).get.collect()
       assert(actualData.head.getTensor[Float](0).toArray.toSeq sameElements expectedData.head.getTensor[Float](0).toArray.toSeq)
       assert(actualData.head.getTensor[Float](1).toArray.toSeq sameElements expectedData.head.getTensor[Float](1).toArray.toSeq)
+    }
+
+    it("can create transformer and bundle from graph bytes") {
+      val model = TensorflowModel(inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
+        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))), graphBytes = graphBytes)
+      val shape = NodeShape().withInput("dense_1_input", "features").withOutput("dense_3/Sigmoid", "score")
+      val transformer = TensorflowTransformer(uid = "wine_quality", shape = shape, model = model)
+
+      val uri = new URI(s"jar:file:${TestUtil.baseDir}/tensorflow2.json.zip")
+      for (file <- managed(BundleFile(uri))) {
+        transformer.writeBundle.name("bundle")
+          .format(SerializationFormat.Json)
+          .save(file)
+      }
+
+      val file = new File(s"${TestUtil.baseDir}/tensorflow2.json.zip")
+      (for (bf <- managed(BundleFile(file))) yield {
+        bf.loadMleapBundle().get.root
+      }).tried.get.asInstanceOf[TensorflowTransformer]
     }
   }
 }

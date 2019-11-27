@@ -11,12 +11,13 @@ scala:
 
 python:
   - "2.7"
+  - "3.6"
+  - "3.7"
 
 install:
-  pip install --user -r ./python/requirements.txt
-
+    -   pip install --user tox
 script:
-  - nosetests ./python -v --exclude-dir=./python/mleap/pyspark
+  - tox -c python/tox.ini -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .) -v
   - travis/travis.sh
 
 notifications:

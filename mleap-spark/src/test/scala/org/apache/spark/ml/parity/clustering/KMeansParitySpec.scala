@@ -20,4 +20,6 @@ class KMeansParitySpec extends SparkParityBase {
     new KMeans().
       setFeaturesCol("features").
       setPredictionCol("prediction"))).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType", "initMode", "initSteps", "maxIter", "tol", "k", "seed")
 }

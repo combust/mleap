@@ -12,10 +12,8 @@ import scala.util.Try
 case class FeatureHasher(override val uid: String = Transformer.uniqueName("feature_hasher"),
                          override val shape: NodeShape,
                          override val model: FeatureHasherModel) extends Transformer {
-  private val f = (values: Row) => {
-    model(values.toSeq): Tensor[Double]
-  }
-  val exec: UserDefinedFunction = UserDefinedFunction(f,
+  val exec: UserDefinedFunction = UserDefinedFunction(
+    (values: Row) => model(values.toSeq): Tensor[Double],
     outputSchema.fields.head.dataType,
     Seq(SchemaSpec(inputSchema)))
 

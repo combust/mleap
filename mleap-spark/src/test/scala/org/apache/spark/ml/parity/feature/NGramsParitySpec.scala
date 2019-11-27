@@ -16,6 +16,6 @@ class NGramsParitySpec extends SparkParityBase {
     new NGram().
       setInputCol("loan_title_tokens").
       setOutputCol("loan_title_ngram").
-      setN(2))).fit(dataset)
+      setN(3))).fit(dataset)
 
 }

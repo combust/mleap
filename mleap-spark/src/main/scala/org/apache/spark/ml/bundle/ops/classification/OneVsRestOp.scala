@@ -63,6 +63,6 @@ class OneVsRestOp extends SimpleSparkOp[OneVsRestModel] {
   }
 
   override def sparkOutputs(obj: OneVsRestModel): Seq[SimpleParamSpec] = {
-    Seq("prediction" -> obj.predictionCol)
+    Seq("raw_prediction" -> obj.rawPredictionCol, "prediction" -> obj.predictionCol)
   }
 }

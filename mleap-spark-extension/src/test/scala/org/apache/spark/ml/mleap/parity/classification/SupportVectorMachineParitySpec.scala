@@ -23,4 +23,6 @@ class SupportVectorMachineParitySpec extends SparkParityBase {
       model = new mllib.classification.SVMModel(weights = Vectors.dense(0.53, 0.67), intercept = 0.77)).
       setRawPredictionCol("raw_prediction").
       setProbabilityCol("probability"))).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType")
 }

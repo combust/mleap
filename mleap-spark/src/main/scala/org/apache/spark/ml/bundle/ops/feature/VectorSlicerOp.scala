@@ -64,7 +64,7 @@ class VectorSlicerOp extends SimpleSparkOp[VectorSlicer] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: VectorSlicer): VectorSlicer = {
-    new VectorSlicer(uid = uid)
+    new VectorSlicer(uid = uid).setIndices(model.getIndices).setNames(model.getNames)
   }
 
   override def sparkInputs(obj: VectorSlicer): Seq[ParamSpec] = {

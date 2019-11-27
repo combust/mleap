@@ -39,7 +39,8 @@ case class NaiveBayesModel(numFeatures: Int,
                            numClasses: Int,
                            pi: Vector,
                            theta: Matrix,
-                           modelType: NaiveBayesModel.ModelType)
+                           modelType: NaiveBayesModel.ModelType,
+                           override val thresholds: Option[Array[Double]] = None)
   extends ProbabilisticClassificationModel with Model {
 
   private def multinomialCalculation(raw: Vector) = {

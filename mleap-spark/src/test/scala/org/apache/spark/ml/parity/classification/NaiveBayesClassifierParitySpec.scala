@@ -1,8 +1,7 @@
 package org.apache.spark.ml.parity.classification
 
-import org.apache.spark.ml.classification.{LogisticRegressionModel, NaiveBayes}
-import org.apache.spark.ml.feature.{VectorAssembler, StringIndexer}
-import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.ml.classification.NaiveBayes
+import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.sql._
@@ -23,6 +22,9 @@ class NaiveBayesClassifierParitySpec extends SparkParityBase {
       setOutputCol("label"),
     new NaiveBayes(uid = "nb").
       setModelType("multinomial").
+      setThresholds(Array(0.4)).
       setFeaturesCol("features").
       setLabelCol("label"))).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType", "labelCol", "smoothing")
 }

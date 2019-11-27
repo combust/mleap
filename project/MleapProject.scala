@@ -16,9 +16,13 @@ object MleapProject {
     sparkTestkit,
     spark,
     sparkExtension,
-    xgboostRuntime,
-    xgboostSpark,
-    tensorflow,
+    executor,
+    executorTestKit,
+    grpc,
+    grpcServer,
+    repositoryS3,
+    springBootServing,
+    serving,
     databricksRuntime)
 
   var rootSettings = Release.settings ++
@@ -121,7 +125,49 @@ object MleapProject {
   lazy val serving = Project(
     id = "mleap-serving",
     base = file("mleap-serving"),
-    dependencies = Seq(runtime, avro, xgboostRuntime)
+    dependencies = Seq(springBootServing, grpcServer)
+  )
+
+  lazy val executor = Project(
+    id = "mleap-executor",
+    base = file("mleap-executor"),
+    dependencies = Seq(runtime)
+  )
+
+  lazy val executorTestKit = Project(
+    id = "mleap-executor-testkit",
+    base = file("mleap-executor-testkit"),
+    dependencies = Seq(executor)
+  )
+
+  lazy val executorTests = Project(
+    id = "mleap-executor-tests",
+    base = file("mleap-executor-tests"),
+    dependencies = Seq(executor, executorTestKit % "test")
+  )
+
+  lazy val grpc = Project(
+    id = "mleap-grpc",
+    base = file("mleap-grpc"),
+    dependencies = Seq(`executor`)
+  )
+
+  lazy val grpcServer = Project(
+    id = "mleap-grpc-server",
+    base = file("mleap-grpc-server"),
+    dependencies = Seq(grpc, executorTestKit % "test")
+  )
+
+  lazy val repositoryS3 = Project(
+    id = "mleap-repository-s3",
+    base = file("mleap-repository-s3"),
+    dependencies = Seq(executor)
+  )
+
+  lazy val springBootServing = Project(
+    id = "mleap-spring-boot",
+    base = file("mleap-spring-boot"),
+    dependencies = Seq(`executor`)
   )
 
   lazy val benchmark = Project(
@@ -142,6 +188,7 @@ object MleapProject {
       spark,
       sparkExtension,
       tensorflow,
+      xgboostRuntime,
       xgboostSpark)
   ).settings(excludeDependencies ++= Seq(
     SbtExclusionRule("org.tensorflow"),

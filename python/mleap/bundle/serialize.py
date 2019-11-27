@@ -1,5 +1,6 @@
 import os
 import shutil
+import six
 import json
 import numpy as np
 
@@ -81,13 +82,13 @@ class MLeapSerializer(object):
                 }
             elif isinstance(value, list) and isinstance(value[0], str):
                 attributes[name] = {
-                      "type": "list",
-                      "string": value
+                    "type": "list",
+                    "string": value
                 }
 
             elif isinstance(value, np.ndarray):
                 attributes[name] = {
-                    "double":  list(value.flatten()),
+                    "double": list(value.flatten()),
                     "shape": {
                         "dimensions": [{
                             "size": list(value.shape),
@@ -109,16 +110,16 @@ class MLeapSerializer(object):
                         shapes.append(({"base": "scalar",
                                         "isNullable": False}))
                     elif shape['shape'] == 'tensor':
-                        shapes.append(({"base": "tensor",
-                                        "isNullable": False,
-                                        "tensorShape": {
-                                            "dimensions": [{
-                                                "size": shape['tensor_shape']['dimensions'][0]['size'],
-                                                "name": ""
-                                                }]
-                                            }
-                                        }
-                                       ))
+                        shapes.append(({
+                            "base": "tensor",
+                            "isNullable": False,
+                            "tensorShape": {
+                                "dimensions": [{
+                                    "size": shape['tensor_shape']['dimensions'][0]['size'],
+                                    "name": ""
+                                }]
+                            }
+                        }))
                 attributes[name] = {
                     'type': 'list',
                     'data_shape': shapes
@@ -130,12 +131,12 @@ class MLeapSerializer(object):
 
     def get_mleap_node(self, transformer, inputs, outputs):
         js = {
-              "name": transformer.name,
-              "shape": {
+            "name": transformer.name,
+            "shape": {
                 "inputs": inputs,
                 "outputs": outputs
-              }
             }
+        }
         return js
 
     def serialize(self, transformer, path, model_name, attributes, inputs, outputs, node=True, model=True):
@@ -180,7 +181,7 @@ class MLeapDeserializer(object):
 
     @staticmethod
     def _node_features_format(x):
-        if isinstance(x, str) or isinstance(x, unicode):
+        if isinstance(x, six.string_types):
             return [str(x)]
         return x
 
@@ -200,7 +201,7 @@ class MLeapDeserializer(object):
         attributes = model_j['attributes']
         for attribute in attributes.keys():
             value_key = [key for key in attributes[attribute].keys()
-                         if key in ['string', 'boolean','long', 'double', 'data_shape']][0]
+                         if key in ['string', 'boolean', 'long', 'double', 'data_shape']][0]
             if attributes_map is not None and attribute in attributes_map.keys():
                 setattr(transformer, attributes_map[attribute], attributes[attribute][value_key])
             else:

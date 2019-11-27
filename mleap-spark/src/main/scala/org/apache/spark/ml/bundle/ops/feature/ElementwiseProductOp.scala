@@ -29,7 +29,7 @@ class ElementwiseProductOp extends SimpleSparkOp[ElementwiseProduct] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: ElementwiseProduct): ElementwiseProduct = {
-    new ElementwiseProduct(uid = uid)
+    new ElementwiseProduct(uid = uid).setScalingVec(model.getScalingVec)
   }
 
   override def sparkInputs(obj: ElementwiseProduct): Seq[ParamSpec] = {

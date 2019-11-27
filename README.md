@@ -43,6 +43,20 @@ Our goals for this project are:
 MLeap is built against Scala 2.11 and Java 8.  Because we depend heavily on Typesafe config for MLeap, we only support Java 8 at the
 moment.
 
+### MLeap/Spark Version
+
+Choose the right verison of the `mleap-spark` module to export your pipeline. The serialization format is backwards compatible between different versions of MLeap. So if you export a pipeline using MLeap 0.11.0 and Spark 2.1, you can still load that pipeline using MLeap runtime version 0.12.0.
+
+| MLeap Version | Spark Version |
+|---------------|---------------|
+| 0.15.0        | 2.4           |
+| 0.14.0        | 2.4           |
+| 0.13.0        | 2.3           |
+| 0.12.0        | 2.3           |
+| 0.11.0        | 2.2           |
+| 0.11.0        | 2.1           |
+| 0.11.0        | 2.0           |
+
 ## Setup
 
 ### Link with Maven or SBT
@@ -50,7 +64,7 @@ moment.
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.10.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.15.0"
 ```
 
 #### Maven
@@ -59,7 +73,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.10.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.11</artifactId>
-    <version>0.10.0</version>
+    <version>0.15.0</version>
 </dependency>
 ```
 
@@ -68,7 +82,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.10.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.10.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.15.0"
 ```
 
 #### Maven
@@ -77,23 +91,22 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.10.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.11</artifactId>
-    <version>0.10.0</version>
+    <version>0.15.0</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.10.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.15.0
 ```
 
 ### PySpark Integration
 
-Install MLeap from pypy
+Install MLeap from [PyPI](https://pypi.org/project/mleap/)
 ```bash
 $ pip install mleap
 ```
-
 
 ## Using the Library
 

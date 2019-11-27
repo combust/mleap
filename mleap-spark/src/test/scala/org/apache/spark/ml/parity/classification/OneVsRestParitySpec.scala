@@ -21,4 +21,6 @@ class OneVsRestParitySpec extends SparkParityBase {
       setLabelCol("fico_index").
       setFeaturesCol("features").
       setPredictionCol("prediction"))).fit(dataset)
+
+  override val unserializedParams = Set("stringOrderType", "classifier", "labelCol")
 }

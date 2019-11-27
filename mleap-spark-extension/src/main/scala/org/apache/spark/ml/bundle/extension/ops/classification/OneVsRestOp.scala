@@ -2,7 +2,7 @@ package org.apache.spark.ml.bundle.extension.ops.classification
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.serializer.ModelSerializer
 import org.apache.spark.ml.attribute.NominalAttribute
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
@@ -29,6 +29,7 @@ class OneVsRestOp extends SimpleSparkOp[OneVsRestModel] {
       }
 
       model.withValue("num_classes", Value.long(obj.models.length))
+        .withValue("num_features", Value.long(obj.models.head.numFeatures))
     }
 
     override def load(model: Model)
@@ -36,7 +37,7 @@ class OneVsRestOp extends SimpleSparkOp[OneVsRestModel] {
       val numClasses = model.value("num_classes").getLong.toInt
 
       val models = (0 until numClasses).toArray.map {
-        i => ModelSerializer(context.bundleContext(s"model$i")).read().asInstanceOf[ClassificationModel[_, _]]
+        i => ModelSerializer(context.bundleContext(s"model$i")).read().get.asInstanceOf[ClassificationModel[_, _]]
       }
 
       val labelMetadata = NominalAttribute.defaultAttr.

@@ -26,6 +26,17 @@ trait FrameBuilder[FB <: FrameBuilder[FB]] {
     */
   def select(fieldNames: String *): Try[FB]
 
+  /** Selects all of the fields from field names that exist in the leap frame.
+    * Returns a new leap frame with all of the available fields.
+    *
+    * @param fieldNames fields to try and select
+    * @return leap frame with select fields
+    */
+  def relaxedSelect(fieldNames: String *): FB = {
+    val actualFieldNames = fieldNames.filter(schema.hasField)
+    select(actualFieldNames: _*).get
+  }
+
   /** Try to add a column to the LeapFrame.
     *
     * Returns a Failure if trying to add a field that already exists.

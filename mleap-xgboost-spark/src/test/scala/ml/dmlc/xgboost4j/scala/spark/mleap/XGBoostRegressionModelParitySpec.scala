@@ -36,6 +36,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   private val xgboostParams: Map[String, Any] = Map(
     "eta" -> 0.3,
     "max_depth" -> 2,
+    "missing" -> 0.0f,
     "objective" -> "reg:squarederror",
     "early_stopping_rounds" ->2,
     "num_round" -> 15

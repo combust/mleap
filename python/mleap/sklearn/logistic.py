@@ -65,11 +65,17 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
 
     def serialize_to_bundle(self, transformer, path, model_name):
 
+        num_classes = len(transformer.classes_)
+
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('intercept', transformer.intercept_.tolist()[0]))
-        attributes.append(('coefficients', transformer.coef_.tolist()[0]))
-        attributes.append(('num_classes', 2)) # TODO: get number of classes from the transformer
+        if num_classes > 2:
+            attributes.append(('coefficient_matrix', transformer.coef_))
+            attributes.append(('intercept_vector', transformer.intercept_))
+        else:
+            attributes.append(('coefficients', transformer.coef_.tolist()[0]))
+            attributes.append(('intercept', transformer.intercept_.tolist()[0]))
+        attributes.append(('num_classes', num_classes))
 
         # define node inputs and outputs
         inputs = [{
@@ -88,7 +94,9 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
 
         attributes_map = {
             'coefficients': 'coef_',
-            'intercept': 'intercept_'
+            'coefficient_matrix': 'coef_',
+            'intercept': 'intercept_',
+            'intercept_vector': 'intercept_',
         }
 
         # Set serialized attributes
@@ -102,6 +110,8 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
             transformer.fit_intercept = False
 
         transformer.coef_ = np.array([transformer.coef_])
-        transformer.classes_ = np.array([0, 1])
+        if transformer.num_classes > 2:
+            transformer.coef_ = np.reshape(transformer.coef_, (transformer.num_classes, -1))
+        transformer.classes_ = np.array(range(transformer.num_classes))
 
         return transformer

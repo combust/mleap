@@ -31,11 +31,11 @@ from mleap.sklearn.logistic import LogisticRegression, LogisticRegressionCV
 from mleap.sklearn.preprocessing.data import FeatureExtractor, Binarizer
 
 
-def to_quartile(rand_num):
+def to_standard_normal_quartile(rand_num):
     """Retrieve the quartile of a data point sampled from the standard normal distribution
 
     Useful for assigning multi-class labels to random data during tests
-    Tests should probably use sklearn.preprocessing.KBinsDiscretizer instead
+    Such tests should probably use sklearn.preprocessing.KBinsDiscretizer instead
     But they can't since scikit-learn is pinned < 0.20.0
     https://github.com/combust/mleap/pull/431
 
@@ -178,12 +178,12 @@ class TransformerTests(unittest.TestCase):
 
         logistic_regression = LogisticRegression(fit_intercept=True)
         logistic_regression.mlinit(
-            input_features='features',
+            input_features='a',
             prediction_column='prediction'
         )
 
         X = self.df[['a']]
-        y = np.array([to_quartile(elem) for elem in X.to_numpy()])
+        y = np.array([to_standard_normal_quartile(elem) for elem in X.to_numpy()])
 
         logistic_regression.fit(X, y)
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)
@@ -214,7 +214,7 @@ class TransformerTests(unittest.TestCase):
         )
 
         X = self.df[['a']]
-        y = np.array([to_quartile(elem) for elem in X.to_numpy()])
+        y = np.array([to_standard_normal_quartile(elem) for elem in X.to_numpy()])
 
         logistic_regression.fit(X, y)
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)

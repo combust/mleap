@@ -209,7 +209,7 @@ class TransformerTests(unittest.TestCase):
 
         logistic_regression = LogisticRegression(fit_intercept=True)
         logistic_regression.mlinit(
-            input_features='features',
+            input_features='a',
             prediction_column='prediction'
         )
 

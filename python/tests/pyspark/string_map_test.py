@@ -1,6 +1,9 @@
 import unittest
 from py4j.protocol import Py4JJavaError
+import os
 from mleap.pyspark.feature.string_map import StringMap
+from mleap.pyspark.spark_support import SimpleSparkSerializer
+from pyspark.ml import Pipeline
 from pyspark.sql import types as t
 from tests.pyspark.lib.assertions import assert_df
 from tests.pyspark.lib.spark_session import spark_session
@@ -50,6 +53,17 @@ class StringMapTest(unittest.TestCase):
         expected = self.spark.createDataFrame([['a', 'b', 1.0]], OUTPUT_SCHEMA)
         assert_df(expected, result)
 
+    def test_serialize_to_bundle(self):
+        string_map = StringMap({'a': 1.0}, 'key_col', 'value_col')
+        pipeline = Pipeline(stages=[string_map]).fit(self.input)
+        pipeline_file = os.path.join(os.path.dirname(__file__), '..', '..',
+                                     'target', 'test_serialize_to_bundle-pipeline.zip')
+        _serialize_to_file(pipeline_file, self.input, pipeline)
+        deserialized_pipeline = _deserialize_from_file(pipeline_file)
+        result = deserialized_pipeline.transform(self.input)
+        expected = self.spark.createDataFrame([['a', 'b', 1.0]], OUTPUT_SCHEMA)
+        assert_df(expected, result)
+
     @staticmethod
     def test_validate_handleInvalid_ok():
         StringMap({}, handleInvalid='error')
@@ -69,3 +83,18 @@ class StringMapTest(unittest.TestCase):
     def test_validate_labels_value_fails(self):
         with self.assertRaises(AssertionError):
             StringMap(None, {'valid_key_type': 'invalid_value_type'})
+
+
+def _serialize_to_file(path, df_for_serializing, model):
+    if os.path.exists(path):
+        os.remove(path)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    SimpleSparkSerializer().serializeToBundle(model, _to_file_path(path), df_for_serializing)
+
+
+def _to_file_path(path):
+    return "jar:file:" + os.path.abspath(path)
+
+
+def _deserialize_from_file(path):
+    return SimpleSparkSerializer().deserializeFromBundle(_to_file_path(path))

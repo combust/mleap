@@ -6,7 +6,7 @@ from pyspark.sql import DataFrame
 
 
 class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, JavaMLWritable):
-    def __init__(self, labels, inputCol=None, outputCol=None, handleInvalid='error', defaultValue=0.0):
+    def __init__(self, labels={}, inputCol=None, outputCol=None, handleInvalid='error', defaultValue=0.0):
         """
         :param labels: a dict {string: double}
         :param handleInvalid: how to handle missing labels: 'error' (throw), or 'keep' (map to defaultValue)

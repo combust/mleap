@@ -1,7 +1,7 @@
 package ml.combust.mleap.executor.service
 
 import akka.pattern.pipe
-import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Status, Terminated}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, ReceiveTimeout, Status, Terminated}
 import akka.stream.Materializer
 import ml.combust.bundle.dsl.Bundle
 import ml.combust.mleap.executor._
@@ -30,7 +30,7 @@ object BundleActor {
 class BundleActor(request: LoadModelRequest,
                   loader: RepositoryBundleLoader,
                   config: ExecutorConfig)
-                 (implicit materializer: Materializer) extends Actor {
+                 (implicit materializer: Materializer) extends Actor with ActorLogging {
   import BundleActor.Messages
   import RowStreamActor.{Messages => RFMessages}
   import FrameStreamActor.{Messages => FFMessages}
@@ -103,7 +103,9 @@ class BundleActor(request: LoadModelRequest,
   def maybeLoad(): Unit = {
     if (!loading) {
       loader.loadBundle(model.uri).map(Try(_)).recover {
-        case err => Failure(err)
+        case err =>
+          log.warning("Cannot load bundle because: {}", err)
+          Failure(err)
       }.map(Messages.Loaded).pipeTo(self)
       loading = true
     }

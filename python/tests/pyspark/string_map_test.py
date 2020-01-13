@@ -88,7 +88,9 @@ class StringMapTest(unittest.TestCase):
 def _serialize_to_file(path, df_for_serializing, model):
     if os.path.exists(path):
         os.remove(path)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    path_dir = os.path.dirname(path)
+    if not os.path.exists(path_dir):
+        os.makedirs(path_dir)
     SimpleSparkSerializer().serializeToBundle(model, _to_file_path(path), df_for_serializing)
 
 

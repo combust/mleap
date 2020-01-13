@@ -26,8 +26,6 @@ import scala.collection.mutable
   */
 case class PowerPlantTableForClassifier(AT: Double, V : Double, AP : Double, RH : Double, PE : Int)
 
-case class testDetails(parameters: Map[String, Any], dataset: DataFrame, transformer: Transformer )
-
 class XGBoostClassificationModelParitySpec extends FunSpec
   with BeforeAndAfterAll {
 
@@ -74,7 +72,7 @@ class XGBoostClassificationModelParitySpec extends FunSpec
         setOutputCol("features"))).fit(denseDataset)
   }
 
-  private val sparkTransformerForsparseDataset: Transformer = {
+  private val sparkTransformerForSparseDataset: Transformer = {
     val featureAssembler = new VectorAssembler()
       .setInputCols(Array("AT", "V", "AP", "RH"))
       .setOutputCol("features")
@@ -206,6 +204,6 @@ class XGBoostClassificationModelParitySpec extends FunSpec
   }
 
   it("produces the same result for a sparse dataset") {
-    doTest(sparkTransformerForsparseDataset, sparseDataset, bundleCacheSparse)
+    doTest(sparkTransformerForSparseDataset, sparseDataset, bundleCacheSparse)
   }
 }

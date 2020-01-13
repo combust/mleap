@@ -109,9 +109,11 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
         else:
             transformer.fit_intercept = False
 
-        transformer.coef_ = np.array([transformer.coef_])
         if transformer.num_classes > 2:
             transformer.coef_ = np.reshape(transformer.coef_, (transformer.num_classes, -1))
+        else:
+            transformer.coef_ = np.reshape(transformer.coef_, (1, -1))
+
         transformer.classes_ = np.array(range(transformer.num_classes))
 
         return transformer

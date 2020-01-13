@@ -1,6 +1,9 @@
 package org.apache.spark.ml.mleap.parity.feature
 
+import java.io.File
+
 import ml.combust.mleap.core.feature.{StringMapHandleInvalid, StringMapModel}
+import ml.combust.mleap.spark.SimpleSparkSerializer
 import org.apache.spark.ml.mleap.feature.StringMap
 import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.ml.{Pipeline, Transformer}
@@ -25,4 +28,16 @@ class StringMapParitySpec extends SparkParityBase {
     )).setInputCol("name").setOutputCol("index2")
 
   )).fit(dataset)
+
+  it("serializes/deserializes with SimpleSparkSerializer") {
+    if (!ignoreSerializationTest) {
+      new File("/tmp/mleap/spark-parity").mkdirs()
+      val file = new File(s"/tmp/mleap/spark-parity/${getClass.getName}.zip")
+      file.delete()
+      val filePath = "jar:file:" + file.getAbsolutePath
+      new SimpleSparkSerializer().serializeToBundle(sparkTransformer, filePath, dataset)
+      new SimpleSparkSerializer().deserializeFromBundle(filePath)
+      file.delete()
+    }
+  }
 }

@@ -53,7 +53,6 @@ class StringMapTest(unittest.TestCase):
         expected = self.spark.createDataFrame([['a', 'b', 1.0]], OUTPUT_SCHEMA)
         assert_df(expected, result)
 
-    @unittest.skip("Works locally but fails on Travis. Don't know how to reproduce")
     def test_serialize_to_bundle(self):
         string_map = StringMap({'a': 1.0}, 'key_col', 'value_col')
         pipeline = Pipeline(stages=[string_map]).fit(self.input)

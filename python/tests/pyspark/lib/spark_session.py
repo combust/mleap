@@ -42,5 +42,14 @@ def _mleap_classpath():
     classpath_file = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..',
                                   'mleap-spark-extension', 'target', 'classpath-runtime_2.11.8.txt')
     assert os.path.exists(classpath_file), 'classpath-runtime.txt is missing. Run sbt +compile first to generate it.'
+
+    classes_folder = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..',
+                                  'mleap-spark-extension', 'target', 'scala-2.11', 'classes')
+    print('!!! scala-2.11 class folder.list: {}'.format(os.listdir(classes_folder)))
+
+    classes_folder = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..',
+                                  'mleap-spark-extension', 'target', 'scala-2.12', 'classes')
+    print('!!! scala-2.12 class folder.list: {}'.format(os.listdir(classes_folder)))
+
     with open(classpath_file, 'r') as f:
         return f.read()

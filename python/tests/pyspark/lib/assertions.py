@@ -9,7 +9,7 @@ def _print_dfs(actual, expected):
     expected.show(100, False)
 
 
-def assert_df(actual, expected, sort=True, **kwargs):
+def assert_df(actual, expected, sort=True):
     """
     For more elaborate DFs comparision, e.g. ignoring sorting or less precise.
     Default precision for float comparison is 5 digits.
@@ -21,7 +21,7 @@ def assert_df(actual, expected, sort=True, **kwargs):
         expected = expected.orderBy(actual.columns)
 
     try:
-        assert_frame_equal(actual.toPandas(), expected.toPandas(), **kwargs)
+        assert_frame_equal(actual.toPandas(), expected.toPandas())
     except AssertionError as e:
         _print_dfs(actual, expected)
         # assert_frame_equal doesn't print the column name, only the index

@@ -11,7 +11,7 @@ def _print_dfs(actual, expected):
 
 def assert_df(actual, expected, sort=True):
     """
-    For more elaborate DFs comparision, e.g. ignoring sorting or less precise.
+    For more elaborate DFs comparison, e.g. ignoring sorting or less precise.
     Default precision for float comparison is 5 digits.
     """
     __tracebackhide__ = True

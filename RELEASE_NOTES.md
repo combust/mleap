@@ -22,3 +22,22 @@
 
 ### Other Changes
 - None
+
+# Release 0.16.0 (pending, not released yet)
+
+### Breaking Changes
+- None
+
+### New Features
+- Scikit-learn support for Multinomial Logistic Regression
+- Support for min/max values other than defaults (i.e. 0.0 and 1.0) in MinMaxScalerModel
+
+### Bug Fixes
+- Fix XGBoost sparse vector support
+- Fix MinMaxScalerModel outputs different in Spark vs MLeap
+- Fix Spark deserialization for CountVectorizer transformer
+
+### Improvements
+- Minor documentation updates
+
+### Other Changes

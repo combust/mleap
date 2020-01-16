@@ -17,12 +17,9 @@ def spark_session():
     # difference is that spark.jars takes a comma-separated list of jars,
     #   while extraClassPath requires file paths with a platform-specific separator
     classpath = _mleap_classpath()
-    builder = builder \
-        .config('spark.driver.extraClassPath', classpath) \
-        .config('spark.executor.extraClassPath', classpath)
-
     return builder \
-        .enableHiveSupport() \
+        .config('spark.driver.extraClassPath', classpath) \
+        .config('spark.executor.extraClassPath', classpath) \
         .getOrCreate()
 
 

@@ -91,9 +91,9 @@ class MLeapSerializer(object):
                     "double": list(value.flatten()),
                     "shape": {
                         "dimensions": [{
-                            "size": list(value.shape),
+                            "size": dim,
                             "name": ""
-                        }]
+                        } for dim in value.shape]
                     },
                     "type": "tensor"
                 }

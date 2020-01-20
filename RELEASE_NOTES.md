@@ -34,7 +34,7 @@
 # Release 0.16.0 (pending, not released yet)
 
 ### Breaking Changes
-- None
+- Fix default ports when running grpc/http requests; default grpc port is 65328 and can be overridden via MLEAP_GRPC_PORT; default http port should be: 65327 and can be overridden via MLEAP_HTTP_PORT
 
 ### New Features
 - Scikit-learn support for Multinomial Logistic Regression

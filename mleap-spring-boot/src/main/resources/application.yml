@@ -1,0 +1,2 @@
+server:
+  port: ${MLEAP_HTTP_PORT:65327}

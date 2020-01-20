@@ -104,6 +104,13 @@ Check out the available Swagger API documentation `mleap_serving_1.0.0_swagger.y
 
 See the README.md in `mleap-serving` about starting both a gRPC and HTTP server using a single MLeap executor.
 
+If you encounter an issue of
+
+```
+Unexpected HTTP/1.x request: POST /models 
+```
+
+you need to make sure curl or whichever method is used to send the requests uses HTTP2.
 
 ## Loading models at startup
 

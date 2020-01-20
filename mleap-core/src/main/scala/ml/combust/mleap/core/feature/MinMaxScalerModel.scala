@@ -17,12 +17,11 @@ import scala.math.{max, min}
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.4.0/mllib/src/main/scala/org/apache/spark/ml/feature/MinMaxScaler.scala")
 case class MinMaxScalerModel(originalMin: Vector,
-                             originalMax: Vector) extends Model {
+                             originalMax: Vector,
+                             minValue: Double = 0.0,
+                             maxValue: Double = 1.0) extends Model {
   val originalRange = (originalMax.toBreeze - originalMin.toBreeze).toArray
   val minArray = originalMin.toArray
-
-  val minValue = 0.0
-  val maxValue = 1.0
 
   /**Scale a feature vector using the min/max
     *

@@ -1,3 +1,11 @@
+# Release 0.11.0
+### Breaking Changes
+- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.13.0 or higher.
+
+# Release 0.12.0
+### Breaking Changes
+- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.13.0 or higher.
+
 # Release 0.15.0
 
 ### Breaking Changes

@@ -1,7 +1,7 @@
 # Release 0.15.0
 
 ### Breaking Changes
-- Fix default ports when running grpc/http requests; default grpc port is 65328 and can be overridden via MLEAP_GRPC_PORT; default http port should be: 65327 and can be overridden via MLEAP_HTTP_PORT
+- None
 
 ### New Features
 - Load models at start up in mleap-spring-boot

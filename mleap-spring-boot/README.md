@@ -104,6 +104,7 @@ Check out the available Swagger API documentation `mleap_serving_1.0.0_swagger.y
 
 See the README.md in `mleap-serving` about starting both a gRPC and HTTP server using a single MLeap executor.
 
+
 ## Loading models at startup
 
 This functionality can be activated by passing the configuration property `mleap.model.config`. Specifying a path to a single config will load that single config, while specifying a path to a directory will load all files from that directory.

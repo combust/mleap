@@ -169,6 +169,8 @@ import mleap.pyspark
 from mleap.pyspark.spark_support import SimpleSparkSerializer
 ```
 
+See [PySpark Integration of python/README.md](python/README.md#pyspark-integration) for more.
+
 ### Create and Export a Scikit-Learn Pipeline
 
 ```python

@@ -12,6 +12,9 @@ import org.apache.spark.ml.linalg.{Matrices, Vectors}
   * Created by hollinwilkins on 8/21/16.
   */
 class LogisticRegressionOp extends SimpleSparkOp[LogisticRegressionModel] {
+
+  private final val LOGISTIC_REGRESSION_DEFAULT_THRESHOLD = 0.5
+
   override val Model: OpModel[SparkBundleContext, LogisticRegressionModel] = new OpModel[SparkBundleContext, LogisticRegressionModel] {
     override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 
@@ -57,7 +60,7 @@ class LogisticRegressionOp extends SimpleSparkOp[LogisticRegressionModel] {
         // default threshold is 0.5 for both Spark and Scikit-learn
         val threshold = model.getValue("threshold")
           .map(value => value.getDouble)
-          .getOrElse(0.5)
+          .getOrElse(LOGISTIC_REGRESSION_DEFAULT_THRESHOLD)
 
         lr.setThreshold(threshold)
       }

@@ -17,8 +17,8 @@ python:
 install:
     -   pip install --user tox
 script:
-  - tox -c python/tox.ini -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .) -v
   - travis/travis.sh
+  - tox -c python/tox.ini -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .) -v
 
 notifications:
   on_success: change

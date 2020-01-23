@@ -8,7 +8,6 @@ import ml.combust.mleap.core.types._
 import org.scalatest.FunSpec
 import resource.managed
 import ml.combust.mleap.runtime.MleapSupport._
-import ml.combust.mleap.runtime.test.TestUtil
 import ml.combust.mleap.runtime.transformer.Pipeline
 
 class OneHotEncoderSpec extends FunSpec {

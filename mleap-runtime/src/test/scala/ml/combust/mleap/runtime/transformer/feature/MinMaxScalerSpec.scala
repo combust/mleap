@@ -1,11 +1,17 @@
 package ml.combust.mleap.runtime.transformer.feature
 
+import java.io.File
+
+import ml.combust.bundle.BundleFile
 import ml.combust.mleap.core.feature.MinMaxScalerModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.runtime.transformer.Pipeline
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
+import resource.managed
+import ml.combust.mleap.runtime.MleapSupport._
 
 /**
   * Created by mikhail on 9/25/16.
@@ -43,6 +49,17 @@ class MinMaxScalerSpec extends FunSpec{
       assert(minMaxScaler.schema.fields ==
         Seq(StructField("test_vec", TensorType.Double(3)),
           StructField("test_normalized", TensorType.Double(3))))
+    }
+  }
+
+  describe("min max scaler with defaults for min/max still works") {
+    it ("loads correctly in mleap") {
+      val file = new File(getClass.getResource("/min_max_scaler_tf.zip").toURI)
+      val pipeline = (for (bf <- managed(BundleFile(file))) yield {
+        bf.loadMleapBundle().get.root
+      }).tried.get.asInstanceOf[Pipeline]
+
+      assert(pipeline.model.transformers.size == 2)
     }
   }
 }

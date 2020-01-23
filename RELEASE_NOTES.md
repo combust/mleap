@@ -1,8 +1,10 @@
 # Release 0.11.0
+
 ### Breaking Changes
 - OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.13.0 or higher.
 
 # Release 0.12.0
+
 ### Breaking Changes
 - OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.13.0 or higher.
 
@@ -39,6 +41,7 @@
 ### New Features
 - Scikit-learn support for Multinomial Logistic Regression
 - Support for min/max values other than defaults (i.e. 0.0 and 1.0) in MinMaxScalerModel
+- Suppor for custom transformers (StringMap) in Pyspark
 
 ### Bug Fixes
 - Fix XGBoost sparse vector support

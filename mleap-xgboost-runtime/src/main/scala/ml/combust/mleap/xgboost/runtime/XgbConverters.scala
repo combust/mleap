@@ -1,5 +1,6 @@
 package ml.combust.mleap.xgboost.runtime
 
+import biz.k11i.xgboost.util.FVec
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 import ml.dmlc.xgboost4j.LabeledPoint
 import ml.dmlc.xgboost4j.scala.DMatrix
@@ -16,6 +17,17 @@ trait XgbConverters {
           new DMatrix(Iterator(new LabeledPoint(0.0f, null, values.map(_.toFloat))))
       }
     }
+
+    def asXGBPredictor: FVec = {
+      vector match {
+//        case SparseVector(_, indices, values) => {
+//          FVec.Transformer.fromMap(
+//        }
+        case DenseVector(values) => {
+          FVec.Transformer.fromArray(values.map(_.toFloat), false)
+        }
+      }
+    }
   }
 
   implicit class DoubleTensorOps(tensor: Tensor[Double]) {
@@ -28,6 +40,10 @@ trait XgbConverters {
           new DMatrix(Iterator(new LabeledPoint(0.0f, null, tensor.toDense.rawValues.map(_.toFloat))))
         }
       }
+    }
+
+    def asXGBPredictor: FVec = {
+      FVec.Transformer.fromArray(tensor.toArray.map(_.toFloat), false)
     }
   }
 }

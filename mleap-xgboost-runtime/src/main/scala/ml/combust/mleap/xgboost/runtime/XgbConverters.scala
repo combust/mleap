@@ -2,6 +2,7 @@ package ml.combust.mleap.xgboost.runtime
 
 import biz.k11i.xgboost.util.FVec
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
+import ml.combust.mleap.xgboost.FVecTensorImpl
 import ml.dmlc.xgboost4j.LabeledPoint
 import ml.dmlc.xgboost4j.scala.DMatrix
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
@@ -43,7 +44,14 @@ trait XgbConverters {
     }
 
     def asXGBPredictor: FVec = {
-      FVec.Transformer.fromArray(tensor.toArray.map(_.toFloat), false)
+      tensor match {
+        case sparseTensor: SparseTensor[Double] => {
+          FVecTensorImpl(sparseTensor)
+        }
+        case DenseTensor(_, _) => {
+          FVec.Transformer.fromArray(tensor.toArray.map(_.toFloat), false)
+        }
+      }
     }
   }
 }

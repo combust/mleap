@@ -1,6 +1,5 @@
 package ml.combust.mleap.xgboost.runtime.bundle.ops
 
-import java.io.FileInputStream
 import java.nio.file.Files
 
 import ml.combust.bundle.BundleContext
@@ -10,9 +9,6 @@ import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.xgboost.runtime.{XGBoostBinaryClassificationModel, XGBoostClassification, XGBoostClassificationModel, XGBoostMultinomialClassificationModel, XGBoostPerformantBinaryClassificationModel, XGBoostPerformantClassification, XGBoostPerformantClassificationModel}
 import ml.dmlc.xgboost4j.scala.{Booster, XGBoost}
-import biz.k11i.xgboost.Predictor
-
-//import biz.k11i.xgboost.util.FVec;
 
 
 /**
@@ -52,21 +48,6 @@ class XGBoostClassificationOp extends MleapOp[XGBoostClassification, XGBoostClas
       XGBoostClassificationModel(impl)
     }
   }
-
-
-  def load(model: Model)
-                     (implicit context: BundleContext[MleapContext]): XGBoostPerformantClassificationModel = {
-
-      val predictor = new Predictor(new FileInputStream("/path/to/xgboost-model-file"))
-
-      val numClasses = model.value("num_classes").getInt
-      val numFeatures = model.value("num_features").getInt
-      val treeLimit = model.value("tree_limit").getInt
-
-      val impl = XGBoostPerformantBinaryClassificationModel(predictor, numFeatures, treeLimit)
-
-      XGBoostPerformantClassificationModel(impl)
-    }
 
   override def model(node: XGBoostClassification): XGBoostClassificationModel = node.model
 }

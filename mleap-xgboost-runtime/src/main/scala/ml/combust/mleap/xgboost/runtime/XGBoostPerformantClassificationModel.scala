@@ -6,7 +6,6 @@ import ml.combust.mleap.core.classification.ProbabilisticClassificationModel
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import XgbConverters._
 import ml.combust.mleap.core.types.{ListType, ScalarType, StructType, TensorType}
-import ml.dmlc.xgboost4j.scala.{Booster, DMatrix}
 
 
 trait XGBoostPerformantClassificationModelBase extends ProbabilisticClassificationModel {
@@ -25,19 +24,17 @@ trait XGBoostPerformantClassificationModelBase extends ProbabilisticClassificati
   def predictLeaf(features: Vector): Seq[Double] = predictLeaf(features.asXGBPredictor)
   def predictLeaf(data: FVec): Seq[Double] = predictor.predictLeaf(data, treeLimit).map(_.toDouble)
 
-//  def predictContrib(features: Vector): Seq[Double] = predictContrib(features.asXGB)
-//  def predictContrib(data: DMatrix): Seq[Double] = predictor.predictContrib(data, treeLimit).map(_.toDouble)
 }
 
 case class XGBoostPerformantBinaryClassificationModel(
       override val predictor: Predictor,
       override val numFeatures: Int,
       override val treeLimit: Int) extends XGBoostPerformantClassificationModelBase {
+
   override val numClasses: Int = 2
 
-  def predict(data: FVec): Double = {
+  def predict(data: FVec): Double =
     Math.round(predictor.predict(data, false, treeLimit).head)
-  }
 
   def predictProbabilities(data: FVec): Vector = {
     val m = predictor.predict(data, false, treeLimit).head
@@ -46,7 +43,7 @@ case class XGBoostPerformantBinaryClassificationModel(
 
   def predictRaw(data: FVec): Vector = {
     val m = predictor.predict(data, true, treeLimit).head
-    Vectors.dense(1 - m, m)
+    Vectors.dense(- m, m)
   }
 
   override def rawToProbabilityInPlace(raw: Vector): Vector = {
@@ -59,10 +56,10 @@ case class XGBoostPerformantClassificationModel(impl: XGBoostPerformantClassific
   override val numFeatures: Int = impl.numFeatures
   def treeLimit: Int = impl.treeLimit
 
-  def booster: Predictor = impl.predictor
+  def predictor: Predictor = impl.predictor
 
-  def binaryClassificationModel: XGBoostBinaryClassificationModel = impl.asInstanceOf[XGBoostBinaryClassificationModel]
-  def multinomialClassificationModel: XGBoostMultinomialClassificationModel = impl.asInstanceOf[XGBoostMultinomialClassificationModel]
+  def binaryClassificationModel: XGBoostPerformantBinaryClassificationModel = impl.asInstanceOf[XGBoostPerformantBinaryClassificationModel]
+//  def multinomialClassificationModel: XGBoostMultinomialClassificationModel = impl.asInstanceOf[XGBoostMultinomialClassificationModel]
 
   def predict(data: FVec): Double = impl.predict(data)
 
@@ -77,9 +74,11 @@ case class XGBoostPerformantClassificationModel(impl: XGBoostPerformantClassific
 
   override def rawToProbabilityInPlace(raw: Vector): Vector = impl.rawToProbabilityInPlace(raw)
 
-  override def outputSchema: StructType = StructType("raw_prediction" -> TensorType.Double(numClasses),
-    "probability" -> TensorType.Double(numClasses),
-    "prediction" -> ScalarType.Double.nonNullable,
-    "leaf_prediction" -> ListType.Double,
-    "contrib_prediction" -> ListType.Double).get
+  override def outputSchema: StructType = StructType(
+    "raw_prediction" -> TensorType.Double(numClasses),
+//    "probability" -> TensorType.Double(numClasses),
+    "prediction" -> ScalarType.Double.nonNullable
+//    "leaf_prediction" -> ListType.Double,
+//    "contrib_prediction" -> ListType.Double).get
+  ).get
 }

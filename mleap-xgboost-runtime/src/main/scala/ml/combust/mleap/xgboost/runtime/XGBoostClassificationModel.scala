@@ -42,7 +42,7 @@ case class XGBoostBinaryClassificationModel(override val booster: Booster,
 
   def predictRaw(data: DMatrix): Vector = {
     val m = booster.predict(data, outPutMargin = true, treeLimit = treeLimit).head(0)
-    Vectors.dense(1 - m, m)
+    Vectors.dense(- m, m)
   }
 
   override def rawToProbabilityInPlace(raw: Vector): Vector = {

@@ -23,8 +23,10 @@ class XGBoostClassificationOp extends MleapOp[XGBoostClassification, XGBoostClas
                       (implicit context: BundleContext[MleapContext]): Model = {
       val out = Files.newOutputStream(context.file("xgboost.model"))
       obj.booster.saveModel(out)
-      model.withValue("num_features", Value.int(obj.numFeatures)).
-        withValue("num_classes", Value.int(obj.numClasses))
+      model
+        .withValue("num_features", Value.int(obj.numFeatures))
+        .withValue("num_classes", Value.int(obj.numClasses))
+        .withValue("tree_limit", Value.int(obj.treeLimit))
     }
 
     override def load(model: Model)

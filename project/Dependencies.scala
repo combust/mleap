@@ -80,6 +80,7 @@ object Dependencies {
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
     val junit = "junit" % "junit" % "4.12" % "test"
     val junitInterface = "com.novocode" % "junit-interface" % "0.10" % "test"
+    val spark = Compile.spark.map(_ % "test")
   }
 
   object Provided {
@@ -114,7 +115,7 @@ object Dependencies {
 
   val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
-  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(Test.scalaTest)
+  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Test.spark ++ Seq(Test.scalaTest)
 
   val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark
 

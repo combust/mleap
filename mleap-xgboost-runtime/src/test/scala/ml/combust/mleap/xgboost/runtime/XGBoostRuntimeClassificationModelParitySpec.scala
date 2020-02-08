@@ -20,9 +20,6 @@ import ml.combust.mleap.xgboost.runtime.testing.FloatingPointApproximations
 import org.apache.spark.ml.linalg.{SparseVector, Vectors}
 
 
-/**
-  * Created by hollinwilkins on 9/16/17.
-  */
 class XGBoostRuntimeClassificationModelParitySpec extends FunSpec
   with FloatingPointApproximations {
 

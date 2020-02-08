@@ -21,6 +21,4 @@ trait FloatingPointApproximations {
     }
     true
   }
-
 }
-

@@ -26,6 +26,17 @@ class XGBoostClassificationModelParitySpec extends FunSpec
     )
   }
 
+  def createMultinomialBoosterClassifier(booster: Booster): Transformer ={
+
+    XGBoostClassification(
+      "xgboostSingleThread",
+      NodeShape.probabilisticClassifier(
+        rawPredictionCol = Some("raw_prediction"),
+        probabilityCol = Some("probability")),
+      XGBoostClassificationModel(XGBoostMultinomialClassificationModel(booster, 3, numFeatures, 0))
+    )
+  }
+
   def equalityTestRowByRow(booster: Booster, mleapTransformer: Transformer) = {
 
     import XgbConverters._
@@ -90,6 +101,20 @@ class XGBoostClassificationModelParitySpec extends FunSpec
   it("Results are the same pre and post serialization") {
     val booster = trainBooster(xgboostParams, denseDataset)
     val xgboostTransformer = createBoosterClassifier(booster)
+
+    val preSerializationResult = xgboostTransformer.transform(leapFrameLibSVMtrain)
+
+    val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
+
+    val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
+    val deserializedModelResult = deserializedTransformer.transform(leapFrameLibSVMtrain).get
+
+    assert(preSerializationResult.get.dataset == deserializedModelResult.dataset)
+  }
+
+  it("Test XGBoostMultinomialClassificationModel results are the same pre and post serialization") {
+    val booster = trainBooster(xgboostParams, denseDataset)
+    val xgboostTransformer = createMultinomialBoosterClassifier(booster)
 
     val preSerializationResult = xgboostTransformer.transform(leapFrameLibSVMtrain)
 

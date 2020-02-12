@@ -27,7 +27,7 @@ trait CachedDatasetUtils {
     // Use Spark utils to load libsvm from disk
     val spark = SparkSession.builder()
       .master("local[2]")
-      .appName("XGBoostRuntimeClassificationModelParitySpec")
+      .appName(s"${this.getClass.getName}")
       .getOrCreate()
 
     // This is the dataset used by dmls-XGBoost https://github.com/dmlc/xgboost/blob/master/demo/data/agaricus.txt.train

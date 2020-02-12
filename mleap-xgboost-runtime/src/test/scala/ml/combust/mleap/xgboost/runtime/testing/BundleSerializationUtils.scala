@@ -13,8 +13,8 @@ trait BundleSerializationUtils {
   def serializeModelToMleapBundle(transformer: Transformer): File = {
     import ml.combust.mleap.runtime.MleapSupport._
 
-    new File("/tmp/mleap/spark-parity").mkdirs()
-    val file = new File(s"/tmp/mleap/spark-parity/${this.getClass.getName}.zip")
+    new File("/tmp/mleap/xgboost-runtime-parity").mkdirs()
+    val file = new File(s"/tmp/mleap/xgboost-runtime-parity/${this.getClass.getName}.zip")
     file.delete()
 
     for(bf <- managed(BundleFile(file))) {

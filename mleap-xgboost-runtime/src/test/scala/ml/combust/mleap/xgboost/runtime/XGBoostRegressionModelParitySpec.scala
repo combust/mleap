@@ -14,25 +14,29 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   with BundleSerializationUtils
   with FloatingPointApproximations {
 
-  def createBoosterRegressor(booster: Booster): Transformer ={
+  def trainRegressor: Transformer ={
+
+    val booster: Booster = trainBooster(denseDataset)
 
     XGBoostRegression(
       "xgboostSingleThread",
       NodeShape.regression(),
-      XGBoostRegressionModel(booster, numFeatures, 0)
+      XGBoostRegressionModel(booster, numFeatures(leapFrameLibSVMtrain), 0)
     )
   }
 
-  def equalityTestRowByRow(booster: Booster, mleapTransformer: Transformer) = {
+  def equalityTestRowByRow(booster: Booster, mleapTransformer: Transformer, leapFrameDataset: DefaultLeapFrame) = {
 
     import XgbConverters._
 
-    leapFrameLibSVMtest.dataset.foreach {
+    val featuresColumnIndex = leapFrameDataset.schema.indexOf("features").get
+
+    leapFrameDataset.dataset.foreach {
       r=>
-        val mleapResult = mleapTransformer.transform(DefaultLeapFrame(mleapSchema.get, Seq(r))).get
+        val mleapResult = mleapTransformer.transform(DefaultLeapFrame(leapFrameDataset.schema, Seq(r))).get
         val mleapPredictionColIndex = mleapResult.schema.indexOf("prediction").get
 
-        val singleRowDMatrix = r(1).asInstanceOf[SparseTensor[Double]].asXGB
+        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[SparseTensor[Double]].asXGB
         val boosterResult = booster.predict(singleRowDMatrix, false, 0).head(0)
 
         assert (boosterResult == mleapResult.dataset.head.getDouble(mleapPredictionColIndex))
@@ -41,19 +45,19 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   }
 
   it("Results between the XGBoost4j booster and the MLeap Transformer are the same") {
-    val booster = trainBooster(xgboostParams, denseDataset)
-    val xgboostTransformer = createBoosterRegressor(trainBooster(xgboostParams, denseDataset))
+    val booster = trainBooster(denseDataset)
+    val xgboostTransformer = trainRegressor
 
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    equalityTestRowByRow(booster, deserializedTransformer)
+    equalityTestRowByRow(booster, deserializedTransformer, leapFrameLibSVMtest)
   }
 
   it("has the correct inputs and outputs with columns: prediction, probability and raw_prediction") {
 
-    val booster = trainBooster(xgboostParams, denseDataset)
-    val transformer = createBoosterRegressor(booster)
+    val transformer = trainRegressor
+    val numFeatures = transformer.asInstanceOf[XGBoostRegression].model.numFeatures
 
     assert(transformer.schema.fields ==
       Seq(StructField("features", TensorType(BasicType.Double, Seq(numFeatures))),
@@ -61,15 +65,13 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   }
 
   it("Results are the same pre and post serialization") {
-    val booster = trainBooster(xgboostParams, denseDataset)
-    val xgboostTransformer = createBoosterRegressor(booster)
-
-    val preSerializationResult = xgboostTransformer.transform(leapFrameLibSVMtrain)
+    val xgboostTransformer = trainRegressor
 
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
-
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
-    val deserializedModelResult = deserializedTransformer.transform(leapFrameLibSVMtrain).get
+
+    val preSerializationResult = xgboostTransformer.transform(leapFrameLibSVMtest)
+    val deserializedModelResult = deserializedTransformer.transform(leapFrameLibSVMtest).get
 
     assert(preSerializationResult.get.dataset == deserializedModelResult.dataset)
   }

@@ -11,16 +11,21 @@ import org.apache.spark.sql.mleap.TypeConverters
 trait CachedDatasetUtils {
 
   private final val TrainDataFilePath = "datasources/agaricus.train"
+  private final val TrainDataMultinomialFilePath = "datasources/iris.scale.txt"
   private final val TestDataFilePath = "datasources/agaricus.test"
-  var mleapSchema: Option[StructType] = None
 
-  lazy val denseDataset: DMatrix =
+  val denseDataset: DMatrix =
     new DMatrix(this.getClass.getClassLoader.getResource(TrainDataFilePath).getFile)
 
+  val denseMultinomialDataset: DMatrix =
+    new DMatrix(this.getClass.getClassLoader.getResource(TrainDataMultinomialFilePath).getFile)
+
   lazy val leapFrameLibSVMtrain: DefaultLeapFrame = leapFrameFromLibSVMFile(TrainDataFilePath)
+  lazy val leapFrameIrisTrain: DefaultLeapFrame = leapFrameFromLibSVMFile(TrainDataMultinomialFilePath)
   lazy val leapFrameLibSVMtest: DefaultLeapFrame = leapFrameFromLibSVMFile(TestDataFilePath)
-  lazy val numFeatures: Int =
-    leapFrameLibSVMtrain.schema.getField("features").get.dataType.asInstanceOf[TensorType].dimensions.get.head
+
+  def numFeatures(dataset: DefaultLeapFrame): Int =
+    dataset.schema.getField("features").get.dataType.asInstanceOf[TensorType].dimensions.get.head
 
   private def leapFrameFromLibSVMFile(filePath: String): DefaultLeapFrame = {
 
@@ -34,7 +39,7 @@ trait CachedDatasetUtils {
     val dataFrame = spark.read.format("libsvm")
       .load(this.getClass.getClassLoader.getResource(filePath).getFile)
 
-    mleapSchema = Option(TypeConverters.sparkSchemaToMleapSchema(dataFrame))
+    val mleapSchema = Option(TypeConverters.sparkSchemaToMleapSchema(dataFrame))
 
     val mleapMatrix: Array[ArrayRow] = dataFrame.collect().map {
       r => ArrayRow(
@@ -46,5 +51,4 @@ trait CachedDatasetUtils {
 
     DefaultLeapFrame(mleapSchema.get, mleapMatrix)
   }
-
 }

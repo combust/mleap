@@ -4,11 +4,11 @@ import biz.k11i.xgboost.Predictor
 import biz.k11i.xgboost.util.FVec
 import ml.combust.mleap.core.classification.ProbabilisticClassificationModel
 import org.apache.spark.ml.linalg.{Vector, Vectors}
+import ml.combust.mleap.core.types.{StructType, TensorType}
 import XgbConverters._
-import ml.combust.mleap.core.types.{ListType, ScalarType, StructType, TensorType}
 
 
-trait XGBoostPerformantClassificationModelBase extends ProbabilisticClassificationModel {
+trait XGBoostPredictorClassificationModelBase extends ProbabilisticClassificationModel {
   def predictor: Predictor
   def treeLimit: Int
 
@@ -23,13 +23,12 @@ trait XGBoostPerformantClassificationModelBase extends ProbabilisticClassificati
 
   def predictLeaf(features: Vector): Seq[Double] = predictLeaf(features.asXGBPredictor)
   def predictLeaf(data: FVec): Seq[Double] = predictor.predictLeaf(data, treeLimit).map(_.toDouble)
-
 }
 
-case class XGBoostPerformantBinaryClassificationModel(
+case class XGBoostPredictorBinaryClassificationModel(
       override val predictor: Predictor,
       override val numFeatures: Int,
-      override val treeLimit: Int) extends XGBoostPerformantClassificationModelBase {
+      override val treeLimit: Int) extends XGBoostPredictorClassificationModelBase {
 
   override val numClasses: Int = 2
 
@@ -51,15 +50,38 @@ case class XGBoostPerformantBinaryClassificationModel(
   }
 }
 
-case class XGBoostPerformantClassificationModel(impl: XGBoostPerformantClassificationModelBase) extends ProbabilisticClassificationModel {
+case class XGBoostPredictorMultinomialClassificationModel(
+                       override val predictor: Predictor,
+                       override val numClasses: Int,
+                       override val numFeatures: Int,
+                       override val treeLimit: Int) extends XGBoostPredictorClassificationModelBase {
+
+  override def predict(data: FVec): Double = {
+    probabilityToPrediction(predictProbabilities(data))
+  }
+
+  def predictProbabilities(data: FVec): Vector = {
+    Vectors.dense(predictor.predict(data,  false,  treeLimit))
+  }
+
+  def predictRaw(data: FVec): Vector = {
+    Vectors.dense(predictor.predict(data, true, treeLimit))
+  }
+
+  override def rawToProbabilityInPlace(raw: Vector): Vector = {
+    throw new Exception("XGBoost Classification model does not support \'rawToProbabilityInPlace\'")
+  }
+}
+
+case class XGBoostPredictorClassificationModel(impl: XGBoostPredictorClassificationModelBase) extends ProbabilisticClassificationModel {
   override val numClasses: Int = impl.numClasses
   override val numFeatures: Int = impl.numFeatures
   def treeLimit: Int = impl.treeLimit
 
   def predictor: Predictor = impl.predictor
 
-  def binaryClassificationModel: XGBoostPerformantBinaryClassificationModel = impl.asInstanceOf[XGBoostPerformantBinaryClassificationModel]
-//  def multinomialClassificationModel: XGBoostMultinomialClassificationModel = impl.asInstanceOf[XGBoostMultinomialClassificationModel]
+  def binaryClassificationModel: XGBoostPredictorBinaryClassificationModel = impl.asInstanceOf[XGBoostPredictorBinaryClassificationModel]
+  def multinomialClassificationModel: XGBoostPredictorMultinomialClassificationModel = impl.asInstanceOf[XGBoostPredictorMultinomialClassificationModel]
 
   def predict(data: FVec): Double = impl.predict(data)
 
@@ -75,10 +97,6 @@ case class XGBoostPerformantClassificationModel(impl: XGBoostPerformantClassific
   override def rawToProbabilityInPlace(raw: Vector): Vector = impl.rawToProbabilityInPlace(raw)
 
   override def outputSchema: StructType = StructType(
-    "raw_prediction" -> TensorType.Double(numClasses),
-//    "probability" -> TensorType.Double(numClasses),
-    "prediction" -> ScalarType.Double.nonNullable
-//    "leaf_prediction" -> ListType.Double,
-//    "contrib_prediction" -> ListType.Double).get
+    "probability" -> TensorType.Double(numClasses)
   ).get
 }

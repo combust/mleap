@@ -14,20 +14,20 @@ import ml.combust.mleap.xgboost.runtime._
 /**
   * Created by hollinwilkins on 9/16/17.
   */
-class XGBoostPerformantClassificationOp extends MleapOp[XGBoostPerformantClassification, XGBoostPerformantClassificationModel] {
+class XGBoostPredictorClassificationOp extends MleapOp[XGBoostPredictorClassification, XGBoostPredictorClassificationModel] {
 
-  override val Model: OpModel[MleapContext, XGBoostPerformantClassificationModel] = new OpModel[MleapContext, XGBoostPerformantClassificationModel] {
-  override val klazz: Class[XGBoostPerformantClassificationModel] = classOf[XGBoostPerformantClassificationModel]
+  override val Model: OpModel[MleapContext, XGBoostPredictorClassificationModel] = new OpModel[MleapContext, XGBoostPredictorClassificationModel] {
+  override val klazz: Class[XGBoostPredictorClassificationModel] = classOf[XGBoostPredictorClassificationModel]
 
   override def opName: String = "xgboost.classifier"
 
   @throws[RuntimeException]
-  override def store(model: Model, obj: XGBoostPerformantClassificationModel)
+  override def store(model: Model, obj: XGBoostPredictorClassificationModel)
                     (implicit context: BundleContext[MleapContext]): Model =
     throw new RuntimeException("The XGBoostPredictor implementation does not support storing the model.")
 
   override def load(model: Model)
-                   (implicit context: BundleContext[MleapContext]): XGBoostPerformantClassificationModel = {
+                   (implicit context: BundleContext[MleapContext]): XGBoostPredictorClassificationModel = {
 
     val predictor = new Predictor(Files.newInputStream(context.file("xgboost.model")))
 
@@ -35,11 +35,15 @@ class XGBoostPerformantClassificationOp extends MleapOp[XGBoostPerformantClassif
     val numFeatures = model.value("num_features").getInt
     val treeLimit = model.value("tree_limit").getInt
 
-    val impl = XGBoostPerformantBinaryClassificationModel(predictor, numFeatures, treeLimit)
+    val impl = if(numClasses == 2) {
+      XGBoostPredictorBinaryClassificationModel(predictor, numFeatures, treeLimit)
+    } else {
+      XGBoostPredictorMultinomialClassificationModel(predictor, numClasses, numFeatures, treeLimit)
+    }
 
-    XGBoostPerformantClassificationModel(impl)
+    XGBoostPredictorClassificationModel(impl)
   }
 }
 
-  override def model(node: XGBoostPerformantClassification): XGBoostPerformantClassificationModel = node.model
+  override def model(node: XGBoostPredictorClassification): XGBoostPredictorClassificationModel = node.model
 }

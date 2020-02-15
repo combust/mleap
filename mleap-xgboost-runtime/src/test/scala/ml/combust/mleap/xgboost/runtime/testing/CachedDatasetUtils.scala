@@ -1,6 +1,6 @@
 package ml.combust.mleap.xgboost.runtime.testing
 
-import ml.combust.mleap.core.types.{StructType, TensorType}
+import ml.combust.mleap.core.types.TensorType
 import ml.combust.mleap.core.util.VectorConverters
 import ml.combust.mleap.runtime.frame.{ArrayRow, DefaultLeapFrame, Row}
 import ml.dmlc.xgboost4j.scala.DMatrix

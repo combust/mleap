@@ -16,7 +16,6 @@ object MleapProject {
     sparkBase,
     sparkTestkit,
     spark,
-    xgboostRuntime,
     sparkExtension,
     executor,
     executorTestKit,

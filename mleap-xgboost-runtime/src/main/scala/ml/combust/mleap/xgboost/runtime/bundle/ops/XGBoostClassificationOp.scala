@@ -7,7 +7,7 @@ import ml.combust.bundle.dsl.{Model, Value}
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.xgboost.runtime.{XGBoostBinaryClassificationModel, XGBoostClassification, XGBoostClassificationModel, XGBoostMultinomialClassificationModel, XGBoostPerformantBinaryClassificationModel, XGBoostPerformantClassification, XGBoostPerformantClassificationModel}
+import ml.combust.mleap.xgboost.runtime.{XGBoostBinaryClassificationModel, XGBoostClassification, XGBoostClassificationModel, XGBoostMultinomialClassificationModel, XGBoostPredictorBinaryClassificationModel, XGBoostPredictorClassification, XGBoostPredictorClassificationModel}
 import ml.dmlc.xgboost4j.scala.{Booster, XGBoost}
 
 

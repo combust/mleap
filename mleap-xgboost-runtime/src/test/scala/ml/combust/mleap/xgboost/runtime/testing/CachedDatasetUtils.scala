@@ -2,7 +2,7 @@ package ml.combust.mleap.xgboost.runtime.testing
 
 import ml.combust.mleap.core.types.{StructType, TensorType}
 import ml.combust.mleap.core.util.VectorConverters
-import ml.combust.mleap.runtime.frame.{ArrayRow, DefaultLeapFrame}
+import ml.combust.mleap.runtime.frame.{ArrayRow, DefaultLeapFrame, Row}
 import ml.dmlc.xgboost4j.scala.DMatrix
 import org.apache.spark.ml.linalg.SparseVector
 import org.apache.spark.sql.SparkSession
@@ -12,17 +12,15 @@ trait CachedDatasetUtils {
 
   private final val TrainDataFilePath = "datasources/agaricus.train"
   private final val TrainDataMultinomialFilePath = "datasources/iris.scale.txt"
-  private final val TestDataFilePath = "datasources/agaricus.test"
 
-  val denseDataset: DMatrix =
+  val binomialDataset: DMatrix =
     new DMatrix(this.getClass.getClassLoader.getResource(TrainDataFilePath).getFile)
 
-  val denseMultinomialDataset: DMatrix =
+  val multinomialDataset: DMatrix =
     new DMatrix(this.getClass.getClassLoader.getResource(TrainDataMultinomialFilePath).getFile)
 
   lazy val leapFrameLibSVMtrain: DefaultLeapFrame = leapFrameFromLibSVMFile(TrainDataFilePath)
   lazy val leapFrameIrisTrain: DefaultLeapFrame = leapFrameFromLibSVMFile(TrainDataMultinomialFilePath)
-  lazy val leapFrameLibSVMtest: DefaultLeapFrame = leapFrameFromLibSVMFile(TestDataFilePath)
 
   def numFeatures(dataset: DefaultLeapFrame): Int =
     dataset.schema.getField("features").get.dataType.asInstanceOf[TensorType].dimensions.get.head
@@ -35,7 +33,7 @@ trait CachedDatasetUtils {
       .appName(s"${this.getClass.getName}")
       .getOrCreate()
 
-    // This is the dataset used by dmls-XGBoost https://github.com/dmlc/xgboost/blob/master/demo/data/agaricus.txt.train
+    // This is the dataset used by dmlc-XGBoost https://github.com/dmlc/xgboost/blob/master/demo/data/agaricus.txt.train
     val dataFrame = spark.read.format("libsvm")
       .load(this.getClass.getClassLoader.getResource(filePath).getFile)
 
@@ -50,5 +48,22 @@ trait CachedDatasetUtils {
     }
 
     DefaultLeapFrame(mleapSchema.get, mleapMatrix)
+  }
+
+  def toDenseFeaturesLeapFrame(sparseLeapFrame: DefaultLeapFrame): DefaultLeapFrame = {
+    val featureColumnIndex = sparseLeapFrame.schema.indexOf("features").get
+    val labelColumnIndex = sparseLeapFrame.schema.indexOf("label").get
+
+    val denseDataset: Seq[Row] = sparseLeapFrame.dataset.map{
+      row => {
+        val array = new Array[Any](2)
+        array(labelColumnIndex) = row.getDouble(labelColumnIndex)
+        array(featureColumnIndex) = row.getTensor[Double](featureColumnIndex).toDense
+
+        ArrayRow(array)
+      }
+    }
+
+    DefaultLeapFrame(sparseLeapFrame.schema, denseDataset)
   }
 }

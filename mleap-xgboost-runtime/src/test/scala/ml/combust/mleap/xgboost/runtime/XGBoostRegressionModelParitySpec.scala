@@ -16,7 +16,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
 
   def trainRegressor: Transformer ={
 
-    val booster: Booster = trainBooster(denseDataset)
+    val booster: Booster = trainBooster(binomialDataset)
 
     XGBoostRegression(
       "xgboostSingleThread",
@@ -45,13 +45,13 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   }
 
   it("Results between the XGBoost4j booster and the MLeap Transformer are the same") {
-    val booster = trainBooster(denseDataset)
+    val booster = trainBooster(binomialDataset)
     val xgboostTransformer = trainRegressor
 
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    equalityTestRowByRow(booster, deserializedTransformer, leapFrameLibSVMtest)
+    equalityTestRowByRow(booster, deserializedTransformer, leapFrameLibSVMtrain)
   }
 
   it("has the correct inputs and outputs with columns: prediction, probability and raw_prediction") {
@@ -70,9 +70,23 @@ class XGBoostRegressionModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    val preSerializationResult = xgboostTransformer.transform(leapFrameLibSVMtest)
-    val deserializedModelResult = deserializedTransformer.transform(leapFrameLibSVMtest).get
+    val preSerializationResult = xgboostTransformer.transform(leapFrameLibSVMtrain).get
+    val deserializedModelResult = deserializedTransformer.transform(leapFrameLibSVMtrain).get
 
-    assert(preSerializationResult.get.dataset == deserializedModelResult.dataset)
+    assert(preSerializationResult.dataset == deserializedModelResult.dataset)
+  }
+
+  it("Test results are the same when using a dense dataset") {
+    val xgboostTransformer = trainRegressor
+
+    val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
+    val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
+
+    val denseLeapFrame = toDenseFeaturesLeapFrame(leapFrameLibSVMtrain)
+
+    val preSerializationResult = xgboostTransformer.transform(denseLeapFrame).get
+    val deserializedResult = deserializedTransformer.transform(denseLeapFrame).get
+
+    assert(preSerializationResult.dataset == deserializedResult.dataset)
   }
 }

@@ -15,5 +15,6 @@ class CountVectorizerParitySpec extends SparkParityBase {
     setOutputCol("loan_title_tokens"),
     new CountVectorizer().
       setInputCol("loan_title_tokens").
-      setOutputCol("loan_title_token_counts"))).fit(dataset)
+      setOutputCol("loan_title_token_counts")
+  .setMinTF(2))).fit(dataset)
 }

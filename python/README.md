@@ -30,6 +30,16 @@ fittedPipeline = featurePipeline.fit(df)
 fittedPipeline.serializeToBundle("jar:file:/tmp/pyspark.example.zip", fittedPipeline.transform(df))
 ```
 
+### StringMap transformer
+
+```python
+# dict of label mappings
+labels = {'a': 1.0}
+
+string_map_transformer = StringMap(
+    labels, 'key_col', 'value_col', handleInvalid='keep', defaultValue=0.0)
+```
+
 ## Scikit-Learn Integration
 
 MLeap's Scikit-Learn library provides serialization (de-serialization coming soon) functionality to Bundle.ML. There is already parity between the math that Scikit and Spark transformers execute, and MLeap takes advantage of that to provide a common serialization format for the two technologies. 

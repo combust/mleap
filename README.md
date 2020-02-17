@@ -45,7 +45,7 @@ moment.
 
 ### MLeap/Spark Version
 
-Choose the right verison of the `mleap-spark` module to export your pipeline. The serialization format is backwards compatible between different versions of MLeap. So if you export a pipeline using MLeap 0.11.0 and Spark 2.1, you can still load that pipeline using MLeap runtime version 0.12.0.
+Choose the right version of the `mleap-spark` module to export your pipeline. The serialization format is backwards compatible between different versions of MLeap. So if you export a pipeline using MLeap 0.11.0 and Spark 2.1, you can still load that pipeline using MLeap runtime version 0.12.0.
 
 | MLeap Version | Spark Version |
 |---------------|---------------|
@@ -56,6 +56,11 @@ Choose the right verison of the `mleap-spark` module to export your pipeline. Th
 | 0.11.0        | 2.2           |
 | 0.11.0        | 2.1           |
 | 0.11.0        | 2.0           |
+| 0.10.3        | 2.2           |
+| 0.10.3        | 2.1           |
+| 0.10.3        | 2.0           |
+
+Please see the [release notes](RELEASE_NOTES.md) for changes (especially breaking changes) included with each release.
 
 ## Setup
 
@@ -168,6 +173,8 @@ Import the MLeap library in your PySpark job
 import mleap.pyspark
 from mleap.pyspark.spark_support import SimpleSparkSerializer
 ```
+
+See [PySpark Integration of python/README.md](python/README.md#pyspark-integration) for more.
 
 ### Create and Export a Scikit-Learn Pipeline
 

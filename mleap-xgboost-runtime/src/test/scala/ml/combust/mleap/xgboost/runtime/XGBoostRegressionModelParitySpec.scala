@@ -6,6 +6,7 @@ import ml.combust.mleap.tensor.SparseTensor
 import ml.combust.mleap.xgboost.runtime.testing.{BoosterUtils, BundleSerializationUtils, CachedDatasetUtils, FloatingPointApproximations}
 import ml.dmlc.xgboost4j.scala.Booster
 import org.scalatest.FunSpec
+import XgbConverters._
 
 
 class XGBoostRegressionModelParitySpec extends FunSpec
@@ -26,8 +27,6 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   }
 
   def equalityTestRowByRow(booster: Booster, mleapTransformer: Transformer, leapFrameDataset: DefaultLeapFrame) = {
-
-    import XgbConverters._
 
     val featuresColumnIndex = leapFrameDataset.schema.indexOf("features").get
 

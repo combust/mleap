@@ -92,8 +92,6 @@ class XGBoostClassificationModelParitySpec extends FunSpec
       mleapTransformer: Transformer,
       leapFrameDataset: DefaultLeapFrame) = {
 
-    import XgbConverters._
-
     val featuresColumnIndex = leapFrameDataset.schema.indexOf("features").get
 
     leapFrameDataset.dataset.foreach {

@@ -5,6 +5,7 @@ dist: trusty
 services:
   - docker
 
+language: scala
 scala:
   - 2.11.8
 jdk:
@@ -14,7 +15,6 @@ jobs:
   include:
     - stage: "Mleap tests"
       name: "Scala Tests"
-      language: scala
       script:
         - travis/travis.sh
 

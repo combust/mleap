@@ -1,33 +1,51 @@
 package ml.combust.mleap.xgboost.runtime.struct
 
+import java.{lang, util}
+
 import biz.k11i.xgboost.util.FVec
-import ml.combust.mleap.tensor.Tensor
+import ml.combust.mleap.tensor.{SparseTensor, Tensor}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 
 import scala.collection.JavaConversions.mapAsJavaMap
 
 
 object FVecFactory {
-
-  private def fromScalaMap(map: Map[Int, Float]): FVec = {
-    val javaMap = mapAsJavaMap(map).asInstanceOf[java.util.Map[java.lang.Integer, java.lang.Float]]
-
-    FVec.Transformer.fromMap(javaMap)
+  private def toJavaMap(map: Map[Int, Float]): util.Map[lang.Integer, lang.Float] = {
+    mapAsJavaMap(map).asInstanceOf[util.Map[lang.Integer, lang.Float]]
   }
 
-  def fromSparseVector(sparseVector: SparseVector): FVec = {
-    // Casting to floats, because doubles result in compounding differences from the c++ implementation
-    // https://github.com/komiya-atsushi/xgboost-predictor-java/issues/21
-    val scalaMap = (sparseVector.indices zip sparseVector.values.map(_.toFloat)).toMap
+  /**
+    *  NOTE: all these methods cast doubles to floats, because doubles result in compounding differences
+    *  from the c++ implementation: https://github.com/komiya-atsushi/xgboost-predictor-java/issues/21
+    */
+  private implicit class ToFloatArray(doubleArray: Array[Double]) {
+    def toFloats: Array[Float] = {
+      doubleArray.map(_.toFloat)
+    }
+  }
 
-    FVecFactory.fromScalaMap(scalaMap)
+  /** Vector factories */
+  def fromSparseVector(sparseVector: SparseVector): FVec = {
+    val scalaMap = (sparseVector.indices zip sparseVector.values.toFloats).toMap
+    FVec.Transformer.fromMap(toJavaMap(scalaMap))
   }
 
   def fromDenseVector(denseVector: DenseVector): FVec = {
-    // Casting to floats, because doubles result in compounding differences from the c++ implementation
-    // https://github.com/komiya-atsushi/xgboost-predictor-java/issues/21
-    FVec.Transformer.fromArray(denseVector.values.map(_.toFloat), false)
+    FVec.Transformer.fromArray(denseVector.values.toFloats, false)
   }
 
-  def fromTensor(tensor: Tensor[Double]): FVec = FVecTensorImpl(tensor)
+  /** MLeap Tensor factories */
+  def fromSparseTensor(sparseTensor: SparseTensor[Double]): FVec = {
+    assert(sparseTensor.dimensions.size == 1, "must provide a mono-dimensional vector")
+    val indices = sparseTensor.indices.map(_.head).toArray[Int]
+
+    val scalaMap = (indices zip sparseTensor.values.toFloats).toMap
+    FVec.Transformer.fromMap(toJavaMap(scalaMap))
+  }
+
+  def fromDenseTensor(denseTensor: Tensor[Double]): FVec = {
+    assert(denseTensor.dimensions.size == 1, "must provide a mono-dimensional vector")
+
+    FVec.Transformer.fromArray(denseTensor.toArray.toFloats, false)
+  }
 }

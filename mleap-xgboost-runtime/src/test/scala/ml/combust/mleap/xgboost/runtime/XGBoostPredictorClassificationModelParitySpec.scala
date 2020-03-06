@@ -111,14 +111,16 @@ class XGBoostPredictorClassificationModelParitySpec extends FunSpec
         StructField("probability", TensorType(BasicType.Double, Seq(2)))))
   }
 
-  it("Results between the XGBoost4j multinomial booster and the XGBoostPredictorMultinomialClassificationModel are the same") {
+  it("[Multinomial] An XGBoost4j Booster has the same results as a deserialized Predictor"){
     val multiBooster = trainMultinomialBooster(multinomialDataset)
-    val xgboostTransformer = trainMultinomialXGBoost4jClassifier
 
-    equalityTestRowByRowMultinomialProbability(multiBooster, xgboostTransformer, leapFrameIrisTrain)
+    val mleapBundle = serializeModelToMleapBundle(trainMultinomialXGBoost4jClassifier)
+    val deserializedPredictorTransformer: Transformer = loadXGBoostPredictorFromBundle(mleapBundle)
+
+    equalityTestRowByRowMultinomialProbability(multiBooster, deserializedPredictorTransformer, leapFrameIrisTrain)
   }
 
-  it("XGBoostPredictorMultinomialClassificationModel results are the same pre and post serialization") {
+  it("[Multinomial] XGBoostPredictorMultinomialClassificationModel results are the same pre and post serialization") {
     val xgboost4jTransformer = trainMultinomialXGBoost4jClassifier
 
     val mleapBundle = serializeModelToMleapBundle(xgboost4jTransformer)

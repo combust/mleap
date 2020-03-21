@@ -22,12 +22,20 @@ class MinMaxScalerOp extends MleapOp[MinMaxScaler, MinMaxScalerModel]{
                       (implicit context: BundleContext[MleapContext]): Model = {
       model.withValue("min", Value.vector(obj.originalMin.toArray)).
         withValue("max", Value.vector(obj.originalMax.toArray))
+        .withValue("minValue", Value.double(obj.minValue))
+        .withValue("maxValue", Value.double(obj.maxValue))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): MinMaxScalerModel = {
+      val minValue = model.getValue("minValue").map(_.getDouble).getOrElse(0.0)
+      val maxValue = model.getValue("maxValue").map(_.getDouble).getOrElse(1.0)
+
       MinMaxScalerModel(originalMin = Vectors.dense(model.value("min").getTensor[Double].toArray),
-        originalMax = Vectors.dense(model.value("max").getTensor[Double].toArray))
+        originalMax = Vectors.dense(model.value("max").getTensor[Double].toArray),
+        minValue = minValue,
+        maxValue = maxValue
+      )
     }
   }
 

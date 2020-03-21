@@ -1,7 +1,7 @@
 package org.apache.spark.ml.bundle.ops.classification
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
 import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
@@ -12,6 +12,9 @@ import org.apache.spark.ml.linalg.{Matrices, Vectors}
   * Created by hollinwilkins on 8/21/16.
   */
 class LogisticRegressionOp extends SimpleSparkOp[LogisticRegressionModel] {
+
+  private final val LOGISTIC_REGRESSION_DEFAULT_THRESHOLD = 0.5
+
   override val Model: OpModel[SparkBundleContext, LogisticRegressionModel] = new OpModel[SparkBundleContext, LogisticRegressionModel] {
     override val klazz: Class[LogisticRegressionModel] = classOf[LogisticRegressionModel]
 
@@ -53,9 +56,13 @@ class LogisticRegressionOp extends SimpleSparkOp[LogisticRegressionModel] {
         val lr = new LogisticRegressionModel(uid = "",
           coefficients = Vectors.dense(model.value("coefficients").getTensor[Double].toArray),
           intercept = model.value("intercept").getDouble)
-        model.getValue("threshold").
-          map(t => lr.setThreshold(t.getDouble)).
-          getOrElse(lr)
+
+        // default threshold is 0.5 for both Spark and Scikit-learn
+        val threshold = model.getValue("threshold")
+          .map(value => value.getDouble)
+          .getOrElse(LOGISTIC_REGRESSION_DEFAULT_THRESHOLD)
+
+        lr.setThreshold(threshold)
       }
       r
     }

@@ -537,7 +537,7 @@ class ImputerSerializer(MLeapSerializer):
         attributes = list()
         attributes.append(('strategy', transformer.strategy))
         attributes.append(('surrogate_value', transformer.statistics_.tolist()[0]))
-        if transformer.missing_values != "NaN":
+        if transformer.missing_values != np.nan:
             attributes.append(('missing_value', transformer.missing_values))
 
         # define node inputs and outputs

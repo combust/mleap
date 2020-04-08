@@ -111,8 +111,9 @@ front of it, then it would serialize as operating on a tensor and thus, fail at 
 """
 class Imputer(SimpleImputer):
 
-    def __init__(self, missing_values="NaN", strategy="mean",
-                 axis=0, verbose=0, copy=True, input_features=None, output_features=None):
+    def __init__(self, missing_values=np.nan, strategy="mean",
+                 fill_value=None, verbose=0, copy=True, add_indicator=False,
+                 input_features=None, output_features=None):
         self.name = "{}_{}".format(self.op, uuid.uuid1())
         self.input_features = input_features
         self.output_features = output_features
@@ -120,7 +121,8 @@ class Imputer(SimpleImputer):
         self.feature_extractor = FeatureExtractor(input_scalars=[input_features],
                                                   output_vector='extracted_' + output_features,
                                                   output_vector_items=[output_features])
-        SklearnImputer.__init__(self, missing_values, strategy, axis, verbose, copy)
+        SimpleImputer.__init__(missing_values, strategy, fill_value, verbose,
+                               copy, add_indicator, input_features, output_features)
 
     def fit(self, X, y=None):
         super(Imputer, self).fit(self.feature_extractor.transform(X))

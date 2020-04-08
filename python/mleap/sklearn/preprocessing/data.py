@@ -23,8 +23,9 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer, Binarizer, PolynomialFeatures
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, Binarizer, PolynomialFeatures
 from sklearn.preprocessing.data import OneHotEncoder
 from sklearn.preprocessing.label import LabelEncoder
 from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer, Vector
@@ -117,10 +118,10 @@ setattr(MinMaxScaler, 'serialize_to_bundle', serialize_to_bundle)
 setattr(MinMaxScaler, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(MinMaxScaler, 'serializable', True)
 
-setattr(Imputer, 'op', ops.IMPUTER)
-setattr(Imputer, 'mlinit', mleap_init)
-setattr(Imputer, 'serialize_to_bundle', serialize_to_bundle)
-setattr(Imputer, 'serializable', True)
+setattr(SimpleImputer, 'op', ops.IMPUTER)
+setattr(SimpleImputer, 'mlinit', mleap_init)
+setattr(SimpleImputer, 'serialize_to_bundle', serialize_to_bundle)
+setattr(SimpleImputer, 'serializable', True)
 
 setattr(OneHotEncoder, 'op', ops.ONE_HOT_ENCODER)
 setattr(OneHotEncoder, 'mlinit', mleap_init)

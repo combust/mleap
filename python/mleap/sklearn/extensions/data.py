@@ -15,13 +15,13 @@
 # limitations under the License.
 #
 
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing.data import _transform_selected
 from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
 import numpy as np
 import uuid
-from sklearn.preprocessing import Imputer as SklearnImputer
 from mleap.sklearn.preprocessing.data import ImputerSerializer
 import pandas as pd
 
@@ -109,7 +109,7 @@ in the fit() and transform() methods.
 This is because the Imputer both in Spark and MLeap operates on a scalar value and if we were to add a feature extractor in
 front of it, then it would serialize as operating on a tensor and thus, fail at scoring time. 
 """
-class Imputer(SklearnImputer):
+class Imputer(SimpleImputer):
 
     def __init__(self, missing_values="NaN", strategy="mean",
                  axis=0, verbose=0, copy=True, input_features=None, output_features=None):

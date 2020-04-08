@@ -25,7 +25,7 @@ import json
 import uuid
 
 from mleap.sklearn.preprocessing.data import FeatureExtractor, MathUnary, MathBinary, StringMap
-from mleap.sklearn.preprocessing.data import StandardScaler, MinMaxScaler, LabelEncoder, Imputer, Binarizer, PolynomialFeatures
+from mleap.sklearn.preprocessing.data import StandardScaler, MinMaxScaler, LabelEncoder, SimpleImputer, Binarizer, PolynomialFeatures
 from mleap.sklearn.preprocessing.data import OneHotEncoder
 
 from pandas.util.testing import assert_frame_equal
@@ -502,7 +502,7 @@ class TransformerTests(unittest.TestCase):
                                          output_vector='extracted_a_output',
                                          output_vector_items=["{}_out".format(x) for x in extract_features])
 
-        imputer = Imputer(strategy='mean')
+        imputer = SimpleImputer(strategy='mean')
         imputer.mlinit(prior_tf=feature_extractor,
                        output_features='a_imputed')
 

@@ -36,6 +36,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   private val xgboostParams: Map[String, Any] = Map(
     "eta" -> 0.3,
     "max_depth" -> 2,
+    "missing" -> 0.0f,
     "objective" -> "reg:squarederror",
     "early_stopping_rounds" ->2,
     "num_round" -> 15
@@ -82,7 +83,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
         val v1 = sp.getDouble(sparkPredictionCol)
         val v2 = ml.getDouble(mleapPredictionCol)
 
-        assert(sp.getAs[Vector](sparkFeaturesCol).toDense.values sameElements ml.getTensor[Double](mleapFeaturesCol).rawValues)
+        assert(sp.getAs[Vector](sparkFeaturesCol).toDense.values sameElements ml.getTensor[Double](mleapFeaturesCol).toDense.rawValues)
         assert(Math.abs(v2 - v1) < 0.0001)
     }
   }

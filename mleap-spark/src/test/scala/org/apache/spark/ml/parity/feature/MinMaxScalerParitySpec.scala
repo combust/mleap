@@ -20,7 +20,4 @@ class MinMaxScalerParitySpec extends SparkParityBase {
     new MinMaxScaler().
       setInputCol("features").
       setOutputCol("scaled_features"))).fit(dataset)
-
-  //TODO support min/max in mleap other than the defaults 0.0 and 1.0
-  override val unserializedParams = Set("min", "max")
 }

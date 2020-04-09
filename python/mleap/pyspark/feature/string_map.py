@@ -1,17 +1,36 @@
+import six
 from pyspark.ml.util import JavaMLReadable, JavaMLWritable, _jvm
 from pyspark.ml.wrapper import JavaTransformer
 from pyspark.ml.param.shared import HasInputCol, HasOutputCol
+from pyspark.sql import DataFrame
 
 
 class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, JavaMLWritable):
-    def __init__(self, labels, inputCol=None, outputCol=None, handleInvalid='error', defaultValue=0.0):
+    def __init__(self, labels={}, inputCol=None, outputCol=None, handleInvalid='error', defaultValue=0.0):
         """
-        __init__(self, labels, inputCol=None, outputCol=None, handleInvalid='error', defaultValue=0.0)
-        labels is a dict {string: double}
-        handleInvalid: how to handle missing labels: 'error' (throw an error), or 'keep' (map to the default value)
+        :param labels: a dict {string: double}
+        :param handleInvalid: how to handle missing labels: 'error' (throw), or 'keep' (map to defaultValue)
+        :param defaultValue: value to use if key is not found in labels
         """
-        assert handleInvalid in ['error', 'keep'], 'Invalid value for handleInvalid: {}'.format(handleInvalid)
+        """
+        labels must be a dict {string: double} or a spark DataFrame with columns inputCol & outputCol
+        handleInvalid: 
+        """
         super(StringMap, self).__init__()
+
+        def validate_args():
+            """
+            validate args early to avoid failing at Py4j with some hard to interpret error message
+            """
+            assert handleInvalid in ['error', 'keep'], 'Invalid value for handleInvalid: {}'.format(handleInvalid)
+            assert isinstance(labels, dict), 'labels must be a dict, got: {}'.format(type(labels))
+            for (key, value) in labels.items():
+                assert isinstance(key, six.string_types), \
+                    'label keys must be a string type, got: {}'.format(type(key))
+                assert isinstance(value, float), 'label values must be float, got: {}'.format(type(key))
+
+        validate_args()
+
         labels_scala_map = _jvm() \
             .scala \
             .collection \
@@ -28,12 +47,13 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
         self.setOutputCol(outputCol)
 
     @classmethod
-    def from_dataframe(cls, df, key_col, value_col, handleInvalid='error', defaultValue=0.0):
+    def from_dataframe(cls, labels_df, inputCol, outputCol, handleInvalid='error', defaultValue=0.0):
         """
-        from_dataframe(self, df, key_col, value_col)
-        Creates StringMap from a DataFrame.
+        :param labels_df: a spark DataFrame whose columns include inputCol:string & outputCol:double.
+        See StringMap() for other params.
         """
-        dict_from_df = {row[0]: float(row[1]) for row in
-                        df.select([key_col, value_col]).collect()}
-        return cls(dict_from_df, inputCol=key_col, outputCol=value_col, handleInvalid=handleInvalid,
+        assert isinstance(labels_df, DataFrame), 'labels must be a DataFrame, got: {}'.format(type(labels_df))
+        labels_dict = {row[0]: float(row[1]) for row in
+                       labels_df.select([inputCol, outputCol]).collect()}
+        return cls(labels_dict, inputCol=inputCol, outputCol=outputCol, handleInvalid=handleInvalid,
                    defaultValue=defaultValue)

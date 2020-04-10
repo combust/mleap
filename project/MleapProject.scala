@@ -113,6 +113,9 @@ object MleapProject {
     dependencies = Seq(
       runtime,
       sparkTestkit % "test")
+  ).settings(
+    // No Scala 2.12 compatible release yet.
+    skip := scalaVersion.value.startsWith("2.12")
   )
 
   lazy val xgboostSpark = Project(
@@ -122,6 +125,9 @@ object MleapProject {
       xgboostRuntime % "test",
       spark % "test",
       sparkTestkit % "test")
+  ).settings(
+    // No Scala 2.12 compatible release yet.
+    skip := scalaVersion.value.startsWith("2.12")
   )
 
   lazy val serving = Project(

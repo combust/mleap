@@ -3,10 +3,10 @@ package ml.combust.mleap.core.feature
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.types._
+
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import ml.combust.mleap.core.util.Murmur3_x86_32._
-import ml.combust.mleap.core.util.Platform
-
+import ml.combust.mleap.core.util.{Murmur3_x86_32, Platform}
 import scala.collection.mutable
 
 object HashingTermFrequencyModel {
@@ -24,7 +24,7 @@ object HashingTermFrequencyModel {
       case d: Double => hashLong(java.lang.Double.doubleToLongBits(d), seed)
       case s: String =>
         val utf8 = s.getBytes("UTF-8")
-        hashUnsafeBytes(utf8, Platform.BYTE_ARRAY_OFFSET, utf8.length, seed)
+        hashUnsafeBytes2(utf8, Platform.BYTE_ARRAY_OFFSET, utf8.length, seed)
       case _ => throw new IllegalStateException("HashingTF with murmur3 algorithm does not " +
         s"support type ${term.getClass.getCanonicalName} of input data.")
     }
@@ -40,7 +40,7 @@ object HashingTermFrequencyModel {
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/HashingTF.scala")
 case class HashingTermFrequencyModel(numFeatures: Int = 1 << 18,
                                      binary: Boolean = false) extends Model {
-  def indexOf(term: Any): Int = nonNegativeMod(term.##, numFeatures)
+  def indexOf(term: Any): Int = nonNegativeMod(HashingTermFrequencyModel.murmur3(term), numFeatures)
 
   def apply(document: Iterable[_]): Vector = {
     val termFrequencies = mutable.HashMap.empty[Int, Double]

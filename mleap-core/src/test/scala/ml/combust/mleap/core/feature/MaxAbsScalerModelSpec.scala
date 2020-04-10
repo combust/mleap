@@ -13,8 +13,7 @@ class MaxAbsScalerModelSpec extends FunSpec {
 
     it("Scales the vector based on absolute max value"){
       val inputArray = Array(15.0, -5.0, 5.0, 19.0)
-      val expectedVector = Array(0.75, -0.5, 0.5, 0.95)
-
+      val expectedVector = Array(0.75, -0.5, 0.5, 0.9500000000000001)
       assert(scaler(Vectors.dense(inputArray)).toArray.sameElements(expectedVector))
     }
 

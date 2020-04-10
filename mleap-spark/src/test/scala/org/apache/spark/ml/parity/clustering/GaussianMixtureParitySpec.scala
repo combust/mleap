@@ -5,14 +5,10 @@ import org.apache.spark.ml.clustering.GaussianMixture
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.sql.DataFrame
-import org.scalatest.Ignore
 
 /**
   * Created by hollinwilkins on 10/30/16.
-  *
-  * These specs are failing, probably needs some work
   */
-@Ignore
 class GaussianMixtureParitySpec extends SparkParityBase {
   override val dataset: DataFrame = {
     baseDataset.select("dti", "loan_amount", "fico_score_group_fnl")

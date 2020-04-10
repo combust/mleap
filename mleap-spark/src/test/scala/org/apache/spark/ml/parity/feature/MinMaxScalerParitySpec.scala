@@ -4,14 +4,10 @@ import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.ml.feature.{MinMaxScaler, VectorAssembler}
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.sql.DataFrame
-import org.scalatest.Ignore
 
 /**
   * Created by hollinwilkins on 10/30/16.
-  *
-  * These specs are failing, probably needs some work
   */
-@Ignore
 class MinMaxScalerParitySpec extends SparkParityBase {
   override val dataset: DataFrame = baseDataset.select("dti", "loan_amount")
   override val sparkTransformer: Transformer = new Pipeline().setStages(Array(new VectorAssembler().

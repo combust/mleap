@@ -40,20 +40,20 @@ case class MinMaxScalerModel(originalMin: Vector,
     * @return scaled feature vector
     */
   def apply(vector: Vector): Vector = {
-    val values = vector.toArray
+    val arr = vector.copy.toArray
     var i = 0
     while (i < numFeatures) {
-      if (!values(i).isNaN) {
+      if (!arr(i).isNaN) {
         if (scaleArray(i) != 0) {
-          values(i) = (values(i) - minArray(i)) * scaleArray(i) + minValue
+          arr(i) = (arr(i) - minArray(i)) * scaleArray(i) + minValue
         } else {
           // scaleArray(i) == 0 means i-th col is constant
-          values(i) = constantOutput
+          arr(i) = constantOutput
         }
       }
       i += 1
     }
-    Vectors.dense(values).compressed
+    Vectors.dense(arr)
   }
 
   override def inputSchema: StructType = StructType("input" -> TensorType.Double(numFeatures)).get

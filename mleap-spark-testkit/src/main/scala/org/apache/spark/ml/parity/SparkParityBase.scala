@@ -4,6 +4,7 @@ import java.io.File
 
 import org.apache.spark.ml.{PipelineModel, Transformer}
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.functions.col
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.bundle.BundleFile
@@ -132,10 +133,15 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   }
 
   def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit = {
-    val sparkElems = sparkDataset.collect()
-    val mleapElems = mleapDataset.collect()
-    for ((sparkElem, mleapElem) <- sparkElems.zip(mleapElems)) {
-      assert(sparkElem === mleapElem)
+    val sparkCols = sparkDataset.columns.toSeq
+    assert(mleapDataset.columns.toSet === sparkCols.toSet)
+    val sparkRows = sparkDataset.collect()
+    val mleapRows = mleapDataset.select(sparkCols.map(col): _*).collect()
+    var i = 0
+    for ((sparkRow, mleapRow) <- sparkRows.zip(mleapRows)) {
+      // TODO: tolerate small numerical differences
+      assert(sparkRow === mleapRow, s"diff at row $i\ncols: $sparkCols")
+      i += 1
     }
   }
 

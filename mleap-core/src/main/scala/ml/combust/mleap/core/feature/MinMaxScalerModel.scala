@@ -15,13 +15,24 @@ import scala.math.{max, min}
   * @param originalMin minimum values from training features
   * @param originalMax maximum values from training features
   */
-@SparkCode(uri = "https://github.com/apache/spark/blob/v2.4.0/mllib/src/main/scala/org/apache/spark/ml/feature/MinMaxScaler.scala")
+@SparkCode(uri = "https://github.com/apache/spark/blob/v3.0.0-rc1/mllib/src/main/scala/org/apache/spark/ml/feature/MinMaxScaler.scala")
 case class MinMaxScalerModel(originalMin: Vector,
                              originalMax: Vector,
                              minValue: Double = 0.0,
                              maxValue: Double = 1.0) extends Model {
-  val originalRange = (originalMax.toBreeze - originalMin.toBreeze).toArray
-  val minArray = originalMin.toArray
+
+  private val numFeatures = originalMax.size
+  private val scale = maxValue - minValue
+
+  // transformed value for constant cols
+  private val constantOutput = (minValue + maxValue) / 2
+  private val minArray = originalMin.toArray
+
+  private val scaleArray = Array.tabulate(numFeatures) { i =>
+    val range = originalMax(i) - originalMin(i)
+    // scaleArray(i) == 0 iff i-th col is constant (range == 0)
+    if (range != 0) scale / range else 0.0
+  }
 
   /**Scale a feature vector using the min/max
     *
@@ -29,24 +40,24 @@ case class MinMaxScalerModel(originalMin: Vector,
     * @return scaled feature vector
     */
   def apply(vector: Vector): Vector = {
-    val scale = maxValue - minValue
-
-    // 0 in sparse vector will probably be rescaled to non-zero
-    val values = vector.copy.toArray
-    val size = values.length
+    val values = vector.toArray
     var i = 0
-    while (i < size) {
+    while (i < numFeatures) {
       if (!values(i).isNaN) {
-        val raw = if (originalRange(i) != 0) (values(i) - minArray(i)) / originalRange(i) else 0.5
-        values(i) = raw * scale + minValue
+        if (scaleArray(i) != 0) {
+          values(i) = (values(i) - minArray(i)) * scaleArray(i) + minValue
+        } else {
+          // scaleArray(i) == 0 means i-th col is constant
+          values(i) = constantOutput
+        }
       }
       i += 1
     }
-    Vectors.dense(values)
+    Vectors.dense(values).compressed
   }
 
-  override def inputSchema: StructType = StructType("input" -> TensorType.Double(originalRange.length)).get
+  override def inputSchema: StructType = StructType("input" -> TensorType.Double(numFeatures)).get
 
-  override def outputSchema: StructType = StructType("output" -> TensorType.Double(originalRange.length)).get
+  override def outputSchema: StructType = StructType("output" -> TensorType.Double(numFeatures)).get
 
 }

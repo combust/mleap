@@ -134,7 +134,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit = {
     val sparkElems = sparkDataset.collect()
     val mleapElems = mleapDataset.collect()
-    assert(sparkElems sameElements mleapElems)
+    for ((sparkElem, mleapElem) <- sparkElems.zip(mleapElems)) {
+      assert(sparkElem === mleapElem)
+    }
   }
 
   def parityTransformer(): Unit = {

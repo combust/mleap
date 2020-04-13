@@ -49,21 +49,22 @@ class OneHotEncoder(SKLearnOneHotEncoder, MLeapSerializer):
 
     def serialize_to_bundle(self, path, model_name):
 
-        for ith_categories in transformer.categories:
+        for ith_categories in self.categories_:
             if not np.array_equal(ith_categories, np.arange(ith_categories.size)):
                 raise ValueError("All one-hot encoded features must be category indices")
-        if transformer.drop is not None:
+        if self.drop is not None:
             raise ValueError("The OneHotEncoder `drop` parameter is not supported by MLeap")
 
-        # compile tuples of mode attributes to serialize
         attributes = list()
-        attributes.append(('category_sizes', transformer.categories_[0]))
-        if transformer.handle_unknown == 'error':
+        attributes.append(('category_sizes', self.categories_[0]))
+        if self.handle_unknown == 'error':
             attributes.append(('handle_invalid', 'error'))
-            attributes.append(('drop_last', drop_last))
-        else:
+            attributes.append(('drop_last', self.drop_last))
+        elif self.handle_unknown == 'ignore':
             attributes.append(('handle_invalid', 'keep'))  # OneHotEncoderModel.scala adds an extra column when keeping invalid data
-            attributes.append(('drop_last', True))  # drop that extra column to match sklearn's ignore behavior
+            attributes.append(('drop_last', True))         # drop that extra column to match sklearn's ignore behavior
+        else:
+            raise ValueError(f"Unrecognized `handle_unknown` value {self.handle_unknown}")
 
         # define node inputs and outputs
         inputs = [{

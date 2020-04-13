@@ -632,17 +632,17 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
         if transformer.drop is not None:
             raise ValueError("The OneHotEncoder `drop` parameter is not supported by MLeap")
 
-        # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('category_sizes', transformer.categories_[0]))
         if transformer.handle_unknown == 'error':
             attributes.append(('handle_invalid', 'error'))
             attributes.append(('drop_last', False))
-        else:
+        elif transformer.handle_unknown == 'ignore':
             attributes.append(('handle_invalid', 'keep'))  # OneHotEncoderModel.scala adds an extra column when keeping invalid data
-            attributes.append(('drop_last', True))  # drop that extra column to match sklearn's ignore behavior
+            attributes.append(('drop_last', True))         # drop that extra column to match sklearn's ignore behavior
+        else:
+            raise ValueError(f"Unrecognized `handle_unknown` value {transformer.handle_unknown}")
 
-        # define node inputs and outputs
         inputs = [{
                   "name": transformer.input_features,
                   "port": "input"

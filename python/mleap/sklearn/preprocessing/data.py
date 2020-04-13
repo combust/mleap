@@ -626,12 +626,21 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
 
     def serialize_to_bundle(self, transformer, path, model_name):
 
+        for ith_categories in transformer.categories_:
+            if not np.array_equal(ith_categories, np.arange(ith_categories.size)):
+                raise ValueError("All one-hot encoded features must be category indices")
+        if transformer.drop is not None:
+            raise ValueError("The OneHotEncoder `drop` parameter is not supported by MLeap")
+
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('size', transformer.n_values_.tolist()[0]))
-        # the default sklearn OneHotEncoder doesn't support 'drop_last'
-        # see mleap.sklearn.extensions.data for OneHotEncoder that does support 'drop_last'
-        attributes.append(('drop_last', False))
+        attributes.append(('category_sizes', transformer.categories_[0]))
+        if transformer.handle_unknown == 'error':
+            attributes.append(('handle_invalid', 'error'))
+            attributes.append(('drop_last', False))
+        else:
+            attributes.append(('handle_invalid', 'keep'))  # OneHotEncoderModel.scala adds an extra column when keeping invalid data
+            attributes.append(('drop_last', True))  # drop that extra column to match sklearn's ignore behavior
 
         # define node inputs and outputs
         inputs = [{
@@ -649,20 +658,15 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
     def deserialize_from_bundle(self, transformer, node_path, node_name):
 
         attributes_map = {
-            'size': 'n_values_'
+            'category_sizes': 'categories_'
         }
 
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
 
-        # Set Sparse = False
+        transformer.categories_ = [np.asarray(transformer.categories_)]
+        transformer.drop_idx_ = None
         transformer.sparse = False
-
-        # Set Feature Indices
-        n_values = np.hstack([[0], [transformer.n_values_]])
-        indices = np.cumsum(n_values)
-        transformer.feature_indices_ = indices
-        transformer.active_features_ = range(0, transformer.n_values_)
 
         return transformer
 

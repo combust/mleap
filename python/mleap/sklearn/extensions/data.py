@@ -15,33 +15,31 @@
 # limitations under the License.
 #
 
-from sklearn.impute import SimpleImputer
+from sklearn.impute import SimpleImputer as SKLearnImputer
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing.data import _transform_selected
+from sklearn.preprocessing import OneHotEncoder as SKLearnOneHotEncoder
 from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
 import numpy as np
 import uuid
 from mleap.sklearn.preprocessing.data import ImputerSerializer
 import pandas as pd
 
-class OneHotEncoder(OneHotEncoder, MLeapSerializer):
-    def __init__(self, input_features, output_features, drop_last=False, n_values="auto", categorical_features="all",
-                 dtype=np.float, sparse=True, handle_unknown='error'):
-        self.op = 'one_hot_encoder'
+class OneHotEncoder(SKLearnOneHotEncoder, MLeapSerializer):
+    def __init__(self, categories='auto', drop=None, sparse=True,
+                 dtype=np.float64, handle_unknown='error',
+                 drop_last=False, input_features=None, output_features=None):
+
+        if handle_unknown == 'ignore' and drop_last:
+            raise ValueError("MLeap cannot ignore unknown features AND drop the last feature column")
+
         self.name = "{}_{}".format(self.op, uuid.uuid4())
-        self.serializable = True
         self.drop_last = drop_last
-        self.n_values = n_values
-        self.categorical_features = categorical_features
-        self.dtype = dtype
-        self.sparse = sparse
-        self.handle_unknown = handle_unknown
         self.input_features = input_features
         self.output_features = output_features
+        SKLearnOneHotEncoder.__init__(self, categories, drop, sparse, dtype, handle_unknown)
 
     def fit_transform(self, X, y=None):
-        res = _transform_selected(X, self._fit_transform, self.categorical_features, copy=True)
+        res = super().fit_transform(X, y)
         if self.drop_last:
             res = res[:,:-1]
 
@@ -51,10 +49,21 @@ class OneHotEncoder(OneHotEncoder, MLeapSerializer):
 
     def serialize_to_bundle(self, path, model_name):
 
+        for ith_categories in transformer.categories:
+            if not np.array_equal(ith_categories, np.arange(ith_categories.size)):
+                raise ValueError("All one-hot encoded features must be category indices")
+        if transformer.drop is not None:
+            raise ValueError("The OneHotEncoder `drop` parameter is not supported by MLeap")
+
         # compile tuples of mode attributes to serialize
         attributes = list()
-        attributes.append(['size', self.n_values_.tolist()[0]])
-        attributes.append(['drop_last', self.drop_last])
+        attributes.append(('category_sizes', transformer.categories_[0]))
+        if transformer.handle_unknown == 'error':
+            attributes.append(('handle_invalid', 'error'))
+            attributes.append(('drop_last', drop_last))
+        else:
+            attributes.append(('handle_invalid', 'keep'))  # OneHotEncoderModel.scala adds an extra column when keeping invalid data
+            attributes.append(('drop_last', True))  # drop that extra column to match sklearn's ignore behavior
 
         # define node inputs and outputs
         inputs = [{
@@ -109,7 +118,7 @@ in the fit() and transform() methods.
 This is because the Imputer both in Spark and MLeap operates on a scalar value and if we were to add a feature extractor in
 front of it, then it would serialize as operating on a tensor and thus, fail at scoring time. 
 """
-class Imputer(SimpleImputer):
+class Imputer(SKLearnImputer):
 
     def __init__(self, missing_values=np.nan, strategy="mean",
                  fill_value=None, verbose=0, copy=True, add_indicator=False,
@@ -121,8 +130,7 @@ class Imputer(SimpleImputer):
         self.feature_extractor = FeatureExtractor(input_scalars=[input_features],
                                                   output_vector='extracted_' + output_features,
                                                   output_vector_items=[output_features])
-        SimpleImputer.__init__(missing_values, strategy, fill_value, verbose,
-                               copy, add_indicator, input_features, output_features)
+        SKLearnImputer.__init__(self, missing_values, strategy, fill_value, verbose, copy, add_indicator)
 
     def fit(self, X, y=None):
         super(Imputer, self).fit(self.feature_extractor.transform(X))

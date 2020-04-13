@@ -373,7 +373,7 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(le.input_features, label_encoder_tf.input_features)
         self.assertEqual(le.output_features, label_encoder_tf.output_features[0])
 
-    def one_hot_encoder_serializer_test(self):
+    def test_one_hot_encoder_serializer(self):
 
         labels = ['a', 'b', 'c']
 
@@ -394,10 +394,11 @@ class TransformerTests(unittest.TestCase):
             model = json.load(json_data)
 
         self.assertEqual(one_hot_encoder_tf.op, model['op'])
-        self.assertEqual(3, model['attributes']['size']['long'])
+        self.assertEqual(3, model['attributes']['category_sizes']['shape']['dimensions'][0]['size'])
+        self.assertEqual('error', model['attributes']['handle_invalid']['string'])
         self.assertEqual(False, model['attributes']['drop_last']['boolean'])
 
-    def one_hot_encoder_deserializer_test(self):
+    def test_one_hot_encoder_deserializer(self):
 
         labels = ['a', 'b', 'c']
 

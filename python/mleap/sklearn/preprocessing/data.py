@@ -533,7 +533,15 @@ class ImputerSerializer(MLeapSerializer):
 
     def serialize_to_bundle(self, transformer, path, model_name):
 
-        # compile tuples of model attributes to serialize
+        if transformer.strategy == 'most_frequent' or transformer.strategy == 'constant':
+            raise ValueError(f"Imputer strategy `{transformer.strategy}` is not supported by MLeap")
+        if isinstance(transformer.missing_values, str):
+            raise ValueError("Imputer missing values of type `str` are not supported by MLeap")
+        if transformer.add_indicator:
+            raise ValueError("Imputer parameter `add_indicator` is not supported by MLeap")
+        if len(transformer.statistics_.tolist()) != 1:
+            raise ValueError("MLeap Imputer only supports one feature at a time")
+
         attributes = list()
         attributes.append(('strategy', transformer.strategy))
         attributes.append(('surrogate_value', transformer.statistics_.tolist()[0]))

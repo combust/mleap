@@ -518,7 +518,7 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(expected_model['attributes']['input_shapes']['data_shape'][1]['isNullable'],
                      model['attributes']['input_shapes']['data_shape'][1]['isNullable'])
 
-    def imputer_test(self):
+    def test_imputer(self):
 
         def _set_nulls(df):
             row = df['index']

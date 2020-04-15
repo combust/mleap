@@ -58,11 +58,18 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
         transformer.input_features = input_features
 
     def serialize_to_bundle(self, transformer, path, model_name):
+        if transformer.normalize:
+            raise ValueError("MLeap linear regression does not support normalization")
 
-        # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('intercept', transformer.intercept_.tolist()[0]))
-        attributes.append(('coefficients', transformer.coef_.tolist()[0]))
+        if len(transformer.coef_.shape) == 2 and transformer.coef_.shape[0] == 1:
+            attributes.append(('intercept', transformer.intercept_.tolist()[0]))
+            attributes.append(('coefficients', transformer.coef_.tolist()[0]))
+        elif len(transformer.coef_.shape) == 1:
+            attributes.append(('intercept', transformer.intercept_))
+            attributes.append(('coefficients', transformer.coef_.tolist()))
+        else:
+            raise ValueError("MLeap only supports linear regression on a single target variable")
 
         # define node inputs and outputs
         inputs = [{
@@ -89,11 +96,11 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
         transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
 
         # Set Additional Attributes
-        if 'intercept_' in transformer.__dict__:
+        if hasattr(transformer, 'intercept_'):
             transformer.fit_intercept = True
         else:
             transformer.fit_intercept = False
 
-        transformer.coef_ = np.array([transformer.coef_])
+        transformer.coef_ = np.array(transformer.coef_)
 
         return transformer

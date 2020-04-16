@@ -70,7 +70,6 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
         else:
             raise ValueError("MLeap only supports linear regression on a single target variable")
 
-        # define node inputs and outputs
         inputs = [{
             "name": transformer.input_features,
             "port": "features"
@@ -90,11 +89,9 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
             'intercept': 'intercept_'
         }
 
-        # Set serialized attributes
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
 
-        # Set Additional Attributes
         if hasattr(transformer, 'intercept_'):
             transformer.fit_intercept = True
         else:

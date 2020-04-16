@@ -38,11 +38,6 @@ def deserialize_from_bundle(self, path, node_name):
     serializer = SimpleSerializer()
     return serializer.deserialize_from_bundle(self, path, node_name)
 
-setattr(SVC, 'op', 'svm')
-setattr(SVC, 'mlinit', mleap_init)
-setattr(SVC, 'serialize_to_bundle', serialize_to_bundle)
-setattr(SVC, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(SVC, 'serializable', True)
 
 setattr(LinearSVC, 'op', 'svm')
 setattr(LinearSVC, 'mlinit', mleap_init)
@@ -64,14 +59,14 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
         transformer.input_features = input_features
 
     def serialize_to_bundle(self, transformer, path, model_name):
+        if len(transformer.classes_) != 2:
+            raise ValueError("MLeap only supports binary SVM")
 
-        # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('intercept', transformer.intercept_.tolist()[0]))
         attributes.append(('coefficients', transformer.coef_.tolist()[0]))
-        attributes.append(('num_classes', len(transformer.classes_))) # TODO: get number of classes from the transformer
+        attributes.append(('num_classes', 2))
 
-        # define node inputs and outputs
         inputs = [{
                   "name": transformer.input_features,
                   "port": "features"

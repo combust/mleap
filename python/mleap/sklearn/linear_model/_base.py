@@ -15,11 +15,13 @@
 # limitations under the License.
 #
 
-from sklearn.linear_model import LinearRegression
-from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer
-import uuid
 import os
+import uuid
+
 import numpy as np
+from sklearn.linear_model import LinearRegression
+
+from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer
 
 
 def serialize_to_bundle(self, path, model_name):
@@ -58,9 +60,6 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
         transformer.input_features = input_features
 
     def serialize_to_bundle(self, transformer, path, model_name):
-        if transformer.normalize:
-            raise ValueError("MLeap linear regression does not support normalization")
-
         attributes = list()
         if len(transformer.coef_.shape) == 2 and transformer.coef_.shape[0] == 1:
             attributes.append(('intercept', transformer.intercept_.tolist()[0]))
@@ -73,14 +72,14 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
 
         # define node inputs and outputs
         inputs = [{
-                  "name": transformer.input_features,
-                  "port": "features"
-                  }]
+            "name": transformer.input_features,
+            "port": "features"
+        }]
 
         outputs = [{
-                  "name": transformer.prediction_column,
-                  "port": "prediction"
-                   }]
+            "name": transformer.prediction_column,
+            "port": "prediction"
+        }]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 

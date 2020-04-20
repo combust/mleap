@@ -21,6 +21,7 @@ import shutil
 import unittest
 import uuid
 
+from sklearn.model_selection import train_test_split
 import numpy as np
 from numpy.testing import assert_array_equal
 from sklearn.datasets import make_regression
@@ -44,8 +45,9 @@ class LinearRegressionSuite(unittest.TestCase):
         linear_regression = LinearRegression()
         linear_regression.mlinit(input_features='features', prediction_column='prediction')
 
-        X, y = make_regression(n_targets=2)
-        linear_regression.fit(X, y)
+        X, y = make_regression(n_features=100, n_targets=2)
+        X_train, X_test, y_train, y_test = train_test_split(X, y)
+        linear_regression.fit(X_train, y_train)
 
         with self.assertRaises(ValueError):
             linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
@@ -54,8 +56,9 @@ class LinearRegressionSuite(unittest.TestCase):
         linear_regression = LinearRegression()
         linear_regression.mlinit(input_features='features', prediction_column='prediction')
 
-        X, y = make_regression(n_features=100)
-        linear_regression.fit(X, y)
+        X, y = make_regression(n_features=100, n_targets=1)
+        X_train, X_test, y_train, y_test = train_test_split(X, y)
+        linear_regression.fit(X_train, y_train)
 
         self.assertEqual(len(linear_regression.coef_.shape), 1)
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
@@ -71,8 +74,9 @@ class LinearRegressionSuite(unittest.TestCase):
         linear_regression = LinearRegression()
         linear_regression.mlinit(input_features='features', prediction_column='prediction')
 
-        X, y = make_regression(n_features=100)
-        linear_regression.fit(X, y)
+        X, y = make_regression(n_features=100, n_targets=1)
+        X_train, X_test, y_train, y_test = train_test_split(X, y)
+        linear_regression.fit(X_train, y_train)
 
         self.assertEqual(len(linear_regression.coef_.shape), 1)
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
@@ -81,8 +85,9 @@ class LinearRegressionSuite(unittest.TestCase):
         linear_regression_ds = LinearRegression()
         linear_regression_ds = linear_regression_ds.deserialize_from_bundle(self.tmp_dir, node_name)
 
-        expected = linear_regression.predict(X)
-        actual = linear_regression_ds.predict(X)
+        # TODO: Update deserialization code to preserve the shape of `coef_` so this flatten is unnecessary
+        expected = linear_regression.predict(X_test)
+        actual = linear_regression_ds.predict(X_test).flatten()
 
         assert_array_equal(expected, actual)
 
@@ -90,8 +95,9 @@ class LinearRegressionSuite(unittest.TestCase):
         linear_regression = LinearRegression()
         linear_regression.mlinit(input_features='features', prediction_column='prediction')
 
-        X, y = make_regression(n_features=100)
-        linear_regression.fit(X, np.reshape(y, (-1, 1)))
+        X, y = make_regression(n_features=100, n_targets=1)
+        X_train, X_test, y_train, y_test = train_test_split(X, y)
+        linear_regression.fit(X_train, np.reshape(y_train, (-1, 1)))
 
         self.assertEqual(len(linear_regression.coef_.shape), 2)
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
@@ -107,8 +113,9 @@ class LinearRegressionSuite(unittest.TestCase):
         linear_regression = LinearRegression()
         linear_regression.mlinit(input_features='features', prediction_column='prediction')
 
-        X, y = make_regression(n_features=100)
-        linear_regression.fit(X, np.reshape(y, (-1, 1)))
+        X, y = make_regression(n_features=100, n_targets=1)
+        X_train, X_test, y_train, y_test = train_test_split(X, y)
+        linear_regression.fit(X_train, np.reshape(y_train, (-1, 1)))
 
         self.assertEqual(len(linear_regression.coef_.shape), 2)
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
@@ -117,8 +124,7 @@ class LinearRegressionSuite(unittest.TestCase):
         linear_regression_ds = LinearRegression()
         linear_regression_ds = linear_regression_ds.deserialize_from_bundle(self.tmp_dir, node_name)
 
-        # TODO: Update deserialization to preserve `coef_` shape so this flatten is unnecessary
-        expected = linear_regression.predict(X).flatten()
-        actual = linear_regression_ds.predict(X)
+        expected = linear_regression.predict(X_test)
+        actual = linear_regression_ds.predict(X_test)
 
         assert_array_equal(expected, actual)

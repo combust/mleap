@@ -97,6 +97,7 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
         else:
             transformer.fit_intercept = False
 
-        transformer.coef_ = np.array(transformer.coef_)
+        transformer.intercept_ = np.array(transformer.intercept_)
+        transformer.coef_ = np.array(transformer.coef_).reshape((1, -1))
 
         return transformer

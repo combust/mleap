@@ -21,15 +21,15 @@ import shutil
 import unittest
 import uuid
 
-from sklearn.model_selection import train_test_split
 import numpy as np
 from numpy.testing import assert_array_equal
 from sklearn.datasets import make_regression
+from sklearn.model_selection import train_test_split
 
 from mleap.sklearn.linear_model import LinearRegression
 
 
-class LinearRegressionSuite(unittest.TestCase):
+class TestLinearRegression(unittest.TestCase):
     def setUp(self):
         self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
 
@@ -60,14 +60,20 @@ class LinearRegressionSuite(unittest.TestCase):
         X_train, X_test, y_train, y_test = train_test_split(X, y)
         linear_regression.fit(X_train, y_train)
 
-        self.assertEqual(len(linear_regression.coef_.shape), 1)
+        self.assertEqual((100,), linear_regression.coef_.shape)
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
 
         with open("{}/{}.node/model.json".format(self.tmp_dir, linear_regression.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(model['op'], 'linear_regression')
-        self.assertEqual(len(model['attributes']['coefficients']['double']), 100)
+        self.assertEqual('linear_regression', model['op'])
+
+        # assert coefficient matrix has shape (100,)
+        self.assertEqual(100, len(model['attributes']['coefficients']['double']))
+        self.assertEqual(1, len(model['attributes']['coefficients']['shape']['dimensions']))
+        self.assertEqual(100, model['attributes']['coefficients']['shape']['dimensions'][0]['size'])
+
+        # assert intercept scalar exists
         self.assertTrue(model['attributes']['intercept']['double'] is not None)
 
     def test_linear_regression_deserializes_1d_coef(self):
@@ -78,7 +84,7 @@ class LinearRegressionSuite(unittest.TestCase):
         X_train, X_test, y_train, y_test = train_test_split(X, y)
         linear_regression.fit(X_train, y_train)
 
-        self.assertEqual(len(linear_regression.coef_.shape), 1)
+        self.assertEqual((100,), linear_regression.coef_.shape)
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
 
         node_name = "{}.node".format(linear_regression.name)
@@ -99,14 +105,20 @@ class LinearRegressionSuite(unittest.TestCase):
         X_train, X_test, y_train, y_test = train_test_split(X, y)
         linear_regression.fit(X_train, np.reshape(y_train, (-1, 1)))
 
-        self.assertEqual(len(linear_regression.coef_.shape), 2)
+        self.assertEqual((1, 100), linear_regression.coef_.shape)
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
 
         with open("{}/{}.node/model.json".format(self.tmp_dir, linear_regression.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(model['op'], 'linear_regression')
-        self.assertEqual(len(model['attributes']['coefficients']['double']), 100)
+        self.assertEqual('linear_regression', model['op'])
+
+        # assert coefficient matrix has shape (100,)
+        self.assertEqual(100, len(model['attributes']['coefficients']['double']))
+        self.assertEqual(1, len(model['attributes']['coefficients']['shape']['dimensions']))
+        self.assertEqual(100, (model['attributes']['coefficients']['shape']['dimensions'][0]['size']))
+
+        # assert intercept scalar exists
         self.assertTrue(model['attributes']['intercept']['double'] is not None)
 
     def test_linear_regression_deserializes_2d_coef(self):
@@ -117,7 +129,7 @@ class LinearRegressionSuite(unittest.TestCase):
         X_train, X_test, y_train, y_test = train_test_split(X, y)
         linear_regression.fit(X_train, np.reshape(y_train, (-1, 1)))
 
-        self.assertEqual(len(linear_regression.coef_.shape), 2)
+        self.assertEqual((1, 100), linear_regression.coef_.shape)
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
 
         node_name = "{}.node".format(linear_regression.name)

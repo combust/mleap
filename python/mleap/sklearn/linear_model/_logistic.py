@@ -67,26 +67,24 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
 
         num_classes = len(transformer.classes_)
 
-        # compile tuples of model attributes to serialize
         attributes = list()
         if num_classes > 2:
             attributes.append(('coefficient_matrix', transformer.coef_))
             attributes.append(('intercept_vector', transformer.intercept_))
         else:
-            attributes.append(('coefficients', transformer.coef_.tolist()[0]))
-            attributes.append(('intercept', transformer.intercept_.tolist()[0]))
+            attributes.append(('coefficients', transformer.coef_))
+            attributes.append(('intercept', transformer.intercept_))
         attributes.append(('num_classes', num_classes))
 
-        # define node inputs and outputs
         inputs = [{
-                  "name": transformer.input_features,
-                  "port": "features"
-                }]
+            "name": transformer.input_features,
+            "port": "features"
+        }]
 
         outputs = [{
-                  "name": transformer.prediction_column,
-                  "port": "prediction"
-                }]
+            "name": transformer.prediction_column,
+            "port": "prediction"
+        }]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
@@ -99,11 +97,9 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
             'intercept_vector': 'intercept_',
         }
 
-        # Set serialized attributes
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
 
-        # Set Additional Attributes
         if 'intercept_' in transformer.__dict__:
             transformer.fit_intercept = True
         else:

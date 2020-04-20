@@ -16,9 +16,9 @@ import scala.reflect.io.Directory
 import scala.sys.process._
 
 
-class SKLearnLinearRegressionParitySpec extends FunSpec with BeforeAndAfter {
+class SKLearnLogisticRegressionParitySpec extends FunSpec with BeforeAndAfter {
 
-  val LINEAR_REGRESSION_SCRIPT_PATH = "sklearn_scripts/linear_regression.py"
+  val LOGISTIC_REGRESSION_SCRIPT_PATH = "sklearn_scripts/logistic_regression.py"
   val TOLERANCE = 1e-7
 
   implicit val DoubleEq = TolerantNumerics.tolerantDoubleEquality(TOLERANCE)
@@ -26,13 +26,15 @@ class SKLearnLinearRegressionParitySpec extends FunSpec with BeforeAndAfter {
   val spark = org.apache.spark.sql.SparkSession.builder.master("local").getOrCreate
   var tempDir: Path = _
 
-  def runPythonTransformer(scriptPath: String, bundlePath: String, csvPath: String): Unit = {
+  def runPythonTransformer(scriptPath: String, bundlePath: String, csvPath: String, multinomial: Boolean, cv: Boolean): Unit = {
     val resource = getClass.getClassLoader.getResource(scriptPath)
     val absPath = Paths.get(resource.toURI).toFile.getAbsolutePath
     Seq(
       "python3.6", absPath,
       "--bundle-path", bundlePath,
-      "--csv-path", csvPath
+      "--csv-path", csvPath,
+      "--multinomial", multinomial.toString,
+      "--cv", cv.toString
     ).!
   }
 
@@ -45,15 +47,17 @@ class SKLearnLinearRegressionParitySpec extends FunSpec with BeforeAndAfter {
     directory.deleteRecursively()
   }
 
-  describe("sklearn linear regression") {
+  describe("sklearn logistic regression") {
 
-    it("has the same output as mleap runtime") {
+    it("has the same output as mleap runtime on binary data") {
       val bundlePath = tempDir.resolve("logistic_regression_bundle.zip")
       val csvPath = tempDir.resolve("features.csv")
       runPythonTransformer(
-        scriptPath = LINEAR_REGRESSION_SCRIPT_PATH,
+        scriptPath = LOGISTIC_REGRESSION_SCRIPT_PATH,
         bundlePath = tempDir.toString,
-        csvPath = csvPath.toString
+        csvPath = csvPath.toString,
+        multinomial = false,
+        cv = false
       )
 
       val df = spark.read

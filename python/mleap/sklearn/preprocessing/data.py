@@ -23,8 +23,9 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer, Binarizer, PolynomialFeatures
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, Binarizer, PolynomialFeatures
 from sklearn.preprocessing.data import OneHotEncoder
 from sklearn.preprocessing.label import LabelEncoder
 from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer, Vector
@@ -117,10 +118,10 @@ setattr(MinMaxScaler, 'serialize_to_bundle', serialize_to_bundle)
 setattr(MinMaxScaler, 'deserialize_from_bundle', deserialize_from_bundle)
 setattr(MinMaxScaler, 'serializable', True)
 
-setattr(Imputer, 'op', ops.IMPUTER)
-setattr(Imputer, 'mlinit', mleap_init)
-setattr(Imputer, 'serialize_to_bundle', serialize_to_bundle)
-setattr(Imputer, 'serializable', True)
+setattr(SimpleImputer, 'op', ops.IMPUTER)
+setattr(SimpleImputer, 'mlinit', mleap_init)
+setattr(SimpleImputer, 'serialize_to_bundle', serialize_to_bundle)
+setattr(SimpleImputer, 'serializable', True)
 
 setattr(OneHotEncoder, 'op', ops.ONE_HOT_ENCODER)
 setattr(OneHotEncoder, 'mlinit', mleap_init)
@@ -531,15 +532,21 @@ class ImputerSerializer(MLeapSerializer):
         self.serializable = False
 
     def serialize_to_bundle(self, transformer, path, model_name):
+        if isinstance(transformer.missing_values, str):
+            raise ValueError("Imputer missing values of type `str` are not supported by MLeap")
+        if transformer.strategy == 'most_frequent' or transformer.strategy == 'constant':
+            raise ValueError(f"Scikit-learn's Imputer strategy `{transformer.strategy}` is not supported by MLeap")
+        if transformer.add_indicator:
+            raise ValueError("Scikit-learn's Imputer parameter `add_indicator` is not supported by MLeap")
+        if len(transformer.statistics_.tolist()) != 1:
+            raise ValueError("MLeap's Imputer only supports imputing a single feature at a time")
 
-        # compile tuples of model attributes to serialize
         attributes = list()
         attributes.append(('strategy', transformer.strategy))
         attributes.append(('surrogate_value', transformer.statistics_.tolist()[0]))
-        if transformer.missing_values != "NaN":
+        if transformer.missing_values != np.nan:
             attributes.append(('missing_value', transformer.missing_values))
 
-        # define node inputs and outputs
         inputs = [{
                   "name": transformer.input_features,
                   "port": "input"
@@ -624,15 +631,32 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
         super(OneHotEncoderSerializer, self).__init__()
 
     def serialize_to_bundle(self, transformer, path, model_name):
+        if not hasattr(transformer, 'drop_last'):
+            transformer.drop_last = False  # This allows us to use the same serializer in extensions/data.py
 
-        # compile tuples of model attributes to serialize
+        if transformer.drop_last and transformer.handle_unknown == 'ignore':
+            raise ValueError("MLeap's OneHotEncoder cannot drop the last feature column while also ignoring unknown features")
+        if len(transformer.categories_) != 1:
+            raise ValueError("MLeap can only one-hot encode a single column at a time")
+        categories = transformer.categories_[0]
+        if not np.array_equal(categories, np.arange(categories.size)):
+                raise ValueError(f"Categories {categories} do not form a valid index range")
+        if transformer.drop is not None:
+            raise ValueError("Scikit-learn's OneHotEncoder `drop` parameter is not supported by MLeap")
+        if transformer.dtype != np.float64:
+            raise ValueError("Scikit-learn's OneHotEncoder `dtype` parameter is not supported by MLeap")
+
         attributes = list()
-        attributes.append(('size', transformer.n_values_.tolist()[0]))
-        # the default sklearn OneHotEncoder doesn't support 'drop_last'
-        # see mleap.sklearn.extensions.data for OneHotEncoder that does support 'drop_last'
-        attributes.append(('drop_last', False))
+        attributes.append(('size', categories.size))
+        if transformer.handle_unknown == 'error':
+            attributes.append(('handle_invalid', 'error'))
+            attributes.append(('drop_last', transformer.drop_last))
+        elif transformer.handle_unknown == 'ignore':
+            attributes.append(('handle_invalid', 'keep'))  # OneHotEncoderModel.scala adds an extra column when keeping invalid data
+            attributes.append(('drop_last', True))         # drop that extra column to match sklearn's ignore behavior
+        else:
+            raise ValueError(f"Unrecognized `handle_unknown` value {self.handle_unknown}")
 
-        # define node inputs and outputs
         inputs = [{
                   "name": transformer.input_features,
                   "port": "input"
@@ -648,20 +672,19 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
     def deserialize_from_bundle(self, transformer, node_path, node_name):
 
         attributes_map = {
-            'size': 'n_values_'
+            'size': 'categories_',
+            'handle_invalid': 'handle_unknown',
         }
 
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
 
-        # Set Sparse = False
-        transformer.sparse = False
+        transformer.categories_ = np.asarray([range(transformer.categories_)])
+        if transformer.handle_unknown == 'keep':
+            transformer.handle_unknown = 'ignore'
+        transformer.drop_idx_ = None
 
-        # Set Feature Indices
-        n_values = np.hstack([[0], [transformer.n_values_]])
-        indices = np.cumsum(n_values)
-        transformer.feature_indices_ = indices
-        transformer.active_features_ = range(0, transformer.n_values_)
+        transformer.sparse = False
 
         return transformer
 

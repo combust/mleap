@@ -15,59 +15,40 @@
 # limitations under the License.
 #
 
-from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing.data import _transform_selected
-from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
-import numpy as np
 import uuid
-from sklearn.preprocessing import Imputer as SklearnImputer
-from mleap.sklearn.preprocessing.data import ImputerSerializer
-import pandas as pd
 
-class OneHotEncoder(OneHotEncoder, MLeapSerializer):
-    def __init__(self, input_features, output_features, drop_last=False, n_values="auto", categorical_features="all",
-                 dtype=np.float, sparse=True, handle_unknown='error'):
+import numpy as np
+import pandas as pd
+from sklearn.impute import SimpleImputer as SKLearnImputer
+from sklearn.preprocessing import OneHotEncoder as SKLearnOneHotEncoder
+from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
+
+from mleap.sklearn.preprocessing.data import ImputerSerializer, OneHotEncoderSerializer
+from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
+
+
+class OneHotEncoder(SKLearnOneHotEncoder, MLeapSerializer):
+    def __init__(self, input_features, output_features, drop_last=False,
+                 categories='auto', drop=None, sparse=True,
+                 dtype=np.float64, handle_unknown='error'):
         self.op = 'one_hot_encoder'
         self.name = "{}_{}".format(self.op, uuid.uuid4())
-        self.serializable = True
-        self.drop_last = drop_last
-        self.n_values = n_values
-        self.categorical_features = categorical_features
-        self.dtype = dtype
-        self.sparse = sparse
-        self.handle_unknown = handle_unknown
         self.input_features = input_features
         self.output_features = output_features
+        self.drop_last = drop_last
+        SKLearnOneHotEncoder.__init__(self, categories, drop, sparse, dtype, handle_unknown)
 
     def fit_transform(self, X, y=None):
-        res = _transform_selected(X, self._fit_transform, self.categorical_features, copy=True)
+        res = super().fit_transform(X, y)
         if self.drop_last:
-            res = res[:,:-1]
+            res = res[:, :-1]
 
         if self.sparse:
             return res.todense()
         return res
 
     def serialize_to_bundle(self, path, model_name):
-
-        # compile tuples of mode attributes to serialize
-        attributes = list()
-        attributes.append(['size', self.n_values_.tolist()[0]])
-        attributes.append(['drop_last', self.drop_last])
-
-        # define node inputs and outputs
-        inputs = [{
-            "name": self.input_features,
-            "port": "input"
-        }]
-
-        outputs = [{
-            "name": self.output_features,
-            "port": "output"
-        }]
-
-        self.serialize(self, path, model_name, attributes, inputs, outputs)
+        OneHotEncoderSerializer.serialize_to_bundle(self, path, model_name)
 
 
 class DefineEstimator(BaseEstimator, TransformerMixin):
@@ -109,10 +90,12 @@ in the fit() and transform() methods.
 This is because the Imputer both in Spark and MLeap operates on a scalar value and if we were to add a feature extractor in
 front of it, then it would serialize as operating on a tensor and thus, fail at scoring time. 
 """
-class Imputer(SklearnImputer):
+class Imputer(SKLearnImputer):
 
-    def __init__(self, missing_values="NaN", strategy="mean",
-                 axis=0, verbose=0, copy=True, input_features=None, output_features=None):
+    def __init__(self, input_features, output_features,
+                 missing_values=np.nan, strategy="mean",
+                 fill_value=None, verbose=0, copy=True, add_indicator=False):
+        self.op = "imputer"
         self.name = "{}_{}".format(self.op, uuid.uuid1())
         self.input_features = input_features
         self.output_features = output_features
@@ -120,7 +103,7 @@ class Imputer(SklearnImputer):
         self.feature_extractor = FeatureExtractor(input_scalars=[input_features],
                                                   output_vector='extracted_' + output_features,
                                                   output_vector_items=[output_features])
-        SklearnImputer.__init__(self, missing_values, strategy, axis, verbose, copy)
+        SKLearnImputer.__init__(self, missing_values, strategy, fill_value, verbose, copy, add_indicator)
 
     def fit(self, X, y=None):
         super(Imputer, self).fit(self.feature_extractor.transform(X))

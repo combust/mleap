@@ -1,4 +1,3 @@
-
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -16,19 +15,20 @@
 # limitations under the License.
 #
 
-import unittest
-import pandas as pd
-import numpy as np
+import json
 import os
 import shutil
-import json
+import unittest
 import uuid
 
-from mleap.sklearn.preprocessing.data import FeatureExtractor, MathUnary, MathBinary, StringMap
-from mleap.sklearn.preprocessing.data import StandardScaler, MinMaxScaler, LabelEncoder, Imputer, Binarizer, PolynomialFeatures
-from mleap.sklearn.preprocessing.data import OneHotEncoder
-
+import numpy as np
+import pandas as pd
 from pandas.util.testing import assert_frame_equal
+
+from mleap.sklearn.preprocessing.data import FeatureExtractor, MathUnary, MathBinary, StringMap
+from mleap.sklearn.preprocessing.data import OneHotEncoder
+from mleap.sklearn.preprocessing.data import StandardScaler, MinMaxScaler, LabelEncoder, Binarizer, PolynomialFeatures
+
 
 class TransformerTests(unittest.TestCase):
     def setUp(self):
@@ -372,67 +372,6 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(res_a[2], res_b[2])
         self.assertEqual(le.input_features, label_encoder_tf.input_features)
         self.assertEqual(le.output_features, label_encoder_tf.output_features[0])
-
-    def one_hot_encoder_serializer_test(self):
-
-        labels = ['a', 'b', 'c']
-
-        le = LabelEncoder(input_features=['label_feature'],
-                          output_features='label_feature_le_encoded')
-
-        oh_data = le.fit_transform(labels).reshape(3, 1)
-
-        one_hot_encoder_tf = OneHotEncoder(sparse=False)
-        one_hot_encoder_tf.mlinit(prior_tf=le,
-                                  output_features='{}_one_hot_encoded'.format(le.output_features))
-        one_hot_encoder_tf.fit(oh_data)
-
-        one_hot_encoder_tf.serialize_to_bundle(self.tmp_dir, one_hot_encoder_tf.name)
-
-        # Test model.json
-        with open("{}/{}.node/model.json".format(self.tmp_dir, one_hot_encoder_tf.name)) as json_data:
-            model = json.load(json_data)
-
-        self.assertEqual(one_hot_encoder_tf.op, model['op'])
-        self.assertEqual(3, model['attributes']['size']['long'])
-        self.assertEqual(False, model['attributes']['drop_last']['boolean'])
-
-    def one_hot_encoder_deserializer_test(self):
-
-        labels = ['a', 'b', 'c']
-
-        le = LabelEncoder(input_features=['label_feature'],
-                          output_features='label_feature_le_encoded')
-
-        oh_data = le.fit_transform(labels).reshape(3, 1)
-
-        one_hot_encoder_tf = OneHotEncoder(sparse=False)
-        one_hot_encoder_tf.mlinit(prior_tf = le,
-                                  output_features='{}_one_hot_encoded'.format(le.output_features))
-        one_hot_encoder_tf.fit(oh_data)
-
-        one_hot_encoder_tf.serialize_to_bundle(self.tmp_dir, one_hot_encoder_tf.name)
-
-        # Deserialize the OneHotEncoder
-        node_name = "{}.node".format(one_hot_encoder_tf.name)
-        one_hot_encoder_tf_ds = OneHotEncoder()
-        one_hot_encoder_tf_ds.deserialize_from_bundle(self.tmp_dir, node_name)
-
-        # Transform some sample data
-        res_a = one_hot_encoder_tf.transform(oh_data)
-        res_b = one_hot_encoder_tf_ds.transform(oh_data)
-
-        self.assertEqual(res_a[0][0], res_b[0][0])
-        self.assertEqual(res_a[1][0], res_b[1][0])
-        self.assertEqual(res_a[2][0], res_b[2][0])
-
-        # Test node.json
-        with open("{}/{}.node/node.json".format(self.tmp_dir, one_hot_encoder_tf.name)) as json_data:
-            node = json.load(json_data)
-
-        self.assertEqual(one_hot_encoder_tf_ds.name, node['name'])
-        self.assertEqual(one_hot_encoder_tf_ds.input_features[0], node['shape']['inputs'][0]['name'])
-        self.assertEqual(one_hot_encoder_tf_ds.output_features[0], node['shape']['outputs'][0]['name'])
 
     def feature_extractor_test(self):
 

@@ -48,7 +48,7 @@ class OneHotEncoder(SKLearnOneHotEncoder, MLeapSerializer):
         return res
 
     def serialize_to_bundle(self, path, model_name):
-        OneHotEncoderSerializer.serialize_to_bundle(self, path, model_name)
+        OneHotEncoderSerializer().serialize_to_bundle(self, path, model_name)
 
 
 class DefineEstimator(BaseEstimator, TransformerMixin):

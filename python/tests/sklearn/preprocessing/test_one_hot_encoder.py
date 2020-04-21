@@ -86,7 +86,7 @@ class TestOneHotEncoder(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, ohe.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(ohe.op, model['op'])
+        self.assertEqual('one_hot_encoder', model['op'])
         self.assertEqual(3, model['attributes']['size']['long'])
         self.assertEqual('error', model['attributes']['handle_invalid']['string'])
         self.assertEqual(False, model['attributes']['drop_last']['boolean'])
@@ -121,7 +121,7 @@ class TestOneHotEncoder(unittest.TestCase):
         with open("{}/{}.node/model.json".format(self.tmp_dir, ohe.name)) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(ohe.op, model['op'])
+        self.assertEqual('one_hot_encoder', model['op'])
         self.assertEqual(3, model['attributes']['size']['long'])
         self.assertEqual('keep', model['attributes']['handle_invalid']['string'])
         self.assertEqual(True, model['attributes']['drop_last']['boolean'])

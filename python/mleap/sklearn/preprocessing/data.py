@@ -532,8 +532,6 @@ class ImputerSerializer(MLeapSerializer):
         self.serializable = False
 
     def serialize_to_bundle(self, transformer, path, model_name):
-        if isinstance(transformer.missing_values, str):
-            raise ValueError("Imputer missing values of type `str` are not supported by MLeap")
         if transformer.strategy == 'most_frequent' or transformer.strategy == 'constant':
             raise ValueError(f"Scikit-learn's Imputer strategy `{transformer.strategy}` is not supported by MLeap")
         if transformer.add_indicator:
@@ -544,7 +542,7 @@ class ImputerSerializer(MLeapSerializer):
         attributes = list()
         attributes.append(('strategy', transformer.strategy))
         attributes.append(('surrogate_value', transformer.statistics_.tolist()[0]))
-        if transformer.missing_values != np.nan:
+        if not np.isnan(transformer.missing_values):
             attributes.append(('missing_value', transformer.missing_values))
 
         inputs = [{

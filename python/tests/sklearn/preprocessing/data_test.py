@@ -26,7 +26,6 @@ import pandas as pd
 from pandas.util.testing import assert_frame_equal
 
 from mleap.sklearn.preprocessing.data import FeatureExtractor, MathUnary, MathBinary, StringMap
-from mleap.sklearn.preprocessing.data import OneHotEncoder
 from mleap.sklearn.preprocessing.data import StandardScaler, MinMaxScaler, LabelEncoder, Binarizer, PolynomialFeatures
 
 
@@ -427,60 +426,6 @@ class TransformerTests(unittest.TestCase):
                          model['attributes']['input_shapes']['data_shape'][1]['base'])
         self.assertEqual(expected_model['attributes']['input_shapes']['data_shape'][1]['isNullable'],
                      model['attributes']['input_shapes']['data_shape'][1]['isNullable'])
-
-    def imputer_test(self):
-
-        def _set_nulls(df):
-            row = df['index']
-            if row in [2,5]:
-                return np.NaN
-            return df.a
-
-        extract_features = ['a']
-        feature_extractor = FeatureExtractor(input_scalars=['a'],
-                                         output_vector='extracted_a_output',
-                                         output_vector_items=["{}_out".format(x) for x in extract_features])
-
-        imputer = Imputer(strategy='mean')
-        imputer.mlinit(prior_tf=feature_extractor,
-                       output_features='a_imputed')
-
-        df2 = self.df
-        df2.reset_index(inplace=True)
-        df2['a'] = df2.apply(_set_nulls, axis=1)
-
-        imputer.fit(df2[['a']])
-
-        self.assertAlmostEqual(imputer.statistics_[0], df2.a.mean(), places = 7)
-
-        imputer.serialize_to_bundle(self.tmp_dir, imputer.name)
-
-        expected_model = {
-          "op": "imputer",
-          "attributes": {
-            "surrogate_value": {
-              "double": df2.a.mean()
-            },
-            "strategy": {
-              "string": "mean"
-            }
-          }
-        }
-
-        # Test model.json
-        with open("{}/{}.node/model.json".format(self.tmp_dir, imputer.name)) as json_data:
-            model = json.load(json_data)
-
-        self.assertEqual(expected_model['attributes']['strategy']['string'], model['attributes']['strategy']['string'])
-        self.assertAlmostEqual(expected_model['attributes']['surrogate_value']['double'], model['attributes']['surrogate_value']['double'], places = 7)
-
-        # Test node.json
-        with open("{}/{}.node/node.json".format(self.tmp_dir, imputer.name)) as json_data:
-            node = json.load(json_data)
-
-        self.assertEqual(imputer.name, node['name'])
-        self.assertEqual(imputer.input_features, node['shape']['inputs'][0]['name'])
-        self.assertEqual(imputer.output_features, node['shape']['outputs'][0]['name'])
 
     def binarizer_test(self):
 

@@ -28,7 +28,7 @@ from mleap.sklearn.preprocessing.data import FeatureExtractor
 from mleap.sklearn.preprocessing.data import SimpleImputer
 
 
-class ImputerTests(unittest.TestCase):
+class TestImputer(unittest.TestCase):
     def setUp(self):
         self.df = pd.DataFrame([
             [0.85281608, 1.50669264],

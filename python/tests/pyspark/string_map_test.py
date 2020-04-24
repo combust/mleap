@@ -54,14 +54,17 @@ class StringMapTest(unittest.TestCase):
         assert_df(expected, result)
 
     def test_serialize_to_bundle(self):
-        string_map = StringMap({'a': 1.0}, 'key_col', 'value_col')
-        pipeline = Pipeline(stages=[string_map]).fit(self.input)
+        input = self.spark.createDataFrame([['a', 'b'], ['x', 'y']],
+                                           INPUT_SCHEMA)
+        string_map = StringMap({'a': 1.0}, 'key_col', 'value_col', handleInvalid='keep', defaultValue=-1.0)
+        pipeline = Pipeline(stages=[string_map]).fit(input)
         pipeline_file = os.path.join(os.path.dirname(__file__), '..', '..',
                                      'target', 'test_serialize_to_bundle-pipeline.zip')
-        _serialize_to_file(pipeline_file, self.input, pipeline)
+        _serialize_to_file(pipeline_file, input, pipeline)
         deserialized_pipeline = _deserialize_from_file(pipeline_file)
-        result = deserialized_pipeline.transform(self.input)
-        expected = self.spark.createDataFrame([['a', 'b', 1.0]], OUTPUT_SCHEMA)
+        result = deserialized_pipeline.transform(input)
+        expected = self.spark.createDataFrame([['a', 'b', 1.0], ['x', 'y', -1.0]],
+                                              OUTPUT_SCHEMA)
         assert_df(expected, result)
 
     @staticmethod

@@ -82,7 +82,6 @@ class StringMapTest(unittest.TestCase):
         expected = StringMapTest.spark.createDataFrame([['a', 'b', 1.0]], OUTPUT_SCHEMA)
         assert_df(expected, result)
 
-    @unittest.skip("This doesn't work because handleInvalid and defaultValue aren't set after deserialization")
     def test_serialize_to_bundle(self):
         string_map = StringMap(
             labels={'a': 1.0},
@@ -92,8 +91,8 @@ class StringMapTest(unittest.TestCase):
         pipeline = Pipeline(stages=[string_map]).fit(self.input)
         serialization_dataset = pipeline.transform(self.input)
 
-        filepath = _serialize_to_file(pipeline, serialization_dataset)
-        deserialized_pipeline = _deserialize_from_file(filepath)
+        jar_file_path = _serialize_to_file(pipeline, serialization_dataset)
+        deserialized_pipeline = _deserialize_from_file(jar_file_path)
 
         result = deserialized_pipeline.transform(self.input)
         expected = StringMapTest.spark.createDataFrame([['a', 'b', 1.0]], OUTPUT_SCHEMA)
@@ -121,14 +120,15 @@ class StringMapTest(unittest.TestCase):
 
 
 def _serialize_to_file(model, df_for_serializing):
-    filepath = os.path.join(tempfile.mkdtemp(), 'test_serialize_to_bundle-pipeline.zip')
-    SimpleSparkSerializer().serializeToBundle(model, _to_jarfile_path(filepath), df_for_serializing)
-    return filepath
+    jar_file_path = _to_jar_file_path(
+        os.path.join(tempfile.mkdtemp(), 'test_serialize_to_bundle-pipeline.zip'))
+    SimpleSparkSerializer().serializeToBundle(model, jar_file_path, df_for_serializing)
+    return jar_file_path
 
 
-def _to_jarfile_path(path):
+def _to_jar_file_path(path):
     return "jar:file:" + path
 
 
 def _deserialize_from_file(path):
-    return SimpleSparkSerializer().deserializeFromBundle(_to_file_path(path))
+    return SimpleSparkSerializer().deserializeFromBundle(path)

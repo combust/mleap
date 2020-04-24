@@ -11,9 +11,6 @@ scala:
 jdk:
   - oraclejdk8  # sbt +compile fails on jdk11 (xenial's default)
 
-before_script:
-  - travis/scala_classpath_for_python.sh
-
 jobs:
   include:
     - stage: "Mleap tests"
@@ -26,8 +23,10 @@ jobs:
       python: 3.6
       install:
         - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
+      before_script:
+        - source travis/scala_classpath_for_python.sh
       script:
-        - tox -c python/tox.ini -e py36 -v
+        - SCALA_CLASS_PATH=$SCALA_CLASS_PATH tox -c python/tox.ini -e py36 -v
 
     - name: "Python 3.7 tests"
       language: python  # This can't be java and python at the same time
@@ -39,8 +38,11 @@ jobs:
       dist: xenial  # Travis won't install py37 on trusty
       install:
         - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
+      before_script:
+        - source travis/scala_classpath_for_python.sh
       script:
-        - tox -c python/tox.ini -e py37 -v
+        - echo $SCALA_CLASS_PATH
+        - SCALA_CLASS_PATH=$SCALA_CLASS_PATH tox -c python/tox.ini -e py37 -v
 
 notifications:
   on_success: change

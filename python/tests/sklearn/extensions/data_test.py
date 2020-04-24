@@ -1,9 +1,10 @@
-import unittest
-import pandas as pd
+import json
 import numpy as np
 import os
+import pandas as pd
 import shutil
-import json
+import tempfile
+import unittest
 import uuid
 
 from mleap.sklearn.extensions.data import Imputer
@@ -11,12 +12,7 @@ from mleap.sklearn.extensions.data import Imputer
 class ExtensionsTests(unittest.TestCase):
     def setUp(self):
         self.df = pd.DataFrame(np.random.randn(10, 5), columns=['a', 'b', 'c', 'd', 'e'])
-        self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
-
-        if os.path.exists(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-
-        os.makedirs(self.tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)

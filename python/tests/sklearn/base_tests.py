@@ -23,6 +23,7 @@ import os
 import shutil
 import json
 import uuid
+import tempfile
 
 from sklearn.linear_model import LinearRegression, LogisticRegression, LogisticRegressionCV
 from sklearn.preprocessing import Binarizer
@@ -53,16 +54,10 @@ def to_standard_normal_quartile(rand_num):
 class TransformerTests(unittest.TestCase):
     def setUp(self):
         self.df = pd.DataFrame(np.random.randn(100, 5), columns=['a', 'b', 'c', 'd', 'e'])
-        self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
-
-        if os.path.exists(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-
-        os.makedirs(self.tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)
-        pass
 
     def test_linear_regression_serializer(self):
 

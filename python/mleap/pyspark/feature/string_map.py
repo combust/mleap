@@ -1,11 +1,16 @@
 import six
+from pyspark import keyword_only
 from pyspark.ml.util import JavaMLReadable, JavaMLWritable, _jvm
 from pyspark.ml.wrapper import JavaTransformer
 from pyspark.ml.param.shared import HasInputCol, HasOutputCol
 from pyspark.sql import DataFrame
 
+from mleap.pyspark.py2scala import jvm_scala_object
+
 
 class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, JavaMLWritable):
+
+    @keyword_only
     def __init__(self, labels={}, inputCol=None, outputCol=None, handleInvalid='error', defaultValue=0.0):
         """
         :param labels: a dict {string: double}
@@ -38,13 +43,47 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
             .mapAsScalaMapConverter(labels) \
             .asScala() \
             .toMap(_jvm().scala.Predef.conforms())
-        handle_invalid_jvm = _jvm().ml.combust.mleap.core.feature.StringMapHandleInvalid.__getattr__(
-            handleInvalid.capitalize() + '$').__getattr__('MODULE$')
-        string_map_model = self._new_java_obj("ml.combust.mleap.core.feature.StringMapModel",
-                                              labels_scala_map, handle_invalid_jvm, defaultValue)
-        self._java_obj = self._new_java_obj("org.apache.spark.ml.mleap.feature.StringMap", self.uid, string_map_model)
-        self.setInputCol(inputCol)
-        self.setOutputCol(outputCol)
+
+        handle_invalid_jvm = jvm_scala_object(
+            _jvm().ml.combust.mleap.core.feature.StringMapHandleInvalid,
+            handleInvalid.capitalize(),
+        )
+
+        string_map_model = _jvm().ml.combust.mleap.core.feature.StringMapModel(
+            labels_scala_map,
+            handle_invalid_jvm,
+            defaultValue,
+        )
+
+        self._java_obj = self._new_java_obj(
+            "org.apache.spark.ml.mleap.feature.StringMap",
+            self.uid,
+            string_map_model
+        )
+
+        self._setDefault()
+        self.setParams(inputCol=inputCol, outputCol=outputCol)
+
+    @keyword_only
+    def setParams(self, inputCol=None, outputCol=None):
+        """
+        setParams(self, inputCol=None, outputCol=None)
+        Sets params for this MathUnary.
+        """
+        kwargs = self._input_kwargs
+        return self._set(**kwargs)
+
+    def setInputCol(self, value):
+        """
+        Sets the value of :py:attr:`inputCol`.
+        """
+        return self._set(inputCol=value)
+
+    def setOutputCol(self, value):
+        """
+        Sets the value of :py:attr:`outputCol`.
+        """
+        return self._set(outputCol=value)
 
     @classmethod
     def from_dataframe(cls, labels_df, inputCol, outputCol, handleInvalid='error', defaultValue=0.0):
@@ -53,7 +92,17 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
         See StringMap() for other params.
         """
         assert isinstance(labels_df, DataFrame), 'labels must be a DataFrame, got: {}'.format(type(labels_df))
-        labels_dict = {row[0]: float(row[1]) for row in
-                       labels_df.select([inputCol, outputCol]).collect()}
-        return cls(labels_dict, inputCol=inputCol, outputCol=outputCol, handleInvalid=handleInvalid,
-                   defaultValue=defaultValue)
+        labels_dict = {
+            row[0]: float(row[1])
+            for row in
+           labels_df.select([inputCol, outputCol]).collect()
+        }
+
+        return cls(
+            labels=labels_dict,
+	    inputCol=inputCol,
+            outputCol=outputCol,
+            handleInvalid=handleInvalid,
+            defaultValue=defaultValue
+        )
+

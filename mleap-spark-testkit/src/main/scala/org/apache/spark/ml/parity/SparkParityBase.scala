@@ -19,6 +19,10 @@ import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
 import resource._
 
+import org.apache.spark.sql.Row
+import org.apache.spark.ml.linalg.{Vector, Vectors}
+import org.apache.spark.ml.util.TestingUtils._
+
 /**
   * Created by hollinwilkins on 10/30/16.
   */
@@ -132,15 +136,35 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit = {
+  def checkRowWithRelTol(actualAnswer: Row, expectedAnswer: Row, relTol: Double) = {
+    require(actualAnswer.length == expectedAnswer.length,
+      s"actual answer length ${actualAnswer.length} != " +
+        s"expected answer length ${expectedAnswer.length}")
+
+    // TODO: support struct types?
+    actualAnswer.toSeq.zip(expectedAnswer.toSeq).foreach {
+      case (actual: Double, expected: Double) =>
+        assert(actual ~== expected relTol relTol)
+      case (actual: Vector, expected: Vector) =>
+        assert(actual ~= expected relTol relTol)
+      case (actual: Array[Double], expected: Array[Double]) =>
+        assert(Vectors.dense(actual) ~= Vectors.dense(expected) relTol relTol)
+      case (actual: Array[Float], expected: Array[Float]) =>
+        assert(Vectors.dense(actual.map(_.toDouble)) ~=
+          Vectors.dense(expected.map(_.toDouble)) relTol relTol)
+      case (actual, expected) =>
+        assert(actual == expected, s"$actual did not equal $expected")
+    }
+  }
+
+  def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame, relTol: Double=1E-3): Unit = {
     val sparkCols = sparkDataset.columns.toSeq
     assert(mleapDataset.columns.toSet === sparkCols.toSet)
     val sparkRows = sparkDataset.collect()
     val mleapRows = mleapDataset.select(sparkCols.map(col): _*).collect()
     var i = 0
     for ((sparkRow, mleapRow) <- sparkRows.zip(mleapRows)) {
-      // TODO: tolerate small numerical differences
-      assert(sparkRow === mleapRow, s"diff at row $i\ncols: $sparkCols")
+      checkRowWithRelTol(sparkRow, mleapRow, relTol)
       i += 1
     }
   }

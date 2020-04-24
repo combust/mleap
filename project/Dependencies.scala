@@ -6,7 +6,7 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "3.0.0-SNAPSHOT"
+  val sparkVersion = "3.1.0-ver1"
   val scalaTestVersion = "3.0.8"
   val akkaVersion = "2.5.12"
   val akkaHttpVersion = "10.0.3"
@@ -82,11 +82,12 @@ object Dependencies {
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
     val junit = "junit" % "junit" % "4.12" % "test"
     val junitInterface = "com.novocode" % "junit-interface" % "0.10" % "test"
-    val spark = Compile.spark.map(_ % "test")
+    val spark = Compile.spark.map(_ % "test" classifier "tests")
   }
 
   object Provided {
     val spark = Compile.spark.map(_.excludeAll(ExclusionRule(organization = "org.scalatest"))).map(_ % "provided")
+    val sparkTestLib = spark.map(_ classifier "tests")
     val hadoop = Compile.hadoop % "provided"
   }
 
@@ -101,13 +102,13 @@ object Dependencies {
 
   val base = l ++= Seq()
 
-  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)
+  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest) ++ Test.spark
 
   def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface, commonsIo) ++ scalaReflect.modules(scalaVersion.value))
 
   val sparkBase = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
-  val sparkTestkit = l ++= Provided.spark ++ Seq(scalaTest)
+  val sparkTestkit = l ++= Provided.spark ++ Provided.sparkTestLib ++ Seq(scalaTest)
 
   val spark = l ++= Provided.spark
 

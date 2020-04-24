@@ -13,7 +13,7 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
   * @param std optional standard deviations of features
   * @param mean optional means of features
   */
-@SparkCode(uri = "https://github.com/apache/spark/blob/v3.0.0-rc1/mllib/src/main/scala/org/apache/spark/ml/feature/StandardScaler.scala")
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/StandardScaler.scala")
 case class StandardScalerModel(std: Option[Vector],
                                mean: Option[Vector]) extends Model {
   require(std.nonEmpty || mean.nonEmpty, "need to scale with mean and/or with stdev")
@@ -87,93 +87,4 @@ case class StandardScalerModel(std: Option[Vector],
 
   override def outputSchema: StructType = StructType("output" -> TensorType.Double(size)).get
 
-}
-
-object StandardScalerModel {
-
-  private def transformWithBoth(
-                                 shift: Array[Double],
-                                 scale: Array[Double],
-                                 values: Array[Double]): Array[Double] = {
-    var i = 0
-    while (i < values.length) {
-      values(i) = (values(i) - shift(i)) * scale(i)
-      i += 1
-    }
-    values
-  }
-
-  private def transformWithShift(
-                                  shift: Array[Double],
-                                  values: Array[Double]): Array[Double] = {
-    var i = 0
-    while (i < values.length) {
-      values(i) -= shift(i)
-      i += 1
-    }
-    values
-  }
-
-  private def transformDenseWithScale(
-                                       scale: Array[Double],
-                                       values: Array[Double]): Array[Double] = {
-    var i = 0
-    while (i < values.length) {
-      values(i) *= scale(i)
-      i += 1
-    }
-    values
-  }
-
-  private def transformSparseWithScale(
-                                        scale: Array[Double],
-                                        indices: Array[Int],
-                                        values: Array[Double]): Array[Double] = {
-    var i = 0
-    while (i < values.length) {
-      values(i) *= scale(indices(i))
-      i += 1
-    }
-    values
-  }
-
-  private[feature] def getTransformFunc(
-                                         shift: Array[Double],
-                                         scale: Array[Double],
-                                         withShift: Boolean,
-                                         withScale: Boolean): Vector => Vector = {
-    (withShift, withScale) match {
-      case (true, true) =>
-        vector: Vector =>
-          val values = vector match {
-            case d: DenseVector => d.values.clone()
-            case v: Vector => v.toArray
-          }
-          val newValues = transformWithBoth(shift, scale, values)
-          Vectors.dense(newValues)
-
-      case (true, false) =>
-        vector: Vector =>
-          val values = vector match {
-            case d: DenseVector => d.values.clone()
-            case v: Vector => v.toArray
-          }
-          val newValues = transformWithShift(shift, values)
-          Vectors.dense(newValues)
-
-      case (false, true) =>
-        vector: Vector =>
-          vector match {
-            case DenseVector(values) =>
-              val newValues = transformDenseWithScale(scale, values.clone())
-              Vectors.dense(newValues)
-            case SparseVector(size, indices, values) =>
-              val newValues = transformSparseWithScale(scale, indices, values.clone())
-              Vectors.sparse(size, indices, newValues)
-          }
-
-      case (false, false) =>
-        vector: Vector => vector
-    }
-  }
 }

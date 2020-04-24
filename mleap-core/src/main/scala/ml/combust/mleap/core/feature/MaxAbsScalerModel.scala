@@ -13,12 +13,36 @@ import scala.math.{max, min}
   */
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/MaxAbsScaler.scala")
 case class MaxAbsScalerModel(maxAbs: Vector) extends Model {
-  private val scale = maxAbs.toArray.map { v => if (v == 0) 1.0 else 1 / v }
-  private val func = StandardScalerModel.getTransformFunc(
-    Array.empty, scale, withShift = false, withScale = true
-  )
+  def apply(vector: Vector): Vector = {
+    val maxAbsUnzero = Vectors.dense(maxAbs.toArray.map(x => if (x == 0) 1 else x))
 
-  def apply(vector: Vector): Vector = func(vector)
+    vector match {
+      case DenseVector(values) =>
+        val vs = values.clone()
+        val size = vs.length
+        var i = 0
+
+        while (i < size) {
+          if (!values(i).isNaN) {
+            val rescale = max(-1.0, min(1.0, values(i) / maxAbsUnzero(i)))
+            vs(i) = rescale
+          }
+          i += 1
+        }
+        Vectors.dense(vs)
+      case SparseVector(size, indices, values) =>
+        val vs = values.clone()
+        val nnz = vs.length
+        var i = 0
+        while (i < nnz) {
+          val raw = max(-1.0, min(1.0, values(i) / maxAbsUnzero(indices(i))))
+
+          vs(i) = raw
+          i += 1
+        }
+        Vectors.sparse(size, indices, vs)
+    }
+  }
 
   override def inputSchema: StructType = StructType("input" -> TensorType.Double(maxAbs.size)).get
 

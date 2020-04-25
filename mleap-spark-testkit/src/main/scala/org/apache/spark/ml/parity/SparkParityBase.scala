@@ -157,7 +157,8 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame, relTol: Double=1E-3): Unit = {
+  var relTol: Double = 1E-3
+  def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit = {
     val sparkCols = sparkDataset.columns.toSeq
     assert(mleapDataset.columns.toSet === sparkCols.toSet)
     val sparkRows = sparkDataset.collect()

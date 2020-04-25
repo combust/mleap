@@ -40,7 +40,7 @@ def _mleap_classpath():
     However, that's only needed if making changes to dependencies, and any sbt +compile runs writeRuntimeClasspathToFile
     """
     classpath_file = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..',
-                                  'mleap-spark-extension', 'target', 'classpath-runtime_2.11.8.txt')
+                                  'mleap-spark-extension', 'target', 'classpath-runtime_2.12.10.txt')
     assert os.path.exists(classpath_file), 'classpath-runtime.txt is missing. Run sbt +compile first to generate it.'
     with open(classpath_file, 'r') as f:
         return f.read()

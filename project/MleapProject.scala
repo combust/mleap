@@ -4,6 +4,14 @@ import sbt.Keys._
 import sbt._
 
 object MleapProject {
+  val EndToEndTest = config("e2e") extend Test
+
+  lazy val e2eSettings =
+    inConfig(EndToEndTest)(Defaults.testSettings) ++
+      Seq(
+        parallelExecution in EndToEndTest := false,
+        scalaSource in EndToEndTest := baseDirectory.value / "src/e2e/scala")
+
   lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
     tensor,
     tensorflow,
@@ -69,7 +77,7 @@ object MleapProject {
     id = "mleap-runtime",
     base = file("mleap-runtime"),
     dependencies = Seq(core, bundleMl)
-  )
+  ).configs(EndToEndTest).settings(e2eSettings)
 
   lazy val avro = Project(
     id = "mleap-avro",

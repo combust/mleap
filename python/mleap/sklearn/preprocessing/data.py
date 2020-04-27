@@ -636,16 +636,16 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
             raise ValueError("MLeap's OneHotEncoder cannot drop the last feature column while also ignoring unknown features")
         if len(transformer.categories_) != 1:
             raise ValueError("MLeap can only one-hot encode a single column at a time")
-        categories = transformer.categories_[0]
-        if not np.array_equal(categories, np.arange(categories.size)):
-                raise ValueError(f"Categories {categories} do not form a valid index range")
+        singular_categories = transformer.categories_[0]
+        if not np.array_equal(singular_categories, np.arange(singular_categories.size)):
+                raise ValueError(f"Categories {singular_categories} do not form a valid index range")
         if transformer.drop is not None:
             raise ValueError("Scikit-learn's OneHotEncoder `drop` parameter is not supported by MLeap")
         if transformer.dtype != np.float64:
             raise ValueError("Scikit-learn's OneHotEncoder `dtype` parameter is not supported by MLeap")
 
         attributes = list()
-        attributes.append(('size', categories.size))
+        attributes.append(('size', singular_categories.size))
         if transformer.handle_unknown == 'error':
             attributes.append(('handle_invalid', 'error'))
             attributes.append(('drop_last', transformer.drop_last))

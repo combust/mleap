@@ -136,37 +136,36 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  def checkRowWithRelTol(actualAnswer: Row, expectedAnswer: Row, relTol: Double) = {
+  def checkRowWithRelTol(actualAnswer: Row, expectedAnswer: Row, eps: Double): Unit = {
     require(actualAnswer.length == expectedAnswer.length,
       s"actual answer length ${actualAnswer.length} != " +
         s"expected answer length ${expectedAnswer.length}")
 
-    // TODO: support struct types?
     actualAnswer.toSeq.zip(expectedAnswer.toSeq).foreach {
       case (actual: Double, expected: Double) =>
-        assert(actual ~== expected relTol relTol)
+        assert(actual ~== expected relTol eps)
       case (actual: Vector, expected: Vector) =>
-        assert(actual ~= expected relTol relTol)
-      case (actual: Array[Double], expected: Array[Double]) =>
-        assert(Vectors.dense(actual) ~= Vectors.dense(expected) relTol relTol)
-      case (actual: Array[Float], expected: Array[Float]) =>
-        assert(Vectors.dense(actual.map(_.toDouble)) ~=
-          Vectors.dense(expected.map(_.toDouble)) relTol relTol)
+        assert(actual ~= expected relTol eps)
+      case (actual: Seq[Double], expected: Seq[Double]) =>
+        assert(Vectors.dense(actual.toArray) ~= Vectors.dense(expected.toArray) relTol eps)
+      case (actual: Seq[Float], expected: Seq[Float]) =>
+        assert(Vectors.dense(actual.map(_.toDouble).toArray) ~=
+          Vectors.dense(expected.map(_.toDouble).toArray) relTol eps)
+      case (actual: Row, expected: Row) =>
+        checkRowWithRelTol(actual, expected, eps)
       case (actual, expected) =>
         assert(actual == expected, s"$actual did not equal $expected")
     }
   }
 
-  var relTol: Double = 1E-3
+  var relTolEps: Double = 1E-3
   def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit = {
     val sparkCols = sparkDataset.columns.toSeq
     assert(mleapDataset.columns.toSet === sparkCols.toSet)
     val sparkRows = sparkDataset.collect()
     val mleapRows = mleapDataset.select(sparkCols.map(col): _*).collect()
-    var i = 0
     for ((sparkRow, mleapRow) <- sparkRows.zip(mleapRows)) {
-      checkRowWithRelTol(sparkRow, mleapRow, relTol)
-      i += 1
+      checkRowWithRelTol(sparkRow, mleapRow, relTolEps)
     }
   }
 

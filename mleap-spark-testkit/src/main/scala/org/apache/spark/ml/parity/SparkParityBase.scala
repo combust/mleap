@@ -137,20 +137,28 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   }
 
   def checkRowWithRelTol(actualAnswer: Row, expectedAnswer: Row, eps: Double): Unit = {
-    require(actualAnswer.length == expectedAnswer.length,
+    assert(actualAnswer.length == expectedAnswer.length,
       s"actual answer length ${actualAnswer.length} != " +
         s"expected answer length ${expectedAnswer.length}")
 
     actualAnswer.toSeq.zip(expectedAnswer.toSeq).foreach {
       case (actual: Double, expected: Double) =>
         assert(actual ~== expected relTol eps)
+      case (actual: Float, expected: Float) =>
+        assert(actual ~== expected relTol eps)
       case (actual: Vector, expected: Vector) =>
         assert(actual ~= expected relTol eps)
-      case (actual: Seq[Double], expected: Seq[Double]) =>
-        assert(Vectors.dense(actual.toArray) ~= Vectors.dense(expected.toArray) relTol eps)
-      case (actual: Seq[Float], expected: Seq[Float]) =>
-        assert(Vectors.dense(actual.map(_.toDouble).toArray) ~=
-          Vectors.dense(expected.map(_.toDouble).toArray) relTol eps)
+      case (actual: Seq[_], expected: Seq[_]) =>
+        assert(actual.length == expected.length, s"actual length ${actual.length} != " +
+          s"expected length ${expected.length}")
+        actual.zip(expected).foreach {
+          case (actualElem: Double, expectedElem: Double) =>
+            assert(actualElem ~== expectedElem relTol eps)
+          case (actualElem: Float, expectedElem: Float) =>
+            assert(actualElem ~== expectedElem relTol eps)
+          case (actualElem, expectedElem) =>
+            assert(actualElem == expectedElem, s"$actualElem did not equal $expectedElem")
+        }
       case (actual: Row, expected: Row) =>
         checkRowWithRelTol(actual, expected, eps)
       case (actual, expected) =>

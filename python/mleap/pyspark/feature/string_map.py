@@ -46,6 +46,18 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
         self.setInputCol(inputCol)
         self.setOutputCol(outputCol)
 
+    def setInputCol(self, value):
+        """
+        Sets the value of :py:attr:`inputCol`.
+        """
+        return self._set(inputCol=value)
+
+    def setOutputCol(self, value):
+        """
+        Sets the value of :py:attr:`outputCol`.
+        """
+        return self._set(outputCol=value)
+
     @classmethod
     def from_dataframe(cls, labels_df, inputCol, outputCol, handleInvalid='error', defaultValue=0.0):
         """

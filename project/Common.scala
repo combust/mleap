@@ -26,7 +26,7 @@ object Common {
       if(isSnapshot.value) {
         Seq(
           "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-          "ASF Snapshots" at "https://repository.apache.org/content/groups/snapshots"
+          "ASF spark" at "https://repository.apache.org/content/repositories/orgapachespark-1341"
         )
       } else {
         Seq()

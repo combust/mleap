@@ -101,7 +101,7 @@ object Dependencies {
 
   val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)
 
-  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface, commonsIo) ++ scalaReflect.modules(scalaVersion.value)) ++ Test.spark
+  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface, commonsIo) ++ scalaReflect.modules(scalaVersion.value))
 
   val sparkBase = l ++= Provided.spark ++ Seq(Test.scalaTest)
 

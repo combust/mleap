@@ -16,17 +16,15 @@
 #
 
 import json
-import os
 import shutil
+import tempfile
 import unittest
-import uuid
 
 import numpy as np
 import pandas as pd
 
 from mleap.sklearn.extensions.data import Imputer
 from mleap.sklearn.preprocessing.data import FeatureExtractor
-from mleap.sklearn.preprocessing.data import SimpleImputer
 
 
 class TestImputerExtension(unittest.TestCase):
@@ -38,13 +36,8 @@ class TestImputerExtension(unittest.TestCase):
             [np.NaN, -0.96775275],
             [np.NaN, -0.85734022]
         ], columns=['a', 'b'])
-
         self.feature_extractor = FeatureExtractor(input_scalars=['a'], output_vector='a_extracted')
-
-        self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
-        if os.path.exists(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-        os.makedirs(self.tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp(prefix="mleap.python.tests")
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)

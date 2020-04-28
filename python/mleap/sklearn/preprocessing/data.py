@@ -533,11 +533,11 @@ class ImputerSerializer(MLeapSerializer):
 
     def serialize_to_bundle(self, transformer, path, model_name):
         if transformer.strategy == 'most_frequent' or transformer.strategy == 'constant':
-            raise ValueError(f"Scikit-learn's Imputer strategy `{transformer.strategy}` is not supported by MLeap")
+            raise NotImplementedError(f"Scikit-learn's Imputer strategy `{transformer.strategy}` is not supported by MLeap")
         if transformer.add_indicator:
-            raise ValueError("Scikit-learn's Imputer parameter `add_indicator` is not supported by MLeap")
+            raise NotImplementedError("Scikit-learn's Imputer parameter `add_indicator` is not supported by MLeap")
         if len(transformer.statistics_.tolist()) != 1:
-            raise ValueError("MLeap's Imputer only supports imputing a single feature at a time")
+            raise NotImplementedError("MLeap's Imputer only supports imputing a single feature at a time")
 
         attributes = list()
         attributes.append(('strategy', transformer.strategy))
@@ -633,16 +633,16 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
             transformer.drop_last = False  # This allows us to use the same serializer in extensions/data.py
 
         if transformer.drop_last and transformer.handle_unknown == 'ignore':
-            raise ValueError("MLeap's OneHotEncoder cannot drop the last feature column while also ignoring unknown features")
+            raise NotImplementedError("MLeap's OneHotEncoder cannot drop the last feature column while also ignoring unknown features")
         if len(transformer.categories_) != 1:
-            raise ValueError("MLeap can only one-hot encode a single column at a time")
+            raise NotImplementedError("MLeap can only one-hot encode a single column at a time")
         singular_categories = transformer.categories_[0]
         if not np.array_equal(singular_categories, np.arange(singular_categories.size)):
                 raise ValueError(f"Categories {singular_categories} do not form a valid index range")
         if transformer.drop is not None:
-            raise ValueError("Scikit-learn's OneHotEncoder `drop` parameter is not supported by MLeap")
+            raise NotImplementedError("Scikit-learn's OneHotEncoder `drop` parameter is not supported by MLeap")
         if transformer.dtype != np.float64:
-            raise ValueError("Scikit-learn's OneHotEncoder `dtype` parameter is not supported by MLeap")
+            raise NotImplementedError("Scikit-learn's OneHotEncoder `dtype` parameter is not supported by MLeap")
 
         attributes = list()
         attributes.append(('size', singular_categories.size))

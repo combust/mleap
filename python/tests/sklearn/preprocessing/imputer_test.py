@@ -16,10 +16,9 @@
 #
 
 import json
-import os
 import shutil
+import tempfile
 import unittest
-import uuid
 
 import numpy as np
 import pandas as pd
@@ -37,13 +36,8 @@ class TestImputer(unittest.TestCase):
             [np.NaN, -0.96775275],
             [np.NaN, -0.85734022]
         ], columns=['a', 'b'])
-
         self.feature_extractor = FeatureExtractor(input_scalars=['a'], output_vector='a_extracted')
-
-        self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
-        if os.path.exists(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-        os.makedirs(self.tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp(prefix="mleap.python.tests")
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)
@@ -54,7 +48,7 @@ class TestImputer(unittest.TestCase):
 
         imputer.fit(self.feature_extractor.transform(self.df))
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(NotImplementedError):
             imputer.serialize_to_bundle(self.tmp_dir, imputer.name)
 
     def test_imputer_serialization_fails_with_strategy_set_to_constant(self):
@@ -63,7 +57,7 @@ class TestImputer(unittest.TestCase):
 
         imputer.fit(self.feature_extractor.transform(self.df))
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(NotImplementedError):
             imputer.serialize_to_bundle(self.tmp_dir, imputer.name)
 
     def test_imputer_serialization_fails_with_add_indicator_set_to_true(self):
@@ -72,7 +66,7 @@ class TestImputer(unittest.TestCase):
 
         imputer.fit(self.feature_extractor.transform(self.df))
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(NotImplementedError):
             imputer.serialize_to_bundle(self.tmp_dir, imputer.name)
 
     def test_imputer_serialization_fails_when_fit_on_multiple_features(self):
@@ -82,7 +76,7 @@ class TestImputer(unittest.TestCase):
 
         imputer.fit(self.feature_extractor.transform(self.df))
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(NotImplementedError):
             imputer.serialize_to_bundle(self.tmp_dir, imputer.name)
 
     def test_imputer_serialization_succeeds_with_strategy_set_to_mean(self):

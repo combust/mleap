@@ -15,10 +15,9 @@
 # limitations under the License.
 #
 import json
-import os
 import shutil
+import tempfile
 import unittest
-import uuid
 
 from mleap.sklearn.extensions.data import OneHotEncoder
 from mleap.sklearn.preprocessing.data import LabelEncoder
@@ -29,11 +28,7 @@ class TestOneHotEncoderExtension(unittest.TestCase):
         labels = ['a', 'b', 'c', 'a', 'b', 'b']
         self.le = LabelEncoder(input_features=['label'], output_features='label_le_encoded')
         self.oh_data = self.le.fit_transform(labels).reshape(-1, 1)
-
-        self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
-        if os.path.exists(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-        os.makedirs(self.tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp(prefix="mleap.python.tests")
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)
@@ -45,7 +40,7 @@ class TestOneHotEncoderExtension(unittest.TestCase):
                             handle_unknown='ignore')
         ohe.fit(self.oh_data)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(NotImplementedError):
             ohe.serialize_to_bundle(self.tmp_dir, ohe.name)
 
     def test_one_hot_encoder_extension_serialization_succeeds_when_drop_last_is_set_to_false_and_handle_unknown_is_set_to_ignore(self):

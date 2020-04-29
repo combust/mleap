@@ -72,6 +72,7 @@ class TestOneHotEncoder(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             ohe.serialize_to_bundle(self.tmp_dir, ohe.name)
 
+    @unittest.skip("MLeap's OneHotEncoder currently only supports `handleInvalid = HandleInvalid.Keep`")  # https://github.com/combust/mleap/blob/c2d568ff11856b6245e660a8edb4f453d9eeb24d/mleap-runtime/src/main/scala/ml/combust/mleap/bundle/ops/feature/OneHotEncoderOp.scala#L36
     def test_one_hot_encoder_serialization_succeeds_when_handle_unknown_is_set_to_error(self):
         ohe = OneHotEncoder(handle_unknown='error')
         ohe.mlinit(prior_tf=self.le, output_features='{}_one_hot_encoded'.format(self.le.output_features))
@@ -86,6 +87,7 @@ class TestOneHotEncoder(unittest.TestCase):
         self.assertEqual('error', model['attributes']['handle_invalid']['string'])
         self.assertEqual(False, model['attributes']['drop_last']['boolean'])
 
+    @unittest.skip("MLeap's OneHotEncoder currently only supports `handleInvalid = HandleInvalid.Keep`")  # https://github.com/combust/mleap/blob/c2d568ff11856b6245e660a8edb4f453d9eeb24d/mleap-runtime/src/main/scala/ml/combust/mleap/bundle/ops/feature/OneHotEncoderOp.scala#L36
     def test_one_hot_encoder_deserialization_succeeds_when_handle_unknown_is_set_to_error(self):
         ohe = OneHotEncoder(handle_unknown='error')
         ohe.mlinit(prior_tf=self.le, output_features='{}_one_hot_encoded'.format(self.le.output_features))

@@ -647,8 +647,11 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
         attributes = list()
         attributes.append(('size', singular_categories.size))
         if transformer.handle_unknown == 'error':
-            attributes.append(('handle_invalid', 'error'))
-            attributes.append(('drop_last', transformer.drop_last))
+            # TODO: Switch to the "new" OneHotEncoder which supports the 'error' strategy
+            # https://github.com/combust/mleap/blob/c2d568ff11856b6245e660a8edb4f453d9eeb24d/mleap-runtime/src/main/scala/ml/combust/mleap/bundle/ops/feature/OneHotEncoderOp.scala#L40
+            raise NotImplementedError("MLeap's OneHotEncoder does not support the `error` strategy for the `handle_unknown` parameter")
+            # attributes.append(('handle_invalid', 'error'))
+            # attributes.append(('drop_last', transformer.drop_last))
         elif transformer.handle_unknown == 'ignore':
             attributes.append(('handle_invalid', 'keep'))  # OneHotEncoderModel.scala adds an extra column when keeping invalid data
             attributes.append(('drop_last', True))         # drop that extra column to match sklearn's ignore behavior

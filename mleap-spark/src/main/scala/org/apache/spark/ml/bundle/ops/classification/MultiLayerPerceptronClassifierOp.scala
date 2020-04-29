@@ -42,8 +42,10 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
 
   }
 
-  override def sparkLoad(uid: String, shape: NodeShape, model: MultilayerPerceptronClassificationModel): MultilayerPerceptronClassificationModel = {
-    val m = MLPShims.createMLPModel(uid = uid,layers = model.layers, weights = model.weights)
+  override def sparkLoad(uid: String, shape: NodeShape, model: MultilayerPerceptronClassificationModel):
+      MultilayerPerceptronClassificationModel = {
+    val layers = MLPShims.getMLPModelLayers(model)
+    val m = MLPShims.createMLPModel(uid = uid,layers = layers, weights = model.weights)
     if (model.isSet(model.thresholds)) m.setThresholds(model.getThresholds)
     m
   }

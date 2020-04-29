@@ -20,7 +20,7 @@ class HashingTermFrequencyOp extends SimpleSparkOp[HashingTF] {
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withValue("num_features", Value.long(obj.getNumFeatures)).
         withValue("binary", Value.boolean(obj.getBinary)).
-        withValue("version", Value.long(HashingTFShims.version))
+        withValue("version", Value.long(HashingTFShims.runtimeVersion))
     }
 
     override def load(model: Model)
@@ -34,7 +34,7 @@ class HashingTermFrequencyOp extends SimpleSparkOp[HashingTF] {
 
   override def sparkLoad(uid: String, shape: NodeShape, model: HashingTF): HashingTF = {
     HashingTFShims.createHashingTF(uid = uid, numFeatures = model.getNumFeatures,
-      binary = model.getBinary, version = HashingTFShims.version)
+      binary = model.getBinary, version = HashingTFShims.runtimeVersion)
   }
 
   override def sparkInputs(obj: HashingTF): Seq[ParamSpec] = {

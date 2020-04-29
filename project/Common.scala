@@ -16,7 +16,7 @@ object Common {
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
   lazy val sparkVersion = {
-    val ver = System.getProperty("sparkVersion", "2.4.5")
+    val ver = System.getProperty("sparkVersion", "3.0.0")
     if (!ver.startsWith("2.4.") && !ver.startsWith("3.0.")) {
       throw new IllegalArgumentException("Only suppport spark 2.4.x and 3.0.x")
     }

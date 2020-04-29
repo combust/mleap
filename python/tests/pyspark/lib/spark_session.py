@@ -1,6 +1,6 @@
 import os
+import pyspark
 from pyspark.sql import SparkSession
-
 
 def spark_session():
     """
@@ -39,7 +39,12 @@ def _mleap_classpath():
     Classpath file can be refreshed manually by running `sbt mleap-spark-extension/writeRuntimeClasspathToFile`.
     However, that's only needed if making changes to dependencies, and any sbt +compile runs writeRuntimeClasspathToFile
     """
-    scala_version = os.environ['SCALA_VERSION']
+    if pyspark.__version__.startswith("2.4."):
+        scala_version = "2.11.12"
+    elif pyspark.__version__.startswith("3.0."):
+        scala_version = "2.12.10"
+    else:
+        raise RuntimeError("Unsupported pyspark version: " + pyspark.__version__)
     classpath_file = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..',
                                   'mleap-spark-extension', 'target',
                                   'classpath-runtime_{scala_version}.txt'.format(scala_version=scala_version))

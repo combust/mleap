@@ -3,11 +3,11 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
+import org.apache.spark.ml.IDFShims
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.IDFModel
-import org.apache.spark.ml.param.Param
-import org.apache.spark.mllib.feature
-import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.ml.param.{Param, ParamMap}
+import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -26,17 +26,12 @@ class IDFOp extends SimpleSparkOp[IDFModel] {
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): IDFModel = {
       val idf = Vectors.dense(model.value("idf").getTensor[Double].toArray)
-      val idfModel = new feature.IDFModel(idf, new Array[Long](idf.size),0)
-      new IDFModel(uid = "", idfModel = idfModel)
+      IDFShims.createIDFModel(idf)
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: IDFModel): IDFModel = {
-    new IDFModel(uid = uid, idfModel = new feature.IDFModel(
-      Vectors.dense(model.idf.toArray),
-      model.docFreq.clone(),
-      model.numDocs
-    ))
+    model.copy(ParamMap.empty)
   }
 
   override def sparkInputs(obj: IDFModel): Seq[ParamSpec] = {

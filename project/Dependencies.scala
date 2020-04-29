@@ -2,12 +2,13 @@ package ml.combust.mleap
 
 import sbt._
 import Keys._
+import Common.{sparkVersion => sparkVer}
 
 object Dependencies {
   import DependencyHelpers._
+  val sparkVersion = sparkVer
 
-  val sparkVersion = "3.0.0"
-  val scalaTestVersion = "3.0.8"
+  val scalaTestVersion = if (sparkVersion.startsWith("3.0.")) "3.0.8" else "3.0.3"
   val akkaVersion = "2.5.12"
   val akkaHttpVersion = "10.0.3"
   val springBootVersion = "2.0.4.RELEASE"

@@ -5,6 +5,7 @@ import ml.bundle.dtree.Node.{InternalNode, LeafNode}
 import ml.bundle.dtree.Split
 import ml.bundle.dtree.Split.{CategoricalSplit, ContinuousSplit}
 import ml.combust.bundle.tree.decision.NodeWrapper
+import org.apache.spark.ml.TreeShims
 import org.apache.spark.ml.tree
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator
 
@@ -43,7 +44,7 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
 
   override def leaf(node: LeafNode, withImpurities: Boolean): tree.Node = {
     val calc: ImpurityCalculator = if(withImpurities) {
-      ImpurityCalculator.getCalculator("gini", node.values.toArray, rawCount = -1L)
+      TreeShims.getImpurityCalculator("gini", node.values.toArray)
     } else {
       null
     }

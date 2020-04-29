@@ -4,7 +4,9 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
-import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel
+import org.apache.spark.ml.MLPShims
+import org.apache.spark.ml.param.ParamMap
+import org.apache.spark.ml.classification.{MultilayerPerceptronClassificationModel}
 import org.apache.spark.ml.linalg.Vectors
 
 /**
@@ -21,16 +23,18 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
       val thresholds = if(obj.isSet(obj.thresholds)) {
         Some(obj.getThresholds)
       } else None
-      model.withValue("layers", Value.longList(obj.getLayers.map(_.toLong))).
+
+      val layers = MLPShims.getMLPModelLayers(obj)
+      model.withValue("layers", Value.longList(layers.map(_.toLong))).
         withValue("weights", Value.vector(obj.weights.toArray)).
         withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): MultilayerPerceptronClassificationModel = {
-      val m = new MultilayerPerceptronClassificationModel(uid = "",
-        weights = Vectors.dense(model.value("weights").getTensor[Double].toArray))
-      m.set(m.layers, model.value("layers").getLongList.map(_.toInt).toArray)
+      val layers = model.value("layers").getLongList.map(_.toInt).toArray
+      val weights = Vectors.dense(model.value("weights").getTensor[Double].toArray)
+      val m = MLPShims.createMLPModel(layers, weights)
       model.getValue("thresholds").
         map(t => m.setThresholds(t.getDoubleList.toArray)).
         getOrElse(m)
@@ -39,10 +43,7 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: MultilayerPerceptronClassificationModel): MultilayerPerceptronClassificationModel = {
-    val m = new MultilayerPerceptronClassificationModel(uid = uid, weights = model.weights)
-    m.set(m.layers, model.getLayers)
-    if (model.isSet(model.thresholds)) m.setThresholds(model.getThresholds)
-    m
+    model.copy(ParamMap.empty)
   }
 
   override def sparkInputs(obj: MultilayerPerceptronClassificationModel): Seq[ParamSpec] = {

@@ -15,8 +15,16 @@ object Common {
 
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
+  lazy val sparkVersion = {
+    val ver = System.getProperty("sparkVersion", "2.4.5")
+    if (!ver.startsWith("2.4.") && !ver.startsWith("3.0.")) {
+      throw new IllegalArgumentException("Only suppport spark 2.4.x and 3.0.x")
+    }
+    ver
+  }
+
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.12.10",
+    scalaVersion := (if (sparkVersion.startsWith("3.0.")) "2.12.10" else "2.11.12"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),

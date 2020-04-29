@@ -23,6 +23,7 @@ from mleap.sklearn.extensions.data import OneHotEncoder
 from mleap.sklearn.preprocessing.data import LabelEncoder
 
 
+@unittest.skip("The OneHotEncoder extension is currently broken. See Issue 667: https://github.com/combust/mleap/issues/667")
 class TestOneHotEncoderExtension(unittest.TestCase):
     def setUp(self):
         labels = ['a', 'b', 'c', 'a', 'b', 'b']

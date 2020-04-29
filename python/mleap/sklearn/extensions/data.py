@@ -48,6 +48,7 @@ class OneHotEncoder(SKLearnOneHotEncoder, MLeapSerializer):
         return res
 
     def serialize_to_bundle(self, path, model_name):
+        raise NotImplementedError("The OneHotEncoder extension is currently broken. See Issue 667: https://github.com/combust/mleap/issues/667")
         OneHotEncoderSerializer().serialize_to_bundle(self, path, model_name)
 
 

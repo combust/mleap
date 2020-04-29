@@ -39,8 +39,10 @@ def _mleap_classpath():
     Classpath file can be refreshed manually by running `sbt mleap-spark-extension/writeRuntimeClasspathToFile`.
     However, that's only needed if making changes to dependencies, and any sbt +compile runs writeRuntimeClasspathToFile
     """
+    scala_version = os.environ['SCALA_VERSION']
     classpath_file = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..',
-                                  'mleap-spark-extension', 'target', 'classpath-runtime_2.12.10.txt')
+                                  'mleap-spark-extension', 'target',
+                                  'classpath-runtime_{scala_version}.txt'.format(scala_version=scala_version))
     assert os.path.exists(classpath_file), 'classpath-runtime.txt is missing. Run sbt +compile first to generate it.'
     with open(classpath_file, 'r') as f:
         return f.read()

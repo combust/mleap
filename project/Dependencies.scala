@@ -2,11 +2,16 @@ package ml.combust.mleap
 
 import sbt._
 import Keys._
-import Common.{sparkVersion => sparkVer}
 
 object Dependencies {
   import DependencyHelpers._
-  val sparkVersion = sparkVer
+  val sparkVersion = {
+    val ver = System.getProperty("sparkVersion", "2.4.5")
+    if (!ver.startsWith("2.4.") && !ver.startsWith("3.0.")) {
+      throw new IllegalArgumentException("Only suppport spark 2.4.x and 3.0.x")
+    }
+    ver
+  }
 
   val scalaTestVersion = if (sparkVersion.startsWith("3.0.")) "3.0.8" else "3.0.3"
   val akkaVersion = "2.5.12"
@@ -83,7 +88,7 @@ object Dependencies {
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
     val junit = "junit" % "junit" % "4.12" % "test"
     val junitInterface = "com.novocode" % "junit-interface" % "0.10" % "test"
-    val spark = Compile.spark.map(_ % "test" classifier "tests")
+    val spark = Compile.spark.map(_ % "test") ++ Compile.spark.map(_ % "test" classifier "tests")
   }
 
   object Provided {

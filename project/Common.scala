@@ -15,16 +15,14 @@ object Common {
 
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
-  lazy val sparkVersion = {
-    val ver = System.getProperty("sparkVersion", "3.0.0")
-    if (!ver.startsWith("2.4.") && !ver.startsWith("3.0.")) {
-      throw new IllegalArgumentException("Only suppport spark 2.4.x and 3.0.x")
-    }
-    ver
-  }
-
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := (if (sparkVersion.startsWith("3.0.")) "2.12.10" else "2.11.12"),
+    scalaVersion := {
+      val ver = System.getProperty("scalaVersion", "2.11.12")
+      if (!ver.startsWith("2.11.") && !ver.startsWith("2.12.")) {
+        throw new IllegalArgumentException("Only suppport scala 2.11.x and 2.12.x")
+      }
+      ver
+    },
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),

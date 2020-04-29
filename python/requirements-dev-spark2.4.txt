@@ -1,0 +1,4 @@
+-r requirements.txt
+nose-exclude>=0.5.0
+ipdb
+pyspark==2.4.5

@@ -13,6 +13,8 @@ def spark_session():
         .config('spark.shuffle.compress', False) \
         .config('spark.rdd.compress', False)
 
+    # mleap pyspark wrappers have not been tested against scala 2.12. However,
+    # they may still work as long as all jars are with the same scala version.
     classpath = os.environ['SCALA_CLASS_PATH']
 
     return builder \

@@ -40,6 +40,22 @@ string_map_transformer = StringMap(
     labels, 'key_col', 'value_col', handleInvalid='keep', defaultValue=0.0)
 ```
 
+### MathUnary transformer
+
+Example usage:
+```python
+# dict of label mappings
+input_dataframe = pd.DataFrame([[0.1, 0.2, 0.3]], columns=['f1'])
+
+sin_transformer = MathUnary(
+    operation=UnaryOperation.Sin,
+    inputCol="f1",
+    outputCol="sin(f1)",
+)
+
+sin_transformer.transform(input_dataframe)
+```
+
 ## Scikit-Learn Integration
 
 MLeap's Scikit-Learn library provides serialization (de-serialization coming soon) functionality to Bundle.ML. There is already parity between the math that Scikit and Spark transformers execute, and MLeap takes advantage of that to provide a common serialization format for the two technologies. 

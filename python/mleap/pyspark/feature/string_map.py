@@ -68,7 +68,7 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
     def setParams(self, inputCol=None, outputCol=None):
         """
         setParams(self, inputCol=None, outputCol=None)
-        Sets params for this MathUnary.
+        Sets params for this StringMap.
         """
         kwargs = self._input_kwargs
         return self._set(**kwargs)
@@ -95,7 +95,7 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
         labels_dict = {
             row[0]: float(row[1])
             for row in
-           labels_df.select([inputCol, outputCol]).collect()
+            labels_df.select([inputCol, outputCol]).collect()
         }
 
         return cls(

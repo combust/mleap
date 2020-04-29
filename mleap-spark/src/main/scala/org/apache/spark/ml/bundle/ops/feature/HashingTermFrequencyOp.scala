@@ -5,7 +5,7 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.HashingTF
-import org.apache.spark.ml.param.Param
+import org.apache.spark.ml.HashingTFShims
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -19,18 +19,22 @@ class HashingTermFrequencyOp extends SimpleSparkOp[HashingTF] {
     override def store(model: Model, obj: HashingTF)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withValue("num_features", Value.long(obj.getNumFeatures)).
-        withValue("binary", Value.boolean(obj.getBinary))
+        withValue("binary", Value.boolean(obj.getBinary)).
+        withValue("version", Value.long(HashingTFShims.version))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): HashingTF = {
-      new HashingTF(uid = "").setNumFeatures(model.value("num_features").getLong.toInt).
-        setBinary(model.value("binary").getBoolean)
+      val version = model.getValue("version").map(_.getLong.toInt).getOrElse(1)
+      val numFeatures = model.value("num_features").getLong.toInt
+      val binary = model.value("binary").getBoolean
+      HashingTFShims.createHashingTF(uid = "", numFeatures = numFeatures, binary = binary, version = version)
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: HashingTF): HashingTF = {
-    new HashingTF(uid = uid).setBinary(model.getBinary).setNumFeatures(model.getNumFeatures)
+    HashingTFShims.createHashingTF(uid = uid, numFeatures = model.getNumFeatures,
+      binary = model.getBinary, version = HashingTFShims.version)
   }
 
   override def sparkInputs(obj: HashingTF): Seq[ParamSpec] = {

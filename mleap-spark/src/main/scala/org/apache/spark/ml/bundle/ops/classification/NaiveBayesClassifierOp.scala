@@ -47,6 +47,7 @@ class NaiveBayesClassifierOp extends SimpleSparkOp[NaiveBayesModel] {
         Matrices.dense(tensor.dimensions.head, tensor.dimensions(1), tensor.toArray)
       }
       val nb = NaiveBayesShims.createNaiveBayesModel(
+        uid = "",
         pi = Vectors.dense(model.value("pi").getTensor[Double].toArray),
         theta = Matrices.dense(theta.dimensions.head, theta.dimensions(1), theta.toArray),
         sigmaOpt = sigmaOpt)
@@ -58,7 +59,12 @@ class NaiveBayesClassifierOp extends SimpleSparkOp[NaiveBayesModel] {
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: NaiveBayesModel): NaiveBayesModel = {
-    model.copy(ParamMap.empty)
+    val r = NaiveBayesShims.createNaiveBayesModel(uid = uid, pi = model.pi, theta = model.theta,
+      sigmaOpt = NaiveBayesShims.getNaiveBayesModelSigma(model)
+    )
+    if (model.isDefined(model.thresholds)) { r.setThresholds(model.getThresholds) }
+    if (model.isDefined(model.modelType)) { r.set(r.modelType, model.getModelType)}
+    r
   }
 
   override def sparkInputs(obj: NaiveBayesModel): Seq[ParamSpec] = {

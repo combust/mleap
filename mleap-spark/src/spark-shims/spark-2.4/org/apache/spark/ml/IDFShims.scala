@@ -7,9 +7,9 @@ import org.apache.spark.mllib.feature.{IDFModel => OldIDFModel}
 
 object IDFShims {
 
-  def createIDFModel(idf: Vector): IDFModel = {
+  def createIDFModel(uid: String, idf: Vector): IDFModel = {
     val oldModel = new OldIDFModel(OldVectors.fromML(idf))
-    new IDFModel(uid = "", idfModel = oldModel)
+    new IDFModel(uid = uid, idfModel = oldModel)
   }
 
 }

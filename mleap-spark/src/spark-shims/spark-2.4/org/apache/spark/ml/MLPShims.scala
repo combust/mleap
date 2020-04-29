@@ -5,9 +5,9 @@ import org.apache.spark.ml.classification.MultilayerPerceptronClassificationMode
 
 object MLPShims {
 
-  def createMLPModel(layers: Array[Int], weights: Vector):
+  def createMLPModel(uid: String, layers: Array[Int], weights: Vector):
       MultilayerPerceptronClassificationModel = {
-    new MultilayerPerceptronClassificationModel(uid = "", layers = layers, weights = weights)
+    new MultilayerPerceptronClassificationModel(uid = uid, layers = layers, weights = weights)
   }
 
   def getMLPModelLayers(model: MultilayerPerceptronClassificationModel): Array[Int] = {

@@ -34,7 +34,7 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
                      (implicit context: BundleContext[SparkBundleContext]): MultilayerPerceptronClassificationModel = {
       val layers = model.value("layers").getLongList.map(_.toInt).toArray
       val weights = Vectors.dense(model.value("weights").getTensor[Double].toArray)
-      val m = MLPShims.createMLPModel(layers, weights)
+      val m = MLPShims.createMLPModel(uid = "", layers, weights)
       model.getValue("thresholds").
         map(t => m.setThresholds(t.getDoubleList.toArray)).
         getOrElse(m)
@@ -43,7 +43,9 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: MultilayerPerceptronClassificationModel): MultilayerPerceptronClassificationModel = {
-    model.copy(ParamMap.empty)
+    val m = MLPShims.createMLPModel(uid = uid,layers = model.layers, weights = model.weights)
+    if (model.isSet(model.thresholds)) m.setThresholds(model.getThresholds)
+    m
   }
 
   override def sparkInputs(obj: MultilayerPerceptronClassificationModel): Seq[ParamSpec] = {

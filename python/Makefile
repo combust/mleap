@@ -1,7 +1,10 @@
-.PHONY: help env clean py36_test py37_test test build upload
+SHELL := /bin/bash
 
-.EXPORT_ALL_VARIABLES:
-SCALA_CLASS_PATH ?= $(shell cd .. && bash travis/scala_classpath_for_python.sh)
+ifndef SCALA_CLASS_PATH
+$(error SCALA_CLASS_PATH for python tests is not set. Please check out the top-level Makefile)
+endif
+
+.PHONY: help env clean py36_test py37_test test build upload
 
 help:
 	@echo "  env         create a development environment using virtualenv"

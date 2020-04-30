@@ -1,5 +1,7 @@
 #! /bin/bash
 
+# Source this file to load SCALA_CLASS_PATH in the environment
+
 # Compile classes used in python tests
 sbt mleap-spark-extension/compile
 sbt mleap-spark/compile

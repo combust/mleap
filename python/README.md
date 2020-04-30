@@ -99,3 +99,17 @@ You can also take your scikit pipelines and deploy them to your Spark cluster, b
 Documentation can be found on our mleap docs page:
 * [PySpark](http://mleap-docs.combust.ml/getting-started/py-spark.html)
 * [Scikit-Learn](http://mleap-docs.combust.ml/getting-started/scikit-learn.html)
+
+## Contributions
+Contributions are welcome! Make sure all python tests pass.
+You can run them from the top-level makefile:
+```bash
+make py37_test
+```
+
+If you'd rather use the inner `python/Makfile`, remember to source SCALA_CLASS_PATH by running:
+
+```bash
+source scripts/scala_classpath_for_python.sh
+cd python/ && make test
+```

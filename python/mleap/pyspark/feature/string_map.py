@@ -100,7 +100,7 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
 
         return cls(
             labels=labels_dict,
-	    inputCol=inputCol,
+            inputCol=inputCol,
             outputCol=outputCol,
             handleInvalid=handleInvalid,
             defaultValue=defaultValue

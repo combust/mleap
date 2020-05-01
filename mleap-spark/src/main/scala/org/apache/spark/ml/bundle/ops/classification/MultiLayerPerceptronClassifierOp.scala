@@ -4,8 +4,6 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
-import org.apache.spark.ml.MLPShims
-import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.classification.{MultilayerPerceptronClassificationModel}
 import org.apache.spark.ml.linalg.Vectors
 
@@ -24,7 +22,7 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
         Some(obj.getThresholds)
       } else None
 
-      val layers = MLPShims.getMLPModelLayers(obj)
+      val layers = obj.layers
       model.withValue("layers", Value.longList(layers.map(_.toLong))).
         withValue("weights", Value.vector(obj.weights.toArray)).
         withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
@@ -34,7 +32,7 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
                      (implicit context: BundleContext[SparkBundleContext]): MultilayerPerceptronClassificationModel = {
       val layers = model.value("layers").getLongList.map(_.toInt).toArray
       val weights = Vectors.dense(model.value("weights").getTensor[Double].toArray)
-      val m = MLPShims.createMLPModel(uid = "", layers, weights)
+      val m = new MultilayerPerceptronClassificationModel(uid = "", layers = layers, weights = weights)
       model.getValue("thresholds").
         map(t => m.setThresholds(t.getDoubleList.toArray)).
         getOrElse(m)
@@ -44,8 +42,7 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
 
   override def sparkLoad(uid: String, shape: NodeShape, model: MultilayerPerceptronClassificationModel):
       MultilayerPerceptronClassificationModel = {
-    val layers = MLPShims.getMLPModelLayers(model)
-    val m = MLPShims.createMLPModel(uid = uid,layers = layers, weights = model.weights)
+    val m = new MultilayerPerceptronClassificationModel(uid = uid, layers = model.layers, weights = model.weights)
     if (model.isSet(model.thresholds)) m.setThresholds(model.getThresholds)
     m
   }

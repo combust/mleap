@@ -25,7 +25,7 @@ jobs:
         - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
       script:
         - sbt -DsparkVersion=2.4.5 -DscalaVersion=2.11.12 compile
-        - tox -c python/tox-spark2.4.ini -e py27 -v
+        - tox -c python/tox.ini -e py27 -v
 
     - name: "Python 3.7 + scala 2.11 + spark 2.4 tests"
       language: python  # This can't be java and python at the same time
@@ -39,21 +39,7 @@ jobs:
         - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
       script:
         - sbt -DsparkVersion=2.4.5 -DscalaVersion=2.11.12 compile
-        - tox -c python/tox-spark2.4.ini -e py37 -v
-
-    - name: "Python 3.7 + scala 2.12 + spark 3.0 tests"
-      language: python  # This can't be java and python at the same time
-      python: 3.7
-      env:
-        # Required when not setting 'language: java' to force the correct jdk8
-        - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
-        - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
-      dist: xenial  # Travis won't install py37 on trusty
-      install:
-        - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
-      script:
-        - sbt -DsparkVersion=3.0.0 -DscalaVersion=2.12.10 compile
-        - tox -c python/tox-spark3.0.ini -e py37 -v
+        - tox -c python/tox.ini -e py37 -v
 
 notifications:
   on_success: change

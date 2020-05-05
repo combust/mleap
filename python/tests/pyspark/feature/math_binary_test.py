@@ -57,24 +57,61 @@ class MathBinaryTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)
 
-    def test_add_math_binary(self):
-        add_transformer = MathBinary(
+    def _new_add_math_binary(self):
+        return MathBinary(
             operation=BinaryOperation.Add,
             inputA="f1",
             inputB="f2",
             outputCol="add(f1, f2)",
         )
 
+    def test_add_math_binary(self):
+        add_transformer = self._new_add_math_binary()
         result = add_transformer.transform(self.input).toPandas()[['add(f1, f2)']]
         assert_frame_equal(self.expected_add, result)
 
-    def test_math_binary_pipeline(self):
+    def test_add_math_binary_defaults_none(self):
+        add_transformer = self._new_add_math_binary()
+
+        none_df = self.spark.createDataFrame([
+            (None, float(i * 2))
+            for i in range(1, 3)
+        ], INPUT_SCHEMA)
+
+        # Summing None + int yields Nones
+        expected_df = pd.DataFrame([
+            (None,)
+            for i in range(1, 3)
+        ], columns=['add(f1, f2)'])
+
+        result = add_transformer.transform(none_df).toPandas()[['add(f1, f2)']]
+        assert_frame_equal(expected_df, result)
+
+    def test_add_math_binary_default_zero(self):
         add_transformer = MathBinary(
             operation=BinaryOperation.Add,
             inputA="f1",
             inputB="f2",
             outputCol="add(f1, f2)",
+            defaultA=1.0,
+            defaultB=1.0,
         )
+
+        none_df = self.spark.createDataFrame([
+            (None, float(i * 2))
+            for i in range(1, 3)
+        ], INPUT_SCHEMA)
+
+        expected_df = pd.DataFrame([
+            (float(i * 2),)
+            for i in range(1, 3)
+        ], columns=['add(f1, f2)'])
+
+        result = add_transformer.transform(none_df).toPandas()[['add(f1, f2)']]
+        assert_frame_equal(expected_df, result)
+
+    def test_math_binary_pipeline(self):
+        add_transformer = self._new_add_math_binary()
 
         mul_transformer = MathBinary(
             operation=BinaryOperation.Multiply,
@@ -109,55 +146,44 @@ class MathBinaryTest(unittest.TestCase):
             )
 
     def test_serialize_deserialize_math_binary(self):
-        add_transformer = MathBinary(
-            operation=BinaryOperation.Add,
-            inputA="f1",
-            inputB="f2",
-            outputCol="add(f1, f2)",
-        )
+        add_transformer = self._new_add_math_binary()
 
         file_path = '{}{}'.format('jar:file:', os.path.join(self.tmp_dir, 'math_binary.zip'))
 
-        __import__('ipdb').set_trace()
         add_transformer.serializeToBundle(file_path, self.input)
         deserialized_math_binary = SimpleSparkSerializer().deserializeFromBundle(file_path)
 
         result = deserialized_math_binary.transform(self.input).toPandas()[['add(f1, f2)']]
         assert_frame_equal(self.expected_add, result)
 
-    # def test_serialize_deserialize_pipeline(self):
-        # sin_transformer = MathBinary(
-            # operation=UnaryOperation.Sin,
-            # inputCol="f1",
-            # outputCol="sin(f1)",
-        # )
+    def test_serialize_deserialize_pipeline(self):
+        add_transformer = self._new_add_math_binary()
 
-        # exp_transformer = MathBinary(
-            # operation=UnaryOperation.Exp,
-            # inputCol="sin(f1)",
-            # outputCol="exp(sin(f1))",
-        # )
+        mul_transformer = MathBinary(
+            operation=BinaryOperation.Multiply,
+            inputA="f1",
+            inputB="add(f1, f2)",
+            outputCol="mul(f1, add(f1, f2))",
+        )
 
-        # expected = pd.DataFrame(
-            # [(
-                # math.exp(math.sin(i)),
-            # )
-            # for i in range(1, 10)],
-            # columns=['exp(sin(f1))'],
-        # )
+        expected = pd.DataFrame(
+            [(
+                float(i * (i + i * 2))
+            )
+            for i in range(1, 10)],
+            columns=['mul(f1, add(f1, f2))'],
+        )
 
-        # pipeline = Pipeline(
-            # stages=[sin_transformer, exp_transformer]
-        # )
+        pipeline = Pipeline(
+            stages=[add_transformer, mul_transformer]
+        )
 
-        # pipeline_model = pipeline.fit(self.input)
+        pipeline_model = pipeline.fit(self.input)
 
-        # file_path = '{}{}'.format('jar:file:', os.path.join(self.tmp_dir, 'math_unary_pipeline.zip'))
+        file_path = '{}{}'.format('jar:file:', os.path.join(self.tmp_dir, 'math_binary_pipeline.zip'))
 
-        # pipeline_model.serializeToBundle(file_path, self.input)
-        # deserialized_pipeline = SimpleSparkSerializer().deserializeFromBundle(file_path)
+        pipeline_model.serializeToBundle(file_path, self.input)
+        deserialized_pipeline = SimpleSparkSerializer().deserializeFromBundle(file_path)
 
-        # result = pipeline_model.transform(self.input).toPandas()[['exp(sin(f1))']]
-        # assert_frame_equal(expected, result)
-
-
+        result = pipeline_model.transform(self.input).toPandas()[['mul(f1, add(f1, f2))']]
+        assert_frame_equal(expected, result)

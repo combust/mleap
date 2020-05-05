@@ -12,6 +12,7 @@ from pyspark.ml.util import _jvm
 from pyspark.ml.wrapper import JavaTransformer
 
 from mleap.pyspark.py2scala import jvm_scala_object
+from mleap.pyspark.py2scala import Some
 
 
 class BinaryOperation(Enum):
@@ -29,33 +30,47 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
     inputA = Param(
         Params._dummy(),
         "inputA",
-        "the inputA column name",
+        "input for left side of binary operation",
         typeConverter=TypeConverters.toString,
     )
 
     inputB = Param(
         Params._dummy(),
         "inputB",
-        "the inputB column name",
+        "input for right side of binary operation",
         typeConverter=TypeConverters.toString,
     )
 
     @keyword_only
-    def __init__(self, operation=None, inputA=None, inputB=None, outputCol=None):
+    def __init__(
+        self,
+        operation=None,
+        inputA=None,
+        inputB=None,
+        outputCol=None,
+        # defaultA=None,
+        # defaultB=None,
+    ):
         """
-        Computes the mathematical binary `operation` over the input column.
+        Computes the mathematical binary `operation` over
+        the input columns A and B.
 
-        NOTE: we can't make `operation` a JavaParam (as in pyspark) because the
-            underlying scala object MathBinary uses a MathBinaryModel to store
-            the info about the unary operation (add, mul, etc.)
+        :param operation: BinaryOperation to specify the operation type
+        :param inputA: column name for the left side of operation (string)
+        :param inputB: column name for the right side of operation (string)
+        :param outputCol: output column name (string)
+        :param defaultA: default value to use when a cell in inputA is None (float)
+        :param defaultB: default value to use when a cell in inputB is None (float)
 
-            If operation is a JavaParam, py4j will fail trying to set it on the
-            underlying scala object.
+        NOTE: `operation`, `defaultA` and `defaultB` are not JavaParams
+        because the underlying MathBinary scala object uses a MathBinaryModel
+        to store the info about the binary operation and the default values.
 
-            If operation doesn't have a default value, then pyspark will fail
-            upon deserialization trying to instantiate this object without args:
-                (it just runs py_type() where py_type is the class name)
-
+        `operation` has a None default value even though it should *never* be
+        None. A None value is necessary upon deserialization to instantiate a
+        MathBinary without errors. Afterwards, pyspark sets the _java_obj to
+        the deserialized scala object, which encodes the operation (as well
+        as the default values for A and B).
         """
         super(MathBinary, self).__init__()
 
@@ -71,7 +86,7 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
             )
 
             scalaMathBinaryModel = _jvm().ml.combust.mleap.core.feature.MathBinaryModel(
-                scalaBinaryOperation, None, None
+                scalaBinaryOperation, Some(defaultA), Some(defaultB)
             )
 
             self._java_obj = self._new_java_obj(
@@ -91,15 +106,21 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
         kwargs = self._input_kwargs
         return self._set(**kwargs)
 
-    # def setInputCol(self, value):
-        # """
-        # Sets the value of :py:attr:`inputCol`.
-        # """
-        # return self._set(inputCol=value)
+    def setInputA(self, value):
+        """
+        Sets the value of :py:attr:`inputA`.
+        """
+        return self._set(inputA=value)
 
-    # def setOutputCol(self, value):
-        # """
-        # Sets the value of :py:attr:`outputCol`.
-        # """
-        # return self._set(outputCol=value)
+    def setInputB(self, value):
+        """
+        Sets the value of :py:attr:`inputB`.
+        """
+        return self._set(inputB=value)
+
+    def setOutputCol(self, value):
+        """
+        Sets the value of :py:attr:`outputCol`.
+        """
+        return self._set(outputCol=value)
 

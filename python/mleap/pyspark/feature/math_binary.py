@@ -48,8 +48,6 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
         inputA=None,
         inputB=None,
         outputCol=None,
-        # defaultA=None,
-        # defaultB=None,
     ):
         """
         Computes the mathematical binary `operation` over
@@ -59,18 +57,15 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
         :param inputA: column name for the left side of operation (string)
         :param inputB: column name for the right side of operation (string)
         :param outputCol: output column name (string)
-        :param defaultA: default value to use when a cell in inputA is None (float)
-        :param defaultB: default value to use when a cell in inputB is None (float)
 
-        NOTE: `operation`, `defaultA` and `defaultB` are not JavaParams
-        because the underlying MathBinary scala object uses a MathBinaryModel
-        to store the info about the binary operation and the default values.
+        NOTE: `operation` is not a JavaParam because the underlying MathBinary
+        scala object uses a MathBinaryModel to store the info about the binary
+        operation.
 
         `operation` has a None default value even though it should *never* be
         None. A None value is necessary upon deserialization to instantiate a
         MathBinary without errors. Afterwards, pyspark sets the _java_obj to
-        the deserialized scala object, which encodes the operation (as well
-        as the default values for A and B).
+        the deserialized scala object, which encodes the operation.
         """
         super(MathBinary, self).__init__()
 
@@ -85,8 +80,12 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
                 operation.name
             )
 
+            # IMPORTANT: defaults for missing values are forced to None.
+            # I've found an issue when setting default values for A and B,
+            # Remember to treat your missing values before the MathBinary
+            # (for example, you could use an Imputer)
             scalaMathBinaryModel = _jvm().ml.combust.mleap.core.feature.MathBinaryModel(
-                scalaBinaryOperation, Some(defaultA), Some(defaultB)
+                scalaBinaryOperation, Some(None), Some(None)
             )
 
             self._java_obj = self._new_java_obj(

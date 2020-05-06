@@ -6,7 +6,7 @@ import org.scalatest.FunSpec
 class VectorIndexerModelSpec extends FunSpec {
 
   describe("vector indexer model") {
-    val model = VectorIndexerModel(3, Map())
+    val model = VectorIndexerModel(3, Map(), handleInvalid = "error")
 
     it("has the right input schema") {
       assert(model.inputSchema.fields ==

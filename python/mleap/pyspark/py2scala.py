@@ -1,3 +1,5 @@
+from pyspark.ml.util import _jvm
+
 
 def jvm_scala_object(jpkg, obj):
     """
@@ -14,3 +16,10 @@ def jvm_scala_object(jpkg, obj):
         getattr(jpkg, obj + "$"),  # JavaClass
         "MODULE$",  # JavaObject
     )
+
+def Some(value):
+    """
+    Instantiate a scala Some object. Useful when scala code takes in
+    an Option[<value>]
+    """
+    return _jvm().scala.Some(value)

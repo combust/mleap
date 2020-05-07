@@ -27,17 +27,14 @@ class MathUnary(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
         """
         Computes the mathematical unary `operation` over the input column.
 
-        NOTE: we can't make `operation` a JavaParam (as in pyspark) because the
-            underlying scala object MathUnary uses a MathUnaryModel to store
-            the info about the unary operation (sin, tan, etc.)
+        NOTE: `operation` is not a JavaParam because the underlying 
+        MathUnary scala object uses a MathUnaryModel to store the info about
+        the unary operation (sin, tan, etc.), not a JavaParam string.
 
-            If operation is a JavaParam, py4j will fail trying to set it on the
-            underlying scala object.
-
-            If operation doesn't have a default value, then pyspark will fail
-            upon deserialization trying to instantiate this object without args:
-                (it just runs py_type() where py_type is the class name)
-
+        `operation` has a None default value even though it should *never* be
+        None. A None value is necessary upon deserialization to instantiate a
+        MathUnary without errors. Afterwards, pyspark sets the _java_obj to
+        the deserialized scala object, which encodes the operation.
         """
         super(MathUnary, self).__init__()
 

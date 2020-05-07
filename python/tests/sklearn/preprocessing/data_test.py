@@ -20,6 +20,7 @@ import os
 import shutil
 import unittest
 import uuid
+import tempfile
 
 import numpy as np
 import pandas as pd
@@ -32,12 +33,7 @@ from mleap.sklearn.preprocessing.data import StandardScaler, MinMaxScaler, Label
 class TransformerTests(unittest.TestCase):
     def setUp(self):
         self.df = pd.DataFrame(np.random.randn(10, 5), columns=['a', 'b', 'c', 'd', 'e'])
-        self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
-
-        if os.path.exists(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-
-        os.makedirs(self.tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)

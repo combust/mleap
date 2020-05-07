@@ -18,8 +18,7 @@ class VectorIndexerParitySpec extends SparkParityBase {
       setOutputCol("features"),
     new VectorIndexer().
       setInputCol("features").
-      setOutputCol("scaled_features").
-      setHandleInvalid("skip"))).fit(dataset)
+      setOutputCol("scaled_features"))).fit(dataset)
 
   override val unserializedParams = Set("stringOrderType")
 }

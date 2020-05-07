@@ -107,7 +107,7 @@ You can run them from the top-level makefile:
 make py37_test
 ```
 
-If you'd rather use the inner `python/Makfile`, remember to source SCALA_CLASS_PATH by running:
+If you'd rather use the inner `python/Makefile`, remember to source SCALA_CLASS_PATH by running:
 
 ```bash
 source scripts/scala_classpath_for_python.sh

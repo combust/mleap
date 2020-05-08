@@ -1,12 +1,22 @@
-# Release 0.11.0
+# Release 0.16.0 (pending, not released yet)
 
 ### Breaking Changes
-- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.13.0 or higher.
+- Fix default ports when running grpc/http requests; default grpc port is 65328 and can be overridden via MLEAP_GRPC_PORT; default http port should be: 65327 and can be overridden via MLEAP_HTTP_PORT
 
-# Release 0.12.0
+### New Features
+- Scikit-learn support for Multinomial Logistic Regression
+- Support for min/max values other than defaults (i.e. 0.0 and 1.0) in MinMaxScalerModel
+- Support for custom transformers (StringMap, MathUnary) in Pyspark
 
-### Breaking Changes
-- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.13.0 or higher.
+### Bug Fixes
+- Fix XGBoost sparse vector support
+- Fix MinMaxScalerModel outputs different in Spark vs MLeap
+- Fix Spark deserialization for CountVectorizer transformer
+
+### Improvements
+- Minor documentation updates
+
+### Other Changes
 
 # Release 0.15.0
 
@@ -30,25 +40,12 @@
 - Add default grpc port to docker config
 - General documentation improvements
 
-### Other Changes
-- None
-
-# Release 0.16.0 (pending, not released yet)
+# Release 0.12.0
 
 ### Breaking Changes
-- Fix default ports when running grpc/http requests; default grpc port is 65328 and can be overridden via MLEAP_GRPC_PORT; default http port should be: 65327 and can be overridden via MLEAP_HTTP_PORT
+- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.13.0 or higher.
 
-### New Features
-- Scikit-learn support for Multinomial Logistic Regression
-- Support for min/max values other than defaults (i.e. 0.0 and 1.0) in MinMaxScalerModel
-- Suppor for custom transformers (StringMap) in Pyspark
+# Release 0.11.0
 
-### Bug Fixes
-- Fix XGBoost sparse vector support
-- Fix MinMaxScalerModel outputs different in Spark vs MLeap
-- Fix Spark deserialization for CountVectorizer transformer
-
-### Improvements
-- Minor documentation updates
-
-### Other Changes
+### Breaking Changes
+- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.13.0 or higher.

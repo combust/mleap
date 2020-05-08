@@ -15,11 +15,12 @@
 # limitations under the License.
 #
 
-import unittest
 import shutil
-import uuid
-import os
 import json
+import os
+import tempfile
+import unittest
+import uuid
 
 from mleap.gensim.word2vec import Word2Vec
 
@@ -27,16 +28,10 @@ from mleap.gensim.word2vec import Word2Vec
 class TransformerTests(unittest.TestCase):
 
     def setUp(self):
-        self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
-
-        if os.path.exists(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-
-        os.makedirs(self.tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)
-        pass
 
     def test_word2vec(self):
 

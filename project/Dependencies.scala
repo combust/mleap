@@ -5,9 +5,9 @@ import Keys._
 
 object Dependencies {
   import DependencyHelpers._
-  val sparkVersion = "3.0.0"
 
-  val scalaTestVersion = "3.0.8"
+  val sparkVersion = "2.4.5"
+  val scalaTestVersion = "3.0.3"
   val akkaVersion = "2.5.12"
   val akkaHttpVersion = "10.0.3"
   val springBootVersion = "2.0.4.RELEASE"
@@ -17,7 +17,7 @@ object Dependencies {
   lazy val awsSdkVersion = "1.11.349"
   val tensorflowVersion = "1.11.0"
   val xgboostVersion = "0.90"
-  val hadoopVersion = "2.7.4" // matches spark version
+  val hadoopVersion = "2.6.5" // matches spark version
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
@@ -67,10 +67,8 @@ object Dependencies {
       "ch.qos.logback" % "logback-classic" % logbackVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
-
     val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion // scala 2.11 only
     val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion // scala 2.11 only
-
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
 
@@ -82,12 +80,11 @@ object Dependencies {
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
     val junit = "junit" % "junit" % "4.12" % "test"
     val junitInterface = "com.novocode" % "junit-interface" % "0.10" % "test"
-    val spark = Compile.spark.map(_ % "test") ++ Compile.spark.map(_ % "test" classifier "tests")
+    val spark = Compile.spark.map(_ % "test")
   }
 
   object Provided {
     val spark = Compile.spark.map(_.excludeAll(ExclusionRule(organization = "org.scalatest"))).map(_ % "provided")
-    val sparkTestLib = spark.map(_ classifier "tests")
     val hadoop = Compile.hadoop % "provided"
   }
 
@@ -102,17 +99,17 @@ object Dependencies {
 
   val base = l ++= Seq()
 
-  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest) ++ Test.spark
+  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest)
 
   def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface, commonsIo) ++ scalaReflect.modules(scalaVersion.value))
 
   val sparkBase = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
-  val sparkTestkit = l ++= Provided.spark ++ Provided.sparkTestLib ++ Seq(scalaTest)
+  val sparkTestkit = l ++= Provided.spark ++ Seq(scalaTest)
 
-  val spark = l ++= Provided.spark ++ Test.spark
+  val spark = l ++= Provided.spark
 
-  val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest) ++ Test.spark
+  val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest)
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 

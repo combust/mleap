@@ -5,7 +5,6 @@ import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.HashingTF
-import org.apache.spark.ml.HashingTFShims
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -20,7 +19,7 @@ class HashingTermFrequencyOp extends SimpleSparkOp[HashingTF] {
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withValue("num_features", Value.long(obj.getNumFeatures)).
         withValue("binary", Value.boolean(obj.getBinary)).
-        withValue("version", Value.long(HashingTFShims.runtimeVersion))
+        withValue("version", Value.long(2))
     }
 
     override def load(model: Model)

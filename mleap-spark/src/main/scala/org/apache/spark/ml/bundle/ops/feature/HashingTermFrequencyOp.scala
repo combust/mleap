@@ -28,13 +28,13 @@ class HashingTermFrequencyOp extends SimpleSparkOp[HashingTF] {
       val version = model.getValue("version").map(_.getLong.toInt).getOrElse(1)
       val numFeatures = model.value("num_features").getLong.toInt
       val binary = model.value("binary").getBoolean
-      HashingTFShims.createHashingTF(uid = "", numFeatures = numFeatures, binary = binary, version = version)
+      require(version == 2, "Unsupporting load lower version spark model.")
+      new HashingTF(uid = "").setNumFeatures(numFeatures).setBinary(binary)
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: HashingTF): HashingTF = {
-    HashingTFShims.createHashingTF(uid = uid, numFeatures = model.getNumFeatures,
-      binary = model.getBinary, version = HashingTFShims.runtimeVersion)
+    new HashingTF(uid = uid).setNumFeatures(model.getNumFeatures).setBinary(model.getBinary)
   }
 
   override def sparkInputs(obj: HashingTF): Seq[ParamSpec] = {

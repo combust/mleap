@@ -44,7 +44,7 @@ object SparkNodeWrapper extends NodeWrapper[tree.Node] {
 
   override def leaf(node: LeafNode, withImpurities: Boolean): tree.Node = {
     val calc: ImpurityCalculator = if(withImpurities) {
-      TreeShims.getImpurityCalculator("gini", node.values.toArray)
+      ImpurityCalculator.getCalculator("gini", node.values.toArray, rawCount = -1L)
     } else {
       null
     }

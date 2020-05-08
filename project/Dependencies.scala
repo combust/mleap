@@ -5,15 +5,9 @@ import Keys._
 
 object Dependencies {
   import DependencyHelpers._
-  val sparkVersion = {
-    val ver = System.getProperty("sparkVersion", "2.4.5")
-    if (!ver.startsWith("2.4.") && !ver.startsWith("3.0.")) {
-      throw new IllegalArgumentException("Only suppport spark 2.4.x and 3.0.x")
-    }
-    ver
-  }
+  val sparkVersion = "3.0.0"
 
-  val scalaTestVersion = if (sparkVersion.startsWith("3.0.")) "3.0.8" else "3.0.3"
+  val scalaTestVersion = "3.0.8"
   val akkaVersion = "2.5.12"
   val akkaHttpVersion = "10.0.3"
   val springBootVersion = "2.0.4.RELEASE"

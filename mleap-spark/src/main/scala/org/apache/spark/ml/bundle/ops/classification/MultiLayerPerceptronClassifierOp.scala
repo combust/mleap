@@ -4,9 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
-import org.apache.spark.ml.MLPShims
-import org.apache.spark.ml.param.ParamMap
-import org.apache.spark.ml.classification.{MultilayerPerceptronClassificationModel}
+import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel
 import org.apache.spark.ml.linalg.Vectors
 
 /**

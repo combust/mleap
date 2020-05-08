@@ -4,11 +4,9 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.tensor.DenseTensor
-import org.apache.spark.ml.NaiveBayesShims
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.classification.NaiveBayesModel
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
-import org.apache.spark.ml.param.ParamMap
 
 /**
   * Created by fshabbir on 12/25/16.

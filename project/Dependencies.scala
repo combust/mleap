@@ -6,8 +6,8 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "2.4.5"
-  val scalaTestVersion = "3.0.3"
+  val sparkVersion = "3.0.0"
+  val scalaTestVersion = "3.0.8"
   val akkaVersion = "2.5.12"
   val akkaHttpVersion = "10.0.3"
   val springBootVersion = "2.0.4.RELEASE"
@@ -16,7 +16,7 @@ object Dependencies {
   lazy val slf4jVersion = "1.7.25"
   lazy val awsSdkVersion = "1.11.349"
   val tensorflowVersion = "1.11.0"
-  val xgboostVersion = "0.90"
+  val xgboostVersion = "1.0.0"
   val hadoopVersion = "2.6.5" // matches spark version
 
   object Compile {
@@ -67,8 +67,7 @@ object Dependencies {
       "ch.qos.logback" % "logback-classic" % logbackVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
-    val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion // scala 2.11 only
-    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion // scala 2.11 only
+    val xgboostDep = "ml.dmlc" % s"xgboost-jvm_${scalaVersion}" % xgboostVersion
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
 
@@ -117,7 +116,7 @@ object Dependencies {
 
   val xgboostRuntime = l ++= Seq(xgboostDep) ++ Test.spark ++ Seq(Test.scalaTest)
 
-  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark
+  val xgboostSpark = l ++= Seq(xgboostDep) ++ Provided.spark
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

@@ -14,6 +14,7 @@
 - Fix MinMaxScalerModel outputs different in Spark vs MLeap
 - Fix Spark deserialization for CountVectorizer transformer
 - Fix setting HandleInvalid.Error by default to Bucketizer
+- Fix setting HandleInvalid.Error by default to OneHotEncoder for backwards compatibility
 
 ### Improvements
 - Minor documentation updates
@@ -47,4 +48,4 @@
 
 We make every effort for the serialization format to be backwards compatible between different versions of MLeap. Please note below some important notes regarding backwards compatibility. 
 
-- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes in the past few releases, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.16.0 or higher.
+- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes in a few releases (0.11, 0.12, 0.14, 0.15), if you need older Spark versions, please use MLeap version 0.10.3, 0.13 or else please use MLeap version 0.16.0 or higher.

@@ -13,7 +13,7 @@
 - Fix XGBoost sparse vector support
 - Fix MinMaxScalerModel outputs different in Spark vs MLeap
 - Fix Spark deserialization for CountVectorizer transformer
-- Fix setting HandleInvalid.Error by default to Bucketizer
+- Fix adding support for HandleInvalid.Error in Bucketizer
 - Fix setting HandleInvalid.Error by default to OneHotEncoder for backwards compatibility
 
 ### Improvements

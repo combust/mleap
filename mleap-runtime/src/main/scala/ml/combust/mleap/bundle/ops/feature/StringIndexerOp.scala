@@ -26,7 +26,7 @@ class StringIndexerOp extends MleapOp[StringIndexer, StringIndexerModel] {
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): StringIndexerModel = {
-      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString).getOrElse(HandleInvalid.default)
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString(_)).getOrElse(HandleInvalid.default)
 
       StringIndexerModel(labels = model.value("labels").getStringList,
         handleInvalid = handleInvalid)

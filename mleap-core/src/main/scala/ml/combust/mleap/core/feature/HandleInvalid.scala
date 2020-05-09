@@ -19,9 +19,9 @@ object HandleInvalid {
     override def asParamString: String = "keep"
   }
 
-  def fromString(value: String): HandleInvalid = value match {
+  def fromString(value: String, canSkip: Boolean = true): HandleInvalid = value match {
     case "error" => HandleInvalid.Error
-    case "skip" => HandleInvalid.Skip
+    case "skip" => if (canSkip) HandleInvalid.Skip else throw new IllegalArgumentException(s"Invalid handler: $value")
     case "keep" => HandleInvalid.Keep
     case _ => throw new IllegalArgumentException(s"Invalid handler: $value")
   }

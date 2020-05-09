@@ -39,7 +39,7 @@ class OneHotEncoderOp extends MleapOp[OneHotEncoder, OneHotEncoderModel] {
         // New version of 1HE.
         OneHotEncoderModel(
           categorySizes = model.value("category_sizes").getIntList.toArray,
-          handleInvalid = HandleInvalid.fromString(model.value("handle_invalid").getString),
+          handleInvalid = HandleInvalid.fromString(model.value("handle_invalid").getString, false),
           dropLast = model.value("drop_last").getBoolean)
       }
     }

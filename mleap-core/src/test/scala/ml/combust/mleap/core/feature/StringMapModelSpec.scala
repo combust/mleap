@@ -23,14 +23,14 @@ class StringMapModelSpec extends FunSpec {
         " and optionally set a custom defaultValue")
     }
 
-    it("returns default value for StringMapHandleInvalid.keep mode") {
-      val model = StringMapModel(Map("label1" -> 1.0), handleInvalid = StringMapHandleInvalid.Keep)
+    it("returns default value for HandleInvalid.Keep mode") {
+      val model = StringMapModel(Map("label1" -> 1.0), handleInvalid = HandleInvalid.Keep)
       assert(model("label1") == 1.0)
       assert(model("missing_label") == 0.0)
     }
 
-    it("returns custom default value for StringMapHandleInvalid.keep mode") {
-      val model = StringMapModel(Map("label1" -> 1.0), handleInvalid = StringMapHandleInvalid.Keep, defaultValue = 2.0)
+    it("returns custom default value for HandleInvalid.keep mode") {
+      val model = StringMapModel(Map("label1" -> 1.0), handleInvalid = HandleInvalid.Keep, defaultValue = 2.0)
       assert(model("label1") == 1.0)
       assert(model("missing_label") == 2.0)
     }

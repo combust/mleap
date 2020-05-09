@@ -26,7 +26,7 @@ class BucketizerOp extends MleapOp[Bucketizer, BucketizerModel]{
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): BucketizerModel = {
-      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString).getOrElse(HandleInvalid.default)
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString(_)).getOrElse(HandleInvalid.default)
 
       BucketizerModel(splits = restoreSplits(model.value("splits").getDoubleList.toArray),
         handleInvalid = handleInvalid)

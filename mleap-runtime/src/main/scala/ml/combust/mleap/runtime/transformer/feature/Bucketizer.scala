@@ -12,11 +12,10 @@ import scala.util.Try
   */
 case class Bucketizer(override val uid: String = Transformer.uniqueName("bucketizer"),
                       override val shape: NodeShape,
-                      override val model: BucketizerModel) extends Transformer {
+                      override val model: BucketizerModel) extends SimpleTransformer {
   val input: String = inputSchema.fields.head.name
   val inputSelector: FieldSelector = input
-  val output: String = outputSchema.fields.head.name
-  val exec: UserDefinedFunction = (value: Double) => model(value).toDouble
+  val exec: UserDefinedFunction = (value: Double) => model(value)
 
   override def transform[FB <: FrameBuilder[FB]](builder: FB): Try[FB] = {
     if(model.handleInvalid == HandleInvalid.Skip) {

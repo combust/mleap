@@ -45,7 +45,6 @@ class OneHotEncoderOp extends SimpleSparkOp[OneHotEncoderModel] {
 
       val df = context.context.dataset.get
       val categorySizes = obj.getInputCols.map { f ⇒ OneHotEncoderOp.sizeForField(df.schema(f)) }
-      val dropLast = obj.getDropLast
 
       model.withValue("category_sizes", Value.intList(categorySizes))
         .withValue("drop_last", Value.boolean(obj.getDropLast))

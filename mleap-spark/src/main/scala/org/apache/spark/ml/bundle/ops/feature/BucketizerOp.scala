@@ -3,6 +3,7 @@ package org.apache.spark.ml.bundle.ops.feature
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.core.feature.HandleInvalid
 import ml.combust.mleap.runtime.transformer.feature.BucketizerUtil._
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.Bucketizer
@@ -25,7 +26,8 @@ class BucketizerOp extends SimpleSparkOp[Bucketizer] {
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): Bucketizer = {
       val m = new Bucketizer(uid = "").setSplits(restoreSplits(model.value("splits").getDoubleList.toArray))
-      val handleInvalid = model.getValue("handle_invalid").map(_.getString).getOrElse("error")
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString).getOrElse(HandleInvalid.default)
+
       m.set(m.handleInvalid, handleInvalid)
       m
     }

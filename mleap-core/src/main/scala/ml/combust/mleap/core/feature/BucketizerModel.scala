@@ -10,13 +10,13 @@ import ml.combust.mleap.core.types.{ScalarType, StructType}
   *
   * @param splits splits used to determine bucket
   */
-@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/Bucketizer.scala")
-case class BucketizerModel(splits: Array[Double], handleInvalid: String = "error") extends Model {
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.4.5/mllib/src/main/scala/org/apache/spark/ml/feature/Bucketizer.scala")
+case class BucketizerModel(splits: Array[Double], handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
   def apply(feature: Double): Double = {
-    if (handleInvalid == "skip") {
+    if (handleInvalid == HandleInvalid.Skip) {
       -1
     } else {
-      binarySearchForBuckets(splits, feature, keepInvalid = handleInvalid == "keep")
+      binarySearchForBuckets(splits, feature, keepInvalid = handleInvalid == HandleInvalid.Keep)
     }
   }
 

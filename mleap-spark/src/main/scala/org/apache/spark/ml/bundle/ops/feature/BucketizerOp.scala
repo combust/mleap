@@ -26,7 +26,7 @@ class BucketizerOp extends SimpleSparkOp[Bucketizer] {
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): Bucketizer = {
       val m = new Bucketizer(uid = "").setSplits(restoreSplits(model.value("splits").getDoubleList.toArray))
-      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString).getOrElse(HandleInvalid.default)
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).getOrElse(HandleInvalid.default.asParamString)
 
       m.set(m.handleInvalid, handleInvalid)
       m

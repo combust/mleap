@@ -13,11 +13,7 @@ import ml.combust.mleap.core.types.{ScalarType, StructType}
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.4.5/mllib/src/main/scala/org/apache/spark/ml/feature/Bucketizer.scala")
 case class BucketizerModel(splits: Array[Double], handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
   def apply(feature: Double): Double = {
-    if (handleInvalid == HandleInvalid.Skip) {
-      -1
-    } else {
       binarySearchForBuckets(splits, feature, keepInvalid = handleInvalid == HandleInvalid.Keep)
-    }
   }
 
   def binarySearchForBuckets(splits: Array[Double], feature: Double, keepInvalid: Boolean): Double = {

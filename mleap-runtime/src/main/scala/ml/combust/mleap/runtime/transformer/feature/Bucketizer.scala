@@ -1,17 +1,32 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.feature.BucketizerModel
+import ml.combust.mleap.core.feature.{BucketizerModel, HandleInvalid}
 import ml.combust.mleap.core.types.NodeShape
-import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.runtime.frame.{SimpleTransformer, Transformer}
+import ml.combust.mleap.runtime.function.{FieldSelector, UserDefinedFunction}
+import ml.combust.mleap.runtime.frame.{FrameBuilder, SimpleTransformer, Transformer}
+
+import scala.util.Try
 
 /**
   * Created by mikhail on 9/19/16.
   */
 case class Bucketizer(override val uid: String = Transformer.uniqueName("bucketizer"),
                       override val shape: NodeShape,
-                      override val model: BucketizerModel) extends SimpleTransformer {
-  override val exec: UserDefinedFunction = (value: Double) => model(value)
+                      override val model: BucketizerModel) extends Transformer {
+  val input: String = inputSchema.fields.head.name
+  val inputSelector: FieldSelector = input
+  val output: String = outputSchema.fields.head.name
+  val exec: UserDefinedFunction = (value: Double) => model(value).toDouble
+
+  override def transform[FB <: FrameBuilder[FB]](builder: FB): Try[FB] = {
+    if(model.handleInvalid == HandleInvalid.Skip) {
+      builder.filter(input) {
+        value: Double => !value.isNaN
+      }.flatMap(_.withColumn(output, inputSelector)(exec))
+    } else {
+      builder.withColumn(output, inputSelector)(exec)
+    }
+  }
 }
 
 object BucketizerUtil {

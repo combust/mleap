@@ -4,14 +4,16 @@
 - Fix default ports when running grpc/http requests; default grpc port is 65328 and can be overridden via MLEAP_GRPC_PORT; default http port should be: 65327 and can be overridden via MLEAP_HTTP_PORT
 
 ### New Features
-- Scikit-learn support for Multinomial Logistic Regression
+- Scikit-learn support for MultinomialLogisticRegression
 - Support for min/max values other than defaults (i.e. 0.0 and 1.0) in MinMaxScalerModel
-- Support for custom transformers (StringMap, MathUnary) in Pyspark
+- Support for custom transformers (StringMap, MathUnary, MathBinary) in Pyspark
+- Upgrade to Spark version 2.4.5
 
 ### Bug Fixes
 - Fix XGBoost sparse vector support
 - Fix MinMaxScalerModel outputs different in Spark vs MLeap
 - Fix Spark deserialization for CountVectorizer transformer
+- Fix setting HandleInvalid.Error by default to Bucketizer
 
 ### Improvements
 - Minor documentation updates
@@ -40,12 +42,9 @@
 - Add default grpc port to docker config
 - General documentation improvements
 
-# Release 0.12.0
 
-### Breaking Changes
-- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.13.0 or higher.
+# Older releases
 
-# Release 0.11.0
+We make every effort for the serialization format to be backwards compatible between different versions of MLeap. Please note below some important notes regarding backwards compatibility. 
 
-### Breaking Changes
-- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.13.0 or higher.
+- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes in the past few releases, if you need older Spark versions, please use MLeap version 0.10.3 or else please use MLeap version 0.16.0 or higher.

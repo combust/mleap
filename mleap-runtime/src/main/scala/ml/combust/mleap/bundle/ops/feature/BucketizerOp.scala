@@ -20,12 +20,16 @@ class BucketizerOp extends MleapOp[Bucketizer, BucketizerModel]{
 
     override def store(model: Model, obj: BucketizerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      model.withValue("splits", Value.doubleList(obj.splits))
+      model.withValue("splits", Value.doubleList(obj.splits)).
+        withValue("handle_invalid", Value.string(obj.handleInvalid))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): BucketizerModel = {
-      BucketizerModel(splits = restoreSplits(model.value("splits").getDoubleList.toArray))
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).getOrElse("error")
+      val m = BucketizerModel(splits = restoreSplits(model.value("splits").getDoubleList.toArray),
+        handleInvalid = handleInvalid)
+      m
     }
   }
 

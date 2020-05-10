@@ -48,4 +48,4 @@
 
 We make every effort for the serialization format to be backwards compatible between different versions of MLeap. Please note below some important notes regarding backwards compatibility. 
 
-- OneHotEncoder/OneHotEncoderEstimator unfortunately had breaking changes in a few releases (0.11, 0.12, 0.14, 0.15), if you need older Spark versions, please use MLeap version 0.10.3, 0.13 or else please use MLeap version 0.16.0 or higher.
+- The deprecated OneHotEncoder unfortunately had breaking changes in a few releases. In releases 0.11.0 and 0.12.0, the deserialization into MLeap was broken for OneHotEncoder. When using releases 0.13.0, 0.14.0, and 0.15.0, please ensure that the model returns the same results as before the upgrade, by potentially changing dropLast and handleInvalid values after deserialization. Alternatively, please use MLeap version 0.16.0 or higher, in case you have models serialized with other versions of MLeap that use OneHotEncoder. If your model uses OneHotEncoderEstimator or no one hot encoding, then you should not encounter any of the issues above. 

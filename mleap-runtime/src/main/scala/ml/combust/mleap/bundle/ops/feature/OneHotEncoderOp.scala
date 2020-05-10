@@ -30,17 +30,19 @@ class OneHotEncoderOp extends MleapOp[OneHotEncoder, OneHotEncoderModel] {
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): OneHotEncoderModel = {
+      val dropLast = model.value("drop_last").getBoolean
       if (model.getValue("size").nonEmpty) {
         // Old version of 1HE.
+        val handleInvalid = if (dropLast) HandleInvalid.Keep else HandleInvalid.default
         OneHotEncoderModel(categorySizes = Array(model.value("size").getLong.toInt),
-          dropLast = model.value("drop_last").getBoolean,
-          handleInvalid = HandleInvalid.default)
+          dropLast = dropLast,
+          handleInvalid = handleInvalid)
       } else {
         // New version of 1HE.
         OneHotEncoderModel(
           categorySizes = model.value("category_sizes").getIntList.toArray,
           handleInvalid = HandleInvalid.fromString(model.value("handle_invalid").getString, false),
-          dropLast = model.value("drop_last").getBoolean)
+          dropLast = dropLast)
       }
     }
   }

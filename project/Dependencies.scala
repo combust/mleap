@@ -68,6 +68,8 @@ object Dependencies {
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
     val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion // scala 2.11 only
+    val xgboostPredictorDep = "biz.k11i" % "xgboost-predictor" % "0.3.1"
+
     val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion // scala 2.11 only
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
@@ -115,7 +117,7 @@ object Dependencies {
 
   val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
-  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Test.spark ++ Seq(Test.scalaTest)
+  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Test.spark ++ Seq(Test.scalaTest)
 
   val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark
 

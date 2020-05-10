@@ -632,9 +632,9 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
         attributes.append(('drop_last', True))
 
         if transformer.handle_unknown == 'error':
-            attributes.append('handle_invalid', 'error')
+            attributes.append(('handle_invalid', 'error'))
         else:
-            attributes.append('handle_invalid', 'keep')
+            attributes.append(('handle_invalid', 'keep'))
 
         # define node inputs and outputs
         inputs = [{

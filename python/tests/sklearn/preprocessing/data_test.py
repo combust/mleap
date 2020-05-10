@@ -394,7 +394,7 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(True, model['attributes']['drop_last']['boolean'])
         self.assertEqual('error', model['attributes']['handle_invalid']['string'])
 
-def one_hot_encoder_deserializer_test(self):
+    def one_hot_encoder_deserializer_test(self):
 
         labels = ['a', 'b', 'c']
 

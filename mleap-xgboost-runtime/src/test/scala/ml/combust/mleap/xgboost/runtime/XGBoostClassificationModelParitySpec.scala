@@ -3,7 +3,7 @@ package ml.combust.mleap.xgboost.runtime
 import ml.combust.mleap.core.types.{BasicType, NodeShape, ScalarType, StructField, TensorType}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
 import ml.combust.mleap.tensor.SparseTensor
-import ml.combust.mleap.xgboost.runtime.testing.{BoosterUtils, BundleSerializationUtils, CachedDatasetUtils, ClassifierUtils, FloatingPointApproximations}
+import ml.combust.mleap.xgboost.runtime.testing.{BoosterUtils, BundleSerializationUtils, CachedDatasetUtils, FloatingPointApproximations}
 import ml.dmlc.xgboost4j.scala.Booster
 import org.apache.spark.ml.linalg.Vectors
 import org.scalatest.FunSpec
@@ -13,9 +13,37 @@ import XgbConverters._
 class XGBoostClassificationModelParitySpec extends FunSpec
   with BoosterUtils
   with CachedDatasetUtils
-  with ClassifierUtils
   with BundleSerializationUtils
   with FloatingPointApproximations {
+
+  def createBoosterClassifier: Transformer = {
+
+    val booster: Booster = trainBooster(binomialDataset)
+
+    XGBoostClassification(
+      "xgboostSingleThread",
+      NodeShape.probabilisticClassifier(
+        rawPredictionCol = Some("raw_prediction"),
+        probabilityCol = Some("probability")),
+      XGBoostClassificationModel(
+        XGBoostBinaryClassificationModel(booster, numFeatures(leapFrameLibSVMtrain), 0))
+    )
+  }
+
+  def createMultinomialBoosterClassifier: Transformer ={
+
+   val booster: Booster = trainMultinomialBooster(multinomialDataset)
+
+    XGBoostClassification(
+      "xgboostSingleThread",
+      NodeShape.probabilisticClassifier(
+        rawPredictionCol = Some("raw_prediction"),
+        probabilityCol = Some("probability")),
+      XGBoostClassificationModel(
+        XGBoostMultinomialClassificationModel(
+          booster, xgboostMultinomialParams("num_class").asInstanceOf[Int], numFeatures(leapFrameIrisTrain), 0))
+    )
+  }
 
   def equalityTestRowByRow(
                             booster: Booster,
@@ -102,13 +130,13 @@ class XGBoostClassificationModelParitySpec extends FunSpec
 
   it("Results between the XGBoost4j booster and the MLeap Transformer are the same") {
     val booster = trainBooster(binomialDataset)
-    val xgboostTransformer = trainXGBoost4jClassifier
+    val xgboostTransformer = createBoosterClassifier
 
     equalityTestRowByRow(booster, xgboostTransformer, leapFrameLibSVMtrain)
   }
 
   it("has the correct inputs and outputs with columns: prediction, probability and raw_prediction") {
-    val transformer = trainXGBoost4jClassifier
+    val transformer = createBoosterClassifier
     val numFeatures = transformer.asInstanceOf[XGBoostClassification].model.numFeatures
 
     assert(transformer.schema.fields ==
@@ -119,7 +147,7 @@ class XGBoostClassificationModelParitySpec extends FunSpec
   }
 
   it("Results are the same pre and post serialization") {
-    val xgboostTransformer = trainXGBoost4jClassifier
+    val xgboostTransformer = createBoosterClassifier
 
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
@@ -132,13 +160,13 @@ class XGBoostClassificationModelParitySpec extends FunSpec
 
   it("Results between the XGBoost4j multinomial booster and the MLeap XGBoostMultinomialClassificationModel are the same") {
     val multiBooster = trainMultinomialBooster(multinomialDataset)
-    val xgboostTransformer = trainMultinomialXGBoost4jClassifier
+    val xgboostTransformer = createMultinomialBoosterClassifier
 
     equalityTestRowByRowMultinomial(multiBooster, xgboostTransformer, leapFrameIrisTrain)
   }
 
   it("XGBoostMultinomialClassificationModel results are the same pre and post serialization") {
-    val xgboostTransformer = trainMultinomialXGBoost4jClassifier
+    val xgboostTransformer = createMultinomialBoosterClassifier
 
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
@@ -150,7 +178,7 @@ class XGBoostClassificationModelParitySpec extends FunSpec
   }
 
   it("Results pre and post serialization are the same when using a dense dataset") {
-    val xgboostTransformer = trainXGBoost4jClassifier
+    val xgboostTransformer = createBoosterClassifier
 
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)

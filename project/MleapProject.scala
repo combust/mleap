@@ -4,7 +4,6 @@ import sbt.Keys._
 import sbt._
 
 object MleapProject {
-
   lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
     tensor,
     tensorflow,

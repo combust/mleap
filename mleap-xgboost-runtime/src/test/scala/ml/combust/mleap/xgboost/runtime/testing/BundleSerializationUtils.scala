@@ -6,9 +6,7 @@ import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.runtime.{MleapContext, frame}
 import ml.combust.mleap.runtime.frame.Transformer
-import ml.combust.mleap.xgboost.runtime.bundle.ops.{XGBoostClassificationOp, XGBoostPredictorClassificationOp}
 import resource.managed
-
 
 trait BundleSerializationUtils {
 
@@ -33,16 +31,5 @@ trait BundleSerializationUtils {
     (for(bf <- managed(BundleFile(bundleFile))) yield {
       bf.loadMleapBundle().get.root
     }).tried.get
-  }
-
-  def loadXGBoostPredictorFromBundle(bundleFile: File)
-                                    (implicit context: MleapContext): frame.Transformer = {
-
-    // Register a different Op to change the deserialization class between tests.
-    // Use to deserialize with Predictor rather than xgboost4j
-    context.bundleRegistry.register(new XGBoostPredictorClassificationOp())
-    val transformer = loadMleapTransformerFromBundle(bundleFile)
-    context.bundleRegistry.register(new XGBoostClassificationOp())  // revert to the original Op
-    transformer
   }
 }

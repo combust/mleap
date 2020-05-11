@@ -15,7 +15,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   with BundleSerializationUtils
   with FloatingPointApproximations {
 
-  def trainRegressor: Transformer = {
+  def trainRegressor: Transformer ={
 
     val booster: Booster = trainBooster(binomialDataset)
 

@@ -16,7 +16,7 @@ object Dependencies {
   lazy val slf4jVersion = "1.7.25"
   lazy val awsSdkVersion = "1.11.349"
   val tensorflowVersion = "1.11.0"
-  val xgboostVersion = "1.0.0-spark3"
+  val xgboostVersion = "1.0.0"
   val hadoopVersion = "2.7.4" // matches spark version
   val kryoVersion = "4.0.2"
 
@@ -68,10 +68,10 @@ object Dependencies {
       "ch.qos.logback" % "logback-classic" % logbackVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
-    val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion
-    val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % xgboostVersion
-    val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
     val kryo = "com.esotericsoftware" % "kryo" % kryoVersion
+    val xgboostDep = Seq("ml.dmlc" %% "xgboost4j" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo"), kryo)
+    val xgboostSparkDep = Seq("ml.dmlc" %% "xgboost4j-spark" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo"), kryo)
+    val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
 
   object Test {
@@ -118,9 +118,9 @@ object Dependencies {
 
   val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
-  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Test.spark ++ Seq(Test.scalaTest)
+  val xgboostRuntime = l ++= xgboostDep ++ Test.spark ++ Seq(Test.scalaTest)
 
-  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark
+  val xgboostSpark = l ++= xgboostSparkDep ++ Provided.spark
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

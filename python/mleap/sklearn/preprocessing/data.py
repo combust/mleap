@@ -630,6 +630,10 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
         attributes.append(('size', transformer.n_values_.tolist()[0]))
         # setting drop_last to True, so to that 1HE maintains parity with MLeap/Spark
         attributes.append(('drop_last', True))
+        if transformer.handle_unknown == 'ignore':
+            attributes.append(('handle_invalid', 'keep'))
+        else:
+            attributes.append(('handle_invalid', 'error'))
 
         # define node inputs and outputs
         inputs = [{

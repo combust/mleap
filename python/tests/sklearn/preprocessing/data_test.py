@@ -392,7 +392,7 @@ class TransformerTests(unittest.TestCase):
         self.assertEqual(one_hot_encoder_tf.op, model['op'])
         self.assertEqual(3, model['attributes']['size']['long'])
         self.assertEqual(True, model['attributes']['drop_last']['boolean'])
-        self.assertEqual('keep', model['attributes']['handle_invalid']['string'])
+        self.assertEqual('error', model['attributes']['handle_invalid']['string'])
 
     def one_hot_encoder_deserializer_test(self):
 

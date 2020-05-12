@@ -30,6 +30,32 @@ fittedPipeline = featurePipeline.fit(df)
 fittedPipeline.serializeToBundle("jar:file:/tmp/pyspark.example.zip", fittedPipeline.transform(df))
 ```
 
+### StringMap transformer
+
+```python
+# dict of label mappings
+labels = {'a': 1.0}
+
+string_map_transformer = StringMap(
+    labels, 'key_col', 'value_col', handleInvalid='keep', defaultValue=0.0)
+```
+
+### MathUnary transformer
+
+Example usage:
+```python
+# dict of label mappings
+input_dataframe = pd.DataFrame([[0.1, 0.2, 0.3]], columns=['f1'])
+
+sin_transformer = MathUnary(
+    operation=UnaryOperation.Sin,
+    inputCol="f1",
+    outputCol="sin(f1)",
+)
+
+sin_transformer.transform(input_dataframe)
+```
+
 ## Scikit-Learn Integration
 
 MLeap's Scikit-Learn library provides serialization (de-serialization coming soon) functionality to Bundle.ML. There is already parity between the math that Scikit and Spark transformers execute, and MLeap takes advantage of that to provide a common serialization format for the two technologies. 
@@ -73,3 +99,17 @@ You can also take your scikit pipelines and deploy them to your Spark cluster, b
 Documentation can be found on our mleap docs page:
 * [PySpark](http://mleap-docs.combust.ml/getting-started/py-spark.html)
 * [Scikit-Learn](http://mleap-docs.combust.ml/getting-started/scikit-learn.html)
+
+## Contributions
+Contributions are welcome! Make sure all python tests pass.
+You can run them from the top-level makefile:
+```bash
+make py37_test
+```
+
+If you'd rather use the inner `python/Makefile`, remember to source SCALA_CLASS_PATH by running:
+
+```bash
+source scripts/scala_classpath_for_python.sh
+cd python/ && make test
+```

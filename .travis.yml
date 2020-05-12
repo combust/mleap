@@ -8,17 +8,36 @@ services:
 language: scala
 scala:
   - 2.11.8
+jdk:
+  - oraclejdk8  # sbt +compile fails on jdk11 (xenial's default)
 
-python:
-  - "2.7"
-  - "3.6"
-  - "3.7"
+jobs:
+  include:
+    - stage: "Mleap tests"
+      name: "Scala Tests"
+      script:
+        - travis/travis.sh
 
-install:
-    -   pip install --user tox
-script:
-  - tox -c python/tox.ini -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .) -v
-  - travis/travis.sh
+    - name: "Python 3.6 tests"
+      language: python
+      python: 3.6
+      install:
+        - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
+      script:
+        - make py36_test
+
+    - name: "Python 3.7 tests"
+      language: python  # This can't be java and python at the same time
+      python: 3.7
+      env:
+        # Required when not setting 'language: java' to force the correct jdk8
+        - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
+        - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+      dist: xenial  # Travis won't install py37 on trusty
+      install:
+        - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
+      script:
+        - make py37_test
 
 notifications:
   on_success: change
@@ -32,8 +51,6 @@ notifications:
     on_success: change
     on_failure: always
 
-jdk:
-  - oraclejdk8
 cache:
   directories:
     - $HOME/.ivy2/cache

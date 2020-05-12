@@ -6,8 +6,8 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "2.4.0"
-  val scalaTestVersion = "3.0.0"
+  val sparkVersion = "2.4.5"
+  val scalaTestVersion = "3.0.3"
   val akkaVersion = "2.5.12"
   val akkaHttpVersion = "10.0.3"
   val springBootVersion = "2.0.4.RELEASE"
@@ -68,6 +68,8 @@ object Dependencies {
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
     val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion // scala 2.11 only
+    val xgboostPredictorDep = "biz.k11i" % "xgboost-predictor" % "0.3.1"
+
     val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion // scala 2.11 only
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
@@ -80,6 +82,7 @@ object Dependencies {
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
     val junit = "junit" % "junit" % "4.12" % "test"
     val junitInterface = "com.novocode" % "junit-interface" % "0.10" % "test"
+    val spark = Compile.spark.map(_ % "test")
   }
 
   object Provided {
@@ -114,7 +117,7 @@ object Dependencies {
 
   val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
-  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(Test.scalaTest)
+  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Test.spark ++ Seq(Test.scalaTest)
 
   val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark
 

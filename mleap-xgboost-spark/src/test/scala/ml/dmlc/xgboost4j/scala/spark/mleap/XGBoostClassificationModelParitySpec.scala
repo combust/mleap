@@ -24,6 +24,8 @@ import scala.collection.mutable
 /**
   * Created by hollinwilkins on 9/16/17.
   */
+case class PowerPlantTableForClassifier(AT: Double, V : Double, AP : Double, RH : Double, PE : Int)
+
 class XGBoostClassificationModelParitySpec extends FunSpec
   with BeforeAndAfterAll {
 
@@ -46,31 +48,63 @@ class XGBoostClassificationModelParitySpec extends FunSpec
     "nworkers" -> 2
   )
 
-  val dataset: DataFrame = {
+  private val denseDataset: DataFrame = {
     SparkParityBase.dataset(spark).select("fico_score_group_fnl", "dti").
       filter(col("fico_score_group_fnl") === "500 - 550" ||
         col("fico_score_group_fnl") === "600 - 650")
   }
 
-  val sparkTransformer: Transformer = {
-    val featurePipeline = new Pipeline().setStages(Array(new StringIndexer().
+  private val sparseDataset: DataFrame = {
+    import spark.sqlContext.implicits._
+
+    spark.sqlContext.sparkContext.textFile(this.getClass.getClassLoader.getResource("datasources/xgboost_training.csv").toString)
+      .map(x => x.split(","))
+      .map(line => PowerPlantTableForClassifier(line(0).toDouble, line(1).toDouble, line(2).toDouble, line(3).toDouble, line(4).toDouble.toInt % 2))
+      .toDF
+  }
+
+  private val featurePipelineForDenseDataset: Transformer = {
+    new Pipeline().setStages(Array(new StringIndexer().
       setInputCol("fico_score_group_fnl").
       setOutputCol("fico_index"),
       new VectorAssembler().
         setInputCols(Array("dti")).
-        setOutputCol("features"))).fit(dataset)
+        setOutputCol("features"))).fit(denseDataset)
+  }
 
-    val classifier = new XGBoostClassifier(xgboostParams).
+  private val sparkTransformerForSparseDataset: Transformer = {
+    val featureAssembler = new VectorAssembler()
+      .setInputCols(Array("AT", "V", "AP", "RH"))
+      .setOutputCol("features")
+
+    val params = xgboostParams + ("missing"-> 0.0f)
+    val classifier = createClassifier(params, featureAssembler, sparseDataset, "PE")
+    SparkUtil.createPipelineModel(Array(featureAssembler, classifier))
+  }
+
+  private val sparkTransformerForDenseDataset: Transformer = {
+
+    val classifier = createClassifier(xgboostParams, featurePipelineForDenseDataset, denseDataset, "fico_index")
+    SparkUtil.createPipelineModel(Array(featurePipelineForDenseDataset, classifier))
+  }
+
+  def createClassifier(
+                        xgboostParams: Map[String, Any],
+                        featurePipeline: Transformer,
+                        dataset: DataFrame,
+                        outputCol: String
+                      ): Transformer ={
+    new XGBoostClassifier(xgboostParams).
       setFeaturesCol("features").
       setProbabilityCol("probabilities").
-      setLabelCol("fico_index").
+      setLabelCol(outputCol).
       fit(featurePipeline.transform(dataset)).
       setLeafPredictionCol("leaf_prediction").
       setContribPredictionCol("contrib_prediction").
       setTreeLimit(2)
-
-    SparkUtil.createPipelineModel(Array(featurePipeline, classifier))
   }
+
+
 
   def equalityTest(sparkDataset: DataFrame,
                    mleapDataset: DefaultLeapFrame): Unit = {
@@ -93,7 +127,7 @@ class XGBoostClassificationModelParitySpec extends FunSpec
 
     sparkDataset.collect().zip(mleapDataset.collect()).foreach {
       case (sp, ml) =>
-        assert(sp.getAs[Vector](sparkFeaturesCol).toDense.values sameElements ml.getTensor[Double](mleapFeaturesCol).rawValues)
+        assert(sp.getAs[Vector](sparkFeaturesCol).toDense.values sameElements ml.getTensor[Double](mleapFeaturesCol).toDense.rawValues)
 
         val sparkProbabilities = sp.getAs[Vector](sparkProbabilityCol).toArray
         val mleapProbabilities = ml.getTensor[Double](mleapProbabilityCol).toArray
@@ -104,9 +138,9 @@ class XGBoostClassificationModelParitySpec extends FunSpec
               println("SPARK: " + sparkProbabilities.mkString(","))
               println("MLEAP: " + mleapProbabilities.mkString(","))
             }
+
             assert(Math.abs(v2 - v1) < 0.0000001)
         }
-
         val sparkPrediction = sp.getDouble(sparkPredictionCol)
         val mleapPrediction = ml.getDouble(mleapPredictionCol)
         assert(sparkPrediction == mleapPrediction)
@@ -121,47 +155,55 @@ class XGBoostClassificationModelParitySpec extends FunSpec
     }
   }
 
-  var bundleCache: Option[File] = None
+  var bundleCacheSparse : Option[File] = None
+  var bundleCacheDense : Option[File] = None
 
-  def serializedModel(transformer: Transformer): File = {
+  def serializeModelToMleapBundle(transformer: Transformer, dataset: DataFrame): File = {
     import ml.combust.mleap.spark.SparkSupport._
 
     implicit val sbc = SparkBundleContext.defaultContext.withDataset(transformer.transform(dataset))
 
-    bundleCache.getOrElse {
-      new File("/tmp/mleap/spark-parity").mkdirs()
-      val file = new File(s"/tmp/mleap/spark-parity/${classOf[XGBoostRegressionModelParitySpec].getName}.zip")
-      file.delete()
+    new File("/tmp/mleap/spark-parity").mkdirs()
+    val file = new File(s"/tmp/mleap/spark-parity/${classOf[XGBoostClassificationModelParitySpec].getName}.zip")
+    file.delete()
 
-      for(bf <- managed(BundleFile(file))) {
-        transformer.writeBundle.format(SerializationFormat.Json).save(bf).get
-      }
-
-      bundleCache = Some(file)
-      file
+    for(bf <- managed(BundleFile(file))) {
+      transformer.writeBundle.format(SerializationFormat.Json).save(bf).get
     }
+    file
   }
 
-  def mleapTransformer(transformer: Transformer)
-                      (implicit context: SparkBundleContext): frame.Transformer = {
+  def loadMleapTransformerFromBundle(bundleFile: File)
+                                    (implicit context: SparkBundleContext): frame.Transformer = {
     import ml.combust.mleap.runtime.MleapSupport._
-
-    (for(bf <- managed(BundleFile(serializedModel(transformer)))) yield {
+    (for(bf <- managed(BundleFile(bundleFile))) yield {
       bf.loadMleapBundle().get.root
     }).tried.get
   }
 
-  it("produces the same results") {
-    val sparkDataset = sparkTransformer.transform(dataset)
-    val mleapSchema = TypeConverters.sparkSchemaToMleapSchema(dataset)
-
-    val data = dataset.collect().map {
+  def constructLeapFrameFromSparkDataFrame(dataFrame: DataFrame): DefaultLeapFrame ={
+    val mleapSchema = TypeConverters.sparkSchemaToMleapSchema(dataFrame)
+    val data = dataFrame.collect().map {
       r => Row(r.toSeq: _*)
     }
-    val frame = DefaultLeapFrame(mleapSchema, data)
-    val mleapT = mleapTransformer(sparkTransformer)
-    val mleapDataset = mleapT.transform(frame).get
+    DefaultLeapFrame(mleapSchema, data)
+  }
+
+  def doTest(sparkTransformer: Transformer, dataset: DataFrame, bundleCache: Option[File]): Unit ={
+    val sparkDataset = sparkTransformer.transform(dataset)
+    val leapFrame = constructLeapFrameFromSparkDataFrame(dataset)
+    val mleapBundle = bundleCache.getOrElse(serializeModelToMleapBundle(sparkTransformer, dataset))
+    val mleapTransformer = loadMleapTransformerFromBundle(mleapBundle)
+    val mleapDataset = mleapTransformer.transform(leapFrame).get
 
     equalityTest(sparkDataset, mleapDataset)
+  }
+
+  it("produces the same results for a dense dataset") {
+    doTest(sparkTransformerForDenseDataset, denseDataset, bundleCacheDense)
+  }
+
+  it("produces the same result for a sparse dataset") {
+    doTest(sparkTransformerForSparseDataset, sparseDataset, bundleCacheSparse)
   }
 }

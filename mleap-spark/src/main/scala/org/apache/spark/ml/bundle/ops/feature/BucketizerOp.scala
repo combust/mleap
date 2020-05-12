@@ -19,16 +19,22 @@ class BucketizerOp extends SimpleSparkOp[Bucketizer] {
     override def store(model: Model, obj: Bucketizer)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withValue("splits", Value.doubleList(obj.getSplits))
+        .withValue("handle_invalid", Value.string(obj.getHandleInvalid))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): Bucketizer = {
-      new Bucketizer(uid = "").setSplits(restoreSplits(model.value("splits").getDoubleList.toArray))
+      val m = new Bucketizer(uid = "").setSplits(restoreSplits(model.value("splits").getDoubleList.toArray))
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).getOrElse("error")
+      m.set(m.handleInvalid, handleInvalid)
+      m
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: Bucketizer): Bucketizer = {
-    new Bucketizer(uid = uid).setSplits(model.getSplits)
+    val m = new Bucketizer(uid = uid).setSplits(model.getSplits)
+    m.set(m.handleInvalid, model.getHandleInvalid)
+    m
   }
 
   override def sparkInputs(obj: Bucketizer): Seq[ParamSpec] = {

@@ -35,6 +35,8 @@ class CountVectorizerOp extends SimpleSparkOp[CountVectorizerModel] {
   override def sparkLoad(uid: String, shape: NodeShape, model: CountVectorizerModel): CountVectorizerModel = {
     new CountVectorizerModel(uid = uid,
       vocabulary = model.vocabulary)
+      .setBinary(model.getBinary)
+      .setMinTF(model.getMinTF)
   }
 
   override def sparkInputs(obj: CountVectorizerModel): Seq[ParamSpec] = {

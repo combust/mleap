@@ -42,4 +42,4 @@ class SimpleSparkSerializer(object):
         self._java_obj.serializeToBundle(transformer._to_java(), path, dataset._jdf)
 
     def deserializeFromBundle(self, path):
-        return JavaTransformer._from_java( self._java_obj.deserializeFromBundle(path))
+        return JavaTransformer._from_java(self._java_obj.deserializeFromBundle(path))

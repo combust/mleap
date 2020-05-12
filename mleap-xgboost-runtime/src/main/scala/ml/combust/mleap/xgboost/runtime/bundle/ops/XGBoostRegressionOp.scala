@@ -25,7 +25,10 @@ class XGBoostRegressionOp extends MleapOp[XGBoostRegression, XGBoostRegressionMo
                       (implicit context: BundleContext[MleapContext]): Model = {
       val out = Files.newOutputStream(context.file("xgboost.model"))
       obj.booster.saveModel(out)
-      model.withValue("num_features", Value.int(obj.numFeatures))
+
+      model
+        .withValue("num_features", Value.int(obj.numFeatures))
+        .withValue("tree_limit", Value.int(obj.treeLimit))
     }
 
     override def load(model: Model)

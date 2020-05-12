@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import ml.combust.mleap.core.feature.BucketizerModel
+import ml.combust.mleap.core.feature.{BucketizerModel, HandleInvalid}
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import org.scalatest.FunSpec
@@ -38,6 +38,22 @@ class BucketizerSpec extends FunSpec {
       val bucketizer2 = bucketizer.copy(shape = NodeShape.feature(inputCol = "bad_double", outputCol = "test_bucket"))
 
       it("returns a Failure") { assert(bucketizer2.transform(frame).isFailure) }
+    }
+
+    describe("with skip logic") {
+      val bucketizer2 = bucketizer.copy(model = bucketizer.model.copy(handleInvalid = HandleInvalid.Skip))
+
+      val dataset = Seq(Row(11.0), Row(0.0), Row(Double.NaN))
+      val frame = DefaultLeapFrame(schema, dataset)
+
+      it("filters all of the invalid values") {
+        val frame2 = bucketizer2.transform(frame).get
+
+        val data = frame2.dataset
+        assert(data.size == 2)
+        assert(data(0).getDouble(1) == 1.0)
+        assert(data(1).getDouble(1) == 0.0)
+      }
     }
   }
 

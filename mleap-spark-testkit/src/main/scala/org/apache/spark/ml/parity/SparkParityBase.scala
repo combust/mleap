@@ -136,34 +136,44 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  def checkRowWithRelTol(actualAnswer: Row, expectedAnswer: Row, relTol: Double) = {
-    require(actualAnswer.length == expectedAnswer.length,
+  def checkRowWithRelTol(actualAnswer: Row, expectedAnswer: Row, eps: Double): Unit = {
+    assert(actualAnswer.length == expectedAnswer.length,
       s"actual answer length ${actualAnswer.length} != " +
         s"expected answer length ${expectedAnswer.length}")
 
-    // TODO: support struct types?
     actualAnswer.toSeq.zip(expectedAnswer.toSeq).foreach {
       case (actual: Double, expected: Double) =>
-        assert(actual ~== expected relTol relTol)
+        assert(actual ~== expected relTol eps)
+      case (actual: Float, expected: Float) =>
+        assert(actual ~== expected relTol eps)
       case (actual: Vector, expected: Vector) =>
-        assert(actual ~= expected relTol relTol)
-      case (actual: Array[Double], expected: Array[Double]) =>
-        assert(Vectors.dense(actual) ~= Vectors.dense(expected) relTol relTol)
-      case (actual: Array[Float], expected: Array[Float]) =>
-        assert(Vectors.dense(actual.map(_.toDouble)) ~=
-          Vectors.dense(expected.map(_.toDouble)) relTol relTol)
+        assert(actual ~= expected relTol eps)
+      case (actual: Seq[_], expected: Seq[_]) =>
+        assert(actual.length == expected.length, s"actual length ${actual.length} != " +
+          s"expected length ${expected.length}")
+        actual.zip(expected).foreach {
+          case (actualElem: Double, expectedElem: Double) =>
+            assert(actualElem ~== expectedElem relTol eps)
+          case (actualElem: Float, expectedElem: Float) =>
+            assert(actualElem ~== expectedElem relTol eps)
+          case (actualElem, expectedElem) =>
+            assert(actualElem == expectedElem, s"$actualElem did not equal $expectedElem")
+        }
+      case (actual: Row, expected: Row) =>
+        checkRowWithRelTol(actual, expected, eps)
       case (actual, expected) =>
         assert(actual == expected, s"$actual did not equal $expected")
     }
   }
 
-  def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame, relTol: Double=1E-3): Unit = {
+  var relTolEps: Double = 1E-3
+  def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit = {
     val sparkCols = sparkDataset.columns.toSeq
     assert(mleapDataset.columns.toSet === sparkCols.toSet)
     val sparkRows = sparkDataset.collect()
     val mleapRows = mleapDataset.select(sparkCols.map(col): _*).collect()
     for ((sparkRow, mleapRow) <- sparkRows.zip(mleapRows)) {
-      checkRowWithRelTol(sparkRow, mleapRow, relTol)
+      checkRowWithRelTol(sparkRow, mleapRow, relTolEps)
     }
   }
 

@@ -110,9 +110,9 @@ object Dependencies {
 
   val sparkTestkit = l ++= Provided.spark ++ Provided.sparkTestLib ++ Seq(scalaTest)
 
-  val spark = l ++= Provided.spark
+  val spark = l ++= Provided.spark ++ Test.spark
 
-  val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest)
+  val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest) ++ Test.spark
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 
@@ -120,7 +120,7 @@ object Dependencies {
 
   val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Test.spark ++ Seq(Test.scalaTest)
 
-  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark
+  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark ++ Test.spark
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

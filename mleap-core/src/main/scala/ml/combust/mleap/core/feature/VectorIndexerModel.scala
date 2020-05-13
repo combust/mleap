@@ -5,7 +5,6 @@ import java.util.NoSuchElementException
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.types.{StructType, TensorType}
-import org.apache.spark.SparkException
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 
 /**

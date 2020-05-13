@@ -16,9 +16,11 @@
 - Fix Spark deserialization for CountVectorizer transformer
 - Fix adding support for HandleInvalid.Error in Bucketizer
 - Fix setting HandleInvalid.Error by default to OneHotEncoder for backwards compatibility
+- Fix OneHotEncoder Python serialization
 
 ### Improvements
 - Minor documentation updates
+- Upgrade to scikit-learn 0.22
 
 ### Other Changes
 

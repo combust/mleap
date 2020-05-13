@@ -82,7 +82,7 @@ object Dependencies {
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
     val junit = "junit" % "junit" % "4.12" % "test"
     val junitInterface = "com.novocode" % "junit-interface" % "0.10" % "test"
-    val spark = Compile.spark.map(_ % "test" classifier "tests")
+    val spark = Compile.spark.map(_ % "test") ++ Compile.spark.map(_ % "test" classifier "tests")
   }
 
   object Provided {

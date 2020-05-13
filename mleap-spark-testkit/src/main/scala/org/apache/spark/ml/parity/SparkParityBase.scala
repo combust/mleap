@@ -18,6 +18,7 @@ import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
 import resource._
 
+import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.Row
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import org.apache.spark.ml.util.TestingUtils._

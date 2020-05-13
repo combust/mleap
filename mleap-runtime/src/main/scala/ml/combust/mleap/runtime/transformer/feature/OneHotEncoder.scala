@@ -16,7 +16,6 @@ case class OneHotEncoder(override val uid: String =
                          override val shape: NodeShape,
                          override val model: OneHotEncoderModel)
     extends SimpleTransformer {
-//  override val exec: UserDefinedFunction = (value: Double) => model(Array(value)).head: Tensor[Double]
 // Lot of things going on here:
 // o Convert values into an array
 // o Invoke 1HE model

@@ -16,59 +16,11 @@
 #
 
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing.data import _transform_selected
 from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
-import numpy as np
 import uuid
 from sklearn.preprocessing import Imputer as SklearnImputer
 from mleap.sklearn.preprocessing.data import ImputerSerializer
 import pandas as pd
-
-class OneHotEncoder(OneHotEncoder, MLeapSerializer):
-    def __init__(self, input_features, output_features, drop_last=False, n_values="auto", categorical_features="all",
-                 dtype=np.float, sparse=True, handle_unknown='error'):
-        self.op = 'one_hot_encoder'
-        self.name = "{}_{}".format(self.op, uuid.uuid4())
-        self.serializable = True
-        self.drop_last = drop_last
-        self.n_values = n_values
-        self.categorical_features = categorical_features
-        self.dtype = dtype
-        self.sparse = sparse
-        self.handle_unknown = handle_unknown
-        self.input_features = input_features
-        self.output_features = output_features
-
-    def fit_transform(self, X, y=None):
-        res = _transform_selected(X, self._fit_transform, self.categorical_features, copy=True)
-        if self.drop_last:
-            res = res[:,:-1]
-
-        if self.sparse:
-            return res.todense()
-        return res
-
-    def serialize_to_bundle(self, path, model_name):
-
-        # compile tuples of mode attributes to serialize
-        attributes = list()
-        attributes.append(['size', self.n_values_.tolist()[0]])
-        attributes.append(['drop_last', self.drop_last])
-
-        # define node inputs and outputs
-        inputs = [{
-            "name": self.input_features,
-            "port": "input"
-        }]
-
-        outputs = [{
-            "name": self.output_features,
-            "port": "output"
-        }]
-
-        self.serialize(self, path, model_name, attributes, inputs, outputs)
-
 
 class DefineEstimator(BaseEstimator, TransformerMixin):
     def __init__(self, transformer):

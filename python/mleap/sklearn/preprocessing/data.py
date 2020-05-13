@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import os
 import json
+import os
 import shutil
 import uuid
 import warnings
@@ -23,15 +23,15 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
+from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer, Vector
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, Binarizer, PolynomialFeatures
+from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 from sklearn.preprocessing.data import OneHotEncoder
 from sklearn.preprocessing.label import LabelEncoder
-from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer, Vector
 from sklearn.utils import column_or_1d
-from sklearn.utils.validation import check_is_fitted
 from sklearn.utils.fixes import np_version
+from sklearn.utils.validation import check_is_fitted
 
 
 class ops(object):
@@ -625,24 +625,23 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
     A one-hot encoder maps a single column of categorical indices to a
     column of binary vectors, which can be re-assamble back to a DataFrame using a ToDense transformer.
     """
+
     def __init__(self):
         super(OneHotEncoderSerializer, self).__init__()
 
     def serialize_to_bundle(self, transformer, path, model_name):
-        if transformer.drop_last and transformer.handle_unknown == 'ignore':
-            raise NotImplementedError("MLeap's OneHotEncoder cannot drop the last feature column while also ignoring unknown features")
         if len(transformer.categories_) != 1:
-            raise NotImplementedError("MLeap can only one-hot encode a single column at a time")
-        singular_categories = transformer.categories_[0]
-        if not np.array_equal(singular_categories, np.arange(singular_categories.size)):
-            raise ValueError(f"Categories {singular_categories} do not form a valid index range")
+            raise NotImplementedError("MLeap can only one-hot encode a single feature at a time")
+        single_feature_categories = transformer.categories_[0]
+        if not np.array_equal(single_feature_categories, np.arange(single_feature_categories.size)):
+            raise ValueError(f"Categories {single_feature_categories} do not form a valid index range")
         if transformer.drop is not None:
             raise NotImplementedError("Scikit-learn's OneHotEncoder `drop` parameter is not supported by MLeap")
         if transformer.dtype != np.float64:
             raise NotImplementedError("Scikit-learn's OneHotEncoder `dtype` parameter is not supported by MLeap")
 
         attributes = list()
-        attributes.append(('size', singular_categories.size))
+        attributes.append(('size', single_feature_categories.size))
         if transformer.handle_unknown == 'ignore':
             # MLeap's OneHotEncoderModel adds an extra column when keeping invalid data
             # so we drop that extra column to match sklearn's ignore behavior

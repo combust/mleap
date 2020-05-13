@@ -15,21 +15,14 @@
 # limitations under the License.
 #
 
-from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing.data import _transform_selected
-from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
-import numpy as np
 import uuid
 
 import numpy as np
 import pandas as pd
+from mleap.sklearn.preprocessing.data import ImputerSerializer, FeatureExtractor
 from sklearn.impute import SimpleImputer as SKLearnImputer
-from sklearn.preprocessing import OneHotEncoder as SKLearnOneHotEncoder
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 
-from mleap.sklearn.preprocessing.data import ImputerSerializer, OneHotEncoderSerializer
-from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
 
 class DefineEstimator(BaseEstimator, TransformerMixin):
     def __init__(self, transformer):

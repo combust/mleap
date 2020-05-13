@@ -629,9 +629,6 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
         super(OneHotEncoderSerializer, self).__init__()
 
     def serialize_to_bundle(self, transformer, path, model_name):
-        if not hasattr(transformer, 'drop_last'):
-            transformer.drop_last = False  # This allows us to use the same serializer in extensions/data.py
-
         if transformer.drop_last and transformer.handle_unknown == 'ignore':
             raise NotImplementedError("MLeap's OneHotEncoder cannot drop the last feature column while also ignoring unknown features")
         if len(transformer.categories_) != 1:
@@ -646,17 +643,14 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
 
         attributes = list()
         attributes.append(('size', singular_categories.size))
-        if transformer.handle_unknown == 'error':
-            # TODO: Switch to the "new" OneHotEncoder which supports the 'error' strategy
-            # https://github.com/combust/mleap/blob/c2d568ff11856b6245e660a8edb4f453d9eeb24d/mleap-runtime/src/main/scala/ml/combust/mleap/bundle/ops/feature/OneHotEncoderOp.scala#L40
-            raise NotImplementedError("MLeap's OneHotEncoder does not support the `error` strategy for the `handle_unknown` parameter")
-            # attributes.append(('handle_invalid', 'error'))
-            # attributes.append(('drop_last', transformer.drop_last))
-        elif transformer.handle_unknown == 'ignore':
-            attributes.append(('handle_invalid', 'keep'))  # OneHotEncoderModel.scala adds an extra column when keeping invalid data
-            attributes.append(('drop_last', True))         # drop that extra column to match sklearn's ignore behavior
+        if transformer.handle_unknown == 'ignore':
+            # MLeap's OneHotEncoderModel adds an extra column when keeping invalid data
+            # so we drop that extra column to match sklearn's ignore behavior
+            attributes.append(('handle_invalid', 'keep'))
+            attributes.append(('drop_last', True))
         else:
-            raise ValueError(f"Unrecognized `handle_unknown` value {self.handle_unknown}")
+            attributes.append(('handle_invalid', 'error'))
+            attributes.append(('drop_last', False))
 
         inputs = [{
                   "name": transformer.input_features,

@@ -15,6 +15,11 @@
 # limitations under the License.
 #
 
+from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing.data import _transform_selected
+from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
+import numpy as np
 import uuid
 
 import numpy as np
@@ -25,32 +30,6 @@ from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
 
 from mleap.sklearn.preprocessing.data import ImputerSerializer, OneHotEncoderSerializer
 from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
-
-
-class OneHotEncoder(SKLearnOneHotEncoder, MLeapSerializer):
-    def __init__(self, input_features, output_features, drop_last=False,
-                 categories='auto', drop=None, sparse=True,
-                 dtype=np.float64, handle_unknown='error'):
-        self.op = 'one_hot_encoder'
-        self.name = "{}_{}".format(self.op, uuid.uuid4())
-        self.input_features = input_features
-        self.output_features = output_features
-        self.drop_last = drop_last
-        SKLearnOneHotEncoder.__init__(self, categories, drop, sparse, dtype, handle_unknown)
-
-    def fit_transform(self, X, y=None):
-        res = super().fit_transform(X, y)
-        if self.drop_last:
-            res = res[:, :-1]
-
-        if self.sparse:
-            return res.todense()
-        return res
-
-    def serialize_to_bundle(self, path, model_name):
-        raise NotImplementedError("The OneHotEncoder extension is currently broken. See Issue 667: https://github.com/combust/mleap/issues/667")
-        OneHotEncoderSerializer().serialize_to_bundle(self, path, model_name)
-
 
 class DefineEstimator(BaseEstimator, TransformerMixin):
     def __init__(self, transformer):

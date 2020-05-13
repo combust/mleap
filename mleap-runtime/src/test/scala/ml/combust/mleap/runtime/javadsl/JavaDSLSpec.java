@@ -43,7 +43,7 @@ public class JavaDSLSpec {
                     withStandardInput("string").
                     withStandardOutput("string_index"),
             new StringIndexerModel(JavaConversions.asScalaBuffer(Collections.singletonList("hello")).toSeq(),
-                    HandleInvalid$.MODULE$.fromString("error")));
+                    HandleInvalid$.MODULE$.fromString("error", true)));
 
     DefaultLeapFrame buildFrame() {
         List<StructField> fields = Arrays.asList(frameBuilder.createField("bool", frameBuilder.createBoolean()),

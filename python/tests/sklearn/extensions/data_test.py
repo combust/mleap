@@ -1,11 +1,9 @@
 import json
 import numpy as np
-import os
 import pandas as pd
 import shutil
 import tempfile
 import unittest
-import uuid
 
 from mleap.sklearn.extensions.data import Imputer
 

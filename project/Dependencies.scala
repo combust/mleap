@@ -82,7 +82,8 @@ object Dependencies {
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
     val junit = "junit" % "junit" % "4.12" % "test"
     val junitInterface = "com.novocode" % "junit-interface" % "0.10" % "test"
-    val spark = Compile.spark.map(_ % "test") ++ Compile.spark.map(_ % "test" classifier "tests")
+    val spark = Compile.spark.map(_ % "test")
+    val sparkTest = Compile.spark.map(_ % "test" classifier "tests")
   }
 
   object Provided {
@@ -102,7 +103,7 @@ object Dependencies {
 
   val base = l ++= Seq()
 
-  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest) ++ Test.spark
+  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest) ++ Test.sparkTest
 
   def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface, commonsIo) ++ scalaReflect.modules(scalaVersion.value))
 
@@ -110,17 +111,17 @@ object Dependencies {
 
   val sparkTestkit = l ++= Provided.spark ++ Provided.sparkTestLib ++ Seq(scalaTest)
 
-  val spark = l ++= Provided.spark ++ Test.spark
+  val spark = l ++= Provided.spark ++ Test.sparkTest
 
-  val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest) ++ Test.spark
+  val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest) ++ Test.sparkTest
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 
   val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
-  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Test.spark ++ Seq(Test.scalaTest)
+  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Test.spark ++ Test.sparkTest ++ Seq(Test.scalaTest)
 
-  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark ++ Test.spark
+  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark ++ Test.spark ++ Test.sparkTest
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

@@ -16,7 +16,7 @@ class MinMaxScalerModelSpec extends FunSpec{
     it("scales vector based on min/max range"){
       val inputVector = Vectors.dense(15.0, 5.0, 5.0, 19.0)
       val expectedVector = Vectors.dense(1.0, 0.5, 0.0, 0.9)
-      assert(scaler(inputVector) ~= expectedVector relTol 1E-3)
+      assert(scaler(inputVector) ~= expectedVector relTol 1E-9)
     }
 
     it("has the right input schema") {

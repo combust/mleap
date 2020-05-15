@@ -16,7 +16,7 @@ class MaxAbsScalerModelSpec extends FunSpec {
     it("Scales the vector based on absolute max value"){
       val inputVector = Vectors.dense(15.0, -5.0, 5.0, 19.0)
       val expectedVector = Vectors.dense(0.75, -0.5, 0.5, 0.95)
-      assert(scaler(inputVector) ~= expectedVector relTol 1E-3)
+      assert(scaler(inputVector) ~= expectedVector relTol 1E-9)
     }
 
     it("Has the right input schema") {

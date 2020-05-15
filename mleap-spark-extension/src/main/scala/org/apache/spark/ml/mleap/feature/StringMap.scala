@@ -1,6 +1,6 @@
 package org.apache.spark.ml.mleap.feature
 
-import ml.combust.mleap.core.feature.{StringMapHandleInvalid, StringMapModel}
+import ml.combust.mleap.core.feature.{HandleInvalid, StringMapModel}
 import org.apache.hadoop.fs.Path
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.ml.Transformer
@@ -97,7 +97,7 @@ object StringMap extends MLReadable[StringMap] {
 
       val data = sparkSession.read.parquet(dataPath).select("labels", "handleInvalid", "defaultValue").head()
       val labels = data.getAs[Map[String, Double]](0)
-      val handleInvalid = data.getAs[StringMapHandleInvalid](1)
+      val handleInvalid = data.getAs[HandleInvalid](1)
       val defaultValue = data.getAs[Double](2)
 
       val model = new StringMapModel(labels, handleInvalid = handleInvalid, defaultValue = defaultValue)

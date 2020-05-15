@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
-import ml.combust.mleap.core.feature.{StringMapHandleInvalid, StringMapModel}
+import ml.combust.mleap.core.feature.{HandleInvalid, StringMapModel}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.StringMap
 
@@ -42,8 +42,8 @@ class StringMapOp extends MleapOp[StringMap, StringMapModel] {
       // retrieve our list of values
       val values = model.value("values").getDoubleList
 
-      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(StringMapHandleInvalid.fromString).getOrElse(StringMapHandleInvalid.default)
-      val defaultValue = model.getValue("default_value").map(_.getDouble).getOrElse(StringMapHandleInvalid.defaultValue)
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString(_, false)).getOrElse(HandleInvalid.default)
+      val defaultValue = model.getValue("default_value").map(_.getDouble).getOrElse(StringMapModel.defaultValue)
 
       // reconstruct the model using the parallel labels and values
       StringMapModel(labels.zip(values).toMap, handleInvalid = handleInvalid, defaultValue = defaultValue)

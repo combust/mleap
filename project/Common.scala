@@ -16,12 +16,13 @@ object Common {
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.11.8",
-    crossScalaVersions := Seq("2.11.8", "2.12.8"),
+    scalaVersion := "2.11.12",
+    crossScalaVersions := Seq("2.11.12", "2.12.10"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
     resolvers += Resolver.mavenLocal,
+    resolvers += Resolver.jcenterRepo,
     resolvers ++= {
       // Only add Sonatype Snapshots if this version itself is a snapshot version
       if(isSnapshot.value) {

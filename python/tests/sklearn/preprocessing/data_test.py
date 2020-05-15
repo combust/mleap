@@ -23,6 +23,7 @@ import os
 import shutil
 import json
 import uuid
+import tempfile
 
 from mleap.sklearn.preprocessing.data import FeatureExtractor, MathUnary, MathBinary, StringMap
 from mleap.sklearn.preprocessing.data import StandardScaler, MinMaxScaler, LabelEncoder, Imputer, Binarizer, PolynomialFeatures
@@ -33,12 +34,7 @@ from pandas.util.testing import assert_frame_equal
 class TransformerTests(unittest.TestCase):
     def setUp(self):
         self.df = pd.DataFrame(np.random.randn(10, 5), columns=['a', 'b', 'c', 'd', 'e'])
-        self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
-
-        if os.path.exists(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-
-        os.makedirs(self.tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)
@@ -395,7 +391,8 @@ class TransformerTests(unittest.TestCase):
 
         self.assertEqual(one_hot_encoder_tf.op, model['op'])
         self.assertEqual(3, model['attributes']['size']['long'])
-        self.assertEqual(False, model['attributes']['drop_last']['boolean'])
+        self.assertEqual(True, model['attributes']['drop_last']['boolean'])
+        self.assertEqual('error', model['attributes']['handle_invalid']['string'])
 
     def one_hot_encoder_deserializer_test(self):
 

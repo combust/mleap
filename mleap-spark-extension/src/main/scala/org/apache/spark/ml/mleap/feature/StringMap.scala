@@ -100,7 +100,7 @@ object StringMap extends MLReadable[StringMap] {
       val handleInvalid = data.getAs[StringMapHandleInvalid](1)
       val defaultValue = data.getAs[Double](2)
 
-      val model = new StringMapModel(labels, handleInvalid = handleInvalid., defaultValue = defaultValue)
+      val model = new StringMapModel(labels, handleInvalid = handleInvalid, defaultValue = defaultValue)
       val StringMap = new StringMap(metadata.uid, model)
 
       metadata.getAndSetParams(StringMap)

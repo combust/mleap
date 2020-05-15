@@ -18,23 +18,13 @@ jobs:
       script:
         - travis/travis.sh
 
-    - name: "Python 2.7 tests"
-      language: python
-      python: 2.7
-      install:
-        - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
-      script:
-        - sbt +compile
-        - tox -c python/tox.ini -e py27 -v
-
     - name: "Python 3.6 tests"
       language: python
       python: 3.6
       install:
         - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
       script:
-        - sbt +compile
-        - tox -c python/tox.ini -e py36 -v
+        - make py36_test
 
     - name: "Python 3.7 tests"
       language: python  # This can't be java and python at the same time
@@ -47,8 +37,7 @@ jobs:
       install:
         - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
       script:
-        - sbt +compile
-        - tox -c python/tox.ini -e py37 -v
+        - make py37_test
 
 notifications:
   on_success: change

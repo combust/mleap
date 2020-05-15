@@ -3,29 +3,6 @@ package ml.combust.mleap.core.feature
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{ScalarType, StructType}
 
-sealed trait StringMapHandleInvalid {
-  def asParamString: String
-}
-
-object StringMapHandleInvalid {
-  val default = Error
-  val defaultValue = 0.0
-
-  case object Error extends StringMapHandleInvalid {
-    override def asParamString: String = "error"
-  }
-
-  case object Keep extends StringMapHandleInvalid {
-    override def asParamString: String = "keep"
-  }
-
-  def fromString(value: String): StringMapHandleInvalid = value match {
-    case "error" => StringMapHandleInvalid.Error
-    case "keep" => StringMapHandleInvalid.Keep
-    case _ => throw new IllegalArgumentException(s"Invalid handler: $value")
-  }
-}
-
 /** Class for string map model.
  *
  * Maps a string into a double.
@@ -36,10 +13,10 @@ object StringMapHandleInvalid {
  * @param defaultValue value to use if label is not found in the map
  */
 case class StringMapModel(labels: Map[String, Double],
-                          handleInvalid: StringMapHandleInvalid = StringMapHandleInvalid.default,
-                          defaultValue: Double = StringMapHandleInvalid.defaultValue) extends Model {
+                          handleInvalid: HandleInvalid = HandleInvalid.default,
+                          defaultValue: Double = StringMapModel.defaultValue) extends Model {
 
-  private val keepInvalid = handleInvalid == StringMapHandleInvalid.Keep
+  private val keepInvalid = handleInvalid == HandleInvalid.Keep
 
   def apply(label: String): Double = {
     if (keepInvalid) {
@@ -49,7 +26,7 @@ case class StringMapModel(labels: Map[String, Double],
         labels(label)
       } else {
         throw new NoSuchElementException(s"Missing label: $label. To handle unseen labels, " +
-          s"set handleInvalid to ${StringMapHandleInvalid.Keep.asParamString} and optionally set a custom defaultValue")
+          s"set handleInvalid to ${HandleInvalid.Keep.asParamString} and optionally set a custom defaultValue")
       }
     }
   }
@@ -57,4 +34,8 @@ case class StringMapModel(labels: Map[String, Double],
   override def inputSchema: StructType = StructType("input" -> ScalarType.String).get
 
   override def outputSchema: StructType = StructType("output" -> ScalarType.Double.nonNullable).get
+}
+
+object StringMapModel {
+  val defaultValue = 0.0
 }

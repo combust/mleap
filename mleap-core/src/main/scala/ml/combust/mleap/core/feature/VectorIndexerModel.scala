@@ -10,10 +10,10 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 /**
   * Created by hollinwilkins on 12/28/16.
   */
-@SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/VectorIndexer.scala")
+@SparkCode(uri = "https://github.com/apache/spark/blob/v2.4.5/mllib/src/main/scala/org/apache/spark/ml/feature/VectorIndexer.scala")
 case class VectorIndexerModel(numFeatures: Int,
                               categoryMaps: Map[Int, Map[Double, Int]],
-                              handleInvalid: String = "error") extends Model {
+                              handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
   val sortedCatFeatureIndices = categoryMaps.keys.toArray.sorted
   val localVectorMap = categoryMaps
   val localNumFeatures = numFeatures
@@ -33,13 +33,13 @@ case class VectorIndexerModel(numFeatures: Int,
           } catch {
             case _: NoSuchElementException =>
               localHandleInvalid match {
-                case "error" =>
+                case HandleInvalid.Error =>
                   throw new IllegalArgumentException(s"VectorIndexer encountered invalid value " +
-                    s"${tmpv(featureIndex)} on feature index ${featureIndex}. To handle " +
+                    s"${tmpv(featureIndex)} on feature index $featureIndex. To handle " +
                     s"or skip invalid value, try setting VectorIndexer.handleInvalid.")
-                case "keep" =>
+                case HandleInvalid.Keep =>
                   tmpv.values(featureIndex) = categoryMap.size
-                case "skip" =>
+                case HandleInvalid.Skip =>
                   hasInvalid = true
               }
           }
@@ -63,13 +63,13 @@ case class VectorIndexerModel(numFeatures: Int,
             } catch {
               case _: NoSuchElementException =>
                 localHandleInvalid match {
-                  case "error" =>
+                  case HandleInvalid.Error =>
                     throw new IllegalArgumentException(s"VectorIndexer encountered invalid value " +
-                      s"${tmpv.values(k)} on feature index ${featureIndex}. To handle " +
+                      s"${tmpv.values(k)} on feature index $featureIndex. To handle " +
                       s"or skip invalid value, try setting VectorIndexer.handleInvalid.")
-                  case "keep" =>
+                  case HandleInvalid.Keep =>
                     tmpv.values(k) = localVectorMap(featureIndex).size
-                  case "skip" =>
+                  case HandleInvalid.Skip =>
                     hasInvalid = true
                 }
             }

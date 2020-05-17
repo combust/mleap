@@ -7,6 +7,7 @@
 - Scikit-learn support for MultinomialLogisticRegression
 - Support for min/max values other than defaults (i.e. 0.0 and 1.0) in MinMaxScalerModel
 - Support for custom transformers (StringMap, MathUnary, MathBinary) in Pyspark
+- Support MLWritable/ML
 - Support for a performant implementation of the XGboost runtime (XGboost Predictor)
 - Upgrade to Spark version 2.4.5
 

@@ -97,14 +97,14 @@ object StringMap extends MLReadable[StringMap] {
 
       val data = sparkSession.read.parquet(dataPath).select("labels", "handleInvalid", "defaultValue").head()
       val labels = data.getAs[Map[String, Double]](0)
-      val handleInvalid = data.getAs[HandleInvalid](1)
+      val handleInvalid = HandleInvalid.fromString(data.getAs[String](1))
       val defaultValue = data.getAs[Double](2)
 
       val model = new StringMapModel(labels, handleInvalid = handleInvalid, defaultValue = defaultValue)
-      val StringMap = new StringMap(metadata.uid, model)
+      val transformer = new StringMap(metadata.uid, model)
 
-      metadata.getAndSetParams(StringMap)
-      StringMap
+      metadata.getAndSetParams(transformer)
+      transformer
     }
   }
 

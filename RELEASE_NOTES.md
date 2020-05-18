@@ -4,12 +4,13 @@
 - Fix default ports when running grpc/http requests; default grpc port is 65328 and can be overridden via MLEAP_GRPC_PORT; default http port should be: 65327 and can be overridden via MLEAP_HTTP_PORT
 
 ### New Features
+- Upgrade to Spark version 2.4.5
+- Support for a performant implementation of the XGboost runtime (XGboost Predictor)
 - Scikit-learn support for MultinomialLogisticRegression
 - Support for min/max values other than defaults (i.e. 0.0 and 1.0) in MinMaxScalerModel
 - Support for custom transformers (StringMap, MathUnary, MathBinary) in Pyspark
 - Support MLWritable/MLReadable for custom transformers (StringMap, MathUnary, MathBinary)
-- Support for a performant implementation of the XGboost runtime (XGboost Predictor)
-- Upgrade to Spark version 2.4.5
+- Fixes support for loading/storing bundles from/to hdfs in Pyspark
 
 ### Bug Fixes
 - Fix XGBoost sparse vector support
@@ -17,6 +18,7 @@
 - Fix Spark deserialization for CountVectorizer transformer
 - Added support for HandleInvalid in Bucketizer, VectorIndexer
 - Fix setting HandleInvalid by default to OneHotEncoder for backwards compatibility
+- Fixes MLReader for Imputer mleap implementation of Spark transformer
 
 ### Improvements
 - Minor documentation updates

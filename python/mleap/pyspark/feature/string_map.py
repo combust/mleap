@@ -45,7 +45,7 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
             .toMap(_jvm().scala.Predef.conforms())
 
         handle_invalid_jvm = jvm_scala_object(
-            _jvm().ml.combust.mleap.core.feature.StringMapHandleInvalid,
+            _jvm().ml.combust.mleap.core.feature.HandleInvalid,
             handleInvalid.capitalize(),
         )
 

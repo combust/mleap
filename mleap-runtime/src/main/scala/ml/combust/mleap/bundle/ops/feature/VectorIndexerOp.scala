@@ -31,7 +31,8 @@ class VectorIndexerOp extends MleapOp[VectorIndexer, VectorIndexerModel] {
           m.withValue(s"${key}_keys", Value.doubleList(vKeys)).
             withValue(s"${key}_values", Value.longList(vValues.map(_.toLong)))
       }.withValue("keys", Value.longList(keys.map(_.toLong).toSeq)).
-        withValue("num_features", Value.long(obj.numFeatures))
+        withValue("num_features", Value.long(obj.numFeatures)).
+        withValue("handle_invalid", Value.string(obj.handleInvalid))
     }
 
     override def load(model: Model)
@@ -43,9 +44,10 @@ class VectorIndexerOp extends MleapOp[VectorIndexer, VectorIndexerModel] {
           val kValues = model.value(s"key_${key}_values").getLongList.map(_.toInt)
           (key, kKeys.zip(kValues).toMap)
       }.toMap
-
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).getOrElse("error")
       VectorIndexerModel(numFeatures = model.value("num_features").getLong.toInt,
-        categoryMaps = categoryMaps)
+        categoryMaps = categoryMaps,
+        handleInvalid = handleInvalid)
     }
   }
 

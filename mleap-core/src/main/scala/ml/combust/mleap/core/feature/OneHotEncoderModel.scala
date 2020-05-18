@@ -11,7 +11,6 @@ import org.apache.spark.ml.linalg.{Vector, Vectors}
   * logistic regression where binary and not multinomial features
   * are supported in the feature vector.
   *
-  * @param size size of the output one hot vectors
   */
 case class OneHotEncoderModel(categorySizes: Array[Int],
                               handleInvalid: HandleInvalid = HandleInvalid.Error,

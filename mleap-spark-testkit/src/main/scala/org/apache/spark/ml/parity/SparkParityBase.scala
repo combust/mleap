@@ -4,7 +4,6 @@ import java.io.File
 
 import org.apache.spark.ml.{PipelineModel, Transformer}
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.col
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.bundle.BundleFile
@@ -19,6 +18,7 @@ import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
 import resource._
 
+import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.Row
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import org.apache.spark.ml.util.TestingUtils._
@@ -166,7 +166,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  var relTolEps: Double = 1E-3
+  var relTolEps: Double = 1E-9
   def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit = {
     val sparkCols = sparkDataset.columns.toSeq
     assert(mleapDataset.columns.toSet === sparkCols.toSet)

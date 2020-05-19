@@ -11,14 +11,6 @@ scala:
 jdk:
   - oraclejdk8  # sbt +compile fails on jdk11 (xenial's default)
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - gcc-4.8
-      - g++-4.8
-
 jobs:
   include:
     - stage: "Mleap tests"

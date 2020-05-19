@@ -70,6 +70,7 @@ object Dependencies {
     )
 
     val kryo = "com.esotericsoftware" % "kryo" % kryoVersion
+    // exclude jar "com.esotericsoftware.kryo % kryo" which conflicts with spark 3.0
     val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo")
     val xgboostPredictorDep = "biz.k11i" % "xgboost-predictor" % "0.3.1" exclude("com.esotericsoftware.kryo", "kryo")
     val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo")

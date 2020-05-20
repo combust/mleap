@@ -6,8 +6,8 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "2.4.5"
-  val scalaTestVersion = "3.0.3"
+  val sparkVersion = "3.0.0"
+  val scalaTestVersion = "3.0.8"
   val akkaVersion = "2.5.12"
   val akkaHttpVersion = "10.0.3"
   val springBootVersion = "2.0.4.RELEASE"
@@ -16,8 +16,9 @@ object Dependencies {
   lazy val slf4jVersion = "1.7.25"
   lazy val awsSdkVersion = "1.11.349"
   val tensorflowVersion = "1.11.0"
-  val xgboostVersion = "0.90"
-  val hadoopVersion = "2.6.5" // matches spark version
+  val xgboostVersion = "1.0.0"
+  val hadoopVersion = "2.7.4" // matches spark version
+  val kryoVersion = "4.0.2"
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
@@ -67,10 +68,13 @@ object Dependencies {
       "ch.qos.logback" % "logback-classic" % logbackVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
-    val xgboostDep = "ml.dmlc" % "xgboost4j" % xgboostVersion // scala 2.11 only
-    val xgboostPredictorDep = "biz.k11i" % "xgboost-predictor" % "0.3.1"
 
-    val xgboostSparkDep = "ml.dmlc" % "xgboost4j-spark" % xgboostVersion // scala 2.11 only
+    val kryo = "com.esotericsoftware" % "kryo" % kryoVersion
+    // exclude jar "com.esotericsoftware.kryo % kryo" which conflicts with spark 3.0
+    val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo")
+    val xgboostPredictorDep = "biz.k11i" % "xgboost-predictor" % "0.3.1" exclude("com.esotericsoftware.kryo", "kryo")
+    val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo")
+
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
 
@@ -119,9 +123,9 @@ object Dependencies {
 
   val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
-  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Test.spark ++ Test.sparkTest ++ Seq(Test.scalaTest)
+  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Seq(kryo) ++ Test.spark ++ Test.sparkTest ++ Seq(Test.scalaTest)
 
-  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark ++ Test.spark ++ Test.sparkTest
+  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Seq(kryo) ++ Provided.spark ++ Test.spark ++ Test.sparkTest
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

@@ -1,7 +1,7 @@
 package org.apache.spark.ml.parity.feature
 
 import org.apache.spark.ml.parity.SparkParityBase
-import org.apache.spark.ml.feature.{OneHotEncoderEstimator, StringIndexer}
+import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer}
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.sql.DataFrame
 
@@ -15,7 +15,7 @@ class OneHotEncoderParitySpec extends SparkParityBase {
         .setStages(Array(
           new StringIndexer().setInputCol("state").setOutputCol("state_index"),
           new StringIndexer().setInputCol("state").setOutputCol("state_index2"),
-          new OneHotEncoderEstimator()
+          new OneHotEncoder()
             .setInputCols(Array("state_index", "state_index2"))
             .setOutputCols(Array("state_oh", "state_oh2"))
         ))

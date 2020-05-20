@@ -16,7 +16,7 @@ object Common {
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.11.12",
+    scalaVersion := "2.12.10",
     crossScalaVersions := Seq("2.11.12", "2.12.10"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork in Test := true,
@@ -28,7 +28,7 @@ object Common {
       if(isSnapshot.value) {
         Seq(
           "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-          "ASF Snapshots" at "https://repository.apache.org/content/groups/snapshots"
+          "ASF spark" at "https://repository.apache.org/content/repositories/orgapachespark-1341" // Apache spark repo
         )
       } else {
         Seq()

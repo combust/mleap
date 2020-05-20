@@ -1,6 +1,7 @@
+-f https://dist.apache.org/repos/dist/dev/spark/v3.0.0-rc1-bin/
 -r requirements.txt
 coverage<5.0.0
 ipdb
 nose
 nose-exclude>=0.5.0
-pyspark
+pyspark==3.0.0

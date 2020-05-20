@@ -10,12 +10,14 @@ import org.apache.spark.sql.DataFrame
   */
 class MinMaxScalerWithNonDefaultsParitySpec extends SparkParityBase {
   override val dataset: DataFrame = baseDataset.select("dti", "loan_amount")
-  override val sparkTransformer: Transformer = new Pipeline().setStages(Array(new VectorAssembler().
-    setInputCols(Array("dti", "loan_amount")).
-    setOutputCol("features"),
+  override val sparkTransformer: Transformer = new Pipeline().setStages(Array(
+    new VectorAssembler().
+      setInputCols(Array("dti", "loan_amount")).
+      setOutputCol("features"),
     new MinMaxScaler().
       setInputCol("features").
       setOutputCol("scaled_features").
       setMin(2.0).
-      setMax(4.0))).fit(dataset)
+      setMax(4.0)
+  )).fit(dataset)
 }

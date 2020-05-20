@@ -186,7 +186,7 @@ case class LocalLDAModel (topics: Matrix[Double],
         docBound += count * LDAUtils.logSumExp(Elogthetad + localElogbeta(idx, ::).t)
       }
       // E[log p(theta | alpha) - log q(theta | gamma)]
-      docBound += sum((brzAlpha - gammad) :* Elogthetad)
+      docBound += sum((brzAlpha - gammad) *:* Elogthetad)
       docBound += sum(lgamma(gammad) - lgamma(brzAlpha))
       docBound += lgamma(sum(brzAlpha)) - lgamma(sum(gammad))
 
@@ -196,7 +196,7 @@ case class LocalLDAModel (topics: Matrix[Double],
     // Bound component for prob(topic-term distributions):
     //   E[log p(beta | eta) - log q(beta | lambda)]
     val sumEta = eta * vocabSize
-    val topicsPart = sum((eta - lambda) :* Elogbeta) +
+    val topicsPart = sum((eta - lambda) *:* Elogbeta) +
       sum(lgamma(lambda) - lgamma(eta)) +
       sum(lgamma(sumEta) - lgamma(sum(lambda(::, breeze.linalg.*))))
 

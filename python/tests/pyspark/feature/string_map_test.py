@@ -1,7 +1,6 @@
 import os
 import tempfile
 import unittest
-import mleap
 
 from py4j.protocol import Py4JJavaError
 from pyspark.ml import Pipeline
@@ -84,8 +83,6 @@ class StringMapTest(unittest.TestCase):
         assert_df(expected, result)
 
     def test_serialize_to_bundle(self):
-        print('anca')
-        print(mleap.__version__)
         string_map = StringMap(
             labels={'a': 1.0},
             inputCol='key_col',

@@ -54,7 +54,7 @@ case class NaiveBayesModel(numFeatures: Int,
     val ones = new DenseVector(Array.fill(theta.numCols) {1.0})
     val thetaMinusNegTheta = Matrices.map(theta, value =>
       value - math.log(1.0 - math.exp(value)))
-    val negThetaSum = negTheta.multiply(ones);
+    val negThetaSum = negTheta.multiply(ones)
 
     raw.foreachActive((_, value) =>
       require(value == 0.0 || value == 1.0,

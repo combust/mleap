@@ -16,7 +16,7 @@
 #
 
 from sklearn.pipeline import Pipeline
-from mleap.version import __version__
+from mleap import __version__
 import os
 import json
 import shutil

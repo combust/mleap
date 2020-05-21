@@ -2,7 +2,8 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.core.feature.HandleInvalid
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.VectorIndexerModel
 
@@ -42,7 +43,7 @@ class VectorIndexerOp extends SimpleSparkOp[VectorIndexerModel] {
           val kValues = model.value(s"key_${key}_values").getLongList.map(_.toInt)
           (key, kKeys.zip(kValues).toMap)
       }.toMap
-      val handleInvalid = model.getValue("handle_invalid").map(_.getString).getOrElse("error")
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).getOrElse(HandleInvalid.default.asParamString)
 
       val m = new VectorIndexerModel(uid = "",
         numFeatures = model.value("num_features").getLong.toInt,

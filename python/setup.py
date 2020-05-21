@@ -17,7 +17,7 @@
 # limitations under the License.
 
 from __future__ import print_function
-from mleap.version import __version__
+from mleap.version import version
 import sys
 from setuptools import setup, find_packages
 
@@ -33,7 +33,7 @@ except IOError:
           file=sys.stderr)
     sys.exit(-1)
 
-VERSION = __version__
+VERSION = version
 
 numpy_version = "1.8.2"
 

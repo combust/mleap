@@ -17,7 +17,7 @@
 # limitations under the License.
 
 from __future__ import print_function
-from mleap.version import __version__
+from mleap import __version__
 import sys
 from setuptools import setup, find_packages
 

@@ -1,6 +1,7 @@
 import os
 import tempfile
 import unittest
+import mleap
 
 from py4j.protocol import Py4JJavaError
 from pyspark.ml import Pipeline

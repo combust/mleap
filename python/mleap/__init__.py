@@ -1,1 +1,3 @@
-__version__ = "0.16.0-SNAPSHOT"
+from mleap.version import version
+
+__version__ = version

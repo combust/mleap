@@ -4,7 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
-import ml.combust.mleap.core.feature.VectorIndexerModel
+import ml.combust.mleap.core.feature.{HandleInvalid, VectorIndexerModel}
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.transformer.feature.VectorIndexer
 
@@ -32,7 +32,7 @@ class VectorIndexerOp extends MleapOp[VectorIndexer, VectorIndexerModel] {
             withValue(s"${key}_values", Value.longList(vValues.map(_.toLong)))
       }.withValue("keys", Value.longList(keys.map(_.toLong).toSeq)).
         withValue("num_features", Value.long(obj.numFeatures)).
-        withValue("handle_invalid", Value.string(obj.handleInvalid))
+        withValue("handle_invalid", Value.string(obj.handleInvalid.asParamString))
     }
 
     override def load(model: Model)
@@ -44,7 +44,7 @@ class VectorIndexerOp extends MleapOp[VectorIndexer, VectorIndexerModel] {
           val kValues = model.value(s"key_${key}_values").getLongList.map(_.toInt)
           (key, kKeys.zip(kValues).toMap)
       }.toMap
-      val handleInvalid = model.getValue("handle_invalid").map(_.getString).getOrElse("error")
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString(_)).getOrElse(HandleInvalid.default)
       VectorIndexerModel(numFeatures = model.value("num_features").getLong.toInt,
         categoryMaps = categoryMaps,
         handleInvalid = handleInvalid)

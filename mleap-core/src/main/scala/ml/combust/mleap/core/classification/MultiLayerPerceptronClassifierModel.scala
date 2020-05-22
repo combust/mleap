@@ -1,11 +1,8 @@
 package ml.combust.mleap.core.classification
 
-import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.ann.FeedForwardTopology
 import ml.combust.mleap.core.annotation.SparkCode
-import ml.combust.mleap.core.classification.MultiLayerPerceptronClassifierModel.LabelConverter
 import ml.combust.mleap.core.feature.LabeledPoint
-import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 /**

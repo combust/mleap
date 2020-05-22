@@ -1,4 +1,4 @@
-# Release 0.16.0 (pending, not released yet)
+# Release 0.16.0
 
 ### Breaking Changes
 - Fix default ports when running grpc/http requests; default grpc port is 65328 and can be overridden via MLEAP_GRPC_PORT; default http port should be: 65327 and can be overridden via MLEAP_HTTP_PORT
@@ -9,8 +9,9 @@
 - Scikit-learn support for MultinomialLogisticRegression
 - Support for min/max values other than defaults (i.e. 0.0 and 1.0) in MinMaxScalerModel
 - Support for custom transformers (StringMap, MathUnary, MathBinary) in Pyspark
-- Support MLWritable/MLReadable for custom transformers (StringMap, MathUnary, MathBinary)
+- Support MLWritable/MLReadable for custom transformers (StringMap, MathUnary, MathBinary) and fix this for Imputer transformer
 - Fixes support for loading/storing bundles from/to hdfs in Pyspark
+- Improve importing mleap __version__ for python modules
 
 ### Bug Fixes
 - Fix XGBoost sparse vector support

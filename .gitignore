@@ -8,3 +8,4 @@ metastore_db/
 unsafe.*
 /python/**/*.pyc
 .sbtopts
+/mleap-databricks-runtime-fat-tests/src/test/

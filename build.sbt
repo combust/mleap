@@ -27,3 +27,4 @@ lazy val springBoot = MleapProject.springBootServing
 lazy val databricksRuntimeFat = MleapProject.databricksRuntimeFat
 lazy val databricksRuntime = MleapProject.databricksRuntime
 lazy val databricksRuntimeTestkit = MleapProject.databricksRuntimeTestkit
+lazy val databricksRuntimeFatTests = MleapProject.databricksRuntimeFatTests

@@ -213,4 +213,11 @@ object MleapProject {
       xgboostSpark % "provided",
       tensorflow % "provided")
   )
+
+  lazy val databricksRuntimeFatTests = Project(
+    id = "mleap-databricks-runtime-fat-tests",
+    base = file("mleap-databricks-runtime-fat-tests"),
+    dependencies = Seq(
+      databricksRuntimeFat)
+  )
 }

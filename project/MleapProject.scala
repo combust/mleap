@@ -184,6 +184,7 @@ object MleapProject {
     id = "mleap-databricks-runtime-fat",
     base = file("mleap-databricks-runtime-fat"),
     dependencies = Seq(baseProject,
+      avro,
       tensor,
       core,
       runtime,

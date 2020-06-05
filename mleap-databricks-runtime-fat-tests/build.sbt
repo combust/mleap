@@ -14,5 +14,3 @@ genTestCodeTask := {
 }
 
 (test in Test) <<= (test in Test).dependsOn(genTestCodeTask)
-
-//compile in Compile <<= (compile in Compile).dependsOn(genTestCodeTask)

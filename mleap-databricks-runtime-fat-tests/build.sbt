@@ -37,4 +37,4 @@ unmanagedResourceDirectories in Test += baseDirectory.value / ".." / "mleap-xgbo
 unmanagedSourceDirectories in Test += baseDirectory.value / ".." / "mleap-spark-testkit" / "src" / "main"
 unmanagedResourceDirectories in Test += baseDirectory.value / ".." / "mleap-spark-testkit" / "src" / "main" / "resources"
 
-(dependencyClasspath in Test) := Seq(Attributed.blank(baseDirectory.value / ".." / "mleap-databricks-runtime-fat" / "target" / "scala-2.12" / "mleap-databricks-runtime-fat_2.12-0.17.0-SNAPSHOT.jar")) ++ (dependencyClasspath in Test).value
+(dependencyClasspath in Test) := Seq(Attributed.blank(baseDirectory.value / ".." / "mleap-databricks-runtime-fat" / "target" / "scala-2.12" / "mleap-databricks-runtime-fat-assembly-0.17.0-SNAPSHOT.jar")) ++ (dependencyClasspath in Test).value

@@ -4,6 +4,7 @@ import sbt.Keys._
 import sbt._
 
 object MleapProject {
+
   lazy val aggregatedProjects: Seq[ProjectReference] = Seq(baseProject,
     tensor,
     tensorflow,
@@ -110,7 +111,9 @@ object MleapProject {
   lazy val xgboostRuntime = Project(
     id = "mleap-xgboost-runtime",
     base = file("mleap-xgboost-runtime"),
-    dependencies = Seq(runtime)
+    dependencies = Seq(
+      runtime,
+      sparkTestkit % "test")
   )
 
   lazy val xgboostSpark = Project(
@@ -167,7 +170,7 @@ object MleapProject {
   lazy val springBootServing = Project(
     id = "mleap-spring-boot",
     base = file("mleap-spring-boot"),
-    dependencies = Seq(`executor`)
+    dependencies = Seq(executor)
   )
 
   lazy val benchmark = Project(

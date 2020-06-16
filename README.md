@@ -45,10 +45,11 @@ moment.
 
 ### MLeap/Spark Version
 
-Choose the right verison of the `mleap-spark` module to export your pipeline. The serialization format is backwards compatible between different versions of MLeap. So if you export a pipeline using MLeap 0.11.0 and Spark 2.1, you can still load that pipeline using MLeap runtime version 0.12.0.
+Choose the right version of the `mleap-spark` module to export your pipeline. The serialization format is backwards compatible between different versions of MLeap. So if you export a pipeline using MLeap 0.11.0 and Spark 2.1, you can still load that pipeline using MLeap runtime version 0.12.0.
 
 | MLeap Version | Spark Version |
 |---------------|---------------|
+| 0.16.0        | 2.4.5         |
 | 0.15.0        | 2.4           |
 | 0.14.0        | 2.4           |
 | 0.13.0        | 2.3           |
@@ -56,6 +57,11 @@ Choose the right verison of the `mleap-spark` module to export your pipeline. Th
 | 0.11.0        | 2.2           |
 | 0.11.0        | 2.1           |
 | 0.11.0        | 2.0           |
+| 0.10.3        | 2.2           |
+| 0.10.3        | 2.1           |
+| 0.10.3        | 2.0           |
+
+Please see the [release notes](RELEASE_NOTES.md) for changes (especially breaking changes) included with each release.
 
 ## Setup
 
@@ -64,7 +70,7 @@ Choose the right verison of the `mleap-spark` module to export your pipeline. Th
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.15.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.16.0"
 ```
 
 #### Maven
@@ -73,7 +79,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.15.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.11</artifactId>
-    <version>0.15.0</version>
+    <version>0.16.0</version>
 </dependency>
 ```
 
@@ -82,7 +88,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.15.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.15.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.16.0"
 ```
 
 #### Maven
@@ -91,14 +97,14 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.15.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.11</artifactId>
-    <version>0.15.0</version>
+    <version>0.16.0</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.15.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.16.0
 ```
 
 ### PySpark Integration
@@ -168,6 +174,8 @@ Import the MLeap library in your PySpark job
 import mleap.pyspark
 from mleap.pyspark.spark_support import SimpleSparkSerializer
 ```
+
+See [PySpark Integration of python/README.md](python/README.md#pyspark-integration) for more.
 
 ### Create and Export a Scikit-Learn Pipeline
 

@@ -22,7 +22,7 @@ class SimpleSparkSerializer() {
       map(d => SparkBundleContext.defaultContext.withDataset(d)).
       getOrElse(SparkBundleContext.defaultContext)
 
-    (for(file <- managed(BundleFile(path))) yield {
+    (for(file <- managed(BundleFile.load(path))) yield {
       transformer.writeBundle.format(format).save(file).get
     }).tried.get
   }
@@ -30,7 +30,7 @@ class SimpleSparkSerializer() {
   def deserializeFromBundle(path: String): Transformer = {
     implicit val context: SparkBundleContext = SparkBundleContext.defaultContext
 
-    (for(file <- managed(BundleFile(path))) yield {
+    (for(file <- managed(BundleFile.load(path))) yield {
       file.loadSparkBundle().get.root
     }).tried.get
   }

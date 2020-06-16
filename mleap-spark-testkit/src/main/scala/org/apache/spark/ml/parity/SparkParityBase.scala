@@ -18,6 +18,11 @@ import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
 import resource._
 
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.Row
+import org.apache.spark.ml.linalg.{Vector, Vectors}
+import org.apache.spark.ml.util.TestingUtils._
+
 /**
   * Created by hollinwilkins on 10/30/16.
   */
@@ -131,10 +136,45 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
+  def checkRowWithRelTol(actualAnswer: Row, expectedAnswer: Row, eps: Double): Unit = {
+    assert(actualAnswer.length == expectedAnswer.length,
+      s"actual answer length ${actualAnswer.length} != " +
+        s"expected answer length ${expectedAnswer.length}")
+
+    actualAnswer.toSeq.zip(expectedAnswer.toSeq).foreach {
+      case (actual: Double, expected: Double) =>
+        assert(actual ~== expected relTol eps)
+      case (actual: Float, expected: Float) =>
+        assert(actual ~== expected relTol eps)
+      case (actual: Vector, expected: Vector) =>
+        assert(actual ~= expected relTol eps)
+      case (actual: Seq[_], expected: Seq[_]) =>
+        assert(actual.length == expected.length, s"actual length ${actual.length} != " +
+          s"expected length ${expected.length}")
+        actual.zip(expected).foreach {
+          case (actualElem: Double, expectedElem: Double) =>
+            assert(actualElem ~== expectedElem relTol eps)
+          case (actualElem: Float, expectedElem: Float) =>
+            assert(actualElem ~== expectedElem relTol eps)
+          case (actualElem, expectedElem) =>
+            assert(actualElem == expectedElem, s"$actualElem did not equal $expectedElem")
+        }
+      case (actual: Row, expected: Row) =>
+        checkRowWithRelTol(actual, expected, eps)
+      case (actual, expected) =>
+        assert(actual == expected, s"$actual did not equal $expected")
+    }
+  }
+
+  var relTolEps: Double = 1E-7
   def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit = {
-    val sparkElems = sparkDataset.collect()
-    val mleapElems = mleapDataset.collect()
-    assert(sparkElems sameElements mleapElems)
+    val sparkCols = sparkDataset.columns.toSeq
+    assert(mleapDataset.columns.toSet === sparkCols.toSet)
+    val sparkRows = sparkDataset.collect()
+    val mleapRows = mleapDataset.select(sparkCols.map(col): _*).collect()
+    for ((sparkRow, mleapRow) <- sparkRows.zip(mleapRows)) {
+      checkRowWithRelTol(sparkRow, mleapRow, relTolEps)
+    }
   }
 
   def parityTransformer(): Unit = {

@@ -1,20 +1,16 @@
-import unittest
+import json
 import os
 import shutil
+import tempfile
+import unittest
 import uuid
-import json
 
 from mleap.sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
 
 class TransformerTests(unittest.TestCase):
     def setUp(self):
-        self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
-
-        if os.path.exists(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-
-        os.makedirs(self.tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp()
 
         self.docs = ['test']
 

@@ -18,10 +18,10 @@ class MinMaxScalerOp extends SimpleSparkOp[MinMaxScalerModel] {
 
     override def store(model: Model, obj: MinMaxScalerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      require(obj.getMin == 0.0, "MLeap only supports min set to 0.0")
-      require(obj.getMax == 1.0, "MLeap only supports max set to 1.0")
       model.withValue("min", Value.vector(obj.originalMin.toArray)).
         withValue("max", Value.vector(obj.originalMax.toArray))
+        .withValue("minValue", Value.double(obj.getMin))
+        .withValue("maxValue", Value.double(obj.getMax))
     }
 
     override def load(model: Model)
@@ -29,8 +29,8 @@ class MinMaxScalerOp extends SimpleSparkOp[MinMaxScalerModel] {
       new MinMaxScalerModel(uid = "",
         originalMin = Vectors.dense(model.value("min").getTensor[Double].toArray),
         originalMax = Vectors.dense(model.value("max").getTensor[Double].toArray))
-        .setMin(0.0)
-        .setMax(1.0)
+        .setMin(model.getValue("minValue").map(_.getDouble).getOrElse(0.0))
+        .setMax(model.getValue("maxValue").map(_.getDouble).getOrElse(1.0))
     }
 
   }

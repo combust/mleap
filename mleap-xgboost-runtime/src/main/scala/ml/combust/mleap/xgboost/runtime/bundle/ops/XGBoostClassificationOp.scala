@@ -7,8 +7,9 @@ import ml.combust.bundle.dsl.{Model, Value}
 import ml.combust.bundle.op.OpModel
 import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
-import ml.combust.mleap.xgboost.runtime.{XGBoostBinaryClassificationModel, XGBoostClassification, XGBoostClassificationModel, XGBoostMultinomialClassificationModel}
-import ml.dmlc.xgboost4j.scala.XGBoost
+import ml.combust.mleap.xgboost.runtime.{XGBoostBinaryClassificationModel, XGBoostClassification, XGBoostClassificationModel, XGBoostMultinomialClassificationModel, XGBoostPredictorBinaryClassificationModel, XGBoostPredictorClassification, XGBoostPredictorClassificationModel}
+import ml.dmlc.xgboost4j.scala.{Booster, XGBoost}
+
 
 /**
   * Created by hollinwilkins on 9/16/17.
@@ -23,13 +24,17 @@ class XGBoostClassificationOp extends MleapOp[XGBoostClassification, XGBoostClas
                       (implicit context: BundleContext[MleapContext]): Model = {
       val out = Files.newOutputStream(context.file("xgboost.model"))
       obj.booster.saveModel(out)
-      model.withValue("num_features", Value.int(obj.numFeatures)).
-        withValue("num_classes", Value.int(obj.numClasses))
+      model
+        .withValue("num_features", Value.int(obj.numFeatures))
+        .withValue("num_classes", Value.int(obj.numClasses))
+        .withValue("tree_limit", Value.int(obj.treeLimit))
     }
 
     override def load(model: Model)
-                     (implicit context: BundleContext[MleapContext]): XGBoostClassificationModel = {
-      val booster = XGBoost.loadModel(Files.newInputStream(context.file("xgboost.model")))
+            (implicit context: BundleContext[MleapContext]): XGBoostClassificationModel = {
+
+      val booster: Booster = XGBoost.loadModel(Files.newInputStream(context.file("xgboost.model")))
+
       val numClasses = model.value("num_classes").getInt
       val numFeatures = model.value("num_features").getInt
       val treeLimit = model.value("tree_limit").getInt

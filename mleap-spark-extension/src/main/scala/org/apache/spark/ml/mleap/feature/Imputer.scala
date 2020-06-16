@@ -217,11 +217,11 @@ object ImputerModel extends MLReadable[ImputerModel] {
     override def load(path: String): ImputerModel = {
       val metadata = DefaultParamsReader.loadMetadata(path, sc, className)
       val dataPath = new Path(path, "data").toString
-      val data = sparkSession.read.parquet(dataPath)
+      val data = sparkSession.read.parquet(dataPath).select("imputeValue", "missingValue", "strategy").head()
 
-      val Row(surrogateValue: Double, missingValue: Double, strategy: String) = MLUtils.convertVectorColumnsToML(data, "imputeValue", "missingValue", "strategy")
-        .select("surrogateValue", "missingValue", "strategy")
-        .head()
+      val surrogateValue = data.getAs[Double](0)
+      val missingValue = data.getAs[Double](1)
+      val strategy = data.getAs[String](2)
 
       val model = new ImputerModel(metadata.uid, surrogateValue).
         setMissingValue(missingValue).

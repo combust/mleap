@@ -2,6 +2,7 @@ import unittest
 import os
 import shutil
 import json
+import tempfile
 import uuid
 
 from mleap.sklearn.tree.tree import DecisionTreeClassifier, DecisionTreeRegressor
@@ -9,12 +10,7 @@ from sklearn.datasets import load_iris
 
 class TransformerTests(unittest.TestCase):
     def setUp(self):
-        self.tmp_dir = "/tmp/mleap.python.tests/{}".format(uuid.uuid1())
-
-        if os.path.exists(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-
-        os.makedirs(self.tmp_dir)
+        self.tmp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
         shutil.rmtree(self.tmp_dir)

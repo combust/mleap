@@ -67,7 +67,6 @@ class MathBinaryTest(unittest.TestCase):
 
     def test_add_math_binary(self):
         add_transformer = self._new_add_math_binary()
-        assert add_transformer
         result = add_transformer.transform(self.input).toPandas()[['add(f1, f2)']]
         assert_frame_equal(self.expected_add, result)
 
@@ -113,7 +112,6 @@ class MathBinaryTest(unittest.TestCase):
 
         add_transformer.serializeToBundle(file_path, self.input)
         deserialized_math_binary = SimpleSparkSerializer().deserializeFromBundle(file_path)
-        deserialized_math_binary
         result = deserialized_math_binary.transform(self.input).toPandas()[['add(f1, f2)']]
         assert_frame_equal(self.expected_add, result)
 

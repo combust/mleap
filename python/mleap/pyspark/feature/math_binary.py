@@ -12,6 +12,7 @@ from pyspark.ml.util import _jvm
 from pyspark.ml.wrapper import JavaTransformer
 
 from mleap.pyspark.py2scala import jvm_scala_object
+from mleap.pyspark.py2scala import ScalaNone
 from mleap.pyspark.py2scala import Some
 
 
@@ -43,11 +44,13 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
 
     @keyword_only
     def __init__(
-        self,
-        operation=None,
-        inputA=None,
-        inputB=None,
-        outputCol=None,
+            self,
+            operation=None,
+            inputA=None,
+            inputB=None,
+            outputCol=None,
+            defaultA=None,
+            defaultB=None,
     ):
         """
         Computes the mathematical binary `operation` over
@@ -57,15 +60,18 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
         :param inputA: column name for the left side of operation (string)
         :param inputB: column name for the right side of operation (string)
         :param outputCol: output column name (string)
+        :param defaultA: Default to use instead of inputA
+        :param defaultB: Default to use instead of inputB
 
-        NOTE: `operation` is not a JavaParam because the underlying MathBinary
-        scala object uses a MathBinaryModel to store the info about the binary
-        operation.
+        NOTE: `operation`, `defaultA`, `defaultB` is not a JavaParam because
+        the underlying MathBinary scala object uses a MathBinaryModel to store
+        the info about the binary operation.
 
         `operation` has a None default value even though it should *never* be
         None. A None value is necessary upon deserialization to instantiate a
         MathBinary without errors. Afterwards, pyspark sets the _java_obj to
-        the deserialized scala object, which encodes the operation.
+        the deserialized scala object, which encodes the operation (as well
+        as the default values for A and B).
         """
         super(MathBinary, self).__init__()
 
@@ -80,14 +86,11 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
                 operation.name
             )
 
-            # IMPORTANT: defaults for missing values are forced to None.
-            # I've found an issue when setting default values for A and B,
-            # Remember to treat your missing values before the MathBinary
-            # (for example, you could use an Imputer)
             scalaMathBinaryModel = _jvm().ml.combust.mleap.core.feature.MathBinaryModel(
-                scalaBinaryOperation, Some(None), Some(None)
+                scalaBinaryOperation,
+                Some(defaultA) if defaultA else ScalaNone(),
+                Some(defaultB) if defaultB else ScalaNone(),
             )
-
             self._java_obj = self._new_java_obj(
                 "org.apache.spark.ml.mleap.feature.MathBinary",
                 self.uid,
@@ -102,7 +105,8 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
         """
         Sets params for this MathBinary.
         """
-        kwargs = self._input_kwargs
+        # For the correct behavior of MathBinary, params that are None must be unset
+        kwargs = {k: v for k, v in self._input_kwargs.items() if v is not None}
         return self._set(**kwargs)
 
     def setInputA(self, value):
@@ -122,4 +126,3 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
         Sets the value of :py:attr:`outputCol`.
         """
         return self._set(outputCol=value)
-

@@ -164,11 +164,11 @@ class MathBinaryTest(unittest.TestCase):
         result = add_transformer.transform(none_df).toPandas()[['add(f1, f2)']]
         assert_frame_equal(expected_df, result)
 
-    def test_add_math_binary_default_inputA(self):
-        add_transformer = MathBinary(
+    def test_mult_math_binary_default_inputA(self):
+        mult_transformer = MathBinary(
             operation=BinaryOperation.Multiply,
             inputB="f2",
-            outputCol="add(f1, f2)",
+            outputCol="mult(1, f2)",
             defaultA=1.0,
         )
         none_df = self.spark.createDataFrame([
@@ -179,6 +179,44 @@ class MathBinaryTest(unittest.TestCase):
         expected_df = pd.DataFrame([
             (float(i * 1234), )
             for i in range(1, 3)
-        ], columns=['add(f1, f2)'])
-        result = add_transformer.transform(none_df).toPandas()[['add(f1, f2)']]
+        ], columns=['mult(1, f2)'])
+        result = mult_transformer.transform(none_df).toPandas()[['mult(1, f2)']]
+        assert_frame_equal(expected_df, result)
+
+    def test_mult_math_binary_default_inputB(self):
+        mult_transformer = MathBinary(
+            operation=BinaryOperation.Multiply,
+            inputA="f1",
+            outputCol="mult(f1, 2)",
+            defaultB=2.0,
+        )
+        none_df = self.spark.createDataFrame([
+            (float(i * 1234), None)
+            for i in range(1, 3)
+        ], INPUT_SCHEMA)
+
+        expected_df = pd.DataFrame([
+            (float(i * 1234 * 2), )
+            for i in range(1, 3)
+        ], columns=['mult(f1, 2)'])
+        result = mult_transformer.transform(none_df).toPandas()[['mult(f1, 2)']]
+        assert_frame_equal(expected_df, result)
+
+    def test_mult_math_binary_default_both(self):
+        mult_transformer = MathBinary(
+            operation=BinaryOperation.Multiply,
+            outputCol="mult(7, 8)",
+            defaultA=7.0,
+            defaultB=8.0,
+        )
+        none_df = self.spark.createDataFrame([
+            (None, None)
+            for i in range(1, 3)
+        ], INPUT_SCHEMA)
+
+        expected_df = pd.DataFrame([
+            (float(7 * 8), )
+            for i in range(1, 3)
+        ], columns=['mult(7, 8)'])
+        result = mult_transformer.transform(none_df).toPandas()[['mult(7, 8)']]
         assert_frame_equal(expected_df, result)

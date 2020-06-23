@@ -60,8 +60,14 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
         :param inputA: column name for the left side of operation (string)
         :param inputB: column name for the right side of operation (string)
         :param outputCol: output column name (string)
-        :param defaultA: Default to use instead of inputA
-        :param defaultB: Default to use instead of inputB
+        :param defaultA: Default to use instead of inputA. This will only be used
+         when inputA is None. For example when defaultA=4,
+         operation=BinaryOperation.Multiply and inputB=f1, then all entries of
+         col f1 will be multiplied by 4.
+        :param defaultB: Default to use instead of inputB. This will only be used
+         when inputB is None. For example when defaultB=4,
+         operation=BinaryOperation.Multiply and inputA=f1, then all entries of
+         col f1 will be multiplied by 4.
 
         NOTE: `operation`, `defaultA`, `defaultB` is not a JavaParam because
         the underlying MathBinary scala object uses a MathBinaryModel to store

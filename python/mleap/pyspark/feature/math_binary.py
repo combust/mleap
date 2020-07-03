@@ -44,13 +44,13 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
 
     @keyword_only
     def __init__(
-            self,
-            operation=None,
-            inputA=None,
-            inputB=None,
-            outputCol=None,
-            defaultA=None,
-            defaultB=None,
+        self,
+        operation=None,
+        inputA=None,
+        inputB=None,
+        outputCol=None,
+        defaultA=None,
+        defaultB=None,
     ):
         """
         Computes the mathematical binary `operation` over
@@ -88,8 +88,7 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
         # if operation is not None, we can proceed to instantiate the scala classes
         if operation:
             scalaBinaryOperation = jvm_scala_object(
-                _jvm().ml.combust.mleap.core.feature.BinaryOperation,
-                operation.name
+                _jvm().ml.combust.mleap.core.feature.BinaryOperation, operation.name
             )
 
             scalaMathBinaryModel = _jvm().ml.combust.mleap.core.feature.MathBinaryModel(

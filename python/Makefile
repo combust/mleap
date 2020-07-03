@@ -31,7 +31,10 @@ py36_test:
 py37_test:
 	tox -e py37 -v
 
-test: py36_test py37_test
+black_test:
+    tox -e black -v
+
+test: black_test py36_test py37_test
 	@echo "All python tests completed"
 
 build: clean

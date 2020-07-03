@@ -4,12 +4,7 @@ import six
 import json
 import numpy as np
 
-_type_map = {
-    int: 'long',
-    float: 'double',
-    str: 'string',
-    np.float64: 'double'
-}
+_type_map = {int: "long", float: "double", str: "string", np.float64: "double"}
 
 
 class Vector(object):
@@ -24,6 +19,7 @@ class MLeapSerializer(object):
                 then we serialize the coefficients and the intercept of the model.
         - Node: Contains the definition of the input and output data.
     """
+
     def __init__(self):
         pass
 
@@ -38,9 +34,7 @@ class MLeapSerializer(object):
         :param attributes_to_serialize: Tuple of (name, value)
         :return:
         """
-        js = {
-            'op': transformer.op
-        }
+        js = {"op": transformer.op}
 
         # If the transformer doesn't have any attributes, return just the op name
         if attributes_to_serialize is None:
@@ -50,96 +44,86 @@ class MLeapSerializer(object):
 
         for name, value in attributes_to_serialize:
             if isinstance(value, float):
-                attributes[name] = {
-                    "double": value
-                }
+                attributes[name] = {"double": value}
 
             elif isinstance(value, bool) and value in [True, False]:
-                attributes[name] = {
-                    "boolean": value
-                }
+                attributes[name] = {"boolean": value}
 
             elif isinstance(value, int):
-                attributes[name] = {
-                    "long": value
-                }
+                attributes[name] = {"long": value}
             elif isinstance(value, Vector):
-                attributes[name] = {
-                    "type": "list",
-                    "double": value.values
-                }
-            elif isinstance(value, list) and (isinstance(value[0], np.float64) or isinstance(value[0], np.float32) or isinstance(value[0], float)):
+                attributes[name] = {"type": "list", "double": value.values}
+            elif isinstance(value, list) and (
+                isinstance(value[0], np.float64)
+                or isinstance(value[0], np.float32)
+                or isinstance(value[0], float)
+            ):
                 base = type(value[0])
                 attributes[name] = {
                     _type_map[base]: value,
-                    "shape": {
-                        "dimensions": [{
-                            "size": len(value),
-                            "name": ""
-                        }]
-                    },
-                    "type": "tensor"
+                    "shape": {"dimensions": [{"size": len(value), "name": ""}]},
+                    "type": "tensor",
                 }
             elif isinstance(value, list) and isinstance(value[0], str):
-                attributes[name] = {
-                    "type": "list",
-                    "string": value
-                }
+                attributes[name] = {"type": "list", "string": value}
 
             elif isinstance(value, np.ndarray):
                 attributes[name] = {
                     "double": list(value.flatten()),
                     "shape": {
-                        "dimensions": [{
-                            "size": dim,
-                            "name": ""
-                        } for dim in value.shape]
+                        "dimensions": [{"size": dim, "name": ""} for dim in value.shape]
                     },
-                    "type": "tensor"
+                    "type": "tensor",
                 }
 
             elif isinstance(value, str):
-                attributes[name] = {
-                    'string': value
-                }
+                attributes[name] = {"string": value}
 
             elif isinstance(value, dict):
                 shapes = list()
-                for shape in value['data_shape']:
-                    if shape['shape'] == 'scalar':
-                        shapes.append(({"base": "scalar",
-                                        "isNullable": False}))
-                    elif shape['shape'] == 'tensor':
-                        shapes.append(({
-                            "base": "tensor",
-                            "isNullable": False,
-                            "tensorShape": {
-                                "dimensions": [{
-                                    "size": shape['tensor_shape']['dimensions'][0]['size'],
-                                    "name": ""
-                                }]
-                            }
-                        }))
-                attributes[name] = {
-                    'type': 'list',
-                    'data_shape': shapes
-                }
+                for shape in value["data_shape"]:
+                    if shape["shape"] == "scalar":
+                        shapes.append(({"base": "scalar", "isNullable": False}))
+                    elif shape["shape"] == "tensor":
+                        shapes.append(
+                            (
+                                {
+                                    "base": "tensor",
+                                    "isNullable": False,
+                                    "tensorShape": {
+                                        "dimensions": [
+                                            {
+                                                "size": shape["tensor_shape"][
+                                                    "dimensions"
+                                                ][0]["size"],
+                                                "name": "",
+                                            }
+                                        ]
+                                    },
+                                }
+                            )
+                        )
+                attributes[name] = {"type": "list", "data_shape": shapes}
 
-        js['attributes'] = attributes
+        js["attributes"] = attributes
 
         return js
 
     def get_mleap_node(self, transformer, inputs, outputs):
-        js = {
-            "name": transformer.name,
-            "shape": {
-                "inputs": inputs,
-                "outputs": outputs
-            }
-        }
+        js = {"name": transformer.name, "shape": {"inputs": inputs, "outputs": outputs}}
         return js
 
-    def serialize(self, transformer, path, model_name, attributes, inputs, outputs, node=True, model=True):
+    def serialize(
+        self,
+        transformer,
+        path,
+        model_name,
+        attributes,
+        inputs,
+        outputs,
+        node=True,
+        model=True,
+    ):
         # If bundle path already exists, delete it and create a clean directory
         if node:
             if os.path.exists("{}/{}.node".format(path, model_name)):
@@ -156,17 +140,20 @@ class MLeapSerializer(object):
 
         if model:
             # Write bundle file
-            with open("{}/{}".format(model_dir, 'model.json'), 'w') as outfile:
-                json.dump(self.get_mleap_model(transformer, attributes), outfile, indent=3)
+            with open("{}/{}".format(model_dir, "model.json"), "w") as outfile:
+                json.dump(
+                    self.get_mleap_model(transformer, attributes), outfile, indent=3
+                )
 
         if node:
             # Write node file
-            with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
-                json.dump(self.get_mleap_node(transformer, inputs, outputs), outfile, indent=3)
+            with open("{}/{}".format(model_dir, "node.json"), "w") as outfile:
+                json.dump(
+                    self.get_mleap_node(transformer, inputs, outputs), outfile, indent=3
+                )
 
 
 class MLeapDeserializer(object):
-
     def deserialize_from_bundle(self, transformer, node_path, node_name):
         """
         :type node_path: str
@@ -185,7 +172,9 @@ class MLeapDeserializer(object):
             return [str(x)]
         return x
 
-    def deserialize_single_input_output(self, transformer, node_path, attributes_map=None):
+    def deserialize_single_input_output(
+        self, transformer, node_path, attributes_map=None
+    ):
         """
         :attributes_map: Map of attributes names. For example StandardScaler has `mean_` but is serialized as `mean`
         :param transformer: Scikit or Pandas transformer
@@ -198,23 +187,34 @@ class MLeapDeserializer(object):
             model_j = json.load(json_data)
 
         # Set Transformer Attributes
-        attributes = model_j['attributes']
+        attributes = model_j["attributes"]
         for attribute in attributes.keys():
-            value_key = [key for key in attributes[attribute].keys()
-                         if key in ['string', 'boolean', 'long', 'double', 'data_shape']][0]
+            value_key = [
+                key
+                for key in attributes[attribute].keys()
+                if key in ["string", "boolean", "long", "double", "data_shape"]
+            ][0]
             if attributes_map is not None and attribute in attributes_map.keys():
-                setattr(transformer, attributes_map[attribute], attributes[attribute][value_key])
+                setattr(
+                    transformer,
+                    attributes_map[attribute],
+                    attributes[attribute][value_key],
+                )
             else:
                 setattr(transformer, attribute, attributes[attribute][value_key])
 
-        transformer.op = model_j['op']
+        transformer.op = model_j["op"]
 
         # Load the node file
         with open("{}/node.json".format(node_path)) as json_data:
             node_j = json.load(json_data)
 
-        transformer.name = node_j['name']
-        transformer.input_features = self._node_features_format(node_j['shape']['inputs'][0]['name'])
-        transformer.output_features = self._node_features_format(node_j['shape']['outputs'][0]['name'])
+        transformer.name = node_j["name"]
+        transformer.input_features = self._node_features_format(
+            node_j["shape"]["inputs"][0]["name"]
+        )
+        transformer.output_features = self._node_features_format(
+            node_j["shape"]["outputs"][0]["name"]
+        )
 
         return transformer

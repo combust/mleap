@@ -34,11 +34,12 @@ def deserialize_from_bundle(self, path):
 def mleap_init(self):
     self.name = "{}_{}".format(self.op, uuid.uuid1())
 
-setattr(FeatureUnion, 'serialize_to_bundle', serialize_to_bundle)
-setattr(FeatureUnion, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(FeatureUnion, 'op', 'feature_union')
-setattr(FeatureUnion, 'mlinit', mleap_init)
-setattr(FeatureUnion, 'serializable', True)
+
+setattr(FeatureUnion, "serialize_to_bundle", serialize_to_bundle)
+setattr(FeatureUnion, "deserialize_from_bundle", deserialize_from_bundle)
+setattr(FeatureUnion, "op", "feature_union")
+setattr(FeatureUnion, "mlinit", mleap_init)
+setattr(FeatureUnion, "serializable", True)
 
 
 class SimplekSerializer(object):
@@ -56,10 +57,10 @@ class SimplekSerializer(object):
             model_dir = "{}/{}.node".format(path, transformer.name)
             os.mkdir(model_dir)
 
-            if transformer.op == 'pipeline':
+            if transformer.op == "pipeline":
                 # Write bundle file
                 transformer.serialize_to_bundle(model_dir, transformer.name)
-#
+            #
             if isinstance(transformer, list):
                 pass
 

@@ -22,15 +22,19 @@ import sys
 from setuptools import setup, find_packages
 
 if sys.version_info < (2, 7):
-    print("Python versions prior to 2.7 are not supported for pip installed MLeap.",
-          file=sys.stderr)
+    print(
+        "Python versions prior to 2.7 are not supported for pip installed MLeap.",
+        file=sys.stderr,
+    )
     exit(-1)
 
 try:
-    exec(open('mleap/version.py').read())
+    exec(open("mleap/version.py").read())
 except IOError:
-    print("Failed to load MLeap version file for packaging. You must be in MLeap's python directory.",
-          file=sys.stderr)
+    print(
+        "Failed to load MLeap version file for packaging. You must be in MLeap's python directory.",
+        file=sys.stderr,
+    )
     sys.exit(-1)
 
 VERSION = version
@@ -38,39 +42,38 @@ VERSION = version
 numpy_version = "1.8.2"
 
 REQUIRED_PACKAGES = [
-      'numpy >= %s' % numpy_version,
-      'six >= 1.10.0',
-      'scipy>=0.13.0b1',
-      'pandas>=0.18.1',
-      'scikit-learn>=0.18.dev0',
+    "numpy >= %s" % numpy_version,
+    "six >= 1.10.0",
+    "scipy>=0.13.0b1",
+    "pandas>=0.18.1",
+    "scikit-learn>=0.18.dev0",
 ]
 
-TESTS_REQUIRED_PACKAGES = [
-      'nose-exclude>=0.5.0'
-]
+TESTS_REQUIRED_PACKAGES = ["nose-exclude>=0.5.0"]
 
-setup(name='mleap',
-      version=VERSION,
-      description='MLeap Python API',
-      author='MLeap Developers',
-      author_email='combust@combust.ml',
-      url='https://github.com/combust/mleap/tree/master/python',
-      packages=find_packages(),
-      zip_safe=False,
-      install_requires=REQUIRED_PACKAGES,
-      tests_require=TESTS_REQUIRED_PACKAGES,
-      classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
-        'Operating System :: OS Independent',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Communications :: Chat',
-        'Topic :: Internet',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
+setup(
+    name="mleap",
+    version=VERSION,
+    description="MLeap Python API",
+    author="MLeap Developers",
+    author_email="combust@combust.ml",
+    url="https://github.com/combust/mleap/tree/master/python",
+    packages=find_packages(),
+    zip_safe=False,
+    install_requires=REQUIRED_PACKAGES,
+    tests_require=TESTS_REQUIRED_PACKAGES,
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Communications :: Chat",
+        "Topic :: Internet",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
     ],
-     )
+)

@@ -38,11 +38,11 @@ def mleap_init(self, input_features, prediction_column):
     self.name = "{}_{}".format(self.op, uuid.uuid1())
 
 
-setattr(LinearRegression, 'op', 'linear_regression')
-setattr(LinearRegression, 'mlinit', mleap_init)
-setattr(LinearRegression, 'serialize_to_bundle', serialize_to_bundle)
-setattr(LinearRegression, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(LinearRegression, 'serializable', True)
+setattr(LinearRegression, "op", "linear_regression")
+setattr(LinearRegression, "mlinit", mleap_init)
+setattr(LinearRegression, "serialize_to_bundle", serialize_to_bundle)
+setattr(LinearRegression, "deserialize_from_bundle", deserialize_from_bundle)
+setattr(LinearRegression, "serializable", True)
 
 
 class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
@@ -61,35 +61,28 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('intercept', transformer.intercept_.tolist()[0]))
-        attributes.append(('coefficients', transformer.coef_.tolist()[0]))
+        attributes.append(("intercept", transformer.intercept_.tolist()[0]))
+        attributes.append(("coefficients", transformer.coef_.tolist()[0]))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "features"
-                  }]
+        inputs = [{"name": transformer.input_features, "port": "features"}]
 
-        outputs = [{
-                  "name": transformer.prediction_column,
-                  "port": "prediction"
-                   }]
+        outputs = [{"name": transformer.prediction_column, "port": "prediction"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
     def deserialize_from_bundle(self, transformer, node_path, node_name):
 
-        attributes_map = {
-            'coefficients': 'coef_',
-            'intercept': 'intercept_'
-        }
+        attributes_map = {"coefficients": "coef_", "intercept": "intercept_"}
 
         # Set serialized attributes
         full_node_path = os.path.join(node_path, node_name)
-        transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
+        transformer = self.deserialize_single_input_output(
+            transformer, full_node_path, attributes_map
+        )
 
         # Set Additional Attributes
-        if 'intercept_' in transformer.__dict__:
+        if "intercept_" in transformer.__dict__:
             transformer.fit_intercept = True
         else:
             transformer.fit_intercept = False

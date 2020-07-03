@@ -32,18 +32,20 @@ def mleap_init(self, input_features, prediction_column, feature_names):
 
 def serialize_to_bundle(self, path, model_name, serialize_node=True):
     serializer = SimpleSerializer()
-    return serializer.serialize_to_bundle(self, path, model_name, serialize_node=serialize_node)
+    return serializer.serialize_to_bundle(
+        self, path, model_name, serialize_node=serialize_node
+    )
 
 
-setattr(DecisionTreeRegressor, 'op', 'decision_tree_regression')
-setattr(DecisionTreeRegressor, 'mlinit', mleap_init)
-setattr(DecisionTreeRegressor, 'serialize_to_bundle', serialize_to_bundle)
-setattr(DecisionTreeRegressor, 'serializable', True)
+setattr(DecisionTreeRegressor, "op", "decision_tree_regression")
+setattr(DecisionTreeRegressor, "mlinit", mleap_init)
+setattr(DecisionTreeRegressor, "serialize_to_bundle", serialize_to_bundle)
+setattr(DecisionTreeRegressor, "serializable", True)
 
-setattr(DecisionTreeClassifier, 'op', 'decision_tree_classifier')
-setattr(DecisionTreeClassifier, 'mlinit', mleap_init)
-setattr(DecisionTreeClassifier, 'serialize_to_bundle', serialize_to_bundle)
-setattr(DecisionTreeClassifier, 'serializable', True)
+setattr(DecisionTreeClassifier, "op", "decision_tree_classifier")
+setattr(DecisionTreeClassifier, "mlinit", mleap_init)
+setattr(DecisionTreeClassifier, "serialize_to_bundle", serialize_to_bundle)
+setattr(DecisionTreeClassifier, "serializable", True)
 
 
 class SimpleSerializer(MLeapSerializer):
@@ -61,7 +63,10 @@ class SimpleSerializer(MLeapSerializer):
         """
 
         tree_ = tree.tree_
-        feature_name = [feature_names[i] if i != _tree.TREE_UNDEFINED else 'n/a' for i in tree_.feature]
+        feature_name = [
+            feature_names[i] if i != _tree.TREE_UNDEFINED else "n/a"
+            for i in tree_.feature
+        ]
 
         def traverse(node, depth, outfile):
             if tree_.feature[node] != _tree.TREE_UNDEFINED:
@@ -70,17 +75,17 @@ class SimpleSerializer(MLeapSerializer):
 
                 # Define internal node for serialization
                 internal_node = {
-                    'type': 'internal',
-                    'split': {
-                        'type': 'continuous',
-                        'featureIndex': feature_names.index(name),
-                        'threshold': threshold
-                    }
+                    "type": "internal",
+                    "split": {
+                        "type": "continuous",
+                        "featureIndex": feature_names.index(name),
+                        "threshold": threshold,
+                    },
                 }
 
                 # Serialize the internal Node
                 json.dump(internal_node, outfile)
-                outfile.write('\n')
+                outfile.write("\n")
 
                 # Traverse Left
                 traverse(tree_.children_left[node], depth + 1, outfile)
@@ -88,14 +93,11 @@ class SimpleSerializer(MLeapSerializer):
                 # Traverse Rigiht
                 traverse(tree_.children_right[node], depth + 1, outfile)
             else:
-                leaf_node = {
-                    'type': 'leaf',
-                    'values': tree_.value[node].tolist()[0]
-                }
+                leaf_node = {"type": "leaf", "values": tree_.value[node].tolist()[0]}
 
                 # Serialize the leaf node
                 json.dump(leaf_node, outfile)
-                outfile.write('\n')
+                outfile.write("\n")
 
         traverse(0, 1, outfile)
 
@@ -113,29 +115,31 @@ class SimpleSerializer(MLeapSerializer):
 
         # Define attributes
         attributes = list()
-        attributes.append(('num_features', transformer.n_features_))
+        attributes.append(("num_features", transformer.n_features_))
         if isinstance(transformer, DecisionTreeClassifier):
-            attributes.append(('num_classes', int(transformer.n_classes_)))
+            attributes.append(("num_classes", int(transformer.n_classes_)))
 
         inputs = []
         outputs = []
         if serialize_node:
             # define node inputs and outputs
-            inputs = [{
-                      "name": transformer.input_features,
-                      "port": "features"
-                    }]
+            inputs = [{"name": transformer.input_features, "port": "features"}]
 
-            outputs = [{
-                      "name": transformer.prediction_column,
-                      "port": "prediction"
-                    }]
+            outputs = [{"name": transformer.prediction_column, "port": "prediction"}]
 
-        self.serialize(transformer, path, model_name, attributes, inputs, outputs, node=serialize_node)
+        self.serialize(
+            transformer,
+            path,
+            model_name,
+            attributes,
+            inputs,
+            outputs,
+            node=serialize_node,
+        )
 
         # Serialize tree.json
         tree_path = "{}/{}.node/tree.json".format(path, model_name)
         if not serialize_node:
             tree_path = "{}/{}/tree.json".format(path, model_name)
-        with open(tree_path, 'w') as outfile:
+        with open(tree_path, "w") as outfile:
             self.serialize_tree(transformer, transformer.feature_names, outfile)

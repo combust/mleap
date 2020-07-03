@@ -20,8 +20,9 @@ class UnaryOperation(Enum):
     Sqrt = 7
 
 
-class MathUnary(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, JavaMLWritable):
-
+class MathUnary(
+    JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, JavaMLWritable
+):
     @keyword_only
     def __init__(self, operation=None, inputCol=None, outputCol=None):
         """
@@ -45,11 +46,12 @@ class MathUnary(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
         # if operation is not None, we can proceed to instantiate the scala classes
         if operation:
             scalaUnaryOperation = jvm_scala_object(
-                _jvm().ml.combust.mleap.core.feature.UnaryOperation,
-                operation.name
+                _jvm().ml.combust.mleap.core.feature.UnaryOperation, operation.name
             )
 
-            scalaMathUnaryModel = _jvm().ml.combust.mleap.core.feature.MathUnaryModel(scalaUnaryOperation)
+            scalaMathUnaryModel = _jvm().ml.combust.mleap.core.feature.MathUnaryModel(
+                scalaUnaryOperation
+            )
 
             self._java_obj = self._new_java_obj(
                 "org.apache.spark.ml.mleap.feature.MathUnary",

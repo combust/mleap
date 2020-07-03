@@ -26,7 +26,6 @@ from mleap.gensim.word2vec import Word2Vec
 
 
 class TransformerTests(unittest.TestCase):
-
     def setUp(self):
         self.tmp_dir = tempfile.mkdtemp()
 
@@ -36,40 +35,42 @@ class TransformerTests(unittest.TestCase):
     def test_word2vec(self):
 
         sentences4word2vec_ = [
-            ['call', 'me', 'tomorrow'],
-            ['give', 'me', 'a', 'call', 'in',' the', 'after', 'noon'],
-            ['when', 'can', 'i', 'call'],
-            ['when', 'is', 'the', 'best', 'time', 'to', 'call'],
-            ['call', 'me', 'tomorrow', 'after', 'noon'],
-            ['i', 'would', 'like', 'a', 'call', 'tomorrow'],
-            ['do', 'not', 'call', 'until', 'tomorrow'],
-            ['best', 'time', 'is', 'tomorrow', 'after', 'noon'],
-            ['call', 'tomorrow', 'after', 'lunch'],
-            ['call', 'after', 'lunch', 'time'],
-            ['make', 'the', 'call', 'tomorrow'],
-            ['make', 'the', 'call', 'tomorrow', 'after', 'noon'],
-            ['make', 'the' 'call', 'after', 'lunch', 'time']
+            ["call", "me", "tomorrow"],
+            ["give", "me", "a", "call", "in", " the", "after", "noon"],
+            ["when", "can", "i", "call"],
+            ["when", "is", "the", "best", "time", "to", "call"],
+            ["call", "me", "tomorrow", "after", "noon"],
+            ["i", "would", "like", "a", "call", "tomorrow"],
+            ["do", "not", "call", "until", "tomorrow"],
+            ["best", "time", "is", "tomorrow", "after", "noon"],
+            ["call", "tomorrow", "after", "lunch"],
+            ["call", "after", "lunch", "time"],
+            ["make", "the", "call", "tomorrow"],
+            ["make", "the", "call", "tomorrow", "after", "noon"],
+            ["make", "the" "call", "after", "lunch", "time"],
         ]
 
         size_ = 5
         window_ = 2
 
         model_ = Word2Vec(sentences4word2vec_, min_count=2, size=size_, window=window_)
-        model_.mlinit(input_features=['input'], prediction_column = 'sentence_vector')
+        model_.mlinit(input_features=["input"], prediction_column="sentence_vector")
 
         model_.serialize_to_bundle(self.tmp_dir, model_.name)
 
-        res = model_.sent2vec(['call', 'me', 'on', 'my', 'cell', 'phone'])
+        res = model_.sent2vec(["call", "me", "on", "my", "cell", "phone"])
 
-
-        with open('{}/{}.node/node.json'.format(self.tmp_dir, model_.name)) as node_json:
+        with open(
+            "{}/{}.node/node.json".format(self.tmp_dir, model_.name)
+        ) as node_json:
             node = json.load(node_json)
 
-        with open('{}/{}.node/model.json'.format(self.tmp_dir, model_.name)) as model_json:
+        with open(
+            "{}/{}.node/model.json".format(self.tmp_dir, model_.name)
+        ) as model_json:
             model = json.load(model_json)
 
-
         self.assertEqual(5, res.size)
-        self.assertEqual(node['shape']['inputs'][0]['name'], ['input'])
-        self.assertEqual(node['shape']['outputs'][0]['name'], 'sentence_vector')
-        self.assertEqual(model['op'], 'word2vec')
+        self.assertEqual(node["shape"]["inputs"][0]["name"], ["input"])
+        self.assertEqual(node["shape"]["outputs"][0]["name"], "sentence_vector")
+        self.assertEqual(model["op"], "word2vec")

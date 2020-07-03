@@ -31,10 +31,10 @@ def mleap_init(self, input_features, prediction_column):
     self.name = "{}_{}".format(self.op, uuid.uuid4())
 
 
-setattr(PCA, 'op', 'pca')
-setattr(PCA, 'mlinit', mleap_init)
-setattr(PCA, 'serialize_to_bundle', serialize_to_bundle)
-setattr(PCA, 'serializable', True)
+setattr(PCA, "op", "pca")
+setattr(PCA, "mlinit", mleap_init)
+setattr(PCA, "serialize_to_bundle", serialize_to_bundle)
+setattr(PCA, "serializable", True)
 
 
 class SimpleSparkSerializer(MLeapSerializer):
@@ -53,17 +53,11 @@ class SimpleSparkSerializer(MLeapSerializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('principal_components', transformer.components_))
+        attributes.append(("principal_components", transformer.components_))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "input"
-                  }]
+        inputs = [{"name": transformer.input_features, "port": "input"}]
 
-        outputs = [{
-                  "name": transformer.prediction_column,
-                  "port": "output"
-                   }]
+        outputs = [{"name": transformer.prediction_column, "port": "output"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)

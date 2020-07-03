@@ -8,10 +8,18 @@ from pyspark.sql import DataFrame
 from mleap.pyspark.py2scala import jvm_scala_object
 
 
-class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, JavaMLWritable):
-
+class StringMap(
+    JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, JavaMLWritable
+):
     @keyword_only
-    def __init__(self, labels={}, inputCol=None, outputCol=None, handleInvalid='error', defaultValue=0.0):
+    def __init__(
+        self,
+        labels={},
+        inputCol=None,
+        outputCol=None,
+        handleInvalid="error",
+        defaultValue=0.0,
+    ):
         """
         :param labels: a dict {string: double}
         :param handleInvalid: how to handle missing labels: 'error' (throw), or 'keep' (map to defaultValue)
@@ -27,22 +35,29 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
             """
             validate args early to avoid failing at Py4j with some hard to interpret error message
             """
-            assert handleInvalid in ['error', 'keep'], 'Invalid value for handleInvalid: {}'.format(handleInvalid)
-            assert isinstance(labels, dict), 'labels must be a dict, got: {}'.format(type(labels))
+            assert handleInvalid in [
+                "error",
+                "keep",
+            ], "Invalid value for handleInvalid: {}".format(handleInvalid)
+            assert isinstance(labels, dict), "labels must be a dict, got: {}".format(
+                type(labels)
+            )
             for (key, value) in labels.items():
-                assert isinstance(key, six.string_types), \
-                    'label keys must be a string type, got: {}'.format(type(key))
-                assert isinstance(value, float), 'label values must be float, got: {}'.format(type(key))
+                assert isinstance(
+                    key, six.string_types
+                ), "label keys must be a string type, got: {}".format(type(key))
+                assert isinstance(
+                    value, float
+                ), "label values must be float, got: {}".format(type(key))
 
         validate_args()
 
-        labels_scala_map = _jvm() \
-            .scala \
-            .collection \
-            .JavaConverters \
-            .mapAsScalaMapConverter(labels) \
-            .asScala() \
+        labels_scala_map = (
+            _jvm()
+            .scala.collection.JavaConverters.mapAsScalaMapConverter(labels)
+            .asScala()
             .toMap(_jvm().scala.Predef.conforms())
+        )
 
         handle_invalid_jvm = jvm_scala_object(
             _jvm().ml.combust.mleap.core.feature.HandleInvalid,
@@ -50,15 +65,11 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
         )
 
         string_map_model = _jvm().ml.combust.mleap.core.feature.StringMapModel(
-            labels_scala_map,
-            handle_invalid_jvm,
-            defaultValue,
+            labels_scala_map, handle_invalid_jvm, defaultValue,
         )
 
         self._java_obj = self._new_java_obj(
-            "org.apache.spark.ml.mleap.feature.StringMap",
-            self.uid,
-            string_map_model
+            "org.apache.spark.ml.mleap.feature.StringMap", self.uid, string_map_model
         )
 
         self._setDefault()
@@ -86,16 +97,19 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
         return self._set(outputCol=value)
 
     @classmethod
-    def from_dataframe(cls, labels_df, inputCol, outputCol, handleInvalid='error', defaultValue=0.0):
+    def from_dataframe(
+        cls, labels_df, inputCol, outputCol, handleInvalid="error", defaultValue=0.0
+    ):
         """
         :param labels_df: a spark DataFrame whose columns include inputCol:string & outputCol:double.
         See StringMap() for other params.
         """
-        assert isinstance(labels_df, DataFrame), 'labels must be a DataFrame, got: {}'.format(type(labels_df))
+        assert isinstance(
+            labels_df, DataFrame
+        ), "labels must be a DataFrame, got: {}".format(type(labels_df))
         labels_dict = {
             row[0]: float(row[1])
-            for row in
-            labels_df.select([inputCol, outputCol]).collect()
+            for row in labels_df.select([inputCol, outputCol]).collect()
         }
 
         return cls(
@@ -103,6 +117,5 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
             inputCol=inputCol,
             outputCol=outputCol,
             handleInvalid=handleInvalid,
-            defaultValue=defaultValue
+            defaultValue=defaultValue,
         )
-

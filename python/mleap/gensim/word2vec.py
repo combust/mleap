@@ -36,11 +36,12 @@ def mleap_init(self, input_features, prediction_column):
     self.prediction_column = prediction_column
     self.name = "{}_{}".format(self.op, uuid.uuid4())
 
-setattr(Word2Vec, 'op', 'word2vec')
-setattr(Word2Vec, 'mlinit', mleap_init)
-setattr(Word2Vec, 'serialize_to_bundle', serialize_to_bundle)
-setattr(Word2Vec, 'serializable', True)
-setattr(Word2Vec, 'sent2vec', sent2vec)
+
+setattr(Word2Vec, "op", "word2vec")
+setattr(Word2Vec, "mlinit", mleap_init)
+setattr(Word2Vec, "serialize_to_bundle", serialize_to_bundle)
+setattr(Word2Vec, "serializable", True)
+setattr(Word2Vec, "sent2vec", sent2vec)
 
 
 class SimpleSparkSerializer(MLeapSerializer):
@@ -59,26 +60,26 @@ class SimpleSparkSerializer(MLeapSerializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('words', transformer.wv.index2word))
+        attributes.append(("words", transformer.wv.index2word))
 
         # indices = [np.float64(x) for x in list(range(len(transformer.wv.index2word)))]
-        word_vectors = np.array([float(y) for x in [transformer.wv.word_vec(w) for w in transformer.wv.index2word] for y in x])
+        word_vectors = np.array(
+            [
+                float(y)
+                for x in [transformer.wv.word_vec(w) for w in transformer.wv.index2word]
+                for y in x
+            ]
+        )
 
         # attributes.append(('indices', indices))
         # Excluding indices because they are 0 - N
-        attributes.append(('word_vectors', word_vectors))
-        attributes.append(('kernel', 'sqrt'))
+        attributes.append(("word_vectors", word_vectors))
+        attributes.append(("kernel", "sqrt"))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "input"
-                  }]
+        inputs = [{"name": transformer.input_features, "port": "input"}]
 
-        outputs = [{
-                  "name": transformer.prediction_column,
-                  "port": "output"
-                   }]
+        outputs = [{"name": transformer.prediction_column, "port": "output"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 

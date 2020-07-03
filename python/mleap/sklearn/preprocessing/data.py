@@ -24,7 +24,13 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer, Binarizer, PolynomialFeatures
+from sklearn.preprocessing import (
+    StandardScaler,
+    MinMaxScaler,
+    Imputer,
+    Binarizer,
+    PolynomialFeatures,
+)
 from sklearn.preprocessing.data import OneHotEncoder
 from sklearn.preprocessing.label import LabelEncoder
 from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer, Vector
@@ -35,15 +41,16 @@ from sklearn.utils.fixes import np_version
 
 class ops(object):
     def __init__(self):
-        self.STANDARD_SCALER = 'standard_scaler'
-        self.MIN_MAX_SCALER = 'min_max_scaler'
-        self.LABEL_ENCODER = 'string_indexer'
-        self.ONE_HOT_ENCODER = 'one_hot_encoder'
-        self.IMPUTER = 'imputer'
-        self.NDARRAYTODATAFRAME = 'one_dim_array_to_dataframe'
-        self.TODENSE = 'dense_transformer'
-        self.BINARIZER = 'sklearn_binarizer'
-        self.POLYNOMIALEXPANSION = 'sklearn_polynomial_expansion'
+        self.STANDARD_SCALER = "standard_scaler"
+        self.MIN_MAX_SCALER = "min_max_scaler"
+        self.LABEL_ENCODER = "string_indexer"
+        self.ONE_HOT_ENCODER = "one_hot_encoder"
+        self.IMPUTER = "imputer"
+        self.NDARRAYTODATAFRAME = "one_dim_array_to_dataframe"
+        self.TODENSE = "dense_transformer"
+        self.BINARIZER = "sklearn_binarizer"
+        self.POLYNOMIALEXPANSION = "sklearn_polynomial_expansion"
+
 
 ops = ops()
 
@@ -56,10 +63,12 @@ def _check_numpy_unicode_bug(labels):
       https://github.com/numpy/numpy/pull/243
 
     """
-    if np_version[:3] < (1, 7, 0) and labels.dtype.kind == 'U':
-        raise RuntimeError("NumPy < 1.7.0 does not implement searchsorted"
-                           " on unicode data correctly. Please upgrade"
-                           " NumPy to use LabelEncoder with unicode inputs.")
+    if np_version[:3] < (1, 7, 0) and labels.dtype.kind == "U":
+        raise RuntimeError(
+            "NumPy < 1.7.0 does not implement searchsorted"
+            " on unicode data correctly. Please upgrade"
+            " NumPy to use LabelEncoder with unicode inputs."
+        )
 
 
 def serialize_to_bundle(self, path, model_name):
@@ -76,15 +85,15 @@ def mleap_init(self, prior_tf, output_features=None):
 
     self.name = "{}_{}".format(self.op, uuid.uuid1())
 
-    if prior_tf.op == 'vector_assembler':
+    if prior_tf.op == "vector_assembler":
         self.input_features = prior_tf.output_vector
-        output_shape = 'tensor'
+        output_shape = "tensor"
         output_size = len(prior_tf.input_features)
         output_feature_name = prior_tf.output_vector
 
     else:
         self.input_features = prior_tf.output_features
-        output_shape = 'scalar'
+        output_shape = "scalar"
         output_size = 1
         output_feature_name = prior_tf.output_features
 
@@ -95,50 +104,56 @@ def mleap_init(self, prior_tf, output_features=None):
     else:
         self.output_features = "{}_{}".format(output_feature_name, class_name.lower())
 
-    if class_name == 'PolynomialFeatures':
+    if class_name == "PolynomialFeatures":
         self.input_size = len(prior_tf.input_features)
 
-    elif output_shape == 'tensor':
-        self.input_shapes = {'data_shape': [{'shape':'tensor',
-                                                 "tensor_shape": {"dimensions": [{"size": output_size}]}}]}
+    elif output_shape == "tensor":
+        self.input_shapes = {
+            "data_shape": [
+                {
+                    "shape": "tensor",
+                    "tensor_shape": {"dimensions": [{"size": output_size}]},
+                }
+            ]
+        }
     else:
-        self.input_shapes = {'data_shape': [{'shape': output_shape}]}
+        self.input_shapes = {"data_shape": [{"shape": output_shape}]}
 
 
-setattr(StandardScaler, 'op', ops.STANDARD_SCALER)
-setattr(StandardScaler, 'serialize_to_bundle', serialize_to_bundle)
-setattr(StandardScaler, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(StandardScaler, 'mlinit', mleap_init)
-setattr(StandardScaler, 'serializable', True)
+setattr(StandardScaler, "op", ops.STANDARD_SCALER)
+setattr(StandardScaler, "serialize_to_bundle", serialize_to_bundle)
+setattr(StandardScaler, "deserialize_from_bundle", deserialize_from_bundle)
+setattr(StandardScaler, "mlinit", mleap_init)
+setattr(StandardScaler, "serializable", True)
 
-setattr(MinMaxScaler, 'op', ops.MIN_MAX_SCALER)
-setattr(MinMaxScaler, 'mlinit', mleap_init)
-setattr(MinMaxScaler, 'serialize_to_bundle', serialize_to_bundle)
-setattr(MinMaxScaler, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(MinMaxScaler, 'serializable', True)
+setattr(MinMaxScaler, "op", ops.MIN_MAX_SCALER)
+setattr(MinMaxScaler, "mlinit", mleap_init)
+setattr(MinMaxScaler, "serialize_to_bundle", serialize_to_bundle)
+setattr(MinMaxScaler, "deserialize_from_bundle", deserialize_from_bundle)
+setattr(MinMaxScaler, "serializable", True)
 
-setattr(Imputer, 'op', ops.IMPUTER)
-setattr(Imputer, 'mlinit', mleap_init)
-setattr(Imputer, 'serialize_to_bundle', serialize_to_bundle)
-setattr(Imputer, 'serializable', True)
+setattr(Imputer, "op", ops.IMPUTER)
+setattr(Imputer, "mlinit", mleap_init)
+setattr(Imputer, "serialize_to_bundle", serialize_to_bundle)
+setattr(Imputer, "serializable", True)
 
-setattr(OneHotEncoder, 'op', ops.ONE_HOT_ENCODER)
-setattr(OneHotEncoder, 'mlinit', mleap_init)
-setattr(OneHotEncoder, 'serialize_to_bundle', serialize_to_bundle)
-setattr(OneHotEncoder, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(OneHotEncoder, 'serializable', True)
+setattr(OneHotEncoder, "op", ops.ONE_HOT_ENCODER)
+setattr(OneHotEncoder, "mlinit", mleap_init)
+setattr(OneHotEncoder, "serialize_to_bundle", serialize_to_bundle)
+setattr(OneHotEncoder, "deserialize_from_bundle", deserialize_from_bundle)
+setattr(OneHotEncoder, "serializable", True)
 
-setattr(Binarizer, 'op', ops.BINARIZER)
-setattr(Binarizer, 'mlinit', mleap_init)
-setattr(Binarizer, 'serialize_to_bundle', serialize_to_bundle)
-setattr(Binarizer, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(Binarizer, 'serializable', True)
+setattr(Binarizer, "op", ops.BINARIZER)
+setattr(Binarizer, "mlinit", mleap_init)
+setattr(Binarizer, "serialize_to_bundle", serialize_to_bundle)
+setattr(Binarizer, "deserialize_from_bundle", deserialize_from_bundle)
+setattr(Binarizer, "serializable", True)
 
-setattr(PolynomialFeatures, 'op', ops.POLYNOMIALEXPANSION)
-setattr(PolynomialFeatures, 'mlinit', mleap_init)
-setattr(PolynomialFeatures, 'serialize_to_bundle', serialize_to_bundle)
-setattr(PolynomialFeatures, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(PolynomialFeatures, 'serializable', True)
+setattr(PolynomialFeatures, "op", ops.POLYNOMIALEXPANSION)
+setattr(PolynomialFeatures, "mlinit", mleap_init)
+setattr(PolynomialFeatures, "serialize_to_bundle", serialize_to_bundle)
+setattr(PolynomialFeatures, "deserialize_from_bundle", deserialize_from_bundle)
+setattr(PolynomialFeatures, "serializable", True)
 
 
 class SimpleSerializer(object):
@@ -149,6 +164,7 @@ class SimpleSerializer(object):
         - serialize_to_bundle
     methods. The set input/output features are required to maintain parity with the Spark/MLeap execution engine.
     """
+
     def __init__(self):
         super(SimpleSerializer, self).__init__()
 
@@ -194,7 +210,13 @@ def _to_list(x):
 
 
 class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
-    def __init__(self, input_scalars=None, input_vectors=None, output_vector=None, output_vector_items=None):
+    def __init__(
+        self,
+        input_scalars=None,
+        input_vectors=None,
+        output_vector=None,
+        output_vector_items=None,
+    ):
         """
         Selects a subset of features from a pandas dataframe that are then passed into a subsequent transformer.
         MLeap treats this transformer like a VectorAssembler equivalent in spark.
@@ -219,7 +241,7 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         self.input_features = self.get_input_features(input_scalars, input_vectors)
         self.output_vector_items = output_vector_items
         self.output_vector = output_vector
-        self.op = 'vector_assembler'
+        self.op = "vector_assembler"
         self.name = "{}_{}".format(self.op, uuid.uuid1())
         self.dtypes = None
         self.serializable = True
@@ -230,12 +252,16 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
     def get_input_features(self, input_scalars, input_vectors):
         if input_scalars is not None:
             return input_scalars
-        elif input_vectors is not None and isinstance(input_vectors, list) and len(input_vectors)>0:
+        elif (
+            input_vectors is not None
+            and isinstance(input_vectors, list)
+            and len(input_vectors) > 0
+        ):
             features = list()
             for x in input_vectors:
-                if 'output_vector' in x.__dict__:
+                if "output_vector" in x.__dict__:
                     features.append(x.output_vector)
-                elif 'output_features' in x.__dict__:
+                elif "output_features" in x.__dict__:
                     features.append(x.output_features)
             return features
         else:
@@ -249,17 +275,29 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
     def assign_input_shapes(self, X):
         # Figure out the data shape
         if self.input_scalars is not None and isinstance(X, pd.DataFrame):
-            self.input_shapes = {'data_shape': [{'shape': 'scalar'}]*len(self.input_features)}
+            self.input_shapes = {
+                "data_shape": [{"shape": "scalar"}] * len(self.input_features)
+            }
 
         elif self.input_vectors is not None:
-            self.input_shapes = {'data_shape': []}
+            self.input_shapes = {"data_shape": []}
             for vector in self.input_vectors:
                 if vector.op not in [ops.ONE_HOT_ENCODER, ops.POLYNOMIALEXPANSION]:
-                    shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": len(vector.input_features)}]}}
-                    self.input_shapes['data_shape'].append(shape)
+                    shape = {
+                        "shape": "tensor",
+                        "tensor_shape": {
+                            "dimensions": [{"size": len(vector.input_features)}]
+                        },
+                    }
+                    self.input_shapes["data_shape"].append(shape)
                 elif vector.op == ops.ONE_HOT_ENCODER:
-                    shape = {'shape': 'tensor', "tensor_shape": {"dimensions": [{"size": int(vector.n_values_[0] - 1)}]}}
-                    self.input_shapes['data_shape'].append(shape)
+                    shape = {
+                        "shape": "tensor",
+                        "tensor_shape": {
+                            "dimensions": [{"size": int(vector.n_values_[0] - 1)}]
+                        },
+                    }
+                    self.input_shapes["data_shape"].append(shape)
         return self
 
     def fit(self, X, y=None, **fit_params):
@@ -286,12 +324,12 @@ class FeatureExtractor(BaseEstimator, TransformerMixin, MLeapSerializer):
         attributes.append(("input_shapes", self.input_shapes))
 
         # define node inputs and outputs
-        inputs = [{'name': x, 'port': 'input{}'.format(self.input_features.index(x))} for x in self.input_features]
+        inputs = [
+            {"name": x, "port": "input{}".format(self.input_features.index(x))}
+            for x in self.input_features
+        ]
 
-        outputs = [{
-                  "name": self.output_vector,
-                  "port": "output"
-                }]
+        outputs = [{"name": self.output_vector, "port": "output"}]
 
         self.serialize(self, path, model_name, attributes, inputs, outputs)
 
@@ -351,13 +389,13 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
     ['tokyo', 'tokyo', 'paris']
 
     """
+
     def __init__(self, input_features=None, output_features=None):
         self.input_features = input_features
         self.output_features = output_features
-        self.op = 'string_indexer'
+        self.op = "string_indexer"
         self.name = "{}_{}".format(self.op, uuid.uuid1())
         self.serializable = True
-
 
     def fit(self, X):
         """Fit label encoder
@@ -405,7 +443,7 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
         -------
         y : array-like of shape [n_samples]
         """
-        check_is_fitted(self, 'classes_')
+        check_is_fitted(self, "classes_")
         y = column_or_1d(y, warn=True)
 
         classes = np.unique(y)
@@ -427,7 +465,7 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
         -------
         y : numpy array of shape [n_samples]
         """
-        check_is_fitted(self, 'classes_')
+        check_is_fitted(self, "classes_")
 
         diff = np.setdiff1d(y, np.arange(len(self.classes_)))
         if diff:
@@ -439,30 +477,24 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('labels', self.classes_.tolist()))
-        attributes.append(('nullable_input', False))
+        attributes.append(("labels", self.classes_.tolist()))
+        attributes.append(("nullable_input", False))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": self.input_features[0],
-                  "port": "input"
-                }]
+        inputs = [{"name": self.input_features[0], "port": "input"}]
 
-        outputs = [{
-                  "name": self.output_features,
-                  "port": "output"
-                }]
+        outputs = [{"name": self.output_features, "port": "output"}]
 
         self.serialize(self, path, model_name, attributes, inputs, outputs)
 
     def deserialize_from_bundle(self, node_path, node_name):
 
-        attributes_map = {
-            'labels': 'classes_'
-        }
+        attributes_map = {"labels": "classes_"}
 
         full_node_path = os.path.join(node_path, node_name)
-        transformer = self.deserialize_single_input_output(self, full_node_path, attributes_map)
+        transformer = self.deserialize_single_input_output(
+            self, full_node_path, attributes_map
+        )
 
         return transformer
 
@@ -481,6 +513,7 @@ class MinMaxScalerSerializer(MLeapSerializer, MLeapDeserializer):
     >>>      [ 1.],
     >>>      [ 0.]])
     """
+
     def __init__(self):
         super(MinMaxScalerSerializer, self).__init__()
 
@@ -488,19 +521,13 @@ class MinMaxScalerSerializer(MLeapSerializer, MLeapDeserializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('min', _to_list(transformer.data_min_)))
-        attributes.append(('max', _to_list(transformer.data_max_)))
+        attributes.append(("min", _to_list(transformer.data_min_)))
+        attributes.append(("max", _to_list(transformer.data_max_)))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "input"
-                }]
+        inputs = [{"name": transformer.input_features, "port": "input"}]
 
-        outputs = [{
-                  "name": transformer.output_features,
-                  "port": "output"
-                }]
+        outputs = [{"name": transformer.output_features, "port": "output"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
@@ -509,16 +536,19 @@ class MinMaxScalerSerializer(MLeapSerializer, MLeapDeserializer):
         # Default (and only range supported)
         feature_range = (0, 1)
 
-        attributes_map = {
-            'min': 'data_min_',
-            'max': 'data_max_'
-        }
+        attributes_map = {"min": "data_min_", "max": "data_max_"}
 
         full_node_path = os.path.join(node_path, node_name)
-        transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
-        transformer.data_range_ = np.array(transformer.data_max_) - np.array(transformer.data_min_)
+        transformer = self.deserialize_single_input_output(
+            transformer, full_node_path, attributes_map
+        )
+        transformer.data_range_ = np.array(transformer.data_max_) - np.array(
+            transformer.data_min_
+        )
 
-        transformer.scale_ = ((feature_range[1] - feature_range[0]) / transformer.data_range_)
+        transformer.scale_ = (
+            feature_range[1] - feature_range[0]
+        ) / transformer.data_range_
 
         transformer.min_ = feature_range[0] - transformer.data_min_ * transformer.scale_
 
@@ -534,21 +564,15 @@ class ImputerSerializer(MLeapSerializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('strategy', transformer.strategy))
-        attributes.append(('surrogate_value', transformer.statistics_.tolist()[0]))
+        attributes.append(("strategy", transformer.strategy))
+        attributes.append(("surrogate_value", transformer.statistics_.tolist()[0]))
         if transformer.missing_values != "NaN":
-            attributes.append(('missing_value', transformer.missing_values))
+            attributes.append(("missing_value", transformer.missing_values))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "input"
-                }]
+        inputs = [{"name": transformer.input_features, "port": "input"}]
 
-        outputs = [{
-                  "name": transformer.output_features,
-                  "port": "output"
-                }]
+        outputs = [{"name": transformer.output_features, "port": "output"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
@@ -566,6 +590,7 @@ class StandardScalerSerializer(MLeapSerializer, MLeapDeserializer):
     >>>         [ 1.20740686],
     >>>         [-0.98787834]])
     """
+
     def __init__(self):
         super(StandardScalerSerializer, self).__init__()
 
@@ -573,40 +598,33 @@ class StandardScalerSerializer(MLeapSerializer, MLeapDeserializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('mean', transformer.mean_.tolist()))
-        attributes.append(('std', [np.sqrt(x) for x in transformer.var_]))
+        attributes.append(("mean", transformer.mean_.tolist()))
+        attributes.append(("std", [np.sqrt(x) for x in transformer.var_]))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "input"
-                }]
+        inputs = [{"name": transformer.input_features, "port": "input"}]
 
-        outputs = [{
-                  "name": transformer.output_features,
-                  "port": "output"
-                }]
+        outputs = [{"name": transformer.output_features, "port": "output"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
     def deserialize_from_bundle(self, transformer, node_path, node_name):
 
-        attributes_map = {
-            'mean': 'mean_',
-            'std': 'scale_'
-        }
+        attributes_map = {"mean": "mean_", "std": "scale_"}
 
         # Set serialized attributes
         full_node_path = os.path.join(node_path, node_name)
-        transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
+        transformer = self.deserialize_single_input_output(
+            transformer, full_node_path, attributes_map
+        )
 
         # Set Additional Attributes
-        if 'mean_' in transformer.__dict__:
+        if "mean_" in transformer.__dict__:
             transformer.with_mean = True
         else:
             transformer.with_mean = False
 
-        if 'scale_' in transformer.__dict__:
+        if "scale_" in transformer.__dict__:
             transformer.with_std = True
             transformer.var = np.square(transformer.scale_)
         else:
@@ -620,6 +638,7 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
     A one-hot encoder maps a single column of categorical indices to a
     column of binary vectors, which can be re-assamble back to a DataFrame using a ToDense transformer.
     """
+
     def __init__(self):
         super(OneHotEncoderSerializer, self).__init__()
 
@@ -627,35 +646,29 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('size', transformer.n_values_.tolist()[0]))
+        attributes.append(("size", transformer.n_values_.tolist()[0]))
         # setting drop_last to True, so to that 1HE maintains parity with MLeap/Spark
-        attributes.append(('drop_last', True))
-        if transformer.handle_unknown == 'ignore':
-            attributes.append(('handle_invalid', 'keep'))
+        attributes.append(("drop_last", True))
+        if transformer.handle_unknown == "ignore":
+            attributes.append(("handle_invalid", "keep"))
         else:
-            attributes.append(('handle_invalid', 'error'))
+            attributes.append(("handle_invalid", "error"))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "input"
-                }]
+        inputs = [{"name": transformer.input_features, "port": "input"}]
 
-        outputs = [{
-                  "name": transformer.output_features,
-                  "port": "output"
-                }]
+        outputs = [{"name": transformer.output_features, "port": "output"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
     def deserialize_from_bundle(self, transformer, node_path, node_name):
 
-        attributes_map = {
-            'size': 'n_values_'
-        }
+        attributes_map = {"size": "n_values_"}
 
         full_node_path = os.path.join(node_path, node_name)
-        transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
+        transformer = self.deserialize_single_input_output(
+            transformer, full_node_path, attributes_map
+        )
 
         # Set Sparse = False
         transformer.sparse = False
@@ -673,25 +686,17 @@ class BinarizerSerializer(MLeapSerializer, MLeapDeserializer):
     def __init__(self):
         super(BinarizerSerializer, self).__init__()
 
-
-
     def serialize_to_bundle(self, transformer, path, model_name):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('threshold', float(transformer.threshold)))
+        attributes.append(("threshold", float(transformer.threshold)))
         attributes.append(("input_shapes", transformer.input_shapes))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "input"
-                }]
+        inputs = [{"name": transformer.input_features, "port": "input"}]
 
-        outputs = [{
-                  "name": transformer.output_features,
-                  "port": "output"
-                }]
+        outputs = [{"name": transformer.output_features, "port": "output"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
@@ -711,18 +716,19 @@ class PolynomialExpansionSerializer(MLeapSerializer, MLeapDeserializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('combinations', str(transformer.get_feature_names()).replace("'", "").replace(", ", ",")))
+        attributes.append(
+            (
+                "combinations",
+                str(transformer.get_feature_names())
+                .replace("'", "")
+                .replace(", ", ","),
+            )
+        )
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "input"
-                }]
+        inputs = [{"name": transformer.input_features, "port": "input"}]
 
-        outputs = [{
-                  "name": transformer.output_features,
-                  "port": "output"
-                }]
+        outputs = [{"name": transformer.output_features, "port": "output"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
@@ -737,20 +743,27 @@ class PolynomialExpansionSerializer(MLeapSerializer, MLeapDeserializer):
             node_j = json.load(json_data)
 
         # Set powers
-        transformer.n_input_features_ = len(node_j['shape']['inputs'][0]['name']) # TODO: Make this dynamic
+        transformer.n_input_features_ = len(
+            node_j["shape"]["inputs"][0]["name"]
+        )  # TODO: Make this dynamic
         transformer.interaction_only = False
 
-        transformer.n_output_features_ = sum(1 for _ in transformer._combinations(transformer.n_input_features_,
-                                                                                  transformer.degree,
-                                                                                  transformer.interaction_only,
-                                                                                  transformer.include_bias))
+        transformer.n_output_features_ = sum(
+            1
+            for _ in transformer._combinations(
+                transformer.n_input_features_,
+                transformer.degree,
+                transformer.interaction_only,
+                transformer.include_bias,
+            )
+        )
         return transformer
 
 
 class ReshapeArrayToN1(BaseEstimator, TransformerMixin):
     def __init__(self):
-        self.serializable=False
-        self.op='reshape_array'
+        self.serializable = False
+        self.op = "reshape_array"
         self.name = "{}_{}".format(self.op, uuid.uuid1())
 
     def transform(self, X, **params):
@@ -773,7 +786,7 @@ class NDArrayToDataFrame(BaseEstimator, TransformerMixin):
     def __init__(self, input_features):
         self.input_features = input_features
         self.output_features = input_features
-        self.op = 'one_dim_array_to_dataframe'
+        self.op = "one_dim_array_to_dataframe"
         self.name = "{}_{}".format(self.op, uuid.uuid1())
 
     def transform(self, X, **params):
@@ -788,21 +801,19 @@ class NDArrayToDataFrame(BaseEstimator, TransformerMixin):
         return self.transform(X)
 
     def get_mleap_model(self):
-        js = {
-          "op": self.op
-        }
+        js = {"op": self.op}
         return js
 
     def get_mleap_node(self):
         js = {
-          "name": self.name,
-          "shape": {
-            "inputs": [{'name': x, 'port': 'input{}'.format(self.input_features.index(x))} for x in self.input_features],
-            "outputs": [{
-              "name": self.output_features,
-              "port": "output"
-            }]
-          }
+            "name": self.name,
+            "shape": {
+                "inputs": [
+                    {"name": x, "port": "input{}".format(self.input_features.index(x))}
+                    for x in self.input_features
+                ],
+                "outputs": [{"name": self.output_features, "port": "output"}],
+            },
         }
         return js
 
@@ -816,17 +827,17 @@ class NDArrayToDataFrame(BaseEstimator, TransformerMixin):
         os.mkdir(model_dir)
 
         # Write bundle file
-        with open("{}/{}".format(model_dir, 'model.json'), 'w') as outfile:
+        with open("{}/{}".format(model_dir, "model.json"), "w") as outfile:
             json.dump(self.get_mleap_model(), outfile, indent=3)
 
         # Write node file
-        with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
+        with open("{}/{}".format(model_dir, "node.json"), "w") as outfile:
             json.dump(self.get_mleap_node(), outfile, indent=3)
 
 
 class ToDense(BaseEstimator, TransformerMixin):
     def __init__(self, input_features):
-        self.op = 'dense_transformer'
+        self.op = "dense_transformer"
         self.name = "{}_{}".format(self.op, uuid.uuid1())
         self.input_features = input_features
         self.output_features = input_features
@@ -841,21 +852,16 @@ class ToDense(BaseEstimator, TransformerMixin):
         return self.transform(X)
 
     def get_mleap_model(self):
-        js = {
-          "op": self.op
-        }
+        js = {"op": self.op}
         return js
 
     def get_mleap_node(self):
         js = {
-          "name": self.name,
-          "shape": {
-            "inputs": {'name': self.input_features, 'port': 'input0'},
-            "outputs": [{
-              "name": self.output_features,
-              "port": "output"
-            }]
-          }
+            "name": self.name,
+            "shape": {
+                "inputs": {"name": self.input_features, "port": "input0"},
+                "outputs": [{"name": self.output_features, "port": "output"}],
+            },
         }
         return js
 
@@ -868,11 +874,11 @@ class ToDense(BaseEstimator, TransformerMixin):
         os.mkdir(model_dir)
 
         # Write bundle file
-        with open("{}/{}".format(model_dir, 'model.json'), 'w') as outfile:
+        with open("{}/{}".format(model_dir, "model.json"), "w") as outfile:
             json.dump(self.get_mleap_model(), outfile, indent=3)
 
         # Write node file
-        with open("{}/{}".format(model_dir, 'node.json'), 'w') as outfile:
+        with open("{}/{}".format(model_dir, "node.json"), "w") as outfile:
             json.dump(self.get_mleap_node(), outfile, indent=3)
 
 
@@ -888,9 +894,10 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
     Note, currently we only support 1d-arrays.
     Inputs need to be floats.
     """
+
     def __init__(self, input_features=None, output_features=None, transform_type=None):
-        self.valid_transforms = ['log', 'exp', 'sqrt', 'sin', 'cos', 'tan', 'abs']
-        self.op = 'math_unary'
+        self.valid_transforms = ["log", "exp", "sqrt", "sin", "cos", "tan", "abs"]
+        self.op = "math_unary"
         self.name = "{}_{}".format(self.op, uuid.uuid4())
         self.input_features = input_features
         self.output_features = output_features
@@ -905,7 +912,7 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
         """
         X = column_or_1d(X, warn=True)
         if self.transform_type not in self.valid_transforms:
-                warnings.warn("Invalid transform type.", stacklevel=2)
+            warnings.warn("Invalid transform type.", stacklevel=2)
         return self
 
     def transform(self, y):
@@ -914,20 +921,20 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
         :param y:
         :return:
         """
-        if self.transform_type == 'log':
+        if self.transform_type == "log":
             return np.log(y)
-        elif self.transform_type == 'exp':
+        elif self.transform_type == "exp":
             return np.exp(y)
-        elif self.transform_type == 'sqrt':
+        elif self.transform_type == "sqrt":
             return np.sqrt(y)
-        elif self.transform_type == 'sin':
+        elif self.transform_type == "sin":
             return np.sin(y)
-        elif self.transform_type == 'cos':
+        elif self.transform_type == "cos":
             return np.cos(y)
-        elif self.transform_type == 'tan':
+        elif self.transform_type == "tan":
             return np.tan(y)
-        elif self.transform_type == 'abs':
-             return np.abs(y)
+        elif self.transform_type == "abs":
+            return np.abs(y)
 
     def fit_transform(self, X, y=None, **fit_params):
         """
@@ -945,27 +952,21 @@ class MathUnary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('operation', self.transform_type))
+        attributes.append(("operation", self.transform_type))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": self.input_features[0],
-                  "port": "input"
-                }]
+        inputs = [{"name": self.input_features[0], "port": "input"}]
 
-        outputs = [{
-                  "name": self.output_features,
-                  "port": "output"
-                }]
+        outputs = [{"name": self.output_features, "port": "output"}]
 
         self.serialize(self, path, model_name, attributes, inputs, outputs)
 
     def deserialize_from_bundle(self, node_path, node_name):
-        attributes_map = {
-            'operation': 'transform_type'
-        }
+        attributes_map = {"operation": "transform_type"}
         full_node_path = os.path.join(node_path, node_name)
-        transformer = self.deserialize_single_input_output(self, full_node_path, attributes_map)
+        transformer = self.deserialize_single_input_output(
+            self, full_node_path, attributes_map
+        )
         return transformer
 
 
@@ -982,9 +983,10 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
     These transforms work on 2-dimensional arrays/vectors, where the the first column is x and second column is y.
     Inputs need to be floats.
     """
+
     def __init__(self, input_features=None, output_features=None, transform_type=None):
-        self.valid_transforms = ['add', 'sub', 'mul', 'div', 'rem', 'logn', 'pow']
-        self.op = 'math_binary'
+        self.valid_transforms = ["add", "sub", "mul", "div", "rem", "logn", "pow"]
+        self.op = "math_binary"
         self.name = "{}_{}".format(self.op, uuid.uuid4())
         self.input_features = input_features
         self.output_features = output_features
@@ -1002,7 +1004,7 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
         :return:
         """
         if self.transform_type not in self.valid_transforms:
-                warnings.warn("Invalid transform type.", stacklevel=2)
+            warnings.warn("Invalid transform type.", stacklevel=2)
         return self
 
     def transform(self, y):
@@ -1012,23 +1014,23 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
         :return:
         """
         if isinstance(y, pd.DataFrame):
-            x = y.ix[:,0]
-            y = y.ix[:,1]
+            x = y.ix[:, 0]
+            y = y.ix[:, 1]
         else:
-            x = y[:,0]
-            y = y[:,1]
-        if self.transform_type == 'add':
+            x = y[:, 0]
+            y = y[:, 1]
+        if self.transform_type == "add":
             return pd.DataFrame(np.add(x, y))
-        elif self.transform_type == 'sub':
+        elif self.transform_type == "sub":
             return pd.DataFrame(np.subtract(x, y))
-        elif self.transform_type == 'mul':
+        elif self.transform_type == "mul":
             return pd.DataFrame(np.multiply(x, y))
-        elif self.transform_type == 'div':
+        elif self.transform_type == "div":
             return pd.DataFrame(np.divide(x, y))
-        elif self.transform_type == 'rem':
+        elif self.transform_type == "rem":
             return pd.DataFrame(np.remainder(x, y))
-        elif self.transform_type == 'pow':
-            return pd.DataFrame(x**y)
+        elif self.transform_type == "pow":
+            return pd.DataFrame(x ** y)
 
     def fit_transform(self, X, y=None, **fit_params):
         """
@@ -1046,37 +1048,30 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('operation', self.transform_type))
+        attributes.append(("operation", self.transform_type))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": self.input_features[0],
-                  "port": "input_a"
-                },
-                {
-                    "name": self.input_features[1],
-                    "port": "input_b"
-                }]
+        inputs = [
+            {"name": self.input_features[0], "port": "input_a"},
+            {"name": self.input_features[1], "port": "input_b"},
+        ]
 
-        outputs = [{
-                  "name": self.output_features,
-                  "port": "output"
-                }]
+        outputs = [{"name": self.output_features, "port": "output"}]
 
         self.serialize(self, path, model_name, attributes, inputs, outputs)
 
     def deserialize_from_bundle(self, node_path, node_name):
-        attributes_map = {
-            'operation': 'transform_type'
-        }
+        attributes_map = {"operation": "transform_type"}
         full_node_path = os.path.join(node_path, node_name)
-        transformer = self.deserialize_single_input_output(self, full_node_path, attributes_map)
+        transformer = self.deserialize_single_input_output(
+            self, full_node_path, attributes_map
+        )
         return transformer
 
-class StringMap(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserializer):
 
+class StringMap(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserializer):
     def __init__(self, input_features=None, output_features=None, labels=None):
-        self.op = 'string_map'
+        self.op = "string_map"
         self.name = "{}_{}".format(self.op, uuid.uuid4())
         self.input_features = input_features
         self.output_features = output_features
@@ -1096,7 +1091,7 @@ class StringMap(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
         return self
 
     def transform(self, y):
-       return y.applymap(lambda input : self.labels[input]).values
+        return y.applymap(lambda input: self.labels[input]).values
 
     def fit_transform(self, X, y=None, **fit_params):
         self.fit(X)
@@ -1109,24 +1104,17 @@ class StringMap(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseriali
         attributes.append(("values", Vector(list(self.labels.values()))))
 
         # define node inputs and outputs
-        inputs = [{
-            "name": self.input_features[0],
-            "port": "input"
-        }]
+        inputs = [{"name": self.input_features[0], "port": "input"}]
 
-        outputs = [{
-            "name": self.output_features,
-            "port": "output"
-        }]
+        outputs = [{"name": self.output_features, "port": "output"}]
 
         self.serialize(self, path, model_name, attributes, inputs, outputs)
 
     def deserialize_from_bundle(self, node_path, node_name):
-        attributes_map = {
-            'labels': 'label_keys',
-            'values': 'label_values'
-        }
+        attributes_map = {"labels": "label_keys", "values": "label_values"}
 
         full_node_path = os.path.join(node_path, node_name)
-        transformer = self.deserialize_single_input_output(self, full_node_path, attributes_map)
+        transformer = self.deserialize_single_input_output(
+            self, full_node_path, attributes_map
+        )
         return transformer

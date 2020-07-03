@@ -12,10 +12,8 @@ def jvm_scala_object(jpkg, obj):
     or the scala case object `UnaryOperation.Sin`
         (for reference see file ml.combust.mleap.core.feature.MathUnaryModel)
     """
-    return getattr(
-        getattr(jpkg, obj + "$"),  # JavaClass
-        "MODULE$",  # JavaObject
-    )
+    return getattr(getattr(jpkg, obj + "$"), "MODULE$",)  # JavaClass  # JavaObject
+
 
 def Some(value):
     """
@@ -23,6 +21,7 @@ def Some(value):
     an Option[<value>]
     """
     return _jvm().scala.Some(value)
+
 
 def ScalaNone():
     return jvm_scala_object(_jvm().scala, "None")

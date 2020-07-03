@@ -1,4 +1,3 @@
-
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -25,7 +24,11 @@ import json
 import uuid
 import tempfile
 
-from sklearn.linear_model import LinearRegression, LogisticRegression, LogisticRegressionCV
+from sklearn.linear_model import (
+    LinearRegression,
+    LogisticRegression,
+    LogisticRegressionCV,
+)
 from sklearn.preprocessing import Binarizer
 from mleap.sklearn.base import LinearRegression
 from mleap.sklearn.logistic import LogisticRegression, LogisticRegressionCV
@@ -53,7 +56,9 @@ def to_standard_normal_quartile(rand_num):
 
 class TransformerTests(unittest.TestCase):
     def setUp(self):
-        self.df = pd.DataFrame(np.random.randn(100, 5), columns=['a', 'b', 'c', 'd', 'e'])
+        self.df = pd.DataFrame(
+            np.random.randn(100, 5), columns=["a", "b", "c", "d", "e"]
+        )
         self.tmp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
@@ -62,42 +67,45 @@ class TransformerTests(unittest.TestCase):
     def test_linear_regression_serializer(self):
 
         linear_regression = LinearRegression(fit_intercept=True, normalize=False)
-        linear_regression.mlinit(input_features='a',
-                                 prediction_column='e')
+        linear_regression.mlinit(input_features="a", prediction_column="e")
 
-        linear_regression.fit(self.df[['a']], self.df[['e']])
+        linear_regression.fit(self.df[["a"]], self.df[["e"]])
 
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
 
-
         # Test model.json
-        with open("{}/{}.node/model.json".format(self.tmp_dir, linear_regression.name)) as json_data:
+        with open(
+            "{}/{}.node/model.json".format(self.tmp_dir, linear_regression.name)
+        ) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(model['op'], 'linear_regression')
-        self.assertTrue(model['attributes']['intercept']['double'] is not None)
+        self.assertEqual(model["op"], "linear_regression")
+        self.assertTrue(model["attributes"]["intercept"]["double"] is not None)
 
     def test_linear_regression_deserializer(self):
 
         linear_regression = LinearRegression(fit_intercept=True, normalize=False)
-        linear_regression.mlinit(input_features='a',
-                                 prediction_column='e')
+        linear_regression.mlinit(input_features="a", prediction_column="e")
 
-        linear_regression.fit(self.df[['a']], self.df[['e']])
+        linear_regression.fit(self.df[["a"]], self.df[["e"]])
 
         linear_regression.serialize_to_bundle(self.tmp_dir, linear_regression.name)
 
         # Test model.json
-        with open("{}/{}.node/model.json".format(self.tmp_dir, linear_regression.name)) as json_data:
+        with open(
+            "{}/{}.node/model.json".format(self.tmp_dir, linear_regression.name)
+        ) as json_data:
             model = json.load(json_data)
 
         # Now deserialize it back
         node_name = "{}.node".format(linear_regression.name)
         linear_regression_tf = LinearRegression()
-        linear_regression_tf = linear_regression_tf.deserialize_from_bundle(self.tmp_dir, node_name)
+        linear_regression_tf = linear_regression_tf.deserialize_from_bundle(
+            self.tmp_dir, node_name
+        )
 
-        res_a = linear_regression.predict(self.df[['a']])
-        res_b = linear_regression_tf.predict(self.df[['a']])
+        res_a = linear_regression.predict(self.df[["a"]])
+        res_b = linear_regression_tf.predict(self.df[["a"]])
 
         self.assertEqual(res_a[0], res_b[0])
         self.assertEqual(res_a[1], res_b[1])
@@ -106,64 +114,69 @@ class TransformerTests(unittest.TestCase):
     def test_logistic_regression_serializer(self):
 
         logistic_regression = LogisticRegression(fit_intercept=True)
-        logistic_regression.mlinit(input_features='a',
-                                 prediction_column='e_binary')
+        logistic_regression.mlinit(input_features="a", prediction_column="e_binary")
 
-        extract_features = ['e']
-        feature_extractor = FeatureExtractor(input_scalars=['e'],
-                                         output_vector='extracted_e_output',
-                                         output_vector_items=["{}_out".format(x) for x in extract_features])
+        extract_features = ["e"]
+        feature_extractor = FeatureExtractor(
+            input_scalars=["e"],
+            output_vector="extracted_e_output",
+            output_vector_items=["{}_out".format(x) for x in extract_features],
+        )
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(prior_tf=feature_extractor,
-                         output_features='e_binary')
+        binarizer.mlinit(prior_tf=feature_extractor, output_features="e_binary")
 
-        Xres = binarizer.fit_transform(self.df[['a']])
+        Xres = binarizer.fit_transform(self.df[["a"]])
 
-        logistic_regression.fit(self.df[['a']], Xres)
+        logistic_regression.fit(self.df[["a"]], Xres)
 
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)
 
-
         # Test model.json
-        with open("{}/{}.node/model.json".format(self.tmp_dir, logistic_regression.name)) as json_data:
+        with open(
+            "{}/{}.node/model.json".format(self.tmp_dir, logistic_regression.name)
+        ) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(model['op'], 'logistic_regression')
-        self.assertTrue(model['attributes']['intercept']['double'] is not None)
+        self.assertEqual(model["op"], "logistic_regression")
+        self.assertTrue(model["attributes"]["intercept"]["double"] is not None)
 
     def test_logistic_regression_deserializer(self):
 
         logistic_regression = LogisticRegression(fit_intercept=True)
-        logistic_regression.mlinit(input_features='a',
-                                   prediction_column='e_binary')
+        logistic_regression.mlinit(input_features="a", prediction_column="e_binary")
 
-        extract_features = ['e']
-        feature_extractor = FeatureExtractor(input_scalars=['e'],
-                                         output_vector='extracted_e_output',
-                                         output_vector_items=["{}_out".format(x) for x in extract_features])
+        extract_features = ["e"]
+        feature_extractor = FeatureExtractor(
+            input_scalars=["e"],
+            output_vector="extracted_e_output",
+            output_vector_items=["{}_out".format(x) for x in extract_features],
+        )
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(prior_tf=feature_extractor,
-                         output_features='e_binary')
+        binarizer.mlinit(prior_tf=feature_extractor, output_features="e_binary")
 
-        Xres = binarizer.fit_transform(self.df[['a']])
+        Xres = binarizer.fit_transform(self.df[["a"]])
 
-        logistic_regression.fit(self.df[['a']], Xres)
+        logistic_regression.fit(self.df[["a"]], Xres)
 
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)
 
         # Test model.json
-        with open("{}/{}.node/model.json".format(self.tmp_dir, logistic_regression.name)) as json_data:
+        with open(
+            "{}/{}.node/model.json".format(self.tmp_dir, logistic_regression.name)
+        ) as json_data:
             model = json.load(json_data)
 
         # Now deserialize it back
         node_name = "{}.node".format(logistic_regression.name)
         logistic_regression_tf = LogisticRegression()
-        logistic_regression_tf = logistic_regression_tf.deserialize_from_bundle(self.tmp_dir, node_name)
+        logistic_regression_tf = logistic_regression_tf.deserialize_from_bundle(
+            self.tmp_dir, node_name
+        )
 
-        res_a = logistic_regression.predict(self.df[['a']])
-        res_b = logistic_regression_tf.predict(self.df[['a']])
+        res_a = logistic_regression.predict(self.df[["a"]])
+        res_b = logistic_regression_tf.predict(self.df[["a"]])
 
         self.assertEqual(res_a[0], res_b[0])
         self.assertEqual(res_a[1], res_b[1])
@@ -172,43 +185,51 @@ class TransformerTests(unittest.TestCase):
     def test_multinomial_logistic_regression_serializer(self):
 
         logistic_regression = LogisticRegression(fit_intercept=True)
-        logistic_regression.mlinit(
-            input_features='a',
-            prediction_column='prediction'
-        )
+        logistic_regression.mlinit(input_features="a", prediction_column="prediction")
 
-        X = self.df[['a']]
+        X = self.df[["a"]]
         y = np.array([to_standard_normal_quartile(elem) for elem in X.to_numpy()])
 
         logistic_regression.fit(X, y)
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)
 
-        with open("{}/{}.node/model.json".format(self.tmp_dir, logistic_regression.name)) as json_data:
+        with open(
+            "{}/{}.node/model.json".format(self.tmp_dir, logistic_regression.name)
+        ) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(model['op'], 'logistic_regression')
-        self.assertEqual(model['attributes']['num_classes']['long'], 4)
+        self.assertEqual(model["op"], "logistic_regression")
+        self.assertEqual(model["attributes"]["num_classes"]["long"], 4)
 
         # assert 4x1 coefficient matrix
-        self.assertEqual(len(model['attributes']['coefficient_matrix']['double']), 4)
-        self.assertEqual(len(model['attributes']['coefficient_matrix']['shape']['dimensions']), 2)
-        self.assertEqual(model['attributes']['coefficient_matrix']['shape']['dimensions'][0]['size'], 4)
-        self.assertEqual(model['attributes']['coefficient_matrix']['shape']['dimensions'][1]['size'], 1)
+        self.assertEqual(len(model["attributes"]["coefficient_matrix"]["double"]), 4)
+        self.assertEqual(
+            len(model["attributes"]["coefficient_matrix"]["shape"]["dimensions"]), 2
+        )
+        self.assertEqual(
+            model["attributes"]["coefficient_matrix"]["shape"]["dimensions"][0]["size"],
+            4,
+        )
+        self.assertEqual(
+            model["attributes"]["coefficient_matrix"]["shape"]["dimensions"][1]["size"],
+            1,
+        )
 
         # assert 4x0 intercept vector
-        self.assertEqual(len(model['attributes']['intercept_vector']['double']), 4)
-        self.assertEqual(len(model['attributes']['intercept_vector']['shape']['dimensions']), 1)
-        self.assertEqual(model['attributes']['intercept_vector']['shape']['dimensions'][0]['size'], 4)
+        self.assertEqual(len(model["attributes"]["intercept_vector"]["double"]), 4)
+        self.assertEqual(
+            len(model["attributes"]["intercept_vector"]["shape"]["dimensions"]), 1
+        )
+        self.assertEqual(
+            model["attributes"]["intercept_vector"]["shape"]["dimensions"][0]["size"], 4
+        )
 
     def test_multinomial_logistic_regression_deserializer(self):
 
         logistic_regression = LogisticRegression(fit_intercept=True)
-        logistic_regression.mlinit(
-            input_features='a',
-            prediction_column='prediction'
-        )
+        logistic_regression.mlinit(input_features="a", prediction_column="prediction")
 
-        X = self.df[['a']]
+        X = self.df[["a"]]
         y = np.array([to_standard_normal_quartile(elem) for elem in X.to_numpy()])
 
         logistic_regression.fit(X, y)
@@ -216,74 +237,81 @@ class TransformerTests(unittest.TestCase):
 
         node_name = "{}.node".format(logistic_regression.name)
         logistic_regression_tf = LogisticRegression()
-        logistic_regression_tf = logistic_regression_tf.deserialize_from_bundle(self.tmp_dir, node_name)
+        logistic_regression_tf = logistic_regression_tf.deserialize_from_bundle(
+            self.tmp_dir, node_name
+        )
 
-        expected = logistic_regression.predict(self.df[['a']])
-        actual = logistic_regression_tf.predict(self.df[['a']])
+        expected = logistic_regression.predict(self.df[["a"]])
+        actual = logistic_regression_tf.predict(self.df[["a"]])
 
         np.testing.assert_array_equal(expected, actual)
 
     def test_logistic_regression_cv_serializer(self):
 
         logistic_regression = LogisticRegressionCV(fit_intercept=True)
-        logistic_regression.mlinit(input_features='a',
-                                 prediction_column='e_binary')
+        logistic_regression.mlinit(input_features="a", prediction_column="e_binary")
 
-        extract_features = ['e']
-        feature_extractor = FeatureExtractor(input_scalars=['e'],
-                                             output_vector='extracted_e_output',
-                                             output_vector_items=["{}_out".format(x) for x in extract_features])
+        extract_features = ["e"]
+        feature_extractor = FeatureExtractor(
+            input_scalars=["e"],
+            output_vector="extracted_e_output",
+            output_vector_items=["{}_out".format(x) for x in extract_features],
+        )
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(prior_tf=feature_extractor,
-                         output_features='e_binary')
+        binarizer.mlinit(prior_tf=feature_extractor, output_features="e_binary")
 
-        Xres = binarizer.fit_transform(self.df[['a']])
+        Xres = binarizer.fit_transform(self.df[["a"]])
 
-        logistic_regression.fit(self.df[['a']], Xres)
+        logistic_regression.fit(self.df[["a"]], Xres)
 
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)
 
-
         # Test model.json
-        with open("{}/{}.node/model.json".format(self.tmp_dir, logistic_regression.name)) as json_data:
+        with open(
+            "{}/{}.node/model.json".format(self.tmp_dir, logistic_regression.name)
+        ) as json_data:
             model = json.load(json_data)
 
-        self.assertEqual(model['op'], 'logistic_regression')
-        self.assertTrue(model['attributes']['intercept']['double'] is not None)
+        self.assertEqual(model["op"], "logistic_regression")
+        self.assertTrue(model["attributes"]["intercept"]["double"] is not None)
 
     def test_logistic_regression_cv_deserializer(self):
 
         logistic_regression = LogisticRegressionCV(fit_intercept=True)
-        logistic_regression.mlinit(input_features='a',
-                                   prediction_column='e_binary')
+        logistic_regression.mlinit(input_features="a", prediction_column="e_binary")
 
-        extract_features = ['e']
-        feature_extractor = FeatureExtractor(input_scalars=['e'],
-                                             output_vector='extracted_e_output',
-                                             output_vector_items=["{}_out".format(x) for x in extract_features])
+        extract_features = ["e"]
+        feature_extractor = FeatureExtractor(
+            input_scalars=["e"],
+            output_vector="extracted_e_output",
+            output_vector_items=["{}_out".format(x) for x in extract_features],
+        )
 
         binarizer = Binarizer(threshold=0.0)
-        binarizer.mlinit(prior_tf=feature_extractor,
-                         output_features='e_binary')
+        binarizer.mlinit(prior_tf=feature_extractor, output_features="e_binary")
 
-        Xres = binarizer.fit_transform(self.df[['a']])
+        Xres = binarizer.fit_transform(self.df[["a"]])
 
-        logistic_regression.fit(self.df[['a']], Xres)
+        logistic_regression.fit(self.df[["a"]], Xres)
 
         logistic_regression.serialize_to_bundle(self.tmp_dir, logistic_regression.name)
 
         # Test model.json
-        with open("{}/{}.node/model.json".format(self.tmp_dir, logistic_regression.name)) as json_data:
+        with open(
+            "{}/{}.node/model.json".format(self.tmp_dir, logistic_regression.name)
+        ) as json_data:
             model = json.load(json_data)
 
         # Now deserialize it back
         node_name = "{}.node".format(logistic_regression.name)
         logistic_regression_tf = LogisticRegressionCV()
-        logistic_regression_tf = logistic_regression_tf.deserialize_from_bundle(self.tmp_dir, node_name)
+        logistic_regression_tf = logistic_regression_tf.deserialize_from_bundle(
+            self.tmp_dir, node_name
+        )
 
-        res_a = logistic_regression.predict(self.df[['a']])
-        res_b = logistic_regression_tf.predict(self.df[['a']])
+        res_a = logistic_regression.predict(self.df[["a"]])
+        res_b = logistic_regression_tf.predict(self.df[["a"]])
 
         self.assertEqual(res_a[0], res_b[0])
         self.assertEqual(res_a[1], res_b[1])

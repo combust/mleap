@@ -29,8 +29,9 @@ def deserializeFromBundle(path):
     serializer = SimpleSparkSerializer()
     return serializer.deserializeFromBundle(path)
 
-setattr(Transformer, 'serializeToBundle', serializeToBundle)
-setattr(Transformer, 'deserializeFromBundle', staticmethod(deserializeFromBundle))
+
+setattr(Transformer, "serializeToBundle", serializeToBundle)
+setattr(Transformer, "deserializeFromBundle", staticmethod(deserializeFromBundle))
 
 
 class SimpleSparkSerializer(object):

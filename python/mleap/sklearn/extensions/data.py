@@ -22,6 +22,7 @@ from sklearn.preprocessing import Imputer as SklearnImputer
 from mleap.sklearn.preprocessing.data import ImputerSerializer
 import pandas as pd
 
+
 class DefineEstimator(BaseEstimator, TransformerMixin):
     def __init__(self, transformer):
         """
@@ -33,22 +34,22 @@ class DefineEstimator(BaseEstimator, TransformerMixin):
         :param transformer: Estimator (linear regression, random forest, etc)
         :return: Estimator
         """
-        self.op = 'define_estimator'
+        self.op = "define_estimator"
         self.name = "{}_{}".format(self.op, uuid.uuid4())
         self.transformer = transformer
-        self.serializable=False
+        self.serializable = False
 
     def fit(self, X, y, sample_weight=None):
         return self.transformer.fit(X[:, :-1], X[:, -1:])
 
     def transform(self, X):
-        return self.transformer.predict(X[:,:-1])
+        return self.transformer.predict(X[:, :-1])
 
     def fit_transform(self, X, y=None, **fit_params):
-        return self.transformer.fit_transform(X[:,:-1], X[:,-1:])
+        return self.transformer.fit_transform(X[:, :-1], X[:, -1:])
 
     def predict(self, X):
-        return self.transformer.predict(X[:,:-1])
+        return self.transformer.predict(X[:, :-1])
 
 
 """
@@ -61,17 +62,28 @@ in the fit() and transform() methods.
 This is because the Imputer both in Spark and MLeap operates on a scalar value and if we were to add a feature extractor in
 front of it, then it would serialize as operating on a tensor and thus, fail at scoring time. 
 """
-class Imputer(SklearnImputer):
 
-    def __init__(self, missing_values="NaN", strategy="mean",
-                 axis=0, verbose=0, copy=True, input_features=None, output_features=None):
+
+class Imputer(SklearnImputer):
+    def __init__(
+        self,
+        missing_values="NaN",
+        strategy="mean",
+        axis=0,
+        verbose=0,
+        copy=True,
+        input_features=None,
+        output_features=None,
+    ):
         self.name = "{}_{}".format(self.op, uuid.uuid1())
         self.input_features = input_features
         self.output_features = output_features
-        self.input_shapes = {'data_shape': [{'shape': 'scalar'}]}
-        self.feature_extractor = FeatureExtractor(input_scalars=[input_features],
-                                                  output_vector='extracted_' + output_features,
-                                                  output_vector_items=[output_features])
+        self.input_shapes = {"data_shape": [{"shape": "scalar"}]}
+        self.feature_extractor = FeatureExtractor(
+            input_scalars=[input_features],
+            output_vector="extracted_" + output_features,
+            output_vector_items=[output_features],
+        )
         SklearnImputer.__init__(self, missing_values, strategy, axis, verbose, copy)
 
     def fit(self, X, y=None):
@@ -79,7 +91,9 @@ class Imputer(SklearnImputer):
         return self
 
     def transform(self, X):
-        return pd.DataFrame(super(Imputer, self).transform(self.feature_extractor.transform(X)))
+        return pd.DataFrame(
+            super(Imputer, self).transform(self.feature_extractor.transform(X))
+        )
 
     def serialize_to_bundle(self, path, model_name):
         ImputerSerializer().serialize_to_bundle(self, path, model_name)

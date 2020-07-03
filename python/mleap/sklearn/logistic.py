@@ -38,17 +38,18 @@ def deserialize_from_bundle(self, path, node_name):
     serializer = SimpleSerializer()
     return serializer.deserialize_from_bundle(self, path, node_name)
 
-setattr(LogisticRegression, 'op', 'logistic_regression')
-setattr(LogisticRegression, 'mlinit', mleap_init)
-setattr(LogisticRegression, 'serialize_to_bundle', serialize_to_bundle)
-setattr(LogisticRegression, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(LogisticRegression, 'serializable', True)
 
-setattr(LogisticRegressionCV, 'op', 'logistic_regression')
-setattr(LogisticRegressionCV, 'mlinit', mleap_init)
-setattr(LogisticRegressionCV, 'serialize_to_bundle', serialize_to_bundle)
-setattr(LogisticRegressionCV, 'deserialize_from_bundle', deserialize_from_bundle)
-setattr(LogisticRegressionCV, 'serializable', True)
+setattr(LogisticRegression, "op", "logistic_regression")
+setattr(LogisticRegression, "mlinit", mleap_init)
+setattr(LogisticRegression, "serialize_to_bundle", serialize_to_bundle)
+setattr(LogisticRegression, "deserialize_from_bundle", deserialize_from_bundle)
+setattr(LogisticRegression, "serializable", True)
+
+setattr(LogisticRegressionCV, "op", "logistic_regression")
+setattr(LogisticRegressionCV, "mlinit", mleap_init)
+setattr(LogisticRegressionCV, "serialize_to_bundle", serialize_to_bundle)
+setattr(LogisticRegressionCV, "deserialize_from_bundle", deserialize_from_bundle)
+setattr(LogisticRegressionCV, "serializable", True)
 
 
 class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
@@ -70,47 +71,45 @@ class SimpleSerializer(MLeapSerializer, MLeapDeserializer):
         # compile tuples of model attributes to serialize
         attributes = list()
         if num_classes > 2:
-            attributes.append(('coefficient_matrix', transformer.coef_))
-            attributes.append(('intercept_vector', transformer.intercept_))
+            attributes.append(("coefficient_matrix", transformer.coef_))
+            attributes.append(("intercept_vector", transformer.intercept_))
         else:
-            attributes.append(('coefficients', transformer.coef_.tolist()[0]))
-            attributes.append(('intercept', transformer.intercept_.tolist()[0]))
-        attributes.append(('num_classes', num_classes))
+            attributes.append(("coefficients", transformer.coef_.tolist()[0]))
+            attributes.append(("intercept", transformer.intercept_.tolist()[0]))
+        attributes.append(("num_classes", num_classes))
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "features"
-                }]
+        inputs = [{"name": transformer.input_features, "port": "features"}]
 
-        outputs = [{
-                  "name": transformer.prediction_column,
-                  "port": "prediction"
-                }]
+        outputs = [{"name": transformer.prediction_column, "port": "prediction"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
     def deserialize_from_bundle(self, transformer, node_path, node_name):
 
         attributes_map = {
-            'coefficients': 'coef_',
-            'coefficient_matrix': 'coef_',
-            'intercept': 'intercept_',
-            'intercept_vector': 'intercept_',
+            "coefficients": "coef_",
+            "coefficient_matrix": "coef_",
+            "intercept": "intercept_",
+            "intercept_vector": "intercept_",
         }
 
         # Set serialized attributes
         full_node_path = os.path.join(node_path, node_name)
-        transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
+        transformer = self.deserialize_single_input_output(
+            transformer, full_node_path, attributes_map
+        )
 
         # Set Additional Attributes
-        if 'intercept_' in transformer.__dict__:
+        if "intercept_" in transformer.__dict__:
             transformer.fit_intercept = True
         else:
             transformer.fit_intercept = False
 
         if transformer.num_classes > 2:
-            transformer.coef_ = np.reshape(transformer.coef_, (transformer.num_classes, -1))
+            transformer.coef_ = np.reshape(
+                transformer.coef_, (transformer.num_classes, -1)
+            )
         else:
             transformer.coef_ = np.reshape(transformer.coef_, (1, -1))
 

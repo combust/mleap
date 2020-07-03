@@ -35,15 +35,15 @@ def serialize_to_bundle(self, path, model_name):
     return serializer.serialize_to_bundle(self, path, model_name)
 
 
-setattr(RandomForestRegressor, 'op', 'random_forest_regression')
-setattr(RandomForestRegressor, 'mlinit', mleap_init)
-setattr(RandomForestRegressor, 'serialize_to_bundle', serialize_to_bundle)
-setattr(RandomForestRegressor, 'serializable', True)
+setattr(RandomForestRegressor, "op", "random_forest_regression")
+setattr(RandomForestRegressor, "mlinit", mleap_init)
+setattr(RandomForestRegressor, "serialize_to_bundle", serialize_to_bundle)
+setattr(RandomForestRegressor, "serializable", True)
 
-setattr(RandomForestClassifier, 'op', 'random_forest_classifier')
-setattr(RandomForestClassifier, 'mlinit', mleap_init)
-setattr(RandomForestClassifier, 'serialize_to_bundle', serialize_to_bundle)
-setattr(RandomForestClassifier, 'serializable', True)
+setattr(RandomForestClassifier, "op", "random_forest_classifier")
+setattr(RandomForestClassifier, "mlinit", mleap_init)
+setattr(RandomForestClassifier, "serialize_to_bundle", serialize_to_bundle)
+setattr(RandomForestClassifier, "serializable", True)
 
 
 class SimpleSerializer(MLeapSerializer):
@@ -62,35 +62,30 @@ class SimpleSerializer(MLeapSerializer):
         """
 
         # Define Node Inputs and Outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "features"
-                }]
+        inputs = [{"name": transformer.input_features, "port": "features"}]
 
         outputs = list()
-        outputs.append({
-                  "name": transformer.prediction_column,
-                  "port": "prediction"
-                })
+        outputs.append({"name": transformer.prediction_column, "port": "prediction"})
 
-        outputs.append({
-              "name": "raw_prediction",
-              "port": "raw_prediction"
-             })
+        outputs.append({"name": "raw_prediction", "port": "raw_prediction"})
 
-        outputs.append({
-              "name": "probability",
-              "port": "probability"
-            })
+        outputs.append({"name": "probability", "port": "probability"})
 
         # compile tuples of model attributes to serialize
         tree_weights = Vector([1.0 for x in range(0, len(transformer.estimators_))])
         attributes = list()
-        attributes.append(('num_features', transformer.n_features_))
-        attributes.append(('tree_weights', tree_weights))
-        attributes.append(('trees', ["tree{}".format(x) for x in range(0, len(transformer.estimators_))]))
+        attributes.append(("num_features", transformer.n_features_))
+        attributes.append(("tree_weights", tree_weights))
+        attributes.append(
+            (
+                "trees",
+                ["tree{}".format(x) for x in range(0, len(transformer.estimators_))],
+            )
+        )
         if isinstance(transformer, RandomForestClassifier):
-            attributes.append(('num_classes', transformer.n_classes_)) # TODO: get number of classes from the transformer
+            attributes.append(
+                ("num_classes", transformer.n_classes_)
+            )  # TODO: get number of classes from the transformer
 
         self.serialize(transformer, path, model, attributes, inputs, outputs)
 
@@ -100,7 +95,11 @@ class SimpleSerializer(MLeapSerializer):
 
         i = 0
         for estimator in estimators:
-            estimator.mlinit(input_features = transformer.input_features, prediction_column = transformer.prediction_column, feature_names=transformer.feature_names)
+            estimator.mlinit(
+                input_features=transformer.input_features,
+                prediction_column=transformer.prediction_column,
+                feature_names=transformer.feature_names,
+            )
             model_name = "tree{}".format(i)
             estimator.serialize_to_bundle(rf_path, model_name, serialize_node=False)
 

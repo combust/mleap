@@ -3,9 +3,9 @@ from pandas.testing import assert_frame_equal
 
 
 def _print_dfs(actual, expected):
-    print('actual.show(100):')
+    print("actual.show(100):")
     actual.show(100, False)
-    print('expected.show(100):')
+    print("expected.show(100):")
     expected.show(100, False)
 
 
@@ -26,10 +26,14 @@ def assert_df(actual, expected, sort=True):
         _print_dfs(actual, expected)
         # assert_frame_equal doesn't print the column name, only the index
         #   -> get the index from message with regex & resolve column name
-        matcher = re.search(r'iloc\[:, (\d+)\]', e.args[0])
+        matcher = re.search(r"iloc\[:, (\d+)\]", e.args[0])
         if matcher:
             iloc = matcher.group(1)
             if iloc is not None:
-                raise AssertionError("failed assert on column '{}': {}".format(actual.columns[int(iloc)], e))
+                raise AssertionError(
+                    "failed assert on column '{}': {}".format(
+                        actual.columns[int(iloc)], e
+                    )
+                )
         # couldn't extract column name. unexpected.
         raise e

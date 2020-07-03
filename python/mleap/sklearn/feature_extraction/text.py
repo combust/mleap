@@ -23,8 +23,8 @@ import uuid
 
 class ops(object):
     def __init__(self):
-        self.COUNT_VECTORIZER = 'tokenizer'
-        self.TF_IDF_VECTORIZER = 'pipeline'
+        self.COUNT_VECTORIZER = "tokenizer"
+        self.TF_IDF_VECTORIZER = "pipeline"
 
 
 ops = ops()
@@ -46,15 +46,15 @@ def mleap_init(self, input_features, prediction_column):
     self.prediction_column = prediction_column
 
 
-setattr(TfidfVectorizer, 'op', ops.TF_IDF_VECTORIZER)
-setattr(TfidfVectorizer, 'mlinit', mleap_init)
-setattr(TfidfVectorizer, 'serialize_to_bundle', serialize_to_bundle)
-setattr(TfidfVectorizer, 'serializable', True)
+setattr(TfidfVectorizer, "op", ops.TF_IDF_VECTORIZER)
+setattr(TfidfVectorizer, "mlinit", mleap_init)
+setattr(TfidfVectorizer, "serialize_to_bundle", serialize_to_bundle)
+setattr(TfidfVectorizer, "serializable", True)
 
-setattr(CountVectorizer, 'op', ops.COUNT_VECTORIZER)
-setattr(CountVectorizer, 'mlinit', mleap_init)
-setattr(CountVectorizer, 'serialize_to_bundle', serialize_to_bundle)
-setattr(CountVectorizer, 'serializable', True)
+setattr(CountVectorizer, "op", ops.COUNT_VECTORIZER)
+setattr(CountVectorizer, "mlinit", mleap_init)
+setattr(CountVectorizer, "serialize_to_bundle", serialize_to_bundle)
+setattr(CountVectorizer, "serializable", True)
 
 
 class SimpleSerializer(object):
@@ -95,15 +95,9 @@ class CountVectorizerSerializer(MLeapSerializer):
         attributes = None
 
         # define node inputs and outputs
-        inputs = [{
-                  "name": transformer.input_features,
-                  "port": "input"
-                  }]
+        inputs = [{"name": transformer.input_features, "port": "input"}]
 
-        outputs = [{
-                  "name": transformer.prediction_column,
-                  "port": "output"
-                   }]
+        outputs = [{"name": transformer.prediction_column, "port": "output"}]
 
         self.serialize(transformer, path, model_name, attributes, inputs, outputs)
 
@@ -130,37 +124,29 @@ class TfidfVectorizerSerializer(MLeapSerializer):
             vocabulary[termidx] = str(term)
 
         tf_attributes = [
-            ('vocabulary', vocabulary),
-            ('binary', transformer.binary),
+            ("vocabulary", vocabulary),
+            ("binary", transformer.binary),
             # no concept of 'min_tf' in scikit's TfidfVectorizer
-            ('min_tf', 0)
+            ("min_tf", 0),
         ]
-        tf_inputs = [{
-            "name": transformer.input_features,
-            "port": "input"
-        }]
-        tf_outputs = [{
-            "name": "token_counts",
-            "port": "output"
-        }]
-        tf_step = TfidfStep(transformer, 'count_vectorizer', tf_attributes, tf_inputs, tf_outputs)
+        tf_inputs = [{"name": transformer.input_features, "port": "input"}]
+        tf_outputs = [{"name": "token_counts", "port": "output"}]
+        tf_step = TfidfStep(
+            transformer, "count_vectorizer", tf_attributes, tf_inputs, tf_outputs
+        )
 
-        idf_attributes = [
-            ('idf', transformer.idf_.tolist())
-        ]
-        idf_inputs = [{
-            "name": tf_outputs[0]['name'],
-            "port": "input"
-        }]
-        idf_outputs = [{
-            "name": transformer.prediction_column,
-            "port": "output"
-        }]
-        idf_step = TfidfStep(transformer, 'idf', idf_attributes, idf_inputs, idf_outputs)
+        idf_attributes = [("idf", transformer.idf_.tolist())]
+        idf_inputs = [{"name": tf_outputs[0]["name"], "port": "input"}]
+        idf_outputs = [{"name": transformer.prediction_column, "port": "output"}]
+        idf_step = TfidfStep(
+            transformer, "idf", idf_attributes, idf_inputs, idf_outputs
+        )
 
-        pipeline_step = TfidfStep(transformer, 'pipeline', None, None, None)
-        pipeline_step.steps = [('tf', tf_step), ('idf', idf_step)]
-        self.pipeline_serializer.serialize_to_bundle(pipeline_step, path, model_name, True)
+        pipeline_step = TfidfStep(transformer, "pipeline", None, None, None)
+        pipeline_step.steps = [("tf", tf_step), ("idf", idf_step)]
+        self.pipeline_serializer.serialize_to_bundle(
+            pipeline_step, path, model_name, True
+        )
 
 
 class TfidfStep(MLeapSerializer):
@@ -175,4 +161,6 @@ class TfidfStep(MLeapSerializer):
         self.serializable = True
 
     def serialize_to_bundle(self, path, model_name):
-        self.serialize(self, path, model_name, self.attributes, self.inputs, self.outputs)
+        self.serialize(
+            self, path, model_name, self.attributes, self.inputs, self.outputs
+        )

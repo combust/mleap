@@ -104,7 +104,7 @@ class XGBoostClassificationModelParitySpec extends FunSpec
     val booster = trainBooster(binomialDataset)
     val xgboostTransformer = trainXGBoost4jClassifier
 
-    equalityTestRowByRow(booster, xgboostTransformer, leapFrameLibSVMtrain)
+    equalityTestRowByRow(booster, xgboostTransformer, leapFrameBinomial)
   }
 
   it("has the correct inputs and outputs with columns: prediction, probability and raw_prediction") {
@@ -124,8 +124,8 @@ class XGBoostClassificationModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    val preSerializationResult = xgboostTransformer.transform(leapFrameLibSVMtrain).get
-    val deserializedModelResult = deserializedTransformer.transform(leapFrameLibSVMtrain).get
+    val preSerializationResult = xgboostTransformer.transform(leapFrameBinomial).get
+    val deserializedModelResult = deserializedTransformer.transform(leapFrameBinomial).get
 
     assert(preSerializationResult.dataset == deserializedModelResult.dataset)
   }
@@ -134,7 +134,7 @@ class XGBoostClassificationModelParitySpec extends FunSpec
     val multiBooster = trainMultinomialBooster(multinomialDataset)
     val xgboostTransformer = trainMultinomialXGBoost4jClassifier
 
-    equalityTestRowByRowMultinomial(multiBooster, xgboostTransformer, leapFrameIrisTrain)
+    equalityTestRowByRowMultinomial(multiBooster, xgboostTransformer, leapFrameMultinomial)
   }
 
   it("XGBoostMultinomialClassificationModel results are the same pre and post serialization") {
@@ -143,8 +143,8 @@ class XGBoostClassificationModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    val preSerializationResult = xgboostTransformer.transform(leapFrameIrisTrain).get
-    val deserializedResult = deserializedTransformer.transform(leapFrameIrisTrain).get
+    val preSerializationResult = xgboostTransformer.transform(leapFrameMultinomial).get
+    val deserializedResult = deserializedTransformer.transform(leapFrameMultinomial).get
 
     assert(preSerializationResult.dataset == deserializedResult.dataset)
   }
@@ -155,7 +155,7 @@ class XGBoostClassificationModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    val denseLeapFrame = toDenseFeaturesLeapFrame(leapFrameLibSVMtrain)
+    val denseLeapFrame = toDenseFeaturesLeapFrame(leapFrameBinomial)
 
     val preSerializationResult = xgboostTransformer.transform(denseLeapFrame).get
     val deserializedResult = deserializedTransformer.transform(denseLeapFrame).get

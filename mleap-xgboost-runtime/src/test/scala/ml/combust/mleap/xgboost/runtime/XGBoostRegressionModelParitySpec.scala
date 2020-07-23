@@ -22,7 +22,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
     XGBoostRegression(
       "xgboostSingleThread",
       NodeShape.regression(),
-      XGBoostRegressionModel(booster, numFeatures(leapFrameLibSVMtrain), 0)
+      XGBoostRegressionModel(booster, numFeatures(leapFrameBinomial), 0)
     )
   }
 
@@ -50,7 +50,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    equalityTestRowByRow(booster, deserializedTransformer, leapFrameLibSVMtrain)
+    equalityTestRowByRow(booster, deserializedTransformer, leapFrameBinomial)
   }
 
   it("has the correct inputs and outputs with columns: prediction, probability and raw_prediction") {
@@ -69,8 +69,8 @@ class XGBoostRegressionModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    val preSerializationResult = xgboostTransformer.transform(leapFrameLibSVMtrain).get
-    val deserializedModelResult = deserializedTransformer.transform(leapFrameLibSVMtrain).get
+    val preSerializationResult = xgboostTransformer.transform(leapFrameBinomial).get
+    val deserializedModelResult = deserializedTransformer.transform(leapFrameBinomial).get
 
     assert(preSerializationResult.dataset == deserializedModelResult.dataset)
   }
@@ -81,7 +81,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    val denseLeapFrame = toDenseFeaturesLeapFrame(leapFrameLibSVMtrain)
+    val denseLeapFrame = toDenseFeaturesLeapFrame(leapFrameBinomial)
 
     val preSerializationResult = xgboostTransformer.transform(denseLeapFrame).get
     val deserializedResult = deserializedTransformer.transform(denseLeapFrame).get

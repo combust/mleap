@@ -10,17 +10,18 @@ import org.apache.spark.sql.mleap.TypeConverters
 
 trait CachedDatasetUtils {
 
-  private final val TrainDataFilePath = "datasources/agaricus.train"
+  private final val TrainDataFilePath = "datasources/diabetes.txt"
   private final val TrainDataMultinomialFilePath = "datasources/iris.scale.txt"
 
+  // indexing_mode is necessary to tell xgboost that features start from 1, not 0 (xgboost default is 0)
   val binomialDataset: DMatrix =
-    new DMatrix(this.getClass.getClassLoader.getResource(TrainDataFilePath).getFile)
+    new DMatrix(this.getClass.getClassLoader.getResource(TrainDataFilePath).getFile + "?indexing_mode=1")
 
   val multinomialDataset: DMatrix =
-    new DMatrix(this.getClass.getClassLoader.getResource(TrainDataMultinomialFilePath).getFile)
+    new DMatrix(this.getClass.getClassLoader.getResource(TrainDataMultinomialFilePath).getFile + "?indexing_mode=1")
 
-  lazy val leapFrameLibSVMtrain: DefaultLeapFrame = leapFrameFromLibSVMFile(TrainDataFilePath)
-  lazy val leapFrameIrisTrain: DefaultLeapFrame = leapFrameFromLibSVMFile(TrainDataMultinomialFilePath)
+  lazy val leapFrameBinomial: DefaultLeapFrame = leapFrameFromLibSVMFile(TrainDataFilePath)
+  lazy val leapFrameMultinomial: DefaultLeapFrame = leapFrameFromLibSVMFile(TrainDataMultinomialFilePath)
 
   def numFeatures(dataset: DefaultLeapFrame): Int =
     dataset.schema.getField("features").get.dataType.asInstanceOf[TensorType].dimensions.get.head

@@ -7,7 +7,7 @@ if [[ $TRAVIS_BRANCH == 'master' ]] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; the
       "+ mleap-executor-tests/test" \
       "+ mleap-benchmark/test" \
       "+ mleap-xgboost-runtime/test" \
-      "mleap-xgboost-spark/test" \
+      "+ mleap-xgboost-spark/test" \
       "+ publishSigned" \
       "mleap-xgboost-runtime/publishSigned" \
       "mleap-xgboost-spark/publishSigned" \
@@ -18,5 +18,5 @@ else
       "+ mleap-executor-tests/test" \
       "+ mleap-benchmark/test" \
       "+ mleap-xgboost-runtime/test" \
-      "mleap-xgboost-spark/test"
+      "+ mleap-xgboost-spark/test"
 fi

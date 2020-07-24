@@ -18,6 +18,7 @@ object Dependencies {
   val tensorflowVersion = "1.11.0"
   val xgboostVersion = "1.0.0"
   val hadoopVersion = "2.6.5" // matches spark version
+  val kryoVersion = "4.0.2" // Remove upon upgrading to xgboost 1.1.1
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
@@ -67,10 +68,12 @@ object Dependencies {
       "ch.qos.logback" % "logback-classic" % logbackVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
-    val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion
-    val xgboostPredictorDep = "ai.h2o" % "xgboost-predictor" % "0.3.17"
 
-    val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % xgboostVersion
+    val kryo = "com.esotericsoftware" % "kryo" % kryoVersion
+    val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo")
+    val xgboostPredictorDep = "ai.h2o" % "xgboost-predictor" % "0.3.17" exclude("com.esotericsoftware.kryo", "kryo")
+
+    val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo")
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
 
@@ -119,9 +122,9 @@ object Dependencies {
 
   val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
-  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Test.spark ++ Test.sparkTest ++ Seq(Test.scalaTest)
+  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Seq(kryo) ++ Test.spark ++ Test.sparkTest ++ Seq(Test.scalaTest)
 
-  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark ++ Test.spark ++ Test.sparkTest
+  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Seq(kryo) ++ Provided.spark ++ Test.spark ++ Test.sparkTest
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

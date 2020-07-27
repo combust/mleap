@@ -14,9 +14,25 @@ jdk:
 jobs:
   include:
     - stage: "Mleap tests"
-      name: "Scala Tests"
+    - name: "MLeap executor tests"
       script:
-        - travis/travis.sh
+        - sbt "+ mleap-executor-tests/test"
+
+    - name: "Mleap benchmark tests"
+      script:
+        - sbt "+ mleap-benchmark/test"
+
+    - name: "MLeap xgboost runtime tests"
+      script:
+        - sbt "mleap-xgboost-runtime/test"
+
+    - name: "MLeap xgboost spark tests"
+      script:
+        - sbt "mleap-xgboost-spark/test"
+
+      name: "All other sbt tests"
+      script:
+        - sbt "+ test"
 
     - name: "Python 3.6 tests"
       language: python
@@ -38,6 +54,12 @@ jobs:
         - pip install "virtualenv<20.0.0" tox  # Bug https://github.com/pypa/virtualenv/issues/1551
       script:
         - make py37_test
+
+    - stage: "Deploy"
+      name: "Publish signed jars"
+      if: branch = master
+      script:
+        - travis/travis_publish.sh
 
 notifications:
   on_success: change

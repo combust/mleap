@@ -55,9 +55,9 @@ jobs:
       script:
         - make py37_test
 
-    - stage: "Deploy"
+    - if: (NOT type IN (pull_request)) AND (branch = master)
+      stage: "Deploy"
       name: "Publish signed jars"
-      if: branch = master
       script:
         - travis/travis_publish.sh
 

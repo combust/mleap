@@ -11,10 +11,10 @@ test_benchmark:
 	sbt "+ mleap-benchmark/test"
 
 test_xgboost_runtime:
-	sbt "mleap-xgboost-runtime/test"
+	sbt "+ mleap-xgboost-runtime/test"
 
 test_xgboost_spark:
-	sbt "mleap-xgboost-spark/test"
+	sbt "+ mleap-xgboost-spark/test"
 
 test_root_sbt_project:
 	sbt "+ test"

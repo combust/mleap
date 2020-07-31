@@ -10,7 +10,7 @@ import org.apache.spark.sql.mleap.TypeConverters
 
 trait CachedDatasetUtils {
 
-  private final val TrainDataFilePath = "datasources/diabetes.txt"
+  private final val TrainDataFilePath = "datasources/agaricus.train"
   private final val TrainDataMultinomialFilePath = "datasources/iris.scale.txt"
 
   // indexing_mode is necessary to tell xgboost that features start from 1, not 0 (xgboost default is 0)

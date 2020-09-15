@@ -39,6 +39,11 @@ jobs:
       python: 3.6
       install:
         - pip install tox
+      before_script:
+        - >
+          curl
+          --create-dirs -L -o $HOME/.sbt/launchers/0.13.18/sbt-launch.jar
+          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.18/sbt-launch.jar
       script:
         - make py36_test
 
@@ -52,6 +57,11 @@ jobs:
       dist: xenial  # Travis won't install py37 on trusty
       install:
         - pip install tox
+      before_script:
+        - >
+          curl
+          --create-dirs -L -o $HOME/.sbt/launchers/0.13.18/sbt-launch.jar
+          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.18/sbt-launch.jar
       script:
         - make py37_test
 

@@ -2,7 +2,7 @@ package ml.combust.mleap.xgboost.runtime
 
 import ml.combust.mleap.core.types.{BasicType, NodeShape, ScalarType, StructField, TensorType}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
-import ml.combust.mleap.tensor.SparseTensor
+import ml.combust.mleap.tensor.{SparseTensor, Tensor}
 import ml.combust.mleap.xgboost.runtime.testing.{BoosterUtils, BundleSerializationUtils, CachedDatasetUtils, ClassifierUtils, FloatingPointApproximations}
 import ml.dmlc.xgboost4j.scala.Booster
 import org.apache.spark.ml.linalg.Vectors
@@ -32,7 +32,7 @@ class XGBoostClassificationModelParitySpec extends FunSpec
         val mleapRawPredictionColIndex = mleapResult.schema.indexOf("raw_prediction").get
         val mleapProbabilityColIndex = mleapResult.schema.indexOf("probability").get
 
-        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[SparseTensor[Double]].asXGB
+        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[Tensor[Double]].asXGB
 
         val boosterResult = booster.predict(singleRowDMatrix, false, 0).head(0)
 

@@ -1,6 +1,7 @@
 package ml.combust.mleap.xgboost.runtime.testing
 
 import java.io.File
+import java.nio.file.{Files, Path}
 
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
@@ -15,9 +16,13 @@ trait BundleSerializationUtils {
   def serializeModelToMleapBundle(transformer: Transformer): File = {
     import ml.combust.mleap.runtime.MleapSupport._
 
-    new File("/tmp/mleap/xgboost-runtime-parity").mkdirs()
-    val file = new File(s"/tmp/mleap/xgboost-runtime-parity/${this.getClass.getName}.zip")
-    file.delete()
+    val tempDirPath = {
+      val temp: Path = Files.createTempDirectory("xgboost-runtime-parity")
+      temp.toFile.deleteOnExit()
+      temp.toAbsolutePath
+    }
+
+    val file = new File(s"${tempDirPath}/${this.getClass.getName}.zip")
 
     for(bf <- managed(BundleFile(file))) {
       transformer.writeBundle.format(SerializationFormat.Json).save(bf).get

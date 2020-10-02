@@ -18,6 +18,8 @@ case class InteractionModel(featuresSpec: Array[Array[Int]],
   assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and tensor shapes as inputs")
 
   val outputSize = featuresSpec.map(_.sum).product
+  // The Seq created below are required by SparseTensor api during initialization
+  // For performance optimization, we initialize these sequences here so we don't have to at runtime
   val seqCache: Array[Seq[Int]] = {
     val arr = mutable.ArrayBuilder.make[Seq[Int]]
     for (i <- 0 to outputSize){
@@ -114,11 +116,7 @@ case class FeatureEncoder(numFeatures: Array[Int]) {
     * @param f The callback to invoke on each non-zero (index, value) output pair.
     */
   def foreachNonzeroOutput(v: Any, f: (Int, Double) => Unit): Unit = {
-    val value = v match {
-      case tensor: Tensor[_] => tensor.asInstanceOf[Tensor[Double]]
-      case _ => v
-    }
-    value match {
+    v match {
       case d: Double =>
         assert(numFeatures.length == 1, "DoubleType columns should only contain one feature.")
         val numOutputCols = numFeatures.head

@@ -1,6 +1,7 @@
 package ml.dmlc.xgboost4j.scala.spark.mleap
 
 import java.io.File
+import java.nio.file.{Files, Path}
 
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
@@ -96,9 +97,14 @@ class XGBoostRegressionModelParitySpec extends FunSpec
     implicit val sbc = SparkBundleContext.defaultContext.withDataset(transformer.transform(dataset))
 
     bundleCache.getOrElse {
-      new File("/tmp/mleap/spark-parity").mkdirs()
-      val file = new File(s"/tmp/mleap/spark-parity/${classOf[XGBoostRegressionModelParitySpec].getName}.zip")
-      file.delete()
+
+      val tempDirPath = {
+        val temp: Path = Files.createTempDirectory("mleap-spark-parity")
+        temp.toFile.deleteOnExit()
+        temp.toAbsolutePath
+      }
+
+      val file = new File(s"${tempDirPath}/${classOf[XGBoostRegressionModelParitySpec].getName}.zip")
 
       for(bf <- managed(BundleFile(file))) {
         transformer.writeBundle.format(SerializationFormat.Json).save(bf).get

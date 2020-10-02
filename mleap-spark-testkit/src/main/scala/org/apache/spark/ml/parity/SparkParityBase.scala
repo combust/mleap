@@ -1,6 +1,7 @@
 package org.apache.spark.ml.parity
 
 import java.io.File
+import java.nio.file.{Files, Path}
 
 import org.apache.spark.ml.{PipelineModel, Transformer}
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -17,7 +18,6 @@ import org.apache.spark.ml.bundle.SparkBundleContext
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
 import resource._
-
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.Row
 import org.apache.spark.ml.linalg.{Vector, Vectors}
@@ -78,9 +78,14 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   def serializedModel(transformer: Transformer)
                      (implicit context: SparkBundleContext): File = {
     bundleCache.getOrElse {
-      new File("/tmp/mleap/spark-parity").mkdirs()
-      val file = new File(s"/tmp/mleap/spark-parity/${getClass.getName}.zip")
-      file.delete()
+
+      val tempDirPath = {
+        val temp: Path = Files.createTempDirectory("mleap-spark-parity")
+        temp.toFile.deleteOnExit()
+        temp.toAbsolutePath
+      }
+
+      val file = new File(s"${tempDirPath}/${getClass.getName}.zip")
 
       for(bf <- managed(BundleFile(file))) {
         transformer.writeBundle.format(SerializationFormat.Json).save(bf).get

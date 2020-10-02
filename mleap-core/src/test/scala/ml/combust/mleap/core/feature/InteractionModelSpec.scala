@@ -48,29 +48,29 @@ class InteractionModelSpec extends FunSpec {
     val encoderSpec: Array[Array[Int]] = Array(Array(4), Array(1, 1))
     val model = InteractionModel(encoderSpec, Seq(ScalarShape(), TensorShape(2)))
 
-    it("produce the expected interaction vector when using Vectors") {
+    it("produce the expected interaction vector when using spark Vector") {
       val features = Seq(2.toDouble, Vectors.dense(3, 4))
 
       assert(model(features).toArray.toSeq == Seq(0, 0, 0, 0, 3, 4, 0, 0))
     }
 
     describe("produce the expected interaction vector when using Dense Tensor") {
-      it("when the first feature is 2"){
+      it("when the first feature is 2 and the second is (3,4)"){
         val features = Seq(2.toDouble, DenseTensor(Seq(3, 4).toArray, Seq(2)))
         assert(model(features).toArray.toSeq == Seq(0, 0, 0, 0, 3, 4, 0, 0))
       }
-      it("when the first feature is 3"){
+      it("when the first feature is 3 and the second is (3,4)"){
         val features = Seq(3.toDouble, DenseTensor(Seq(3, 4).toArray, Seq(2)))
         assert(model(features).toArray.toSeq == Seq(0, 0, 0, 0, 0, 0, 3, 4))
       }
     }
 
     describe("produce the expected interaction vector when using Sparse Tensor") {
-      it("when the first feature is 2 and second is (3, 4)"){
+      it("when the first feature is 2 and the second is (3, 4)"){
         val features = Seq(2.toDouble, SparseTensor(Seq(Seq(0), Seq(1)), Seq(3, 4).toArray, Seq(2)))
         assert(model(features).toArray.toSeq == Seq(0, 0, 0, 0, 3, 4, 0, 0))
       }
-      it("when the first feature is 3 and second is (3, 4)"){
+      it("when the first feature is 3 and the second is (3, 4)"){
         val features = Seq(3.toDouble, SparseTensor(Seq(Seq(0), Seq(1)), Seq(3, 4).toArray, Seq(2)))
         assert(model(features).toArray.toSeq == Seq(0, 0, 0, 0, 0, 0, 3, 4))
       }

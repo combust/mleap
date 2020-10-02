@@ -16,7 +16,8 @@ case class Interaction(override val uid: String = Transformer.uniqueName("intera
                        override val shape: NodeShape,
                        override val model: InteractionModel) extends BaseTransformer {
   val exec: UserDefinedFunction = {
-    UserDefinedFunction((row: Row) => model(row.toSeq): Tensor[Double],
+    UserDefinedFunction(
+      (row: Row) => model.mleapApply(row.toSeq),
       TensorType(BasicType.Double, Seq(model.outputSize)),
       Seq(SchemaSpec(inputSchema)))
   }

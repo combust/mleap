@@ -23,7 +23,7 @@ class CountVectorizerModelSpec extends FunSpec {
     }
 
     it("Produces the correct mleap Tensor"){
-      assert(model(Seq("1", "1", "2", "3")).toArray.toSeq == Seq(1, 0, 0))
+      assert(model.mleapApply(Seq("1", "1", "2", "3")).toArray.toSeq == Seq(1, 0, 0))
     }
   }
 }

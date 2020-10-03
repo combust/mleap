@@ -17,5 +17,13 @@ class CountVectorizerModelSpec extends FunSpec {
       assert(model.outputSchema.fields ==
         Seq(StructField("output", TensorType.Double(3))))
     }
+
+    it("Produces the correct spark Vector"){
+      assert(model(Seq("1", "1", "2", "3")).toArray.toSeq == Seq(1, 0, 0))
+    }
+
+    it("Produces the correct mleap Tensor"){
+      assert(model(Seq("1", "1", "2", "3")).toArray.toSeq == Seq(1, 0, 0))
+    }
   }
 }

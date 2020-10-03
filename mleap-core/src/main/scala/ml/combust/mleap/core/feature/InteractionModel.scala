@@ -31,7 +31,7 @@ case class InteractionModel(featuresSpec: Array[Array[Int]],
 
   def apply(features: Seq[Any]): Vector = {
     val (size, indices, values) = _apply(features)
-    Vectors.sparse(size, indices, values)
+    Vectors.sparse(size, indices, values).compressed
   }
 
   def mleapApply(features: Seq[Any]): Tensor[Double] = {

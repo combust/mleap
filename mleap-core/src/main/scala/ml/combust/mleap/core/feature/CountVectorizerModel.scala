@@ -3,6 +3,7 @@ package ml.combust.mleap.core.feature
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.types.{BasicType, ListType, StructType, TensorType}
+import ml.combust.mleap.tensor.{SparseTensor, Tensor}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 import scala.collection.mutable
@@ -15,8 +16,17 @@ case class CountVectorizerModel(vocabulary: Array[String],
                                 binary: Boolean,
                                 minTf: Double) extends Model {
   val dict: Map[String, Int] = vocabulary.zipWithIndex.toMap
-
-  def apply(document: Seq[String]): Vector = {
+  val outputSize = dict.size
+  // The Seq created below are required by SparseTensor api during initialization
+  // For performance optimization, we initialize these sequences here so we don't have to at runtime
+  val seqCache: Array[Seq[Int]] = {
+    val arr = mutable.ArrayBuilder.make[Seq[Int]]
+    for (i <- 0 to outputSize){
+      arr += Seq(i)
+    }
+    arr.result()
+  }
+  def _apply(document: Seq[String]): Seq[(Int, Double)] = {
     val termCounts = mutable.Map[Int, Double]()
     var tokenCount = 0L
     document.foreach {
@@ -34,8 +44,16 @@ case class CountVectorizerModel(vocabulary: Array[String],
     } else {
       termCounts.filter(_._2 >= effectiveMinTF).toSeq
     }
+    effectiveCounts
+  }
 
-    Vectors.sparse(dict.size, effectiveCounts)
+  def apply(document: Seq[String]): Vector = {
+    Vectors.sparse(outputSize, _apply(document))
+  }
+
+  def mleapApply(document: Seq[String]): Tensor[Double] = {
+    val (indices, values) = _apply(document).unzip
+    SparseTensor(indices.map(e=>seqCache(e)), values.toArray, Seq(outputSize))
   }
 
   override def inputSchema: StructType = StructType("input" -> ListType(BasicType.String)).get

@@ -52,7 +52,7 @@ case class CountVectorizerModel(vocabulary: Array[String],
   }
 
   def mleapApply(document: Seq[String]): Tensor[Double] = {
-    val (indices, values) = _apply(document).unzip
+    val (indices, values) = _apply(document).sortBy(p => p._1).unzip
     SparseTensor(indices.map(e=>seqCache(e)), values.toArray, Seq(outputSize))
   }
 

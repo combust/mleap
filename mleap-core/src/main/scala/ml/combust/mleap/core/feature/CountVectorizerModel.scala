@@ -6,7 +6,7 @@ import ml.combust.mleap.core.types.{BasicType, ListType, StructType, TensorType}
 import ml.combust.mleap.tensor.{SparseTensor, Tensor}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
-import scala.collection.mutable
+import scala.collection.{SortedMap, mutable}
 
 /**
   * Created by hollinwilkins on 12/28/16.
@@ -27,7 +27,7 @@ case class CountVectorizerModel(vocabulary: Array[String],
     arr.result()
   }
   def _apply(document: Seq[String]): Seq[(Int, Double)] = {
-    val termCounts = mutable.Map[Int, Double]()
+    var termCounts = SortedMap[Int, Double]()
     var tokenCount = 0L
     document.foreach {
       term =>
@@ -52,7 +52,7 @@ case class CountVectorizerModel(vocabulary: Array[String],
   }
 
   def mleapApply(document: Seq[String]): Tensor[Double] = {
-    val (indices, values) = _apply(document).sortBy(p => p._1).unzip
+    val (indices, values) = _apply(document).unzip
     SparseTensor(indices.map(e=>seqCache(e)), values.toArray, Seq(outputSize))
   }
 

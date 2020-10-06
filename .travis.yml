@@ -30,14 +30,6 @@ jobs:
       script:
         - make test_benchmark
 
-    - name: "MLeap xgboost runtime tests"
-      script:
-        - make test_xgboost_runtime
-
-    - name: "MLeap xgboost spark tests"
-      script:
-        - make test_xgboost_spark
-
     - name: "All other sbt tests"
       script:
         - make test_root_sbt_project

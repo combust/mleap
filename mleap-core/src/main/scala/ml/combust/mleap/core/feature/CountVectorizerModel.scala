@@ -47,11 +47,8 @@ case class CountVectorizerModel(vocabulary: Array[String],
     effectiveCounts
   }
 
-  def apply(document: Seq[String]): Vector = {
-    Vectors.sparse(outputSize, _apply(document))
-  }
 
-  def mleapApply(document: Seq[String]): Tensor[Double] = {
+  def apply(document: Seq[String]): Tensor[Double] = {
     val (indices, values) = _apply(document).unzip
     SparseTensor(indices.map(e=>seqCache(e)), values.toArray, Seq(outputSize))
   }

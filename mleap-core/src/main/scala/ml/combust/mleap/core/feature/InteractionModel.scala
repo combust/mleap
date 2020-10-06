@@ -29,12 +29,7 @@ case class InteractionModel(featuresSpec: Array[Array[Int]],
   }
   val encoders: Array[FeatureEncoder] = featuresSpec.map(FeatureEncoder.apply)
 
-  def apply(features: Seq[Any]): Vector = {
-    val (size, indices, values) = _apply(features)
-    Vectors.sparse(size, indices, values).compressed
-  }
-
-  def mleapApply(features: Seq[Any]): Tensor[Double] = {
+  def apply(features: Seq[Any]): Tensor[Double] = {
     val (size, indices, values) = _apply(features)
     SparseTensor(indices.map(e=>seqCache(e)), values, Seq(size))
   }
@@ -127,13 +122,6 @@ case class FeatureEncoder(numFeatures: Array[Int]) {
           f(d.toInt, 1.0)
         } else {
           f(0, d)
-        }
-      case vec: Vector =>
-        assert(numFeatures.length == vec.size,
-          s"Vector column size was ${vec.size}, expected ${numFeatures.length}")
-        vec.foreachActive { (i, v) =>
-          val numOutputCols = numFeatures(i)
-          checkAndApplyWithOffset(numOutputCols, v, i, f)
         }
       case dTensor: DenseTensor[_] =>
         assert(numFeatures.length == dTensor.size,

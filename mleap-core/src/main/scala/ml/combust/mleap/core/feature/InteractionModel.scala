@@ -123,6 +123,13 @@ case class FeatureEncoder(numFeatures: Array[Int]) {
         } else {
           f(0, d)
         }
+      case vec: Vector =>
+        assert(numFeatures.length == vec.size,
+          s"Vector column size was ${vec.size}, expected ${numFeatures.length}")
+        vec.foreachActive { (i, v) =>
+          val numOutputCols = numFeatures(i)
+          checkAndApplyWithOffset(numOutputCols, v, i, f)
+        }
       case dTensor: DenseTensor[_] =>
         assert(numFeatures.length == dTensor.size,
           s"Vector column size was ${dTensor.size}, expected ${numFeatures.length}")

@@ -14,6 +14,11 @@ class InteractionModelSpec extends FunSpec {
     val encoderSpec: Array[Array[Int]] = Array(Array(1), Array(1, 1))
     val model = InteractionModel(encoderSpec, Seq(ScalarShape(), TensorShape(2)))
 
+    it("produces the expected interaction vector when using spark Vector") {
+      val features = Seq(2.toDouble, Vectors.dense(3, 4))
+      assert(model(features).toArray.toSeq == Seq(6, 8))
+    }
+
     it("produces the expected interaction vector when using DenseTensor") {
       val features = Seq(2.toDouble, DenseTensor(Seq(3, 4).toArray, Seq(2)))
       assert(model(features).toArray.toSeq == Seq(6, 8))
@@ -37,6 +42,12 @@ class InteractionModelSpec extends FunSpec {
   describe("with one nominal input") {
     val encoderSpec: Array[Array[Int]] = Array(Array(4), Array(1, 1))
     val model = InteractionModel(encoderSpec, Seq(ScalarShape(), TensorShape(2)))
+
+    it("produce the expected interaction vector when using spark Vector") {
+      val features = Seq(2.toDouble, Vectors.dense(3, 4))
+
+      assert(model(features).toArray.toSeq == Seq(0, 0, 0, 0, 3, 4, 0, 0))
+    }
 
     describe("produce the expected interaction vector when using Dense Tensor") {
       it("when the first feature is 2 and the second is (3,4)"){

@@ -15,7 +15,7 @@ services:
 
 language: scala
 scala:
-  - 2.11.8
+  - 2.11.12
 jdk:
   - oraclejdk8  # sbt +compile fails on jdk11 (xenial's default)
 

@@ -2,7 +2,7 @@ package ml.combust.mleap.xgboost.runtime
 
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
-import ml.combust.mleap.tensor.SparseTensor
+import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.xgboost.runtime.testing.{BoosterUtils, BundleSerializationUtils, CachedDatasetUtils, FloatingPointApproximations}
 import ml.dmlc.xgboost4j.scala.Booster
 import org.scalatest.FunSpec
@@ -22,7 +22,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
     XGBoostRegression(
       "xgboostSingleThread",
       NodeShape.regression(),
-      XGBoostRegressionModel(booster, numFeatures(leapFrameLibSVMtrain), 0)
+      XGBoostRegressionModel(booster, numFeatures(leapFrameBinomial), 0)
     )
   }
 
@@ -35,7 +35,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
         val mleapResult = mleapTransformer.transform(DefaultLeapFrame(leapFrameDataset.schema, Seq(r))).get
         val mleapPredictionColIndex = mleapResult.schema.indexOf("prediction").get
 
-        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[SparseTensor[Double]].asXGB
+        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[Tensor[Double]].asXGB
         val boosterResult = booster.predict(singleRowDMatrix, false, 0).head(0)
 
         assert (boosterResult == mleapResult.dataset.head.getDouble(mleapPredictionColIndex))
@@ -50,7 +50,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    equalityTestRowByRow(booster, deserializedTransformer, leapFrameLibSVMtrain)
+    equalityTestRowByRow(booster, deserializedTransformer, leapFrameBinomial)
   }
 
   it("has the correct inputs and outputs with columns: prediction, probability and raw_prediction") {
@@ -69,8 +69,8 @@ class XGBoostRegressionModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    val preSerializationResult = xgboostTransformer.transform(leapFrameLibSVMtrain).get
-    val deserializedModelResult = deserializedTransformer.transform(leapFrameLibSVMtrain).get
+    val preSerializationResult = xgboostTransformer.transform(leapFrameBinomial).get
+    val deserializedModelResult = deserializedTransformer.transform(leapFrameBinomial).get
 
     assert(preSerializationResult.dataset == deserializedModelResult.dataset)
   }
@@ -81,7 +81,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
     val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
 
-    val denseLeapFrame = toDenseFeaturesLeapFrame(leapFrameLibSVMtrain)
+    val denseLeapFrame = toDenseFeaturesLeapFrame(leapFrameBinomial)
 
     val preSerializationResult = xgboostTransformer.transform(denseLeapFrame).get
     val deserializedResult = deserializedTransformer.transform(denseLeapFrame).get

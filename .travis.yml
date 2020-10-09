@@ -2,6 +2,14 @@
 sudo: required
 dist: trusty
 
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.8
+      - g++-4.8
+
 services:
   - docker
 
@@ -21,14 +29,6 @@ jobs:
     - name: "Mleap benchmark tests"
       script:
         - make test_benchmark
-
-    - name: "MLeap xgboost runtime tests"
-      script:
-        - make test_xgboost_runtime
-
-    - name: "MLeap xgboost spark tests"
-      script:
-        - make test_xgboost_spark
 
     - name: "All other sbt tests"
       script:

@@ -4,7 +4,6 @@ import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
-import ml.combust.mleap.core.util.VectorConverters._
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 import scala.collection.mutable
@@ -18,20 +17,17 @@ case class InteractionModel(featuresSpec: Array[Array[Int]],
   assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and tensor shapes as inputs")
 
   val outputSize = featuresSpec.map(_.sum).product
-  // The Seq created below are required by SparseTensor api during initialization
-  // For performance optimization, we initialize these sequences here so we don't have to at runtime
-  val seqCache: Array[Seq[Int]] = {
-    val arr = mutable.ArrayBuilder.make[Seq[Int]]
-    for (i <- 0 to outputSize){
-      arr += Seq(i)
-    }
-    arr.result()
-  }
   val encoders: Array[FeatureEncoder] = featuresSpec.map(FeatureEncoder.apply)
-
   def apply(features: Seq[Any]): Tensor[Double] = {
     val (size, indices, values) = _apply(features)
-    SparseTensor(indices.map(e=>seqCache(e)), values, Seq(size))
+    val array = Array.ofDim[Double](outputSize)
+    var idx = 0
+    val iterator = indices.iterator
+    while (iterator.hasNext){
+      array(iterator.next()) = values(idx)
+      idx += 1
+    }
+    DenseTensor(array, Seq(size))
   }
 
   def _apply(features: Seq[Any]): (Int, Array[Int], Array[Double]) = {
@@ -130,22 +126,29 @@ case class FeatureEncoder(numFeatures: Array[Int]) {
           val numOutputCols = numFeatures(i)
           checkAndApplyWithOffset(numOutputCols, v, i, f)
         }
-      case dTensor: DenseTensor[_] =>
-        assert(numFeatures.length == dTensor.size,
-          s"Vector column size was ${dTensor.size}, expected ${numFeatures.length}")
-        dTensor.values.zipWithIndex foreach {
-          case (nV: Number, idx: Int)=>
-            val numOutputCols = numFeatures(idx)
-            val dV = nV.doubleValue()
-            checkAndApplyWithOffset(numOutputCols, dV, idx, f)
-        }
-      case sTensor: SparseTensor[_] =>
-        assert(numFeatures.length == sTensor.size,
-          s"Vector column size was ${sTensor.size}, expected ${numFeatures.length}")
+      case dT: DenseTensor[_] =>
+        val values = dT.values
+        val dimensions = dT.dimensions
+        assert(numFeatures.length == dimensions.product,
+          s"Vector column size was ${dimensions.product}, expected ${numFeatures.length}")
+        val iterator = values.iterator
         var idx = 0
-        sTensor.indices.map(_.head).foreach { i =>
-          val numOutputCols = numFeatures(i)
-          val dV = sTensor.values(idx).asInstanceOf[Number].doubleValue()
+        while (iterator.hasNext){
+          val dV = iterator.next().asInstanceOf[Number].doubleValue()
+          checkAndApplyWithOffset(numFeatures(idx), dV, idx, f)
+          idx += 1
+        }
+      case st: SparseTensor[_] =>
+        val indices = st.indices
+        val values = st.values
+        val dimensions = st.dimensions
+        assert(numFeatures.length == dimensions.product,
+          s"Vector column size was ${dimensions.head}, expected ${numFeatures.length}")
+        var idx = 0
+        val iterator = indices.iterator
+        while (iterator.hasNext){
+          val numOutputCols = numFeatures(iterator.next().head)
+          val dV = values(idx).asInstanceOf[Number].doubleValue()
           checkAndApplyWithOffset(numOutputCols, dV, idx, f)
           idx += 1
         }

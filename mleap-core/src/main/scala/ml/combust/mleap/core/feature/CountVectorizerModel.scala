@@ -4,7 +4,6 @@ import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.types.{BasicType, ListType, StructType, TensorType}
 import ml.combust.mleap.tensor.{SparseTensor, Tensor}
-import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 import scala.collection.{SortedMap, mutable}
 
@@ -26,7 +25,7 @@ case class CountVectorizerModel(vocabulary: Array[String],
     }
     arr.result()
   }
-  def _apply(document: Seq[String]): Seq[(Int, Double)] = {
+  def _apply(document: Seq[String]): (Seq[Seq[Int]], Array[Double]) = {
     var termCounts = SortedMap[Int, Double]()
     var tokenCount = 0L
     document.foreach {
@@ -37,20 +36,34 @@ case class CountVectorizerModel(vocabulary: Array[String],
         }
         tokenCount += 1
     }
-
+    val valuesArray = mutable.ArrayBuilder.make[Double]
+    val indicesArray = mutable.ArrayBuilder.make[Seq[Int]]
     val effectiveMinTF = if (minTf >= 1.0) minTf else tokenCount * minTf
-    val effectiveCounts = if(binary) {
-      termCounts.filter(_._2 >= effectiveMinTF).map(p => (p._1, 1.0)).toSeq
-    } else {
-      termCounts.filter(_._2 >= effectiveMinTF).toSeq
+    val iterator = termCounts.iterator
+    if (binary){
+      while (iterator.hasNext){
+        val (termIndex, count) = iterator.next()
+        if (count>= effectiveMinTF){
+          valuesArray += 1.0
+          indicesArray += seqCache(termIndex)
+        }
+      }
+    }else{
+      while (iterator.hasNext){
+        val (termIndex, count) = iterator.next()
+        if (count>= effectiveMinTF){
+          valuesArray += count
+          indicesArray += seqCache(termIndex)
+        }
+      }
     }
-    effectiveCounts
+    Tuple2(indicesArray.result(), valuesArray.result())
   }
 
 
   def apply(document: Seq[String]): Tensor[Double] = {
-    val (indices, values) = _apply(document).unzip
-    SparseTensor(indices.map(e=>seqCache(e)), values.toArray, Seq(outputSize))
+    val (indices, values) = _apply(document)
+    SparseTensor(indices, values, Seq(outputSize))
   }
 
   override def inputSchema: StructType = StructType("input" -> ListType(BasicType.String)).get

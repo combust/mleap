@@ -17,17 +17,17 @@ case class InteractionModel(featuresSpec: Array[Array[Int]],
   assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and tensor shapes as inputs")
 
   val outputSize = featuresSpec.map(_.sum).product
+  val seqCache: Array[Seq[Int]] = {
+    val arr = mutable.ArrayBuilder.make[Seq[Int]]
+    for (i <- 0 to outputSize){
+      arr += Seq(i)
+    }
+    arr.result()
+  }
   val encoders: Array[FeatureEncoder] = featuresSpec.map(FeatureEncoder.apply)
   def apply(features: Seq[Any]): Tensor[Double] = {
     val (size, indices, values) = _apply(features)
-    val array = Array.ofDim[Double](outputSize)
-    var idx = 0
-    val iterator = indices.iterator
-    while (iterator.hasNext){
-      array(iterator.next()) = values(idx)
-      idx += 1
-    }
-    DenseTensor(array, Seq(size))
+    SparseTensor(indices.map(e=>seqCache(e)), values, Seq(size))
   }
 
   def _apply(features: Seq[Any]): (Int, Array[Int], Array[Double]) = {

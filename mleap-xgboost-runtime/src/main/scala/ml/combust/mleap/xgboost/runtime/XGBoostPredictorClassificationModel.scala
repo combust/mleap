@@ -61,11 +61,11 @@ case class XGBoostPredictorMultinomialClassificationModel(
   }
 
   def predictProbabilities(data: FVec): Vector = {
-    Vectors.dense(predictor.predict(data,  false,  treeLimit))
+    Vectors.dense(predictor.predict(data,  false,  treeLimit).map(_.toDouble))
   }
 
   def predictRaw(data: FVec): Vector = {
-    Vectors.dense(predictor.predict(data, true, treeLimit))
+    Vectors.dense(predictor.predict(data, true, treeLimit).map(_.toDouble))
   }
 
   override def rawToProbabilityInPlace(raw: Vector): Vector = {

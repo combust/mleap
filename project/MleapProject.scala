@@ -12,6 +12,8 @@ object MleapProject {
     bundleHdfs,
     core,
     runtime,
+    xgboostRuntime,
+    xgboostSpark,
     avro,
     sparkBase,
     sparkTestkit,

@@ -21,20 +21,20 @@ class XGBoostPredictorRegressionModelParitySpec extends FunSpec
 
 
   /**
-   * A Predictor only provides a probability column for performance reasons
+   * A Predictor only provides a prediction column for performance reasons
    */
-  def probabilityColumnEqualityTest(mleapFrame1: DefaultLeapFrame, mleapFrame2: DefaultLeapFrame) = {
-    val probabilityFrame1 = mleapFrame1.select("prediction").get
-    val probabilityFrame2 = mleapFrame2.select("prediction").get
+  def predictionColumnEqualityTest(mleapFrame1: DefaultLeapFrame, mleapFrame2: DefaultLeapFrame) = {
+    val predictionFrame1 = mleapFrame1.select("prediction").get
+    val predictionFrame2 = mleapFrame2.select("prediction").get
 
-    val probabilityIndex = probabilityFrame1.schema.indexOf("prediction").get
+    val predictionIndex = predictionFrame1.schema.indexOf("prediction").get
 
-    probabilityFrame1.dataset zip probabilityFrame2.dataset foreach {
+    predictionFrame1.dataset zip predictionFrame2.dataset foreach {
       case (row1, row2) => {
         assert(
           almostEqual(
-            row1.getDouble(probabilityIndex),
-            row2.getDouble(probabilityIndex)
+            row1.getDouble(predictionIndex),
+            row2.getDouble(predictionIndex)
           )
         )
       }
@@ -60,7 +60,7 @@ class XGBoostPredictorRegressionModelParitySpec extends FunSpec
     val preSerializationXGBoost4jResult = xgboost4jTransformer.transform(leapFrameBinomial).get
     val predictorModelResult = deserializedPredictor.transform(leapFrameBinomial).get
 
-    probabilityColumnEqualityTest(preSerializationXGBoost4jResult, predictorModelResult)
+    predictionColumnEqualityTest(preSerializationXGBoost4jResult, predictorModelResult)
   }
 
   it("A deserialized XGBoost4j has the same results of a deserialized Predictor"){
@@ -74,7 +74,7 @@ class XGBoostPredictorRegressionModelParitySpec extends FunSpec
     val deserializedPredictorTransformer: Transformer = loadXGBoostPredictorFromBundle(mleapBundle)
     val deserializedPredictorResult = deserializedPredictorTransformer.transform(leapFrameBinomial).get
 
-    probabilityColumnEqualityTest(deserializedPredictorResult, deserializedXGBoost4jResult)
+    predictionColumnEqualityTest(deserializedPredictorResult, deserializedXGBoost4jResult)
   }
 
   it("Predictor has the correct inputs and an output probability column") {
@@ -104,6 +104,6 @@ class XGBoostPredictorRegressionModelParitySpec extends FunSpec
     val xgboost4jResult = xgboost4jTransformer.transform(denseLeapFrame).get
     val predictorResult = predictorTransformer.transform(denseLeapFrame).get
 
-    probabilityColumnEqualityTest(xgboost4jResult, predictorResult)
+    predictionColumnEqualityTest(xgboost4jResult, predictorResult)
   }
 }

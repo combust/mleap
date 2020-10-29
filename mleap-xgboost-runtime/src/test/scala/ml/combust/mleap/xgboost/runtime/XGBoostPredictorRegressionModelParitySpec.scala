@@ -69,9 +69,11 @@ class XGBoostPredictorRegressionModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(xgboost4jTransformer)
 
     val deserializedXGBoost4jTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
+    assert(deserializedXGBoost4jTransformer.isInstanceOf[XGBoostRegression])
     val deserializedXGBoost4jResult = deserializedXGBoost4jTransformer.transform(leapFrameBinomial).get
 
     val deserializedPredictorTransformer: Transformer = loadXGBoostPredictorFromBundle(mleapBundle)
+    assert(deserializedPredictorTransformer.isInstanceOf[XGBoostPredictorRegression])
     val deserializedPredictorResult = deserializedPredictorTransformer.transform(leapFrameBinomial).get
 
     predictionColumnEqualityTest(deserializedPredictorResult, deserializedXGBoost4jResult)

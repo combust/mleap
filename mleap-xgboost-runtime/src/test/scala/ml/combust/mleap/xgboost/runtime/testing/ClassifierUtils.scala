@@ -18,7 +18,7 @@ trait ClassifierUtils extends BoosterUtils with CachedDatasetUtils {
         rawPredictionCol = Some("raw_prediction"),
         probabilityCol = Some("probability")),
       XGBoostClassificationModel(
-        XGBoostBinaryClassificationModel(booster, numFeatures(leapFrameLibSVMtrain), 0))
+        XGBoostBinaryClassificationModel(booster, numFeatures(leapFrameBinomial), 0))
     )
   }
 
@@ -33,7 +33,7 @@ trait ClassifierUtils extends BoosterUtils with CachedDatasetUtils {
         probabilityCol = Some("probability")),
       XGBoostClassificationModel(
         XGBoostMultinomialClassificationModel(
-          booster, xgboostMultinomialParams("num_class").asInstanceOf[Int], numFeatures(leapFrameIrisTrain), 0))
+          booster, xgboostMultinomialParams("num_class").asInstanceOf[Int], numFeatures(leapFrameMultinomial), 0))
     )
   }
 }

@@ -32,12 +32,16 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
 
       val out = Files.newOutputStream(context.file("xgboost.model"))
       obj._booster.saveModel(out)
-
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList)).
         withValue("num_classes", Value.int(obj.numClasses)).
         withValue("num_features", Value.int(numFeatures)).
-        withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit)))
+        withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit))).
+        withValue("objective", Value.string(obj.getOrDefault(obj.objective))).
+        withValue("label_col", Value.string(obj.getOrDefault(obj.labelCol))).
+        withValue("missing", Value.float(obj.getOrDefault(obj.missing))).
+        withValue("eval_metric", Value.string(obj.getOrDefault(obj.evalMetric))).
+        withValue("allow_non_zero_for_missing", Value.boolean(obj.getOrDefault(obj.allowNonZeroForMissing)))
     }
 
     override def load(model: Model)
@@ -46,14 +50,43 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
         SXGBoost.loadModel(in)
       }).tried.get
 
-      new XGBoostClassificationModel("", model.value("num_classes").getInt, booster)
+      val classifier = new XGBoostClassificationModel("", model.value("num_classes").getInt, booster).
+          setTreeLimit(model.value("tree_limit").getInt)
+
+      val objective = model.getValue("objective")
+      if(objective.isDefined)
+        classifier.set(classifier.objective, objective.get.getString)
+
+      val evalMetric = model.getValue("eval_metric")
+      if(evalMetric.isDefined)
+        classifier.set(classifier.evalMetric, evalMetric.get.getString)
+
+      val labelCol = model.getValue("label_col")
+      if(labelCol.isDefined)
+        classifier.set(classifier.labelCol, labelCol.get.getString)
+
+      val missing = model.getValue("missing")
+      if(missing.isDefined)
+        classifier.setMissing(missing.get.getFloat)
+
+      val allowNonZeroForMissing = model.getValue("allow_non_zero_for_missing")
+      if(allowNonZeroForMissing.isDefined)
+        classifier.setAllowZeroForMissingValue(allowNonZeroForMissing.get.getBoolean)
+
+      classifier
     }
   }
 
   override def sparkLoad(uid: String,
                          shape: NodeShape,
                          model: XGBoostClassificationModel): XGBoostClassificationModel = {
-    new XGBoostClassificationModel(uid, model.numClasses, model._booster)
+    val classifier = new XGBoostClassificationModel(uid, model.numClasses, model._booster).
+      setMissing(model.getOrDefault(model.missing)).
+      setAllowZeroForMissingValue(model.getOrDefault(model.allowNonZeroForMissing)).
+      setTreeLimit(model.getOrDefault(model.treeLimit))
+    classifier.set(classifier.objective, model.getOrDefault(model.objective)).
+      set(classifier.evalMetric, model.getOrDefault(model.evalMetric)).
+      set(classifier.labelCol, model.getOrDefault(model.labelCol))
   }
 
   override def sparkInputs(obj: XGBoostClassificationModel): Seq[ParamSpec] = {

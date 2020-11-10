@@ -30,7 +30,12 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
 
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("num_features", Value.int(numFeatures)).
-        withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit)))
+        withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit))).
+        withValue("objective", Value.string(obj.getOrDefault(obj.objective))).
+        withValue("eval_metric", Value.string(obj.getOrDefault(obj.evalMetric))).
+        withValue("label_col", Value.string(obj.getOrDefault(obj.labelCol))).
+        withValue("missing", Value.float(obj.getOrDefault(obj.missing))).
+        withValue("allow_non_zero_for_missing", Value.boolean(obj.getOrDefault(obj.allowNonZeroForMissing)))
     }
 
     override def load(model: Model)
@@ -39,14 +44,43 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
         SXGBoost.loadModel(in)
       }).tried.get
 
-      new XGBoostRegressionModel("", booster)
+      val regressor = new XGBoostRegressionModel("", booster).
+        setTreeLimit(model.value("tree_limit").getInt)
+
+      val objective = model.getValue("objective")
+      if(objective.isDefined)
+        regressor.set(regressor.objective, objective.get.getString)
+
+      val evalMetric = model.getValue("eval_metric")
+      if(evalMetric.isDefined)
+        regressor.set(regressor.evalMetric, evalMetric.get.getString)
+
+      val labelCol = model.getValue("label_col")
+      if(labelCol.isDefined)
+        regressor.set(regressor.labelCol, labelCol.get.getString)
+
+      val missing = model.getValue("missing")
+      if(missing.isDefined)
+        regressor.setMissing(missing.get.getFloat)
+
+      val allowNonZeroForMissing = model.getValue("allow_non_zero_for_missing")
+      if(allowNonZeroForMissing.isDefined)
+        regressor.setAllowZeroForMissingValue(allowNonZeroForMissing.get.getBoolean)
+
+      regressor
     }
   }
 
   override def sparkLoad(uid: String,
                          shape: NodeShape,
                          model: XGBoostRegressionModel): XGBoostRegressionModel = {
-    new XGBoostRegressionModel(uid, model._booster)
+    val regressor = new XGBoostRegressionModel(uid, model._booster).
+      setMissing(model.getOrDefault(model.missing)).
+      setAllowZeroForMissingValue(model.getOrDefault(model.allowNonZeroForMissing)).
+      setTreeLimit(model.getOrDefault(model.treeLimit))
+    regressor.set(regressor.objective, model.getOrDefault(model.objective)).
+      set(regressor.evalMetric, model.getOrDefault(model.evalMetric)).
+      set(regressor.labelCol, model.getOrDefault(model.labelCol))
   }
 
   override def sparkInputs(obj: XGBoostRegressionModel): Seq[ParamSpec] = {

@@ -3,7 +3,7 @@ package ml.combust.mleap.xgboost.runtime
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
 import ml.combust.mleap.tensor.Tensor
-import ml.combust.mleap.xgboost.runtime.testing.{BoosterUtils, BundleSerializationUtils, CachedDatasetUtils, FloatingPointApproximations}
+import ml.combust.mleap.xgboost.runtime.testing.{BoosterUtils, BundleSerializationUtils, CachedDatasetUtils, FloatingPointApproximations, RegressionUtils}
 import ml.dmlc.xgboost4j.scala.Booster
 import org.scalatest.FunSpec
 import XgbConverters._
@@ -13,18 +13,10 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   with BoosterUtils
   with CachedDatasetUtils
   with BundleSerializationUtils
-  with FloatingPointApproximations {
+  with FloatingPointApproximations
+  with RegressionUtils {
 
-  def trainRegressor: Transformer = {
 
-    val booster: Booster = trainBooster(binomialDataset)
-
-    XGBoostRegression(
-      "xgboostSingleThread",
-      NodeShape.regression(),
-      XGBoostRegressionModel(booster, numFeatures(leapFrameBinomial), 0)
-    )
-  }
 
   def equalityTestRowByRow(booster: Booster, mleapTransformer: Transformer, leapFrameDataset: DefaultLeapFrame) = {
 

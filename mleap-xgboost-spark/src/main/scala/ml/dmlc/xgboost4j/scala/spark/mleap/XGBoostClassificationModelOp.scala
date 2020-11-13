@@ -37,10 +37,9 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
         withValue("num_classes", Value.int(obj.numClasses)).
         withValue("num_features", Value.int(numFeatures)).
         withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit))).
-        withValue("objective", Value.string(obj.getOrDefault(obj.objective))).
-        withValue("label_col", Value.string(obj.getOrDefault(obj.labelCol))).
         withValue("missing", Value.float(obj.getOrDefault(obj.missing))).
-        withValue("eval_metric", Value.string(obj.getOrDefault(obj.evalMetric))).
+        withValue("infer_batch_size", Value.int(obj.getOrDefault(obj.inferBatchSize))).
+        withValue("use_external_memory", Value.boolean(obj.getOrDefault(obj.useExternalMemory))).
         withValue("allow_non_zero_for_missing", Value.boolean(obj.getOrDefault(obj.allowNonZeroForMissing)))
     }
 
@@ -50,43 +49,29 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
         SXGBoost.loadModel(in)
       }).tried.get
 
-      val classifier = new XGBoostClassificationModel("", model.value("num_classes").getInt, booster).
+      val xgb = new XGBoostClassificationModel("", model.value("num_classes").getInt, booster).
           setTreeLimit(model.value("tree_limit").getInt)
 
-      val objective = model.getValue("objective")
-      if(objective.isDefined)
-        classifier.set(classifier.objective, objective.get.getString)
-
-      val evalMetric = model.getValue("eval_metric")
-      if(evalMetric.isDefined)
-        classifier.set(classifier.evalMetric, evalMetric.get.getString)
-
-      val labelCol = model.getValue("label_col")
-      if(labelCol.isDefined)
-        classifier.set(classifier.labelCol, labelCol.get.getString)
-
-      val missing = model.getValue("missing")
-      if(missing.isDefined)
-        classifier.setMissing(missing.get.getFloat)
-
-      val allowNonZeroForMissing = model.getValue("allow_non_zero_for_missing")
-      if(allowNonZeroForMissing.isDefined)
-        classifier.setAllowZeroForMissingValue(allowNonZeroForMissing.get.getBoolean)
-
-      classifier
+      model.getValue("thresholds").map(o => xgb.setThresholds(o.getDoubleList.toArray))
+      model.getValue("missing").map(o => xgb.setMissing(o.getFloat))
+      model.getValue("allow_non_zero_for_missing").map(o => xgb.setAllowZeroForMissingValue(o.getBoolean))
+      model.getValue("infer_batch_size").map(o => xgb.setInferBatchSize(o.getInt))
+      model.getValue("use_external_memory").map(o => xgb.set(xgb.useExternalMemory, o.getBoolean))
+      xgb
     }
   }
 
   override def sparkLoad(uid: String,
                          shape: NodeShape,
                          model: XGBoostClassificationModel): XGBoostClassificationModel = {
-    val classifier = new XGBoostClassificationModel(uid, model.numClasses, model._booster).
-      setMissing(model.getOrDefault(model.missing)).
-      setAllowZeroForMissingValue(model.getOrDefault(model.allowNonZeroForMissing)).
-      setTreeLimit(model.getOrDefault(model.treeLimit))
-    classifier.set(classifier.objective, model.getOrDefault(model.objective)).
-      set(classifier.evalMetric, model.getOrDefault(model.evalMetric)).
-      set(classifier.labelCol, model.getOrDefault(model.labelCol))
+    val xgb = new XGBoostClassificationModel(uid, model.numClasses, model._booster)
+    if(model.isSet(model.thresholds)) xgb.setThresholds(model.getOrDefault(model.thresholds))
+    if(model.isSet(model.missing)) xgb.setMissing(model.getOrDefault(model.missing))
+    if(model.isSet(model.allowNonZeroForMissing)) xgb.setAllowZeroForMissingValue(model.getOrDefault(model.allowNonZeroForMissing))
+    if(model.isSet(model.inferBatchSize)) xgb.setInferBatchSize(model.getOrDefault(model.inferBatchSize))
+    if(model.isSet(model.treeLimit)) xgb.setTreeLimit(model.getOrDefault(model.treeLimit))
+    if(model.isSet(model.useExternalMemory)) xgb.set(xgb.useExternalMemory, model.getOrDefault(model.useExternalMemory))
+    xgb
   }
 
   override def sparkInputs(obj: XGBoostClassificationModel): Seq[ParamSpec] = {

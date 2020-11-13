@@ -22,8 +22,11 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
     "treeMethod" -> "approx",
     "earlyStoppingRounds" -> 2,
     "numRound" -> 15,
-    "allowNonZeroFor_Missing" -> true
+    "allowNonZeroForMissing" -> true
   )
+
+  // These params are not needed for making predictions, so we don't serialize them
+  override val unserializedParams = Set("labelCol", "evalMetric", "objective")
 
   val dataset: DataFrame = {
     import spark.sqlContext.implicits._

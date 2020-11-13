@@ -33,8 +33,12 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
     "numClasses" -> 2,
     "nWorkers" -> 2,
     "missing" -> 0.0f,
-    "allowNonZeroFor_Missing" -> true
+    "allowNonZeroForMissing" -> true
   )
+
+  // These params are not needed for making predictions, so we don't serialize them
+  override val unserializedParams = Set("labelCol", "evalMetric", "objective")
+
   val sparkTransformer: Transformer = {
     val featureAssembler = new VectorAssembler()
       .setInputCols(Array("AT", "V", "AP", "RH"))

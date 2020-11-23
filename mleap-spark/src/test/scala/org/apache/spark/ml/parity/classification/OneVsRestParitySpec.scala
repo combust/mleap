@@ -1,5 +1,8 @@
 package org.apache.spark.ml.parity.classification
 
+import ml.combust.mleap.core.Model
+import ml.combust.mleap.core.types.NodeShape
+import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.classification.{LogisticRegression, OneVsRest}
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
@@ -23,4 +26,12 @@ class OneVsRestParitySpec extends SparkParityBase {
       setPredictionCol("prediction"))).fit(dataset)
 
   override val unserializedParams = Set("stringOrderType", "classifier", "labelCol")
+
+  override def assertModelTypesMatchTransformerTypes(model: Model, shape: NodeShape, exec: UserDefinedFunction): Unit = {
+    /* OneVsRestModel intentionally does not have the same output schema as its exec */
+    val inputFields = model.inputSchema.fields.map(_.name)
+    val modelInputTypes = model.inputSchema.fields.map(_.dataType)
+    val transformerInputTypes = exec.inputs.flatMap(_.dataTypes)
+    checkTypes(modelInputTypes, transformerInputTypes, inputFields)
+  }
 }

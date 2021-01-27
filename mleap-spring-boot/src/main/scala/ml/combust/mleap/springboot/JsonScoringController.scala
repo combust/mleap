@@ -54,7 +54,6 @@ class JsonScoringController(@Autowired val actorSystem : ActorSystem,
       .map(model => JsonMethods.compact(jsonPrinter.toJson(model)))(executor).toJava
 
   @GetMapping(path = Array("/models/{model_name}"),
-              consumes = Array("application/json; charset=UTF-8"),
               produces = Array("application/json; charset=UTF-8"))
   def getModel(@PathVariable("model_name") modelName: String,
                @RequestHeader(value = "timeout", defaultValue = "60000") timeout: Int): CompletionStage[String] =
@@ -64,7 +63,6 @@ class JsonScoringController(@Autowired val actorSystem : ActorSystem,
       .map(model => JsonMethods.compact(jsonPrinter.toJson(model)))(executor).toJava
 
   @GetMapping(path = Array("/models/{model_name}/meta"),
-              consumes = Array("application/json; charset=UTF-8"),
               produces = Array("application/json; charset=UTF-8"))
   def getMeta(@PathVariable("model_name") modelName: String,
               @RequestHeader(value = "timeout", defaultValue = "60000") timeout: Int) : CompletionStage[String] =

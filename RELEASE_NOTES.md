@@ -1,3 +1,24 @@
+# Release 0.17.0 (not released yet)
+
+### Breaking Changes
+
+### New Features
+- upgrade to xgboost 1.0.0 - using h2oai Predictor
+- support for using xgboost predictor when using xgboost regressor
+
+### Bug Fixes
+- fix Spark deserialization of random forest classifier to include numTrees
+
+### Improvements
+- scoring optimizations for Interacting and CountVectorizer
+
+### Other Changes
+
+# Release 0.16.1 - python only release
+
+### Bug Fixes
+- fix MathBinary serialization/deserialization in pyspark
+
 # Release 0.16.0
 
 ### Breaking Changes

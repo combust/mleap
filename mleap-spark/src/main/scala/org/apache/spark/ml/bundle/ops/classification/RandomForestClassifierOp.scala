@@ -56,6 +56,7 @@ class RandomForestClassifierOp extends SimpleSparkOp[RandomForestClassificationM
         numFeatures = numFeatures,
         numClasses = numClasses,
         _trees = models)
+      m.setNumTrees(models.size)
       model.getValue("thresholds").
         map(t => m.setThresholds(t.getDoubleList.toArray)).
         getOrElse(m)
@@ -68,6 +69,7 @@ class RandomForestClassifierOp extends SimpleSparkOp[RandomForestClassificationM
       numFeatures = model.numFeatures,
       numClasses = model.numClasses)
     if (model.isDefined(model.thresholds)) { r.setThresholds(model.getThresholds) }
+    if (model.isDefined(model.numTrees)) { r.setNumTrees(model.getNumTrees) }
     r
   }
 

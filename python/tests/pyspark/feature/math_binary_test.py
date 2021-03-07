@@ -112,7 +112,6 @@ class MathBinaryTest(unittest.TestCase):
 
         add_transformer.serializeToBundle(file_path, self.input)
         deserialized_math_binary = SimpleSparkSerializer().deserializeFromBundle(file_path)
-
         result = deserialized_math_binary.transform(self.input).toPandas()[['add(f1, f2)']]
         assert_frame_equal(self.expected_add, result)
 
@@ -147,3 +146,77 @@ class MathBinaryTest(unittest.TestCase):
 
         result = pipeline_model.transform(self.input).toPandas()[['mul(f1, add(f1, f2))']]
         assert_frame_equal(expected, result)
+
+    def test_add_math_binary_defaults_none(self):
+        add_transformer = self._new_add_math_binary()
+
+        none_df = self.spark.createDataFrame([
+            (None, float(i * 2))
+            for i in range(1, 3)
+        ], INPUT_SCHEMA)
+
+        # Summing None + int yields Nones
+        expected_df = pd.DataFrame([
+            (None,)
+            for i in range(1, 3)
+        ], columns=['add(f1, f2)'])
+
+        result = add_transformer.transform(none_df).toPandas()[['add(f1, f2)']]
+        assert_frame_equal(expected_df, result)
+
+    def test_mult_math_binary_default_inputA(self):
+        mult_transformer = MathBinary(
+            operation=BinaryOperation.Multiply,
+            inputB="f2",
+            outputCol="mult(1, f2)",
+            defaultA=1.0,
+        )
+        none_df = self.spark.createDataFrame([
+            (None, float(i * 1234))
+            for i in range(1, 3)
+        ], INPUT_SCHEMA)
+
+        expected_df = pd.DataFrame([
+            (float(i * 1234), )
+            for i in range(1, 3)
+        ], columns=['mult(1, f2)'])
+        result = mult_transformer.transform(none_df).toPandas()[['mult(1, f2)']]
+        assert_frame_equal(expected_df, result)
+
+    def test_mult_math_binary_default_inputB(self):
+        mult_transformer = MathBinary(
+            operation=BinaryOperation.Multiply,
+            inputA="f1",
+            outputCol="mult(f1, 2)",
+            defaultB=2.0,
+        )
+        none_df = self.spark.createDataFrame([
+            (float(i * 1234), None)
+            for i in range(1, 3)
+        ], INPUT_SCHEMA)
+
+        expected_df = pd.DataFrame([
+            (float(i * 1234 * 2), )
+            for i in range(1, 3)
+        ], columns=['mult(f1, 2)'])
+        result = mult_transformer.transform(none_df).toPandas()[['mult(f1, 2)']]
+        assert_frame_equal(expected_df, result)
+
+    def test_mult_math_binary_default_both(self):
+        mult_transformer = MathBinary(
+            operation=BinaryOperation.Multiply,
+            outputCol="mult(7, 8)",
+            defaultA=7.0,
+            defaultB=8.0,
+        )
+        none_df = self.spark.createDataFrame([
+            (None, None)
+            for i in range(1, 3)
+        ], INPUT_SCHEMA)
+
+        expected_df = pd.DataFrame([
+            (float(7 * 8), )
+            for i in range(1, 3)
+        ], columns=['mult(7, 8)'])
+        result = mult_transformer.transform(none_df).toPandas()[['mult(7, 8)']]
+        assert_frame_equal(expected_df, result)

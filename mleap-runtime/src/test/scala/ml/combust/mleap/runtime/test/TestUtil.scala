@@ -1,6 +1,7 @@
 package ml.combust.mleap.runtime.test
 
 import java.io.File
+import java.nio.file.{Files, Path}
 
 import ml.combust.mleap.core.regression.DecisionTreeRegressionModel
 import ml.combust.mleap.core.tree.{ContinuousSplit, InternalNode, LeafNode, Node}
@@ -10,9 +11,11 @@ import ml.combust.mleap.core.tree.{ContinuousSplit, InternalNode, LeafNode, Node
   */
 object TestUtil {
 
-  val baseDir = new File("/tmp/mleap-runtime")
-  TestUtil.delete(baseDir)
-  baseDir.mkdirs()
+  val baseDir = {
+    val temp: Path = Files.createTempDirectory("mleap-runtime")
+    temp.toFile.deleteOnExit()
+    temp.toAbsolutePath
+  }
 
   def delete(file: File): Array[(String, Boolean)] = {
     Option(file.listFiles).map(_.flatMap(f => delete(f))).getOrElse(Array()) :+ (file.getPath -> file.delete)

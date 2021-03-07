@@ -293,6 +293,8 @@ integration.
 * Hollin Wilkins (hollin@combust.ml)
 * Mikhail Semeniuk (mikhail@combust.ml)
 * Anca Sarb (sarb.anca@gmail.com)
+* Talal Riaz (talal@yelp.com)
+* Ryan Vogan (rvogan@yelp.com)
 
 ## License
 

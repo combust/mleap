@@ -3,8 +3,7 @@ package ml.combust.mleap.core.feature
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.types._
-import ml.combust.mleap.tensor.Tensor
-import ml.combust.mleap.core.util.VectorConverters._
+import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 import scala.collection.mutable
@@ -18,9 +17,20 @@ case class InteractionModel(featuresSpec: Array[Array[Int]],
   assert(inputShapes.find(s => !s.isScalar && !s.isTensor) == None, "must provide scalar and tensor shapes as inputs")
 
   val outputSize = featuresSpec.map(_.sum).product
+  val seqCache: Array[Seq[Int]] = {
+    val arr = mutable.ArrayBuilder.make[Seq[Int]]
+    for (i <- 0 to outputSize){
+      arr += Seq(i)
+    }
+    arr.result()
+  }
   val encoders: Array[FeatureEncoder] = featuresSpec.map(FeatureEncoder.apply)
+  def apply(features: Seq[Any]): Tensor[Double] = {
+    val (size, indices, values) = _apply(features)
+    SparseTensor(indices.map(e=>seqCache(e)), values, Seq(size))
+  }
 
-  def apply(features: Seq[Any]): Vector = {
+  def _apply(features: Seq[Any]): (Int, Array[Int], Array[Double]) = {
     var indices = mutable.ArrayBuilder.make[Int]
     var values = mutable.ArrayBuilder.make[Double]
     var size = 1
@@ -45,7 +55,7 @@ case class InteractionModel(featuresSpec: Array[Array[Int]],
       })
       featureIndex -= 1
     }
-    Vectors.sparse(size, indices.result(), values.result()).compressed
+    Tuple3(size, indices.result(), values.result())
   }
 
   override def inputSchema: StructType = {
@@ -78,6 +88,18 @@ case class FeatureEncoder(numFeatures: Array[Int]) {
     arr
   }
 
+  private def checkAndApplyWithOffset(
+                                       numOutputCols: Int, dV: Double, idx: Int, f: (Int, Double) => Unit
+                                     ): Unit = {
+    if (numOutputCols > 1) {
+      assert(
+        dV >= 0.0 && dV == dV.toInt && dV < numOutputCols,
+        s"Values from column must be indices, but got $dV.")
+      f(outputOffsets(idx) + dV.toInt, 1.0)
+    } else {
+      f(outputOffsets(idx), dV)
+    }
+  }
   /**
     * Given an input row of features, invokes the specific function for every non-zero output.
     *
@@ -85,12 +107,7 @@ case class FeatureEncoder(numFeatures: Array[Int]) {
     * @param f The callback to invoke on each non-zero (index, value) output pair.
     */
   def foreachNonzeroOutput(v: Any, f: (Int, Double) => Unit): Unit = {
-    val value = v match {
-      case tensor: Tensor[_] => tensor.asInstanceOf[Tensor[Double]]: Vector
-      case _ => v
-    }
-
-    value match {
+    v match {
       case d: Double =>
         assert(numFeatures.length == 1, "DoubleType columns should only contain one feature.")
         val numOutputCols = numFeatures.head
@@ -107,14 +124,33 @@ case class FeatureEncoder(numFeatures: Array[Int]) {
           s"Vector column size was ${vec.size}, expected ${numFeatures.length}")
         vec.foreachActive { (i, v) =>
           val numOutputCols = numFeatures(i)
-          if (numOutputCols > 1) {
-            assert(
-              v >= 0.0 && v == v.toInt && v < numOutputCols,
-              s"Values from column must be indices, but got $v.")
-            f(outputOffsets(i) + v.toInt, 1.0)
-          } else {
-            f(outputOffsets(i), v)
-          }
+          checkAndApplyWithOffset(numOutputCols, v, i, f)
+        }
+      case dT: DenseTensor[_] =>
+        val values = dT.values
+        val dimensions = dT.dimensions
+        assert(numFeatures.length == dimensions.product,
+          s"Vector column size was ${dimensions.product}, expected ${numFeatures.length}")
+        val iterator = values.iterator
+        var idx = 0
+        while (iterator.hasNext){
+          val dV = iterator.next().asInstanceOf[Number].doubleValue()
+          checkAndApplyWithOffset(numFeatures(idx), dV, idx, f)
+          idx += 1
+        }
+      case st: SparseTensor[_] =>
+        val indices = st.indices
+        val values = st.values
+        val dimensions = st.dimensions
+        assert(numFeatures.length == dimensions.product,
+          s"Vector column size was ${dimensions.head}, expected ${numFeatures.length}")
+        var idx = 0
+        val iterator = indices.iterator
+        while (iterator.hasNext){
+          val numOutputCols = numFeatures(iterator.next().head)
+          val dV = values(idx).asInstanceOf[Number].doubleValue()
+          checkAndApplyWithOffset(numOutputCols, dV, idx, f)
+          idx += 1
         }
       case null =>
         throw new IllegalArgumentException("Values to interact cannot be null.")

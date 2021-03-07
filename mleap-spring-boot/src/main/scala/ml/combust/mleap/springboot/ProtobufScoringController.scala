@@ -47,7 +47,6 @@ class ProtobufScoringController(@Autowired val actorSystem : ActorSystem,
       .map(model => Model.toJavaProto(model))(executor).toJava
 
   @GetMapping(path = Array("/models/{model_name}"),
-    consumes = Array("application/x-protobuf; charset=UTF-8"),
     produces = Array("application/x-protobuf; charset=UTF-8"))
   def getModel(@PathVariable("model_name") modelName: String,
                @RequestHeader(value = "timeout", defaultValue = "60000") timeout: Int): CompletionStage[Mleap.Model] =
@@ -56,7 +55,6 @@ class ProtobufScoringController(@Autowired val actorSystem : ActorSystem,
       .map(model => Model.toJavaProto(model))(executor).toJava
 
   @GetMapping(path = Array("/models/{model_name}/meta"),
-    consumes = Array("application/x-protobuf; charset=UTF-8"),
     produces = Array("application/x-protobuf; charset=UTF-8"))
   def getMeta(@PathVariable("model_name") modelName: String,
               @RequestHeader(value = "timeout", defaultValue = "60000") timeout: Int) : CompletionStage[Mleap.BundleMeta] =

@@ -30,7 +30,11 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
 
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("num_features", Value.int(numFeatures)).
-        withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit)))
+        withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit))).
+        withValue("missing", Value.float(obj.getOrDefault(obj.missing))).
+        withValue("infer_batch_size", Value.int(obj.getOrDefault(obj.inferBatchSize))).
+        withValue("use_external_memory", Value.boolean(obj.getOrDefault(obj.useExternalMemory))).
+        withValue("allow_non_zero_for_missing", Value.boolean(obj.getOrDefault(obj.allowNonZeroForMissing)))
     }
 
     override def load(model: Model)
@@ -39,14 +43,27 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
         SXGBoost.loadModel(in)
       }).tried.get
 
-      new XGBoostRegressionModel("", booster)
+      val xgb = new XGBoostRegressionModel("", booster).
+        setTreeLimit(model.value("tree_limit").getInt)
+
+      model.getValue("missing").map(o => xgb.setMissing(o.getFloat))
+      model.getValue("allow_non_zero_for_missing").map(o => xgb.setAllowZeroForMissingValue(o.getBoolean))
+      model.getValue("infer_batch_size").map(o => xgb.setInferBatchSize(o.getInt))
+      model.getValue("use_external_memory").map(o => xgb.set(xgb.useExternalMemory, o.getBoolean))
+      xgb
     }
   }
 
   override def sparkLoad(uid: String,
                          shape: NodeShape,
                          model: XGBoostRegressionModel): XGBoostRegressionModel = {
-    new XGBoostRegressionModel(uid, model._booster)
+    val xgb = new XGBoostRegressionModel(uid, model._booster)
+    if(model.isSet(model.missing)) xgb.setMissing(model.getOrDefault(model.missing))
+    if(model.isSet(model.allowNonZeroForMissing)) xgb.setAllowZeroForMissingValue(model.getOrDefault(model.allowNonZeroForMissing))
+    if(model.isSet(model.inferBatchSize)) xgb.setInferBatchSize(model.getOrDefault(model.inferBatchSize))
+    if(model.isSet(model.treeLimit)) xgb.setTreeLimit(model.getOrDefault(model.treeLimit))
+    if(model.isSet(model.useExternalMemory)) xgb.set(xgb.useExternalMemory, model.getOrDefault(model.useExternalMemory))
+    xgb
   }
 
   override def sparkInputs(obj: XGBoostRegressionModel): Seq[ParamSpec] = {

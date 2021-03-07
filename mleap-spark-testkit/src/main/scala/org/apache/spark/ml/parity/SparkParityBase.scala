@@ -1,6 +1,7 @@
 package org.apache.spark.ml.parity
 
 import java.io.File
+import java.nio.file.{Files, Path}
 
 import org.apache.spark.ml.{PipelineModel, Transformer}
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -17,10 +18,9 @@ import org.apache.spark.ml.bundle.SparkBundleContext
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
 import resource._
-
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.Row
-import org.apache.spark.ml.linalg.{Vector, Vectors}
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.util.TestingUtils._
 
 /**
@@ -78,9 +78,14 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   def serializedModel(transformer: Transformer)
                      (implicit context: SparkBundleContext): File = {
     bundleCache.getOrElse {
-      new File("/tmp/mleap/spark-parity").mkdirs()
-      val file = new File(s"/tmp/mleap/spark-parity/${getClass.getName}.zip")
-      file.delete()
+
+      val tempDirPath = {
+        val temp: Path = Files.createTempDirectory("mleap-spark-parity")
+        temp.toFile.deleteOnExit()
+        temp.toAbsolutePath
+      }
+
+      val file = new File(s"${tempDirPath}/${getClass.getName}.zip")
 
       for(bf <- managed(BundleFile(file))) {
         transformer.writeBundle.format(SerializationFormat.Json).save(bf).get
@@ -106,31 +111,28 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   }
 
   def assertModelTypesMatchTransformerTypes(model: Model, shape: NodeShape, exec: UserDefinedFunction): Unit = {
-    val modelInputTypes = shape.inputs.
-      map(_._2.port).
-      map(n => model.inputSchema.getField(n).get.dataType).
-      toSeq
+    val inputFields = model.inputSchema.fields.map(_.name)
+    val modelInputTypes = model.inputSchema.fields.map(_.dataType)
     val transformerInputTypes = exec.inputs.flatMap(_.dataTypes)
 
-    val modelOutputTypes = shape.outputs.
-      map(_._2.port).
-      map(n => model.outputSchema.getField(n).get.dataType).
-      toSeq
+    val outputFields = model.outputSchema.fields.map(_.name)
+    val modelOutputTypes = model.outputSchema.fields.map(_.dataType)
     val transformerOutputTypes = exec.outputTypes
 
-    checkTypes(modelInputTypes, transformerInputTypes)
-    checkTypes(modelOutputTypes, transformerOutputTypes)
+    checkTypes(modelInputTypes, transformerInputTypes, inputFields)
+    checkTypes(modelOutputTypes, transformerOutputTypes, outputFields)
   }
 
-  def checkTypes(modelTypes: Seq[DataType], transformerTypes: Seq[DataType]): Unit = {
+  def checkTypes(modelTypes: Seq[DataType], transformerTypes: Seq[DataType], fields: Seq[String]): Unit = {
     assert(modelTypes.size == modelTypes.size)
-    modelTypes.zip(transformerTypes).foreach {
-      case (modelType, transformerType) => {
+    modelTypes.zip(transformerTypes).zip(fields).foreach {
+      case ((modelType, transformerType), field) => {
         if (modelType.isInstanceOf[TensorType]) {
-          assert(transformerType.isInstanceOf[TensorType] &&
-            modelType.base == transformerType.base)
+          assert(
+            transformerType.isInstanceOf[TensorType] && modelType.base == transformerType.base,
+            s"Type of ${field} does not match, $transformerType")
         } else {
-          assert(modelType == transformerType)
+          assert(modelType == transformerType, s"Type of ${field} does not match")
         }
       }
     }
@@ -140,14 +142,17 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     assert(actualAnswer.length == expectedAnswer.length,
       s"actual answer length ${actualAnswer.length} != " +
         s"expected answer length ${expectedAnswer.length}")
-
+    var rowIdx = 0
     actualAnswer.toSeq.zip(expectedAnswer.toSeq).foreach {
       case (actual: Double, expected: Double) =>
         assert(actual ~== expected relTol eps)
+        rowIdx += 1
       case (actual: Float, expected: Float) =>
         assert(actual ~== expected relTol eps)
+        rowIdx += 1
       case (actual: Vector, expected: Vector) =>
         assert(actual ~= expected relTol eps)
+        rowIdx += 1
       case (actual: Seq[_], expected: Seq[_]) =>
         assert(actual.length == expected.length, s"actual length ${actual.length} != " +
           s"expected length ${expected.length}")
@@ -157,12 +162,15 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
           case (actualElem: Float, expectedElem: Float) =>
             assert(actualElem ~== expectedElem relTol eps)
           case (actualElem, expectedElem) =>
-            assert(actualElem == expectedElem, s"$actualElem did not equal $expectedElem")
+            assert(actualElem == expectedElem, s"Field ${actualAnswer.schema(rowIdx)} differs.")
         }
+        rowIdx += 1
       case (actual: Row, expected: Row) =>
         checkRowWithRelTol(actual, expected, eps)
+        rowIdx += 1
       case (actual, expected) =>
         assert(actual == expected, s"$actual did not equal $expected")
+        rowIdx += 1
     }
   }
 
@@ -230,7 +238,6 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
     it("model input/output schema matches transformer UDF") {
       val mTransformer = mleapTransformer(sparkTransformer)
-
       mTransformer match {
         case transformer: SimpleTransformer =>
           assertModelTypesMatchTransformerTypes(transformer.model, transformer.shape, transformer.typedExec)

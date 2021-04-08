@@ -8,7 +8,7 @@ Deploying machine learning data pipelines and algorithms should not be a time-co
 
 ## Documentation
 
-Documentation is available at [mleap-docs.combust.ml](http://mleap-docs.combust.ml).
+Documentation is available at [https://combust.github.io/mleap-docs/](https://combust.github.io/mleap-docs/).
 
 Read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
 

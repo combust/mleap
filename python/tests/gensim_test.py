@@ -54,7 +54,7 @@ class TransformerTests(unittest.TestCase):
         size_ = 5
         window_ = 2
 
-        model_ = Word2Vec(sentences4word2vec_, min_count=2, size=size_, window=window_)
+        model_ = Word2Vec(sentences4word2vec_, min_count=2, vector_size=size_, window=window_)
         model_.mlinit(input_features=['input'], prediction_column = 'sentence_vector')
 
         model_.serialize_to_bundle(self.tmp_dir, model_.name)

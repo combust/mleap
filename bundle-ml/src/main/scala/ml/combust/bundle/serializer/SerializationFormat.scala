@@ -11,7 +11,7 @@ import ml.bundle.Format
   *   <li>protobuf - use protobuf for all attributes, models and nodes</li>
   * </ol>
   */
-sealed trait SerializationFormat {
+sealed trait SerializationFormat extends Serializable {
   def asBundle: Format
 }
 

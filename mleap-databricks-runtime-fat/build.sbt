@@ -29,6 +29,9 @@ assemblyShadeRules in assembly := Seq(
   ShadeRule.rename("spire.**" -> "ml.combust.mleap.shaded.@0").inAll,
   ShadeRule.rename("sourcecode.**" -> "ml.combust.mleap.shaded.@0").inAll,
   ShadeRule.rename("buildinfo.**" -> "ml.combust.mleap.shaded.@0").inAll,
-
+  ShadeRule.rename("com.esotericsoftware.**" -> "ml.combust.mleap.shaded.@0").inAll,
+  ShadeRule.rename("net.jafama.**" -> "ml.combust.mleap.shaded.@0").inAll,
+  ShadeRule.rename("org.objenesis.**" -> "ml.combust.mleap.shaded.@0").inAll,
+  ShadeRule.rename("org.objectweb.**" -> "ml.combust.mleap.shaded.@0").inAll,
   ShadeRule.zap("org.slf4j.**").inAll
 )

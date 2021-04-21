@@ -54,7 +54,7 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
 
       model.getValue("thresholds").map(o => xgb.setThresholds(o.getDoubleList.toArray))
       model.getValue("missing").map(o => xgb.setMissing(o.getFloat))
-      model.getValue("allow_non_zero_for_missing").map(o => xgb.setAllowZeroForMissingValue(o.getBoolean))
+      model.getValue("allow_non_zero_for_missing").map(o => xgb.setAllowNonZeroForMissing(o.getBoolean))
       model.getValue("infer_batch_size").map(o => xgb.setInferBatchSize(o.getInt))
       model.getValue("use_external_memory").map(o => xgb.set(xgb.useExternalMemory, o.getBoolean))
       xgb
@@ -67,7 +67,7 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
     val xgb = new XGBoostClassificationModel(uid, model.numClasses, model._booster)
     if(model.isSet(model.thresholds)) xgb.setThresholds(model.getOrDefault(model.thresholds))
     if(model.isSet(model.missing)) xgb.setMissing(model.getOrDefault(model.missing))
-    if(model.isSet(model.allowNonZeroForMissing)) xgb.setAllowZeroForMissingValue(model.getOrDefault(model.allowNonZeroForMissing))
+    if(model.isSet(model.allowNonZeroForMissing)) xgb.setAllowNonZeroForMissing(model.getOrDefault(model.allowNonZeroForMissing))
     if(model.isSet(model.inferBatchSize)) xgb.setInferBatchSize(model.getOrDefault(model.inferBatchSize))
     if(model.isSet(model.treeLimit)) xgb.setTreeLimit(model.getOrDefault(model.treeLimit))
     if(model.isSet(model.useExternalMemory)) xgb.set(xgb.useExternalMemory, model.getOrDefault(model.useExternalMemory))

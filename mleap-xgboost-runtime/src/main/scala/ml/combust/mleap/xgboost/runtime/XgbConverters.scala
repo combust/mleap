@@ -13,10 +13,10 @@ trait XgbConverters {
     def asXGB: DMatrix = {
       vector match {
         case SparseVector(_, indices, values) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, indices, values.map(_.toFloat))))
+          new DMatrix(Iterator(new LabeledPoint(0.0f, values.size, indices, values.map(_.toFloat))))
 
         case DenseVector(values) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, null, values.map(_.toFloat))))
+          new DMatrix(Iterator(new LabeledPoint(0.0f, values.size, null, values.map(_.toFloat))))
       }
     }
 
@@ -34,10 +34,10 @@ trait XgbConverters {
     def asXGB: DMatrix = {
       tensor match {
         case SparseTensor(indices, values, _) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, indices.map(_.head).toArray, values.map(_.toFloat))))
+          new DMatrix(Iterator(new LabeledPoint(0.0f, values.size, indices.map(_.head).toArray, values.map(_.toFloat))))
 
         case DenseTensor(_, _) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, null, tensor.toDense.rawValues.map(_.toFloat))))
+          new DMatrix(Iterator(new LabeledPoint(0.0f, tensor.toDense.size, null, tensor.toDense.rawValues.map(_.toFloat))))
       }
     }
 

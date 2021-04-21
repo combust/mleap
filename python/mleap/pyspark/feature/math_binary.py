@@ -24,6 +24,8 @@ class BinaryOperation(Enum):
     Remainder = 5
     LogN = 6
     Pow = 7
+    Min = 8
+    Max = 9
 
 
 class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):

@@ -30,13 +30,12 @@ class ChiSqSelectorOp extends SimpleSparkOp[ChiSqSelectorModel] {
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): ChiSqSelectorModel = {
       new ChiSqSelectorModel(uid = "",
-        chiSqSelector = new feature.ChiSqSelectorModel(model.value("filter_indices").getLongList.map(_.toInt).toArray))
+        model.value("filter_indices").getLongList.map(_.toInt).toArray)
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: ChiSqSelectorModel): ChiSqSelectorModel = {
-    new ChiSqSelectorModel(uid = uid,
-      chiSqSelector = new feature.ChiSqSelectorModel(model.selectedFeatures))
+    new ChiSqSelectorModel(uid = uid, model.selectedFeatures)
   }
 
   override def sparkInputs(obj: ChiSqSelectorModel): Seq[ParamSpec] = {

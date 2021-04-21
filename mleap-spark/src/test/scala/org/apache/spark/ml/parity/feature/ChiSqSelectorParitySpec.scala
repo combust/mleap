@@ -14,7 +14,7 @@ class ChiSqSelectorParitySpec extends SparkParityBase {
   override val sparkTransformer: Transformer = new Pipeline().setStages(Array(new VectorAssembler().
     setInputCols(Array("dti", "loan_amount")).
     setOutputCol("features"),
-    new ChiSqSelectorModel(uid = "chi_sq_selector", chiSqSelector = new feature.ChiSqSelectorModel(Array(1))).
+    new ChiSqSelectorModel(uid = "chi_sq_selector", Array(1)).
       setFeaturesCol("features").
       setOutputCol("filter_features"))).fit(dataset)
 }

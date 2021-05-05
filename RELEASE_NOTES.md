@@ -1,3 +1,8 @@
+# Release 0.17.1
+
+### Improvements
+- MLeap MathBinaryModel now supports Min and Max operations
+
 # Release 0.17.0 (not released yet)
 
 ### Breaking Changes

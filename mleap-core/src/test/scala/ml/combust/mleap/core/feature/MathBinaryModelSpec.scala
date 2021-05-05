@@ -34,4 +34,6 @@ class MathBinaryModelSpec extends FunSpec {
   binaryLike(Remainder, "rem", 3.0, 6.7, 3.0 % 6.7)
   binaryLike(LogN, "log_n", 3.0, 6.7, Math.log(3.0) / Math.log(6.7))
   binaryLike(Pow, "pow", 3.0, 6.7, Math.pow(3.0, 6.7))
+  binaryLike(Min, "min", 3.0, 6.7, Math.min(3.0, 6.7))
+  binaryLike(Max, "max", 3.0, 6.7, Math.max(3.0, 6.7))
 }

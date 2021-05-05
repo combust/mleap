@@ -1,8 +1,3 @@
-# Release 0.17.1
-
-### Improvements
-- MLeap MathBinaryModel now supports Min and Max operations
-
 # Release 0.17.0 (not released yet)
 
 ### Breaking Changes
@@ -10,6 +5,7 @@
 ### New Features
 - upgrade to xgboost 1.0.0 - using h2oai Predictor
 - support for using xgboost predictor when using xgboost regressor
+- MathBinaryModel now supports Min and Max operations
 
 ### Bug Fixes
 - fix Spark deserialization of random forest classifier to include numTrees

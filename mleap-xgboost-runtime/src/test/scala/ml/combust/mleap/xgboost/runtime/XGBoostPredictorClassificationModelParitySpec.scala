@@ -38,7 +38,8 @@ class XGBoostPredictorClassificationModelParitySpec extends FunSpec
         assert(
           almostEqualSequences(
             Seq(boosterProbability.values),
-            Seq(mleapResult.dataset.head.getTensor[Double](mleapProbabilityColIndex).toArray)
+            Seq(mleapResult.dataset.head.getTensor[Double](mleapProbabilityColIndex).toArray),
+            precision = 1e-6
           )
         )
     }
@@ -58,7 +59,9 @@ class XGBoostPredictorClassificationModelParitySpec extends FunSpec
         assert(
           almostEqualSequences(
             Seq(row1.getTensor[Double](probabilityIndex).toArray),
-            Seq(row2.getTensor[Double](probabilityIndex).toArray)))
+            Seq(row2.getTensor[Double](probabilityIndex).toArray),
+            precision = 1e-6
+          ))
       }
     }
   }

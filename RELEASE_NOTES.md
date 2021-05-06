@@ -5,6 +5,7 @@
 ### New Features
 - upgrade to xgboost 1.0.0 - using h2oai Predictor
 - support for using xgboost predictor when using xgboost regressor
+- MathBinaryModel now supports Min and Max operations
 
 ### Bug Fixes
 - fix Spark deserialization of random forest classifier to include numTrees

@@ -31,8 +31,13 @@ object BinaryOperation {
   case object Pow extends BinaryOperation {
     override def name: String = "pow"
   }
-
-  val all = Set(Add, Subtract, Multiply, Divide, Remainder, LogN, Pow)
+  case object Min extends BinaryOperation {
+    override def name: String = "min"
+  }
+  case object Max extends BinaryOperation {
+    override def name: String = "max"
+  }
+  val all = Set(Add, Subtract, Multiply, Divide, Remainder, LogN, Pow, Min, Max)
   val forName: Map[String, BinaryOperation] = all.map(o => (o.name, o)).toMap
 }
 
@@ -53,6 +58,8 @@ case class MathBinaryModel(operation: BinaryOperation,
       case Remainder => a % b
       case LogN => Math.log(a) / Math.log(b)
       case Pow => Math.pow(a, b)
+      case Min => Math.min(a, b)
+      case Max => Math.max(a, b)
       case _ => throw new RuntimeException(s"unsupported binary operation $operation")
     }
   }

@@ -19,7 +19,7 @@ machine into the container. In this example, we will be storing our models in `/
 
 ```
 mkdir /tmp/models
-docker run -p 8080:8080 -v /tmp/models:/models combustml/mleap-spring-boot:{VERSION}
+docker run -p 8080:65327 -v /tmp/models:/models combustml/mleap-spring-boot:{VERSION}
 ```
 
 This will expose the model server locally on port `8080`.

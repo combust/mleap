@@ -1,4 +1,4 @@
-# Release 0.17.0 (not released yet)
+# Release 0.17.0
 
 ### Breaking Changes
 

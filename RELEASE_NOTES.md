@@ -1,4 +1,16 @@
-# Release 0.17.0 (not released yet)
+# Release 0.18.0-SNAPSHOT (not released yet)
+
+### Breaking Changes
+
+### New Features
+
+### Bug Fixes
+
+### Improvements
+
+### Other Changes
+
+# Release 0.17.0
 
 ### Breaking Changes
 

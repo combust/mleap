@@ -29,6 +29,15 @@ object Tensor {
 
   def denseVector[T: ClassTag](values: Array[T]): DenseTensor[T] = DenseTensor(values, Seq(values.length))
   def scalar[T: ClassTag](value: T): DenseTensor[T] = DenseTensor(Array(value), Seq())
+  def denseIndex(index: Seq[Int], dimensions: Seq[Int]): Int = {
+    var n = index.last
+    var r = dimensions
+    for(i <- 0 until (index.length - 1)) {
+      r = r.tail
+      n += index(i) * r.product
+    }
+    n
+  }
 }
 
 sealed trait Tensor[T] {
@@ -66,29 +75,11 @@ case class DenseTensor[T](values: Array[T],
   }
 
   override def get(indices: Int *): Option[T] = {
-    var i = 0
-    var dimI = 1
-    var n = indices.head
-    var tail = indices.tail
-    while(i < tail.size) {
-      var ti = dimI
-      var tn = tail.head
-      tail = tail.tail
-      while(ti < dimensions.size) {
-        tn *= dimensions(ti)
-        ti += 1
-      }
-      dimI += 1
-      i += 1
-      n += tn
-    }
-
-    if (values.size > n) {
+    val n = Tensor.denseIndex(indices, dimensions)
+    if (values.length > n) {
       Some(values(n))
     } else { None }
   }
-
-
 
   override def equals(obj: Any): Boolean = obj match {
     case obj: DenseTensor[_] =>
@@ -120,7 +111,7 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
     var i = 0
     indices.foreach {
       index =>
-        array(denseIndex(index)) = values(i)
+        array(Tensor.denseIndex(index, dimensions)) = values(i)
         i += 1
     }
     array
@@ -147,17 +138,6 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
     if(index >= 0) {
       Some(values(index))
     } else { None }
-  }
-
-  private def denseIndex(index: Seq[Int]): Int = {
-    var n = index.last
-    var r = dimensions
-    for(i <- 0 until (index.length - 1)) {
-      r = r.tail
-      n += index(i) * r.product
-    }
-
-    n
   }
 
   override def equals(obj: Any): Boolean = obj match {

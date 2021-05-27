@@ -15,10 +15,12 @@ object Dependencies {
   lazy val loggingVersion = "3.9.0"
   lazy val slf4jVersion = "1.7.25"
   lazy val awsSdkVersion = "1.11.349"
-  val tensorflowVersion = "1.11.0"
+  val tensorflowVersion = "0.3.1" // Match Tensorflow 2.4.1 https://github.com/tensorflow/java/#tensorflow-version-support
   val xgboostVersion = "1.0.0"
   val hadoopVersion = "2.6.5" // matches spark version
   val kryoVersion = "4.0.2" // Remove upon upgrading to xgboost 1.1.1
+  val platforms = "windows-x86_64,linux-x86_64,macosx-x86_64"
+  val tensorflowPlatforms : Array[String] =  sys.env.getOrElse("TENSORFLOW_PLATFORMS", platforms).split(",")
 
   object Compile {
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
@@ -37,10 +39,9 @@ object Dependencies {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
     val commonsIo = "commons-io" % "commons-io" % "2.5"
-    val tensorflowDeps = Seq(
-      "org.tensorflow" % "libtensorflow" % tensorflowVersion,
-      "org.tensorflow" % "libtensorflow_jni" % tensorflowVersion
-    )
+    val tensorflowCoreApi = "org.tensorflow" % "tensorflow-core-api" % tensorflowVersion
+    val tensorflowDeps = Seq(tensorflowCoreApi) ++ tensorflowPlatforms.map(platform => tensorflowCoreApi classifier platform)
+
 
     val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion

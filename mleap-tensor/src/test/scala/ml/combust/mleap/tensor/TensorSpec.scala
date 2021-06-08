@@ -1,14 +1,55 @@
 package ml.combust.mleap.tensor
 
 import org.scalatest.FunSpec
+import org.scalatest.exceptions.TestFailedException
 
 class TensorSpec extends FunSpec {
-  def toIndices(dimensions: Seq[Int]): Seq[Seq[Int]] =  combine(dimensions.map(d => 0 until d))
+  def toIndices(dimensions: Seq[Int]): Seq[Seq[Int]] = combine(dimensions.map(d => 0 until d))
 
   def combine[A](xs: Traversable[Traversable[A]]): Seq[Seq[A]] =
     xs.foldLeft(Seq(Seq.empty[A])) {
       (x, y) => for (a <- x.view; b <- y) yield a :+ b
     }
+
+  describe("Test Legacy DenseTensor Get") {
+    def legacy_get(indices: Seq[Int], dimensions: Seq[Int]) = {
+      //This is the legacy get method from DenseTensor
+      var i = 0
+      var dimI = 1
+      var n = indices.head
+      var tail = indices.tail
+      while (i < tail.size) {
+        var ti = dimI
+        var tn = tail.head
+        tail = tail.tail
+        while (ti < dimensions.size) {
+          tn *= dimensions(ti)
+          ti += 1
+        }
+        println(tn)
+        dimI += 1
+        i += 1
+        n += tn
+        println(n)
+      }
+      n
+    }
+
+    ignore("Fortran layout") {
+        assert(legacy_get(Seq(0, 0), Seq(3, 4)) == 0)
+        assert(legacy_get(Seq(2, 3), Seq(3, 4)) == 3 * 3 + 2) // should be 11 no matter C or F but result is 14
+        assert(legacy_get(Seq(1, 1), Seq(3, 4)) == 1 * 3 + 1) // should be 4 if follow 'F' but result is 5, it's 'C' 1*4+1
+        assert(legacy_get(Seq(1, 1, 1), Seq(3, 4, 5)) == 1 * 4 * 3 + 1 * 3 + 1) //should be 16 if follow 'F' but got 21, 'C' should  be 1*4*5+1*5+1=26
+        assert(legacy_get(Seq(2, 3, 4), Seq(3, 4, 5)) == 4 * 4 * 3 + 3 * 3 + 2) // should be 59 no matter 'C' or 'F', but not 62
+    }
+    ignore("C layout") {
+      assert(legacy_get(Seq(0, 0), Seq(3, 4)) == 0)
+      assert(legacy_get(Seq(2, 3), Seq(3, 4)) == 2 * 4 + 3) // should be 11 no matter C or F but result is 14
+      assert(legacy_get(Seq(1, 1), Seq(3, 4)) == 1 * 4 + 1) // should be 5 if follow 'C'
+      assert(legacy_get(Seq(1, 1, 1), Seq(3, 4, 5)) == 1 * 4 * 5 + 1 * 5 + 1) // should be 16 if follow 'F' but got 21, 'C' should  be 1*4*5+1*5+1=26
+      assert(legacy_get(Seq(2, 3, 4), Seq(3, 4, 5)) == 2 * 4 * 5 + 3 * 5 + 4) // should be 59 no matter 'C' or 'F', but not 62
+    }
+  }
 
   describe("DenseVector") {
     it("should return false for dense tensors with different base") {
@@ -56,10 +97,12 @@ class TensorSpec extends FunSpec {
 
   describe("DenseTensor") {
     val random = new scala.util.Random
-    val shape = Seq(5,4,3,2,1)
+    val shape = Seq(5, 4, 3, 2, 1)
     val dims = shape.length
     val size = shape.product
-    val floatArray = Array.fill(size){random.nextFloat}
+    val floatArray = Array.fill(size) {
+      random.nextFloat
+    }
 
     it("should return true for dense tensors with same elements and dimensions") {
       val tensor1 = Tensor.create(floatArray, dimensions = shape)
@@ -69,27 +112,27 @@ class TensorSpec extends FunSpec {
 
     it("should return false for dense tensors with different dimensions") {
       val tensor1 = Tensor.create(floatArray, dimensions = shape)
-      val tensor2 = Tensor.create(floatArray, dimensions = shape.slice(0,dims -1))
+      val tensor2 = Tensor.create(floatArray, dimensions = shape.slice(0, dims - 1))
       assert(tensor1 != tensor2)
     }
 
     it("should return false for dense tensors with same dimension but different elements") {
       val tensor1 = Tensor.create(floatArray, dimensions = shape)
-      val tensor2 = Tensor.create(floatArray.map(x=>x*2), dimensions = shape)
+      val tensor2 = Tensor.create(floatArray.map(x => x * 2), dimensions = shape)
       assert(tensor1 != tensor2)
     }
 
     it("should return true for dense tensors with dimension -1 and same elements") {
       val tensor1 = Tensor.create(floatArray, Seq(-1) ++ shape.slice(1, 5))
-      val tensor2 = Tensor.create(floatArray, shape.slice(0,4) ++ Seq(-1))
+      val tensor2 = Tensor.create(floatArray, shape.slice(0, 4) ++ Seq(-1))
       assert(tensor1 == tensor2)
     }
 
     it("should return true for dense tensors each elements compare to original array") {
       val tensor = Tensor.create(floatArray, dimensions = shape)
       println(floatArray.mkString(" "))
-      println(toIndices(shape).map(indices => tensor(indices: _*) ).mkString(" "))
-      assert( floatArray sameElements toIndices(shape).map(indices => tensor(indices: _*) ) )
+      println(toIndices(shape).map(indices => tensor(indices: _*)).mkString(" "))
+      assert(floatArray sameElements toIndices(shape).map(indices => tensor(indices: _*)))
     }
   }
 
@@ -134,10 +177,12 @@ class TensorSpec extends FunSpec {
 
   describe("SparseTensor") {
     val random = new scala.util.Random
-    val indices = Seq(Seq(0,0,0), Seq(1, 1, 0), Seq(2, 1, 0))
-    val array = Array.fill[Float](indices.length){random.nextFloat()}
-    val shape = Seq(5,4,3)
-    val otherShape = Seq(3,2,1)
+    val indices = Seq(Seq(0, 0, 0), Seq(1, 1, 0), Seq(2, 1, 0))
+    val array = Array.fill[Float](indices.length) {
+      random.nextFloat()
+    }
+    val shape = Seq(5, 4, 3)
+    val otherShape = Seq(3, 2, 1)
 
     it("should return true for empty sparse tensors") {
       val tensor1 = Tensor.create(Array(), shape, Some(Seq(Seq())))
@@ -159,7 +204,7 @@ class TensorSpec extends FunSpec {
 
     it("should return false for sparse tensors with same dimension but different elements") {
       val tensor1 = Tensor.create(array, shape, Some(indices))
-      val tensor2 = Tensor.create(array.map(x=> x*2), shape, Some(indices))
+      val tensor2 = Tensor.create(array.map(x => x * 2), shape, Some(indices))
       assert(tensor1 != tensor2)
     }
 
@@ -172,14 +217,14 @@ class TensorSpec extends FunSpec {
     it("should return true for sparse tensors each elements compare to original array") {
       val tensor = Tensor.create(array, shape, Some(indices))
       println(array.mkString(" "))
-      println(indices.map(i => tensor(i: _*) ).mkString(" "))
-      assert( array sameElements indices.map(i=> tensor(i: _*) ) )
+      println(indices.map(i => tensor(i: _*)).mkString(" "))
+      assert(array sameElements indices.map(i => tensor(i: _*)))
     }
     it("should return true for sparse tensors each elements compare to original array after converted to dense") {
       val tensor = Tensor.create(array, shape, Some(indices)).toDense
       println(array.mkString(" "))
-      println(indices.map(i => tensor(i: _*) ).mkString(" "))
-      assert( array sameElements indices.map(i=> tensor(i: _*) ) )
+      println(indices.map(i => tensor(i: _*)).mkString(" "))
+      assert(array sameElements indices.map(i => tensor(i: _*)))
     }
 
   }

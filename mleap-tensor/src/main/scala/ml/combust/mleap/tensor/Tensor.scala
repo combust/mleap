@@ -22,21 +22,52 @@ object Tensor {
 
   def create[T: ClassTag](values: Array[T],
                           dimensions: Seq[Int],
-                          indices: Option[Seq[Seq[Int]]] = None): Tensor[T] = indices match {
-    case Some(is) => SparseTensor(is, values, dimensions)
-    case None => DenseTensor(values, dimensions)
+                          indices: Option[Seq[Seq[Int]]] = None): Tensor[T] = {
+    indices match {
+      case Some(is) => {
+        if (!isKnownDimensions(dimensions))
+          throw new IllegalArgumentException("dimensions must be known for SparseTensor")
+        SparseTensor(is, values, dimensions)
+      }
+      case None => {
+        DenseTensor(values, normalizeDimensions(values.length, dimensions))
+      }
+    }
   }
 
   def denseVector[T: ClassTag](values: Array[T]): DenseTensor[T] = DenseTensor(values, Seq(values.length))
   def scalar[T: ClassTag](value: T): DenseTensor[T] = DenseTensor(Array(value), Seq())
-  def denseIndex(index: Seq[Int], dimensions: Seq[Int]): Int = {
-    var n = index.last
+  def denseIndex(indices: Seq[Int], dimensions: Seq[Int]): Int = {
+    var n = indices.last
     var r = dimensions
-    for(i <- 0 until (index.length - 1)) {
+    for(i <- 0 until (indices.length - 1)) {
       r = r.tail
-      n += index(i) * r.product
+      n += indices(i) * r.product
     }
     n
+  }
+  def isKnownDimensions(dimensions: Seq[Int]): Boolean =  dimensions.count(dim => dim == -1) == 0
+
+  def normalizeDimensions(size: Int, dimensions: Seq[Int]) : Seq[Int] = {
+    val numOfUnknownDimensions = dimensions.count(dim => dim == -1)
+    if (numOfUnknownDimensions > 1)
+      throw new  IllegalArgumentException("dimensions contains more then one `-1`")
+
+    val normalizedDimensions = if (numOfUnknownDimensions == 1) {
+      val concreteDimension = size / dimensions.filter(dim => dim != -1 ).product
+      dimensions.map(dim =>  if(dim == -1) concreteDimension else dim)
+    } else {
+      dimensions
+    }
+    if(normalizedDimensions.product != size)
+      throw  new IllegalArgumentException("size of dimensions must equals size of values")
+
+    normalizedDimensions
+  }
+  def tensorEquals[T](lhr: Tensor[T], rhs: Tensor[T]) = {
+    lhr.base == rhs.base &&
+      lhr.dimensions == rhs.dimensions &&
+      lhr.rawValues.sameElements[T](rhs.rawValues)
   }
 }
 
@@ -64,7 +95,6 @@ case class DenseTensor[T](values: Array[T],
                           override val dimensions: Seq[Int])
                          (implicit override val base: ClassTag[T]) extends Tensor[T] {
   override def isDense: Boolean = true
-
   override def toDense: DenseTensor[T] = this
   override def toArray: Array[T] = values
 
@@ -83,16 +113,7 @@ case class DenseTensor[T](values: Array[T],
 
   override def equals(obj: Any): Boolean = obj match {
     case obj: DenseTensor[_] =>
-      if(base == obj.base) {
-        if (values.isEmpty) {
-          if (obj.values.isEmpty) { true }
-          else { false }
-        } else {
-          ((dimensions == obj.dimensions) ||
-            ((dimensions.head == -1 || obj.dimensions.head == -1) && dimensions.tail == obj.dimensions.tail)) &&
-              (values sameElements obj.asInstanceOf[DenseTensor[T]].values)
-        }
-      } else { false }
+      Tensor.tensorEquals(this, obj.asInstanceOf[DenseTensor[T]])
     case _ => false
   }
 }
@@ -142,16 +163,8 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
 
   override def equals(obj: Any): Boolean = obj match {
     case obj: SparseTensor[_] =>
-      if(base == obj.base) {
-        if (values.isEmpty) {
-          if (obj.values.isEmpty) { true }
-          else { false }
-        } else if(indices.length == obj.indices.length && indices == obj.indices) {
-          ((dimensions == obj.dimensions) ||
-            ((dimensions.head == -1 || obj.dimensions.head == -1) && dimensions.tail == obj.dimensions.tail)) &&
-              (values sameElements obj.asInstanceOf[SparseTensor[T]].values)
-        } else { false }
-      } else { false }
+        indices == obj.indices &&
+        Tensor.tensorEquals(this, obj.asInstanceOf[SparseTensor[T]])
     case _ => false
   }
 }

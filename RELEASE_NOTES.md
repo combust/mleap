@@ -8,6 +8,7 @@
 - Fix OneHotEncoder Python serialization
 
 ### Improvements
+- Upgrade to scikit-learn 0.22
 
 ### Other Changes
 
@@ -58,7 +59,6 @@
 
 ### Improvements
 - Minor documentation updates
-- Upgrade to scikit-learn 0.22
 
 ### Other Changes
 

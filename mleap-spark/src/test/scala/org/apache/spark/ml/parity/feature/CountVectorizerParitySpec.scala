@@ -10,6 +10,7 @@ import org.apache.spark.sql._
   */
 class CountVectorizerParitySpec extends SparkParityBase {
   override val dataset: DataFrame = baseDataset.select("loan_title")
+  throw new RuntimeException(dataset.schema)
   override val sparkTransformer: Transformer = new Pipeline().setStages(Array(new Tokenizer().
     setInputCol("loan_title").
     setOutputCol("loan_title_tokens"),

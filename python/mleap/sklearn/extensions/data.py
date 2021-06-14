@@ -68,7 +68,6 @@ class Imputer(SKLearnImputer):
     def __init__(self, input_features, output_features,
                  missing_values=np.nan, strategy="mean",
                  fill_value=None, verbose=0, copy=True, add_indicator=False):
-        self.op = "imputer"
         self.name = "{}_{}".format(self.op, uuid.uuid1())
         self.input_features = input_features
         self.output_features = output_features

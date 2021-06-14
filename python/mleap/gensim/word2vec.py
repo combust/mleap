@@ -59,10 +59,10 @@ class SimpleSparkSerializer(MLeapSerializer):
 
         # compile tuples of model attributes to serialize
         attributes = list()
-        attributes.append(('words', transformer.wv.index2word))
+        attributes.append(('words', transformer.wv.index_to_key))
 
-        # indices = [np.float64(x) for x in list(range(len(transformer.wv.index2word)))]
-        word_vectors = np.array([float(y) for x in [transformer.wv.word_vec(w) for w in transformer.wv.index2word] for y in x])
+        # indices = [np.float64(x) for x in list(range(len(transformer.wv.index_to_key)))]
+        word_vectors = np.array([float(y) for x in [transformer.wv.word_vec(w) for w in transformer.wv.index_to_key] for y in x])
 
         # attributes.append(('indices', indices))
         # Excluding indices because they are 0 - N

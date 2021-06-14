@@ -23,3 +23,6 @@ def Some(value):
     an Option[<value>]
     """
     return _jvm().scala.Some(value)
+
+def ScalaNone():
+    return jvm_scala_object(_jvm().scala, "None")

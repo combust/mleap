@@ -3,8 +3,6 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.InteractionModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import ml.combust.mleap.tensor.Tensor
-import ml.combust.mleap.core.util.VectorConverters._
 import ml.combust.mleap.runtime.frame.{BaseTransformer, FrameBuilder, Row, Transformer}
 
 import scala.util.Try
@@ -16,7 +14,8 @@ case class Interaction(override val uid: String = Transformer.uniqueName("intera
                        override val shape: NodeShape,
                        override val model: InteractionModel) extends BaseTransformer {
   val exec: UserDefinedFunction = {
-    UserDefinedFunction((row: Row) => model(row.toSeq): Tensor[Double],
+    UserDefinedFunction(
+      (row: Row) => model(row.toSeq),
       TensorType(BasicType.Double, Seq(model.outputSize)),
       Seq(SchemaSpec(inputSchema)))
   }

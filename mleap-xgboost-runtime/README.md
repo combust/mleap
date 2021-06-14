@@ -11,7 +11,7 @@ In order to use the Predictor implementation, you may:
     ```
     ml.combust.mleap.xgboost.ops = [
       "ml.combust.mleap.xgboost.runtime.bundle.ops.XGBoostPredictorClassificationOp",
-      "ml.combust.mleap.xgboost.runtime.bundle.ops.XGBoostRegressionOp"
+      "ml.combust.mleap.xgboost.runtime.bundle.ops.XGBoostPredictorRegressionOp"
     ]
     ```
 2. add this to your project's pom file:

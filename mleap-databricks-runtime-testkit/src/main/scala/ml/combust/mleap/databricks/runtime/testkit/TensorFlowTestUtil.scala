@@ -1,6 +1,7 @@
 package ml.combust.mleap.databricks.runtime.testkit
 
 import java.io.File
+import java.nio.file.{Files, Path}
 
 import org.tensorflow
 
@@ -24,9 +25,11 @@ object TensorFlowTestUtil {
     graph
   }
 
-  val baseDir = new File("/tmp/mleap-tensorflow")
-  TensorFlowTestUtil.delete(baseDir)
-  baseDir.mkdirs()
+  val baseDir = {
+    val temp: Path = Files.createTempDirectory("mleap-tensorflow")
+    temp.toFile.deleteOnExit()
+    temp.toAbsolutePath
+  }
 
   def delete(file: File): Array[(String, Boolean)] = {
     Option(file.listFiles).map(_.flatMap(f => delete(f))).getOrElse(Array()) :+ (file.getPath -> file.delete)

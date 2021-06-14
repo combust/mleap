@@ -8,7 +8,7 @@ Deploying machine learning data pipelines and algorithms should not be a time-co
 
 ## Documentation
 
-Documentation is available at [mleap-docs.combust.ml](http://mleap-docs.combust.ml).
+Documentation is available at [https://combust.github.io/mleap-docs/](https://combust.github.io/mleap-docs/).
 
 Read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
 
@@ -49,6 +49,8 @@ Choose the right version of the `mleap-spark` module to export your pipeline. Th
 
 | MLeap Version | Spark Version |
 |---------------|---------------|
+| 0.17.0        | 2.4.5         |
+| 0.16.0        | 2.4.5         |
 | 0.15.0        | 2.4           |
 | 0.14.0        | 2.4           |
 | 0.13.0        | 2.3           |
@@ -69,7 +71,7 @@ Please see the [release notes](RELEASE_NOTES.md) for changes (especially breakin
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.15.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.17.0"
 ```
 
 #### Maven
@@ -78,7 +80,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.15.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.11</artifactId>
-    <version>0.15.0</version>
+    <version>0.17.0</version>
 </dependency>
 ```
 
@@ -87,7 +89,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.15.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.15.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.17.0"
 ```
 
 #### Maven
@@ -96,14 +98,14 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.15.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.11</artifactId>
-    <version>0.15.0</version>
+    <version>0.17.0</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.15.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.11:0.17.0
 ```
 
 ### PySpark Integration
@@ -292,6 +294,8 @@ integration.
 * Hollin Wilkins (hollin@combust.ml)
 * Mikhail Semeniuk (mikhail@combust.ml)
 * Anca Sarb (sarb.anca@gmail.com)
+* Talal Riaz (talal@yelp.com)
+* Ryan Vogan (rvogan@yelp.com)
 
 ## License
 

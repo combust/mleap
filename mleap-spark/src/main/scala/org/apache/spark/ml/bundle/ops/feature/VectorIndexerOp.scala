@@ -2,7 +2,8 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.core.feature.HandleInvalid
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.VectorIndexerModel
 
@@ -29,7 +30,8 @@ class VectorIndexerOp extends SimpleSparkOp[VectorIndexerModel] {
           m.withValue(s"${key}_keys", Value.doubleList(vKeys)).
             withValue(s"${key}_values", Value.longList(vValues.map(_.toLong)))
       }.withValue("keys", Value.longList(keys.map(_.toLong).toSeq)).
-        withValue("num_features", Value.long(obj.numFeatures))
+        withValue("num_features", Value.long(obj.numFeatures)).
+        withValue("handle_invalid", Value.string(obj.getHandleInvalid))
     }
 
     override def load(model: Model)
@@ -41,15 +43,20 @@ class VectorIndexerOp extends SimpleSparkOp[VectorIndexerModel] {
           val kValues = model.value(s"key_${key}_values").getLongList.map(_.toInt)
           (key, kKeys.zip(kValues).toMap)
       }.toMap
+      val handleInvalid = model.getValue("handle_invalid").map(_.getString).getOrElse(HandleInvalid.default.asParamString)
 
-      new VectorIndexerModel(uid = "",
+      val m = new VectorIndexerModel(uid = "",
         numFeatures = model.value("num_features").getLong.toInt,
         categoryMaps = categoryMaps)
+      m.set(m.handleInvalid, handleInvalid)
+      m
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: VectorIndexerModel): VectorIndexerModel = {
-    new VectorIndexerModel(uid = uid, numFeatures = model.numFeatures, categoryMaps = model.categoryMaps)
+    val m = new VectorIndexerModel(uid = uid, numFeatures = model.numFeatures, categoryMaps = model.categoryMaps)
+    m.set(m.handleInvalid, model.getHandleInvalid)
+    m
   }
 
   override def sparkInputs(obj: VectorIndexerModel): Seq[ParamSpec] = {

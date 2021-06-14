@@ -12,6 +12,8 @@ object MleapProject {
     bundleHdfs,
     core,
     runtime,
+    xgboostRuntime,
+    xgboostSpark,
     avro,
     sparkBase,
     sparkTestkit,
@@ -170,7 +172,7 @@ object MleapProject {
   lazy val springBootServing = Project(
     id = "mleap-spring-boot",
     base = file("mleap-spring-boot"),
-    dependencies = Seq(`executor`)
+    dependencies = Seq(executor)
   )
 
   lazy val benchmark = Project(

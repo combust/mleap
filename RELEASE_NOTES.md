@@ -1,22 +1,60 @@
-# Release 0.16.0 (pending, not released yet)
+# Release 0.18.0-SNAPSHOT (not released yet)
+
+### Breaking Changes
+
+### New Features
+
+### Bug Fixes
+- Fix OneHotEncoder Python serialization
+
+### Improvements
+
+### Other Changes
+
+# Release 0.17.0
+
+### Breaking Changes
+
+### New Features
+- upgrade to xgboost 1.0.0 - using h2oai Predictor
+- support for using xgboost predictor when using xgboost regressor
+- MathBinaryModel now supports Min and Max operations
+
+### Bug Fixes
+- fix Spark deserialization of random forest classifier to include numTrees
+
+### Improvements
+- scoring optimizations for Interacting and CountVectorizer
+
+### Other Changes
+
+# Release 0.16.1 - python only release
+
+### Bug Fixes
+- fix MathBinary serialization/deserialization in pyspark
+
+# Release 0.16.0
 
 ### Breaking Changes
 - Fix default ports when running grpc/http requests; default grpc port is 65328 and can be overridden via MLEAP_GRPC_PORT; default http port should be: 65327 and can be overridden via MLEAP_HTTP_PORT
 
 ### New Features
+- Upgrade to Spark version 2.4.5
+- Support for a performant implementation of the XGboost runtime (XGboost Predictor)
 - Scikit-learn support for MultinomialLogisticRegression
 - Support for min/max values other than defaults (i.e. 0.0 and 1.0) in MinMaxScalerModel
 - Support for custom transformers (StringMap, MathUnary, MathBinary) in Pyspark
-- Support for a performant implementation of the XGboost runtime (XGboost Predictor)
-- Upgrade to Spark version 2.4.5
+- Support MLWritable/MLReadable for custom transformers (StringMap, MathUnary, MathBinary) and fix this for Imputer transformer
+- Fixes support for loading/storing bundles from/to hdfs in Pyspark
+- Improve importing mleap __version__ for python modules
 
 ### Bug Fixes
 - Fix XGBoost sparse vector support
 - Fix MinMaxScalerModel outputs different in Spark vs MLeap
 - Fix Spark deserialization for CountVectorizer transformer
-- Fix adding support for HandleInvalid.Error in Bucketizer
-- Fix setting HandleInvalid.Error by default to OneHotEncoder for backwards compatibility
-- Fix OneHotEncoder Python serialization
+- Added support for HandleInvalid in Bucketizer, VectorIndexer
+- Fix setting HandleInvalid by default to OneHotEncoder for backwards compatibility
+- Fixes MLReader for Imputer mleap implementation of Spark transformer
 
 ### Improvements
 - Minor documentation updates

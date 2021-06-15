@@ -15,7 +15,7 @@ object Dependencies {
   lazy val loggingVersion = "3.9.0"
   lazy val slf4jVersion = "1.7.25"
   lazy val awsSdkVersion = "1.11.349"
-  val tensorflowVersion = "0.3.1" // Match Tensorflow 2.4.1 https://github.com/tensorflow/java/#tensorflow-version-support
+  val tensorflowJavaVersion = "0.3.1" // Match Tensorflow 2.4.1 https://github.com/tensorflow/java/#tensorflow-version-support
   val xgboostVersion = "1.0.0"
   val hadoopVersion = "2.6.5" // matches spark version
   val kryoVersion = "4.0.2" // Remove upon upgrading to xgboost 1.1.1
@@ -39,7 +39,7 @@ object Dependencies {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
     val commonsIo = "commons-io" % "commons-io" % "2.5"
-    val tensorflowCoreApi = "org.tensorflow" % "tensorflow-core-api" % tensorflowVersion
+    val tensorflowCoreApi = "org.tensorflow" % "tensorflow-core-api" % tensorflowJavaVersion
     val tensorflowDeps = Seq(tensorflowCoreApi) ++ tensorflowPlatforms.map(platform => tensorflowCoreApi classifier platform)
 
 

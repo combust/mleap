@@ -31,12 +31,11 @@ import java.util.function.BiConsumer
 object MleapConverter {
   def convert[T: ClassTag](value: Tensor[T], tt: TensorType): tensorflow.Tensor = {
     val dense = value.toDense
-    val dimensions = dense.dimensions.map(_.toLong).toArray
-
+    val shape = Shape.of(dense.dimensions.map(_.toLong).toArray: _*)
     value.base.runtimeClass match {
       case Tensor.ByteClass =>
         TUint8.tensorOf(
-          Shape.of(dimensions: _*),
+          shape,
           DataBuffers.of(
             ByteBuffer.wrap(
               dense.values.asInstanceOf[Array[Byte]]
@@ -45,7 +44,7 @@ object MleapConverter {
         )
       case Tensor.IntClass =>
         TInt32.tensorOf(
-          Shape.of(dimensions: _*),
+          shape,
           DataBuffers.of(
             IntBuffer.wrap(
               dense.values.asInstanceOf[Array[Int]]
@@ -55,7 +54,7 @@ object MleapConverter {
 
       case Tensor.LongClass =>
         TInt64.tensorOf(
-          Shape.of(dimensions: _*),
+          shape,
           DataBuffers.of(
             LongBuffer.wrap(
               dense.values.asInstanceOf[Array[Long]]
@@ -64,7 +63,7 @@ object MleapConverter {
         )
       case Tensor.FloatClass =>
         TFloat32.tensorOf(
-          Shape.of(dimensions: _*),
+          shape,
           DataBuffers.of(
             FloatBuffer.wrap(
               dense.values.asInstanceOf[Array[Float]]
@@ -73,7 +72,7 @@ object MleapConverter {
         )
       case Tensor.DoubleClass =>
         TFloat64.tensorOf(
-          Shape.of(dimensions: _*),
+          shape,
           DataBuffers.of(
             DoubleBuffer.wrap(
               dense.values.asInstanceOf[Array[Double]]
@@ -81,30 +80,30 @@ object MleapConverter {
           )
         )
       case Tensor.StringClass =>
-        val stringMatrix = NdArrays.ofObjects(classOf[String], Shape.of(dimensions: _*))
-        val bs_value = dense.asInstanceOf[DenseTensor[String]]
+        val ndString = NdArrays.ofObjects(classOf[String],shape)
+        val mlTensor = dense.asInstanceOf[DenseTensor[String]]
 
-        stringMatrix.scalars.asInstanceOf[NdArraySequence[NdArray[String]]].forEachIndexed(
+        ndString.scalars.asInstanceOf[NdArraySequence[NdArray[String]]].forEachIndexed(
           new BiConsumer[Array[Long], NdArray[String]]
           {
             override def accept(i: Array[Long], e: NdArray[String]): Unit = {
-            stringMatrix.setObject(bs_value.get(i.map(_.toInt):_*).get, i:_*)
+              ndString.setObject(mlTensor.get(i.map(_.toInt):_*).get, i:_*)
           }
         })
-        TString.tensorOf(stringMatrix)
+        TString.tensorOf(ndString)
 
       case Tensor.ByteStringClass =>
-        val stringMatrix = NdArrays.ofObjects(classOf[Array[Byte]], Shape.of(dimensions: _*))
-        val bs_value = dense.asInstanceOf[DenseTensor[ByteString]]
+        val ndString = NdArrays.ofObjects(classOf[Array[Byte]], shape)
+        val mlTensor = dense.asInstanceOf[DenseTensor[ByteString]]
 
-        stringMatrix.scalars.asInstanceOf[NdArraySequence[NdArray[Array[Byte]]]].forEachIndexed(
+        ndString.scalars.asInstanceOf[NdArraySequence[NdArray[Array[Byte]]]].forEachIndexed(
           new BiConsumer[Array[Long], NdArray[Array[Byte]]]
           {
             override def accept(i: Array[Long], e: NdArray[Array[Byte]]): Unit = {
-            stringMatrix.setObject(bs_value.get(i.map(_.toInt):_*).map(s => s.bytes).get, i:_*)
+              ndString.setObject(mlTensor.get(i.map(_.toInt):_*).map(s => s.bytes).get, i:_*)
           }
         })
-        TString.tensorOfBytes(stringMatrix)
+        TString.tensorOfBytes(ndString)
       case _ =>
         throw new IllegalArgumentException(s"unsupported tensor type $tt")
     }

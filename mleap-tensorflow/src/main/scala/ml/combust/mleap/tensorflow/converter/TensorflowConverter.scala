@@ -17,38 +17,31 @@ import java.util.function.BiConsumer
   * Created by hollinwilkins on 1/12/17.
   */
 object TensorflowConverter {
-  def convertBytesToHex(bytes: Array[Byte]): String = {
-    val sb = new StringBuilder
-    for (b <- bytes) {
-      sb.append(String.format("%02x ", Byte.box(b)))
-    }
-    sb.toString
-  }
     def convert(tensor: tensorflow.Tensor, tensorType: TensorType): DenseTensor[_] = {
       val dimensions = getShape(tensor)
       val size = getSize(tensor)
 
       tensor match {
         case u8: TUint8 =>
-          val b = ByteBuffer.allocate(size)
-          u8.read(DataBuffers.of(b))
-          DenseTensor(b.array, dimensions)
+         val buffer = ByteBuffer.allocate(size)
+          u8.read(DataBuffers.of(buffer))
+          DenseTensor(buffer.array, dimensions)
         case i32: TInt32 =>
-          val b = IntBuffer.allocate(size)
-          i32.read(DataBuffers.of(b))
-          DenseTensor(b.array, dimensions)
+         val buffer = IntBuffer.allocate(size)
+          i32.read(DataBuffers.of(buffer))
+          DenseTensor(buffer.array, dimensions)
         case i64: TInt64=>
-          val b = LongBuffer.allocate(size)
-          i64.read(DataBuffers.of(b))
-          DenseTensor(b.array, dimensions)
+         val buffer = LongBuffer.allocate(size)
+          i64.read(DataBuffers.of(buffer))
+          DenseTensor(buffer.array, dimensions)
         case f32: TFloat32 =>
-          val b = FloatBuffer.allocate(size)
-          f32.read(DataBuffers.of(b))
-          DenseTensor(b.array, dimensions)
+         val buffer = FloatBuffer.allocate(size)
+          f32.read(DataBuffers.of(buffer))
+          DenseTensor(buffer.array, dimensions)
         case f64: TFloat64 =>
-          val b = DoubleBuffer.allocate(size)
-          f64.read(DataBuffers.of(b))
-          DenseTensor(b.array, dimensions)
+         val buffer = DoubleBuffer.allocate(size)
+          f64.read(DataBuffers.of(buffer))
+          DenseTensor(buffer.array, dimensions)
         case str: TString =>
           tensorType.base match {
             case BasicType.String =>
@@ -82,5 +75,4 @@ object TensorflowConverter {
   def getShape(tensor: tensorflow.Tensor): Seq[Int] = {
     tensor.shape.asArray.toSeq.map(_.toInt)
   }
-
 }

@@ -54,7 +54,6 @@ class TensorflowTransformerSpec extends FunSpec {
 
     graph.importGraphDef(graphDef)
     val gb = graph.toGraphDef.toByteArray
-    println(gb.length)
 
     it("can create transformer and bundle from a TF frozen graph") {
 

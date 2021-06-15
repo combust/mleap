@@ -26,8 +26,8 @@ case class TensorflowModel(@transient var graph: Option[tensorflow.Graph] = None
 
     val result = Try {
       val tensors = values.zip(inputs).map {
-        case (v, (name, dataType)) =>
-          val tensor = MleapConverter.convert(v, dataType)
+        case (v, (name, _)) =>
+          val tensor = MleapConverter.convert(v)
           garbage += tensor
           (name, tensor)
       }
@@ -53,8 +53,7 @@ case class TensorflowModel(@transient var graph: Option[tensorflow.Graph] = None
           runner.run().asScala.zip(outputs).map {
             case (tensor, (_, dataType)) =>
               garbage += tensor
-              val mleapTensor = TensorflowConverter.convert(tensor, dataType)
-              mleapTensor
+              TensorflowConverter.convert(tensor, dataType)
           }
       }
     }

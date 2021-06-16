@@ -4,6 +4,7 @@ import ml.combust.mleap.core.types.TensorType
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
 import org.tensorflow.types._
+import org.tensorflow.ndarray.Shape
 
 class MleapConverterSpec extends FunSpec {
   val random = new scala.util.Random
@@ -19,13 +20,6 @@ class MleapConverterSpec extends FunSpec {
       (x, y) => for (a <- x.view; b <- y) yield a :+ b
     }
 
-  def assertSameTensor(lhr: Tensor[_], rhs: Tensor[_]) = {
-    assert(lhr.dimensions == rhs.dimensions)
-    assert(lhr.base == rhs.base)
-    assert(lhr.size == lhr.size)
-    assert(lhr.toArray sameElements lhr.toArray)
-  }
-
   describe("round trip from mleap tensor to tensorflow tensor") {
 
     it("vector") {
@@ -35,7 +29,7 @@ class MleapConverterSpec extends FunSpec {
       val mlTensor = Tensor.denseVector(array)
       val tfTensorConverted = MleapConverter.convert(mlTensor)
       val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.Int())
-      assertSameTensor(mlTensor, mlTensorConverted)
+      assert(mlTensor == mlTensorConverted)
     }
 
     it("int nd dense tensors") {
@@ -45,7 +39,7 @@ class MleapConverterSpec extends FunSpec {
       val mlTensor = Tensor.create(array, dimensions = shape)
       val tfTensorConverted = MleapConverter.convert(mlTensor).asInstanceOf[TInt32]
       val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.Int())
-      assertSameTensor(mlTensor, mlTensorConverted)
+      assert(mlTensor == mlTensorConverted)
       // make sure same indices has same value between tensorflow tensor and mleap tensor
       assert(
         toIndices(shape).map(indices => tfTensorConverted.getObject(indices.map(_.toLong): _*))
@@ -60,7 +54,7 @@ class MleapConverterSpec extends FunSpec {
       val mlTensor = Tensor.create(array, dimensions = shape)
       val tfTensorConverted = MleapConverter.convert(mlTensor).asInstanceOf[TInt64]
       val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.Long())
-      assertSameTensor(mlTensor, mlTensorConverted)
+      assert(mlTensor == mlTensorConverted)
       // make sure same indices has same value between tensorflow tensor and mleap tensor
       assert(
         toIndices(shape).map(indices => tfTensorConverted.getObject(indices.map(_.toLong): _*))
@@ -75,7 +69,7 @@ class MleapConverterSpec extends FunSpec {
       val mlTensor = Tensor.create(array, dimensions = shape)
       val tfTensorConverted = MleapConverter.convert(mlTensor).asInstanceOf[TFloat32]
       val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.Float())
-      assertSameTensor(mlTensor, mlTensorConverted)
+      assert(mlTensor == mlTensorConverted)
       // make sure same indices has same value between tensorflow tensor and mleap tensor
       assert(
         toIndices(shape).map(indices => tfTensorConverted.getObject(indices.map(_.toLong): _*))
@@ -91,7 +85,7 @@ class MleapConverterSpec extends FunSpec {
       val mlTensor = Tensor.create(array, dimensions = shape)
       val tfTensorConverted = MleapConverter.convert(mlTensor).asInstanceOf[TFloat64]
       val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.Double())
-      assertSameTensor(mlTensor, mlTensorConverted)
+      assert(mlTensor == mlTensorConverted)
       // make sure same indices has same value between tensorflow tensor and mleap tensor
       assert(
         toIndices(shape).map(indices => tfTensorConverted.getObject(indices.map(_.toLong): _*))
@@ -106,7 +100,7 @@ class MleapConverterSpec extends FunSpec {
       val mlTensor = Tensor.create(array, dimensions = shape)
       val tfTensorConverted = MleapConverter.convert(mlTensor).asInstanceOf[TUint8]
       val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.Byte())
-      assertSameTensor(mlTensor, mlTensorConverted)
+      assert(mlTensor == mlTensorConverted)
       // make sure same indices has same value between tensorflow tensor and mleap tensor
       assert(
         toIndices(shape).map(indices => tfTensorConverted.getObject(indices.map(_.toLong): _*))
@@ -126,7 +120,7 @@ class MleapConverterSpec extends FunSpec {
       val mlTensor = Tensor.create(array, dimensions = shape)
       val tfTensorConverted = MleapConverter.convert(mlTensor).asInstanceOf[TString]
       val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.ByteString()).asInstanceOf[Tensor[ByteString]]
-      assertSameTensor(mlTensor, mlTensorConverted)
+      assert(mlTensor == mlTensorConverted)
       // make sure same indices has same value between tensorflow tensor and mleap tensor
       val expected = toIndices(shape).map(indices => mlTensor(indices: _*).bytes)
       val actual = toIndices(shape).map(indices => tfTensorConverted.asBytes().getObject(indices.map(_.toLong): _*))
@@ -140,7 +134,7 @@ class MleapConverterSpec extends FunSpec {
       val mlTensor = Tensor.create(array, dimensions = shape)
       val tfTensorConverted = MleapConverter.convert(mlTensor).asInstanceOf[TString]
       val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.String())
-      assertSameTensor(mlTensor, mlTensorConverted)
+      assert(mlTensor == mlTensorConverted)
       assert(
         toIndices(shape).map(indices => tfTensorConverted.getObject(indices.map(_.toLong): _*))
           sameElements toIndices(shape).map(indices => mlTensor(indices: _*))
@@ -159,6 +153,18 @@ class MleapConverterSpec extends FunSpec {
       catch {
         case _: IllegalArgumentException => // continue
       }
+    }
+
+    it("empty tensor remain empty after converted to tf tensor and convert it back") {
+      val array = Array[Int]()
+      val mlTensor = Tensor.create(array, dimensions = Seq(0))
+      assert(0  == mlTensor.size)
+      val tfTensorConverted = MleapConverter.convert(mlTensor)
+      assert(tfTensorConverted.shape() == Shape.of(0))
+      assert(tfTensorConverted.size() == 0)
+      val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.Int())
+      assert(0 == mlTensorConverted.size)
+      assert(mlTensor == mlTensorConverted)
     }
   }
 }

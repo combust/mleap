@@ -64,11 +64,6 @@ object Tensor {
 
     normalizedDimensions
   }
-  def tensorEquals[T](lhr: Tensor[T], rhs: Tensor[T]) = {
-    lhr.base == rhs.base &&
-      lhr.dimensions == rhs.dimensions &&
-      lhr.rawValues.sameElements[T](rhs.rawValues)
-  }
 }
 
 sealed trait Tensor[T] {
@@ -89,6 +84,16 @@ sealed trait Tensor[T] {
 
   def apply(indices: Int *): T = get(indices: _*).get
   def get(indices: Int *): Option[T]
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case obj: Tensor[T] =>
+        base == obj.base &&
+          dimensions == obj.dimensions &&
+          rawValues.sameElements[T](obj.rawValues)
+      case _ => false
+    }
+  }
 }
 
 case class DenseTensor[T](values: Array[T],
@@ -112,8 +117,7 @@ case class DenseTensor[T](values: Array[T],
   }
 
   override def equals(obj: Any): Boolean = obj match {
-    case obj: DenseTensor[_] =>
-      Tensor.tensorEquals(this, obj.asInstanceOf[DenseTensor[T]])
+    case obj: DenseTensor[T] => super.equals(obj)
     case _ => false
   }
 }
@@ -162,9 +166,8 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
   }
 
   override def equals(obj: Any): Boolean = obj match {
-    case obj: SparseTensor[_] =>
-        indices == obj.indices &&
-        Tensor.tensorEquals(this, obj.asInstanceOf[SparseTensor[T]])
+    case obj: SparseTensor[T] =>
+        indices == obj.indices && super.equals(obj)
     case _ => false
   }
 }

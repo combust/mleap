@@ -18,6 +18,9 @@ class CountVectorizerOp extends SimpleSparkOp[CountVectorizerModel] {
 
     override def store(model: Model, obj: CountVectorizerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
+      if (obj.vocabulary contains null) {
+        throw new RuntimeException("MLeap cannot serialize CountVectorizerModel vocabularies containing `null`")
+      }
       model.withValue("vocabulary", Value.stringList(obj.vocabulary)).
         withValue("binary", Value.boolean(obj.getBinary)).
         withValue("min_tf", Value.double(obj.getMinTF))

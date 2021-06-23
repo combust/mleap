@@ -49,15 +49,11 @@ class TensorflowTransformerSpec extends FunSpec {
   describe("example tensorflow wine quality model") {
 
     val graphBytes = Files.readAllBytes(Paths.get(getClass.getClassLoader.getResource("optimized_wine_quality.pb").getPath))
-    val graph = new Graph()
-    val graphDef = GraphDef.parseFrom(graphBytes)
 
-    graph.importGraphDef(graphDef)
-    val gb = graph.toGraphDef.toByteArray
 
     it("can create transformer and bundle from a TF frozen graph") {
 
-      val model = TensorflowModel(graph = Some(graph), inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
+      val model = TensorflowModel(inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
         outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))), graphBytes = graphBytes)
       val shape = NodeShape().withInput("dense_1_input", "features").withOutput("dense_3/Sigmoid", "score")
       val transformer = TensorflowTransformer(uid = "wine_quality", shape = shape, model = model)

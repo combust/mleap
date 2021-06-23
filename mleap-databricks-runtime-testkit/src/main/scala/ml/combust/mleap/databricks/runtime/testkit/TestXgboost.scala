@@ -7,8 +7,6 @@ import ml.combust.bundle.BundleFile
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.sql.SparkSession
-import org.apache.avro.file.{DataFileReader, SeekableByteArrayInput}
-import org.apache.avro.generic.{GenericData, GenericDatumReader}
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier

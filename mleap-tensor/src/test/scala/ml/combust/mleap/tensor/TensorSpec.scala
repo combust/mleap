@@ -1,7 +1,6 @@
 package ml.combust.mleap.tensor
 
 import org.scalatest.FunSpec
-import org.scalatest.exceptions.TestFailedException
 
 class TensorSpec extends FunSpec {
   def toIndices(dimensions: Seq[Int]): Seq[Seq[Int]] = combine(dimensions.map(d => 0 until d))

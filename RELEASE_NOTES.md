@@ -1,10 +1,23 @@
-# Release 0.17.0 (not released yet)
+# Release 0.18.0-SNAPSHOT (not released yet)
+
+### Breaking Changes
+
+### New Features
+
+### Bug Fixes
+
+### Improvements
+
+### Other Changes
+
+# Release 0.17.0
 
 ### Breaking Changes
 
 ### New Features
 - upgrade to xgboost 1.0.0 - using h2oai Predictor
 - support for using xgboost predictor when using xgboost regressor
+- MathBinaryModel now supports Min and Max operations
 
 ### Bug Fixes
 - fix Spark deserialization of random forest classifier to include numTrees

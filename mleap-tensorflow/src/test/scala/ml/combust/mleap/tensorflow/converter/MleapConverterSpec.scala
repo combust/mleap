@@ -166,5 +166,43 @@ class MleapConverterSpec extends FunSpec {
       assert(0 == mlTensorConverted.size)
       assert(mlTensor == mlTensorConverted)
     }
+
+    it("scalar converted to tf tensor and convert it back") {
+      val mlTensor = Tensor.scalar(random.nextInt())
+      assert(1  == mlTensor.size)
+      assert(mlTensor.dimensions == Seq())
+      val tfTensorConverted = MleapConverter.convert(mlTensor)
+      assert(tfTensorConverted.shape() == Shape.scalar())
+      assert(tfTensorConverted.size() == 1)
+      val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.Int())
+      assert(1 == mlTensorConverted.size)
+      assert(mlTensor == mlTensorConverted)
+    }
+
+    it("scalar string converted to tf tensor and convert it back") {
+      val mlTensor = Tensor.scalar(random.alphanumeric.take(100).mkString)
+      assert(1  == mlTensor.size)
+      assert(mlTensor.dimensions == Seq())
+      val tfTensorConverted = MleapConverter.convert(mlTensor)
+      assert(tfTensorConverted.shape().isScalar())
+      assert(tfTensorConverted.size() == 1)
+      val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.String())
+      assert(1 == mlTensorConverted.size)
+      assert(mlTensor == mlTensorConverted)
+    }
+
+    it("scalar byte string converted to tf tensor and convert it back") {
+      val bytes = Array.fill[Byte](100) {'a'}
+      random.nextBytes(bytes)
+      val mlTensor = Tensor.scalar(ByteString(bytes))
+      assert(1  == mlTensor.size)
+      assert(mlTensor.dimensions == Seq())
+      val tfTensorConverted = MleapConverter.convert(mlTensor)
+      assert(tfTensorConverted.shape().isScalar())
+      assert(tfTensorConverted.size() == 1)
+      val mlTensorConverted = TensorflowConverter.convert(tfTensorConverted, TensorType.ByteString())
+      assert(1 == mlTensorConverted.size)
+      assert(mlTensor == mlTensorConverted)
+    }
   }
 }

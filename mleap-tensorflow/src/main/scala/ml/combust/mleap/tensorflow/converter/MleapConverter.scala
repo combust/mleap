@@ -65,27 +65,33 @@ object MleapConverter {
       case Tensor.StringClass =>
         val ndString = NdArrays.ofObjects(classOf[String],shape)
         val mlTensor = dense.asInstanceOf[DenseTensor[String]]
-
-        ndString.scalars.asInstanceOf[NdArraySequence[NdArray[String]]].forEachIndexed(
-          new BiConsumer[Array[Long], NdArray[String]]
-          {
-            override def accept(i: Array[Long], e: NdArray[String]): Unit = {
-              e.setObject(mlTensor(i.map(_.toInt):_*))
-          }
-        })
+        if (shape.isScalar()) {
+          ndString.setObject(mlTensor(0))
+        } else {
+          ndString.scalars.asInstanceOf[NdArraySequence[NdArray[String]]].forEachIndexed(
+            new BiConsumer[Array[Long], NdArray[String]]
+            {
+              override def accept(i: Array[Long], e: NdArray[String]): Unit = {
+                e.setObject(mlTensor(i.map(_.toInt):_*))
+            }
+          })
+        }
         TString.tensorOf(ndString)
 
       case Tensor.ByteStringClass =>
         val ndString = NdArrays.ofObjects(classOf[Array[Byte]], shape)
         val mlTensor = dense.asInstanceOf[DenseTensor[ByteString]]
-
-        ndString.scalars.asInstanceOf[NdArraySequence[NdArray[Array[Byte]]]].forEachIndexed(
-          new BiConsumer[Array[Long], NdArray[Array[Byte]]]
-          {
-            override def accept(i: Array[Long], e: NdArray[Array[Byte]]): Unit = {
-              e.setObject(mlTensor(i.map(_.toInt):_*).bytes)
-          }
-        })
+        if (shape.isScalar()) {
+          ndString.setObject(mlTensor(0).bytes)
+        } else {
+          ndString.scalars.asInstanceOf[NdArraySequence[NdArray[Array[Byte]]]].forEachIndexed(
+            new BiConsumer[Array[Long], NdArray[Array[Byte]]]
+            {
+              override def accept(i: Array[Long], e: NdArray[Array[Byte]]): Unit = {
+                e.setObject(mlTensor(i.map(_.toInt):_*).bytes)
+            }
+          })
+        }
         TString.tensorOfBytes(ndString)
       case _ =>
         throw new IllegalArgumentException(s"unsupported tensor type ${value.getClass}[${value.base.runtimeClass}]")

@@ -46,19 +46,27 @@ object TensorflowConverter {
           tensorType.base match {
             case BasicType.String =>
               val array = ArrayBuffer[String]()
-              str.scalars.asInstanceOf[NdArraySequence[NdArray[String]]].forEachIndexed(new BiConsumer[Array[Long], NdArray[String]] {
-                override def accept(i: Array[Long], e: NdArray[String]): Unit = {
-                  array += e.getObject()
-                }
-              })
+              if (dimensions.isEmpty) {
+                array += str.getObject()
+              } else {
+                str.scalars.asInstanceOf[NdArraySequence[NdArray[String]]].forEachIndexed(new BiConsumer[Array[Long], NdArray[String]] {
+                  override def accept(i: Array[Long], e: NdArray[String]): Unit = {
+                    array += e.getObject()
+                  }
+                })
+              }
               DenseTensor(array.toArray, dimensions)
             case BasicType.ByteString =>
               val array = ArrayBuffer[ByteString]()
-              str.asBytes().scalars.asInstanceOf[NdArraySequence[NdArray[Array[Byte]]]].forEachIndexed(new BiConsumer[Array[Long], NdArray[Array[Byte]]] {
-                override def accept(i: Array[Long], e: NdArray[Array[Byte]]): Unit = {
-                  array += ByteString(e.getObject())
-                }
-              })
+              if (dimensions.isEmpty) {
+                array += ByteString(str.asBytes().getObject())
+              } else {
+                str.asBytes().scalars.asInstanceOf[NdArraySequence[NdArray[Array[Byte]]]].forEachIndexed(new BiConsumer[Array[Long], NdArray[Array[Byte]]] {
+                  override def accept(i: Array[Long], e: NdArray[Array[Byte]]): Unit = {
+                    array += ByteString(e.getObject())
+                  }
+                })
+              }
               DenseTensor(array.toArray, dimensions)
             case _ =>
               throw new RuntimeException(s"unsupported ml TensorType ${tensorType} when Tensorflow tensor is String")

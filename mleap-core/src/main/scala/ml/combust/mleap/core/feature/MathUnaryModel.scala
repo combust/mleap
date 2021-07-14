@@ -32,11 +32,11 @@ object UnaryOperation {
   case object Abs extends UnaryOperation {
     override def name: String = "abs"
   }
-  case object LogitTransform extends UnaryOperation { 
-    override def name: String = "LogitTransform"
+  case object Logit extends UnaryOperation {
+    override def name: String = "Logit"
   }
 
-  val all = Set(Log, Exp, Sqrt, Sin, Cos, Tan, Abs, LogitTransform)
+  val all = Set(Log, Exp, Sqrt, Sin, Cos, Tan, Abs, Logit)
   val forName: Map[String, UnaryOperation] = all.map(o => (o.name, o)).toMap
 }
 
@@ -51,7 +51,7 @@ case class MathUnaryModel(operation: UnaryOperation) extends Model {
     case Cos => Math.cos(a)
     case Tan => Math.tan(a)
     case Abs => Math.abs(a)
-    case LogitTransform => LogitHelper.logit(a)
+    case Logit => LogitHelper.logit(a)
     case _ => throw new RuntimeException(s"unsupported unary operation: $operation")
   }
 
@@ -63,13 +63,7 @@ case class MathUnaryModel(operation: UnaryOperation) extends Model {
 }
 
 object LogitHelper { 
-  val LOGIT_MIN = 0.000001
-  val LOGIT_MAX = 0.999999
-  
   def logit(value: Double): Double = {
-    if (value < LOGIT_MIN || value > LOGIT_MAX) {
-      throw new RuntimeException(s"logit value $value out of bounds")
-    }
     val logitInstance = new Logit()
     return logitInstance.value(value)
   } 

@@ -32,5 +32,5 @@ class MathUnaryModelSpec extends FunSpec {
   unaryLike(Cos, "cos", 9982.2, Math.cos(9982.2))
   unaryLike(Tan, "tan", 88777.777, Math.tan(88777.777))
   unaryLike(Abs, "abs", -88777.777, Math.abs(-88777.777))
-  unaryLike(LogitTransform, "logitTransform", 0.9, LogitHelper.logit(0.9))
+  unaryLike(Logit, "logit", 0.9, LogitHelper.logit(0.9))
 }

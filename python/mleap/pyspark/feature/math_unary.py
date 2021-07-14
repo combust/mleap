@@ -18,7 +18,7 @@ class UnaryOperation(Enum):
     Exp = 5
     Abs = 6
     Sqrt = 7
-    LogitTransform = 8
+    Logit = 8
 
 
 class MathUnary(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, JavaMLWritable):

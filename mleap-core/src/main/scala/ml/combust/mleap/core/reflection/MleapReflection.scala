@@ -72,7 +72,7 @@ trait MleapReflection {
   }
 
   private def mirrorType[T: TypeTag]: `Type` = MleapReflectionLock.synchronized {
-    typeTag[T].in(mirror).tpe.normalize
+    typeTag[T].in(mirror).tpe.dealias
   }
 
   def extractConstructorParameters[T: TypeTag] : Seq[(String, DataType)] = MleapReflectionLock.synchronized {
@@ -93,11 +93,11 @@ trait MleapReflection {
   }
 
   private def constructParams(tpe: Type): Seq[Symbol] = {
-    constructorSymbol(tpe).paramss.flatten
+    constructorSymbol(tpe).paramLists.flatten
   }
 
   private def constructorSymbol(tpe: universe.Type) : MethodSymbol = {
-    val constructorSymbol = tpe.member(nme.CONSTRUCTOR)
+    val constructorSymbol = tpe.member(termNames.CONSTRUCTOR)
     if (constructorSymbol.isMethod) {
       constructorSymbol.asMethod
     } else {

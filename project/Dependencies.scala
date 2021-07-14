@@ -6,18 +6,18 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "2.4.5"
-  val scalaTestVersion = "3.0.3"
-  val akkaVersion = "2.5.12"
-  val akkaHttpVersion = "10.0.3"
+  val sparkVersion = "3.0.2"
+  val scalaTestVersion = "3.0.8"
+  val akkaVersion = "2.6.14"
+  val akkaHttpVersion = "10.2.4"
   val springBootVersion = "2.0.4.RELEASE"
   lazy val logbackVersion = "1.2.3"
   lazy val loggingVersion = "3.9.0"
   lazy val slf4jVersion = "1.7.25"
-  lazy val awsSdkVersion = "1.11.349"
+  lazy val awsSdkVersion = "1.11.1033"
   val tensorflowVersion = "1.11.0"
   val xgboostVersion = "1.0.0"
-  val hadoopVersion = "2.6.5" // matches spark version
+  val hadoopVersion = "2.7.4" // matches spark version
   val kryoVersion = "4.0.2" // Remove upon upgrading to xgboost 1.1.1
 
   object Compile {

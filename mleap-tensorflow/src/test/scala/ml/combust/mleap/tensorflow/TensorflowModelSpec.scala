@@ -12,10 +12,11 @@ class TensorflowModelSpec extends FunSpec {
   describe("with an adding tensorflow model") {
     it("adds two floats together") {
       val graph = TestUtil.createAddGraph()
-      val model = TensorflowModel(graph = Some(graph),
+      val model = TensorflowModel(
+        graph=Some(graph),
         inputs = Seq(("InputA", TensorType.Float()), ("InputB", TensorType.Float())),
         outputs = Seq(("MyResult", TensorType.Float())),
-        graphBytes = graph.toGraphDef
+        graphBytes = graph.toGraphDef.toByteArray
       )
 
       assert(model(Tensor.scalar(23.4f), Tensor.scalar(45.6f)).head == Tensor.scalar(23.4f + 45.6f))
@@ -33,7 +34,7 @@ class TensorflowModelSpec extends FunSpec {
         val model = TensorflowModel(graph = Some(graph),
           inputs = Seq(("InputA", TensorType.Float()), ("InputB", TensorType.Float())),
           outputs = Seq(("MyResult", TensorType.Float(3))),
-          graphBytes = graph.toGraphDef)
+          graphBytes = graph.toGraphDef.toByteArray)
         val tensor1 = DenseTensor(Array(1.0f, 2.0f, 3.0f), Seq(3))
         val scale1 = Tensor.scalar(2.0f)
 

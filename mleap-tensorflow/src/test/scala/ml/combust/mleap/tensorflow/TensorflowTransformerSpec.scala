@@ -3,7 +3,6 @@ package ml.combust.mleap.tensorflow
 import java.io.File
 import java.net.URI
 import java.nio.file.{Files, Paths}
-
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.types.{NodeShape, StructField, StructType, TensorType}
@@ -11,8 +10,9 @@ import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import org.scalatest.FunSpec
+import org.tensorflow.Graph
 import resource.managed
-
+import org.tensorflow.proto.framework.GraphDef
 /**
   * Created by hollinwilkins on 1/13/17.
   */
@@ -24,7 +24,7 @@ class TensorflowTransformerSpec extends FunSpec {
       val model = TensorflowModel(graph = Some(graph),
         inputs = Seq(("InputA", TensorType.Float()), ("InputB", TensorType.Float())),
         outputs = Seq(("MyResult", TensorType.Float())),
-        graphBytes = graph.toGraphDef)
+        graphBytes = graph.toGraphDef.toByteArray)
       val shape = NodeShape().withInput("InputA", "input_a").
         withInput("InputB", "input_b").
         withOutput("MyResult", "my_result")
@@ -49,13 +49,12 @@ class TensorflowTransformerSpec extends FunSpec {
   describe("example tensorflow wine quality model") {
 
     val graphBytes = Files.readAllBytes(Paths.get(getClass.getClassLoader.getResource("optimized_wine_quality.pb").getPath))
-    val graph = new org.tensorflow.Graph()
-    graph.importGraphDef(graphBytes)
+
 
     it("can create transformer and bundle from a TF frozen graph") {
 
-      val model = TensorflowModel(graph = Some(graph), inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
-        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))), graphBytes = graph.toGraphDef)
+      val model = TensorflowModel(inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
+        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))), graphBytes = graphBytes)
       val shape = NodeShape().withInput("dense_1_input", "features").withOutput("dense_3/Sigmoid", "score")
       val transformer = TensorflowTransformer(uid = "wine_quality", shape = shape, model = model)
 
@@ -79,8 +78,8 @@ class TensorflowTransformerSpec extends FunSpec {
       }).tried.get.asInstanceOf[TensorflowTransformer]
 
       // checks
-      assert(transformer.inputSchema.fields sameElements( tfTransformer.inputSchema.fields))
-      assert(transformer.outputSchema.fields sameElements( tfTransformer.outputSchema.fields))
+      assert(transformer.inputSchema.fields sameElements (tfTransformer.inputSchema.fields))
+      assert(transformer.outputSchema.fields sameElements (tfTransformer.outputSchema.fields))
 
       val actualData = tfTransformer.transform(frame).get.collect()
       assert(actualData.head.getTensor[Float](0).toArray.toSeq sameElements expectedData.head.getTensor[Float](0).toArray.toSeq)

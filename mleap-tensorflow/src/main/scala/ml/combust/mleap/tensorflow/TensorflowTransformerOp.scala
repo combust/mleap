@@ -1,6 +1,7 @@
 package ml.combust.mleap.tensorflow
 
 import java.nio.file.Files
+import org.tensorflow.proto.framework.GraphDef
 
 import ml.bundle.{BasicType, DataShape}
 import ml.combust.bundle.BundleContext
@@ -25,11 +26,12 @@ class TensorflowTransformerOp extends MleapOp[TensorflowTransformer, TensorflowM
                       (implicit context: BundleContext[MleapContext]): Model = {
       val graph = obj.graph.getOrElse({
         val graph = new org.tensorflow.Graph()
-        graph.importGraphDef(obj.graphBytes)
+        val graphDef = GraphDef.parseFrom(obj.graphBytes)
+        graph.importGraphDef(graphDef)
         graph
       })
 
-      Files.write(context.file("graph.pb"), graph.toGraphDef)
+      Files.write(context.file("graph.pb"), graph.toGraphDef.toByteArray)
       val (inputNames, inputMleapDataTypes) = obj.inputs.unzip
       val (inputBasicTypes, inputShapes) = inputMleapDataTypes.map {
         dt => (dt.base: BasicType, dt.shape: DataShape)
@@ -71,7 +73,8 @@ class TensorflowTransformerOp extends MleapOp[TensorflowTransformer, TensorflowM
       })
 
       val graph = new org.tensorflow.Graph()
-      graph.importGraphDef(graphBytes)
+      val graphDef = GraphDef.parseFrom(graphBytes)
+      graph.importGraphDef(graphDef)
       TensorflowModel(graph = Some(graph),
         inputs = inputs,
         outputs = outputs,

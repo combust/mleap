@@ -7,7 +7,6 @@ import ml.combust.bundle.BundleFile
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.sql.SparkSession
-import com.databricks.spark.avro._
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.MleapSupport._
 import org.apache.spark.ml.Pipeline
@@ -23,7 +22,7 @@ class TestSparkMl(session: SparkSession) extends Runnable {
       path,
       StandardCopyOption.REPLACE_EXISTING)
 
-    val sampleData = sqlContext.read.avro(path.toString)
+    val sampleData = sqlContext.read.format("avro").load(path.toString)
     sampleData.show()
 
     val stringIndexer = new StringIndexer().

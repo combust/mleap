@@ -7,7 +7,6 @@ import ml.combust.bundle.BundleFile
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.sql.SparkSession
-import com.databricks.spark.avro._
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
@@ -25,14 +24,13 @@ class TestXgboost(session: SparkSession) extends Runnable {
 
   override def run(): Unit = {
     val sqlContext = session.sqlContext
-
     // Create a temporary file and copy the contents of the resource avro to it
     val path = Files.createTempFile("mleap-databricks-runtime-testkit", ".avro")
     Files.copy(getClass.getClassLoader.getResource("datasources/lending_club_sample.avro").openStream(),
       path,
       StandardCopyOption.REPLACE_EXISTING)
 
-    val sampleData = sqlContext.read.avro(path.toString)
+    val sampleData = sqlContext.read.format("avro").load(path.toString)
     sampleData.show()
 
     val stringIndexer = new StringIndexer().

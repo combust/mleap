@@ -5,8 +5,10 @@
 ### New Features
 
 ### Bug Fixes
+- Fix OneHotEncoder Python serialization
 
 ### Improvements
+- Upgrade to scikit-learn 0.22
 
 ### Other Changes
 

@@ -2,6 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{ScalarType, StructType}
+import org.apache.commons.math3.analysis.function.Logit
 
 /**
   * Created by hollinwilkins on 12/27/16.
@@ -31,8 +32,11 @@ object UnaryOperation {
   case object Abs extends UnaryOperation {
     override def name: String = "abs"
   }
+  case object Logit extends UnaryOperation {
+    override def name: String = "Logit"
+  }
 
-  val all = Set(Log, Exp, Sqrt, Sin, Cos, Tan, Abs)
+  val all = Set(Log, Exp, Sqrt, Sin, Cos, Tan, Abs, Logit)
   val forName: Map[String, UnaryOperation] = all.map(o => (o.name, o)).toMap
 }
 
@@ -47,6 +51,7 @@ case class MathUnaryModel(operation: UnaryOperation) extends Model {
     case Cos => Math.cos(a)
     case Tan => Math.tan(a)
     case Abs => Math.abs(a)
+    case Logit => LogitHelper.logit(a)
     case _ => throw new RuntimeException(s"unsupported unary operation: $operation")
   }
 
@@ -56,3 +61,11 @@ case class MathUnaryModel(operation: UnaryOperation) extends Model {
   override def outputSchema: StructType = StructType(
     "output" -> ScalarType.Double.nonNullable).get
 }
+
+object LogitHelper { 
+  def logit(value: Double): Double = {
+    val logitInstance = new Logit()
+    return logitInstance.value(value)
+  } 
+
+} 

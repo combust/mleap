@@ -88,7 +88,7 @@ class MLeapSerializer(object):
 
             elif isinstance(value, np.ndarray):
                 attributes[name] = {
-                    "double": list(value.flatten()),
+                    "double": value.flatten().tolist(),
                     "shape": {
                         "dimensions": [{
                             "size": dim,

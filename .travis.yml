@@ -21,18 +21,18 @@ jdk:
 
 jobs:
   include:
-    - stage: "Mleap tests"
-      name: "MLeap executor tests"
-      script:
-        - make test_executor
-
-    - name: "Mleap benchmark tests"
-      script:
-        - make test_benchmark
-
-    - name: "All other sbt tests"
-      script:
-        - make test_root_sbt_project
+#    - stage: "Mleap tests"
+#      name: "MLeap executor tests"
+#      script:
+#        - make test_executor
+#
+#    - name: "Mleap benchmark tests"
+#      script:
+#        - make test_benchmark
+#
+#    - name: "All other sbt tests"
+#      script:
+#        - make test_root_sbt_project
 
     - name: "Python 3.6 tests"
       language: python
@@ -52,7 +52,7 @@ jobs:
         - jdk_switcher use openjdk8
         - source ./scripts/custom_path.sh
         - export PATH=$(get_filtered_path /usr/local/lib/jvm/openjdk11/bin)
-        - make py36_test
+#        - make py36_test
 
     - name: "Python 3.7 tests"
       language: python
@@ -68,11 +68,12 @@ jobs:
         # By default, "python" projects use the default jdk version, which is openjdk11 on bionic
         # so we use the jdk switcher and path scripts to change back to openjdk8
         # scripts taken from https://travis-ci.community/t/using-jdk-8-on-a-python-project/2725
+        - ls /usr/lib/jvm/
         - source ./scripts/jdk_switcher.sh
         - jdk_switcher use openjdk8
         - source ./scripts/custom_path.sh
         - export PATH=$(get_filtered_path /usr/local/lib/jvm/openjdk11/bin)
-        - make py37_test
+#        - make py37_test
 
     - if: (NOT type IN (pull_request)) AND (branch = master)
       stage: "Deploy"

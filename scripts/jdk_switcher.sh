@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if uname -a | grep x86_64 >/dev/null; then
+if uname -a | grep x86_64; then
     ARCH_SUFFIX=amd64
 else
     ARCH_SUFFIX=i386

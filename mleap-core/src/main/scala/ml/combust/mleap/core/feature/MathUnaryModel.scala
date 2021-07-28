@@ -2,7 +2,7 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{ScalarType, StructType}
-import org.apache.commons.math3.analysis.function.Logit
+import org.apache.commons.math3.analysis.function.{Logit => MathLogit}
 
 /**
   * Created by hollinwilkins on 12/27/16.
@@ -64,8 +64,6 @@ case class MathUnaryModel(operation: UnaryOperation) extends Model {
 
 object LogitHelper { 
   def logit(value: Double): Double = {
-    val logitInstance = new Logit()
-    return logitInstance.value(value)
-  } 
-
+    new MathLogit().value(value)
+  }
 } 

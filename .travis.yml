@@ -37,6 +37,8 @@ jobs:
     - name: "Python 3.6 tests"
       language: python
       python: 3.6
+      before_install:
+        - java install openjdk8
       install:
         - pip install tox
       before_script:
@@ -57,6 +59,8 @@ jobs:
     - name: "Python 3.7 tests"
       language: python
       python: 3.7
+      before_install:
+        - java install openjdk8
       install:
         - pip install tox
       before_script:

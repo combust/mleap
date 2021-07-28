@@ -1,6 +1,6 @@
 # Use container-based infrastructure
 sudo: required
-dist: trusty
+dist: bionic
 
 addons:
   apt:
@@ -15,7 +15,7 @@ services:
 
 language: scala
 scala:
-  - 2.11.12
+  - 2.12.13
 jdk:
   - oraclejdk8  # sbt +compile fails on jdk11 (xenial's default)
 
@@ -54,7 +54,6 @@ jobs:
         # Required when not setting 'language: java' to force the correct jdk8
         - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
         - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
-      dist: xenial  # Travis won't install py37 on trusty
       install:
         - pip install tox
       before_script:

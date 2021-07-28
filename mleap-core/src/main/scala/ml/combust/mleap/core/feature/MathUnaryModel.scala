@@ -33,7 +33,7 @@ object UnaryOperation {
     override def name: String = "abs"
   }
   case object Logit extends UnaryOperation {
-    override def name: String = "Logit"
+    override def name: String = "logit"
   }
 
   val all = Set(Log, Exp, Sqrt, Sin, Cos, Tan, Abs, Logit)

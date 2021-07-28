@@ -17,7 +17,7 @@ language: scala
 scala:
   - 2.12.13
 jdk:
-  - oraclejdk8  # sbt +compile fails on jdk11 (xenial's default)
+  - openjdk8
 
 jobs:
   include:

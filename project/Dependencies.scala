@@ -17,6 +17,7 @@ object Dependencies {
   lazy val awsSdkVersion = "1.11.1033"
   val tensorflowVersion = "1.11.0"
   val xgboostVersion = "1.0.0"
+  val breezeVersion = "1.0"
   val hadoopVersion = "2.7.4" // matches spark version
   val kryoVersion = "4.0.2" // Remove upon upgrading to xgboost 1.1.1
 
@@ -69,6 +70,8 @@ object Dependencies {
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
 
+    val breeze = "org.scalanlp" %% "breeze" % breezeVersion
+
     val kryo = "com.esotericsoftware" % "kryo" % kryoVersion
     val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo")
     val xgboostPredictorDep = "ai.h2o" % "xgboost-predictor" % "0.3.17" exclude("com.esotericsoftware.kryo", "kryo")
@@ -106,7 +109,7 @@ object Dependencies {
 
   val base = l ++= Seq()
 
-  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest) ++ Test.sparkTest
+  val core = l ++= Seq(sparkMllibLocal, jTransform, breeze, Test.scalaTest) ++ Test.sparkTest
 
   def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface, commonsIo) ++ scalaReflect.modules(scalaVersion.value))
 

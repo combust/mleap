@@ -9,7 +9,7 @@ import org.apache.spark.ml.feature.StringIndexerModel
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] {
+class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] with MultiInOutFormatSparkOp[StringIndexerModel] {
   override val Model: OpModel[SparkBundleContext, StringIndexerModel] = new OpModel[SparkBundleContext, StringIndexerModel] {
     override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
 
@@ -23,7 +23,7 @@ class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] {
       obj.labelsArray.indices.foreach(
         i => result = result.withValue(s"labels_array_$i", Value.stringList(obj.labelsArray(i)))
       )
-      result
+      saveMultiInOutFormat(result, obj)
     }
 
     override def load(model: Model)
@@ -40,20 +40,14 @@ class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] {
         }
         collectedLabels
       }
-      new StringIndexerModel(uid = "", labelsArray = labelsArray).
+
+      val obj = new StringIndexerModel(labelsArray = labelsArray).
         setHandleInvalid(model.value("handle_invalid").getString)
+      loadMultiInOutFormat(model, obj)
     }
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: StringIndexerModel): StringIndexerModel = {
-    new StringIndexerModel(uid = uid, labelsArray = model.labelsArray).setHandleInvalid(model.getHandleInvalid)
-  }
-
-  override def sparkInputs(obj: StringIndexerModel): Seq[ParamSpec] = {
-    Seq("input" -> obj.inputCol)
-  }
-
-  override def sparkOutputs(obj: StringIndexerModel): Seq[SimpleParamSpec] = {
-    Seq("output" -> obj.outputCol)
+    model
   }
 }

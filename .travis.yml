@@ -60,6 +60,8 @@ jobs:
         # But we need jdk8 for spark, so we need to change it back
         - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
         - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+      install:
+        - pip install tox
       before_script:
         - >
           curl

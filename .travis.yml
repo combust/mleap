@@ -1,6 +1,6 @@
 # Use container-based infrastructure
 os: linux
-dist: bionic
+dist: xenial
 
 addons:
   apt:
@@ -21,24 +21,27 @@ jdk:
 
 jobs:
   include:
-#    - stage: "Mleap tests"
-#      name: "MLeap executor tests"
-#      script:
-#        - make test_executor
-#
-#    - name: "Mleap benchmark tests"
-#      script:
-#        - make test_benchmark
-#
-#    - name: "All other sbt tests"
-#      script:
-#        - make test_root_sbt_project
+    - stage: "Mleap tests"
+      name: "MLeap executor tests"
+      script:
+        - make test_executor
+
+    - name: "Mleap benchmark tests"
+      script:
+        - make test_benchmark
+
+    - name: "All other sbt tests"
+      script:
+        - make test_root_sbt_project
 
     - name: "Python 3.6 tests"
       language: python
       python: 3.6
-      before_install:
-        - java install openjdk8
+      env:
+        # By default, "python" projects use the default jdk version, which is openjdk11 on xenial
+        # But we need jdk8 for spark, so we need to change it back
+        - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
+        - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
       install:
         - pip install tox
       before_script:
@@ -47,37 +50,23 @@ jobs:
           --create-dirs -L -o $HOME/.sbt/launchers/0.13.18/sbt-launch.jar
           https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.18/sbt-launch.jar
       script:
-        # By default, "python" projects use the default jdk version, which is openjdk11 on bionic
-        # so we use the jdk switcher and path scripts to change back to openjdk8
-        # scripts taken from https://travis-ci.community/t/using-jdk-8-on-a-python-project/2725
-        - source ./scripts/jdk_switcher.sh
-        - jdk_switcher use openjdk8
-        - source ./scripts/custom_path.sh
-        - export PATH=$(get_filtered_path /usr/local/lib/jvm/openjdk11/bin)
-#        - make py36_test
+        - make py36_test
 
     - name: "Python 3.7 tests"
       language: python
       python: 3.7
-      before_install:
-        - java install openjdk8
-      install:
-        - pip install tox
+      env:
+        # By default, "python" projects use the default jdk version, which is openjdk11 on xenial
+        # But we need jdk8 for spark, so we need to change it back
+        - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
+        - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
       before_script:
         - >
           curl
           --create-dirs -L -o $HOME/.sbt/launchers/0.13.18/sbt-launch.jar
           https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.18/sbt-launch.jar
       script:
-        # By default, "python" projects use the default jdk version, which is openjdk11 on bionic
-        # so we use the jdk switcher and path scripts to change back to openjdk8
-        # scripts taken from https://travis-ci.community/t/using-jdk-8-on-a-python-project/2725
-        - ls /usr/lib/jvm/
-        - source ./scripts/jdk_switcher.sh
-        - jdk_switcher use openjdk8
-        - source ./scripts/custom_path.sh
-        - export PATH=$(get_filtered_path /usr/local/lib/jvm/openjdk11/bin)
-#        - make py37_test
+        - make py37_test
 
     - if: (NOT type IN (pull_request)) AND (branch = master)
       stage: "Deploy"

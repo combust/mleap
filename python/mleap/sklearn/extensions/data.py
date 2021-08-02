@@ -15,12 +15,14 @@
 # limitations under the License.
 #
 
-from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
-from mleap.sklearn.preprocessing.data import MLeapSerializer, FeatureExtractor
 import uuid
-from sklearn.preprocessing import Imputer as SklearnImputer
-from mleap.sklearn.preprocessing.data import ImputerSerializer
+
+import numpy as np
 import pandas as pd
+from mleap.sklearn.preprocessing.data import ImputerSerializer, FeatureExtractor
+from sklearn.impute import SimpleImputer as SKLearnImputer
+from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
+
 
 class DefineEstimator(BaseEstimator, TransformerMixin):
     def __init__(self, transformer):
@@ -61,10 +63,11 @@ in the fit() and transform() methods.
 This is because the Imputer both in Spark and MLeap operates on a scalar value and if we were to add a feature extractor in
 front of it, then it would serialize as operating on a tensor and thus, fail at scoring time. 
 """
-class Imputer(SklearnImputer):
+class Imputer(SKLearnImputer):
 
-    def __init__(self, missing_values="NaN", strategy="mean",
-                 axis=0, verbose=0, copy=True, input_features=None, output_features=None):
+    def __init__(self, input_features, output_features,
+                 missing_values=np.nan, strategy="mean",
+                 fill_value=None, verbose=0, copy=True, add_indicator=False):
         self.name = "{}_{}".format(self.op, uuid.uuid1())
         self.input_features = input_features
         self.output_features = output_features
@@ -72,7 +75,7 @@ class Imputer(SklearnImputer):
         self.feature_extractor = FeatureExtractor(input_scalars=[input_features],
                                                   output_vector='extracted_' + output_features,
                                                   output_vector_items=[output_features])
-        SklearnImputer.__init__(self, missing_values, strategy, axis, verbose, copy)
+        SKLearnImputer.__init__(self, missing_values, strategy, fill_value, verbose, copy, add_indicator)
 
     def fit(self, X, y=None):
         super(Imputer, self).fit(self.feature_extractor.transform(X))

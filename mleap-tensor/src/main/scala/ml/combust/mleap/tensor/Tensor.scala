@@ -22,13 +22,48 @@ object Tensor {
 
   def create[T: ClassTag](values: Array[T],
                           dimensions: Seq[Int],
-                          indices: Option[Seq[Seq[Int]]] = None): Tensor[T] = indices match {
-    case Some(is) => SparseTensor(is, values, dimensions)
-    case None => DenseTensor(values, dimensions)
+                          indices: Option[Seq[Seq[Int]]] = None): Tensor[T] = {
+    indices match {
+      case Some(is) => {
+        if (!isKnownDimensions(dimensions))
+          throw new IllegalArgumentException("dimensions must be known for SparseTensor")
+        SparseTensor(is, values, dimensions)
+      }
+      case None => {
+        DenseTensor(values, normalizeDimensions(values.length, dimensions))
+      }
+    }
   }
 
   def denseVector[T: ClassTag](values: Array[T]): DenseTensor[T] = DenseTensor(values, Seq(values.length))
   def scalar[T: ClassTag](value: T): DenseTensor[T] = DenseTensor(Array(value), Seq())
+  def denseIndex(indices: Seq[Int], dimensions: Seq[Int]): Int = {
+    var n = indices.last
+    var r = dimensions
+    for(i <- 0 until (indices.length - 1)) {
+      r = r.tail
+      n += indices(i) * r.product
+    }
+    n
+  }
+  def isKnownDimensions(dimensions: Seq[Int]): Boolean =  dimensions.count(dim => dim == -1) == 0
+
+  def normalizeDimensions(size: Int, dimensions: Seq[Int]) : Seq[Int] = {
+    val numOfUnknownDimensions = dimensions.count(dim => dim == -1)
+    if (numOfUnknownDimensions > 1)
+      throw new  IllegalArgumentException("dimensions contains more then one `-1`")
+
+    val normalizedDimensions = if (numOfUnknownDimensions == 1) {
+      val concreteDimension = size / dimensions.filter(dim => dim != -1 ).product
+      dimensions.map(dim =>  if(dim == -1) concreteDimension else dim)
+    } else {
+      dimensions
+    }
+    if(normalizedDimensions.product != size)
+      throw  new IllegalArgumentException("size of dimensions must equals size of values")
+
+    normalizedDimensions
+  }
 }
 
 sealed trait Tensor[T] {
@@ -49,13 +84,22 @@ sealed trait Tensor[T] {
 
   def apply(indices: Int *): T = get(indices: _*).get
   def get(indices: Int *): Option[T]
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case obj: Tensor[T] =>
+        base == obj.base &&
+          dimensions == obj.dimensions &&
+          rawValues.sameElements[T](obj.rawValues)
+      case _ => false
+    }
+  }
 }
 
 case class DenseTensor[T](values: Array[T],
                           override val dimensions: Seq[Int])
                          (implicit override val base: ClassTag[T]) extends Tensor[T] {
   override def isDense: Boolean = true
-
   override def toDense: DenseTensor[T] = this
   override def toArray: Array[T] = values
 
@@ -66,42 +110,14 @@ case class DenseTensor[T](values: Array[T],
   }
 
   override def get(indices: Int *): Option[T] = {
-    var i = 0
-    var dimI = 1
-    var n = indices.head
-    var tail = indices.tail
-    while(i < tail.size) {
-      var ti = dimI
-      var tn = tail.head
-      tail = tail.tail
-      while(ti < dimensions.size) {
-        tn *= dimensions(ti)
-        ti += 1
-      }
-      dimI += 1
-      i += 1
-      n += tn
-    }
-
-    if (values.size > n) {
+    val n = Tensor.denseIndex(indices, dimensions)
+    if (values.length > n) {
       Some(values(n))
     } else { None }
   }
 
-
-
   override def equals(obj: Any): Boolean = obj match {
-    case obj: DenseTensor[_] =>
-      if(base == obj.base) {
-        if (values.isEmpty) {
-          if (obj.values.isEmpty) { true }
-          else { false }
-        } else {
-          ((dimensions == obj.dimensions) ||
-            ((dimensions.head == -1 || obj.dimensions.head == -1) && dimensions.tail == obj.dimensions.tail)) &&
-              (values sameElements obj.asInstanceOf[DenseTensor[T]].values)
-        }
-      } else { false }
+    case obj: DenseTensor[T] => super.equals(obj)
     case _ => false
   }
 }
@@ -120,7 +136,7 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
     var i = 0
     indices.foreach {
       index =>
-        array(denseIndex(index)) = values(i)
+        array(Tensor.denseIndex(index, dimensions)) = values(i)
         i += 1
     }
     array
@@ -149,29 +165,9 @@ case class SparseTensor[T](indices: Seq[Seq[Int]],
     } else { None }
   }
 
-  private def denseIndex(index: Seq[Int]): Int = {
-    var n = index.last
-    var r = dimensions
-    for(i <- 0 until (index.length - 1)) {
-      r = r.tail
-      n += index(i) * r.product
-    }
-
-    n
-  }
-
   override def equals(obj: Any): Boolean = obj match {
-    case obj: SparseTensor[_] =>
-      if(base == obj.base) {
-        if (values.isEmpty) {
-          if (obj.values.isEmpty) { true }
-          else { false }
-        } else if(indices.length == obj.indices.length && indices == obj.indices) {
-          ((dimensions == obj.dimensions) ||
-            ((dimensions.head == -1 || obj.dimensions.head == -1) && dimensions.tail == obj.dimensions.tail)) &&
-              (values sameElements obj.asInstanceOf[SparseTensor[T]].values)
-        } else { false }
-      } else { false }
+    case obj: SparseTensor[T] =>
+        indices == obj.indices && super.equals(obj)
     case _ => false
   }
 }

@@ -5,6 +5,7 @@ import ml.combust.mleap.core.types.{StructField, StructType, TensorType}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.tensorflow.converter.{MleapConverter, TensorflowConverter}
 import org.tensorflow
+import org.tensorflow.proto.framework.GraphDef
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -21,12 +22,12 @@ case class TensorflowModel(@transient var graph: Option[tensorflow.Graph] = None
                            graphBytes: Array[Byte]) extends Model with AutoCloseable {
 
   def apply(values: Tensor[_] *): Seq[Any] = {
-    val garbage: mutable.ArrayBuilder[tensorflow.Tensor[_]] = mutable.ArrayBuilder.make[tensorflow.Tensor[_]]()
+    val garbage: mutable.ArrayBuilder[tensorflow.Tensor] = mutable.ArrayBuilder.make[tensorflow.Tensor]()
 
     val result = Try {
       val tensors = values.zip(inputs).map {
-        case (v, (name, dataType)) =>
-          val tensor = MleapConverter.convert(v, dataType)
+        case (v, (name, _)) =>
+          val tensor = MleapConverter.convert(v)
           garbage += tensor
           (name, tensor)
       }
@@ -52,8 +53,7 @@ case class TensorflowModel(@transient var graph: Option[tensorflow.Graph] = None
           runner.run().asScala.zip(outputs).map {
             case (tensor, (_, dataType)) =>
               garbage += tensor
-              val mleapTensor = TensorflowConverter.convert(tensor, dataType)
-              mleapTensor
+              TensorflowConverter.convert(tensor, dataType)
           }
       }
     }
@@ -68,7 +68,8 @@ case class TensorflowModel(@transient var graph: Option[tensorflow.Graph] = None
       case Some(gg) => gg
       case _ => { // can also be null at deserialization time, not just empty
         val gg = new tensorflow.Graph()
-        gg.importGraphDef(graphBytes)
+        val graphDef = GraphDef.parseFrom(graphBytes)
+        gg.importGraphDef(graphDef)
         graph = Some(gg)
         graph.get
       }

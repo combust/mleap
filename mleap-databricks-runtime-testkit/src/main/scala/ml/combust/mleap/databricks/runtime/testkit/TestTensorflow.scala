@@ -11,9 +11,12 @@ import ml.combust.mleap.runtime.MleapSupport._
 
 class TestTensorflow(session: SparkSession) extends Runnable {
   override def run(): Unit = {
-    val model = TensorflowModel(TensorFlowTestUtil.createAddGraph(),
+    val graph = TensorFlowTestUtil.createAddGraph()
+    val model = TensorflowModel(graph = Some(graph),
       inputs = Seq(("InputA", TensorType.Float()), ("InputB", TensorType.Float())),
-      outputs = Seq(("MyResult", TensorType.Float())))
+      outputs = Seq(("MyResult", TensorType.Float())),
+      graphBytes = graph.toGraphDef.toByteArray
+    )
     val shape = NodeShape().withInput("InputA", "input_a").
       withInput("InputB", "input_b").
       withOutput("MyResult", "my_result")

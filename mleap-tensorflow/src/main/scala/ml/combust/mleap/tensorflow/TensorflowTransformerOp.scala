@@ -1,7 +1,6 @@
 package ml.combust.mleap.tensorflow
 
 import java.nio.file.Files
-import org.tensorflow.proto.framework.GraphDef
 
 import ml.bundle.{BasicType, DataShape}
 import ml.combust.bundle.BundleContext
@@ -12,7 +11,6 @@ import ml.combust.mleap.core
 import ml.combust.mleap.core.types.TensorType
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
-
 /**
   * Created by hollinwilkins on 1/15/17.
   */
@@ -24,36 +22,37 @@ class TensorflowTransformerOp extends MleapOp[TensorflowTransformer, TensorflowM
 
     override def store(model: Model, obj: TensorflowModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      val graph = obj.graph.getOrElse({
-        val graph = new org.tensorflow.Graph()
-        val graphDef = GraphDef.parseFrom(obj.graphBytes)
-        graph.importGraphDef(graphDef)
-        graph
-      })
+       obj.format match {
+         case Some("saved_model")  => {
+           Files.write(context.file("saved_model.zip"), obj.modelBytes)
+         }
+         case Some("graph") | None  => Files.write(context.file("graph.pb"), obj.modelBytes)
+       }
 
-      Files.write(context.file("graph.pb"), graph.toGraphDef.toByteArray)
-      val (inputNames, inputMleapDataTypes) = obj.inputs.unzip
-      val (inputBasicTypes, inputShapes) = inputMleapDataTypes.map {
-        dt => (dt.base: BasicType, dt.shape: DataShape)
-      }.unzip
 
-      val (outputNames, outputMleapDataTypes) = obj.outputs.unzip
-      val (outputBasicTypes, outputShapes) = outputMleapDataTypes.map {
-        dt => (dt.base: BasicType, dt.shape: DataShape)
-      }.unzip
+       val (inputNames, inputMleapDataTypes) = obj.inputs.unzip
+       val (inputBasicTypes, inputShapes) = inputMleapDataTypes.map {
+         dt => (dt.base: BasicType, dt.shape: DataShape)
+       }.unzip
 
-      model.withValue("input_names", Value.stringList(inputNames)).
-        withValue("input_types", Value.basicTypeList(inputBasicTypes)).
-        withValue("input_shapes", Value.dataShapeList(inputShapes)).
-        withValue("output_names", Value.stringList(outputNames)).
-        withValue("output_types", Value.basicTypeList(outputBasicTypes)).
-        withValue("output_shapes", Value.dataShapeList(outputShapes)).
-        withValue("nodes", obj.nodes.map(Value.stringList))
+       val (outputNames, outputMleapDataTypes) = obj.outputs.unzip
+       val (outputBasicTypes, outputShapes) = outputMleapDataTypes.map {
+         dt => (dt.base: BasicType, dt.shape: DataShape)
+       }.unzip
+
+       model.withValue("input_names", Value.stringList(inputNames)).
+         withValue("input_types", Value.basicTypeList(inputBasicTypes)).
+         withValue("input_shapes", Value.dataShapeList(inputShapes)).
+         withValue("output_names", Value.stringList(outputNames)).
+         withValue("output_types", Value.basicTypeList(outputBasicTypes)).
+         withValue("output_shapes", Value.dataShapeList(outputShapes)).
+         withValue("nodes", obj.nodes.map(Value.stringList)).
+         withValue("format", obj.format.map(Value.string))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): TensorflowModel = {
-      val graphBytes = Files.readAllBytes(context.file("graph.pb"))
+      val format = model.getValue("format").map(_.getString)
 
       val inputNames = model.value("input_names").getStringList
       val inputTypes = model.value("input_types").getBasicTypeList.map(v => v: core.types.BasicType)
@@ -71,15 +70,18 @@ class TensorflowTransformerOp extends MleapOp[TensorflowTransformer, TensorflowM
       val outputs = outputNames.zip(outputTypes.zip(outputShapes).map {
         case (b, s) => core.types.DataType(b, s).asInstanceOf[TensorType]
       })
-
-      val graph = new org.tensorflow.Graph()
-      val graphDef = GraphDef.parseFrom(graphBytes)
-      graph.importGraphDef(graphDef)
-      TensorflowModel(graph = Some(graph),
+      val modelBytes = format match {
+        case Some("graph") | None => Files.readAllBytes(context.file("graph.pb"))
+        case Some("saved_model") => Files.readAllBytes(context.file("saved_model.zip"))
+        case _ => throw new RuntimeException("Only support `saved_model` and `tf` format");
+      }
+      TensorflowModel(
         inputs = inputs,
         outputs = outputs,
         nodes = nodes,
-        graphBytes = graphBytes)
+        modelBytes = modelBytes,
+        format = format
+      )
     }
   }
 

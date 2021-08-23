@@ -1,5 +1,6 @@
 package ml.combust.mleap.tensorflow
 
+import ml.combust.bundle.serializer.FileUtil
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{StructField, StructType, TensorType}
 import ml.combust.mleap.tensor.Tensor
@@ -7,6 +8,9 @@ import ml.combust.mleap.tensorflow.converter.{MleapConverter, TensorflowConverte
 import org.tensorflow
 import org.tensorflow.proto.framework.GraphDef
 
+import java.io.ByteArrayInputStream
+import java.nio.file.Files
+import java.util.zip.ZipInputStream
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.Try
@@ -14,12 +18,14 @@ import scala.util.Try
 /**
   * Created by hollinwilkins on 1/12/17.
   */
-case class TensorflowModel(@transient var graph: Option[tensorflow.Graph] = None,
-                           @transient var session: Option[tensorflow.Session] = None,
+case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = None,
+                            @transient var session: Option[tensorflow.Session] = None,
                            inputs: Seq[(String, TensorType)],
                            outputs: Seq[(String, TensorType)],
                            nodes: Option[Seq[String]] = None,
-                           graphBytes: Array[Byte]) extends Model with AutoCloseable {
+                           format: Option[String] = None,
+                           modelBytes: Array[Byte],
+                          ) extends Model with AutoCloseable {
 
   def apply(values: Tensor[_] *): Seq[Any] = {
     val garbage: mutable.ArrayBuilder[tensorflow.Tensor] = mutable.ArrayBuilder.make[tensorflow.Tensor]()
@@ -64,26 +70,34 @@ case class TensorflowModel(@transient var graph: Option[tensorflow.Graph] = None
   }
 
   private def withSession[T](f: (tensorflow.Session) => T): T = {
-    val g = graph match {
-      case Some(gg) => gg
-      case _ => { // can also be null at deserialization time, not just empty
-        val gg = new tensorflow.Graph()
-        val graphDef = GraphDef.parseFrom(graphBytes)
-        gg.importGraphDef(graphDef)
-        graph = Some(gg)
-        graph.get
+    val (s,g) = (session, graph) match {
+      case (Some(sess), Some(gg)) => (sess, gg)
+      case _ => format match {
+        case Some("graph") | None => getSessionG
+        case Some("saved_model") => getSessionS
       }
     }
-
-    val s = session match {
-      case Some(sess) => sess
-      case _ => { // can also be null at deserialization time, not just empty
-        session = Some(new tensorflow.Session(g))
-        session.get
-      }
-    }
-
+    session = Some(s)
+    graph = Some(g)
     f(s)
+  }
+
+  private def getSessionG: (tensorflow.Session, tensorflow.Graph) = {
+    val gg = new tensorflow.Graph()
+    val graphDef = GraphDef.parseFrom(modelBytes)
+    gg.importGraphDef(graphDef)
+    (new tensorflow.Session(gg), gg)
+  }
+
+  private def getSessionS: (tensorflow.Session, tensorflow.Graph) = {
+    val dest = Files.createTempDirectory("saved_model")
+    val savedModelStream = new ZipInputStream(
+      new ByteArrayInputStream(modelBytes)
+    )
+    FileUtil().extract(savedModelStream, dest.toFile)
+    val modelBundle = tensorflow.SavedModelBundle.load(dest.toString)
+    FileUtil().rmRF(dest.toFile)
+    (modelBundle.session, modelBundle.graph)
   }
 
   override def close(): Unit = {

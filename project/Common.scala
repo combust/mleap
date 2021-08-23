@@ -16,7 +16,7 @@ object Common {
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.11.12",
+    scalaVersion := "2.12.10",
     crossScalaVersions := Seq("2.11.12", "2.12.13"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-target:jvm-1.8"),
     fork in Test := true,

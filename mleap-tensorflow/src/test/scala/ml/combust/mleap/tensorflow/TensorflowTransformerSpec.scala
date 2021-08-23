@@ -1,18 +1,24 @@
 package ml.combust.mleap.tensorflow
 
-import java.io.File
-import java.net.URI
-import java.nio.file.{Files, Paths}
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
-import ml.combust.mleap.core.types.{NodeShape, StructField, StructType, TensorType}
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.core.types.NodeShape
+import ml.combust.mleap.core.types.StructField
+import ml.combust.mleap.core.types.StructType
+import ml.combust.mleap.core.types.TensorType
 import ml.combust.mleap.runtime.MleapSupport._
-import ml.combust.mleap.tensor.{DenseTensor, Tensor}
+import ml.combust.mleap.runtime.frame.DefaultLeapFrame
+import ml.combust.mleap.runtime.frame.Row
+import ml.combust.mleap.tensor.DenseTensor
+import ml.combust.mleap.tensor.Tensor
 import org.scalatest.FunSpec
-import org.tensorflow.Graph
 import resource.managed
-import org.tensorflow.proto.framework.GraphDef
+import java.io.File
+import java.net.URI
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.zip.ZipOutputStream
+
 /**
   * Created by hollinwilkins on 1/13/17.
   */
@@ -21,10 +27,10 @@ class TensorflowTransformerSpec extends FunSpec {
   describe("with a scaling tensorflow model") {
     it("scales the vector using the model and returns the result") {
       val graph = TestUtil.createAddGraph()
-      val model = TensorflowModel(graph = Some(graph),
+      val model = TensorflowModel(
         inputs = Seq(("InputA", TensorType.Float()), ("InputB", TensorType.Float())),
         outputs = Seq(("MyResult", TensorType.Float())),
-        graphBytes = graph.toGraphDef.toByteArray)
+        modelBytes = graph.toGraphDef.toByteArray)
       val shape = NodeShape().withInput("InputA", "input_a").
         withInput("InputB", "input_b").
         withOutput("MyResult", "my_result")
@@ -53,8 +59,10 @@ class TensorflowTransformerSpec extends FunSpec {
 
     it("can create transformer and bundle from a TF frozen graph") {
 
-      val model = TensorflowModel(inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
-        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))), graphBytes = graphBytes)
+      val model = TensorflowModel(
+        inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
+        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))),
+        modelBytes = graphBytes)
       val shape = NodeShape().withInput("dense_1_input", "features").withOutput("dense_3/Sigmoid", "score")
       val transformer = TensorflowTransformer(uid = "wine_quality", shape = shape, model = model)
 
@@ -87,8 +95,10 @@ class TensorflowTransformerSpec extends FunSpec {
     }
 
     it("can create transformer and bundle from graph bytes") {
-      val model = TensorflowModel(inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
-        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))), graphBytes = graphBytes)
+      val model = TensorflowModel(
+        inputs = Seq(("dense_1_input", TensorType.Float(1, 11))),
+        outputs = Seq(("dense_3/Sigmoid", TensorType.Float(1, 9))),
+        modelBytes= graphBytes)
       val shape = NodeShape().withInput("dense_1_input", "features").withOutput("dense_3/Sigmoid", "score")
       val transformer = TensorflowTransformer(uid = "wine_quality", shape = shape, model = model)
 

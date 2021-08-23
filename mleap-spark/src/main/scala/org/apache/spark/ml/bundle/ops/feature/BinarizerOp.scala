@@ -1,5 +1,6 @@
 package org.apache.spark.ml.bundle.ops.feature
 
+import ml.bundle.DataShape
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
@@ -27,7 +28,8 @@ class BinarizerOp extends SimpleSparkOp[Binarizer] with MultiInOutFormatSparkOp[
       var result = {
         ParamValidators.checkSingleVsMultiColumnParams(obj, Seq(obj.inputCol), Seq(obj.inputCols))
         if(obj.isSet(obj.inputCols)) {
-          model.withValue("input_shapes", Value.dataShape(ListShape()))
+          val inputShapes = obj.getInputCols.map(i => sparkToMleapDataShape(dataset.schema(i), dataset): DataShape)
+          model.withValue("input_shapes_list", Value.dataShapeList(inputShapes))
         } else {
           model.withValue("input_shapes", Value.dataShape(sparkToMleapDataShape(dataset.schema(obj.getInputCol), dataset)))
         }

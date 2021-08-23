@@ -19,15 +19,15 @@ class HashingTermFrequencyOp extends SimpleSparkOp[HashingTF] {
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withValue("num_features", Value.long(obj.getNumFeatures)).
         withValue("binary", Value.boolean(obj.getBinary)).
-        withValue("version", Value.int(2))
+        withValue("hashUnsafeBytesVersion", Value.int(2))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): HashingTF = {
-      val version = model.getValue("version").map(_.getInt).getOrElse(1)
+      val hashUnsafeBytesVersion = model.getValue("hashUnsafeBytesVersion").map(_.getInt).getOrElse(1)
       val numFeatures = model.value("num_features").getLong.toInt
       val binary = model.value("binary").getBoolean
-      require(version == 2, "Unsupporting load lower version spark model.")
+      require(hashUnsafeBytesVersion == 2, "Unsupported load lower version spark model.")
       new HashingTF(uid = "").setNumFeatures(numFeatures).setBinary(binary)
     }
   }

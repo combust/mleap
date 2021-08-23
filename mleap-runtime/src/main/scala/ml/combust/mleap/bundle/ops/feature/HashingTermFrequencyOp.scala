@@ -21,7 +21,7 @@ class HashingTermFrequencyOp extends MleapOp[HashingTermFrequency, HashingTermFr
                       (implicit context: BundleContext[MleapContext]): Model = {
       model.withValue("num_features", Value.long(obj.numFeatures))
         .withValue("binary", Value.boolean(obj.binary)).
-        withValue("version", Value.int(obj.version))
+        withValue("hashUnsafeBytesVersion", Value.int(obj.hashUnsafeBytesVersion))
     }
 
     override def load(model: Model)
@@ -29,7 +29,7 @@ class HashingTermFrequencyOp extends MleapOp[HashingTermFrequency, HashingTermFr
       HashingTermFrequencyModel(
         numFeatures = model.value("num_features").getLong.toInt,
         binary = model.getValue("binary").map(_.getBoolean).getOrElse(false),
-        version = model.getValue("version").map(_.getInt).getOrElse(1)
+        hashUnsafeBytesVersion = model.getValue("hashUnsafeBytesVersion").map(_.getInt).getOrElse(1)
       )
     }
   }

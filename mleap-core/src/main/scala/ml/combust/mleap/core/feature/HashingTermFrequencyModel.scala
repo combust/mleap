@@ -12,7 +12,7 @@ import scala.collection.mutable
 object HashingTermFrequencyModel {
   val seed = 42
 
-  def murmur3(term: Any, version: Int): Int = {
+  def murmur3(term: Any, hashUnsafeBytesVersion: Int): Int = {
     term match {
       case null => seed
       case b: Boolean => hashInt(if (b) 1 else 0, seed)
@@ -24,7 +24,7 @@ object HashingTermFrequencyModel {
       case d: Double => hashLong(java.lang.Double.doubleToLongBits(d), seed)
       case s: String =>
         val utf8 = s.getBytes("UTF-8")
-        if (version == VERSION_1) {
+        if (hashUnsafeBytesVersion == HASH_UNSAFE_BYTES_VERSION_1) {
           hashUnsafeBytes(utf8, Platform.BYTE_ARRAY_OFFSET, utf8.length, seed)
         } else {
           hashUnsafeBytes2(utf8, Platform.BYTE_ARRAY_OFFSET, utf8.length, seed)
@@ -33,8 +33,8 @@ object HashingTermFrequencyModel {
         s"support type ${term.getClass.getCanonicalName} of input data.")
     }
   }
-  val VERSION_1: Int = 1
-  val VERSION_2: Int = 2
+  val HASH_UNSAFE_BYTES_VERSION_1: Int = 1
+  val HASH_UNSAFE_BYTES_VERSION_2: Int = 2
 }
 
 /** Class for hashing token frequencies into a vector.
@@ -46,14 +46,14 @@ object HashingTermFrequencyModel {
 @SparkCode(uri = "https://github.com/apache/spark/blob/v2.0.0/mllib/src/main/scala/org/apache/spark/ml/feature/HashingTF.scala")
 case class HashingTermFrequencyModel(numFeatures: Int = 1 << 18,
                                      binary: Boolean = false,
-                                     version: Int = HashingTermFrequencyModel.VERSION_2) extends Model {
-  def indexOf(term: Any): Int = nonNegativeMod(HashingTermFrequencyModel.murmur3(term, version), numFeatures)
+                                     hashUnsafeBytesVersion: Int = HashingTermFrequencyModel.HASH_UNSAFE_BYTES_VERSION_2) extends Model {
+  def indexOf(term: Any): Int = nonNegativeMod(HashingTermFrequencyModel.murmur3(term, hashUnsafeBytesVersion), numFeatures)
 
   def apply(document: Iterable[_]): Vector = {
     val termFrequencies = mutable.HashMap.empty[Int, Double]
     val setTF = if (binary) (i: Int) => 1.0 else (i: Int) => termFrequencies.getOrElse(i, 0.0) + 1.0
     document.foreach { term =>
-      val i = nonNegativeMod(HashingTermFrequencyModel.murmur3(term, version), numFeatures)
+      val i = nonNegativeMod(HashingTermFrequencyModel.murmur3(term, hashUnsafeBytesVersion), numFeatures)
       termFrequencies.put(i, setTF(i))
     }
     Vectors.sparse(numFeatures, termFrequencies.toSeq)

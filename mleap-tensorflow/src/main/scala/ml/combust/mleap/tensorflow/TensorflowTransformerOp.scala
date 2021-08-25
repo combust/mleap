@@ -27,6 +27,7 @@ class TensorflowTransformerOp extends MleapOp[TensorflowTransformer, TensorflowM
            Files.write(context.file("saved_model.zip"), obj.modelBytes)
          }
          case Some("graph") | None  => Files.write(context.file("graph.pb"), obj.modelBytes)
+         case _ => throw  new RuntimeException("Only gaph and saved_model formats are supported")
        }
 
 

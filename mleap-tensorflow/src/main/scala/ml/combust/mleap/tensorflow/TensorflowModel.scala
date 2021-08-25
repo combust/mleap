@@ -24,7 +24,7 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
                            outputs: Seq[(String, TensorType)],
                            nodes: Option[Seq[String]] = None,
                            format: Option[String] = None,
-                           modelBytes: Array[Byte],
+                           modelBytes: Array[Byte]
                           ) extends Model with AutoCloseable {
 
   def apply(values: Tensor[_] *): Seq[Any] = {
@@ -75,6 +75,7 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
       case _ => format match {
         case Some("graph") | None => getSessionG
         case Some("saved_model") => getSessionS
+        case _ =>  throw new RuntimeException("Only graph and saved_model are supported")
       }
     }
     session = Some(s)

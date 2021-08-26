@@ -1,6 +1,6 @@
 # Use container-based infrastructure
-sudo: required
-dist: trusty
+os: linux
+dist: xenial
 
 addons:
   apt:
@@ -15,9 +15,9 @@ services:
 
 language: scala
 scala:
-  - 2.11.12
+  - 2.12.13
 jdk:
-  - oraclejdk8  # sbt +compile fails on jdk11 (xenial's default)
+  - openjdk8
 
 jobs:
   include:
@@ -37,6 +37,11 @@ jobs:
     - name: "Python 3.6 tests"
       language: python
       python: 3.6
+      env:
+        # By default, "python" projects use the default jdk version, which is openjdk11 on xenial
+        # But we need jdk8 for spark, so we need to change it back
+        - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
+        - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
       install:
         - pip install tox
       before_script:
@@ -48,13 +53,13 @@ jobs:
         - make py36_test
 
     - name: "Python 3.7 tests"
-      language: python  # This can't be java and python at the same time
+      language: python
       python: 3.7
       env:
-        # Required when not setting 'language: java' to force the correct jdk8
+        # By default, "python" projects use the default jdk version, which is openjdk11 on xenial
+        # But we need jdk8 for spark, so we need to change it back
         - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
         - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
-      dist: xenial  # Travis won't install py37 on trusty
       install:
         - pip install tox
       before_script:
@@ -74,8 +79,6 @@ jobs:
 notifications:
   on_success: change
   on_failure: always
-  urls:
-    - https://webhooks.gitter.im/e/65cd239c75c243ce635e
   slack:
     rooms:
       - secure: "RLxhNQarrr8WNtJRSx855EJX6w9XsyvzfhJGHrJYcNs5hNZfnCcWJaGRExqSHjd3UKpyZOgOAa0+5IrUl4Pbug7Dzq+Kk5nIOxdDILfcL8giVXV2bMfeGADKyiDdkwyeud4eb0Oc7uVhFfmelW8d3EFPWio4yXUaVGZl0cNpCfx9iF1r0vLwRb7U5fiicuvpz8tNZkw6Vp8lrW0+teeXWpzVopxh4gTZxULlaVvp28OIJ09dS2k02baL6g3L4G4z9IxW4adEdH6DpAbw0JgyAFjZE1BXoEQuoZvHjoYstwy62f+maB8c2xNEB9bzobUruc0JHLKly0AdOqtKL25OCeSD3qBVWZKK/TOSQ4phY+iapI1JB5JCoZj/z/k5YogxdRGjFGyUhupuR8+kqZuAUAegD9N5wOLgwei5GTD2oim90ZixeS1Do7GvqhRiyaRHSL0CKRyJXV/iiDr1a8zV5tW8uREZX29Jq5DObxCTLDrWGjqijNWC06lOV0dhvF83qov9A1c+yulrS28qP7Hn7MXQWETShvlw4YxBCDGQLNJ3BMwA9nOx9O0ZI+0KCNVXPu6n8ZVbahJg0LoYZ2ftGFiwxq1/svlhInUN57MXkgI6iDf7NojAL7urGwN3YWbxuJemnASjPtigkN2yboAsBG/aSjOiYNeIVfna//XrFeI="

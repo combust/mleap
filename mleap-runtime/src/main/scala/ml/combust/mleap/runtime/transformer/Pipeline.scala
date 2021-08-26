@@ -2,7 +2,7 @@ package ml.combust.mleap.runtime.transformer
 
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{DataType, NodeShape, StructField, StructType}
-import ml.combust.mleap.runtime.frame.{FrameBuilder, Transformer}
+import ml.combust.mleap.runtime.frame.{FrameBuilder, Transformer => FrameTransformer}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -10,7 +10,7 @@ import scala.util.Try
 /**
   * Created by hwilkins on 11/8/15.
   */
-case class PipelineModel(transformers: Seq[Transformer]) extends Model {
+case class PipelineModel(transformers: Seq[FrameTransformer]) extends Model {
   override def inputSchema: StructType = {
     throw new NotImplementedError("inputSchema is not implemented for a PipelineModel")
   }
@@ -19,10 +19,10 @@ case class PipelineModel(transformers: Seq[Transformer]) extends Model {
   }
 }
 
-case class Pipeline(override val uid: String = Transformer.uniqueName("pipeline"),
+case class Pipeline(override val uid: String = FrameTransformer.uniqueName("pipeline"),
                     override val shape: NodeShape,
-                    override val model: PipelineModel) extends Transformer {
-  def transformers: Seq[Transformer] = model.transformers
+                    override val model: PipelineModel) extends FrameTransformer {
+  def transformers: Seq[FrameTransformer] = model.transformers
 
   override def transform[TB <: FrameBuilder[TB]](builder: TB): Try[TB] = {
     model.transformers.foldLeft(Try(builder))((b, stage) => b.flatMap(stage.transform))

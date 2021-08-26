@@ -155,9 +155,9 @@ class MathBinaryTest(unittest.TestCase):
             for i in range(1, 3)
         ], INPUT_SCHEMA)
 
-        # Summing None + int yields Nones
+        # Summing null + int yields NaN
         expected_df = pd.DataFrame([
-            (None,)
+            (float("NaN"),)
             for i in range(1, 3)
         ], columns=['add(f1, f2)'])
 

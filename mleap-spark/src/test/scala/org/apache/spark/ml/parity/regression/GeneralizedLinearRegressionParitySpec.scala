@@ -1,6 +1,6 @@
 package org.apache.spark.ml.parity.regression
 
-import org.apache.spark.ml.feature.{OneHotEncoderEstimator, StringIndexer, VectorAssembler}
+import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer, VectorAssembler}
 import org.apache.spark.ml.{Pipeline, Transformer}
 import org.apache.spark.ml.parity.SparkParityBase
 import org.apache.spark.ml.regression.GeneralizedLinearRegression
@@ -14,7 +14,7 @@ class GeneralizedLinearRegressionParitySpec extends SparkParityBase {
   override val sparkTransformer: Transformer = new Pipeline().setStages(Array(new StringIndexer().
     setInputCol("fico_score_group_fnl").
     setOutputCol("fico_index"),
-    new OneHotEncoderEstimator().
+    new OneHotEncoder().
       setInputCols(Array("fico_index")).
       setOutputCols(Array("fico")),
     new VectorAssembler().

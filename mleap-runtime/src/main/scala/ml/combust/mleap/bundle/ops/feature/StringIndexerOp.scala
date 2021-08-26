@@ -19,7 +19,9 @@ class StringIndexerOp extends MleapOp[StringIndexer, StringIndexerModel] {
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-        model.withValue("labels", Value.stringList(obj.labels)).
+        model.
+          withValue("labels_length", Value.int(1)).
+          withValue("labels_array_0", Value.stringList(obj.labels)).
           withValue("handle_invalid", Value.string(obj.handleInvalid.asParamString))
 
     }
@@ -27,9 +29,15 @@ class StringIndexerOp extends MleapOp[StringIndexer, StringIndexerModel] {
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): StringIndexerModel = {
       val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString(_)).getOrElse(HandleInvalid.default)
-
-      StringIndexerModel(labels = model.value("labels").getStringList,
-        handleInvalid = handleInvalid)
+      val label_length = model.getValue("labels_length").map(_.getInt).getOrElse(-1)
+      val labels: Seq[String] = label_length match {
+        case -1 =>
+          // backawards compatibility with spark v2
+          model.value("labels").getStringList
+        case 1 => model.value("labels_array_0").getStringList
+        case _ =>  throw new UnsupportedOperationException("Multi-input StringIndexer not supported yet.")
+      }
+      StringIndexerModel(labels = labels, handleInvalid = handleInvalid)
     }
   }
 

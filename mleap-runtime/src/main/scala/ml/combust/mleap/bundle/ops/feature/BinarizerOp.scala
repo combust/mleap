@@ -27,8 +27,14 @@ class BinarizerOp extends MleapOp[Binarizer, BinarizerModel] {
 
     override def load(model: Model)
                      (implicit context: BundleContext[MleapContext]): BinarizerModel = {
-      BinarizerModel(model.value("threshold").getDouble,
-        model.value("input_shapes").getDataShape)
+      val threshold: Option[Double] = model.getValue("threshold").map(_.getDouble)
+      val thresholds: Option[Seq[Double]] = model.getValue("thresholds").map(_.getDoubleList)
+      (threshold, thresholds) match {
+        case (None, None) => throw new IllegalArgumentException("Neither threshold nor thresholds were found")
+        case (Some(v), None) => BinarizerModel(v, model.value("input_shapes").getDataShape)
+        case (None, Some(v)) => throw new UnsupportedOperationException("Multi-column Binarizer not supported yet")
+        case (_, _) => throw new IllegalArgumentException("Both thresholds and threshold were found")
+      }
     }
   }
 

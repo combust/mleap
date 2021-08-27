@@ -3,12 +3,15 @@
 ### Breaking Changes
 
 ### New Features
+- MathBinaryModel now supports Logit operations
 
 ### Bug Fixes
 - Fix OneHotEncoder Python serialization
 
 ### Improvements
 - Upgrade to scikit-learn 0.22
+- Upgrade to Spark 3.0.2
+- Upgrade Tensorflow version to 2.4.1
 
 ### Other Changes
 

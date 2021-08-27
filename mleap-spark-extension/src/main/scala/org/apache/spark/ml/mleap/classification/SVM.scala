@@ -93,7 +93,7 @@ class SVMModel(override val uid: String,
     if(margin(features) > getThreshold) 1.0 else 0.0
   }
 
-  override protected def predictRaw(features: linalg.Vector): linalg.Vector = {
+  override def predictRaw(features: linalg.Vector): linalg.Vector = {
     val m = margin(features)
     linalg.Vectors.dense(-m, m)
   }

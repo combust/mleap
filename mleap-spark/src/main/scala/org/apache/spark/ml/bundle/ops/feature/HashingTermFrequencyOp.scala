@@ -1,11 +1,10 @@
 package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.bundle.op.{OpModel, OpNode}
+import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.HashingTF
-import org.apache.spark.ml.param.Param
 
 /**
   * Created by hollinwilkins on 8/21/16.
@@ -19,13 +18,17 @@ class HashingTermFrequencyOp extends SimpleSparkOp[HashingTF] {
     override def store(model: Model, obj: HashingTF)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
       model.withValue("num_features", Value.long(obj.getNumFeatures)).
-        withValue("binary", Value.boolean(obj.getBinary))
+        withValue("binary", Value.boolean(obj.getBinary)).
+        withValue("hashUnsafeBytesVersion", Value.int(2))
     }
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): HashingTF = {
-      new HashingTF(uid = "").setNumFeatures(model.value("num_features").getLong.toInt).
-        setBinary(model.value("binary").getBoolean)
+      val hashUnsafeBytesVersion = model.getValue("hashUnsafeBytesVersion").map(_.getInt).getOrElse(1)
+      val numFeatures = model.value("num_features").getLong.toInt
+      val binary = model.value("binary").getBoolean
+      require(hashUnsafeBytesVersion == 2, "Unsupported load lower version spark model.")
+      new HashingTF(uid = "").setNumFeatures(numFeatures).setBinary(binary)
     }
   }
 

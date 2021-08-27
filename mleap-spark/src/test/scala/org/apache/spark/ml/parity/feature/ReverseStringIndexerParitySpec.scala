@@ -18,7 +18,7 @@ class ReverseStringIndexerParitySpec extends SparkParityBase {
     val reverseStringIndexer = new IndexToString().
       setInputCol("state_index").
       setOutputCol("state_reverse").
-      setLabels(stringIndexer.labels)
+      setLabels(stringIndexer.labelsArray(0))
     new Pipeline().setStages(Array(stringIndexer, reverseStringIndexer)).fit(dataset)
   }
 

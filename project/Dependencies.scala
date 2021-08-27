@@ -6,18 +6,19 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "2.4.5"
-  val scalaTestVersion = "3.0.3"
-  val akkaVersion = "2.5.12"
-  val akkaHttpVersion = "10.0.3"
+  val sparkVersion = "3.0.2"
+  val scalaTestVersion = "3.0.8"
+  val akkaVersion = "2.6.14"
+  val akkaHttpVersion = "10.2.4"
   val springBootVersion = "2.0.4.RELEASE"
   lazy val logbackVersion = "1.2.3"
   lazy val loggingVersion = "3.9.0"
   lazy val slf4jVersion = "1.7.25"
-  lazy val awsSdkVersion = "1.11.349"
+  lazy val awsSdkVersion = "1.11.1033"
   val tensorflowJavaVersion = "0.3.1" // Match Tensorflow 2.4.1 https://github.com/tensorflow/java/#tensorflow-version-support
   val xgboostVersion = "1.0.0"
-  val hadoopVersion = "2.6.5" // matches spark version
+  val breezeVersion = "1.0"
+  val hadoopVersion = "2.7.4" // matches spark version
   val kryoVersion = "4.0.2" // Remove upon upgrading to xgboost 1.1.1
   val platforms = "windows-x86_64,linux-x86_64,macosx-x86_64"
   val tensorflowPlatforms : Array[String] =  sys.env.getOrElse("TENSORFLOW_PLATFORMS", platforms).split(",")
@@ -69,6 +70,8 @@ object Dependencies {
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
 
+    val breeze = "org.scalanlp" %% "breeze" % breezeVersion
+
     val kryo = "com.esotericsoftware" % "kryo" % kryoVersion
     val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo")
     val xgboostPredictorDep = "ai.h2o" % "xgboost-predictor" % "0.3.17" exclude("com.esotericsoftware.kryo", "kryo")
@@ -106,7 +109,7 @@ object Dependencies {
 
   val base = l ++= Seq()
 
-  val core = l ++= Seq(sparkMllibLocal, jTransform, Test.scalaTest) ++ Test.sparkTest
+  val core = l ++= Seq(sparkMllibLocal, jTransform, breeze, Test.scalaTest) ++ Test.sparkTest
 
   def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface, commonsIo) ++ scalaReflect.modules(scalaVersion.value))
 

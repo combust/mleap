@@ -21,7 +21,7 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
       val thresholds = if(obj.isSet(obj.thresholds)) {
         Some(obj.getThresholds)
       } else None
-      model.withValue("layers", Value.longList(obj.layers.map(_.toLong))).
+      model.withValue("layers", Value.longList(obj.getLayers.map(_.toLong))).
         withValue("weights", Value.vector(obj.weights.toArray)).
         withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList))
     }
@@ -29,8 +29,8 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): MultilayerPerceptronClassificationModel = {
       val m = new MultilayerPerceptronClassificationModel(uid = "",
-        layers = model.value("layers").getLongList.map(_.toInt).toArray,
         weights = Vectors.dense(model.value("weights").getTensor[Double].toArray))
+      m.set(m.layers, model.value("layers").getLongList.map(_.toInt).toArray)
       model.getValue("thresholds").
         map(t => m.setThresholds(t.getDoubleList.toArray)).
         getOrElse(m)
@@ -39,7 +39,8 @@ class MultiLayerPerceptronClassifierOp extends SimpleSparkOp[MultilayerPerceptro
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: MultilayerPerceptronClassificationModel): MultilayerPerceptronClassificationModel = {
-    val m = new MultilayerPerceptronClassificationModel(uid = uid,layers = model.layers, weights = model.weights)
+    val m = new MultilayerPerceptronClassificationModel(uid = uid, weights = model.weights)
+    m.set(m.layers, model.getLayers)
     if (model.isSet(model.thresholds)) m.setThresholds(model.getThresholds)
     m
   }

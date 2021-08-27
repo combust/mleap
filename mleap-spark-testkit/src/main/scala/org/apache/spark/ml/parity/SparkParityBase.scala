@@ -185,6 +185,41 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
+  def checkParamsEquality(original: Transformer, deserialized: Transformer, additionalIgnore: Set[String]): Unit = {
+    val ignoredParams = unserializedParams.union(additionalIgnore)
+    assert(original.params.length == deserialized.params.length)
+    original.params.zip(deserialized.params).foreach {
+      case (param1, param2) => if(!ignoredParams.contains(param1.name)) {
+        assert(original.isDefined(param1) == deserialized.isDefined(param2),
+          s"spark transformer param ${param1.name} is defined ${original.isDefined(param1)} deserialized is ${deserialized.isDefined(param2)}")
+
+        if (original.isDefined(param1)) {
+          val v1Value = original.getOrDefault(param1)
+          val v2Value = deserialized.getOrDefault(param2)
+
+          v1Value match {
+            case v1Value: Array[_] => assert(v1Value sameElements v2Value.asInstanceOf[Array[_]])
+            case _ => assert(v1Value == v2Value, s"$param1 is not equivalent")
+          }
+        }
+      }
+    }
+  }
+
+  def checkEquality(original: Transformer, deserialized: Transformer, additionalIgnoreParams: Set[String]): Unit = {
+    assert(original.getClass == deserialized.getClass)
+    checkParamsEquality(original, deserialized, additionalIgnoreParams)
+    original match {
+      case original: PipelineModel =>
+        val deStages = deserialized.asInstanceOf[PipelineModel].stages
+        assert(original.stages.length == deStages.length)
+        original.stages.zip(deStages).foreach {
+          case (o, d) => checkEquality(o, d, additionalIgnoreParams)
+        }
+      case _ =>
+    }
+  }
+
   def parityTransformer(): Unit = {
     it("has parity between Spark/MLeap") {
       val sparkTransformed = sparkTransformer.transform(dataset)
@@ -196,43 +231,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
       equalityTest(sparkDataset, mleapDataset)
     }
 
-    def checkParamsEquality(original: Transformer, deserialized: Transformer): Unit = {
-      val ignoredParams = unserializedParams
-      assert(original.params.length == deserialized.params.length)
-      original.params.zip(deserialized.params).foreach {
-        case (param1, param2) => if(!ignoredParams.contains(param1.name)) {
-          assert(original.isDefined(param1) == deserialized.isDefined(param2),
-            s"spark transformer param ${param1.name} is defined ${original.isDefined(param1)} deserialized is ${deserialized.isDefined(param2)}")
-
-          if (original.isDefined(param1)) {
-            val v1Value = original.getOrDefault(param1)
-            val v2Value = deserialized.getOrDefault(param1)
-
-            v1Value match {
-              case v1Value: Array[_] => assert(v1Value sameElements v2Value.asInstanceOf[Array[_]])
-              case _ => assert(v1Value == v2Value, s"$param1 is not equivalent")
-            }
-          }
-        }
-      }
-    }
-    def checkEquality(original: Transformer, deserialized: Transformer): Unit = {
-      assert(original.getClass == deserialized.getClass)
-      checkParamsEquality(original, deserialized)
-      original match {
-        case original: PipelineModel =>
-          val deStages = deserialized.asInstanceOf[PipelineModel].stages
-          assert(original.stages.length == deStages.length)
-          original.stages.zip(deStages).foreach {
-            case (o, d) => checkEquality(o, d)
-          }
-        case _ =>
-      }
-    }
-
     it("serializes/deserializes the Spark model properly") {
       if (!ignoreSerializationTest) {
-        checkEquality(sparkTransformer, deserializedSparkTransformer(sparkTransformer))
+        checkEquality(sparkTransformer, deserializedSparkTransformer(sparkTransformer), Set())
       }
     }
 

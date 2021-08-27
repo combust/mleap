@@ -6,12 +6,12 @@ import biz.k11i.xgboost.util.FVec
 import ml.combust.mleap.tensor.{SparseTensor, Tensor}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 
-import scala.collection.JavaConversions.mapAsJavaMap
+import scala.collection.JavaConverters.mapAsJavaMapConverter
 
 
 object FVecFactory {
   private def toJavaMap(map: Map[Int, Float]): util.Map[lang.Integer, lang.Float] = {
-    mapAsJavaMap(map).asInstanceOf[util.Map[lang.Integer, lang.Float]]
+    map.asJava.asInstanceOf[util.Map[lang.Integer, lang.Float]]
   }
 
   /**

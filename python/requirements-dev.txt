@@ -3,4 +3,4 @@ coverage<5.0.0
 ipdb
 nose
 nose-exclude>=0.5.0
-pyspark<=2.4.5
+pyspark==3.0.2

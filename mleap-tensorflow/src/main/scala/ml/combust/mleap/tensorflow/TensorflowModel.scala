@@ -73,8 +73,8 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
     val (s,g) = (session, graph) match {
       case (Some(sess), Some(gg)) => (sess, gg)
       case _ => format match {
-        case Some("graph") | None => getSessionG
-        case Some("saved_model") => getSessionS
+        case Some("graph") | None => getSessionFromFrozenGraph
+        case Some("saved_model") => getSessionFromSavedModel
         case _ =>  throw new RuntimeException("Only graph and saved_model are supported")
       }
     }
@@ -83,14 +83,13 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
     f(s)
   }
 
-  private def getSessionG: (tensorflow.Session, tensorflow.Graph) = {
-    val gg = new tensorflow.Graph()
-    val graphDef = GraphDef.parseFrom(modelBytes)
-    gg.importGraphDef(graphDef)
-    (new tensorflow.Session(gg), gg)
+  private def getSessionFromFrozenGraph: (tensorflow.Session, tensorflow.Graph) = {
+    val graph = new tensorflow.Graph()
+    graph.importGraphDef(GraphDef.parseFrom(modelBytes))
+    (new tensorflow.Session(graph), graph)
   }
 
-  private def getSessionS: (tensorflow.Session, tensorflow.Graph) = {
+  private def getSessionFromSavedModel: (tensorflow.Session, tensorflow.Graph) = {
     val dest = Files.createTempDirectory("saved_model")
     val savedModelStream = new ZipInputStream(
       new ByteArrayInputStream(modelBytes)

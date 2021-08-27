@@ -1,22 +1,14 @@
 package ml.combust.mleap.tensorflow
 
 import java.io.File
-import java.nio.file.{Files, Path}
 
 import org.tensorflow
 import org.tensorflow.op.Ops
-import org.tensorflow.SavedModelBundle
-import org.tensorflow.Session
-import org.tensorflow.ndarray.Shape
-import org.tensorflow.ndarray.StdArrays
 import org.tensorflow.types.TFloat32
 import org.tensorflow.Signature
 import org.tensorflow.op.core.Placeholder
 import org.tensorflow.ConcreteFunction
-import org.tensorflow.ndarray.FloatNdArray
 import org.tensorflow.ndarray.Shape
-import org.tensorflow.ndarray.StdArrays
-import org.tensorflow.op.core.Init
 import java.nio.file.Files
 import java.nio.file.Path
 /**
@@ -54,12 +46,15 @@ object TestUtil {
   }
 
 
-  def createGraphWithVariables(tf: Ops, xShape: Shape) :  Signature = {
+  def createConcreteFunctionWithVariables(xShape: Shape) :  ConcreteFunction = {
+    val g = new tensorflow.Graph()
+    val tf = tensorflow.op.Ops.create(g)
     val x = tf.placeholder(classOf[TFloat32], Placeholder.shape(xShape))
     val y = tf.variable(tf.random.randomUniform(tf.constant(xShape), classOf[TFloat32]))
     val z = tf.reduceSum(tf.math.add(x, y), tf.array(0, 1))
-    val init = tf.init
-    Signature.builder.input("input", x).output("reducedSum", z).build
+    val signature= Signature.builder.input("input", x).output("reducedSum", z).build
+    val session = new tensorflow.Session(g)
+    session.run(tf.init())
+    tensorflow.ConcreteFunction.create(signature, session)
   }
-
 }

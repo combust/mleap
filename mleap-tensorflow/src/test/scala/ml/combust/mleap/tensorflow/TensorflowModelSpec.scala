@@ -1,25 +1,18 @@
 package ml.combust.mleap.tensorflow
 
+import ml.combust.bundle.serializer.FileUtil
 import ml.combust.mleap.core.types.TensorType
 import ml.combust.mleap.tensor.{DenseTensor, Tensor}
-import org.scalatest.FunSpec
-import org.tensorflow.ndarray.StdArrays
-import org.tensorflow.ndarray.Shape
-import org.tensorflow.op.core.Init
-import org.tensorflow
-
-import java.nio.file.Files
-import org.tensorflow.types.TFloat32
-import org.tensorflow.ConcreteFunction
-import org.tensorflow.SavedModelBundle
-import org.tensorflow.Signature
-
-import scala.collection.JavaConverters._
-import ml.combust.bundle.serializer.FileUtil
 import ml.combust.mleap.tensorflow.converter.MleapConverter
+import org.scalatest.FunSpec
+import org.tensorflow.{SavedModelBundle, Signature}
+import org.tensorflow.ndarray.Shape
+import org.tensorflow.types.TFloat32
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.io.ByteArrayOutputStream
+import java.nio.file.Files
 import java.util.zip.ZipOutputStream
+import scala.collection.JavaConverters._
 
 /**
   * Created by hollinwilkins on 1/12/17.
@@ -30,7 +23,7 @@ class TensorflowModelSpec extends FunSpec {
     it("adds two floats together") {
       val graph = TestUtil.createAddGraph()
       val model = TensorflowModel(
-        graph=Some(graph),
+        graph = Some(graph),
         inputs = Seq(("InputA", TensorType.Float()), ("InputB", TensorType.Float())),
         outputs = Seq(("MyResult", TensorType.Float())),
         modelBytes = graph.toGraphDef.toByteArray
@@ -62,54 +55,49 @@ class TensorflowModelSpec extends FunSpec {
     }
   }
 
-  describe("with an tensorflow model with variables") {
+  describe("with an tensorflow model has variables") {
     it("saved model") {
       var reducedSum = 0.0f
       val testFolder = Files.createTempDirectory("tf-saved-model-export")
       val input = DenseTensor(Array(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f), Seq(2, 3))
       val xyShape = Shape.of(2, 3L)
-      val g = new tensorflow.Graph()
-      val session = new tensorflow.Session(g)
+      val f = TestUtil.createConcreteFunctionWithVariables(xyShape)
+      val xTensor = MleapConverter.convert(input)
+      val zTensor = f.call(xTensor).asInstanceOf[TFloat32]
       try {
-        val tf = tensorflow.op.Ops.create(g)
-        val signature = TestUtil.createGraphWithVariables(tf, xyShape)
-        val f = tensorflow.ConcreteFunction.create(signature, session)
-        session.run(Init.DEFAULT_NAME)
-        val xTensor = MleapConverter.convert(input)
-        val zTensor = f.call(xTensor).asInstanceOf[TFloat32]
-        try {
-          reducedSum = zTensor.getFloat()
-          f.save(testFolder.toString)
-        } finally {
-          if (xTensor != null) xTensor.close()
-          if (zTensor != null) zTensor.close()
-        }
+        reducedSum = zTensor.getFloat()
+        f.save(testFolder.toString)
       } finally {
-        session.close()
-        g.close()
+        if (xTensor != null) xTensor.close()
+        if (zTensor != null) zTensor.close()
+        if (f != null) f.close()
       }
+      // load it back
       val bundle = SavedModelBundle.load(testFolder.toString)
       try {
         val signatureDef = bundle.metaGraphDef.getSignatureDefOrThrow(Signature.DEFAULT_KEY)
-        val inputMap = signatureDef.getInputsMap.asScala.map{case (k, v) => (k, v.getName)}
-        val outputMap = signatureDef.getOutputsMap.asScala.map{case (k,v) => (k, v.getName)}
+        val inputMap = signatureDef.getInputsMap.asScala.map { case (k, v) => (k, v.getName) }
+        val outputMap = signatureDef.getOutputsMap.asScala.map { case (k, v) => (k, v.getName) }
         assert(inputMap("input") == "Placeholder:0")
         assert(outputMap("reducedSum") == "ReduceSum:0")
+
         val inputs = Seq(("Placeholder:0", TensorType.Float(2, 3)))
         val outputs = Seq(("ReduceSum:0", TensorType.Float()))
-        val format  = Some("saved_model")
+        val format = Some("saved_model")
         val byteStream = new ByteArrayOutputStream()
         val zf = new ZipOutputStream(byteStream)
-        FileUtil().zip(testFolder.toFile, zf)
-        zf.close()
+        try FileUtil().zip(testFolder.toFile, zf) finally if (zf != null) zf.close()
+
         val model = TensorflowModel(
           inputs = inputs,
           outputs = outputs,
           format = format,
           modelBytes = byteStream.toByteArray
         )
-        val output = model(input)
-        assert(reducedSum ==  output.head.asInstanceOf[DenseTensor[Float]](0))
+        try {
+          val output = model(input)
+          assert(reducedSum == output.head.asInstanceOf[DenseTensor[Float]](0))
+        } finally if (model != null) model.close()
       } finally if (bundle != null) bundle.close()
     }
   }

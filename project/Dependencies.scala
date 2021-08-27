@@ -39,10 +39,9 @@ object Dependencies {
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
     val commonsIo = "commons-io" % "commons-io" % "2.5"
-    val tensorflowCoreApi = "org.tensorflow" % "tensorflow-core-api" % tensorflowJavaVersion
-    val tensorflowDeps = Seq(tensorflowCoreApi) ++ tensorflowPlatforms.map(platform => tensorflowCoreApi classifier platform)
-
-
+    var tensorflowCoreApi = "org.tensorflow" % "tensorflow-core-api" % tensorflowJavaVersion
+    (Seq("") ++ tensorflowPlatforms).foreach(platform => tensorflowCoreApi = tensorflowCoreApi classifier platform)
+    val tensorflowDeps = Seq(tensorflowCoreApi)
     val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion
 

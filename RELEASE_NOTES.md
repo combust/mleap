@@ -1,6 +1,7 @@
 # Release 0.18.0-SNAPSHOT (not released yet)
 
 ### Breaking Changes
+- Scala 2.11 is no longer supported due to Spark 3 upgrade
 
 ### New Features
 - MathBinaryModel now supports Logit operations

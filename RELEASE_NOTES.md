@@ -3,12 +3,12 @@
 ### Breaking Changes
 
 ### New Features
-
 ### Bug Fixes
 - Fix OneHotEncoder Python serialization
 
 ### Improvements
 - Upgrade to scikit-learn 0.22
+- Support for tensorflow saved_model format
 
 ### Other Changes
 

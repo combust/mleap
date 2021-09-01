@@ -27,7 +27,7 @@ class TensorflowTransformerOp extends MleapOp[TensorflowTransformer, TensorflowM
            Files.write(context.file("saved_model.zip"), obj.modelBytes)
          }
          case Some("graph") | None  => Files.write(context.file("graph.pb"), obj.modelBytes)
-         case _ => throw  new RuntimeException("Only gaph and saved_model formats are supported")
+         case _ => throw new UnsupportedOperationException("Only support `saved_model` and `graph` format")
        }
 
 
@@ -74,7 +74,7 @@ class TensorflowTransformerOp extends MleapOp[TensorflowTransformer, TensorflowM
       val modelBytes = format match {
         case Some("graph") | None => Files.readAllBytes(context.file("graph.pb"))
         case Some("saved_model") => Files.readAllBytes(context.file("saved_model.zip"))
-        case _ => throw new RuntimeException("Only support `saved_model` and `tf` format");
+        case _ => throw new UnsupportedOperationException("Only support `saved_model` and `graph` format")
       }
       TensorflowModel(
         inputs = inputs,

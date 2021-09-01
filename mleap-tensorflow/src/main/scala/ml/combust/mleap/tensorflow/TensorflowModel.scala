@@ -75,7 +75,7 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
       case _ => format match {
         case Some("graph") | None => getSessionFromFrozenGraph
         case Some("saved_model") => getSessionFromSavedModel
-        case _ =>  throw new RuntimeException("Only graph and saved_model are supported")
+        case _ =>  throw new UnsupportedOperationException("Only support `saved_model` and `graph` format")
       }
     }
     session = Some(s)
@@ -84,9 +84,9 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
   }
 
   private def getSessionFromFrozenGraph: (tensorflow.Session, tensorflow.Graph) = {
-    val graph = new tensorflow.Graph()
-    graph.importGraphDef(GraphDef.parseFrom(modelBytes))
-    (new tensorflow.Session(graph), graph)
+    val g = new tensorflow.Graph()
+    g.importGraphDef(GraphDef.parseFrom(modelBytes))
+    (new tensorflow.Session(g), g)
   }
 
   private def getSessionFromSavedModel: (tensorflow.Session, tensorflow.Graph) = {

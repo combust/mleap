@@ -151,6 +151,47 @@ object Casting {
             c => (l: Any) => l.asInstanceOf[Seq[Any]].map(c)
           }
         }
+      case (_: ListType, _: TensorType) =>
+        baseCast(from.base, to.base).map {
+          _.map {
+            c =>
+              to.base match {
+                case BasicType.Boolean =>
+                  val cc = c.asInstanceOf[(Any) => Boolean]
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
+                case BasicType.Byte =>
+                  val cc = c.asInstanceOf[(Any) => Byte]
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
+                case BasicType.Short =>
+                  val cc = c.asInstanceOf[(Any) => Short]
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
+                case BasicType.Int =>
+                  val cc = c.asInstanceOf[(Any) => Int]
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
+                case BasicType.Long =>
+                  val cc = c.asInstanceOf[(Any) => Long]
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
+                case BasicType.Float =>
+                  val cc = c.asInstanceOf[(Any) => Float]
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
+                case BasicType.Double =>
+                  val cc = c.asInstanceOf[(Any) => Double]
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
+                case BasicType.String =>
+                  val cc = c.asInstanceOf[(Any) => String]
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
+                case BasicType.ByteString =>
+                  val cc = c.asInstanceOf[(Any) => ByteString]
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
+              }
+          }
+        }
+      case (_: TensorType, _: ListType) =>
+        baseCast(from.base, to.base).map {
+          _.map {
+            c => (v: Any) => v.asInstanceOf[Tensor[_]].rawValues.toList.map(c)
+          }
+        }
       case (_: TensorType, _: TensorType) =>
         baseCast(from.base, to.base).map {
           _.map {

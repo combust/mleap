@@ -5,7 +5,8 @@
 
 ### New Features
 - MathBinaryModel now supports Logit operations
-- TensorflowTransformerOp now support saving and loading in SavedModel format
+- TensorflowTransformerOp now supports serialization and deserialization using SavedModel format
+- `Casting.cast` now supports conversions between ListType and TensorType
 
 ### Bug Fixes
 - Fix OneHotEncoder Python serialization

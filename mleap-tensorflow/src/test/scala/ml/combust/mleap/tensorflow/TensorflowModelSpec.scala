@@ -59,6 +59,7 @@ class TensorflowModelSpec extends FunSpec {
     it("saved model") {
       var reducedSum = 0.0f
       val testFolder = Files.createTempDirectory("tf-saved-model-export")
+
       val input = DenseTensor(Array(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f), Seq(2, 3))
       val xyShape = Shape.of(2, 3L)
       val f = TestUtil.createConcreteFunctionWithVariables(xyShape)
@@ -73,6 +74,7 @@ class TensorflowModelSpec extends FunSpec {
         if (f != null) f.close()
       }
       // load it back
+
       val bundle = SavedModelBundle.load(testFolder.toString)
       try {
         val signatureDef = bundle.metaGraphDef.getSignatureDefOrThrow(Signature.DEFAULT_KEY)
@@ -87,7 +89,7 @@ class TensorflowModelSpec extends FunSpec {
         val byteStream = new ByteArrayOutputStream()
         val zf = new ZipOutputStream(byteStream)
         try FileUtil().zip(testFolder.toFile, zf) finally if (zf != null) zf.close()
-
+        FileUtil().rmRF(testFolder.toFile)
         val model = TensorflowModel(
           inputs = inputs,
           outputs = outputs,
@@ -99,6 +101,7 @@ class TensorflowModelSpec extends FunSpec {
           assert(reducedSum == output.head.asInstanceOf[DenseTensor[Float]](0))
         } finally if (model != null) model.close()
       } finally if (bundle != null) bundle.close()
+
     }
   }
 }

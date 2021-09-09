@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   description: |
     This documentation covers the MLeap Serving API. You can findout more about MLeap at
-    [http://mleap-docs.combust.ml/](http://mleap-docs.combust.ml/) or on Gitter
+    [https://combust.github.io/mleap-docs/](https://combust.github.io/mleap-docs/) or on Gitter
     [Combust/mleap](https://gitter.im/combust/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge).
   version: "1.0.0"
   title: Swagger MLeap Serving

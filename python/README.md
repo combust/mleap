@@ -13,9 +13,9 @@ $ pip install mleap
 
 ## PySpark Integration
 
-MLeap's PySpark library provides serialization and deserialization functionality to/from Bundle.ML. There is 100% parity between MLeap's PySpark and Scala/Spark support and all of the supported transformers can be found [here](http://mleap-docs.combust.ml/core-concepts/transformers/support.html).
+MLeap's PySpark library provides serialization and deserialization functionality to/from Bundle.ML. There is 100% parity between MLeap's PySpark and Scala/Spark support and all of the supported transformers can be found [here](https://combust.github.io/mleap-docs/core-concepts/transformers/support.html).
 
-We have both a [basic tutorial](http://mleap-docs.combust.ml/py-spark/) and an [advance demo](https://github.com/combust/mleap-demo/blob/master/notebooks/PySpark%20-%20AirBnb.ipynb) of serializing and de-serializing using PySpark, but in short you can continue to write ML Pipelines as you normally would and we provide the following interface for serialization/de-serialization:
+We have both a [basic tutorial](https://combust.github.io/mleap-docs/py-spark/) and an [advance demo](https://github.com/combust/mleap-demo/blob/master/notebooks/PySpark%20-%20AirBnb.ipynb) of serializing and de-serializing using PySpark, but in short you can continue to write ML Pipelines as you normally would and we provide the following interface for serialization/de-serialization:
 
 ```python
 # Define your pipeline
@@ -90,15 +90,15 @@ A simple example is the `StandardScaler` transformer that normalizes the data gi
 }
 ```
 
-Scikit-Learn pipelines, just like Spark Pipelines, can be serialized to an MLeap Bundle and deployed to an [MLeap runtime environment](http://mleap-docs.combust.ml/mleap-runtime/).
+Scikit-Learn pipelines, just like Spark Pipelines, can be serialized to an MLeap Bundle and deployed to an [MLeap runtime environment](https://combust.github.io/mleap-docs/mleap-runtime/).
 
 You can also take your scikit pipelines and deploy them to your Spark cluster, because MLeap can de-serialize them into a Spark ML Pipeline and execute them on data frames.
 
 ## Documentation
 
 Documentation can be found on our mleap docs page:
-* [PySpark](http://mleap-docs.combust.ml/getting-started/py-spark.html)
-* [Scikit-Learn](http://mleap-docs.combust.ml/getting-started/scikit-learn.html)
+* [PySpark](https://combust.github.io/mleap-docs/getting-started/py-spark.html)
+* [Scikit-Learn](https://combust.github.io/mleap-docs/getting-started/scikit-learn.html)
 
 ## Contributions
 Contributions are welcome! Make sure all python tests pass.

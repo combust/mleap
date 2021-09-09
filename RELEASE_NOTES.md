@@ -5,6 +5,7 @@
 
 ### New Features
 - MathBinaryModel now supports Logit operations
+- TensorflowTransformerOp now support saving and loading in SavedModel format
 
 ### Bug Fixes
 - Fix OneHotEncoder Python serialization

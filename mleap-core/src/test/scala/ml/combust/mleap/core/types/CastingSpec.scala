@@ -105,16 +105,16 @@ class CastingSpec extends FunSpec {
     (BasicType.String, BasicType.Double, "", null)
   )
 
-  def createTensor(base: BasicType, value: Any): Tensor[_] = base match {
-    case BasicType.Boolean => Tensor.denseVector(Array(value.asInstanceOf[Boolean]))
-    case BasicType.Byte => Tensor.denseVector(Array(value.asInstanceOf[Byte]))
-    case BasicType.Short => Tensor.denseVector(Array(value.asInstanceOf[Short]))
-    case BasicType.Int => Tensor.denseVector(Array(value.asInstanceOf[Int]))
-    case BasicType.Long => Tensor.denseVector(Array(value.asInstanceOf[Long]))
-    case BasicType.Float => Tensor.denseVector(Array(value.asInstanceOf[Float]))
-    case BasicType.Double => Tensor.denseVector(Array(value.asInstanceOf[Double]))
-    case BasicType.String => Tensor.denseVector(Array(value.asInstanceOf[String]))
-    case BasicType.ByteString => Tensor.denseVector(Array(value.asInstanceOf[ByteString]))
+  def createTensor(base: BasicType, values: Seq[_]): Tensor[_] = base match {
+    case BasicType.Boolean => Tensor.denseVector(values.map(_.asInstanceOf[Boolean]).toArray)
+    case BasicType.Byte => Tensor.denseVector(values.map(_.asInstanceOf[Byte]).toArray)
+    case BasicType.Short => Tensor.denseVector(values.map(_.asInstanceOf[Short]).toArray)
+    case BasicType.Int => Tensor.denseVector(values.map(_.asInstanceOf[Int]).toArray)
+    case BasicType.Long => Tensor.denseVector(values.map(_.asInstanceOf[Long]).toArray)
+    case BasicType.Float => Tensor.denseVector(values.map(_.asInstanceOf[Float]).toArray)
+    case BasicType.Double => Tensor.denseVector(values.map(_.asInstanceOf[Double]).toArray)
+    case BasicType.String => Tensor.denseVector(values.map(_.asInstanceOf[String]).toArray)
+    case BasicType.ByteString => Tensor.denseVector(values.map(_.asInstanceOf[ByteString]).toArray)
   }
 
   def createTensorScalar(base: BasicType, value: Any): Tensor[_] = base match {
@@ -146,24 +146,30 @@ class CastingSpec extends FunSpec {
       it("casts the list") {
         val fromList = Seq(fromValue, fromValue, fromValue)
         val expectedList = Seq(expectedValue, expectedValue, expectedValue)
+        val expectedTensor = createTensor(to, expectedList)
 
         val c = Casting.cast(ListType(from), ListType(to)).get.get
         val oc = Casting.cast(ListType(from), ListType(to).nonNullable).get.get
         val co = Casting.cast(ListType(from).nonNullable, ListType(to)).get.get
         val oco = Casting.cast(ListType(from), ListType(to)).get.get
+        val tcl = Casting.cast(ListType(from), TensorType(to, Some(Seq(expectedList.length)))).get.get
 
         assert(c(fromList) == expectedList)
         assertThrows[NullPointerException](oc(null))
         assert(co(fromList) == expectedList)
         assert(oco(null) == null)
+        assert(tcl(fromList) == expectedTensor)
       }
 
       it("casts the tensor") {
-        val fromTensor = createTensor(from, fromValue)
-        val expectedTensor = createTensor(to, expectedValue)
+        val fromTensor = createTensor(from, Seq(fromValue))
+        val expectedTensor = createTensor(to, Seq(expectedValue))
 
         val fromScalarTensor = createTensorScalar(from, fromValue)
         val expectedScalarTensor = createTensorScalar(to, expectedValue)
+
+        val fromListTensor = createTensor(from, Seq(fromValue, fromValue, fromValue))
+        val expectedList = Seq(expectedValue, expectedValue, expectedValue)
 
         val c = Casting.cast(TensorType(from), TensorType(to)).get.get
         val oc = Casting.cast(TensorType(from), TensorType(to).nonNullable).get.get
@@ -171,6 +177,7 @@ class CastingSpec extends FunSpec {
         val oco = Casting.cast(TensorType(from), TensorType(to)).get.get
         val tc = Casting.cast(ScalarType(from), TensorType(to, Some(Seq()))).get.get
         val ct = Casting.cast(TensorType(from, Some(Seq())), ScalarType(to)).get.get
+        val lct = Casting.cast(TensorType(from, Some(Seq(expectedList.length))), ListType(to)).get.get
 
         assert(c(fromTensor) == expectedTensor)
         assertThrows[NullPointerException](oc(null))
@@ -178,7 +185,9 @@ class CastingSpec extends FunSpec {
         assert(oco(null) == null)
         assert(tc(fromValue) == expectedScalarTensor)
         assert(ct(fromScalarTensor) == expectedValue)
+        assert(lct(fromListTensor) == expectedList)
       }
+
     }
   }
 }

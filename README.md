@@ -1,4 +1,4 @@
-<a href="http://mleap-docs.combust.ml"><img src="logo.png" alt="MLeap Logo" width="176" height="70" /></a>
+<a href="https://combust.github.io/mleap-docs/"><img src="logo.png" alt="MLeap Logo" width="176" height="70" /></a>
 
 [![Gitter](https://badges.gitter.im/combust/mleap.svg)](https://gitter.im/combust/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Build Status](https://travis-ci.org/combust/mleap.svg?branch=master)](https://travis-ci.org/combust/mleap)
@@ -262,7 +262,7 @@ assert(data2(1).getDouble(3) == 0.0)
 
 ## Documentation
 
-For more documentation, please see our [documentation](http://mleap-docs.combust.ml), where you can learn to:
+For more documentation, please see our [documentation](https://combust.github.io/mleap-docs/), where you can learn to:
 
 1. Implement custom transformers that will work with Spark, MLeap and Scikit-learn
 2. Implement custom data types to transform with Spark and MLeap pipelines

@@ -10,7 +10,7 @@ object BundleHelper {
       |Must provide a sample data frame for the ${klazz.getCanonicalName} transformer.
       |
       |See more information here:
-      |http://mleap-docs.combust.ml/troubleshooting.html#must-provide-a-sample-dataset-for-the-x-transformer
+      |https://combust.github.io/mleap-docs//troubleshooting.html#must-provide-a-sample-dataset-for-the-x-transformer
       |
       |// Use your Spark ML Pipeline to transform the Spark DataFrame
       |val transformedDataset = sparkTransformer.transform(sparkDataset)

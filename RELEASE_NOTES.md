@@ -5,6 +5,7 @@
 
 ### New Features
 - MathBinaryModel now supports Logit operations
+- `Casting.cast` now supports conversions between ListType and TensorType
 
 ### Bug Fixes
 - Fix OneHotEncoder Python serialization

@@ -1,3 +1,15 @@
+# Release 0.19.0-SNAPSHOT (NOT RELEASED YET)
+
+### Breaking Changes
+
+### New Features
+
+### Bug Fixes
+
+### Improvements
+
+### Other Changes
+
 # Release 0.18.0
 
 ### Breaking Changes

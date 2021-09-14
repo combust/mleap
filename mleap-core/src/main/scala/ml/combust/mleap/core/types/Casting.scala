@@ -153,8 +153,8 @@ object Casting {
         }
       case (_: ListType, _: TensorType) =>
         baseCast(from.base, to.base).map {
-          _.map {
-            c =>
+          _.flatMap {
+            c => Try {
               to.base match {
                 case BasicType.Boolean =>
                   val cc = c.asInstanceOf[(Any) => Boolean]
@@ -184,6 +184,32 @@ object Casting {
                   val cc = c.asInstanceOf[(Any) => ByteString]
                   (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
               }
+            }
+          }
+        }.orElse {
+          Some {
+            Try {
+              from.base match {
+                case BasicType.Boolean =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Boolean]).toArray)
+                case BasicType.Byte =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Byte]).toArray)
+                case BasicType.Short =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Short]).toArray)
+                case BasicType.Int =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Int]).toArray)
+                case BasicType.Long =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Long]).toArray)
+                case BasicType.Float =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Float]).toArray)
+                case BasicType.Double =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Double]).toArray)
+                case BasicType.String =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[String]).toArray)
+                case BasicType.ByteString =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[ByteString]).toArray)
+              }
+            }
           }
         }
       case (_: TensorType, _: ListType) =>

@@ -2,6 +2,7 @@ package ml.combust.mleap.core.types
 
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import org.scalatest.FunSpec
+import scala.util.Success
 
 /**
   * Created by hollinwilkins on 9/18/17.
@@ -20,6 +21,7 @@ class CastingSpec extends FunSpec {
   }
 
   val castTests = Seq(
+    (BasicType.Boolean, BasicType.Boolean, true, true),
     (BasicType.Boolean, BasicType.Byte, true, 1.toByte),
     (BasicType.Boolean, BasicType.Short, true, 1.toShort),
     (BasicType.Boolean, BasicType.Int, true, 1),
@@ -132,10 +134,10 @@ class CastingSpec extends FunSpec {
   for(((from, to, fromValue, expectedValue), i) <- castTests.zipWithIndex) {
     describe(s"cast from $from to $to - $i") {
       it("casts the scalar") {
-        val c = Casting.cast(ScalarType(from), ScalarType(to)).get.get
-        val oc = Casting.cast(ScalarType(from), ScalarType(to).nonNullable).get.get
-        val co = Casting.cast(ScalarType(from).nonNullable, ScalarType(to)).get.get
-        val oco = Casting.cast(ScalarType(from), ScalarType(to)).get.get
+        val c = Casting.cast(ScalarType(from), ScalarType(to)).getOrElse(Success((v: Any) => v)).get
+        val oc = Casting.cast(ScalarType(from), ScalarType(to).nonNullable).getOrElse(Success((v: Any) => v)).get
+        val co = Casting.cast(ScalarType(from).nonNullable, ScalarType(to)).getOrElse(Success((v: Any) => v)).get
+        val oco = Casting.cast(ScalarType(from), ScalarType(to)).getOrElse(Success((v: Any) => v)).get
 
         assert(c(fromValue) == expectedValue)
         assertThrows[NullPointerException](oc(null))
@@ -148,11 +150,11 @@ class CastingSpec extends FunSpec {
         val expectedList = Seq(expectedValue, expectedValue, expectedValue)
         val expectedTensor = createTensor(to, expectedList)
 
-        val c = Casting.cast(ListType(from), ListType(to)).get.get
-        val oc = Casting.cast(ListType(from), ListType(to).nonNullable).get.get
-        val co = Casting.cast(ListType(from).nonNullable, ListType(to)).get.get
-        val oco = Casting.cast(ListType(from), ListType(to)).get.get
-        val tcl = Casting.cast(ListType(from), TensorType(to, Some(Seq(expectedList.length)))).get.get
+        val c = Casting.cast(ListType(from), ListType(to)).getOrElse(Success((v: Any) => v)).get
+        val oc = Casting.cast(ListType(from), ListType(to).nonNullable).getOrElse(Success((v: Any) => v)).get
+        val co = Casting.cast(ListType(from).nonNullable, ListType(to)).getOrElse(Success((v: Any) => v)).get
+        val oco = Casting.cast(ListType(from), ListType(to)).getOrElse(Success((v: Any) => v)).get
+        val tcl = Casting.cast(ListType(from), TensorType(to, Some(Seq(expectedList.length)))).getOrElse(Success((v: Any) => v)).get
 
         assert(c(fromList) == expectedList)
         assertThrows[NullPointerException](oc(null))

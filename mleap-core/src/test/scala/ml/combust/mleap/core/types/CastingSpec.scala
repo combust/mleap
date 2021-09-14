@@ -30,6 +30,7 @@ class CastingSpec extends FunSpec {
     (BasicType.Boolean, BasicType.Double, true, 1.0),
     (BasicType.Boolean, BasicType.String, true, "1"),
 
+    (BasicType.Byte, BasicType.Byte, 7.toByte, 7.toByte),
     (BasicType.Byte, BasicType.Boolean, 7.toByte, true),
     (BasicType.Byte, BasicType.Boolean, 0.toByte, false),
     (BasicType.Byte, BasicType.Short, 13.toByte, 13.toShort),
@@ -39,6 +40,7 @@ class CastingSpec extends FunSpec {
     (BasicType.Byte, BasicType.Double, 13.toByte, 13.toDouble),
     (BasicType.Byte, BasicType.String, 13.toByte, 13.toString),
 
+    (BasicType.Short, BasicType.Short, 7.toShort, 7.toShort),
     (BasicType.Short, BasicType.Boolean, 7.toShort, true),
     (BasicType.Short, BasicType.Boolean, 0.toShort, false),
     (BasicType.Short, BasicType.Byte, 13.toShort, 13.toByte),
@@ -48,6 +50,7 @@ class CastingSpec extends FunSpec {
     (BasicType.Short, BasicType.Double, 13.toShort, 13.toDouble),
     (BasicType.Short, BasicType.String, 13.toShort, 13.toString),
 
+    (BasicType.Int, BasicType.Int, 7, 7),
     (BasicType.Int, BasicType.Boolean, 7, true),
     (BasicType.Int, BasicType.Boolean, 0, false),
     (BasicType.Int, BasicType.Byte, 13, 13.toByte),
@@ -57,6 +60,7 @@ class CastingSpec extends FunSpec {
     (BasicType.Int, BasicType.Double, 13, 13.toDouble),
     (BasicType.Int, BasicType.String, 13, 13.toString),
 
+    (BasicType.Long, BasicType.Long, 7.toLong, 7.toLong),
     (BasicType.Long, BasicType.Boolean, 7.toLong, true),
     (BasicType.Long, BasicType.Boolean, 0.toLong, false),
     (BasicType.Long, BasicType.Byte, 13.toLong, 13.toByte),
@@ -66,6 +70,7 @@ class CastingSpec extends FunSpec {
     (BasicType.Long, BasicType.Double, 13.toLong, 13.toDouble),
     (BasicType.Long, BasicType.String, 13.toLong, 13.toString),
 
+    (BasicType.Float, BasicType.Float, 7.0.toFloat, 7.0.toFloat),
     (BasicType.Float, BasicType.Boolean, 7.0.toFloat, true),
     (BasicType.Float, BasicType.Boolean, 0.0.toFloat, false),
     (BasicType.Float, BasicType.Byte, 13.0.toFloat, 13.0.toFloat.toByte),
@@ -75,6 +80,7 @@ class CastingSpec extends FunSpec {
     (BasicType.Float, BasicType.Double, 13.0.toFloat, 13.0),
     (BasicType.Float, BasicType.String, 13.toFloat, 13.0.toFloat.toString),
 
+    (BasicType.Double, BasicType.Double, 7.0, 7.0),
     (BasicType.Double, BasicType.Boolean, 7.0, true),
     (BasicType.Double, BasicType.Boolean, 0.0, false),
     (BasicType.Double, BasicType.Byte, 13.0, 13.0.toByte),
@@ -84,6 +90,7 @@ class CastingSpec extends FunSpec {
     (BasicType.Double, BasicType.Float, 13.0, 13.0.toFloat),
     (BasicType.Double, BasicType.String, 13.0, 13.0.toString),
 
+    (BasicType.String, BasicType.String, "hello", "hello"),
     (BasicType.String, BasicType.Boolean, "true", true),
     (BasicType.String, BasicType.Boolean, "false", false),
     (BasicType.String, BasicType.Boolean, "", false),
@@ -173,13 +180,13 @@ class CastingSpec extends FunSpec {
         val fromListTensor = createTensor(from, Seq(fromValue, fromValue, fromValue))
         val expectedList = Seq(expectedValue, expectedValue, expectedValue)
 
-        val c = Casting.cast(TensorType(from), TensorType(to)).get.get
-        val oc = Casting.cast(TensorType(from), TensorType(to).nonNullable).get.get
-        val co = Casting.cast(TensorType(from).nonNullable, TensorType(to)).get.get
-        val oco = Casting.cast(TensorType(from), TensorType(to)).get.get
-        val tc = Casting.cast(ScalarType(from), TensorType(to, Some(Seq()))).get.get
-        val ct = Casting.cast(TensorType(from, Some(Seq())), ScalarType(to)).get.get
-        val lct = Casting.cast(TensorType(from, Some(Seq(expectedList.length))), ListType(to)).get.get
+        val c = Casting.cast(TensorType(from), TensorType(to)).getOrElse(Success((v: Any) => v)).get
+        val oc = Casting.cast(TensorType(from), TensorType(to).nonNullable).getOrElse(Success((v: Any) => v)).get
+        val co = Casting.cast(TensorType(from).nonNullable, TensorType(to)).getOrElse(Success((v: Any) => v)).get
+        val oco = Casting.cast(TensorType(from), TensorType(to)).getOrElse(Success((v: Any) => v)).get
+        val tc = Casting.cast(ScalarType(from), TensorType(to, Some(Seq()))).getOrElse(Success((v: Any) => v)).get
+        val ct = Casting.cast(TensorType(from, Some(Seq())), ScalarType(to)).getOrElse(Success((v: Any) => v)).get
+        val lct = Casting.cast(TensorType(from, Some(Seq(expectedList.length))), ListType(to)).getOrElse(Success((v: Any) => v)).get
 
         assert(c(fromTensor) == expectedTensor)
         assertThrows[NullPointerException](oc(null))

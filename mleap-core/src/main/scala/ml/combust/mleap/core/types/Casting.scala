@@ -214,9 +214,11 @@ object Casting {
         }
       case (_: TensorType, _: ListType) =>
         baseCast(from.base, to.base).map {
-          _.map {
-            c => (v: Any) => v.asInstanceOf[Tensor[_]].rawValues.toList.map(c)
+          _.flatMap {
+            c => Try((v: Any) => v.asInstanceOf[Tensor[_]].rawValues.toList.map(c))
           }
+        }.orElse {
+          Some(Try((v: Any) => v.asInstanceOf[Tensor[_]].rawValues.toList))
         }
       case (_: TensorType, _: TensorType) =>
         baseCast(from.base, to.base).map {

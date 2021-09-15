@@ -199,4 +199,17 @@ class CastingSpec extends FunSpec {
 
     }
   }
+
+  it("SparseTensor cannot be cast to List") {
+    val tensor = Tensor.create[Double](Array(42.0), Seq(2), Some(Seq(Seq(0))))
+    val cast1 = Casting.cast(TensorType(BasicType.Double), ListType(BasicType.Double)).get.get
+    val cast2 = Casting.cast(TensorType(BasicType.Double), ListType(BasicType.Float)).get.get
+    assertThrows[IllegalArgumentException] {
+      cast1(tensor)
+    }
+    assertThrows[IllegalArgumentException] {
+      cast2(tensor)
+    }
+  }
+
 }

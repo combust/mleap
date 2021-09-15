@@ -1,6 +1,6 @@
 package ml.combust.mleap.core.types
 
-import ml.combust.mleap.tensor.{ByteString, Tensor}
+import ml.combust.mleap.tensor.{ByteString, Tensor, DenseTensor, SparseTensor}
 
 import scala.util.{Failure, Success, Try}
 
@@ -215,10 +215,28 @@ object Casting {
       case (_: TensorType, _: ListType) =>
         baseCast(from.base, to.base).map {
           _.flatMap {
-            c => Try((v: Any) => v.asInstanceOf[Tensor[_]].rawValues.toList.map(c))
+            c => Try {
+              (v: Any) => {
+                v match {
+                  case _: SparseTensor[_] => throw new IllegalArgumentException("Cannot cast from SparseTensor to List")
+                  case _: DenseTensor[_] => v.asInstanceOf[Tensor[_]].toArray.toList.map(c)
+                  case _ => throw new IllegalArgumentException(s"${v.getClass.getName} is not a valid Tensor")
+                }
+              }
+            }
           }
         }.orElse {
-          Some(Try((v: Any) => v.asInstanceOf[Tensor[_]].rawValues.toList))
+          Some {
+            Try {
+              (v: Any) => {
+                v match {
+                  case _: SparseTensor[_] => throw new IllegalArgumentException("Cannot cast from SparseTensor to List")
+                  case _: DenseTensor[_] => v.asInstanceOf[Tensor[_]].toArray.toList
+                  case _ => throw new IllegalArgumentException(s"${v.getClass.getName} is not a valid Tensor")
+                }
+              }
+            }
+          }
         }
       case (_: TensorType, _: TensorType) =>
         baseCast(from.base, to.base).map {

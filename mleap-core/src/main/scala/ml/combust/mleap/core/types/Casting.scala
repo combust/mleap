@@ -1,6 +1,6 @@
 package ml.combust.mleap.core.types
 
-import ml.combust.mleap.tensor.{ByteString, Tensor}
+import ml.combust.mleap.tensor.{ByteString, Tensor, DenseTensor, SparseTensor}
 
 import scala.util.{Failure, Success, Try}
 
@@ -153,8 +153,8 @@ object Casting {
         }
       case (_: ListType, _: TensorType) =>
         baseCast(from.base, to.base).map {
-          _.map {
-            c =>
+          _.flatMap {
+            c => Try {
               to.base match {
                 case BasicType.Boolean =>
                   val cc = c.asInstanceOf[(Any) => Boolean]
@@ -184,12 +184,58 @@ object Casting {
                   val cc = c.asInstanceOf[(Any) => ByteString]
                   (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(cc).toArray)
               }
+            }
+          }
+        }.orElse {
+          Some {
+            Try {
+              from.base match {
+                case BasicType.Boolean =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Boolean]).toArray)
+                case BasicType.Byte =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Byte]).toArray)
+                case BasicType.Short =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Short]).toArray)
+                case BasicType.Int =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Int]).toArray)
+                case BasicType.Long =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Long]).toArray)
+                case BasicType.Float =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Float]).toArray)
+                case BasicType.Double =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[Double]).toArray)
+                case BasicType.String =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[String]).toArray)
+                case BasicType.ByteString =>
+                  (v: Any) => Tensor.denseVector(v.asInstanceOf[Seq[_]].map(_.asInstanceOf[ByteString]).toArray)
+              }
+            }
           }
         }
       case (_: TensorType, _: ListType) =>
         baseCast(from.base, to.base).map {
-          _.map {
-            c => (v: Any) => v.asInstanceOf[Tensor[_]].rawValues.toList.map(c)
+          _.flatMap {
+            c => Try {
+              (v: Any) => {
+                v match {
+                  case _: SparseTensor[_] => throw new IllegalArgumentException("Cannot cast from SparseTensor to List")
+                  case _: DenseTensor[_] => v.asInstanceOf[Tensor[_]].toArray.toList.map(c)
+                  case _ => throw new IllegalArgumentException(s"${v.getClass.getName} is not a valid Tensor")
+                }
+              }
+            }
+          }
+        }.orElse {
+          Some {
+            Try {
+              (v: Any) => {
+                v match {
+                  case _: SparseTensor[_] => throw new IllegalArgumentException("Cannot cast from SparseTensor to List")
+                  case _: DenseTensor[_] => v.asInstanceOf[Tensor[_]].toArray.toList
+                  case _ => throw new IllegalArgumentException(s"${v.getClass.getName} is not a valid Tensor")
+                }
+              }
+            }
           }
         }
       case (_: TensorType, _: TensorType) =>

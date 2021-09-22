@@ -10,6 +10,11 @@
 
 ### Other Changes
 
+# Release 0.18.1
+
+### Bug Fixes
+- Fix (List <-> Tensor) casting when base types match
+
 # Release 0.18.0
 
 ### Breaking Changes

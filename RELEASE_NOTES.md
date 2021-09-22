@@ -14,6 +14,7 @@
 
 ### Bug Fixes
 - Fix (List <-> Tensor) casting when base types match
+- Fix deserialization of legacy Spark 2 models
 
 # Release 0.18.0
 

@@ -30,13 +30,13 @@ trait MultiInOutFormatSparkOp[
     val outputCol = model.getValue("output_col").map(_.getString)
     val outputCols = model.getValue("output_cols").map(_.getStringList)
     val result: N = (inputCol, inputCols) match {
-      case (None, None) => throw new UnsupportedOperationException("No inputs found.")
+      case (None, None) => obj
       case (Some(col), None) => obj.set(obj.inputCol, col)
       case (None, Some(cols)) => obj.set(obj.inputCols, cols.toArray)
       case (_, _) => throw new UnsupportedOperationException("Cannot use both inputCol and inputCols")
     }
     (outputCol, outputCols) match {
-      case (None, None) => throw new UnsupportedOperationException("No outputs found.")
+      case (None, None) => obj
       case (Some(col), None) => result.set(result.outputCol, col)
       case (None, Some(cols)) => result.set(result.outputCols, cols.toArray)
       case (_, _) => throw new UnsupportedOperationException("Cannot use both outputCol and outputCols")
@@ -44,7 +44,6 @@ trait MultiInOutFormatSparkOp[
   }
 
   def sparkInputs(obj: N): Seq[ParamSpec] = {
-    ParamValidators.checkSingleVsMultiColumnParams(obj, Seq(obj.inputCol), Seq(obj.inputCols))
     if (obj.isSet(obj.inputCols)) {
       Seq(ParamSpec("input", obj.inputCols))
     } else{
@@ -53,7 +52,6 @@ trait MultiInOutFormatSparkOp[
   }
 
   def sparkOutputs(obj: N): Seq[ParamSpec] = {
-    ParamValidators.checkSingleVsMultiColumnParams(obj, Seq(obj.outputCol), Seq(obj.outputCols))
     if (obj.isSet(obj.outputCols)) {
       Seq(ParamSpec("output", obj.outputCols))
     } else{

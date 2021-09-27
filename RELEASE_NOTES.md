@@ -20,7 +20,7 @@
 
 ### Breaking Changes
 - Scala 2.11 is no longer supported due to Spark 3 upgrade
-- Please use 0.18.1 mleap version if you have models serialized with both Spark 2.x and Spark 3.
+- Please use 0.18.1 mleap version if you have models serialized with both Spark 2.x and Spark 3.x
 
 ### New Features
 - MathBinaryModel now supports Logit operations

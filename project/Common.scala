@@ -22,6 +22,7 @@ object Common {
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
     resolvers += Resolver.mavenLocal,
     resolvers += Resolver.jcenterRepo,
+    resolvers += "Apache Spark RC Repository" at "https://repository.apache.org/content/repositories/orgapachespark-1392",
     resolvers ++= {
       // Only add Sonatype Snapshots if this version itself is a snapshot version
       if(isSnapshot.value) {

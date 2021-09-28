@@ -16,7 +16,7 @@ object Dependencies {
   lazy val slf4jVersion = "1.7.25"
   lazy val awsSdkVersion = "1.11.1033"
   val tensorflowJavaVersion = "0.3.1" // Match Tensorflow 2.4.1 https://github.com/tensorflow/java/#tensorflow-version-support
-  val xgboostVersion = "1.4.1"
+  val xgboostVersion = "1.0.0"
   val breezeVersion = "1.0"
   val hadoopVersion = "2.7.4" // matches spark version
   val kryoVersion = "4.0.2" // Remove upon upgrading to xgboost 1.1.1

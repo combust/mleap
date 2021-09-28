@@ -12,11 +12,11 @@ trait XgbConverters {
   implicit class VectorOps(vector: Vector) {
     def asXGB: DMatrix = {
       vector match {
-        case SparseVector(size, indices, values) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, size, indices, values.map(_.toFloat))))
+        case SparseVector(_, indices, values) =>
+          new DMatrix(Iterator(new LabeledPoint(0.0f, indices, values.map(_.toFloat))))
 
         case DenseVector(values) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, values.length, null, values.map(_.toFloat))))
+          new DMatrix(Iterator(new LabeledPoint(0.0f, null, values.map(_.toFloat))))
       }
     }
 
@@ -33,11 +33,11 @@ trait XgbConverters {
   implicit class DoubleTensorOps(tensor: Tensor[Double]) {
     def asXGB: DMatrix = {
       tensor match {
-        case SparseTensor(indices, values, dims) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, dims(0), indices.map(_.head).toArray, values.map(_.toFloat))))
+        case SparseTensor(indices, values, _) =>
+          new DMatrix(Iterator(new LabeledPoint(0.0f, indices.map(_.head).toArray, values.map(_.toFloat))))
 
-        case DenseTensor(_, dims) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, dims(0), null, tensor.toDense.rawValues.map(_.toFloat))))
+        case DenseTensor(_, _) =>
+          new DMatrix(Iterator(new LabeledPoint(0.0f, null, tensor.toDense.rawValues.map(_.toFloat))))
       }
     }
 

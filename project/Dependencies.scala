@@ -6,8 +6,8 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "3.0.2"
-  val scalaTestVersion = "3.0.8"
+  val sparkVersion = "3.2.0"
+  val scalaTestVersion = "3.2.9"
   val akkaVersion = "2.6.14"
   val akkaHttpVersion = "10.2.4"
   val springBootVersion = "2.0.4.RELEASE"

@@ -16,10 +16,9 @@ object Dependencies {
   lazy val slf4jVersion = "1.7.25"
   lazy val awsSdkVersion = "1.11.1033"
   val tensorflowJavaVersion = "0.3.1" // Match Tensorflow 2.4.1 https://github.com/tensorflow/java/#tensorflow-version-support
-  val xgboostVersion = "1.0.0"
+  val xgboostVersion = "1.3.1"
   val breezeVersion = "1.0"
   val hadoopVersion = "2.7.4" // matches spark version
-  val kryoVersion = "4.0.2" // Remove upon upgrading to xgboost 1.1.1
   val platforms = "windows-x86_64,linux-x86_64,macosx-x86_64"
   val tensorflowPlatforms : Array[String] =  sys.env.getOrElse("TENSORFLOW_PLATFORMS", platforms).split(",")
 
@@ -72,11 +71,10 @@ object Dependencies {
 
     val breeze = "org.scalanlp" %% "breeze" % breezeVersion
 
-    val kryo = "com.esotericsoftware" % "kryo" % kryoVersion
-    val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo")
-    val xgboostPredictorDep = "ai.h2o" % "xgboost-predictor" % "0.3.17" exclude("com.esotericsoftware.kryo", "kryo")
+    val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion
+    val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % xgboostVersion
+    val xgboostPredictorDep = "ai.h2o" % "xgboost-predictor" % "0.3.18" exclude("com.esotericsoftware.kryo", "kryo")
 
-    val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % xgboostVersion exclude("com.esotericsoftware.kryo", "kryo")
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
   }
 
@@ -125,9 +123,9 @@ object Dependencies {
 
   val tensorflow = l ++= tensorflowDeps ++ Seq(Test.scalaTest)
 
-  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Seq(kryo) ++ Test.spark ++ Test.sparkTest ++ Seq(Test.scalaTest)
+  val xgboostRuntime = l ++= Seq(xgboostDep) ++ Seq(xgboostPredictorDep) ++ Test.spark ++ Test.sparkTest ++ Seq(Test.scalaTest)
 
-  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Seq(kryo) ++ Provided.spark ++ Test.spark ++ Test.sparkTest
+  val xgboostSpark = l ++= Seq(xgboostSparkDep) ++ Provided.spark ++ Test.spark ++ Test.sparkTest
 
   val serving = l ++= Seq(akkaHttp, akkaHttpSprayJson, config, Test.scalaTest, Test.akkaHttpTestkit)
 

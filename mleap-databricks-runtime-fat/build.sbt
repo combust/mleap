@@ -35,7 +35,14 @@ assemblyShadeRules in assembly := Seq(
   "com.esotericsoftware.**",
   "net.jafama.**",
   "org.objectweb.**",
-  "org.objenesis.**"
+  "org.objenesis.**",
+  "algebra.**",
+  "breeze.**",
+  "cats.**",
+  "org.jtransforms.**",
+  "pl.edu.icm.jlargearrays.**",
+  "scala.collection.compat.**",
+  "scala.jdk.**"
 ).map { pattern =>
   ShadeRule.rename(pattern -> "ml.combust.mleap.shaded.@0").inAll
 } :+ ShadeRule.zap("org.slf4j.**").inAll

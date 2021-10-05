@@ -110,13 +110,17 @@ object MleapProject {
     dependencies = Seq(runtime)
   )
 
+  lazy val xgboostRuntimeSettings = inConfig(Test)(Defaults.testSettings) ++ Seq(
+    // xgboost has trouble with multi-threading so avoid parallel executions.
+    parallelExecution in Test := false
+  )
   lazy val xgboostRuntime = Project(
     id = "mleap-xgboost-runtime",
     base = file("mleap-xgboost-runtime"),
     dependencies = Seq(
       runtime,
       sparkTestkit % "test")
-  )
+  ).settings(xgboostRuntimeSettings)
 
   lazy val xgboostSpark = Project(
     id = "mleap-xgboost-spark",

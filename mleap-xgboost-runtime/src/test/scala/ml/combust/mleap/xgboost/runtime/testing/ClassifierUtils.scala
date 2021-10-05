@@ -3,37 +3,34 @@ package ml.combust.mleap.xgboost.runtime.testing
 import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.frame.Transformer
 import ml.combust.mleap.xgboost.runtime.{XGBoostBinaryClassificationModel, XGBoostClassification, XGBoostClassificationModel, XGBoostMultinomialClassificationModel}
-import ml.dmlc.xgboost4j.scala.Booster
 
 
-trait ClassifierUtils extends BoosterUtils with CachedDatasetUtils {
+object ClassifierUtils extends BoosterUtils with CachedDatasetUtils with BundleSerializationUtils {
 
-  def trainXGBoost4jClassifier: Transformer = {
-
-    val booster: Booster = trainBooster(binomialDataset)
-
-    XGBoostClassification(
+  val xgboost4jBooster = trainBooster(binomialDataset)
+  val mleapTransformer: Transformer = XGBoostClassification(
       "xgboostSingleThread",
       NodeShape.probabilisticClassifier(
         rawPredictionCol = Some("raw_prediction"),
         probabilityCol = Some("probability")),
       XGBoostClassificationModel(
-        XGBoostBinaryClassificationModel(booster, numFeatures(leapFrameBinomial), 0))
+        XGBoostBinaryClassificationModel(xgboost4jBooster, numFeatures(leapFrameBinomial), 0))
     )
-  }
+  val mleapBundle = serializeModelToMleapBundle(mleapTransformer)
+  val deserializedXGBoostPredictor = loadXGBoostPredictorFromBundle(mleapBundle)
+  val deserializedmleapTransformer = loadMleapTransformerFromBundle(mleapBundle)
 
-  def trainMultinomialXGBoost4jClassifier: Transformer ={
-
-    val booster: Booster = trainMultinomialBooster(multinomialDataset)
-
-    XGBoostClassification(
+  val multinomialBooster = trainMultinomialBooster(multinomialDataset)
+  val multinomialMleapTransformer: Transformer = XGBoostClassification(
       "xgboostSingleThread",
       NodeShape.probabilisticClassifier(
         rawPredictionCol = Some("raw_prediction"),
         probabilityCol = Some("probability")),
       XGBoostClassificationModel(
         XGBoostMultinomialClassificationModel(
-          booster, xgboostMultinomialParams("num_class").asInstanceOf[Int], numFeatures(leapFrameMultinomial), 0))
+          multinomialBooster, xgboostMultinomialParams("num_class").asInstanceOf[Int], numFeatures(leapFrameMultinomial), 0))
     )
-  }
+  val multinomialMleapBundle = serializeModelToMleapBundle(multinomialMleapTransformer)
+  val deserializedMultinomialXGBoostPredictor = loadXGBoostPredictorFromBundle(multinomialMleapBundle)
+  val deserializedMultinomialMleapTransformer = loadMleapTransformerFromBundle(multinomialMleapBundle)
 }

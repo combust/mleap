@@ -13,8 +13,7 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   with BoosterUtils
   with CachedDatasetUtils
   with BundleSerializationUtils
-  with FloatingPointApproximations
-  with RegressionUtils {
+  with FloatingPointApproximations {
 
 
 
@@ -36,48 +35,26 @@ class XGBoostRegressionModelParitySpec extends FunSpec
   }
 
   it("Results between the XGBoost4j booster and the MLeap Transformer are the same") {
-    val booster = trainBooster(binomialDataset)
-    val xgboostTransformer = trainRegressor
-
-    val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
-    val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
-
-    equalityTestRowByRow(booster, deserializedTransformer, leapFrameBinomial)
+    equalityTestRowByRow(RegressionUtils.xgboostBooster, RegressionUtils.deserializedMleapTransformer, leapFrameBinomial)
   }
 
   it("has the correct inputs and outputs with columns: prediction, probability and raw_prediction") {
-
-    val transformer = trainRegressor
-    val numFeatures = transformer.asInstanceOf[XGBoostRegression].model.numFeatures
-
-    assert(transformer.schema.fields ==
+    val numFeatures = RegressionUtils.mleapTransformer.asInstanceOf[XGBoostRegression].model.numFeatures
+    assert(RegressionUtils.mleapTransformer.schema.fields ==
       Seq(StructField("features", TensorType(BasicType.Double, Seq(numFeatures))),
         StructField("prediction", ScalarType.Double.nonNullable)))
   }
 
   it("Results are the same pre and post serialization") {
-    val xgboostTransformer = trainRegressor
-
-    val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
-    val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
-
-    val preSerializationResult = xgboostTransformer.transform(leapFrameBinomial).get
-    val deserializedModelResult = deserializedTransformer.transform(leapFrameBinomial).get
-
+    val preSerializationResult = RegressionUtils.mleapTransformer.transform(leapFrameBinomial).get
+    val deserializedModelResult = RegressionUtils.deserializedMleapTransformer.transform(leapFrameBinomial).get
     assert(preSerializationResult.dataset == deserializedModelResult.dataset)
   }
 
   it("Test results are the same when using a dense dataset") {
-    val xgboostTransformer = trainRegressor
-
-    val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
-    val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
-
     val denseLeapFrame = toDenseFeaturesLeapFrame(leapFrameBinomial)
-
-    val preSerializationResult = xgboostTransformer.transform(denseLeapFrame).get
-    val deserializedResult = deserializedTransformer.transform(denseLeapFrame).get
-
+    val preSerializationResult = RegressionUtils.mleapTransformer.transform(denseLeapFrame).get
+    val deserializedResult = RegressionUtils.deserializedMleapTransformer.transform(denseLeapFrame).get
     assert(preSerializationResult.dataset == deserializedResult.dataset)
   }
 }

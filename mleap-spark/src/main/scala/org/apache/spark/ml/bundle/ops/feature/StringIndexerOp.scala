@@ -48,6 +48,8 @@ class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] with MultiInOutF
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: StringIndexerModel): StringIndexerModel = {
-    model
+    val m = new StringIndexerModel(uid, model.labelsArray)
+    m.copy(model.extractParamMap())
+    m
   }
 }

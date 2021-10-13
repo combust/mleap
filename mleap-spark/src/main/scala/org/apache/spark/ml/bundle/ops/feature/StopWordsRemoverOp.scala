@@ -2,7 +2,8 @@ package org.apache.spark.ml.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
-import ml.combust.bundle.op.{OpModel}
+import ml.combust.bundle.op.OpModel
+import org.apache.spark.ml.bundle.ops.OpsUtils
 import org.apache.spark.ml.bundle.{MultiInOutFormatSparkOp, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.feature.StopWordsRemover
 
@@ -31,6 +32,8 @@ class StopWordsRemoverOp extends SimpleSparkOp[StopWordsRemover] with MultiInOut
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: StopWordsRemover): StopWordsRemover = {
-    new StopWordsRemover(uid).copy(model.extractParamMap())
+    val m = new StopWordsRemover(uid)
+    OpsUtils.copySparkStageParams(model, m)
+    m
   }
 }

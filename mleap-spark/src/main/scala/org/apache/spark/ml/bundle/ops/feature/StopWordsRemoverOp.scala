@@ -31,8 +31,6 @@ class StopWordsRemoverOp extends SimpleSparkOp[StopWordsRemover] with MultiInOut
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: StopWordsRemover): StopWordsRemover = {
-    val m = new StopWordsRemover(uid)
-    m.copy(model.extractParamMap())
-    m
+    new StopWordsRemover(uid).copy(model.extractParamMap())
   }
 }

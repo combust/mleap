@@ -56,8 +56,6 @@ class BinarizerOp extends SimpleSparkOp[Binarizer] with MultiInOutFormatSparkOp[
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: Binarizer): Binarizer = {
-    val m = new Binarizer(uid)
-    m.copy(model.extractParamMap())
-    m
+    new Binarizer(uid).copy(model.extractParamMap())
   }
 }

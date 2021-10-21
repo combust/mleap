@@ -4,6 +4,8 @@ import sbtassembly.AssemblyPlugin.autoImport.ShadeRule
 Common.defaultMleapSettings
 Common.noPublishSettings
 
+addSbtPlugin("com.frugalmechanic" % "fm-sbt-s3-resolver" % "0.11.0")
+
 enablePlugins(AssemblyPlugin)
 
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)

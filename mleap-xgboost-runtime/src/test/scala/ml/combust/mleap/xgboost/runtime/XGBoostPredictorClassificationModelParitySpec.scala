@@ -21,7 +21,8 @@ class XGBoostPredictorClassificationModelParitySpec extends FunSpec
   def equalityTestRowByRowMultinomialProbability(
                                        booster: Booster,
                                        mleapTransformer: Transformer,
-                                       leapFrameDataset: DefaultLeapFrame) = {
+                                       leapFrameDataset: DefaultLeapFrame,
+                                       precision: Double = 1e-7) = {
 
 
     val featuresColumnIndex = leapFrameDataset.schema.indexOf("features").get
@@ -38,7 +39,8 @@ class XGBoostPredictorClassificationModelParitySpec extends FunSpec
         assert(
           almostEqualSequences(
             Seq(boosterProbability.values),
-            Seq(mleapResult.dataset.head.getTensor[Double](mleapProbabilityColIndex).toArray)
+            Seq(mleapResult.dataset.head.getTensor[Double](mleapProbabilityColIndex).toArray),
+            precision = precision
           )
         )
     }
@@ -47,7 +49,10 @@ class XGBoostPredictorClassificationModelParitySpec extends FunSpec
   /**
     * A Predictor only provides a probability column for performance reasons
     */
-  def probabilityColumnEqualityTest(mleapFrame1: DefaultLeapFrame, mleapFrame2: DefaultLeapFrame) = {
+  def probabilityColumnEqualityTest(
+      mleapFrame1: DefaultLeapFrame,
+      mleapFrame2: DefaultLeapFrame,
+      precision: Double = 1e-7) = {
     val probabilityFrame1 = mleapFrame1.select("probability").get
     val probabilityFrame2 = mleapFrame2.select("probability").get
 
@@ -58,7 +63,10 @@ class XGBoostPredictorClassificationModelParitySpec extends FunSpec
         assert(
           almostEqualSequences(
             Seq(row1.getTensor[Double](probabilityIndex).toArray),
-            Seq(row2.getTensor[Double](probabilityIndex).toArray)))
+            Seq(row2.getTensor[Double](probabilityIndex).toArray),
+            precision = precision
+          )
+        )
       }
     }
   }
@@ -117,7 +125,9 @@ class XGBoostPredictorClassificationModelParitySpec extends FunSpec
     val mleapBundle = serializeModelToMleapBundle(trainMultinomialXGBoost4jClassifier)
     val deserializedPredictorTransformer: Transformer = loadXGBoostPredictorFromBundle(mleapBundle)
 
-    equalityTestRowByRowMultinomialProbability(multiBooster, deserializedPredictorTransformer, leapFrameMultinomial)
+    equalityTestRowByRowMultinomialProbability(
+      multiBooster, deserializedPredictorTransformer, leapFrameMultinomial, precision = 1e-5
+    )
   }
 
   it("[Multinomial] XGBoostPredictorMultinomialClassificationModel results are the same pre and post serialization") {
@@ -129,7 +139,7 @@ class XGBoostPredictorClassificationModelParitySpec extends FunSpec
     val xgboost4jResult = xgboost4jTransformer.transform(leapFrameMultinomial).get
     val predictorResult = predictorTransformer.transform(leapFrameMultinomial).get
 
-    probabilityColumnEqualityTest(xgboost4jResult, predictorResult)
+    probabilityColumnEqualityTest(xgboost4jResult, predictorResult, 1e-5)
   }
 
   it("XGBoost4j and Predictor results are the same when using a dense dataset") {

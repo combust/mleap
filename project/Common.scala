@@ -22,18 +22,7 @@ object Common {
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
     resolvers += Resolver.mavenLocal,
     resolvers += Resolver.jcenterRepo,
-    resolvers += "Databricks Repository on S3" at "s3://s3.amazonaws.com/databricks-mvn/release",
-    resolvers ++= {
-      // Only add Sonatype Snapshots if this version itself is a snapshot version
-      if(isSnapshot.value) {
-        Seq(
-          "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-          "ASF Snapshots" at "https://repository.apache.org/content/groups/snapshots"
-        )
-      } else {
-        Seq()
-      }
-    }
+    resolvers += "Databricks Repository on S3" at "s3://s3.amazonaws.com/databricks-mvn/release"
   )
 
   lazy val mleapSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")

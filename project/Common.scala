@@ -22,7 +22,7 @@ object Common {
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
     resolvers += Resolver.mavenLocal,
     resolvers += Resolver.jcenterRepo,
-    resolvers += "Apache Spark RC Repository" at "https://repository.apache.org/content/repositories/orgapachespark-1392",
+    resolvers += "Databricks Repository on S3" at "s3://s3.amazonaws.com/databricks-mvn/release",
     resolvers ++= {
       // Only add Sonatype Snapshots if this version itself is a snapshot version
       if(isSnapshot.value) {

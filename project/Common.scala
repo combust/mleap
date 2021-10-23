@@ -21,7 +21,8 @@ object Common {
     fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
     resolvers += Resolver.mavenLocal,
-    resolvers += Resolver.jcenterRepo
+    resolvers += Resolver.jcenterRepo,
+    resolvers += "Databricks Repository on S3" at "s3://s3.amazonaws.com/databricks-mvn/release"
   )
 
   lazy val mleapSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")

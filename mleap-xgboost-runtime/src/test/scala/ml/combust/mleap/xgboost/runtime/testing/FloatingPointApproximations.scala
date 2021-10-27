@@ -3,7 +3,7 @@ package ml.combust.mleap.xgboost.runtime.testing
 
 trait FloatingPointApproximations {
 
-  val DefaultMinimumPrecision = 1e-7
+  val DefaultMinimumPrecision = 1e-6
 
   def almostEqual(x: Double, y: Double, precision: Double = DefaultMinimumPrecision): Boolean = {
     if ((x - y).abs < precision) true else false

@@ -13,7 +13,6 @@ import XgbConverters._
 class XGBoostClassificationModelParitySpec extends FunSpec
   with BoosterUtils
   with CachedDatasetUtils
-  with ClassifierUtils
   with BundleSerializationUtils
   with FloatingPointApproximations {
 
@@ -101,17 +100,12 @@ class XGBoostClassificationModelParitySpec extends FunSpec
   }
 
   it("Results between the XGBoost4j booster and the MLeap Transformer are the same") {
-    val booster = trainBooster(binomialDataset)
-    val xgboostTransformer = trainXGBoost4jClassifier
-
-    equalityTestRowByRow(booster, xgboostTransformer, leapFrameBinomial)
+    equalityTestRowByRow(ClassifierUtils.xgboost4jBooster, ClassifierUtils.mleapTransformer, leapFrameBinomial)
   }
 
   it("has the correct inputs and outputs with columns: prediction, probability and raw_prediction") {
-    val transformer = trainXGBoost4jClassifier
-    val numFeatures = transformer.asInstanceOf[XGBoostClassification].model.numFeatures
-
-    assert(transformer.schema.fields ==
+    val numFeatures = ClassifierUtils.mleapTransformer.asInstanceOf[XGBoostClassification].model.numFeatures
+    assert(ClassifierUtils.mleapTransformer.schema.fields ==
       Seq(StructField("features", TensorType(BasicType.Double, Seq(numFeatures))),
         StructField("raw_prediction", TensorType(BasicType.Double, Seq(2))),
         StructField("probability", TensorType(BasicType.Double, Seq(2))),
@@ -119,47 +113,25 @@ class XGBoostClassificationModelParitySpec extends FunSpec
   }
 
   it("Results are the same pre and post serialization") {
-    val xgboostTransformer = trainXGBoost4jClassifier
-
-    val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
-    val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
-
-    val preSerializationResult = xgboostTransformer.transform(leapFrameBinomial).get
-    val deserializedModelResult = deserializedTransformer.transform(leapFrameBinomial).get
-
+    val preSerializationResult = ClassifierUtils.mleapTransformer.transform(leapFrameBinomial).get
+    val deserializedModelResult = ClassifierUtils.deserializedmleapTransformer.transform(leapFrameBinomial).get
     assert(preSerializationResult.dataset == deserializedModelResult.dataset)
   }
 
   it("Results between the XGBoost4j multinomial booster and the MLeap XGBoostMultinomialClassificationModel are the same") {
-    val multiBooster = trainMultinomialBooster(multinomialDataset)
-    val xgboostTransformer = trainMultinomialXGBoost4jClassifier
-
-    equalityTestRowByRowMultinomial(multiBooster, xgboostTransformer, leapFrameMultinomial)
+    equalityTestRowByRowMultinomial(ClassifierUtils.multinomialBooster, ClassifierUtils.multinomialMleapTransformer, leapFrameMultinomial)
   }
 
   it("XGBoostMultinomialClassificationModel results are the same pre and post serialization") {
-    val xgboostTransformer = trainMultinomialXGBoost4jClassifier
-
-    val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
-    val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
-
-    val preSerializationResult = xgboostTransformer.transform(leapFrameMultinomial).get
-    val deserializedResult = deserializedTransformer.transform(leapFrameMultinomial).get
-
+    val preSerializationResult = ClassifierUtils.multinomialMleapTransformer.transform(leapFrameMultinomial).get
+    val deserializedResult = ClassifierUtils.deserializedMultinomialMleapTransformer.transform(leapFrameMultinomial).get
     assert(preSerializationResult.dataset == deserializedResult.dataset)
   }
 
   it("Results pre and post serialization are the same when using a dense dataset") {
-    val xgboostTransformer = trainXGBoost4jClassifier
-
-    val mleapBundle = serializeModelToMleapBundle(xgboostTransformer)
-    val deserializedTransformer: Transformer = loadMleapTransformerFromBundle(mleapBundle)
-
     val denseLeapFrame = toDenseFeaturesLeapFrame(leapFrameBinomial)
-
-    val preSerializationResult = xgboostTransformer.transform(denseLeapFrame).get
-    val deserializedResult = deserializedTransformer.transform(denseLeapFrame).get
-
+    val preSerializationResult = ClassifierUtils.mleapTransformer.transform(denseLeapFrame).get
+    val deserializedResult = ClassifierUtils.deserializedmleapTransformer.transform(denseLeapFrame).get
     assert(preSerializationResult.dataset == deserializedResult.dataset)
   }
 }

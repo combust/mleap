@@ -3,17 +3,15 @@ package ml.combust.mleap.xgboost.runtime.testing
 import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.frame.Transformer
 import ml.combust.mleap.xgboost.runtime.{XGBoostRegression, XGBoostRegressionModel}
-import ml.dmlc.xgboost4j.scala.Booster
 
-trait RegressionUtils extends BoosterUtils with CachedDatasetUtils {
-  def trainRegressor: Transformer = {
-
-    val booster: Booster = trainBooster(binomialDataset)
-
-    XGBoostRegression(
+object RegressionUtils extends BoosterUtils with CachedDatasetUtils with BundleSerializationUtils {
+  val xgboostBooster = trainBooster(binomialDataset)
+  val mleapTransformer: Transformer = XGBoostRegression(
       "xgboostSingleThread",
       NodeShape.regression(),
-      XGBoostRegressionModel(booster, numFeatures(leapFrameBinomial), 0)
+      XGBoostRegressionModel(xgboostBooster, numFeatures(leapFrameBinomial), 0)
     )
-  }
+  val mleapBundle = serializeModelToMleapBundle(mleapTransformer)
+  val deserializedXGBoostPredictor = loadXGBoostPredictorFromBundle(mleapBundle)
+  val deserializedMleapTransformer = loadMleapTransformerFromBundle(mleapBundle)
 }

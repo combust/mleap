@@ -4,6 +4,7 @@ import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
 import org.apache.spark.ml.bundle._
+import org.apache.spark.ml.bundle.ops.OpsUtils
 import org.apache.spark.ml.feature.StringIndexerModel
 
 /**
@@ -48,6 +49,8 @@ class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] with MultiInOutF
   }
 
   override def sparkLoad(uid: String, shape: NodeShape, model: StringIndexerModel): StringIndexerModel = {
-    model
+    val m = new StringIndexerModel(uid,  model.labelsArray)
+    OpsUtils.copySparkStageParams(model, m)
+    m
   }
 }

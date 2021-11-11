@@ -103,4 +103,9 @@ public class LeapFrameBuilder {
     public ListType createList(BasicType base, boolean isNullable) {
         return new ListType(base, isNullable);
     }
+
+    public MapType createMap(BasicType key, BasicType base) { return createMap(key, base, true); }
+    public MapType createMap(BasicType key, BasicType base, boolean isNullable) {
+        return new MapType(key, base, isNullable);
+    }
 }

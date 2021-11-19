@@ -79,6 +79,7 @@ trait TypeConverters {
       case ArrayType(elementType, _) if elementType == new VectorUDT =>
         val a = dataset.select(field.name).head.getAs[mutable.WrappedArray[Vector]](0)
         types.TensorType.Double(a.length, a.head.size)
+      case _ => throw new UnsupportedOperationException(s"Cannot convert spark field $field to mleap")
     }
 
     types.StructField(field.name, dt.setNullable(field.nullable))
@@ -114,6 +115,7 @@ trait TypeConverters {
     case BasicType.Double => DoubleType
     case BasicType.String => StringType
     case BasicType.ByteString => ArrayType(ByteType, containsNull = false)
+    case _ => throw new UnsupportedOperationException(s"Cannot cast mleap type $base to spark DataType")
   }
 
   def mleapToSparkValue(dataType: types.DataType): (Any) => Any = dataType match {

@@ -60,6 +60,7 @@ object Bundle {
       val one_hot_encoder = "one_hot_encoder"
       val min_max_scaler = "min_max_scaler"
       val max_abs_scaler = "max_abs_scaler"
+      val map_entry_selector = "map_entry_selector"
       val bucketizer = "bucketizer"
       val idf = "idf"
       val string_map = "string_map"

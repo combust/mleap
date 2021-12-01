@@ -7,7 +7,7 @@ import ml.combust.mleap.runtime.types.BundleTypeConverters.{bundleToMleapBasicTy
 import org.apache.spark.ml.bundle.{ParamSpec, SimpleSparkOp, SparkBundleContext}
 import org.apache.spark.ml.mleap.feature.MapEntrySelectorModel
 import org.apache.spark.sql.mleap.TypeConverters.{mleapBasicTypeToSparkType, sparkTypeToMleapBasicType}
-import org.apache.spark.sql.types.{DoubleType, StringType}
+import org.apache.spark.sql.{types => T}
 
 class MapEntrySelectorOp extends SimpleSparkOp[MapEntrySelectorModel[_,_]] {
   override  val Model: OpModel[SparkBundleContext, MapEntrySelectorModel[_,_]] = new OpModel[SparkBundleContext, MapEntrySelectorModel[_,_]] {
@@ -29,7 +29,15 @@ class MapEntrySelectorOp extends SimpleSparkOp[MapEntrySelectorModel[_,_]] {
       val valueSparkType = mleapBasicTypeToSparkType(bundleToMleapBasicType(valueBasicType))
       val defaultValue = model.value("default_value").getAnyFromType(valueBasicType)
       val result = (keySparkType, valueSparkType) match {
-        case(StringType, DoubleType) => new MapEntrySelectorModel[String, Double](keySparkType, valueSparkType)
+        case(T.StringType, T.StringType) => new MapEntrySelectorModel[String, String](keySparkType, valueSparkType)
+        case(T.StringType, T.DoubleType) => new MapEntrySelectorModel[String, Double](keySparkType, valueSparkType)
+        case(T.StringType, T.FloatType) => new MapEntrySelectorModel[String, Float](keySparkType, valueSparkType)
+        case(T.StringType, T.LongType) => new MapEntrySelectorModel[String, Long](keySparkType, valueSparkType)
+        case(T.StringType, T.IntegerType) => new MapEntrySelectorModel[String, Int](keySparkType, valueSparkType)
+        case(T.StringType, T.ShortType) => new MapEntrySelectorModel[String, Short](keySparkType, valueSparkType)
+        case(T.StringType, T.BooleanType) => new MapEntrySelectorModel[String, Boolean](keySparkType, valueSparkType)
+        case(T.StringType, T.ByteType) => new MapEntrySelectorModel[String, Byte](keySparkType, valueSparkType)
+        case (k, v) => throw new UnsupportedOperationException(s"Can not load bundle of types $k, $v")
       }
       result.setDefaultValue(defaultValue)
     }
@@ -37,7 +45,15 @@ class MapEntrySelectorOp extends SimpleSparkOp[MapEntrySelectorModel[_,_]] {
 
   override def sparkLoad(uid: String, shape: NodeShape, model: MapEntrySelectorModel[_, _]): MapEntrySelectorModel[_,_] = {
     val result = (model.keyType, model.valueType) match {
-      case(StringType, DoubleType) => new MapEntrySelectorModel[String, Double](model.keyType, model.valueType, uid)
+      case(T.StringType, T.StringType) => new MapEntrySelectorModel[String, String](model.keyType, model.valueType, uid)
+      case(T.StringType, T.DoubleType) => new MapEntrySelectorModel[String, Double](model.keyType, model.valueType, uid)
+      case(T.StringType, T.FloatType) => new MapEntrySelectorModel[String, Float](model.keyType, model.valueType, uid)
+      case(T.StringType, T.LongType) => new MapEntrySelectorModel[String, Long](model.keyType, model.valueType, uid)
+      case(T.StringType, T.IntegerType) => new MapEntrySelectorModel[String, Int](model.keyType, model.valueType, uid)
+      case(T.StringType, T.ShortType) => new MapEntrySelectorModel[String, Short](model.keyType, model.valueType, uid)
+      case(T.StringType, T.BooleanType) => new MapEntrySelectorModel[String, Boolean](model.keyType, model.valueType, uid)
+      case(T.StringType, T.ByteType) => new MapEntrySelectorModel[String, Byte](model.keyType, model.valueType, uid)
+      case (k, v) => throw new UnsupportedOperationException(s"Can not load bundle of types $k, $v")
     }
     result.setDefaultValue(model.getDefaultValue)
   }

@@ -5,7 +5,7 @@ import ml.combust.mleap.core.reflection.MleapReflection.dataType
 import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{MapType, ScalarType, StructField, StructType}
 
-case class MapEntrySelectorModel[K: TypeTag, V: TypeTag](defaultValue: Any = None) extends Model {
+case class MapEntrySelectorModel[K: TypeTag, V: TypeTag](defaultValue: V = None) extends Model {
 
   def apply(m: Map[K, V], key: K): V = {
     m.getOrElse(key, defaultValue.asInstanceOf[V])

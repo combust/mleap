@@ -20,6 +20,7 @@ class DefaultFrameSerializerSpec extends FunSpec {
     StructField("test_byte_vector", TensorType(BasicType.Byte)),
     StructField("test_short_vector", TensorType(BasicType.Short)),
     StructField("test_byte_string", ScalarType.ByteString),
+    StructField("map_double", MapType(BasicType.String, BasicType.Double)),
     StructField("test_nullable", ScalarType.String.asNullable)).get
   val row = Row(2.0d, 45.3f, "hello",
     Tensor.denseVector(Array(0.1, 2.33, 4.5)),
@@ -28,6 +29,7 @@ class DefaultFrameSerializerSpec extends FunSpec {
     Tensor.denseVector(Array[Byte](1, 2, 3, 4)),
     Tensor.denseVector(Array[Short](16, 45, 78)),
     ByteString(Array[Byte](1, 2, 3, 4, 5)),
+    Map[String, Double]("foo" -> 42.0),
     null)
   val dataset = Seq(row)
   val frame = DefaultLeapFrame(schema, dataset)

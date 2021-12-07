@@ -97,6 +97,10 @@ object SchemaConverter {
   implicit def mleapToAvroType(dataType: DataType): Schema = dataType match {
     case st: ScalarType => maybeNullableAvroType(mleapBasicToAvroType(st.base), st.isNullable)
     case lt: ListType => maybeNullableAvroType(Schema.createArray(mleapBasicToAvroType(lt.base)), lt.isNullable)
+    case mt: MapType =>
+      // Avro Map keys are only allowed to be strings https://avro.apache.org/docs/current/spec.html#Maps
+      require(mt.key == BasicType.String, s"Avro only allows String keys, found ${mt.key}")
+      maybeNullableAvroType(Schema.createMap(mleapBasicToAvroType(mt.base)), mt.isNullable)
     case tt: TensorType =>
       tt.base match {
         case BasicType.Boolean => booleanTensorSchema
@@ -156,6 +160,9 @@ object SchemaConverter {
     case Schema.Type.STRING => ScalarType.String
     case Schema.Type.BYTES => ScalarType.ByteString
     case Schema.Type.ARRAY => ListType(avroToMleapBasicType(schema.getElementType.getType))
+    case Schema.Type.MAP =>
+      // Avro Map keys are only allowed to be strings https://avro.apache.org/docs/current/spec.html#Maps
+      MapType(BasicType.String, avroToMleapBasicType(schema.getValueType.getType))
     case Schema.Type.UNION => maybeNullableMleapType(schema)
     case Schema.Type.RECORD =>
       schema.getName match {

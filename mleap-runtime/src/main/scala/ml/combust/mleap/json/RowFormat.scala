@@ -24,6 +24,16 @@ object RowFormat {
     maybeNullableFormat(seqFormat(basicSerializer(lt.base, isNullable = false)), lt.isNullable)
   }
 
+  def mapSerializer(mt: MapType): JsonFormat[_] = {
+    maybeNullableFormat(
+      mapFormat(
+        basicSerializer(mt.key, isNullable = false),
+        basicSerializer(mt.base, isNullable = false)
+      ),
+      mt.isNullable
+    )
+  }
+
   def tensorSerializer(tt: TensorType): JsonFormat[_] = {
     val isNullable = tt.isNullable
 
@@ -51,6 +61,7 @@ object RowFormat {
     case BasicType.Double => maybeNullableFormat(DoubleJsonFormat, isNullable)
     case BasicType.String => maybeNullableFormat(StringJsonFormat, isNullable)
     case BasicType.ByteString => maybeNullableFormat(BundleByteStringFormat, isNullable)
+    case _ => serializationError(s"invalid basic type: $base")
   }
 
   def scalarSerializer(st: ScalarType): JsonFormat[_] = basicSerializer(st.base, st.isNullable)
@@ -59,6 +70,8 @@ object RowFormat {
     case st: ScalarType => scalarSerializer(st)
     case lt: ListType => listSerializer(lt)
     case tt: TensorType => tensorSerializer(tt)
+    case mt: MapType => mapSerializer(mt)
+    case _ => serializationError(s"invalid serialization type $dt")
   }
 }
 

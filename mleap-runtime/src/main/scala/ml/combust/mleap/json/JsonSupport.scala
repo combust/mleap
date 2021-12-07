@@ -79,6 +79,29 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     }
   }
 
+  implicit val MleapMapTypeFormat: JsonFormat[MapType] = new JsonFormat[MapType] {
+    override def write(obj: MapType): JsValue = {
+      var fields = Seq(
+        "type" -> JsString("map"),
+        "base" -> obj.base.toJson,
+        "key" -> obj.key.toJson
+      )
+
+      if(!obj.isNullable) {
+        fields :+= "isNullable" -> JsBoolean(false)
+      }
+
+      JsObject(fields: _*)
+    }
+
+    override def read(json: JsValue): MapType = {
+      val obj = json.asJsObject("invalid map type")
+      val isNullable = obj.fields.get("isNullable").forall(_.convertTo[Boolean])
+
+      MapType(obj.fields("key").convertTo[BasicType], obj.fields("base").convertTo[BasicType], isNullable)
+    }
+  }
+
   implicit val MleapTensorTypeFormat: JsonFormat[TensorType] = lazyFormat(new JsonFormat[TensorType] {
     override def write(obj: TensorType): JsValue = {
       var map = Map("type" -> JsString("tensor"),
@@ -162,6 +185,7 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
     override def write(obj: DataType): JsValue = obj match {
       case st: ScalarType => MleapScalarTypeFormat.write(st)
       case lt: ListType => MleapListTypeFormat.write(lt)
+      case mt: MapType => MleapMapTypeFormat.write(mt)
       case tt: TensorType => MleapTensorTypeFormat.write(tt)
       case _ => serializationError(s"$obj not supported for JSON serialization")
     }
@@ -172,6 +196,7 @@ trait JsonSupport extends ml.combust.mleap.tensor.JsonSupport {
         obj.fields.get("type") match {
           case Some(JsString("basic")) => MleapScalarTypeFormat.read(obj)
           case Some(JsString("list")) => MleapListTypeFormat.read(obj)
+          case Some(JsString("map")) => MleapMapTypeFormat.read(obj)
           case Some(JsString("tensor")) => MleapTensorTypeFormat.read(obj)
           case _ => deserializationError(s"invalid data type: ${obj.fields.get("type")}")
         }

@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.types
 
-import ml.combust.mleap.tensor.{ByteString, Tensor}
+import ml.combust.mleap.tensor.{ByteString, Tensor, SparseTensor}
+import org.apache.spark.ml.linalg.{Vector => SparkVector, Vectors}
 import org.scalatest.FunSpec
 import scala.util.Success
 
@@ -209,6 +210,46 @@ class CastingSpec extends FunSpec {
     }
     assertThrows[IllegalArgumentException] {
       cast2(tensor)
+    }
+  }
+
+  describe(s"DenseVector[Double] can be cast to") {
+    for((from, to, fromValue, expectedValue) <- castTests.filter(t => t._1 == BasicType.Double & t._4 != false)) {
+      it(s"Tensor[$to]") {
+        val fromDouble = fromValue.asInstanceOf[Double]
+        val inputVector = Vectors.dense(fromDouble, fromDouble, fromDouble)
+
+        val castingFn = Casting.cast(
+          TensorType.Double(inputVector.size),
+          TensorType(to, Some(Seq(inputVector.size)))
+        ).get.get
+
+        val actualTensor = castingFn(inputVector)
+        val expectedTensor = createTensor(to, Seq(expectedValue, expectedValue, expectedValue))
+        assert(expectedTensor == actualTensor)
+      }
+    }
+  }
+
+  describe(s"SparseVector[Double] can be cast to") {
+    for((from, to, fromValue, expectedValue) <- castTests.filter(t => t._1 == BasicType.Double & t._4 != false)) {
+      it(s"Tensor[$to]") {
+        val fromDouble = fromValue.asInstanceOf[Double]
+        val inputVector = Vectors.sparse(3, Array(0, 1), Array(fromDouble, fromDouble))
+
+        val castingFn = Casting.cast(
+          TensorType.Double(inputVector.size),
+          TensorType(to, Some(Seq(inputVector.size)))
+        ).get.get
+
+        val actualTensor = castingFn(inputVector).asInstanceOf[SparseTensor[_]]
+        val expectedTensor = SparseTensor(Seq(Seq(0), Seq(1)), Array(expectedValue, expectedValue), Seq(3))
+
+        assert(expectedTensor.values.sameElements(actualTensor.values))
+        assert(expectedTensor.indices == actualTensor.indices)
+        assert(expectedTensor.dimensions == actualTensor.dimensions)
+
+      }
     }
   }
 

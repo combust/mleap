@@ -97,7 +97,7 @@ object Casting {
   }
 
   def cast(from: DataType, to: DataType): Option[Try[(Any) => Any]] = {
-    val primaryCast = (from, to) match {
+    val primaryCast: Option[Try[(Any) => Any]] = (from, to) match {
       case (_: ScalarType, _: ScalarType) =>
         baseCast(from.base, to.base)
       case (_: ScalarType, tt: TensorType) if tt.dimensions.exists(_.isEmpty) =>
@@ -151,6 +151,31 @@ object Casting {
             c => (l: Any) => l.asInstanceOf[Seq[Any]].map(c)
           }
         }
+      case (fMap: MapType, tMap: MapType) =>
+        val mapCaster: Any => Map[Any, Any] = (baseCast(fMap.key, tMap.key), baseCast(fMap.base, tMap.base)) match {
+          // need to consider all the cases where the key and/or values have casting to do (or not do)
+          case (kCast: Some[Try[Any => Any]], vCast: Some[Try[Any => Any]]) =>
+            val kFn = kCast.get.get
+            val vFn = vCast.get.get
+            (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
+              case (k, v) => (kFn(k), vFn(v))
+            }
+          case (None, vCast: Some[Try[Any => Any]]) =>
+            val vFn = vCast.get.get
+            (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
+              case (k, v) => (k, vFn(v))
+            }
+          case (kCast: Some[Try[Any => Any]], None) =>
+            val kFn = kCast.get.get
+            (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
+              case (k, v) => (kFn(k), v)
+            }
+          case (None, None) =>
+            (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
+              case (k, v) => (k, v)
+            }
+          }
+        Option(Try(mapCaster))
       case (_: ListType, _: TensorType) =>
         baseCast(from.base, to.base).map {
           _.flatMap {

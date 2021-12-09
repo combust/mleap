@@ -29,6 +29,22 @@ class MleapReflectionSpec extends FunSpec {
       assert(dataType[java.lang.Long] == ScalarType.Long)
       assert(dataType[java.lang.Double] == ScalarType.Double)
       assert(dataType[Tensor[Double]] == TensorType(BasicType.Double))
+      assert(dataType[Map[String, String]] == MapType(BasicType.String, BasicType.String))
+      assert(dataType[Map[String, Int]] == MapType(BasicType.String, BasicType.Int))
+      assert(dataType[Map[String, Double]] == MapType(BasicType.String, BasicType.Double))
+      assert(dataType[Map[String, Boolean]] == MapType(BasicType.String, BasicType.Boolean))
+      assert(dataType[Map[Int, String]] == MapType(BasicType.Int, BasicType.String))
+      assert(dataType[Map[Int, Int]] == MapType(BasicType.Int, BasicType.Int))
+      assert(dataType[Map[Int, Double]] == MapType(BasicType.Int, BasicType.Double))
+      assert(dataType[Map[Int, Boolean]] == MapType(BasicType.Int, BasicType.Boolean))
+      assert(dataType[Map[Double, String]] == MapType(BasicType.Double, BasicType.String))
+      assert(dataType[Map[Double, Int]] == MapType(BasicType.Double, BasicType.Int))
+      assert(dataType[Map[Double, Double]] == MapType(BasicType.Double, BasicType.Double))
+      assert(dataType[Map[Double, Boolean]] == MapType(BasicType.Double, BasicType.Boolean))
+      assert(dataType[Map[Boolean, String]] == MapType(BasicType.Boolean, BasicType.String))
+      assert(dataType[Map[Boolean, Int]] == MapType(BasicType.Boolean, BasicType.Int))
+      assert(dataType[Map[Boolean, Double]] == MapType(BasicType.Boolean, BasicType.Double))
+      assert(dataType[Map[Boolean, Boolean]] == MapType(BasicType.Boolean, BasicType.Boolean))
     }
 
     describe("#with an invalid Scala type") {

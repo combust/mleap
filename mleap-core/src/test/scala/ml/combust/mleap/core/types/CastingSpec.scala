@@ -170,6 +170,15 @@ class CastingSpec extends FunSpec {
         assert(tcl(fromList) == expectedTensor)
       }
 
+      for(((keyFrom, keyTo, keyFromValue, keyExpectedValue), j) <- castTests.zipWithIndex) {
+        it(s"casts the map with Key types: $keyFrom to $keyTo $j") {
+          val fromMap = Map(keyFromValue -> fromValue)
+          val expectedMap = Map(keyExpectedValue -> expectedValue)
+          val c = Casting.cast(MapType(keyFrom, from), MapType(keyTo, to)).getOrElse(Success((v: Any) => v)).get
+          assert(c(fromMap) == expectedMap)
+        }
+      }
+
       it("casts the tensor") {
         val fromTensor = createTensor(from, Seq(fromValue))
         val expectedTensor = createTensor(to, Seq(expectedValue))

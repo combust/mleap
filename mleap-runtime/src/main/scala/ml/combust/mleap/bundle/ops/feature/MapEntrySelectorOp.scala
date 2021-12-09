@@ -32,7 +32,7 @@ class MapEntrySelectorOp extends MleapOp[MapEntrySelector[_, _], MapEntrySelecto
       (keyBasicType, bundleToMleapBasicType(valueBasicType)) match {
         case (BasicType.String, BasicType.Double) => MapEntrySelectorModel[String, Double](defaultValue.asInstanceOf[Double])
         case (BasicType.String, BasicType.Float) => MapEntrySelectorModel[String, Float](defaultValue.asInstanceOf[Float])
-        case (BasicType.String, BasicType.Long) => MapEntrySelectorModel[String, Long](defaultValue.asInstanceOf[Int])
+        case (BasicType.String, BasicType.Long) => MapEntrySelectorModel[String, Long](defaultValue.asInstanceOf[Long])
         case (BasicType.String, BasicType.Int) => MapEntrySelectorModel[String, Int](defaultValue.asInstanceOf[Int])
         case (BasicType.String, BasicType.Short) => MapEntrySelectorModel[String, Short](defaultValue.asInstanceOf[Short])
         case (BasicType.String, BasicType.String) => MapEntrySelectorModel[String, String](defaultValue.asInstanceOf[String])

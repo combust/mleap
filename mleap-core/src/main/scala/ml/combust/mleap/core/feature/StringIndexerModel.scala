@@ -16,7 +16,7 @@ case class StringIndexerModel(labels: Seq[String],
                               handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
   val stringToIndex: Map[String, Int] = labels.zipWithIndex.toMap
   private val keepInvalid = handleInvalid == HandleInvalid.Keep
-
+  private val invalidValue = labels.length
   /** Convert a string into its integer representation.
     *
     * @param value label to index
@@ -24,17 +24,18 @@ case class StringIndexerModel(labels: Seq[String],
     */
   def apply(value: Any): Int = if (value == null) {
     if (keepInvalid) {
-      labels.length
+      invalidValue
     } else {
       throw new NullPointerException("StringIndexer encountered NULL value. " +
         s"To handle NULLS, set handleInvalid to ${HandleInvalid.Keep.asParamString}")
     }
   } else {
     val label = value.toString
-    if (stringToIndex.contains(label)) {
-      stringToIndex(label)
+    val index = stringToIndex.get(label)
+    if (index.isDefined) {
+      index.get
     } else if (keepInvalid) {
-      labels.length
+      invalidValue
     } else {
       throw new NoSuchElementException(s"Unseen label: $label. To handle unseen labels, " +
         s"set handleInvalid to ${HandleInvalid.Keep.asParamString}")

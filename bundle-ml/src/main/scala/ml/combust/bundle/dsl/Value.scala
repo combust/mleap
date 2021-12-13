@@ -97,6 +97,25 @@ object Value {
     */
   def byteString(value: ByteString): Value = scalarValue(Scalar(bs = protobuf.ByteString.copyFrom(value.bytes)))
 
+  /** Create a scalar value case matched from Any.
+    *
+    * @param value value to wrap
+    * @return wrapped value
+    */
+  def anyAsType(value: Any, t: BasicType): Value = {
+    t match {
+      case BasicType.BYTE => byte(value.asInstanceOf[Byte])
+      case BasicType.BOOLEAN => boolean(value.asInstanceOf[Boolean])
+      case BasicType.SHORT => short(value.asInstanceOf[Short])
+      case BasicType.INT => int(value.asInstanceOf[Int])
+      case BasicType.LONG => long(value.asInstanceOf[Long])
+      case BasicType.DOUBLE => double(value.asInstanceOf[Double])
+      case BasicType.FLOAT => float(value.asInstanceOf[Float])
+      case BasicType.STRING => string(value.asInstanceOf[String])
+      case BasicType.BYTE_STRING => byteString(value.asInstanceOf[ByteString])
+      case o => throw new IllegalArgumentException(s"$o is not a supported BasicType")
+    }
+  }
   /** Create a tensor value.
     *
     * Dimensions must have size greater than 0. Use -1 for
@@ -315,6 +334,25 @@ case class Value(value: ml.bundle.Value) {
     * @return byte string
     */
   def getByteString: ByteString = ByteString(value.getS.bs.toByteArray)
+
+  /** Get value as an Any dependening on basicType
+    *
+    * @return the deserialized value
+    */
+  def getAnyFromType(basicType: BasicType): Any = {
+    basicType match {
+      case BasicType.BYTE => getByte
+      case BasicType.BOOLEAN => getBoolean
+      case BasicType.SHORT => getShort
+      case BasicType.INT => getInt
+      case BasicType.LONG => getLong
+      case BasicType.DOUBLE => getDouble
+      case BasicType.FLOAT => getFloat
+      case BasicType.STRING => getString
+      case BasicType.BYTE_STRING => getByteString
+      case o => throw new IllegalArgumentException(s"$o is not a supported BasicType")
+    }
+  }
 
   /** Get value as a data type.
     *

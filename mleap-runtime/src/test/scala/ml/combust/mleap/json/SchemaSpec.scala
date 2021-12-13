@@ -27,6 +27,7 @@ class SchemaSpec extends FunSpec {
         ScalarType(bt).nonNullable,
         ListType(bt).asNullable,
         ListType(bt).nonNullable,
+        MapType(BasicType.String, bt),
         TensorType(bt, Seq(23, 44)).asNullable,
         TensorType(bt, Seq(23, 44)).nonNullable)
   }

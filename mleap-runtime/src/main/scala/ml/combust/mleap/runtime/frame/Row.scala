@@ -205,6 +205,28 @@ trait Row extends Iterable[Any] {
     */
   def optionSeq[T](index: Int): Option[Seq[T]] = optionAs[Seq[T]](index)
 
+  /** Get value at index as a map.
+    *
+    * @param index index of value
+    * @tparam K type of the map keys
+    * @tparam V type of the map values
+    * @return map value
+    */
+  def getMap[K, V](index: Int): Map[K, V] = get(index) match {
+    case m: java.util.Map[_, _] => m.asScala.toMap.asInstanceOf[Map[K, V]]
+    case m: Map[_, _] => m.asInstanceOf[Map[K, V]]
+    case o => throw new IllegalArgumentException(s"Index $index is not a map type, $o")
+  }
+
+  /** Get value at index as a map.
+    *
+    * @param index index of value
+    * @tparam K type of the map keys
+    * @tparam V type of the map values
+    * @return optional map value
+    */
+  def optionMap[K, V](index: Int): Option[Map[K, V]] = optionAs[Map[K, V]](index)
+
   /** Convert row to a seq of values.
     *
     * @return seq of values from row

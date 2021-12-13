@@ -31,14 +31,14 @@ case class StringIndexerModel(labels: Seq[String],
     }
   } else {
     val label = value.toString
-    val index = stringToIndex.get(label)
-    if (index.isDefined) {
-      index.get
-    } else if (keepInvalid) {
-      invalidValue
-    } else {
-      throw new NoSuchElementException(s"Unseen label: $label. To handle unseen labels, " +
-        s"set handleInvalid to ${HandleInvalid.Keep.asParamString}")
+    stringToIndex.get(label) match {
+      case Some(v) => v
+      case None => if (keepInvalid) {
+        invalidValue
+      } else {
+        throw new NoSuchElementException(s"Unseen label: $label. To handle unseen labels, " +
+          s"set handleInvalid to ${HandleInvalid.Keep.asParamString}")
+      }
     }
   }
 

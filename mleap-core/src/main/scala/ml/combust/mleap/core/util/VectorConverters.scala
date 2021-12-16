@@ -20,10 +20,10 @@ trait VectorConverters {
   implicit def mleapTensorToSparkVector(tensor: Tensor[Double]): Vector = tensor match {
     case tensor: DenseTensor[_] =>
       Vectors.dense(tensor.rawValues.asInstanceOf[Array[Double]])
-    case tensor: SparseTensor[_] =>
-      Vectors.sparse(tensor.dimensions.product,
-        tensor.indices.map(_.head).toArray,
-        tensor.values.asInstanceOf[Array[Double]])
+    case tensor: SparseTensor[_] => {
+      val elements = tensor.indices.map(_.head).toArray zip tensor.values.asInstanceOf[Array[Double]]
+      Vectors.sparse(tensor.dimensions.product, elements)
+    }
   }
 
   implicit def sparkMatrixToMleapTensor(matrix: Matrix): Tensor[Double] = matrix match {

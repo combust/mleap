@@ -10,12 +10,12 @@ import ml.combust.mleap.runtime.frame.RowTransformer;
 import ml.combust.mleap.runtime.frame.Transformer;
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer;
 import org.apache.spark.ml.linalg.Vectors;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ml.combust.mleap.tensor.ByteString;
+import org.junit.jupiter.api.Test;
 import scala.collection.JavaConversions;
 import scala.collection.immutable.ListMap;
 

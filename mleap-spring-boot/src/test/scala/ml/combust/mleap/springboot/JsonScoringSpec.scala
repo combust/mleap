@@ -2,11 +2,8 @@ package ml.combust.mleap.springboot
 
 import java.net.URI
 import java.util.UUID
-
 import com.google.protobuf.ByteString
-import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.http._
 import ml.combust.mleap.pb._
@@ -14,10 +11,11 @@ import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import ml.combust.mleap.springboot.TestUtil.{demoUri, validFrame}
 import org.json4s.jackson.JsonMethods
-
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import scalapb.json4s.{Parser, Printer}
 
-@RunWith(classOf[SpringRunner])
+@ExtendWith(Array(classOf[SpringExtension]))
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class JsonScoringSpec extends ScoringBase[String, String, String, String, String] {
 

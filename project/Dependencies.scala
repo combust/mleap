@@ -11,7 +11,7 @@ object Dependencies {
   val junitVersion = "5.8.2"
   val akkaVersion = "2.6.14"
   val akkaHttpVersion = "10.2.4"
-  val springBootVersion = "2.6.1"
+  val springBootVersion = "2.6.2"
   lazy val logbackVersion = "1.2.3"
   lazy val loggingVersion = "3.9.0"
   lazy val slf4jVersion = "1.7.25"

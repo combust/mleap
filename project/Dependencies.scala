@@ -8,9 +8,10 @@ object Dependencies {
 
   val sparkVersion = "3.0.2"
   val scalaTestVersion = "3.0.8"
+  val junitVersion = "5.8.2"
   val akkaVersion = "2.6.14"
   val akkaHttpVersion = "10.2.4"
-  val springBootVersion = "2.0.4.RELEASE"
+  val springBootVersion = "2.6.2"
   lazy val logbackVersion = "1.2.3"
   lazy val loggingVersion = "3.9.0"
   lazy val slf4jVersion = "1.7.25"
@@ -84,8 +85,7 @@ object Dependencies {
     val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test"
     val springBootTest = "org.springframework.boot" % "spring-boot-starter-test" % springBootVersion % "test"
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test"
-    val junit = "junit" % "junit" % "4.12" % "test"
-    val junitInterface = "com.novocode" % "junit-interface" % "0.10" % "test"
+    val junit = "org.junit.jupiter" % "junit-jupiter" % junitVersion % "test"
     val spark = Compile.spark.map(_ % "test")
     val sparkTest = Compile.spark.map(_ % "test" classifier "tests")
   }
@@ -109,7 +109,7 @@ object Dependencies {
 
   val core = l ++= Seq(sparkMllibLocal, jTransform, breeze, Test.scalaTest) ++ Test.sparkTest
 
-  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, Test.junitInterface, commonsIo) ++ scalaReflect.modules(scalaVersion.value))
+  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, commonsIo) ++ scalaReflect.modules(scalaVersion.value))
 
   val sparkBase = l ++= Provided.spark ++ Seq(Test.scalaTest)
 

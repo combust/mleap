@@ -1,19 +1,18 @@
 package ml.combust.mleap.springboot
 
 import java.net.URI
-
 import com.google.protobuf.ByteString
 import ml.combust.mleap.pb._
 import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import ml.combust.mleap.springboot.TestUtil.validFrame
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.http.{HttpEntity, HttpHeaders, ResponseEntity}
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@RunWith(classOf[SpringRunner])
+@ExtendWith(Array(classOf[SpringExtension]))
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class ProtobufScoringSpec extends ScoringBase[Mleap.LoadModelRequest, Mleap.Model, Mleap.BundleMeta, Mleap.TransformFrameRequest, Mleap.TransformFrameResponse] {
 

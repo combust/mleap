@@ -25,6 +25,7 @@
 - Upgrades to xgboost v1.3.1 (#778)
 - Updates shading rules for databricks runtime assembly (#780)
 - StringIndexerModel now performs faster lookups by caching the index size (#793)
+- Upgrades springboot version to 2.6.2 and junit to 5.8.2
 
 # Release 0.18.1
 

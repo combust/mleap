@@ -2,7 +2,7 @@
 
 [![Gitter](https://badges.gitter.im/combust/mleap.svg)](https://gitter.im/combust/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Build Status](https://travis-ci.org/combust/mleap.svg?branch=master)](https://travis-ci.org/combust/mleap)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/ml.combust.mleap/mleap-base_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/ml.combust.mleap/mleap-base_2.11)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/ml.combust.mleap/mleap-base_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/ml.combust.mleap/mleap-base_2.12)
 
 Deploying machine learning data pipelines and algorithms should not be a time-consuming or difficult task. MLeap allows data scientists and engineers to deploy machine learning pipelines from Spark and Scikit-learn to a portable format and execution engine.
 

@@ -10,12 +10,12 @@ import ml.combust.mleap.runtime.frame.RowTransformer;
 import ml.combust.mleap.runtime.frame.Transformer;
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer;
 import org.apache.spark.ml.linalg.Vectors;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ml.combust.mleap.tensor.ByteString;
+import org.junit.jupiter.api.Test;
 import scala.collection.JavaConversions;
 import scala.collection.immutable.ListMap;
 
@@ -24,7 +24,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class JavaDSLSpec {
 
@@ -33,9 +35,17 @@ public class JavaDSLSpec {
     RowTransformerSupport rowTransformerSupport = new RowTransformerSupport();
     TensorSupport tensorSupport = new TensorSupport();
 
+    private static Map<String, Double> createMap() {
+        Map<String,Double> myMap = new HashMap<String,Double>();
+        myMap.put("a", 1.0);
+        myMap.put("b", 2.0);
+        return myMap;
+    }
+    Map<String, Double> mapCol = createMap();
+
     Row row = frameBuilder.createRow(true, "hello", (byte) 1,
             (short) 2, 3, (long) 4, 34.5f, 44.5, new ByteString("hello_there".getBytes()),
-            Arrays.asList(23, 44, 55), Vectors.dense(new double[]{23, 3, 4}));
+            Arrays.asList(23, 44, 55), mapCol, Vectors.dense(new double[]{23, 3, 4}));
 
     StringIndexer stringIndexer = new StringIndexer(
             "string_indexer",
@@ -56,6 +66,7 @@ public class JavaDSLSpec {
                 frameBuilder.createField("double", frameBuilder.createDouble()),
                 frameBuilder.createField("byte_string", frameBuilder.createByteString()),
                 frameBuilder.createField("list", frameBuilder.createList(frameBuilder.createBasicLong())),
+                frameBuilder.createField("map", frameBuilder.createMap(frameBuilder.createBasicString(), frameBuilder.createBasicDouble())),
                 frameBuilder.createField("tensor", frameBuilder.createTensor(frameBuilder.createBasicDouble())));
         StructType schema = frameBuilder.createSchema(fields);
         return frameBuilder.createFrame(schema, Arrays.asList(row));
@@ -76,6 +87,7 @@ public class JavaDSLSpec {
         assertEquals(schema.getField("double").get(), frameBuilder.createField("double", frameBuilder.createDouble()));
         assertEquals(schema.getField("byte_string").get(), frameBuilder.createField("byte_string", frameBuilder.createByteString()));
         assertEquals(schema.getField("list").get(), frameBuilder.createField("list", frameBuilder.createList(frameBuilder.createBasicLong())));
+        assertEquals(schema.getField("map").get(), frameBuilder.createField("map", frameBuilder.createMap(frameBuilder.createBasicString(), frameBuilder.createBasicDouble())));
         assertEquals(schema.getField("tensor").get(), frameBuilder.createField("tensor", frameBuilder.createTensor(frameBuilder.createBasicDouble())));
 
         Row row = frame.dataset().head();
@@ -89,7 +101,8 @@ public class JavaDSLSpec {
         assertEquals(row.getDouble(7), 44.5, 0.0000000000001);
         assertEquals(row.getByteString(8), new ByteString("hello_there".getBytes()));
         assertEquals(row.getList(9), Arrays.asList(23, 44, 55));
-        List<Double> tensorValues = tensorSupport.toArray(row.getTensor(10));
+        assertEquals(JavaConversions.mapAsJavaMap(row.getMap(10)), mapCol );
+        List<Double> tensorValues = tensorSupport.toArray(row.getTensor(11));
         assertEquals(tensorValues, Arrays.asList(23d, 3d, 4d));
     }
 
@@ -98,7 +111,7 @@ public class JavaDSLSpec {
         DefaultLeapFrame frame = buildFrame();
         RowTransformer rowTransformer = stringIndexer.transform(rowTransformerSupport.createRowTransformer(frame.schema())).get();
         Row result = rowTransformer.transform(row);
-        assertEquals(result.getDouble(11), 0.0, 0.0000000000001);
+        assertEquals(result.getDouble(12), 0.0, 0.0000000000001);
     }
 
     @Test
@@ -136,7 +149,7 @@ public class JavaDSLSpec {
     public void getFieldsFromSchema() {
       DefaultLeapFrame frame = buildFrame();
       List<StructField> fields = leapFrameSupport.getFields(frame.schema());
-      assertEquals(fields.size(), 11);
+      assertEquals(fields.size(), 12);
     }
 
     @Test

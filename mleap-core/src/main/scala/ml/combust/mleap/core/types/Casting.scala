@@ -1,6 +1,7 @@
 package ml.combust.mleap.core.types
 
 import ml.combust.mleap.tensor.{ByteString, Tensor, DenseTensor, SparseTensor}
+import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector => SparkVector}
 
 import scala.util.{Failure, Success, Try}
 
@@ -83,6 +84,13 @@ object Casting {
     case (k, v) => (k, v.asInstanceOf[(Any) => Any])
   }
 
+  def sparkVectorToMLeapTensor(sparkVector: SparkVector): Tensor[Double] = {
+    sparkVector match {
+      case v: DenseVector => DenseTensor[Double](v.values, Seq(v.size))
+      case v: SparseVector => SparseTensor[Double](v.indices.map(i => Seq(i)), v.values, Seq(v.size))
+    }
+  }
+
   def baseCast(from: BasicType, to: BasicType): Option[Try[(Any) => Any]] = {
     if(from == to) {
       None
@@ -97,7 +105,7 @@ object Casting {
   }
 
   def cast(from: DataType, to: DataType): Option[Try[(Any) => Any]] = {
-    val primaryCast = (from, to) match {
+    val primaryCast: Option[Try[(Any) => Any]] = (from, to) match {
       case (_: ScalarType, _: ScalarType) =>
         baseCast(from.base, to.base)
       case (_: ScalarType, tt: TensorType) if tt.dimensions.exists(_.isEmpty) =>
@@ -151,6 +159,31 @@ object Casting {
             c => (l: Any) => l.asInstanceOf[Seq[Any]].map(c)
           }
         }
+      case (fMap: MapType, tMap: MapType) =>
+        val mapCaster: Any => Map[Any, Any] = (baseCast(fMap.key, tMap.key), baseCast(fMap.base, tMap.base)) match {
+          // need to consider all the cases where the key and/or values have casting to do (or not do)
+          case (kCast: Some[Try[Any => Any]], vCast: Some[Try[Any => Any]]) =>
+            val kFn = kCast.get.get
+            val vFn = vCast.get.get
+            (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
+              case (k, v) => (kFn(k), vFn(v))
+            }
+          case (None, vCast: Some[Try[Any => Any]]) =>
+            val vFn = vCast.get.get
+            (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
+              case (k, v) => (k, vFn(v))
+            }
+          case (kCast: Some[Try[Any => Any]], None) =>
+            val kFn = kCast.get.get
+            (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
+              case (k, v) => (kFn(k), v)
+            }
+          case (None, None) =>
+            (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
+              case (k, v) => (k, v)
+            }
+          }
+        Option(Try(mapCaster))
       case (_: ListType, _: TensorType) =>
         baseCast(from.base, to.base).map {
           _.flatMap {
@@ -245,32 +278,88 @@ object Casting {
               to.base match {
                 case BasicType.Boolean =>
                   val cc = c.asInstanceOf[(Any) => Boolean]
-                  (v: Any) => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                  (v: Any) => {
+                    v match {
+                      case _: SparkVector => sparkVectorToMLeapTensor(v.asInstanceOf[SparkVector]).mapValues(cc)
+                      case _ => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                    }
+                  }
                 case BasicType.Byte =>
                   val cc = c.asInstanceOf[(Any) => Byte]
-                  (v: Any) => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                  (v: Any) => {
+                    v match {
+                      case _: SparkVector => sparkVectorToMLeapTensor(v.asInstanceOf[SparkVector]).mapValues(cc)
+                      case _ => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                    }
+                  }
                 case BasicType.Short =>
                   val cc = c.asInstanceOf[(Any) => Short]
-                  (v: Any) => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                  (v: Any) => {
+                    v match {
+                      case _: SparkVector => sparkVectorToMLeapTensor(v.asInstanceOf[SparkVector]).mapValues(cc)
+                      case _ => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                    }
+                  }
                 case BasicType.Int =>
                   val cc = c.asInstanceOf[(Any) => Int]
-                  (v: Any) => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                  (v: Any) => {
+                    v match {
+                      case _: SparkVector => sparkVectorToMLeapTensor(v.asInstanceOf[SparkVector]).mapValues(cc)
+                      case _ => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                    }
+                  }
                 case BasicType.Long =>
                   val cc = c.asInstanceOf[(Any) => Long]
-                  (v: Any) => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                  (v: Any) => {
+                    v match {
+                      case _: SparkVector => sparkVectorToMLeapTensor(v.asInstanceOf[SparkVector]).mapValues(cc)
+                      case _ => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                    }
+                  }
                 case BasicType.Float =>
                   val cc = c.asInstanceOf[(Any) => Float]
-                  (v: Any) => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                  (v: Any) => {
+                    v match {
+                      case _: SparkVector => sparkVectorToMLeapTensor(v.asInstanceOf[SparkVector]).mapValues(cc)
+                      case _ => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                    }
+                  }
                 case BasicType.Double =>
                   val cc = c.asInstanceOf[(Any) => Double]
-                  (v: Any) => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                  (v: Any) => {
+                    v match {
+                      case _: SparkVector => sparkVectorToMLeapTensor(v.asInstanceOf[SparkVector]).mapValues(cc)
+                      case _ => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                    }
+                  }
                 case BasicType.String =>
                   val cc = c.asInstanceOf[(Any) => String]
-                  (v: Any) => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                  (v: Any) => {
+                    v match {
+                      case _: SparkVector => sparkVectorToMLeapTensor(v.asInstanceOf[SparkVector]).mapValues(cc)
+                      case _ => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                    }
+                  }
                 case BasicType.ByteString =>
                   val cc = c.asInstanceOf[(Any) => ByteString]
-                  (v: Any) => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                  (v: Any) => {
+                    v match {
+                      case _: SparkVector => sparkVectorToMLeapTensor(v.asInstanceOf[SparkVector]).mapValues(cc)
+                      case _ => v.asInstanceOf[Tensor[_]].mapValues(cc)
+                    }
+                  }
               }
+          }
+        }.orElse {
+          Some {
+            Try {
+              (v: Any) => {
+                v match {
+                  case _: SparkVector => sparkVectorToMLeapTensor(v.asInstanceOf[SparkVector])
+                  case _ => v
+                }
+              }
+            }
           }
         }
       case _ => Some(Failure(new IllegalArgumentException(s"Cannot cast $from to $to")))

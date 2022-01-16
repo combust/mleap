@@ -69,6 +69,7 @@ trait TypeConverters {
       case ArrayType(DoubleType, _) => types.ListType.Double
       case ArrayType(StringType, _) => types.ListType.String
       case ArrayType(ArrayType(ByteType, _), _) => types.ListType.ByteString
+      case MapType(keyType, valueType, _) => types.MapType(sparkTypeToMleapBasicType(keyType), sparkTypeToMleapBasicType(valueType))
       case _: VectorUDT =>
         val size = getVectorSize(dataset, field)
         types.TensorType.Double(size)
@@ -78,6 +79,7 @@ trait TypeConverters {
       case ArrayType(elementType, _) if elementType == new VectorUDT =>
         val a = dataset.select(field.name).head.getAs[mutable.WrappedArray[Vector]](0)
         types.TensorType.Double(a.length, a.head.size)
+      case _ => throw new UnsupportedOperationException(s"Cannot convert spark field $field to mleap")
     }
 
     types.StructField(field.name, dt.setNullable(field.nullable))
@@ -86,6 +88,21 @@ trait TypeConverters {
   def sparkSchemaToMleapSchema(dataset: DataFrame): types.StructType = {
     val fields = dataset.schema.fields.map(f => sparkFieldToMleapField(dataset, f))
     types.StructType(fields).get
+  }
+
+  def sparkTypeToMleapBasicType(sparkType: DataType): types.BasicType = {
+    sparkType match{
+      case BooleanType => types.BasicType.Boolean
+      case ByteType => types.BasicType.Byte
+      case ShortType => types.BasicType.Short
+      case IntegerType => types.BasicType.Int
+      case LongType => types.BasicType.Long
+      case FloatType => types.BasicType.Float
+      case DoubleType => types.BasicType.Double
+      case _: DecimalType => types.BasicType.Double
+      case StringType => types.BasicType.String
+      case _ => throw new IllegalArgumentException(s"Can not convert spark $sparkType to mleap BasicType")
+    }
   }
 
   def mleapBasicTypeToSparkType(base: BasicType): DataType = base match {
@@ -98,6 +115,7 @@ trait TypeConverters {
     case BasicType.Double => DoubleType
     case BasicType.String => StringType
     case BasicType.ByteString => ArrayType(ByteType, containsNull = false)
+    case _ => throw new UnsupportedOperationException(s"Cannot cast mleap type $base to spark DataType")
   }
 
   def mleapToSparkValue(dataType: types.DataType): (Any) => Any = dataType match {
@@ -128,6 +146,7 @@ trait TypeConverters {
     val dt = field.dataType match {
       case types.ScalarType(base, _) => mleapBasicTypeToSparkType(base)
       case types.ListType(base, _) => ArrayType(mleapBasicTypeToSparkType(base), containsNull = false)
+      case types.MapType(key, value, _) => MapType(mleapBasicTypeToSparkType(key), mleapBasicTypeToSparkType(value))
       case tt: types.TensorType => mleapTensorToSpark(tt)
     }
 
@@ -138,6 +157,7 @@ trait TypeConverters {
     val dt = field.dataType match {
       case types.ScalarType(base, _) => mleapBasicTypeToSparkType(base)
       case types.ListType(base, _) => ArrayType(mleapBasicTypeToSparkType(base), containsNull = false)
+      case types.MapType(key, value, _) => MapType(mleapBasicTypeToSparkType(key), mleapBasicTypeToSparkType(value))
       case tt: types.TensorType => mleapTensorToSpark(tt)
     }
 
@@ -172,6 +192,7 @@ trait TypeConverters {
          | DoubleType | StringType => types.ScalarShape(field.nullable)
     case _: DecimalType => types.ScalarShape(field.nullable)
     case ArrayType(_, false) => types.ListShape(field.nullable)
+    case MapType(_, _, _) => types.ListShape(field.nullable)
     case vu: VectorUDT =>
       val size = getVectorSize(dataset, field)
       types.TensorShape(Some(Seq(size)), field.nullable)

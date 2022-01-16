@@ -4,9 +4,9 @@ import ml.bundle.DataShape
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.dsl._
 import ml.combust.bundle.op.OpModel
-import ml.combust.mleap.core.types.ListShape
 import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.feature.Binarizer
+import org.apache.spark.ml.bundle.ops.OpsUtils
 import org.apache.spark.sql.mleap.TypeConverters._
 import ml.combust.mleap.runtime.types.BundleTypeConverters._
 import org.apache.spark.ml.bundle.ops.OpsUtils

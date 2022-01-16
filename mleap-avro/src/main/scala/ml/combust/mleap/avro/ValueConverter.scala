@@ -1,7 +1,6 @@
 package ml.combust.mleap.avro
 
 import java.nio.ByteBuffer
-
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.{ByteString, DenseTensor, SparseTensor, Tensor}
 import org.apache.avro.generic.GenericData
@@ -31,6 +30,7 @@ case class ValueConverter() {
   def mleapToAvroSimple(dataType: DataType): (Any) => Any = dataType match {
     case st: ScalarType => mleapToAvroBasic(st.base)
     case _: ListType => (value) => value.asInstanceOf[Seq[_]].asJava
+    case _: MapType => (value) => value.asInstanceOf[Map[String, _]].asJava
     case tt: TensorType =>
       val vectorRecord = new GenericData.Record(tt)
       (value) => {
@@ -80,6 +80,13 @@ case class ValueConverter() {
       case _ =>
         val atm = avroToMleapBasic(at.base)
         (value) => value.asInstanceOf[GenericData.Array[_]].asScala.map(atm)
+    }
+    case mt: MapType => (value) => {
+      val kConverter = avroToMleapBasic(mt.key)
+      val vConverter = avroToMleapBasic(mt.base)
+      value.asInstanceOf[java.util.Map[_,_]].asScala.map {
+        case (k, v) => kConverter(k) -> vConverter(v)
+      }
     }
     case tt: TensorType =>
       (value) => {

@@ -208,6 +208,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
   def checkEquality(original: Transformer, deserialized: Transformer, additionalIgnoreParams: Set[String]): Unit = {
     assert(original.getClass == deserialized.getClass)
+    assert(original.uid == deserialized.uid)
     checkParamsEquality(original, deserialized, additionalIgnoreParams)
     original match {
       case original: PipelineModel =>

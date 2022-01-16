@@ -131,3 +131,14 @@ case class ListType(override val base: BasicType,
 
   override def shape: ListShape = ListShape(isNullable)
 }
+
+
+case class MapType(val key: BasicType,
+                   override val base: BasicType,
+                   override val isNullable: Boolean = true) extends DataType {
+
+  override def setNullable(isNullable: Boolean): DataType = copy(isNullable = isNullable)
+  override def simpleString: String = "map"
+  override def printString: String = s"$simpleString(key=$key,base=$base,nullable=$isNullable)"
+  override def shape: ListShape = ListShape(isNullable)
+}

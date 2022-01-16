@@ -1,4 +1,4 @@
-# Release 0.19.0-SNAPSHOT (NOT RELEASED YET)
+# Release 0.20.0-SNAPSHOT (NOT RELEASED YET)
 
 ### Breaking Changes
 
@@ -9,6 +9,23 @@
 ### Improvements
 
 ### Other Changes
+
+# Release 0.19.0
+
+### New Features
+- `MapType` is now supported as a core data type (#789)
+- `MapEntrySelector` is a new Transformer that can be used to select values from maps (#789)
+- Spark Vectors can now be cast into MLeap Tensors (#791)
+
+### Bug Fixes
+- Fixes uid parity issues for certain Spark 3 transformers (#788)
+- MLeap Tensor -> Spark Vector casting logic is fixed for non-increasing indices (#794)
+
+### Improvements
+- Upgrades to xgboost v1.3.1 (#778)
+- Updates shading rules for databricks runtime assembly (#780)
+- StringIndexerModel now performs faster lookups by caching the index size (#793)
+- Upgrades springboot version to 2.6.2 and junit to 5.8.2
 
 # Release 0.18.1
 

@@ -31,8 +31,6 @@ jobs:
         - make test_benchmark
 
     - name: "All other sbt tests"
-      before_script:
-        - travis/publish-xgboost4j-spark32-to-local-mvn.sh
       script:
         - make test_root_sbt_project
 

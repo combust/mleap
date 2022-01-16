@@ -77,6 +77,8 @@ object Dependencies {
     val xgboostPredictorDep = "ai.h2o" % "xgboost-predictor" % "0.3.18" exclude("com.esotericsoftware.kryo", "kryo")
 
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
+
+    val slf4jDep = "org.slf4j" % "slf4j-log4j12" % slf4jVersion
   }
 
   object Test {
@@ -117,7 +119,7 @@ object Dependencies {
 
   val spark = l ++= Provided.spark ++ Test.sparkTest
 
-  val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest) ++ Test.sparkTest
+  val sparkExtension = l ++= Provided.spark ++ Seq(Compile.slf4jDep) ++ Seq(Test.scalaTest) ++ Test.sparkTest
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 

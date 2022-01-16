@@ -95,13 +95,13 @@ class XGBoostPredictorClassificationModelParitySpec extends FunSpec
   }
 
   it("[Multinomial] An XGBoost4j Booster has the same results as a deserialized Predictor"){
-    equalityTestRowByRowMultinomialProbability(ClassifierUtils.multinomialBooster, ClassifierUtils.deserializedMultinomialXGBoostPredictor, leapFrameMultinomial)
+    equalityTestRowByRowMultinomialProbability(ClassifierUtils.multinomialBooster, ClassifierUtils.deserializedMultinomialXGBoostPredictor, leapFrameMultinomial, precision = 1e-5)
   }
 
   it("[Multinomial] XGBoostPredictorMultinomialClassificationModel results are the same pre and post serialization") {
     val xgboost4jResult = ClassifierUtils.multinomialMleapTransformer.transform(leapFrameMultinomial).get
     val predictorResult = ClassifierUtils.deserializedMultinomialXGBoostPredictor.transform(leapFrameMultinomial).get
-    probabilityColumnEqualityTest(xgboost4jResult, predictorResult)
+    probabilityColumnEqualityTest(xgboost4jResult, predictorResult, precision=1e-5)
   }
 
   it("XGBoost4j and Predictor results are the same when using a dense dataset") {

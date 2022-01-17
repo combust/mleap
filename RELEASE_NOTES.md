@@ -5,6 +5,7 @@
 ### New Features
 
 ### Bug Fixes
+- Fixes 'cannot assign instance of java.lang.invoke.SerializedLambda' for Tensorflow transformer when using sparkTransform() method
 
 ### Improvements
 
@@ -15,7 +16,7 @@
 ### New Features
 - `MapType` is now supported as a core data type (#789)
 - `MapEntrySelector` is a new Transformer that can be used to select values from maps (#789)
-- Spark Vectors can now be cast into MLeap Tensors (#791)
+- Spark Vectors can now be cast into\ MLeap Tensors (#791)
 
 ### Bug Fixes
 - Fixes uid parity issues for certain Spark 3 transformers (#788)

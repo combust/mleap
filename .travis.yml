@@ -21,60 +21,9 @@ jdk:
 
 jobs:
   include:
-    - stage: "Mleap tests"
-      name: "MLeap executor tests"
+    - name: "xgboost-spark test"
       script:
-        - make test_executor
-
-    - name: "Mleap benchmark tests"
-      script:
-        - make test_benchmark
-
-    - name: "All other sbt tests"
-      script:
-        - make test_root_sbt_project
-
-    - name: "Python 3.6 tests"
-      language: python
-      python: 3.6
-      env:
-        # By default, "python" projects use the default jdk version, which is openjdk11 on xenial
-        # But we need jdk8 for spark, so we need to change it back
-        - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
-        - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
-      install:
-        - pip install tox
-      before_script:
-        - >
-          curl
-          --create-dirs -L -o $HOME/.sbt/launchers/0.13.18/sbt-launch.jar
-          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.18/sbt-launch.jar
-      script:
-        - make py36_test
-
-    - name: "Python 3.7 tests"
-      language: python
-      python: 3.7
-      env:
-        # By default, "python" projects use the default jdk version, which is openjdk11 on xenial
-        # But we need jdk8 for spark, so we need to change it back
-        - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
-        - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
-      install:
-        - pip install tox
-      before_script:
-        - >
-          curl
-          --create-dirs -L -o $HOME/.sbt/launchers/0.13.18/sbt-launch.jar
-          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.18/sbt-launch.jar
-      script:
-        - make py37_test
-
-    - if: (NOT type IN (pull_request)) AND (branch = master)
-      stage: "Deploy"
-      name: "Publish signed jars"
-      script:
-        - travis/travis_publish.sh
+        - make test_xgboost_spark
 
 notifications:
   on_success: change

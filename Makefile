@@ -21,7 +21,7 @@ test_xgboost_runtime:
 
 .PHONY: test_xgboost_spark
 test_xgboost_spark:
-	$(SBT) "+ mleap-xgboost-spark/test"
+	$(SBT) "+ mleap-xgboost-spark/test" -verbose -debug
 
 .PHONY: py36_test
 py36_test:

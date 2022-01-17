@@ -47,8 +47,7 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
       setPredictionCol("prediction").
       fit(featureAssembler.transform(dataset)).
       setLeafPredictionCol("leaf_prediction").
-      setContribPredictionCol("contrib_prediction").
-      setTreeLimit(1)
+      setContribPredictionCol("contrib_prediction")
 
     SparkUtil.createPipelineModel(Array(featureAssembler, regressor))
   }

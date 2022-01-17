@@ -57,7 +57,6 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
       setLabelCol(labelCol).
       fit(featurePipeline.transform(dataset)).
       setLeafPredictionCol("leaf_prediction").
-      setContribPredictionCol("contrib_prediction").
-      setTreeLimit(1)
+      setContribPredictionCol("contrib_prediction")
   }
 }

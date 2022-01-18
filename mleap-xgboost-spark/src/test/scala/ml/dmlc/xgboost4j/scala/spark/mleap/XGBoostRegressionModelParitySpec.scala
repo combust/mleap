@@ -42,6 +42,9 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
     val featureAssembler = new VectorAssembler()
       .setInputCols(Array("AT", "V", "AP", "RH"))
       .setOutputCol("features")
+    if (org.apache.spark.ml.parity.SparkEnv.spark.sparkContext.isStopped) {
+      throw new RuntimeException("DBG: spark context stopped.")
+    }
     val regressor = new XGBoostRegressor(xgboostParams).
       setFeaturesCol("features").
       setLabelCol("PE").

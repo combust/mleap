@@ -4,7 +4,7 @@ import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.mleap.SparkUtil
-import org.apache.spark.ml.parity.SparkParityBase
+import org.apache.spark.ml.parity.{SparkEnv, SparkParityBase}
 import org.apache.spark.sql.DataFrame
 
 /**
@@ -52,6 +52,9 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
                        featurePipeline: Transformer,
                        dataset: DataFrame,
                        labelCol: String): Transformer ={
+    if (org.apache.spark.ml.parity.SparkEnv.spark.sparkContext.isStopped) {
+      throw new RuntimeException("DBG: spark context stopped.")
+    }
     new XGBoostClassifier(xgboostParams).
       setFeaturesCol("features").
       setProbabilityCol("probabilities").

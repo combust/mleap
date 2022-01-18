@@ -22,7 +22,8 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
     "treeMethod" -> "approx",
     "earlyStoppingRounds" -> 2,
     "numRound" -> 15,
-    "allowNonZeroForMissing" -> true
+    "allowNonZeroForMissing" -> true,
+    "killSparkContextOnWorkerFailure" -> false,
   )
 
   // These params are not needed for making predictions, so we don't serialize them

@@ -1,6 +1,5 @@
 # Use container-based infrastructure
-os: linux
-dist: xenial
+dist: bionic
 
 addons:
   apt:

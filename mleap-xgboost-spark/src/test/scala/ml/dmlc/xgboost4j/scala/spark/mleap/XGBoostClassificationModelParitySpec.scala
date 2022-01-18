@@ -64,7 +64,7 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
         setLeafPredictionCol("leaf_prediction").
         setContribPredictionCol("contrib_prediction")
     } catch {
-      case e: _ =>
+      case e: Exception =>
         if (org.apache.spark.ml.parity.SparkEnv.spark.sparkContext.isStopped) {
           throw new RuntimeException("classifier DBG: spark context stopped. # 2")
         } else {

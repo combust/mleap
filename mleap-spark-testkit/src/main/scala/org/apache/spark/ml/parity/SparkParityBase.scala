@@ -57,6 +57,15 @@ object SparkParityBase extends FunSpec {
   }
 }
 
+
+object SparkEnv {
+  lazy val spark = SparkSession.builder().
+    appName("Spark/MLeap Parity Tests").
+    master("local[2]").
+    getOrCreate()
+}
+
+
 abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   lazy val baseDataset: DataFrame = SparkParityBase.dataset(spark)
   lazy val textDataset: DataFrame = SparkParityBase.textDataset(spark)
@@ -66,12 +75,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
   val dataset: DataFrame
   val sparkTransformer: Transformer
 
-  lazy val spark = SparkSession.builder().
-    appName("Spark/MLeap Parity Tests").
-    master("local[2]").
-    getOrCreate()
-
-  override protected def afterAll(): Unit = spark.stop()
+  val spark = SparkEnv.spark
 
   var bundleCache: Option[File] = None
 

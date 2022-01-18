@@ -31,10 +31,7 @@ trait CachedDatasetUtils {
 
   private def leapFrameFromCSVFile(filePath: String): DefaultLeapFrame = {
     // Use Spark utils to load csv from disk
-    val spark = SparkSession.builder()
-      .master("local[2]")
-      .appName(s"${this.getClass.getName}")
-      .getOrCreate()
+    val spark = org.apache.spark.ml.parity.SparkEnv.spark
 
     val dataFrame = spark.read.format("csv")
       .option("header", "false")
@@ -62,10 +59,7 @@ trait CachedDatasetUtils {
   private def leapFrameFromLibSVMFile(filePath: String): DefaultLeapFrame = {
 
     // Use Spark utils to load libsvm from disk
-    val spark = SparkSession.builder()
-      .master("local[2]")
-      .appName(s"${this.getClass.getName}")
-      .getOrCreate()
+    val spark = org.apache.spark.ml.parity.SparkEnv.spark
 
     // This is the dataset used by dmlc-XGBoost https://github.com/dmlc/xgboost/blob/master/demo/data/agaricus.txt.train
     val dataFrame = spark.read.format("libsvm")

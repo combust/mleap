@@ -16,13 +16,13 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
 
   private val xgboostParams: Map[String, Any] = Map(
     "eta" -> 0.3,
-    "maxDepth" -> 2,
+    "max_depth" -> 2,
     "missing" -> 0.0f,
     "objective" -> "reg:squaredlogerror",
-    "treeMethod" -> "approx",
-    "earlyStoppingRounds" -> 2,
-    "numRound" -> 15,
-    "allowNonZeroForMissing" -> true,
+    "tree_method" -> "approx",
+    "early_stopping_rounds" -> 2,
+    "num_round" -> 15,
+    "allow_non_zero_for_missing" -> true,
     "kill_spark_context_on_worker_failure" -> false,
   )
 

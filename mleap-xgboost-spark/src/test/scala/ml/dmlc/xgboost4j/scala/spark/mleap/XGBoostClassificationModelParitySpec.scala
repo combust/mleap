@@ -25,15 +25,15 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
 
   val xgboostParams = Map(
     "eta" -> 0.3,
-    "maxDepth" -> 2,
+    "max_depth" -> 2,
     "objective" -> "binary:logistic",
-    "treeMethod" -> "approx",
-    "earlyStoppingRounds" -> 2,
-    "numRound" -> 15,
-    "numClasses" -> 2,
-    "nWorkers" -> 2,
+    "tree_method" -> "approx",
+    "early_stopping_rounds" -> 2,
+    "num_round" -> 15,
+    "num_classes" -> 2,
+    "num_workers" -> 2,
     "missing" -> 0.0f,
-    "allowNonZeroForMissing" -> true,
+    "allow_non_zero_for_missing" -> true,
     "kill_spark_context_on_worker_failure" -> false,
   )
 

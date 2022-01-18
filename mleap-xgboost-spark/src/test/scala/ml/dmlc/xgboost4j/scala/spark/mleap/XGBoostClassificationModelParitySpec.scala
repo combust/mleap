@@ -28,7 +28,7 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
     "max_depth" -> 2,
     "objective" -> "binary:logistic",
     "tree_method" -> "approx",
-    "early_stopping_rounds" -> 2,
+    "num_early_stopping_rounds" -> 2,
     "num_round" -> 15,
     "num_classes" -> 2,
     "num_workers" -> 2,

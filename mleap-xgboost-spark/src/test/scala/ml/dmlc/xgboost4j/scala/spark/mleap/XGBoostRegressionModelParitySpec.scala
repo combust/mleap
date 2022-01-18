@@ -20,7 +20,7 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
     "missing" -> 0.0f,
     "objective" -> "reg:squaredlogerror",
     "tree_method" -> "approx",
-    "early_stopping_rounds" -> 2,
+    "num_early_stopping_rounds" -> 2,
     "num_round" -> 15,
     "allow_non_zero_for_missing" -> true,
     "kill_spark_context_on_worker_failure" -> false,

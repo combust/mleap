@@ -1,5 +1,5 @@
 # Use container-based infrastructure
-dist: bionic
+dist: focal
 
 addons:
   apt:

@@ -53,14 +53,23 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
                        dataset: DataFrame,
                        labelCol: String): Transformer ={
     if (org.apache.spark.ml.parity.SparkEnv.spark.sparkContext.isStopped) {
-      throw new RuntimeException("DBG: spark context stopped.")
+      throw new RuntimeException("classifier DBG: spark context stopped. # 1")
     }
-    new XGBoostClassifier(xgboostParams).
-      setFeaturesCol("features").
-      setProbabilityCol("probabilities").
-      setLabelCol(labelCol).
-      fit(featurePipeline.transform(dataset)).
-      setLeafPredictionCol("leaf_prediction").
-      setContribPredictionCol("contrib_prediction")
+    try {
+      new XGBoostClassifier(xgboostParams).
+        setFeaturesCol("features").
+        setProbabilityCol("probabilities").
+        setLabelCol(labelCol).
+        fit(featurePipeline.transform(dataset)).
+        setLeafPredictionCol("leaf_prediction").
+        setContribPredictionCol("contrib_prediction")
+    } catch {
+      case e: _ =>
+        if (org.apache.spark.ml.parity.SparkEnv.spark.sparkContext.isStopped) {
+          throw new RuntimeException("classifier DBG: spark context stopped. # 2")
+        } else {
+          throw e
+        }
+    }
   }
 }

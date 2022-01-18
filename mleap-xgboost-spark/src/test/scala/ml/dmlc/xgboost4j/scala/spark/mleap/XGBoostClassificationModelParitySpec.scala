@@ -35,6 +35,7 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
     "missing" -> 0.0f,
     "allow_non_zero_for_missing" -> true,
     "kill_spark_context_on_worker_failure" -> false,
+    "verbosity" -> 2
   )
 
   // These params are not needed for making predictions, so we don't serialize them

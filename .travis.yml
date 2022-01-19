@@ -1,5 +1,9 @@
 # Use container-based infrastructure
-dist: bionic
+dist: xenial
+
+env:
+  global:
+    - PATH=/opt/python/3.6.7/bin:$PATH
 
 addons:
   apt:
@@ -22,8 +26,6 @@ jobs:
   include:
     - name: "xgboost-spark test"
       before_script:
-        - echo "DEBUG python"
-        - which python3
         - travis/publish-xgboost4j-spark32-to-local-mvn.sh
       script:
         - make test_xgboost_spark

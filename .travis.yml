@@ -22,6 +22,7 @@ jobs:
   include:
     - name: "xgboost-spark test"
       script:
+        - python -V
         - make test_xgboost_spark
 
 notifications:

@@ -28,7 +28,7 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
     "num_classes" -> 2,
     "missing" -> 0.0f,
     "allow_non_zero_for_missing" -> true,
-    "tracker_conf" -> TrackerConf(0L, "scala")
+    // "tracker_conf" -> TrackerConf(0L, "scala")
   )
 
   // These params are not needed for making predictions, so we don't serialize them

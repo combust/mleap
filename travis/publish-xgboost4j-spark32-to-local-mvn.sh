@@ -2,10 +2,10 @@
 
 set -e
 
-git clone https://github.com/WeichenXu123/xgboost.git@v151-dbg --depth=1
+git clone https://github.com/WeichenXu123/xgboost.git --depth=1
 cd xgboost
-git fetch origin xgb1.4.1-spark-3.2:xgb1.4.1-spark-3.2
-git checkout xgb1.4.1-spark-3.2
+git fetch origin v151-dbg:v151-dbg
+git checkout v151-dbg
 
 cd jvm-packages/xgboost4j-spark
 

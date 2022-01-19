@@ -2,6 +2,13 @@
 os: linux
 dist: xenial
 
+# Set default python env to be 3.7
+# because the xgboost-spark 1.5.1 library when running training code, it will
+# run a python script (in RabitTracker) which only support python3
+env:
+  global:
+    - PATH=/opt/python/3.6.7/bin:$PATH
+
 addons:
   apt:
     sources:

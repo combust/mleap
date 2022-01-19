@@ -24,16 +24,10 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
   }
 
   val xgboostParams = Map(
-    "eta" -> 0.3,
-    "maxDepth" -> 2,
     "objective" -> "binary:logistic",
-    "treeMethod" -> "approx",
-    "earlyStoppingRounds" -> 2,
-    "numRound" -> 15,
-    "numClasses" -> 2,
-    "nWorkers" -> 2,
+    "num_classes" -> 2,
     "missing" -> 0.0f,
-    "allowNonZeroForMissing" -> true
+    "allow_non_zero_for_missing" -> true,
   )
 
   // These params are not needed for making predictions, so we don't serialize them

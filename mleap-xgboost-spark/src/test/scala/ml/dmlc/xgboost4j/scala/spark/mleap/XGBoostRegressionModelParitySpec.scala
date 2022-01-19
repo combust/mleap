@@ -54,7 +54,7 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
         fit(featureAssembler.transform(dataset)).
         setLeafPredictionCol("leaf_prediction").
         setContribPredictionCol("contrib_prediction")
-
+      regressor.set[TrackerConf](regressor.trackerConf, TrackerConf())
       SparkUtil.createPipelineModel(Array(featureAssembler, regressor))
     } catch { case e: Exception =>
       if (org.apache.spark.ml.parity.SparkEnv.spark.sparkContext.isStopped) {

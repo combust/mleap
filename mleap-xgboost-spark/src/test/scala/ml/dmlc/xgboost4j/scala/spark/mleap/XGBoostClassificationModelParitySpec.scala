@@ -59,13 +59,15 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
     val xgb1 = new XGBoostClassifier(xgboostParams)
     println(s"classifier max depth=${xgb1.getMaxDepth}")
     try {
-      new XGBoostClassifier(xgboostParams).
+      val model = new XGBoostClassifier(xgboostParams).
         setFeaturesCol("features").
         setProbabilityCol("probabilities").
         setLabelCol(labelCol).
         fit(featurePipeline.transform(dataset)).
         setLeafPredictionCol("leaf_prediction").
         setContribPredictionCol("contrib_prediction")
+      model.set[TrackerConf](model.trackerConf, TrackerConf())
+      model
     } catch {
       case e: Exception =>
         if (org.apache.spark.ml.parity.SparkEnv.spark.sparkContext.isStopped) {

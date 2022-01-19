@@ -8,3 +8,5 @@ metastore_db/
 unsafe.*
 /python/**/*.pyc
 .sbtopts
+.DS_Store
+

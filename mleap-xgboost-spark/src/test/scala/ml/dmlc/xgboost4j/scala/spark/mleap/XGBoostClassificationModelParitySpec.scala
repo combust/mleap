@@ -25,17 +25,16 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
 
   val xgboostParams = Map(
     "eta" -> 0.3,
-    "max_depth" -> 2,
+    "maxDepth" -> 2,
     "objective" -> "binary:logistic",
-    "tree_method" -> "approx",
-    "num_early_stopping_rounds" -> 2,
-    "num_round" -> 15,
-    "num_classes" -> 2,
-    "num_workers" -> 2,
+    "treeMethod" -> "approx",
+    "earlyStoppingRounds" -> 2,
+    "numRound" -> 15,
+    "numClasses" -> 2,
+    "nWorkers" -> 2,
     "missing" -> 0.0f,
-    "allow_non_zero_for_missing" -> true,
-    "kill_spark_context_on_worker_failure" -> false,
-    "verbosity" -> 3
+    "allowNonZeroForMissing" -> true,
+    // "verbosity" -> 3
   )
 
   // These params are not needed for making predictions, so we don't serialize them
@@ -56,6 +55,8 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
     if (org.apache.spark.ml.parity.SparkEnv.spark.sparkContext.isStopped) {
       throw new RuntimeException("classifier DBG: spark context stopped. # 1")
     }
+    val xgb1 = new XGBoostClassifier(xgboostParams)
+    println(s"classifier max depth=${xgb1.getMaxDepth}")
     try {
       new XGBoostClassifier(xgboostParams).
         setFeaturesCol("features").

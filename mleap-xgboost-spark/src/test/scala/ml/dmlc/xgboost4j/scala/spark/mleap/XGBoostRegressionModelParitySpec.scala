@@ -16,15 +16,14 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
 
   private val xgboostParams: Map[String, Any] = Map(
     "eta" -> 0.3,
-    "max_depth" -> 2,
+    "maxDepth" -> 2,
     "missing" -> 0.0f,
     "objective" -> "reg:squaredlogerror",
-    "tree_method" -> "approx",
-    "num_early_stopping_rounds" -> 2,
-    "num_round" -> 15,
-    "allow_non_zero_for_missing" -> true,
-    "kill_spark_context_on_worker_failure" -> false,
-    "verbosity" -> 3
+    "treeMethod" -> "approx",
+    "earlyStoppingRounds" -> 2,
+    "numRound" -> 15,
+    "allowNonZeroForMissing" -> true,
+    // "verbosity" -> 3
   )
 
   // These params are not needed for making predictions, so we don't serialize them

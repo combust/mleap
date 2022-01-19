@@ -24,7 +24,7 @@ jobs:
       before_script:
         - travis/publish-xgboost4j-spark32-to-local-mvn.sh
       script:
-        - python -V
+        - python3 -V
         - make test_xgboost_spark
 
 notifications:

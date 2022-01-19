@@ -1,6 +1,6 @@
 package ml.dmlc.xgboost4j.scala.spark.mleap
 
-import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressor
+import ml.dmlc.xgboost4j.scala.spark.{TrackerConf, XGBoostRegressor}
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.mleap.SparkUtil
@@ -23,6 +23,7 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
     "earlyStoppingRounds" -> 2,
     "numRound" -> 15,
     "allowNonZeroForMissing" -> true,
+    "tracker_conf" -> TrackerConf(0L, "scala")
     // "verbosity" -> 3
   )
 

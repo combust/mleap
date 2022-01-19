@@ -1,6 +1,6 @@
 package ml.dmlc.xgboost4j.scala.spark.mleap
 
-import ml.dmlc.xgboost4j.scala.spark.XGBoostClassifier
+import ml.dmlc.xgboost4j.scala.spark.{TrackerConf, XGBoostClassifier}
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.mleap.SparkUtil
@@ -34,6 +34,7 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
     "nWorkers" -> 2,
     "missing" -> 0.0f,
     "allowNonZeroForMissing" -> true,
+    "tracker_conf" -> TrackerConf(0L, "scala")
     // "verbosity" -> 3
   )
 

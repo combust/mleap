@@ -21,8 +21,6 @@ jdk:
 jobs:
   include:
     - name: "xgboost-spark test"
-      before_script:
-        - travis/publish-xgboost4j-spark32-to-local-mvn.sh
       script:
         - make test_xgboost_spark
 

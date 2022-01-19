@@ -73,7 +73,7 @@ object Dependencies {
     val breeze = "org.scalanlp" %% "breeze" % breezeVersion
 
     val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion
-    val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % "1.5.1-dbg1"
+    val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % xgboostVersion
     val xgboostPredictorDep = "ai.h2o" % "xgboost-predictor" % "0.3.18" exclude("com.esotericsoftware.kryo", "kryo")
 
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion

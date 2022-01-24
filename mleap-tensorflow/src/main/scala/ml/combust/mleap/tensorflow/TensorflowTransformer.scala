@@ -13,12 +13,16 @@ import scala.util.Try
 case class TensorflowTransformer(override val uid: String = Transformer.uniqueName("tensorflow"),
                                  override val shape: NodeShape,
                                  override val model: TensorflowModel) extends Transformer {
-  private val f = (tensors: Row) => {
-    Row(model(tensors.toSeq.map(_.asInstanceOf[Tensor[_]]): _*): _*)
+
+  val exec: UserDefinedFunction = {
+    val f = (tensors: Row) => {
+      Row(model(tensors.toSeq.map(_.asInstanceOf[Tensor[_]]): _*): _*)
+    }
+
+    UserDefinedFunction(f,
+      outputSchema,
+      Seq(SchemaSpec(inputSchema)))
   }
-  val exec: UserDefinedFunction = UserDefinedFunction(f,
-    outputSchema,
-    Seq(SchemaSpec(inputSchema)))
 
   val outputCols: Seq[String] = outputSchema.fields.map(_.name)
   val inputCols: Seq[String] = inputSchema.fields.map(_.name)

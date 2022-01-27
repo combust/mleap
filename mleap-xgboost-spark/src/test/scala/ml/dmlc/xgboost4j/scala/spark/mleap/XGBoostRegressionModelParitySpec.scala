@@ -15,14 +15,9 @@ case class PowerPlantTable(AT: Double, V : Double, AP : Double, RH : Double, PE 
 class XGBoostRegressionModelParitySpec extends SparkParityBase {
 
   private val xgboostParams: Map[String, Any] = Map(
-    "eta" -> 0.3,
-    "maxDepth" -> 2,
-    "missing" -> 0.0f,
     "objective" -> "reg:squaredlogerror",
-    "treeMethod" -> "approx",
-    "earlyStoppingRounds" -> 2,
-    "numRound" -> 15,
-    "allowNonZeroForMissing" -> true
+    "missing" -> 0.0f,
+    "allow_non_zero_for_missing" -> true,
   )
 
   // These params are not needed for making predictions, so we don't serialize them
@@ -47,8 +42,7 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
       setPredictionCol("prediction").
       fit(featureAssembler.transform(dataset)).
       setLeafPredictionCol("leaf_prediction").
-      setContribPredictionCol("contrib_prediction").
-      setTreeLimit(2)
+      setContribPredictionCol("contrib_prediction")
 
     SparkUtil.createPipelineModel(Array(featureAssembler, regressor))
   }

@@ -6,7 +6,7 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "3.0.2"
+  val sparkVersion = "3.2.0"
   val scalaTestVersion = "3.0.8"
   val junitVersion = "5.8.2"
   val akkaVersion = "2.6.14"
@@ -14,10 +14,10 @@ object Dependencies {
   val springBootVersion = "2.6.2"
   lazy val logbackVersion = "1.2.3"
   lazy val loggingVersion = "3.9.0"
-  lazy val slf4jVersion = "1.7.25"
+  lazy val slf4jVersion = "1.7.30"
   lazy val awsSdkVersion = "1.11.1033"
   val tensorflowJavaVersion = "0.3.1" // Match Tensorflow 2.4.1 https://github.com/tensorflow/java/#tensorflow-version-support
-  val xgboostVersion = "1.3.1"
+  val xgboostVersion = "1.5.1"
   val breezeVersion = "1.0"
   val hadoopVersion = "2.7.4" // matches spark version
   val platforms = "windows-x86_64,linux-x86_64,macosx-x86_64"
@@ -77,6 +77,8 @@ object Dependencies {
     val xgboostPredictorDep = "ai.h2o" % "xgboost-predictor" % "0.3.18" exclude("com.esotericsoftware.kryo", "kryo")
 
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
+
+    val slf4jDep = "org.slf4j" % "slf4j-log4j12" % slf4jVersion
   }
 
   object Test {
@@ -117,7 +119,7 @@ object Dependencies {
 
   val spark = l ++= Provided.spark ++ Test.sparkTest
 
-  val sparkExtension = l ++= Provided.spark ++ Seq(Test.scalaTest) ++ Test.sparkTest
+  val sparkExtension = l ++= Provided.spark ++ Seq(Compile.slf4jDep) ++ Seq(Test.scalaTest) ++ Test.sparkTest
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 

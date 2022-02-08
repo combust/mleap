@@ -62,7 +62,7 @@ class TensorflowModelSpec extends FunSpec {
 
       val input = DenseTensor(Array(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f), Seq(2, 3))
       val xyShape = Shape.of(2, 3L)
-      val f = TestUtil.createConcreteFunctionWithVariables(xyShape)
+      val f = TestUtil.createSessionFunctionWithVariables(xyShape)
       val xTensor = MleapConverter.convert(input)
       val zTensor = f.call(xTensor).asInstanceOf[TFloat32]
       try {
@@ -71,7 +71,7 @@ class TensorflowModelSpec extends FunSpec {
       } finally {
         if (xTensor != null) xTensor.close()
         if (zTensor != null) zTensor.close()
-        if (f != null) f.close()
+        if (f != null) f.session.close()
       }
       // load it back
 

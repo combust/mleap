@@ -57,14 +57,14 @@ class TensorflowTransformerSpec extends FunSpec {
       val testFolder = Files.createTempDirectory("tf-saved-model-export")
       val xyShape = Shape.of(2, 3L)
       val input = DenseTensor(Array(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f), Seq(2, 3))
-      val f = TestUtil.createConcreteFunctionWithVariables(xyShape)
+      val f = TestUtil.createSessionFunctionWithVariables(xyShape)
       val xTensor = MleapConverter.convert(input)
       val zTensor = f.call(xTensor).asInstanceOf[TFloat32]
       val reducedSum = zTensor.getFloat()
       try {
         f.save(testFolder.toString)
       } finally {
-        if (f != null) f.close()
+        if (f != null) f.session.close()
         if (xTensor != null) xTensor.close()
         if (zTensor != null) zTensor.close()
       }

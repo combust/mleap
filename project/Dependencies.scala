@@ -16,7 +16,7 @@ object Dependencies {
   lazy val loggingVersion = "3.9.0"
   lazy val slf4jVersion = "1.7.30"
   lazy val awsSdkVersion = "1.11.1033"
-  val tensorflowJavaVersion = "0.3.1" // Match Tensorflow 2.4.1 https://github.com/tensorflow/java/#tensorflow-version-support
+  val tensorflowJavaVersion = "0.4.0" // Match Tensorflow 2.7.0 https://github.com/tensorflow/java/#tensorflow-version-support
   val xgboostVersion = "1.5.2"
   val breezeVersion = "1.0"
   val hadoopVersion = "2.7.4" // matches spark version

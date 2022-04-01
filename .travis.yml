@@ -61,7 +61,7 @@ jobs:
 
     - name: "Python 3.7 tests"
       language: python
-      python: 3.7
+      python: 3.7.9
       env:
         # By default, "python" projects use the default jdk version, which is openjdk11 on xenial
         # But we need jdk8 for spark, so we need to change it back

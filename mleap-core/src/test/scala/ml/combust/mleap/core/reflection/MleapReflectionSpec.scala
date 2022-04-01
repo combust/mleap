@@ -102,6 +102,15 @@ class MleapReflectionSpec extends FunSpec {
     it("throws an illegal argument exception with Product classes that are not case classes") {
       assertThrows[IllegalArgumentException] { newInstance[List[_]](Seq(2,3,4)) }
     }
+
+    it("doesn't accumulate memory") {
+      val before = MleapReflection.universe.asInstanceOf[scala.reflect.runtime.JavaUniverse].undoLog.log.size
+      for (_ <- 0 until 1000) {
+        MleapReflection.extractConstructorParameters[LargeFeatures]
+      }
+      val after = MleapReflection.universe.asInstanceOf[scala.reflect.runtime.JavaUniverse].undoLog.log.size
+      assert(before == after)
+    }
   }
 }
 
@@ -120,3 +129,13 @@ object PersonData {
   def apply() = new PersonData("<no name>", 0)
   def apply(name: String) = new PersonData(name, 0)
 }
+case class LargeFeatures(
+                     a: String,
+                     b: String,
+                     c: String,
+                     d: String,
+                     e: String,
+                     f: String,
+                     g: String,
+                     h: String,
+                     i: List[String])

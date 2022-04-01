@@ -5,9 +5,12 @@
 ### New Features
 
 ### Bug Fixes
-- Fixes 'cannot assign instance of java.lang.invoke.SerializedLambda' for Tensorflow transformer when using sparkTransform() method 
+- Fixes 'cannot assign instance of java.lang.invoke.SerializedLambda' for Tensorflow transformer when using sparkTransform() method (#801)
 
 ### Improvements
+- Upgrade to xgboost v1.5.2 (#799,#803)
+- Upgrade to spark v3.2.0 (#799)
+- Upgrade to tensorflow java 0.4.0 and tensorflow 2.7.1 (#802)
 
 ### Other Changes
 

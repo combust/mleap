@@ -1,4 +1,4 @@
-# Release 0.20.0-SNAPSHOT (NOT RELEASED YET)
+# Release 0.20.0
 
 ### Breaking Changes
 
@@ -11,6 +11,7 @@
 - Upgrade to xgboost v1.5.2 (#799,#803)
 - Upgrade to spark v3.2.0 (#799)
 - Upgrade to tensorflow java 0.4.0 and tensorflow 2.7.1 (#802)
+- Add undoLog cleanup around usages of scala.reflect.api.Types.TypeApi.<:< (#806)
 
 ### Other Changes
 

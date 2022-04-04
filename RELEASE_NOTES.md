@@ -1,8 +1,16 @@
-# Release 0.20.0
+# Release 0.21.0-SNAPSHOT
 
 ### Breaking Changes
 
 ### New Features
+
+### Bug Fixes
+
+### Improvements
+
+### Other Changes
+
+# Release 0.20.0
 
 ### Bug Fixes
 - Fixes 'cannot assign instance of java.lang.invoke.SerializedLambda' for Tensorflow transformer when using sparkTransform() method (#801)
@@ -12,8 +20,6 @@
 - Upgrade to spark v3.2.0 (#799)
 - Upgrade to tensorflow java 0.4.0 and tensorflow 2.7.1 (#802)
 - Add undoLog cleanup around usages of scala.reflect.api.Types.TypeApi.<:< (#806)
-
-### Other Changes
 
 # Release 0.19.0
 
@@ -57,8 +63,6 @@
 - Upgrade to Spark 3.0.2
 - Upgrade Tensorflow version to 2.4.1
 
-### Other Changes
-
 # Release 0.17.0
 
 ### Breaking Changes
@@ -73,8 +77,6 @@
 
 ### Improvements
 - scoring optimizations for Interacting and CountVectorizer
-
-### Other Changes
 
 # Release 0.16.1 - python only release
 
@@ -106,8 +108,6 @@
 
 ### Improvements
 - Minor documentation updates
-
-### Other Changes
 
 # Release 0.15.0
 

@@ -42,7 +42,8 @@ assemblyShadeRules in assembly := Seq(
   "org.jtransforms.**",
   "pl.edu.icm.jlargearrays.**",
   "scala.collection.compat.**", // shading the library https://github.com/scala/scala-collection-compat, but not scala collection
-  "scala.jdk.**" // this is also introduced by scala-collection-compat
+  "scala.jdk.**", // this is also introduced by scala-collection-compat
+  "org.apache.log4j.**"
 ).map { pattern =>
   ShadeRule.rename(pattern -> "ml.combust.mleap.shaded.@0").inAll
 } :+ ShadeRule.zap("org.slf4j.**").inAll

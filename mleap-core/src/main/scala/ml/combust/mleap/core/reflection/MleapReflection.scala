@@ -152,7 +152,17 @@ trait MleapReflection {
 
 object MleapReflection extends MleapReflection {
   override val universe: scala.reflect.runtime.universe.type = scala.reflect.runtime.universe
+  private var classLoader: Option[ClassLoader] = None
+
+  def setClassLoader(cl: ClassLoader) = MleapReflectionLock.synchronized {
+    classLoader = Some(cl)
+  }
+
+  def getClassLoader(): ClassLoader = MleapReflectionLock.synchronized {
+    classLoader.getOrElse(Thread.currentThread().getContextClassLoader)
+  }
+
   override def mirror: universe.Mirror = MleapReflectionLock.synchronized {
-    universe.runtimeMirror(Thread.currentThread().getContextClassLoader)
+    universe.runtimeMirror(getClassLoader())
   }
 }

@@ -4,7 +4,6 @@ import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport
 import sbt.Keys._
 import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, _}
 import ReleaseTransformations._
-import xerial.sbt.Sonatype.SonatypeCommand
 
 object Release {
   lazy val settings = Seq(releaseVersionBump := sbtrelease.Version.Bump.Minor,
@@ -19,7 +18,7 @@ object Release {
       commitReleaseVersion,
       tagRelease,
       publishArtifacts,
-      releaseStepCommand(SonatypeCommand.sonatypeRelease),
+      releaseStepCommand("sonatypeRelease"),
       releaseStepTask(publish in autoImport.Docker in MleapProject.serving),
       setNextVersion,
       commitNextVersion,

@@ -1,7 +1,6 @@
 package ml.combust.bundle.json
 
 import java.util.{Base64, UUID}
-
 import com.google.protobuf.ByteString
 import ml.bundle._
 import ml.combust.bundle.tensor._

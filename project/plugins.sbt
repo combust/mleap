@@ -1,6 +1,6 @@
 logLevel := Level.Warn
 
-addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.2")
+addSbtPlugin("com.thesamet" % "sbt-protoc" % "1.0.6")
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.13")
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.8.1")
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.1.1")

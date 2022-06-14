@@ -44,36 +44,26 @@ jobs:
     - name: "Python 3.6 tests"
       language: python
       python: 3.6
-      env:
-        # By default, "python" projects use the default jdk version, which is openjdk11 on xenial
-        # But we need jdk8 for spark, so we need to change it back
-        - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
-        - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
       install:
         - pip install tox
       before_script:
         - >
           curl
-          --create-dirs -L -o $HOME/.sbt/launchers/0.13.18/sbt-launch.jar
-          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.18/sbt-launch.jar
+          --create-dirs -L -o $HOME/.sbt/launchers/1.4.9/sbt-launch.jar
+          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/1.4.9/sbt-launch.jar
       script:
         - make py36_test
 
     - name: "Python 3.7 tests"
       language: python
       python: 3.7.9
-      env:
-        # By default, "python" projects use the default jdk version, which is openjdk11 on xenial
-        # But we need jdk8 for spark, so we need to change it back
-        - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
-        - JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
       install:
         - pip install tox
       before_script:
         - >
           curl
-          --create-dirs -L -o $HOME/.sbt/launchers/0.13.18/sbt-launch.jar
-          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.18/sbt-launch.jar
+          --create-dirs -L -o $HOME/.sbt/launchers/1.4.9/sbt-launch.jar
+          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/1.4.9/sbt-launch.jar
       script:
         - make py37_test
 

@@ -44,6 +44,8 @@ jobs:
     - name: "Python 3.6 tests"
       language: python
       python: 3.6
+      env:
+        - JAVA_HOME="/usr/lib/jvm/openjdk11"
       install:
         - pip install tox
       before_script:
@@ -57,6 +59,8 @@ jobs:
     - name: "Python 3.7 tests"
       language: python
       python: 3.7.9
+      env:
+        - JAVA_HOME="/usr/lib/jvm/openjdk11"
       install:
         - pip install tox
       before_script:

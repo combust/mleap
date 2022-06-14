@@ -49,8 +49,8 @@ jobs:
       before_script:
         - >
           curl
-          --create-dirs -L -o $HOME/.sbt/launchers/1.4.9/sbt-launch.jar
-          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/1.4.9/sbt-launch.jar
+          --create-dirs -L -o $HOME/.sbt/launchers/0.13.9/sbt-launch.jar
+          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar
       script:
         - make py36_test
 
@@ -62,8 +62,8 @@ jobs:
       before_script:
         - >
           curl
-          --create-dirs -L -o $HOME/.sbt/launchers/1.4.9/sbt-launch.jar
-          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/1.4.9/sbt-launch.jar
+          --create-dirs -L -o $HOME/.sbt/launchers/0.13.9/sbt-launch.jar
+          https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar
       script:
         - make py37_test
 

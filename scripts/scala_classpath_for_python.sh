@@ -14,5 +14,4 @@ ${SBT} mleap-spark/compile
 export SCALA_CLASS_PATH=\
 "$( ${SBT} --error 'export mleap-spark-extension/runtime:fullClasspath' 2> /dev/null | tail -n 1)"
 
-echo "SCALA_CLASS_PATH set to:"
-echo $SCALA_CLASS_PATH
+sbt --error 'export mleap-spark-extension/runtime:fullClasspath'

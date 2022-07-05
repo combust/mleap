@@ -13,3 +13,6 @@ ${SBT} mleap-spark/compile
 # so only the last line output is the SCALA_CLASS_PATH.
 export SCALA_CLASS_PATH=\
 "$( ${SBT} --error 'export mleap-spark-extension/runtime:fullClasspath' 2> /dev/null | tail -n 1)"
+
+echo "SCALA_CLASS_PATH"
+echo $SCALA_CLASS_PATH

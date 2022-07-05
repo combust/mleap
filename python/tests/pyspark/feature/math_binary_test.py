@@ -5,7 +5,6 @@ import tempfile
 import unittest
 
 from py4j.java_gateway import java_import
-java_import(spark._sc._jvm, "org.apache.spark.sql.api.python.*")
 
 import mleap.pyspark  # noqa
 from mleap.pyspark.spark_support import SimpleSparkSerializer  # noqa
@@ -33,6 +32,7 @@ class MathBinaryTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.spark = spark_session()
+        java_import(cls.spark._sc._jvm, "org.apache.spark.sql.api.python.*")
 
     @classmethod
     def tearDownClass(cls):

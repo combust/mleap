@@ -11,6 +11,3 @@ ${SBT} mleap-spark/compile
 # Export the complete dependencyClasspath into an env. variable
 export SCALA_CLASS_PATH=\
 "$( ${SBT} --error 'export mleap-spark-extension/runtime:fullClasspath' )"
-
-echo "SCALA_CLASS_PATH"
-echo $SCALA_CLASS_PATH

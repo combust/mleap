@@ -17,9 +17,6 @@ def spark_session():
     # they may still work as long as all jars are with the same scala version.
     classpath = os.environ['SCALA_CLASS_PATH']
 
-    print("SCALA_CLASS_PATH")
-    print(classpath)
-
     return builder \
         .config('spark.driver.extraClassPath', classpath) \
         .config('spark.executor.extraClassPath', classpath) \

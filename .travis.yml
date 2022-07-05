@@ -49,8 +49,8 @@ jobs:
       before_script:
         - >
           curl
-          --create-dirs -L -o $HOME/.sbt/launchers/1.6.2/sbt-launch.jar
-          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.6.2/sbt-launch-1.6.2.jar
+          --create-dirs -L -o /home/travis/.sbt/launchers/1.4.9/sbt-launch.jar
+          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.4.9/sbt-launch-1.4.9.jar
       script:
         - make py36_test
 
@@ -62,8 +62,8 @@ jobs:
       before_script:
         - >
           curl
-          --create-dirs -L -o $HOME/.sbt/launchers/1.6.2/sbt-launch.jar
-          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.6.2/sbt-launch-1.6.2.jar
+          --create-dirs -L -o /home/travis/.sbt/launchers/1.4.9/sbt-launch.jar
+          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.4.9/sbt-launch-1.4.9.jar
       script:
         - make py37_test
 

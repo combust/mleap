@@ -78,7 +78,11 @@ object Dependencies {
 
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
 
-    val slf4jDep = "org.slf4j" % "slf4j-log4j12" % slf4jVersion
+    val logDeps = Seq(
+      "org.slf4j" % "slf4j-log4j12" % slf4jVersion,
+      "org.apache.logging.log4j" % "log4j-1.2-api" % "2.17.1",
+      "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.17.1"
+    )
   }
 
   object Test {
@@ -119,7 +123,7 @@ object Dependencies {
 
   val spark = l ++= Provided.spark ++ Test.sparkTest
 
-  val sparkExtension = l ++= Provided.spark ++ Seq(Compile.slf4jDep) ++ Seq(Test.scalaTest) ++ Test.sparkTest
+  val sparkExtension = l ++= Provided.spark ++ Seq(Compile.logDeps) ++ Seq(Test.scalaTest) ++ Test.sparkTest
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 

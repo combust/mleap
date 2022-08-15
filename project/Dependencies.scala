@@ -123,7 +123,7 @@ object Dependencies {
 
   val spark = l ++= Provided.spark ++ Test.sparkTest
 
-  val sparkExtension = l ++= Provided.spark ++ Seq(Compile.logDeps) ++ Seq(Test.scalaTest) ++ Test.sparkTest
+  val sparkExtension = l ++= Provided.spark ++ Compile.logDeps ++ Seq(Test.scalaTest) ++ Test.sparkTest
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 

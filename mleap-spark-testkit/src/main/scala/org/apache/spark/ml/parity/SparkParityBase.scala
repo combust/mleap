@@ -59,10 +59,14 @@ object SparkParityBase extends FunSpec {
 
 
 object SparkEnv {
-  lazy val spark = SparkSession.builder().
-    appName("Spark/MLeap Parity Tests").
-    master("local[2]").
-    getOrCreate()
+  lazy val spark = {
+    val session = SparkSession.builder().
+      appName("Spark/MLeap Parity Tests").
+      master("local[2]").
+      getOrCreate()
+    session.sparkContext.setLogLevel("WARN")
+    session
+  }
 }
 
 

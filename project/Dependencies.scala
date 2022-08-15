@@ -14,11 +14,11 @@ object Dependencies {
   val springBootVersion = "2.6.2"
   lazy val logbackVersion = "1.2.3"
   lazy val loggingVersion = "3.9.0"
-  lazy val slf4jVersion = "1.7.32"
+  lazy val slf4jVersion = "1.7.36"
   lazy val awsSdkVersion = "1.11.1033"
   val tensorflowJavaVersion = "0.4.0" // Match Tensorflow 2.7.0 https://github.com/tensorflow/java/#tensorflow-version-support
   val xgboostVersion = "1.5.2"
-  val breezeVersion = "1.0"
+  val breezeVersion = "1.2"
   val hadoopVersion = "2.7.4" // matches spark version
   val platforms = "windows-x86_64,linux-x86_64,macosx-x86_64"
   val tensorflowPlatforms : Array[String] =  sys.env.getOrElse("TENSORFLOW_PLATFORMS", platforms).split(",")
@@ -78,11 +78,7 @@ object Dependencies {
 
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
 
-    val logDeps = Seq(
-      "org.slf4j" % "slf4j-log4j12" % slf4jVersion,
-      "org.apache.logging.log4j" % "log4j-1.2-api" % "2.17.1",
-      "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.17.1"
-    )
+    val slf4jDep = "org.slf4j" % "slf4j-log4j12" % slf4jVersion
   }
 
   object Test {
@@ -123,7 +119,7 @@ object Dependencies {
 
   val spark = l ++= Provided.spark ++ Test.sparkTest
 
-  val sparkExtension = l ++= Provided.spark ++ Compile.logDeps ++ Seq(Test.scalaTest) ++ Test.sparkTest
+  val sparkExtension = l ++= Provided.spark ++ Seq(Compile.slf4jDep) ++ Seq(Test.scalaTest) ++ Test.sparkTest
 
   val avro = l ++= Seq(avroDep, Test.scalaTest)
 

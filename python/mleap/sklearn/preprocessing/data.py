@@ -1026,8 +1026,8 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
         :return:
         """
         if isinstance(y, pd.DataFrame):
-            x = y.ix[:,0]
-            y = y.ix[:,1]
+            x = y.iloc[:,0]
+            y = y.iloc[:,1]
         else:
             x = y[:,0]
             y = y[:,1]

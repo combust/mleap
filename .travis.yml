@@ -41,19 +41,6 @@ jobs:
       script:
         - make test_root_sbt_project
 
-    - name: "Python 3.6 tests"
-      language: python
-      python: 3.6
-      install:
-        - pip install tox
-      before_script:
-        - >
-          curl
-          --create-dirs -L -o /home/travis/.sbt/launchers/1.4.9/sbt-launch.jar
-          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.4.9/sbt-launch-1.4.9.jar
-      script:
-        - make py36_test
-
     - name: "Python 3.7 tests"
       language: python
       python: 3.7.9

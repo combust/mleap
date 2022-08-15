@@ -185,15 +185,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     val sparkRows = sparkDataset.collect()
     val mleapRows = mleapDataset.select(sparkCols.map(col): _*).collect()
     for ((sparkRow, mleapRow) <- sparkRows.zip(mleapRows)) {
-      try {
-        checkRowWithRelTol(sparkRow, mleapRow, relTolEps)
-      } catch {
-        case e: Exception =>
-          println(sparkRow)
-          println("----------")
-          println(mleapRow)
-          throw e
-      }
+      checkRowWithRelTol(sparkRow, mleapRow, relTolEps)
     }
   }
 

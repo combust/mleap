@@ -229,13 +229,15 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
+  val excludedColsForComparison = Array[String]()
+
   def parityTransformer(): Unit = {
     it("has parity between Spark/MLeap") {
       val sparkTransformed = sparkTransformer.transform(dataset)
       implicit val sbc = SparkBundleContext().withDataset(sparkTransformed)
       val mTransformer = mleapTransformer(sparkTransformer)
-      val sparkDataset = sparkTransformed.toSparkLeapFrame.toSpark
-      val mleapDataset = mTransformer.sparkTransform(dataset)
+      val sparkDataset = sparkTransformed.toSparkLeapFrame.toSpark.drop(this.excludedColsForComparison: _*)
+      val mleapDataset = mTransformer.sparkTransform(dataset).drop(this.excludedColsForComparison: _*)
 
       equalityTest(sparkDataset, mleapDataset)
     }

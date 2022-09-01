@@ -22,7 +22,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
-import sun.misc.Cleaner;
+import java.lang.ref.Cleaner;
 import sun.misc.Unsafe;
 
 public final class Platform {
@@ -162,12 +162,8 @@ public final class Platform {
             cleanerField.setAccessible(true);
             final long memory = allocateMemory(size);
             ByteBuffer buffer = (ByteBuffer) constructor.newInstance(memory, size);
-            Cleaner cleaner = Cleaner.create(buffer, new Runnable() {
-                @Override
-                public void run() {
-                    freeMemory(memory);
-                }
-            });
+            Cleaner cleaner = Cleaner.create();
+            cleaner.register(buffer, () -> freeMemory(memory));
             cleanerField.set(buffer, cleaner);
             return buffer;
         } catch (Exception e) {

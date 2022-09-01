@@ -33,6 +33,8 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
   // These params are not needed for making predictions, so we don't serialize them
   override val unserializedParams = Set("labelCol", "evalMetric", "objective")
 
+  override val excludedColsForComparison = Array[String]("prediction")
+
   val sparkTransformer: Transformer = {
     val featureAssembler = new VectorAssembler()
       .setInputCols(Array("AT", "V", "AP", "RH"))

@@ -17,7 +17,7 @@ object Dependencies {
   lazy val slf4jVersion = "1.7.30"
   lazy val awsSdkVersion = "1.11.1033"
   val tensorflowJavaVersion = "0.4.0" // Match Tensorflow 2.7.0 https://github.com/tensorflow/java/#tensorflow-version-support
-  val xgboostVersion = "1.5.2"
+  val xgboostVersion = "1.6.1"
   val breezeVersion = "1.0"
   val hadoopVersion = "2.7.4" // matches spark version
   val platforms = "windows-x86_64,linux-x86_64,macosx-x86_64"
@@ -165,8 +165,8 @@ object Dependencies {
       * Use this as a dependency setting if the dependencies contain both static and Scala-version
       * dependent entries.
       */
-    def versionDependentDeps(modules: ScalaVersionDependentModuleID*): Def.Setting[Seq[ModuleID]] =
-      libraryDependencies <++= scalaVersion(version => modules.flatMap(m => m.modules(version)))
+    def versionDependentDeps(modules: ScalaVersionDependentModuleID*): Def.Setting[Seq[librarymanagement.ModuleID]] =
+      libraryDependencies ++= scalaVersion(version => modules.flatMap(m => m.modules(version))).value
 
     val ScalaVersion = """\d\.\d+\.\d+(?:-(?:M|RC)\d+)?""".r
     val nominalScalaVersion: String => String = {

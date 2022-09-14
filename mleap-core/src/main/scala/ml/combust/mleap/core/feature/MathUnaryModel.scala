@@ -42,7 +42,7 @@ object UnaryOperation {
     override def name: String = "ceil"
   }
   case object Round extends UnaryOperation {
-    override def name: String = "round_of"
+    override def name: String = "round"
   }
 
   val all = Set(Log, Exp, Sqrt, Sin, Cos, Tan, Abs, Logit, Floor, Ceil, Round)

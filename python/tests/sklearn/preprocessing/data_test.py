@@ -630,7 +630,7 @@ class TransformerTests(unittest.TestCase):
 
         Xres = math_binary_tf.fit_transform(self.df[['a', 'b']])
 
-        assert_frame_equal(pd.DataFrame(self.df.a + self.df.b, columns=['a']), Xres)
+        assert_frame_equal(pd.DataFrame(self.df.a + self.df.b, columns=['a_plus_b']), Xres)
 
         math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
@@ -664,7 +664,7 @@ class TransformerTests(unittest.TestCase):
 
         Xres = math_binary_tf.fit_transform(self.df[['a', 'b']])
 
-        assert_frame_equal(pd.DataFrame(self.df.a + self.df.b, columns=['a']), Xres)
+        assert_frame_equal(pd.DataFrame(self.df.a + self.df.b, columns=['a_plus_b']), Xres)
 
         math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
@@ -682,7 +682,7 @@ class TransformerTests(unittest.TestCase):
 
         Xres = math_binary_tf.fit_transform(self.df[['a', 'b']])
 
-        assert_frame_equal(pd.DataFrame(self.df.a - self.df.b, columns=['a']), Xres)
+        assert_frame_equal(pd.DataFrame(self.df.a - self.df.b, columns=['a_less_b']), Xres)
 
         math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
@@ -716,7 +716,7 @@ class TransformerTests(unittest.TestCase):
 
         Xres = math_binary_tf.fit_transform(self.df[['a', 'b']])
 
-        assert_frame_equal(pd.DataFrame(self.df.a * self.df.b, columns=['a']), Xres)
+        assert_frame_equal(pd.DataFrame(self.df.a * self.df.b, columns=['a_mul_b']), Xres)
 
         math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 
@@ -746,11 +746,11 @@ class TransformerTests(unittest.TestCase):
 
     def math_binary_divide_test(self):
 
-        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features='a_mul_b', transform_type='div')
+        math_binary_tf = MathBinary(input_features=['a', 'b'], output_features='a_div_b', transform_type='div')
 
         Xres = math_binary_tf.fit_transform(self.df[['a', 'b']])
 
-        assert_frame_equal(pd.DataFrame(self.df.a / self.df.b, columns=['a']), Xres)
+        assert_frame_equal(pd.DataFrame(self.df.a / self.df.b, columns=['a_div_b']), Xres)
 
         math_binary_tf.serialize_to_bundle(self.tmp_dir, math_binary_tf.name)
 

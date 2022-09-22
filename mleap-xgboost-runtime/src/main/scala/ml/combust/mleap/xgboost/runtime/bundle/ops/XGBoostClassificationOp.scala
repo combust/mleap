@@ -37,7 +37,8 @@ class XGBoostClassificationOp extends MleapOp[XGBoostClassification, XGBoostClas
 
       val numClasses = model.value("num_classes").getInt
       val numFeatures = model.value("num_features").getInt
-      val treeLimit = model.value("tree_limit").getInt
+      val treeLimit = model.getValue("tree_limit")
+        .map(_.getInt).getOrElse(0)
 
       val impl = if(numClasses == 2) {
         XGBoostBinaryClassificationModel(booster, numFeatures, treeLimit)

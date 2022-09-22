@@ -27,7 +27,8 @@ class XGBoostPredictorRegressionOp extends MleapOp[XGBoostPredictorRegression, X
       val predictor = new Predictor(Files.newInputStream(context.file("xgboost.model")))
 
       val numFeatures = model.value("num_features").getInt
-      val treeLimit = model.value("tree_limit").getInt
+      val treeLimit = model.getValue("tree_limit")
+        .map(_.getInt).getOrElse(0)
 
       XGBoostPredictorRegressionModel(
         predictor,

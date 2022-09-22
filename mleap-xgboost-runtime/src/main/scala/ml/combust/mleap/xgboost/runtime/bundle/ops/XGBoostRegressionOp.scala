@@ -35,7 +35,8 @@ class XGBoostRegressionOp extends MleapOp[XGBoostRegression, XGBoostRegressionMo
                      (implicit context: BundleContext[MleapContext]): XGBoostRegressionModel = {
       val bytes = Files.readAllBytes(context.file("xgboost.model"))
       val booster = XGBoost.loadModel(new ByteArrayInputStream(bytes))
-      val treeLimit = model.value("tree_limit").getInt
+      val treeLimit = model.getValue("tree_limit")
+        .map(_.getInt).getOrElse(0)
 
       XGBoostRegressionModel(booster,
         numFeatures = model.value("num_features").getInt,

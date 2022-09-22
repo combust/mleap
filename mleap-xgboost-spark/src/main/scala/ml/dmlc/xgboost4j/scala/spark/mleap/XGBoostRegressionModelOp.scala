@@ -43,9 +43,9 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
         SXGBoost.loadModel(in)
       }).tried.get
 
-      val xgb = new XGBoostRegressionModel("", booster).
-        setTreeLimit(model.value("tree_limit").getInt)
+      val xgb = new XGBoostRegressionModel("", booster)
 
+      model.getValue("tree_limit").map(o => xgb.setTreeLimit(o.getInt))
       model.getValue("missing").map(o => xgb.setMissing(o.getFloat))
       model.getValue("allow_non_zero_for_missing").map(o => xgb.setAllowNonZeroForMissing(o.getBoolean))
       model.getValue("infer_batch_size").map(o => xgb.setInferBatchSize(o.getInt))

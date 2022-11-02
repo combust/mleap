@@ -1,9 +1,15 @@
-# Release 0.21.0-SNAPSHOT
+# Release 0.22.0-SNAPSHOT
+
+### Breaking Changes
+
+### What's Changed
+
+# Release 0.21.0
 
 ### Breaking Changes
 MLeap is now built with Java 11 instead of Java 8.
 
-## What's Changed
+### What's Changed
 * Shade log4j for databricks fat jar by @WeichenXu123 in https://github.com/combust/mleap/pull/812
 * ScalaPB & sbt Upgrade by @emitc2h in https://github.com/combust/mleap/pull/818
 * Upgrade xgboost dependency to be 1.6.1 version by @WeichenXu123 in https://github.com/combust/mleap/pull/822

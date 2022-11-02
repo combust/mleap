@@ -1,14 +1,15 @@
 # Release 0.21.0-SNAPSHOT
 
 ### Breaking Changes
+MLeap is now built with Java 11 instead of Java 8.
 
-### New Features
-
-### Bug Fixes
-
-### Improvements
-
-### Other Changes
+## What's Changed
+* Shade log4j for databricks fat jar by @WeichenXu123 in https://github.com/combust/mleap/pull/812
+* ScalaPB & sbt Upgrade by @emitc2h in https://github.com/combust/mleap/pull/818
+* Upgrade xgboost dependency to be 1.6.1 version by @WeichenXu123 in https://github.com/combust/mleap/pull/822
+* Additional Math unary operations by @shyamsunder00 in https://github.com/combust/mleap/pull/826
+* Added backward compatibility fix for XGBoost models by @chaitanya-basava in https://github.com/combust/mleap/pull/829
+* Address MathBinary issue with zeros defaults by @arthurarj in https://github.com/combust/mleap/pull/828
 
 # Release 0.20.0
 

@@ -40,8 +40,7 @@ Our goals for this project are:
 
 ## Requirements
 
-MLeap is built against Scala 2.11 and Java 11.  Because we depend heavily on Typesafe config for MLeap, we only support Java 8 at the
-moment.
+MLeap is built against Scala 2.12 and Java 11.
 
 ### MLeap/Spark Version
 

@@ -1026,23 +1026,23 @@ class MathBinary(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeserial
         :return:
         """
         if isinstance(y, pd.DataFrame):
-            x = y.ix[:,0]
-            y = y.ix[:,1]
+            x = y.iloc[:,0]
+            y = y.iloc[:,1]
         else:
             x = y[:,0]
             y = y[:,1]
         if self.transform_type == 'add':
-            return pd.DataFrame(np.add(x, y))
+            return pd.DataFrame(np.add(x, y), columns=[self.output_features])
         elif self.transform_type == 'sub':
-            return pd.DataFrame(np.subtract(x, y))
+            return pd.DataFrame(np.subtract(x, y), columns=[self.output_features])
         elif self.transform_type == 'mul':
-            return pd.DataFrame(np.multiply(x, y))
+            return pd.DataFrame(np.multiply(x, y), columns=[self.output_features])
         elif self.transform_type == 'div':
-            return pd.DataFrame(np.divide(x, y))
+            return pd.DataFrame(np.divide(x, y), columns=[self.output_features])
         elif self.transform_type == 'rem':
-            return pd.DataFrame(np.remainder(x, y))
+            return pd.DataFrame(np.remainder(x, y), columns=[self.output_features])
         elif self.transform_type == 'pow':
-            return pd.DataFrame(x**y)
+            return pd.DataFrame(x**y, columns=[self.output_features])
 
     def fit_transform(self, X, y=None, **fit_params):
         """

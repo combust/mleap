@@ -40,7 +40,7 @@ Our goals for this project are:
 
 ## Requirements
 
-MLeap is built against Scala 2.11 and Java 8.  Because we depend heavily on Typesafe config for MLeap, we only support Java 8 at the
+MLeap is built against Scala 2.11 and Java 11.  Because we depend heavily on Typesafe config for MLeap, we only support Java 8 at the
 moment.
 
 ### MLeap/Spark Version
@@ -294,13 +294,18 @@ For more documentation, please see our [documentation](https://combust.github.io
 Thank you to [Swoop](https://www.swoop.com/) for supporting the XGboost
 integration.
 
-## Contact Information
+## Contributors Information
 
+* Jason Sleight ([jsleight](https://github.com/jsleight))
+* Talal Riaz ([talalryz](https://github.com/talalryz))
+* Weichen Xu ([WeichenXu123](https://github.com/WeichenXu123))
+
+## Past contributors
 * Hollin Wilkins (hollin@combust.ml)
 * Mikhail Semeniuk (mikhail@combust.ml)
 * Anca Sarb (sarb.anca@gmail.com)
-* Talal Riaz (talal@yelp.com)
 * Ryan Vogan (rvogan@yelp.com)
+
 
 ## License
 

@@ -52,7 +52,7 @@ jobs:
           --create-dirs -L -o /home/travis/.sbt/launchers/1.4.9/sbt-launch.jar
           https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.4.9/sbt-launch-1.4.9.jar
       script:
-        - make -C python test_python37
+        - make test_python37
 
     - name: "Python 3.8 tests"
       language: python
@@ -65,7 +65,7 @@ jobs:
           --create-dirs -L -o /home/travis/.sbt/launchers/1.4.9/sbt-launch.jar
           https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.4.9/sbt-launch-1.4.9.jar
       script:
-        - make -C python test_python38
+        - make test_python38
 
     - if: (NOT type IN (pull_request)) AND (branch = master)
       stage: "Deploy"

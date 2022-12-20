@@ -7,15 +7,15 @@ dist: focal
 # run a python script (in RabitTracker) which only support python3
 env:
   global:
-    - PATH=/opt/python/3.8.16/bin:$PATH
+    - PATH=/opt/python/3.8.15/bin:$PATH
 
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - gcc-4.8
-      - g++-4.8
+      - gcc-9.3
+      - g++-9.3
 
 services:
   - docker
@@ -56,7 +56,7 @@ jobs:
 
     - name: "Python 3.8 tests"
       language: python
-      python: 3.8.16
+      python: 3.8.15
       install:
         - pip install tox
       before_script:

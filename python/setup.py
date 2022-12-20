@@ -21,6 +21,11 @@ from mleap.version import version
 import sys
 from setuptools import setup, find_packages
 
+if sys.version_info < (2, 7):
+    print("Python versions prior to 2.7 are not supported for pip installed MLeap.",
+          file=sys.stderr)
+    exit(-1)
+
 try:
     exec(open('mleap/version.py').read())
 except IOError:
@@ -30,12 +35,14 @@ except IOError:
 
 VERSION = version
 
+numpy_version = "1.8.2"
+
 REQUIRED_PACKAGES = [
-      'numpy>=1.8.2',
-      'six>=1.10.0',
+      'numpy >= %s' % numpy_version,
+      'six >= 1.10.0',
       'scipy>=0.13.0b1',
       'pandas>=0.18.1',
-      'scikit-learn~=1.0.0',
+      'scikit-learn>=0.22.0,<0.23.0',
 ]
 
 TESTS_REQUIRED_PACKAGES = [
@@ -52,7 +59,6 @@ setup(name='mleap',
       zip_safe=False,
       install_requires=REQUIRED_PACKAGES,
       tests_require=TESTS_REQUIRED_PACKAGES,
-      python_requires=">=3.7",
       classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -63,7 +69,7 @@ setup(name='mleap',
         'Topic :: Internet',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
     ],
      )

@@ -277,7 +277,7 @@ class TransformerTests(unittest.TestCase):
     def test_min_max_scaler_multi_deserializer(self):
 
         extract_features = ['a', 'b']
-        feature_extractor = FeatureExtractor(input_scalars=['a', 'b'],
+        feature_extractor = FeatureExtractor(input_scalars=extract_features,
                                              output_vector='extracted_multi_outputs',
                                              output_vector_items=["{}_out".format(x) for x in extract_features])
 
@@ -285,7 +285,7 @@ class TransformerTests(unittest.TestCase):
         scaler.mlinit(prior_tf=feature_extractor,
                       output_features=['a_scaled', 'b_scaled'])
 
-        scaler.fit(self.df[['a']])
+        scaler.fit(self.df[extract_features])
 
         scaler.serialize_to_bundle(self.tmp_dir, scaler.name)
 
@@ -295,8 +295,8 @@ class TransformerTests(unittest.TestCase):
         min_max_scaler_tf.deserialize_from_bundle(self.tmp_dir, node_name)
 
         # Transform some sample data
-        res_a = scaler.transform(self.df[['a', 'b']])
-        res_b = min_max_scaler_tf.transform(self.df[['a', 'b']])
+        res_a = scaler.transform(self.df[extract_features])
+        res_b = min_max_scaler_tf.transform(self.df[extract_features])
 
         self.assertEqual(res_a[0][0], res_b[0][0])
         self.assertEqual(res_a[0][1], res_b[0][1])

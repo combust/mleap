@@ -25,12 +25,9 @@ import numpy as np
 import pandas as pd
 from mleap.bundle.serialize import MLeapSerializer, MLeapDeserializer, Vector
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, Binarizer, PolynomialFeatures
-from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
-from sklearn.preprocessing.data import OneHotEncoder
-from sklearn.preprocessing.label import LabelEncoder
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, Binarizer, PolynomialFeatures, OneHotEncoder, LabelEncoder
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import column_or_1d
-from sklearn.utils.fixes import np_version
 from sklearn.utils.validation import check_is_fitted
 
 
@@ -47,20 +44,6 @@ class ops(object):
         self.POLYNOMIALEXPANSION = 'sklearn_polynomial_expansion'
 
 ops = ops()
-
-
-def _check_numpy_unicode_bug(labels):
-    """Check that user is not subject to an old numpy bug
-
-    Fixed in master before 1.7.0:
-
-      https://github.com/numpy/numpy/pull/243
-
-    """
-    if np_version[:3] < (1, 7, 0) and labels.dtype.kind == 'U':
-        raise RuntimeError("NumPy < 1.7.0 does not implement searchsorted"
-                           " on unicode data correctly. Please upgrade"
-                           " NumPy to use LabelEncoder with unicode inputs.")
 
 
 def serialize_to_bundle(self, path, model_name):
@@ -373,7 +356,6 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
         self : returns an instance of self.
         """
         X = column_or_1d(X, warn=True)
-        _check_numpy_unicode_bug(X)
         self.classes_ = np.unique(X)
         return self
 
@@ -390,7 +372,6 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
         y : array-like of shape [n_samples]
         """
         y = column_or_1d(X, warn=True)
-        _check_numpy_unicode_bug(X)
         self.classes_, X = np.unique(X, return_inverse=True)
         return X
 
@@ -410,7 +391,6 @@ class LabelEncoder(BaseEstimator, TransformerMixin, MLeapSerializer, MLeapDeseri
         y = column_or_1d(y, warn=True)
 
         classes = np.unique(y)
-        _check_numpy_unicode_bug(classes)
         if len(np.intersect1d(classes, self.classes_)) < len(classes):
             diff = np.setdiff1d(classes, self.classes_)
             raise ValueError("y contains new labels: %s" % str(diff))

@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 from mleap.sklearn.preprocessing.data import ImputerSerializer, FeatureExtractor
 from sklearn.impute import SimpleImputer as SKLearnImputer
-from sklearn.preprocessing.data import BaseEstimator, TransformerMixin
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class DefineEstimator(BaseEstimator, TransformerMixin):
@@ -75,7 +75,15 @@ class Imputer(SKLearnImputer):
         self.feature_extractor = FeatureExtractor(input_scalars=[input_features],
                                                   output_vector='extracted_' + output_features,
                                                   output_vector_items=[output_features])
-        SKLearnImputer.__init__(self, missing_values, strategy, fill_value, verbose, copy, add_indicator)
+        SKLearnImputer.__init__(
+            self,
+            missing_values=missing_values,
+            strategy=strategy,
+            fill_value=fill_value,
+            verbose=verbose,
+            copy=copy,
+            add_indicator=add_indicator,
+           )
 
     def fit(self, X, y=None):
         super(Imputer, self).fit(self.feature_extractor.transform(X))

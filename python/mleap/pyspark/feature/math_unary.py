@@ -46,8 +46,8 @@ class MathUnary(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
         # if operation is not None, we can proceed to instantiate the scala classes
         if operation:
             scalaUnaryOperation = jvm_scala_object(
-                _jvm().ml.combust.mleap.core.feature.UnaryOperation,
-                operation.name
+                _jvm().ml.combust.mleap.core.feature,
+                f"UnaryOperation${operation.name}$",
             )
 
             scalaMathUnaryModel = _jvm().ml.combust.mleap.core.feature.MathUnaryModel(scalaUnaryOperation)

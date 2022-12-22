@@ -90,8 +90,8 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
         # if operation is not None, we can proceed to instantiate the scala classes
         if operation:
             scalaBinaryOperation = jvm_scala_object(
-                _jvm().ml.combust.mleap.core.feature.BinaryOperation,
-                operation.name
+                _jvm().ml.combust.mleap.core.feature,
+                f"BinaryOperation${operation.name}$"
             )
 
             scalaMathBinaryModel = _jvm().ml.combust.mleap.core.feature.MathBinaryModel(

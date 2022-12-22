@@ -1,4 +1,8 @@
-# Release 0.21.0-SNAPSHOT
+# Later Versions
+For release notes of later versions, please see
+[Github releases page](https://github.com/combust/mleap/releases)
+
+# Release 0.21.0
 
 ### Breaking Changes
 MLeap is now built with Java 11 instead of Java 8.

@@ -33,6 +33,12 @@ class MathBinary(override val uid: String = Identifiable.randomUID("math_binary"
 
   @org.apache.spark.annotation.Since("2.0.0")
   override def transform(dataset: Dataset[_]): DataFrame = {
+    // Check this condition at runtime else the input schema inferred by MathBinaryModel might be wrong
+    // and this will cause the transform to fail at inference time
+    if((isSet(inputA) && model.da.isDefined) || (isSet(inputB) && model.db.isDefined)) {
+      throw new RuntimeException("Only one of input column or default value can be present.")
+    }
+
     val binaryUdfA = udf {
       a: Double => model(Some(a), None)
     }

@@ -22,5 +22,25 @@ class MathBinaryParitySpec extends SparkParityBase {
       setOutputCol("bin_out")
   )).fit(dataset)
 
+  describe("has valid inputs") {
+    val model = MathBinaryModel(Multiply, da=Some(4.0), db=Some(5.0))
+    it("Only one of inputA or defaultA") {
+      val invalidSparkTransformer: Transformer = new MathBinary(uid = "math_bin", model = model).
+        setInputA("dti").
+        setOutputCol("bin_out")
+      assertThrows[RuntimeException] {
+        invalidSparkTransformer.transform(dataset)
+      }
+    }
+    it("Only one of inputB or defaultB") {
+      val invalidSparkTransformer: Transformer = new MathBinary(uid = "math_bin", model = model).
+        setInputB("dti").
+        setOutputCol("bin_out")
+      assertThrows[RuntimeException] {
+        invalidSparkTransformer.transform(dataset)
+      }
+    }
+  }
+
   override val unserializedParams = Set("stringOrderType")
 }

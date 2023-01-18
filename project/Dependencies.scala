@@ -9,8 +9,8 @@ object Dependencies {
   val sparkVersion = "3.3.0"
   val scalaTestVersion = "3.0.8"
   val junitVersion = "5.8.2"
-  val akkaVersion = "2.6.14"
-  val akkaHttpVersion = "10.2.4"
+  val akkaVersion = "2.6.14" // Stay below akka v2.7.0 since they swapped to a BSL license
+  val akkaHttpVersion = "10.2.4" // Stay below akka-http v10.3.0 since they swapped to a BSL license
   val springBootVersion = "2.6.2"
   lazy val logbackVersion = "1.2.3"
   lazy val loggingVersion = "3.9.0"

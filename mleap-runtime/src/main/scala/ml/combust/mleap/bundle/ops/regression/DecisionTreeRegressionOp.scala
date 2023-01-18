@@ -24,7 +24,7 @@ class DecisionTreeRegressionOp extends MleapOp[DecisionTreeRegression, DecisionT
 
     override def store(model: Model, obj: DecisionTreeRegressionModel)
                       (implicit context: BundleContext[MleapContext]): Model = {
-      TreeSerializer[tree.Node](context.file("nodes"), withImpurities = false).write(obj.rootNode)
+      TreeSerializer[tree.Node](context.file("tree"), withImpurities = false).write(obj.rootNode)
       model.withValue("num_features", Value.long(obj.numFeatures))
     }
 

@@ -22,7 +22,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
-import java.lang.ref.Cleaner;
 import sun.misc.Unsafe;
 
 public final class Platform {
@@ -146,32 +145,7 @@ public final class Platform {
         freeMemory(address);
         return newMemory;
     }
-
-    /**
-     * Uses internal JDK APIs to allocate a DirectByteBuffer while ignoring the JVM's
-     * MaxDirectMemorySize limit (the default limit is too low and we do not want to require users
-     * to increase it).
-     */
-    @SuppressWarnings("unchecked")
-    public static ByteBuffer allocateDirectBuffer(int size) {
-        try {
-            Class<?> cls = Class.forName("java.nio.DirectByteBuffer");
-            Constructor<?> constructor = cls.getDeclaredConstructor(Long.TYPE, Integer.TYPE);
-            constructor.setAccessible(true);
-            Field cleanerField = cls.getDeclaredField("cleaner");
-            cleanerField.setAccessible(true);
-            final long memory = allocateMemory(size);
-            ByteBuffer buffer = (ByteBuffer) constructor.newInstance(memory, size);
-            Cleaner cleaner = Cleaner.create();
-            cleaner.register(buffer, () -> freeMemory(memory));
-            cleanerField.set(buffer, cleaner);
-            return buffer;
-        } catch (Exception e) {
-            throwException(e);
-        }
-        throw new IllegalStateException("unreachable");
-    }
-
+    
     public static void setMemory(long address, byte value, long size) {
         _UNSAFE.setMemory(address, size, value);
     }

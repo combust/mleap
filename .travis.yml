@@ -24,7 +24,7 @@ language: scala
 scala:
   - 2.12.13
 jdk:
-  - openjdk11
+  - openjdk8
 
 jobs:
   include:

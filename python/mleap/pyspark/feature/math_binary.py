@@ -90,14 +90,14 @@ class MathBinary(JavaTransformer, HasOutputCol, JavaMLReadable, JavaMLWritable):
         # if operation is not None, we can proceed to instantiate the scala classes
         if operation:
             scalaBinaryOperation = jvm_scala_object(
-                _jvm().ml.combust.mleap.core.feature.BinaryOperation,
-                operation.name
+                _jvm().ml.combust.mleap.core.feature,
+                f"BinaryOperation${operation.name}$"
             )
 
             scalaMathBinaryModel = _jvm().ml.combust.mleap.core.feature.MathBinaryModel(
                 scalaBinaryOperation,
-                Some(defaultA) if defaultA else ScalaNone(),
-                Some(defaultB) if defaultB else ScalaNone(),
+                Some(defaultA) if defaultA is not None else ScalaNone(),
+                Some(defaultB) if defaultB is not None else ScalaNone(),
             )
             self._java_obj = self._new_java_obj(
                 "org.apache.spark.ml.mleap.feature.MathBinary",

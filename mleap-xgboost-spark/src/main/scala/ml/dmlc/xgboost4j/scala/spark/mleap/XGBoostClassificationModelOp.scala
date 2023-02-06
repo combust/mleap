@@ -49,9 +49,9 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
         SXGBoost.loadModel(in)
       }).tried.get
 
-      val xgb = new XGBoostClassificationModel("", model.value("num_classes").getInt, booster).
-          setTreeLimit(model.value("tree_limit").getInt)
+      val xgb = new XGBoostClassificationModel("", model.value("num_classes").getInt, booster)
 
+      model.getValue("tree_limit").map(o => xgb.setTreeLimit(o.getInt))
       model.getValue("thresholds").map(o => xgb.setThresholds(o.getDoubleList.toArray))
       model.getValue("missing").map(o => xgb.setMissing(o.getFloat))
       model.getValue("allow_non_zero_for_missing").map(o => xgb.setAllowNonZeroForMissing(o.getBoolean))

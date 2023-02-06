@@ -40,8 +40,7 @@ Our goals for this project are:
 
 ## Requirements
 
-MLeap is built against Scala 2.11 and Java 8.  Because we depend heavily on Typesafe config for MLeap, we only support Java 8 at the
-moment.
+MLeap is built against Scala 2.12 and Java 11.
 
 ### MLeap/Spark Version
 
@@ -49,6 +48,7 @@ Choose the right version of the `mleap-spark` module to export your pipeline. Th
 
 | MLeap Version | Spark Version |
 |---------------|---------------|
+| 0.21.0        | 3.2.0         |
 | 0.20.0        | 3.2.0         |
 | 0.19.0        | 3.0.2         |
 | 0.18.1        | 3.0.2         |
@@ -75,7 +75,7 @@ Please see the [release notes](RELEASE_NOTES.md) for changes (especially breakin
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.20.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.21.0"
 ```
 
 #### Maven
@@ -84,7 +84,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.20.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.12</artifactId>
-    <version>0.20.0</version>
+    <version>0.21.0</version>
 </dependency>
 ```
 
@@ -93,7 +93,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.20.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.20.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.21.0"
 ```
 
 #### Maven
@@ -102,14 +102,14 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.20.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.12</artifactId>
-    <version>0.20.0</version>
+    <version>0.21.0</version>
 </dependency>
 ```
 
 ### Spark Packages
 
 ```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.12:0.20.0
+$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.12:0.21.0
 ```
 
 ### PySpark Integration
@@ -293,13 +293,18 @@ For more documentation, please see our [documentation](https://combust.github.io
 Thank you to [Swoop](https://www.swoop.com/) for supporting the XGboost
 integration.
 
-## Contact Information
+## Contributors Information
 
+* Jason Sleight ([jsleight](https://github.com/jsleight))
+* Talal Riaz ([talalryz](https://github.com/talalryz))
+* Weichen Xu ([WeichenXu123](https://github.com/WeichenXu123))
+
+## Past contributors
 * Hollin Wilkins (hollin@combust.ml)
 * Mikhail Semeniuk (mikhail@combust.ml)
 * Anca Sarb (sarb.anca@gmail.com)
-* Talal Riaz (talal@yelp.com)
 * Ryan Vogan (rvogan@yelp.com)
+
 
 ## License
 

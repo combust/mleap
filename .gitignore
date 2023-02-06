@@ -9,3 +9,4 @@ unsafe.*
 /python/**/*.pyc
 .sbtopts
 .DS_Store
+.bsp/

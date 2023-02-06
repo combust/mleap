@@ -1,21 +1,21 @@
 # Use container-based infrastructure
 os: linux
-dist: xenial
+dist: focal
 
-# Set default python env to be 3.7
-# because the xgboost-spark 1.5.1 library when running training code, it will
+# Set default python env
+# because the xgboost-spark library when running training code, it will
 # run a python script (in RabitTracker) which only support python3
 env:
   global:
-    - PATH=/opt/python/3.6.7/bin:$PATH
+    - PATH=/opt/python/3.8.15/bin:$PATH
 
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - gcc-4.8
-      - g++-4.8
+      - gcc
+      - g++
 
 services:
   - docker
@@ -41,19 +41,6 @@ jobs:
       script:
         - make test_root_sbt_project
 
-    - name: "Python 3.6 tests"
-      language: python
-      python: 3.6
-      install:
-        - pip install tox
-      before_script:
-        - >
-          curl
-          --create-dirs -L -o /home/travis/.sbt/launchers/1.4.9/sbt-launch.jar
-          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.4.9/sbt-launch-1.4.9.jar
-      script:
-        - make py36_test
-
     - name: "Python 3.7 tests"
       language: python
       python: 3.7.9
@@ -65,7 +52,20 @@ jobs:
           --create-dirs -L -o /home/travis/.sbt/launchers/1.4.9/sbt-launch.jar
           https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.4.9/sbt-launch-1.4.9.jar
       script:
-        - make py37_test
+        - make test_python37
+
+    - name: "Python 3.8 tests"
+      language: python
+      python: 3.8.15
+      install:
+        - pip install tox
+      before_script:
+        - >
+          curl
+          --create-dirs -L -o /home/travis/.sbt/launchers/1.4.9/sbt-launch.jar
+          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.4.9/sbt-launch-1.4.9.jar
+      script:
+        - make test_python38
 
     - if: (NOT type IN (pull_request)) AND (branch = master)
       stage: "Deploy"

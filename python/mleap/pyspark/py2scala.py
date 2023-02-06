@@ -13,7 +13,7 @@ def jvm_scala_object(jpkg, obj):
         (for reference see file ml.combust.mleap.core.feature.MathUnaryModel)
     """
     return getattr(
-        getattr(jpkg, obj + "$"),  # JavaClass
+        getattr(jpkg, obj),  # JavaClass
         "MODULE$",  # JavaObject
     )
 
@@ -25,4 +25,4 @@ def Some(value):
     return _jvm().scala.Some(value)
 
 def ScalaNone():
-    return jvm_scala_object(_jvm().scala, "None")
+    return jvm_scala_object(_jvm().scala, "None$")

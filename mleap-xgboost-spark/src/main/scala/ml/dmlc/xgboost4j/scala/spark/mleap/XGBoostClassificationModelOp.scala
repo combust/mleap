@@ -40,7 +40,7 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
         withValue("missing", Value.float(obj.getOrDefault(obj.missing))).
         withValue("infer_batch_size", Value.int(obj.getOrDefault(obj.inferBatchSize))).
         withValue("use_external_memory", Value.boolean(obj.getOrDefault(obj.useExternalMemory))).
-        withValue("allow_non_zero_for_missing", Value.boolean(obj.getOrDefault(obj.allowNonZeroForMissing)))
+        withValue("allow_non_zero_for_missing", Value.boolean(obj.getOrDefault(obj.allowNonZeroForMissing))).
         withValue("objective", Value.string(obj.getOrDefault(obj.objective)))
     }
 

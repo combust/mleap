@@ -73,6 +73,7 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
     if(model.isSet(model.inferBatchSize)) xgb.setInferBatchSize(model.getOrDefault(model.inferBatchSize))
     if(model.isSet(model.treeLimit)) xgb.setTreeLimit(model.getOrDefault(model.treeLimit))
     if(model.isSet(model.useExternalMemory)) xgb.set(xgb.useExternalMemory, model.getOrDefault(model.useExternalMemory))
+    if(model.isSet(model.objective)) xgb.set(xgb.objective, model.getOrDefault(model.objective))
     xgb
   }
 

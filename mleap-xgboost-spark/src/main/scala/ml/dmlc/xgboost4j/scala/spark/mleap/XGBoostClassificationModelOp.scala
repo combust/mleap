@@ -41,6 +41,7 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
         withValue("infer_batch_size", Value.int(obj.getOrDefault(obj.inferBatchSize))).
         withValue("use_external_memory", Value.boolean(obj.getOrDefault(obj.useExternalMemory))).
         withValue("allow_non_zero_for_missing", Value.boolean(obj.getOrDefault(obj.allowNonZeroForMissing)))
+        withValue("objective", Value.string(obj.getOrDefault(obj.objective)))
     }
 
     override def load(model: Model)
@@ -57,6 +58,7 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
       model.getValue("allow_non_zero_for_missing").map(o => xgb.setAllowNonZeroForMissing(o.getBoolean))
       model.getValue("infer_batch_size").map(o => xgb.setInferBatchSize(o.getInt))
       model.getValue("use_external_memory").map(o => xgb.set(xgb.useExternalMemory, o.getBoolean))
+      model.getValue("objective").map(o => xgb.set(xgb.objective, o.getString))
       xgb
     }
   }

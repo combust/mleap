@@ -143,7 +143,7 @@ object Casting {
             }
           }
         }
-      case (tt: TensorType, _: ScalarType) if tt.dimensions.exists(_.isEmpty) =>
+      case (tt: TensorType, _: ScalarType) if tt.dimensions.exists(dimensions => dimensions.isEmpty || dimensions.product == 1) =>
         baseCast(from.base, to.base).map {
           _.map {
             c => (v: Any) => c(v.asInstanceOf[Tensor[_]](0))

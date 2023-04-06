@@ -2,7 +2,7 @@ package ml.combust.mleap.tensorflow
 
 import ml.combust.bundle.serializer.FileUtil
 import ml.combust.mleap.core.Model
-import ml.combust.mleap.core.types.{StructField, StructType, TensorType}
+import ml.combust.mleap.core.types.{DataType, StructField, StructType, TensorType}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.tensorflow.converter.{MleapConverter, TensorflowConverter}
 import org.tensorflow
@@ -57,7 +57,8 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
           }
 
           runner.run().asScala.zip(outputs).map {
-            case (tensor, (_, dataType)) =>
+            case (tensorMap, (_, dataType)) =>
+              val tensor = tensorMap.getValue()
               garbage += tensor
               TensorflowConverter.convert(tensor, dataType)
           }
@@ -66,7 +67,7 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
 
     garbage.result.foreach(_.close())
 
-    result.get
+    result.get.toSeq
   }
 
   private def withSession[T](f: (tensorflow.Session) => T): T = {

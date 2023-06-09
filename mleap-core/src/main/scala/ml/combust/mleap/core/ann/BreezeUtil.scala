@@ -18,7 +18,7 @@ package ml.combust.mleap.core.ann
  */
 
 import breeze.linalg.{DenseMatrix => BDM, DenseVector => BDV}
-import com.github.fommil.netlib.BLAS.{getInstance => NativeBLAS}
+import dev.ludovic.netlib.blas.BLAS.{getInstance => NativeBLAS}
 import ml.combust.mleap.core.annotation.SparkCode
 
 /**

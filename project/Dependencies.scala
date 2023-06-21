@@ -6,7 +6,7 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "3.3.0"
+  val sparkVersion = "3.4.0"
   val scalaTestVersion = "3.0.8"
   val junitVersion = "5.8.2"
   val akkaVersion = "2.6.14" // Stay below akka v2.7.0 since they swapped to a BSL license
@@ -14,12 +14,12 @@ object Dependencies {
   val springBootVersion = "2.6.2"
   lazy val logbackVersion = "1.2.3"
   lazy val loggingVersion = "3.9.0"
-  lazy val slf4jVersion = "1.7.36"
+  lazy val slf4jVersion = "2.0.6"
   lazy val awsSdkVersion = "1.11.1033"
   val tensorflowJavaVersion = "0.5.0" // Match Tensorflow 2.10.1 https://github.com/tensorflow/java/#tensorflow-version-support
   val xgboostVersion = "1.7.3"
-  val breezeVersion = "1.2"
-  val hadoopVersion = "2.7.4" // matches spark version
+  val breezeVersion = "2.1.0"
+  val hadoopVersion = "3.3.4" // matches spark version
   val platforms = "windows-x86_64,linux-x86_64,macosx-x86_64"
   val tensorflowPlatforms : Array[String] =  sys.env.getOrElse("TENSORFLOW_PLATFORMS", platforms).split(",")
 
@@ -32,7 +32,7 @@ object Dependencies {
       "org.apache.spark" %% "spark-catalyst" % sparkVersion,
       "org.apache.spark" %% "spark-avro" % sparkVersion
     )
-    val avroDep = "org.apache.avro" % "avro" % "1.8.1"
+    val avroDep = "org.apache.avro" % "avro" % "1.11.1"
     val sprayJson = "io.spray" %% "spray-json" % "1.3.2"
     val arm = "com.jsuereth" %% "scala-arm" % "2.0"
     val config = "com.typesafe" % "config" % "1.3.0"

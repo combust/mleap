@@ -17,7 +17,7 @@
 
 package ml.combust.mleap.core.linalg
 
-import com.github.fommil.netlib.LAPACK.{getInstance => lapack}
+import dev.ludovic.netlib.lapack.LAPACK.{getInstance => lapack}
 import ml.combust.mleap.core.annotation.SparkCode
 import org.netlib.util.intW
 

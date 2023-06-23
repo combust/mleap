@@ -38,37 +38,22 @@ Our goals for this project are:
 
 <img src="assets/images/single-runtime.jpg" alt="Unified Runtime"/>
 
-## Requirements
+## Dependency Compatibility Matrix
 
-MLeap is built against Scala 2.12 and Java 11.
+Other versions besides those listed below may also work (especially more recent Java versions for the JRE), 
+but these are the configurations which are tested by mleap.
 
-### MLeap/Spark Version
-
-Choose the right version of the `mleap-spark` module to export your pipeline. The serialization format is backwards compatible between different versions of MLeap. So if you export a pipeline using MLeap 0.11.0 and Spark 2.1, you can still load that pipeline using MLeap runtime version 0.12.0.
-
-| MLeap Version | Spark Version |
-|---------------|---------------|
-| 0.22.0        | 3.3.0         |
-| 0.21.1        | 3.2.0         |
-| 0.21.0        | 3.2.0         |
-| 0.20.0        | 3.2.0         |
-| 0.19.0        | 3.0.2         |
-| 0.18.1        | 3.0.2         |
-| 0.18.0        | 3.0.2         |
-| 0.17.0        | 2.4.5         |
-| 0.16.0        | 2.4.5         |
-| 0.15.0        | 2.4           |
-| 0.14.0        | 2.4           |
-| 0.13.0        | 2.3           |
-| 0.12.0        | 2.3           |
-| 0.11.0        | 2.2           |
-| 0.11.0        | 2.1           |
-| 0.11.0        | 2.0           |
-| 0.10.3        | 2.2           |
-| 0.10.3        | 2.1           |
-| 0.10.3        | 2.0           |
-
-Please see the [release notes](RELEASE_NOTES.md) for changes (especially breaking changes) included with each release.
+| MLeap Version | Spark Version | Scala Version    | Java Version | Python Version | XGBoost Version | Tensorflow Version |
+|---------------|---------------|------------------|--------------|----------------|-----------------|--------------------|
+| 0.23.0        | 3.4.0         | 2.12.13          | 11           | 3.7, 3.8       | 1.7.3           | 2.10.1             |
+| 0.22.0        | 3.3.0         | 2.12.13          | 11           | 3.7, 3.8       | 1.6.1           | 2.7.0              |
+| 0.21.1        | 3.2.0         | 2.12.13          | 11           | 3.7            | 1.6.1           | 2.7.0              |
+| 0.21.0        | 3.2.0         | 2.12.13          | 11           | 3.6, 3.7       | 1.6.1           | 2.7.0              |
+| 0.20.0        | 3.2.0         | 2.12.13          | 8            | 3.6, 3.7       | 1.5.2           | 2.7.0              |
+| 0.19.0        | 3.0.2         | 2.12.13          | 8            | 3.6, 3.7       | 1.3.1           | 2.4.1              |
+| 0.18.1        | 3.0.2         | 2.12.13          | 8            | 3.6, 3.7       | 1.0.0           | 2.4.1              |
+| 0.18.0        | 3.0.2         | 2.12.13          | 8            | 3.6, 3.7       | 1.0.0           | 2.4.1              |
+| 0.17.0        | 2.4.5         | 2.11.12, 2.12.10 | 8            | 3.6, 3.7       | 1.0.0           | 1.11.0             |
 
 ## Setup
 
@@ -77,7 +62,7 @@ Please see the [release notes](RELEASE_NOTES.md) for changes (especially breakin
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.22.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.23.0"
 ```
 
 #### Maven
@@ -86,7 +71,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.22.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.12</artifactId>
-    <version>0.22.0</version>
+    <version>0.23.0</version>
 </dependency>
 ```
 
@@ -95,7 +80,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.22.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.22.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.23.0"
 ```
 
 #### Maven
@@ -104,14 +89,8 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.22.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.12</artifactId>
-    <version>0.22.0</version>
+    <version>0.23.0</version>
 </dependency>
-```
-
-### Spark Packages
-
-```bash
-$ bin/spark-shell --packages ml.combust.mleap:mleap-spark_2.12:0.22.0
 ```
 
 ### PySpark Integration

@@ -269,6 +269,13 @@ For more documentation, please see our [documentation](https://combust.github.io
 * Make a pull request for an existing feature request or bug report
 * Join the discussion of how to get MLeap into Spark as a dependency. Talk with us on Gitter (see link at top of README.md)
 
+## Building
+
+Please ensure you have sbt 1.4.9, java 11, scala 2.12.13
+
+1. Initialize the git submodules `git submodule update --init --recursive`
+2. Run `sbt compile`
+
 ## Thank You
 
 Thank you to [Swoop](https://www.swoop.com/) for supporting the XGboost

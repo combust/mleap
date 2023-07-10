@@ -133,7 +133,7 @@ trait JsonSupport {
       obj.ds.foreach(ds => fb += ("data_shape" -> ds.toJson))
       obj.m.foreach(m => fb += ("model" -> m.toJson))
 
-      JsObject(fb.result(): _*)
+      JsObject(fb.result().toSeq: _*)
     }
 
     override def read(json: JsValue): Scalar = json match {
@@ -220,7 +220,7 @@ trait JsonSupport {
       if(obj.ds.nonEmpty) { fb += ("data_shape" -> obj.ds.toJson) }
       if(obj.m.nonEmpty) { fb += ("model" -> obj.m.toJson) }
 
-      JsObject(fb.result(): _*)
+      JsObject(fb.result().toSeq: _*)
     }
 
     override def read(json: JsValue): List = json match {

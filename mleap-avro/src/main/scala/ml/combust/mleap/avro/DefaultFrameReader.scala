@@ -29,11 +29,11 @@ class DefaultFrameReader extends FrameReader {
     var rows = mutable.Seq[Row]()
     while(Try(reader.hasNext).getOrElse(false)) {
       record = reader.next(record)
-      val row = ArrayRow(new Array[Any](schema.fields.length))
+      val row = ArrayRow((new Array[Any](schema.fields.length)).toSeq)
       for(i <- schema.fields.indices) { row.set(i, readers(i)(record.get(i))) }
       rows :+= row
     }
 
-    DefaultLeapFrame(schema, rows)
+    DefaultLeapFrame(schema, rows.toSeq)
   }
 }

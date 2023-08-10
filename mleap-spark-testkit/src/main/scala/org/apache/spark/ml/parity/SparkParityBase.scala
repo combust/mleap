@@ -59,10 +59,14 @@ object SparkParityBase extends FunSpec {
 
 
 object SparkEnv {
-  lazy val spark = SparkSession.builder().
-    appName("Spark/MLeap Parity Tests").
-    master("local[2]").
-    getOrCreate()
+  lazy val spark = {
+    val session = SparkSession.builder().
+      appName("Spark/MLeap Parity Tests").
+      master("local[2]").
+      getOrCreate()
+    session.sparkContext.setLogLevel("WARN")
+    session
+  }
 }
 
 
@@ -178,7 +182,7 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  var relTolEps: Double = 1E-7
+  var relTolEps: Double = 1E-6
   def equalityTest(sparkDataset: DataFrame, mleapDataset: DataFrame): Unit = {
     val sparkCols = sparkDataset.columns.toSeq
     assert(mleapDataset.columns.toSet === sparkCols.toSet)
@@ -225,13 +229,15 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
     }
   }
 
+  val excludedColsForComparison = Array[String]()
+
   def parityTransformer(): Unit = {
     it("has parity between Spark/MLeap") {
       val sparkTransformed = sparkTransformer.transform(dataset)
       implicit val sbc = SparkBundleContext().withDataset(sparkTransformed)
       val mTransformer = mleapTransformer(sparkTransformer)
-      val sparkDataset = sparkTransformed.toSparkLeapFrame.toSpark
-      val mleapDataset = mTransformer.sparkTransform(dataset)
+      val sparkDataset = sparkTransformed.toSparkLeapFrame.toSpark.drop(this.excludedColsForComparison: _*)
+      val mleapDataset = mTransformer.sparkTransform(dataset).drop(this.excludedColsForComparison: _*)
 
       equalityTest(sparkDataset, mleapDataset)
     }

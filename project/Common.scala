@@ -2,8 +2,8 @@ package ml.combust.mleap
 
 import sbt._
 import Keys._
-import com.typesafe.sbt.SbtPgp.autoImportImpl._
-import com.typesafe.sbt.pgp.PgpKeys._
+import com.jsuereth.sbtpgp.SbtPgp.autoImport._
+import com.jsuereth.sbtpgp.PgpKeys._
 import sbtrelease.ReleasePlugin.autoImport._
 import xerial.sbt.Sonatype.autoImport._
 
@@ -17,7 +17,7 @@ object Common {
 
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
     scalaVersion := "2.12.13",
-    scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-target:jvm-1.8"),
+    scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     fork in Test := true,
     javaOptions in test += sys.env.getOrElse("JVM_OPTS", ""),
     resolvers += Resolver.mavenLocal,

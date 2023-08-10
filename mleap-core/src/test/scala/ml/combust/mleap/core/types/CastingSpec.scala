@@ -197,6 +197,7 @@ class CastingSpec extends FunSpec {
         val tc = Casting.cast(ScalarType(from), TensorType(to, Some(Seq()))).getOrElse(Success((v: Any) => v)).get
         val ct = Casting.cast(TensorType(from, Some(Seq())), ScalarType(to)).getOrElse(Success((v: Any) => v)).get
         val lct = Casting.cast(TensorType(from, Some(Seq(expectedList.length))), ListType(to)).getOrElse(Success((v: Any) => v)).get
+        val ct1 = Casting.cast(TensorType(from, Some(Seq(1))), ScalarType(to)).getOrElse(Success((v: Any) => v)).get
 
         assert(c(fromTensor) == expectedTensor)
         assertThrows[NullPointerException](oc(null))
@@ -205,6 +206,7 @@ class CastingSpec extends FunSpec {
         assert(tc(fromValue) == expectedScalarTensor)
         assert(ct(fromScalarTensor) == expectedValue)
         assert(lct(fromListTensor) == expectedList)
+        assert(ct1(fromTensor) == expectedValue)
       }
 
     }

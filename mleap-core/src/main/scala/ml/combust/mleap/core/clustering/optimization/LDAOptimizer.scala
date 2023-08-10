@@ -2,7 +2,7 @@ package ml.combust.mleap.core.clustering.optimization
 
 import breeze.linalg.{Vector, sum, DenseMatrix => BDM, DenseVector => BDV, SparseVector => BSV}
 import breeze.numerics.{abs, exp}
-import breeze.stats.distributions.Gamma
+import breeze.stats.distributions.{Gamma, RandBasis}
 import ml.combust.mleap.core.annotation.SparkCode
 import ml.combust.mleap.core.clustering.LDAUtils
 
@@ -35,7 +35,7 @@ private[clustering] object OnlineLDAOptimizer {
     }
     // Initialize the variational distribution q(theta|gamma) for the mini-batch
     val gammad: BDV[Double] =
-      new Gamma(gammaShape, 1.0 / gammaShape).samplesVector(k)                   // K
+      new Gamma(gammaShape, 1.0 / gammaShape)(RandBasis.mt0).samplesVector(k)                   // K
     val expElogthetad: BDV[Double] = exp(LDAUtils.dirichletExpectation(gammad))  // K
     val expElogbetad = expElogbeta(ids, ::).toDenseMatrix                        // ids * K
 

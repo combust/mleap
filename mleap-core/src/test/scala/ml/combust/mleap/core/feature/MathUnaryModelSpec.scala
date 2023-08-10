@@ -33,4 +33,7 @@ class MathUnaryModelSpec extends FunSpec {
   unaryLike(Tan, "tan", 88777.777, Math.tan(88777.777))
   unaryLike(Abs, "abs", -88777.777, Math.abs(-88777.777))
   unaryLike(Logit, "logit", 0.9, LogitHelper.logit(0.9))
+  unaryLike(Floor, "floor", 3.4, Math.floor(3.4))
+  unaryLike(Ceil, "ceil", 4.6, Math.ceil(4.6))
+  unaryLike(Round, "round", 8.9, Math.round(8.9))
 }

@@ -1,6 +1,6 @@
 # Use container-based infrastructure
 os: linux
-dist: focal
+dist: xenial
 
 # Set default python env
 # because the xgboost-spark library when running training code, it will
@@ -24,7 +24,7 @@ language: scala
 scala:
   - 2.12.13
 jdk:
-  - openjdk11
+  - openjdk8
 
 jobs:
   include:

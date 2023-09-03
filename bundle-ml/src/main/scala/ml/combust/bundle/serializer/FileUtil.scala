@@ -6,7 +6,6 @@ import java.util.zip.{ZipInputStream, ZipOutputStream}
 /**
   * Created by hollinwilkins on 9/11/16.
   */
-@deprecated("Prefer ml.combust.bundle.util.FileUtil object.")
 case class FileUtil() {
   import ml.combust.bundle.util.{FileUtil => FileUtils}
   @deprecated("use FileUtil.rmRF(Path).")

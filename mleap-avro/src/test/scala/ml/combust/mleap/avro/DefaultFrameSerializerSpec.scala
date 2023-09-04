@@ -5,12 +5,12 @@ import ml.combust.mleap.runtime.serialization.FrameReader
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 10/31/16.
   */
-class DefaultFrameSerializerSpec extends FunSpec {
+class DefaultFrameSerializerSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(StructField("test_double", ScalarType.Double),
     StructField("test_float", ScalarType.Float),
     StructField("test_string", ScalarType.String),

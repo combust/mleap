@@ -19,9 +19,9 @@ object BundleHelper {
       |implicit val sbc = SparkBundleContext().withDataset(transformedDataset)
       |
       |// Serialize the pipeline as you would normally
-      |(for(bf <- managed(BundleFile(file))) yield {
+      |Using(BundleFile(file))) { bf =>
       |  sparkTransformer.writeBundle.save(bf).get
-      |}).tried.get
+      |}.get
       |*****************************************************************************************************
     """.stripMargin
   }

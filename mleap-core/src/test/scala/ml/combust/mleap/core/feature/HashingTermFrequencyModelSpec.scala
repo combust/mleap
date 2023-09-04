@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class HashingTermFrequencyModelSpec extends FunSpec {
+class HashingTermFrequencyModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("Hashing Term Frequency Model") {
     val model = HashingTermFrequencyModel()

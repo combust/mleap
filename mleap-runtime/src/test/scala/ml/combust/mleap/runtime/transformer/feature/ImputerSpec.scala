@@ -3,16 +3,15 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.ImputerModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import org.scalatest.FunSpec
 
 /**
-  * Created by hollinwilkins on 1/4/17.
-  */
-class ImputerSpec extends FunSpec {
+ * Created by hollinwilkins on 1/4/17.
+ */
+class ImputerSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("imputer") {
     val transformer = Imputer(
       shape = NodeShape().withStandardInput("test_a").
-              withStandardOutput("test_out"),
+        withStandardOutput("test_out"),
       model = ImputerModel(45.7, 23.6, ""))
 
     describe("null values") {
@@ -40,7 +39,7 @@ class ImputerSpec extends FunSpec {
       val dataset = Seq(Row(42.0), Row(23.6), Row(Double.NaN))
       val frame = DefaultLeapFrame(schema, dataset)
       val transformer2 = transformer.copy(shape = NodeShape().
-              withStandardInput("test_a").
+        withStandardInput("test_a").
         withStandardOutput("test_out"),
         model = transformer.model.copy(nullableInput = false))
 

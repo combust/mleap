@@ -3,9 +3,9 @@ package ml.combust.mleap.runtime.transformer.regression
 import ml.combust.mleap.core.regression.AFTSurvivalRegressionModel
 import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class AFTSurvivalRegressionSpec extends FunSpec {
+class AFTSurvivalRegressionSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
 

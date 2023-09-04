@@ -1,16 +1,15 @@
 package ml.combust.mleap.runtime.transformer.feature
 
-import java.io.File
-
 import ml.combust.bundle.BundleFile
 import ml.combust.mleap.core.feature.OneHotEncoderModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
-import resource.managed
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
 
-class OneHotEncoderSpec extends FunSpec {
+import java.io.File
+import scala.util.Using
+
+class OneHotEncoderSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs in a single-input/output context") {
@@ -20,7 +19,7 @@ class OneHotEncoderSpec extends FunSpec {
       assert(
         transformer.schema.fields ==
           Seq(StructField("input0", ScalarType.Double.nonNullable),
-              StructField("output0", TensorType.Double(5))))
+            StructField("output0", TensorType.Double(5))))
     }
 
     it("has the correct inputs and output in a multi-input/output context") {
@@ -37,11 +36,11 @@ class OneHotEncoderSpec extends FunSpec {
   }
 
   describe("one hot encoder pre Spark 2.3.0") {
-    it ("loads correctly in mleap") {
+    it("loads correctly in mleap") {
       val file = new File(getClass.getResource("/one_hot_encoder_pipeline.zip").toURI)
-      val pipeline = (for (bf <- managed(BundleFile(file))) yield {
+      val pipeline = Using(BundleFile(file)) { bf =>
         bf.loadMleapBundle().get.root
-      }).tried.get.asInstanceOf[Pipeline]
+      }.get.asInstanceOf[Pipeline]
 
       assert(pipeline.model.transformers.size == 2)
     }

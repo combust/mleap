@@ -2,14 +2,14 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 import org.apache.spark.ml.util.TestingUtils._
 
 /**
   * Created by mikhail on 9/18/16.
   */
-class MinMaxScalerModelSpec extends FunSpec{
+class MinMaxScalerModelSpec extends org.scalatest.funspec.AnyFunSpec{
   describe("min max scaler model") {
     val scaler = MinMaxScalerModel(Vectors.dense(Array(1.0, 0.0, 5.0, 10.0)), Vectors.dense(Array(15.0, 10.0, 15.0, 20.0)))
 

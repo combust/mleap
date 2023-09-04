@@ -7,7 +7,7 @@ import ml.combust.mleap.pb
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Component
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import java.nio.file.{Files, Path, Paths}
 
 import ml.combust.mleap.executor.MleapExecutor

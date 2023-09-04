@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.recommendation
 
 import ml.combust.mleap.core.types.{ScalarType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class ALSModelSpec extends FunSpec {
+class ALSModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("ALS") {
     val userFactors = Map(0 -> Array(1.0f, 2.0f), 1 -> Array(3.0f, 1.0f), 2 -> Array(2.0f, 3.0f))

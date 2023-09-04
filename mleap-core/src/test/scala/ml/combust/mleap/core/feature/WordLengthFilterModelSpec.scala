@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class WordLengthFilterModelSpec extends FunSpec {
+class WordLengthFilterModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("word length filter model") {
     val model = new WordLengthFilterModel(5)

@@ -27,8 +27,6 @@ class GrpcSpec extends TestKit(ActorSystem("grpc-server-test"))
     client
   }
 
-  override implicit def materializer: Materializer = ActorMaterializer()(system)
-
   override protected def afterAll(): Unit = {
     server.shutdown()
     channel.shutdown()

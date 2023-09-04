@@ -16,7 +16,6 @@ class MleapExecutorSpec extends TestKit(ActorSystem("MleapExecutorSpec"))
 
   override lazy val transformService: MleapExecutor = MleapExecutor(system)
   private val frame = TestUtil.frame
-  override implicit val materializer: Materializer = ActorMaterializer()(system)
 
   override protected def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system, 5.seconds, verifySystemShutdown = true)

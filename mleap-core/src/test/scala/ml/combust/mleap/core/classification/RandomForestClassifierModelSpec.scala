@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.classification
 
 import ml.combust.mleap.core.types.{ScalarType, StructField, TensorType}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class RandomForestClassifierModelSpec extends FunSpec {
+class RandomForestClassifierModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("random forest classifier model") {
     val model = new RandomForestClassifierModel(Seq(), Seq(), 3, 2)

@@ -2,9 +2,8 @@ package ml.combust.mleap.runtime.transformer.classification
 
 import ml.combust.mleap.core.classification.NaiveBayesModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
 
-class NaiveBayesClassifierSpec extends FunSpec {
+class NaiveBayesClassifierSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

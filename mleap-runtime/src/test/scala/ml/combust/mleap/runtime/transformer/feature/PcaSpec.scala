@@ -5,12 +5,11 @@ import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.{DenseMatrix, Vectors}
-import org.scalatest.FunSpec
 
 /**
-  * Created by hollinwilkins on 10/12/16.
-  */
-class PcaSpec extends FunSpec {
+ * Created by hollinwilkins on 10/12/16.
+ */
+class PcaSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
   val dataset = Seq(Row(Tensor.denseVector(Array(2.0, 1.0, 0.0))))
   val frame = DefaultLeapFrame(schema, dataset)
@@ -33,7 +32,9 @@ class PcaSpec extends FunSpec {
     describe("with invalid input column") {
       val pca2 = pca.copy(shape = NodeShape.feature(inputCol = "bad_input"))
 
-      it("returns a Failure") { assert(pca2.transform(frame).isFailure) }
+      it("returns a Failure") {
+        assert(pca2.transform(frame).isFailure)
+      }
     }
   }
 

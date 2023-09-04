@@ -4,12 +4,11 @@ import ml.combust.mleap.core.feature.NormalizerModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
-import org.scalatest.FunSpec
 
 /**
-  * Created by hollinwilkins on 9/24/16.
-  */
-class NormalizerSpec extends FunSpec {
+ * Created by hollinwilkins on 9/24/16.
+ */
+class NormalizerSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
   val dataset = Seq(Row(Tensor.denseVector(Array(0.0, 20.0, 40.0))))
   val frame = DefaultLeapFrame(schema, dataset)
@@ -32,7 +31,9 @@ class NormalizerSpec extends FunSpec {
     describe("with invalid input column") {
       val normalizer2 = normalizer.copy(shape = NodeShape.feature(inputCol = "bad_input"))
 
-      it("returns a Failure") { assert(normalizer2.transform(frame).isFailure) }
+      it("returns a Failure") {
+        assert(normalizer2.transform(frame).isFailure)
+      }
     }
   }
 

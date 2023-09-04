@@ -2,9 +2,8 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.MinHashLSHModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
 
-class MinHashLSHSpec extends FunSpec {
+class MinHashLSHSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

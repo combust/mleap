@@ -3,12 +3,12 @@ package ml.combust.mleap.core.feature
 import ml.combust.mleap.core.feature.UnaryOperation._
 import ml.combust.mleap.core.feature.LogitHelper
 import ml.combust.mleap.core.types.{ScalarType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 12/27/16.
   */
-class MathUnaryModelSpec extends FunSpec {
+class MathUnaryModelSpec extends org.scalatest.funspec.AnyFunSpec {
   def unaryLike(operation: UnaryOperation,
                 name: String,
                 input: Double,

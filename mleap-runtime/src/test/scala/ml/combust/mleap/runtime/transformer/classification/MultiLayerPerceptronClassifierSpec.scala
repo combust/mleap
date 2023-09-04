@@ -3,9 +3,8 @@ package ml.combust.mleap.runtime.transformer.classification
 import ml.combust.mleap.core.classification.MultiLayerPerceptronClassifierModel
 import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
 
-class MultiLayerPerceptronClassifierSpec extends FunSpec {
+class MultiLayerPerceptronClassifierSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

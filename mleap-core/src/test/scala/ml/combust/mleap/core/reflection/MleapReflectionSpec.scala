@@ -2,12 +2,12 @@ package ml.combust.mleap.core.reflection
 
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.{ByteString, Tensor}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 10/21/16.
   */
-class MleapReflectionSpec extends FunSpec {
+class MleapReflectionSpec extends AnyFunSpec {
   describe("#dataType") {
     import ml.combust.mleap.core.reflection.MleapReflection.dataType
 
@@ -49,7 +49,7 @@ class MleapReflectionSpec extends FunSpec {
 
     describe("#with an invalid Scala type") {
       it("throws an illegal argument exception") {
-        assertThrows[IllegalArgumentException] { dataType[FunSpec] }
+        assertThrows[IllegalArgumentException] { dataType[AnyFunSpec] }
       }
     }
   }

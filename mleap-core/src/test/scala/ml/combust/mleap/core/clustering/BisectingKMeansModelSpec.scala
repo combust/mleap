@@ -3,9 +3,9 @@ package ml.combust.mleap.core.clustering
 import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.linalg.mleap.VectorWithNorm
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class BisectingKMeansModelSpec extends FunSpec {
+class BisectingKMeansModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("bisecting kmeans model") {
     val model = new BisectingKMeansModel(ClusteringTreeNode(23,

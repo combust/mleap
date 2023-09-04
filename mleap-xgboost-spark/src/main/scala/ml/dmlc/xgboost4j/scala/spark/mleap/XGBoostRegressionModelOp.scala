@@ -9,7 +9,7 @@ import ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel
 import ml.dmlc.xgboost4j.scala.{XGBoost => SXGBoost}
 import org.apache.spark.ml.bundle._
 import org.apache.spark.ml.linalg.Vector
-import resource.managed
+import scala.util.Using
 
 /**
   * Created by hollinwilkins on 9/16/17.
@@ -39,9 +39,9 @@ class XGBoostRegressionModelOp extends SimpleSparkOp[XGBoostRegressionModel] {
 
     override def load(model: Model)
                      (implicit context: BundleContext[SparkBundleContext]): XGBoostRegressionModel = {
-      val booster = (for(in <- managed(Files.newInputStream(context.file("xgboost.model")))) yield {
+      val booster = Using(Files.newInputStream(context.file("xgboost.model"))) { in =>
         SXGBoost.loadModel(in)
-      }).tried.get
+      }.get
 
       val xgb = new XGBoostRegressionModel("", booster)
 

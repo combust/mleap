@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class VectorIndexerModelSpec extends FunSpec {
+class VectorIndexerModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("vector indexer model") {
     val model = VectorIndexerModel(3, Map())

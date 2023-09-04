@@ -8,15 +8,18 @@ import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.{FunSpec, Matchers}
 import ml.combust.mleap.core.types._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.{Millis, Span}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Success, Try}
 
-class ExecuteTransformSpec extends FunSpec with ScalaFutures with Matchers {
+class ExecuteTransformSpec extends AnyFunSpec with ScalaFutures with Matchers {
+  override def patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(500, Millis))
+  implicit val cfg = patienceConfig
 
   describe("execute transform") {
 

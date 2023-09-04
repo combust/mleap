@@ -1,12 +1,12 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{BasicType, ListType, ScalarType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hwilkins on 1/21/16.
   */
-class TokenizerModelSpec extends FunSpec {
+class TokenizerModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   val tokenizer = TokenizerModel()
 

@@ -1,15 +1,14 @@
 package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.VectorAssemblerModel
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.core.types._
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
-import org.scalatest.FunSpec
 
 /**
-  * Created by hollinwilkins on 9/15/16.
-  */
-class VectorAssemblerSpec extends FunSpec {
+ * Created by hollinwilkins on 9/15/16.
+ */
+class VectorAssemblerSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(Seq(StructField("feature1", TensorType(BasicType.Double)),
     StructField("feature2", ScalarType.Double),
     StructField("feature3", ScalarType.Int))).get
@@ -17,9 +16,9 @@ class VectorAssemblerSpec extends FunSpec {
   val frame = DefaultLeapFrame(schema, dataset)
   val vectorAssembler = VectorAssembler(
     shape = NodeShape().withInput("input0", "feature1").
-              withInput("input1", "feature2").
-              withInput("input2", "feature3").
-          withStandardOutput("features"),
+      withInput("input1", "feature2").
+      withInput("input2", "feature3").
+      withStandardOutput("features"),
     model = VectorAssemblerModel(Seq(TensorShape(3), ScalarShape(), ScalarShape())))
 
   describe("#transform") {
@@ -32,10 +31,12 @@ class VectorAssemblerSpec extends FunSpec {
 
     describe("with invalid input") {
       val vectorAssembler2 = vectorAssembler.copy(shape = NodeShape().withInput("input0", "bad_input").
-              withStandardOutput("features"),
-      model = VectorAssemblerModel(Seq(ScalarShape())))
+        withStandardOutput("features"),
+        model = VectorAssemblerModel(Seq(ScalarShape())))
 
-      it("returns a Failure") { assert(vectorAssembler2.transform(frame).isFailure) }
+      it("returns a Failure") {
+        assert(vectorAssembler2.transform(frame).isFailure)
+      }
     }
   }
 

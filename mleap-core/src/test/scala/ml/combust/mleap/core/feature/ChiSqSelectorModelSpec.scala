@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class ChiSqSelectorModelSpec extends FunSpec {
+class ChiSqSelectorModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema"){
     val model = new ChiSqSelectorModel(Seq(1,2,3), 3)

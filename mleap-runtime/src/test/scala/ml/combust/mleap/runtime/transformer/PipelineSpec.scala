@@ -6,9 +6,9 @@ import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.transformer.feature.VectorAssembler
 import ml.combust.mleap.runtime.transformer.regression.LinearRegression
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class PipelineSpec extends FunSpec {
+class PipelineSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has inputs or outputs of its transformers") {

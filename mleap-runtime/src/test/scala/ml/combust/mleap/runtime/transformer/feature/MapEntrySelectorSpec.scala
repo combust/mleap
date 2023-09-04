@@ -3,26 +3,25 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.MapEntrySelectorModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import org.scalatest.FunSpec
 
-class MapEntrySelectorSpec extends FunSpec {
+class MapEntrySelectorSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(Seq(
     StructField("test_map", MapType(BasicType.String, BasicType.Double)),
     StructField("my_key", ScalarType.String)
   )).get
   val dataset = Seq(
-    Row(Map("a"->1.0), "a"),
-    Row(Map("b"->2.0), "key_does_not_exist"),
-    Row(Map("c"->3.0), "c")
+    Row(Map("a" -> 1.0), "a"),
+    Row(Map("b" -> 2.0), "key_does_not_exist"),
+    Row(Map("c" -> 3.0), "c")
   )
   val frame = DefaultLeapFrame(schema, dataset)
 
   val transformer = MapEntrySelector(
-    shape=NodeShape()
+    shape = NodeShape()
       .withStandardInput("test_map")
       .withInput("key", "my_key")
       .withStandardOutput("result"),
-    model=MapEntrySelectorModel[String, Double](defaultValue = 42.42)
+    model = MapEntrySelectorModel[String, Double](defaultValue = 42.42)
   )
 
   describe("#transform") {

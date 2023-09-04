@@ -2,12 +2,12 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 9/24/16.
   */
-class NormalizerModelSpec extends FunSpec {
+class NormalizerModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("normalizer model") {
 
     val normalizer = NormalizerModel(20.0, 3)

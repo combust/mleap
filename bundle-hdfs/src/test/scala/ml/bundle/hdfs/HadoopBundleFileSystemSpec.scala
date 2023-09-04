@@ -5,9 +5,9 @@ import java.nio.file.{Files, Paths}
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class HadoopBundleFileSystemSpec extends FunSpec {
+class HadoopBundleFileSystemSpec extends org.scalatest.funspec.AnyFunSpec {
   private val fs = FileSystem.get(new Configuration())
   private val bundleFs = new HadoopBundleFileSystem(fs)
 

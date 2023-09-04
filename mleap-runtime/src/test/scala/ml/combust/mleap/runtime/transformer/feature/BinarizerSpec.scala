@@ -4,12 +4,12 @@ import ml.combust.mleap.core.feature.BinarizerModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by fshabbir on 12/1/16.
   */
-class BinarizerSpec extends FunSpec {
+class BinarizerSpec extends AnyFunSpec {
   val binarizer = Binarizer(shape = NodeShape.feature(
     inputCol = "test_vec",
     outputCol = "test_binarizer"),

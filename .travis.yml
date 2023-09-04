@@ -1,6 +1,6 @@
 # Use container-based infrastructure
 os: linux
-dist: focal
+dist: jammy
 
 # Set default python env
 # because the xgboost-spark library when running training code, it will
@@ -22,7 +22,7 @@ services:
 
 language: scala
 scala:
-  - 2.12.13
+  - 2.12.18
 jdk:
   - openjdk11
 
@@ -43,27 +43,27 @@ jobs:
 
     - name: "Python 3.7 tests"
       language: python
-      python: 3.7.9
+      python: 3.7.15
       install:
         - pip install tox
       before_script:
         - >
           curl
-          --create-dirs -L -o /home/travis/.sbt/launchers/1.4.9/sbt-launch.jar
-          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.4.9/sbt-launch-1.4.9.jar
+          --create-dirs -L -o /home/travis/.sbt/launchers/1.9.4/sbt-launch.jar
+          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.9.4/sbt-launch-1.9.4.jar
       script:
         - make test_python37
 
     - name: "Python 3.8 tests"
       language: python
-      python: 3.8.15
+      python: 3.8.16
       install:
         - pip install tox
       before_script:
         - >
           curl
-          --create-dirs -L -o /home/travis/.sbt/launchers/1.4.9/sbt-launch.jar
-          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.4.9/sbt-launch-1.4.9.jar
+          --create-dirs -L -o /home/travis/.sbt/launchers/1.9.4/sbt-launch.jar
+          https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.9.4/sbt-launch-1.9.4.jar
       script:
         - make test_python38
 

@@ -170,7 +170,7 @@ class GrpcClient(stub: MleapStub)
     }
 
     Flow.fromGraph {
-      GraphDSL.create(_responseSource) {
+      GraphDSL.createGraph(_responseSource) {
         implicit builder =>
           responseSource =>
             import GraphDSL.Implicits._
@@ -267,7 +267,7 @@ class GrpcClient(stub: MleapStub)
     }
 
     Flow.fromGraph {
-      GraphDSL.create(_responseSource) {
+      GraphDSL.createGraph(_responseSource) {
         implicit builder =>
           responseSource =>
             import GraphDSL.Implicits._

@@ -3,11 +3,9 @@ package ml.combust.mleap.springboot
 import java.net.URI
 import java.util
 import java.util.UUID
-
 import ml.combust.mleap.pb.SelectMode.{SELECT_MODE_RELAXED, SELECT_MODE_STRICT}
 import ml.combust.mleap.pb.{Mleap, TransformOptions}
 import ml.combust.mleap.springboot.TestUtil._
-import org.scalatest.{FunSpec, Matchers}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.{HttpEntity, HttpMethod, HttpStatus, ResponseEntity}
@@ -16,16 +14,22 @@ import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter
 import org.springframework.test.context.TestContextManager
 import ml.combust.mleap.runtime.frame.DefaultLeapFrame
 import ml.combust.mleap.runtime.serialization.FrameReader
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.reflect._
 
-abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag[V], cy: ClassTag[Y]) extends FunSpec with Matchers {
+abstract class ScoringBase[T, U, V, X, Y](implicit cu: ClassTag[U], cv: ClassTag[V], cy: ClassTag[Y])
+  extends AnyFunSpec with Matchers {
 
   @Autowired
   var restTemplate: TestRestTemplate = _
-  new TestContextManager(this.getClass).prepareTestInstance(this)
-  restTemplate.getRestTemplate.setMessageConverters(util.Arrays.asList(new ProtobufHttpMessageConverter(),
-    new StringHttpMessageConverter(), new ByteArrayHttpMessageConverter()))
+  private val manager = new TestContextManager(this.getClass)
+  manager.prepareTestInstance(this)
+  restTemplate.getRestTemplate.setMessageConverters(
+    util.Arrays.asList(new ProtobufHttpMessageConverter(),
+      new StringHttpMessageConverter(),
+      new ByteArrayHttpMessageConverter()))
 
   def createLoadModelRequest(modelName: String, uri:URI, createTmpFile: Boolean): HttpEntity[T]
 

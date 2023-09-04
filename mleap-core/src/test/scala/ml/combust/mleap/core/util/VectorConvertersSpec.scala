@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.util
 
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class VectorConvertersSpec extends FunSpec {
+class VectorConvertersSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("mleapTensorToSparkVector works when") {
 
     it("using a Sparse Tensor") {

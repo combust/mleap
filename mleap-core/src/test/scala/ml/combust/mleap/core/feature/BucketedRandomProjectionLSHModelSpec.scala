@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class BucketedRandomProjectionLSHModelSpec extends FunSpec {
+class BucketedRandomProjectionLSHModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema"){
     val model = new BucketedRandomProjectionLSHModel(Seq(), 5, 3)

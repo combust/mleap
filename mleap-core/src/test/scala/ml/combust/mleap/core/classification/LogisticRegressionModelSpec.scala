@@ -2,12 +2,12 @@ package ml.combust.mleap.core.classification
 
 import ml.combust.mleap.core.types.{ScalarType, StructField, TensorType}
 import org.apache.spark.ml.linalg.{Matrices, Vectors}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 5/23/17.
   */
-class LogisticRegressionModelSpec extends FunSpec {
+class LogisticRegressionModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("BinaryLogisticRegression") {
     val weights = Vectors.dense(1.0, 2.0, 4.0)
     val intercept = 0.7

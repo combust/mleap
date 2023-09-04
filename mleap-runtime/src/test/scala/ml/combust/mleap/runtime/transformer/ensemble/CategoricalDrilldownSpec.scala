@@ -4,7 +4,7 @@ import ml.combust.mleap.core.Model
 import ml.combust.mleap.core.types.{NodeShape, ScalarType, StructType}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, MultiTransformer, Row, Transformer}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 case class TestClassifierModel(shift: Int) extends Model {
   def apply(feature: Int): Double = {
@@ -27,7 +27,7 @@ case class TestClassifier(override val uid: String = Transformer.uniqueName("dri
     inputSchema)
 }
 
-class CategoricalDrilldownSpec extends FunSpec {
+class CategoricalDrilldownSpec extends AnyFunSpec {
   val classifier1 = TestClassifier(shape = NodeShape().withStandardInput("feature").
     withOutput("output", "prediction").
     withOutput("probability", "probability"),

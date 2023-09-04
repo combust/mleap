@@ -2,9 +2,9 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.CountVectorizerModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class CountVectorizerSpec extends FunSpec {
+class CountVectorizerSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

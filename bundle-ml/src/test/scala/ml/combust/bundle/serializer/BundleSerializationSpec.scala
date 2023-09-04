@@ -1,16 +1,15 @@
 package ml.combust.bundle.serializer
 
 import java.net.URI
-
 import ml.bundle.Attributes
-import ml.combust.bundle.dsl.Bundle
 import ml.combust.bundle.test.TestSupport._
 import ml.combust.bundle.test._
 import ml.combust.bundle.test.ops._
 import ml.combust.bundle.{BundleFile, BundleRegistry, TestUtil, dsl}
-import org.scalatest.FunSpec
-import resource._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
+import scala.util.Using
 import scala.util.Random
 
 /**
@@ -21,7 +20,7 @@ case object ZipFS extends FSType
 case object DirFS extends FSType
 case object DirInJarFS extends FSType
 
-class BundleSerializationSpec extends FunSpec {
+class BundleSerializationSpec extends AnyFunSpec with Matchers {
   implicit val testContext = TestContext(BundleRegistry("test-registry"))
 
   it should behave like bundleSerializer("Serializing/Deserializing json a bundle as a dir",
@@ -67,15 +66,15 @@ class BundleSerializationSpec extends FunSpec {
       describe("with a simple linear regression") {
         it("serializes/deserializes the same object") {
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/lr_bundle.$format$suffix")
-          for(file <- managed(BundleFile(uri))) {
+          Using(BundleFile(uri)) {file =>
             lr.writeBundle.name("my_bundle").
               format(format).
               save(file)
 
-            val bundleRead = file.loadBundle().get
+            file.loadBundle()
 
-            assert(lr == bundleRead.root)
-          }
+
+          }.flatten.get.root shouldBe lr
         }
       }
 
@@ -90,45 +89,39 @@ class BundleSerializationSpec extends FunSpec {
             model = DecisionTreeRegressionModel(node))
 
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/dt_bundle.$format$suffix")
-          for(file <- managed(BundleFile(uri))) {
+          Using(BundleFile(uri)) { file =>
             dt.writeBundle.name("my_bundle").
               format(format).
               save(file)
 
-            val bundleRead = file.loadBundle().get
-
-            assert(dt == bundleRead.root)
-          }
+            file.loadBundle()
+          }.flatten.get.root shouldBe dt
         }
       }
 
       describe("with a pipeline") {
         it("serializes/deserializes the same object") {
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/pipeline_bundle.$format$suffix")
-          for(file <- managed(BundleFile(uri))) {
+          Using(BundleFile(uri)) { file =>
             pipeline.writeBundle.name("my_bundle").
               format(format).
               save(file)
 
-            val bundleRead: Bundle[Transformer] = file.loadBundle().get
-
-            assert(pipeline == bundleRead.root)
-          }
+            file.loadBundle()
+          }.flatten.get.root shouldBe pipeline
         }
       }
 
       describe("with a backslash'd path for a linear regression") {
         it("serializes and deserializes from a path containing '\\' separators") {
           val uri = s"$prefix:${TestUtil.baseDir}/lr_bundle.$format$suffix".replace('/', '\\')
-          for(file <- managed(BundleFile(uri))) {
+          Using(BundleFile(uri)) { file =>
             lr.writeBundle.name("my_bundle").
               format(format).
               save(file)
 
-            val bundleRead = file.loadBundle().get
-
-            assert(lr == bundleRead.root)
-          }
+            file.loadBundle()
+          }.flatten.get.root shouldBe lr
         }
       }
 
@@ -136,22 +129,20 @@ class BundleSerializationSpec extends FunSpec {
         it("serializes and deserializes any metadata we want to send along with the bundle") {
           val uri = new URI(s"$prefix:${TestUtil.baseDir}/lr_bundle_meta.$format$suffix")
           val meta = new Attributes().withList(Map(
-            "keyA" → dsl.Value.string("valA").value,
-            "keyB" → dsl.Value.double(1.2).value,
-            "keyC" → dsl.Value.stringList(Seq("listValA", "listValB")).value
+            "keyA" -> dsl.Value.string("valA").value,
+            "keyB" -> dsl.Value.double(1.2).value,
+            "keyC" -> dsl.Value.stringList(Seq("listValA", "listValB")).value
           ))
-          for(file <- managed(BundleFile(uri))) {
+          val bundleReadMeta = Using(BundleFile(uri)) { file =>
             lr.writeBundle.name("my_bundle").
               format(format).
               meta(meta).
               save(file)
 
-            val bundleRead = file.loadBundle().get
-
-            // These are written this way explicitly for compatibility with Scala 2.10
-            assert(!bundleRead.info.meta.isEmpty)
-            assert(bundleRead.info.meta.get.equals(meta))
-          }
+            file.loadBundle()
+          }.flatten.get.info.meta
+          bundleReadMeta shouldBe defined
+          bundleReadMeta shouldBe Some(meta)
         }
       }
     }

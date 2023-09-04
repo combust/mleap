@@ -1,8 +1,6 @@
 package ml.combust.mleap.tensor
 
-import org.scalatest.FunSpec
-
-class TensorSpec extends FunSpec {
+class TensorSpec extends org.scalatest.funspec.AnyFunSpec {
   def toIndices(dimensions: Seq[Int]): Seq[Seq[Int]] = combine(dimensions.map(d => 0 until d))
 
   def combine[A](xs: Traversable[Traversable[A]]): Seq[Seq[A]] =

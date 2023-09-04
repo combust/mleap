@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class MultinomialLabelerModelSpec extends FunSpec {
+class MultinomialLabelerModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("multinomal labeler model") {
     val model = MultinomialLabelerModel(9.0, ReverseStringIndexerModel(Seq("hello1", "world2", "!3")))

@@ -2,12 +2,12 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 4/12/17.
   */
-class DCTModelSpec extends FunSpec {
+class DCTModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("dct model") {
     val model = DCTModel(false, 3)
     describe("issue167") {

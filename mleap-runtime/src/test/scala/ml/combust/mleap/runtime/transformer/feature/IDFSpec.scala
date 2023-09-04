@@ -3,9 +3,8 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.IDFModel
 import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
 
-class IDFSpec extends FunSpec {
+class IDFSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

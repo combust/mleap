@@ -3,12 +3,12 @@ package ml.combust.mleap.json
 import ml.combust.mleap.core.types._
 import JsonSupport._
 import spray.json._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 9/25/17.
   */
-class SchemaSpec extends FunSpec {
+class SchemaSpec extends org.scalatest.funspec.AnyFunSpec {
   private val BASIC_TYPES = Seq(
     BasicType.Boolean,
     BasicType.Byte,

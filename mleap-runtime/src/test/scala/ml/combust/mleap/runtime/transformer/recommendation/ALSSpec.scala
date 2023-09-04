@@ -8,11 +8,10 @@ import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.core.recommendation.ALSModel
 import ml.combust.mleap.core.types.{NodeShape, ScalarType, StructField}
 import ml.combust.mleap.runtime.test.TestUtil
-import org.scalatest.FunSpec
-import resource.managed
+import scala.util.Using
 import ml.combust.mleap.runtime.MleapSupport._
 
-class ALSSpec extends FunSpec {
+class ALSSpec extends org.scalatest.funspec.AnyFunSpec {
 
   val userFactors = Map(0 -> Array(1.0f, 2.0f), 1 -> Array(3.0f, 1.0f), 2 -> Array(2.0f, 3.0f))
   val itemFactors = Map(0 -> Array(1.0f, 2.0f), 1 -> Array(3.0f, 1.0f), 2 -> Array(2.0f, 3.0f), 3 -> Array(1.0f, 2.0f))
@@ -33,16 +32,16 @@ class ALSSpec extends FunSpec {
   describe("serialization") {
     it("serializes ALS transformer correctly") {
       val uri = new URI(s"jar:file:${TestUtil.baseDir}/als.json.zip")
-      for (file <- managed(BundleFile(uri))) {
+      Using(BundleFile(uri)) { file =>
         transformer.writeBundle.name("bundle")
           .format(SerializationFormat.Json)
           .save(file)
       }
 
       val file = new File(s"${TestUtil.baseDir}/als.json.zip")
-      val als = (for (bf <- managed(BundleFile(file))) yield {
+      val als = Using(BundleFile(file)) { bf =>
         bf.loadMleapBundle().get.root
-      }).tried.get.asInstanceOf[ALS]
+      }.get.asInstanceOf[ALS]
 
       val (tfUsers, tfUserFactors) = transformer.model.userFactors.toSeq.unzip
       val (tfItems, tfItemFactors) = transformer.model.itemFactors.toSeq.unzip

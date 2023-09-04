@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class RegexTokenizerModelSpec extends FunSpec {
+class RegexTokenizerModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("regex tokenizer model") {
     val model = RegexTokenizerModel(regex = """\s""".r, matchGaps = true,

@@ -1,12 +1,12 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{BasicType, ListType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by mikhail on 10/16/16.
   */
-class StopWordsRemoverModelSpec extends FunSpec {
+class StopWordsRemoverModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("StopWordsRemoverModel"){
 
     val remover = StopWordsRemoverModel(Array("I", "and", "you"), true)

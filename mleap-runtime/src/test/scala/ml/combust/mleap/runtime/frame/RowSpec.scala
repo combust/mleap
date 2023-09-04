@@ -1,13 +1,13 @@
 package ml.combust.mleap.runtime.frame
 
 import ml.combust.mleap.tensor.Tensor
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /** Base trait for testing [[Row]] implementations.
   *
   * @tparam R row class
   */
-trait RowSpec[R <: Row] extends FunSpec {
+trait RowSpec[R <: Row] extends org.scalatest.funspec.AnyFunSpec {
   def create(values: Any *): R
 
   def row(): Unit = {

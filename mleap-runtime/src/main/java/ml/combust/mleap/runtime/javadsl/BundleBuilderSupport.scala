@@ -7,7 +7,7 @@ import ml.combust.bundle.dsl.Bundle
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.frame.Transformer
 import ml.combust.mleap.runtime.MleapSupport._
-import resource._
+import scala.util.Using
 
 /**
   * Created by hollinwilkins on 4/21/17.
@@ -16,16 +16,16 @@ class BundleBuilderSupport {
   def load(file: File, context: MleapContext): Bundle[Transformer] = {
     implicit val c: MleapContext = context
 
-    (for(bf <- managed(BundleFile(file))) yield {
+    Using(BundleFile(file)) { bf =>
       bf.loadMleapBundle()(context).get
-    }).tried.get
+    }.get
   }
 
   def save(transformer: Transformer, file: File, context: MleapContext): Unit = {
     implicit val c: MleapContext = context
-    
-    (for(bf <- managed(BundleFile(file))) yield {
+
+    Using(BundleFile(file)) { bf =>
       transformer.writeBundle.save(bf)(context).get
-    }).tried.get
+    }.get
   }
 }

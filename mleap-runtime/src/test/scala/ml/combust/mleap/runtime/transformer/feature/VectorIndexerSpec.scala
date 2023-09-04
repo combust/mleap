@@ -2,9 +2,8 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.VectorIndexerModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
 
-class VectorIndexerSpec extends FunSpec {
+class VectorIndexerSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

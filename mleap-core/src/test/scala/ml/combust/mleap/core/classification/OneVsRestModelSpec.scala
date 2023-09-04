@@ -2,9 +2,9 @@ package ml.combust.mleap.core.classification
 
 import ml.combust.mleap.core.types.{ScalarType, StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class OneVsRestModelSpec extends FunSpec {
+class OneVsRestModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("one vs rest model") {
     val model = new OneVsRestModel(Array(

@@ -3,9 +3,8 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.RegexIndexerModel
 import ml.combust.mleap.core.types.{NodeShape, ScalarType, StructField, StructType}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import org.scalatest.FunSpec
 
-class RegexIndexerSpec extends FunSpec {
+class RegexIndexerSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(Seq(StructField("test_string", ScalarType.String))).get
   val dataset = Seq(Row("hEllo"), Row("NpOE"), Row("NEy"))
   val frame = DefaultLeapFrame(schema, dataset)
@@ -24,7 +23,7 @@ class RegexIndexerSpec extends FunSpec {
   describe("#transform") {
     it("transforms strings into indices") {
       val data = (for (frame2 <- indexer.transform(frame);
-                      frame3 <- frame2.select("test_index")) yield {
+                       frame3 <- frame2.select("test_index")) yield {
         frame3.dataset.map(_.getInt(0))
       }).get
 

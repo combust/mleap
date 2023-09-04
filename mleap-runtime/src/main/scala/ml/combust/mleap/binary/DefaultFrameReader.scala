@@ -8,7 +8,7 @@ import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.json.JsonSupport._
 import ml.combust.mleap.runtime.frame.{ArrayRow, DefaultLeapFrame, Row}
 import spray.json._
-import resource._
+import scala.util.Using
 
 import scala.collection.mutable
 import scala.util.Try
@@ -19,7 +19,7 @@ import scala.util.Try
 class DefaultFrameReader extends FrameReader {
   override def fromBytes(bytes: Array[Byte],
                          charset: Charset = BuiltinFormats.charset): Try[DefaultLeapFrame] = {
-    (for(in <- managed(new ByteArrayInputStream(bytes))) yield {
+    Using(new ByteArrayInputStream(bytes)) { in =>
       val din = new DataInputStream(in)
       val length = din.readInt()
       val schemaBytes = new Array[Byte](length)
@@ -42,6 +42,6 @@ class DefaultFrameReader extends FrameReader {
       }
 
       DefaultLeapFrame(schema, rows)
-    }).tried
+    }
   }
 }

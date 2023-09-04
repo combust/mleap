@@ -6,9 +6,11 @@ Common.noPublishSettings
 
 enablePlugins(AssemblyPlugin)
 
-assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
+assembly / assemblyOption ~= {
+  _.withIncludeScala(false)
+}
 
-assemblyShadeRules in assembly := Seq(
+assembly / assemblyShadeRules := Seq(
   "spray.json.**",
   "com.google.protobuf.**",
   "com.trueaccord.**",

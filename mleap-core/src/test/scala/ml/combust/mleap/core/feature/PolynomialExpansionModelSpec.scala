@@ -2,12 +2,12 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by mikhail on 10/16/16.
   */
-class PolynomialExpansionModelSpec extends FunSpec {
+class PolynomialExpansionModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("polynomial expansion model") {
     val model = PolynomialExpansionModel(2, 2)
 

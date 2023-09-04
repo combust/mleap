@@ -3,9 +3,9 @@ package ml.combust.mleap.runtime.transformer.regression
 import ml.combust.mleap.core.regression.RandomForestRegressionModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.test.TestUtil
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class RandomForestRegressionSpec extends FunSpec {
+class RandomForestRegressionSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

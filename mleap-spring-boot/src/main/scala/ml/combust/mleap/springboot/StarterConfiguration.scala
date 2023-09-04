@@ -37,7 +37,7 @@ class StarterConfiguration {
   def protobufHttpMessageConverter() = new ProtobufHttpMessageConverter
 
   @Bean
-  def jsonPrinter() = new Printer(includingDefaultValueFields = true, formattingLongAsNumber = true)
+  def jsonPrinter() = new Printer().includingDefaultValueFields.formattingLongAsNumber
 
   @Bean
   def jsonParser() = new Parser()

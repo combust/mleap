@@ -1,22 +1,18 @@
 package ml.combust.mleap.benchmark
-import java.io.File
-
 import com.typesafe.config.Config
-import ml.combust.bundle.BundleFile
+import ml.combust.mleap.runtime.frame.{RowTransformer, Transformer}
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
-import ml.combust.mleap.runtime.MleapSupport._
-import ml.combust.mleap.runtime.frame.RowTransformer
 import org.scalameter.{Bench, Gen}
-import resource._
+
+import java.io.File
+import java.nio.file.Path
 
 /**
   * Created by hollinwilkins on 2/4/17.
   */
 class MleapRowTransformBenchmark extends Benchmark {
   override def benchmark(config: Config): Unit = {
-    val model = (for(bf <- managed(BundleFile(new File(config.getString("model-path"))))) yield {
-      bf.loadMleapBundle()
-    }).tried.flatMap(identity).get.root
+    val model: Transformer = mleapBundleForPath(Path.of(config.getString("model-path"))).root
     val frame = FrameReader(BuiltinFormats.json).read(new File(config.getString("frame-path"))).get
 
     val rowTransformer = model.transform(RowTransformer(frame.schema)).get

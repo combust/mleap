@@ -117,7 +117,7 @@ import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.ml.feature.{Binarizer, StringIndexer}
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
-import resource._
+import scala.util.Using
 
   val datasetName = "./examples/spark-demo.csv"
 
@@ -143,7 +143,7 @@ import resource._
 
   // then serialize pipeline
   val sbc = SparkBundleContext().withDataset(pipeline.transform(dataframe))
-  for(bf <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) {
+  Using(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip")) { bf =>
     pipeline.writeBundle.save(bf)(sbc).get
   }
 ```
@@ -215,9 +215,9 @@ Because we export Spark and Scikit-learn pipelines to a standard format, we can 
 ```scala
 import ml.combust.bundle.BundleFile
 import ml.combust.mleap.runtime.MleapSupport._
-import resource._
+import scala.util.Using
 // load the Spark pipeline we saved in the previous section
-val bundle = (for(bundleFile <- managed(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) yield {
+val bundle = Using(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) { bundleFile =>
   bundleFile.loadMleapBundle().get
 }).opt.get
 
@@ -271,7 +271,7 @@ For more documentation, please see our [documentation](https://combust.github.io
 
 ## Building
 
-Please ensure you have sbt 1.4.9, java 11, scala 2.12.13
+Please ensure you have sbt 1.9.3, java 11, scala 2.12.13
 
 1. Initialize the git submodules `git submodule update --init --recursive`
 2. Run `sbt compile`

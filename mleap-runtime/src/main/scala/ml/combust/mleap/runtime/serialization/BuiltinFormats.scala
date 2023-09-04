@@ -7,7 +7,8 @@ import java.nio.charset.Charset
   */
 object BuiltinFormats {
   val charset = Charset.forName("UTF-8")
-  val json = "ml.combust.mleap.json"
-  val binary = "ml.combust.mleap.binary"
+
+  val json = classOf[ml.combust.mleap.json.DefaultFrameReader].getPackageName
+  val binary = classOf[ml.combust.mleap.binary.DefaultFrameReader].getPackageName
   val avro = "ml.combust.mleap.avro"
 }

@@ -2,12 +2,12 @@ package ml.combust.mleap.runtime.function
 
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.Tensor
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 10/21/16.
   */
-class UserDefinedFunctionSpec extends FunSpec {
+class UserDefinedFunctionSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("#apply") {
     it("creates the udf") {
       val udf0: UserDefinedFunction = () => "hello"

@@ -2,9 +2,8 @@ package ml.combust.mleap.runtime.transformer.clustering
 
 import ml.combust.mleap.core.clustering.GaussianMixtureModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
 
-class GaussianMixtureSpec extends FunSpec {
+class GaussianMixtureSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs with only prediction column") {

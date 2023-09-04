@@ -7,23 +7,26 @@ object Dependencies {
   import DependencyHelpers._
 
   val sparkVersion = "3.4.0"
-  val scalaTestVersion = "3.0.8"
-  val junitVersion = "5.8.2"
-  val akkaVersion = "2.6.14" // Stay below akka v2.7.0 since they swapped to a BSL license
-  val akkaHttpVersion = "10.2.4" // Stay below akka-http v10.3.0 since they swapped to a BSL license
-  val springBootVersion = "2.6.2"
+  val scalaTestVersion = "3.2.16"
+  val scalaPbJson4sVersion = "0.11.1"
+  val junitVersion = "5.9.2"
+  val akkaVersion = "2.6.21" // Stay below akka v2.7.0 since they swapped to a BSL license
+  val akkaHttpVersion = "10.2.10" // Stay below akka-http v10.3.0 since they swapped to a BSL license
+  val springBootVersion = "2.7.0"
   lazy val logbackVersion = "1.2.3"
-  lazy val loggingVersion = "3.9.0"
+  lazy val loggingVersion = "3.9.5"
   lazy val slf4jVersion = "2.0.6"
-  lazy val awsSdkVersion = "1.11.1033"
+  lazy val awsSdkVersion = "1.12.470"
+  lazy val scalaCollectionCompat = "2.8.1"
   val tensorflowJavaVersion = "0.5.0" // Match Tensorflow 2.10.1 https://github.com/tensorflow/java/#tensorflow-version-support
-  val xgboostVersion = "1.7.3"
+  val xgboostVersion = "1.7.6"
   val breezeVersion = "2.1.0"
   val hadoopVersion = "3.3.4" // matches spark version
   val platforms = "windows-x86_64,linux-x86_64,macosx-x86_64"
   val tensorflowPlatforms : Array[String] =  sys.env.getOrElse("TENSORFLOW_PLATFORMS", platforms).split(",")
 
   object Compile {
+    val `scala-collection-compat` = "org.scala-lang.modules" %% "scala-collection-compat" % scalaCollectionCompat
     val sparkMllibLocal = "org.apache.spark" %% "spark-mllib-local" % sparkVersion excludeAll(ExclusionRule(organization = "org.scalatest"))
     val spark = Seq("org.apache.spark" %% "spark-core" % sparkVersion,
       "org.apache.spark" %% "spark-sql" % sparkVersion,
@@ -33,13 +36,11 @@ object Dependencies {
       "org.apache.spark" %% "spark-avro" % sparkVersion
     )
     val avroDep = "org.apache.avro" % "avro" % "1.11.1"
-    val sprayJson = "io.spray" %% "spray-json" % "1.3.2"
-    val arm = "com.jsuereth" %% "scala-arm" % "2.0"
-    val config = "com.typesafe" % "config" % "1.3.0"
+    val sprayJson = "io.spray" %% "spray-json" % "1.3.6"
+    val config = "com.typesafe" % "config" % "1.4.2"
     val scalaReflect = ScalaVersionDependentModuleID.versioned("org.scala-lang" % "scala-reflect" % _)
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
-    val commonsIo = "commons-io" % "commons-io" % "2.5"
     var tensorflowCoreApi = "org.tensorflow" % "tensorflow-core-api" % tensorflowJavaVersion
     (Seq("") ++ tensorflowPlatforms).foreach(platform => tensorflowCoreApi = tensorflowCoreApi classifier platform)
     val tensorflowDeps = Seq(tensorflowCoreApi)
@@ -49,24 +50,31 @@ object Dependencies {
     val akkaStream = "com.typesafe.akka" %% "akka-stream" % akkaVersion
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
-    val scalameter = "com.storm-enroute" %% "scalameter" % "0.8.2"
-    val scopt = "com.github.scopt" %% "scopt" % "3.5.0"
+    // Scalameter 0.19 is the last version published for 2.12
+    val scalameter: Seq[ModuleID] = Seq("scalameter", "scalameter-core").map(
+      "com.storm-enroute" %% _ % "0.19" excludeAll(
+        ExclusionRule("com.storm-enroute"),
+        ExclusionRule("org.scala-lang.modules"),
+      ))
+    val scopt = "com.github.scopt" %% "scopt" % "4.1.0"
 
     val springBoot = "org.springframework.boot" % "spring-boot-starter-web" % springBootVersion
     val springBootActuator = "org.springframework.boot" % "spring-boot-starter-actuator" % springBootVersion
 
-    val commonsLang = "org.apache.commons" % "commons-lang3" % "3.7"
+    val commonsLang = "org.apache.commons" % "commons-lang3" % "3.12.0"
     val scalaPb = Seq(
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion,
-      "com.thesamet.scalapb" %% "scalapb-json4s" % scalapb.compiler.Version.scalapbVersion
+      "com.thesamet.scalapb" %% "scalapb-json4s" % scalaPbJson4sVersion
     )
 
     val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion
 
+    val `logback-core-dep` = "ch.qos.logback" % "logback-core"
+    val `logback-classic-dep` = "ch.qos.logback" % "logback-classic"
     lazy val logging = Seq(
-      "ch.qos.logback" % "logback-core" % logbackVersion,
-      "ch.qos.logback" % "logback-classic" % logbackVersion,
+      `logback-core-dep` % logbackVersion,
+      `logback-classic-dep` % logbackVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % loggingVersion
     )
 
@@ -79,10 +87,11 @@ object Dependencies {
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
 
     val slf4jDep = "org.slf4j" % "slf4j-log4j12" % slf4jVersion
+    val scalapbCompilerPlugin =  "com.thesamet.scalapb" %% "compilerplugin" % "0.11.13"
   }
 
   object Test {
-    val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
+    val scalaTest = Compile.scalaTest % "test"
     val akkaHttpTestkit =  "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % "test"
     val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test"
     val springBootTest = "org.springframework.boot" % "spring-boot-starter-test" % springBootVersion % "test"
@@ -103,17 +112,17 @@ object Dependencies {
 
   val tensor = l ++= Seq(sprayJson, Test.scalaTest)
 
-  val bundleMl = l ++= Seq(arm, config, sprayJson, Test.scalaTest)
+  val bundleMl = l ++= Seq(config, `scala-collection-compat`, sprayJson, Test.scalaTest)
 
   val bundleHdfs = l ++= Seq(Provided.hadoop, Test.scalaTest)
 
-  val base = l ++= Seq()
+  val base = l ++= Seq(`scala-collection-compat`)
 
   val core = l ++= Seq(sparkMllibLocal, jTransform, breeze, Test.scalaTest) ++ Test.sparkTest
 
-  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit, commonsIo) ++ scalaReflect.modules(scalaVersion.value))
+  def runtime(scalaVersion: SettingKey[String]) = l ++= (Seq(Test.scalaTest, Test.junit) ++ scalaReflect.modules(scalaVersion.value))
 
-  val sparkBase = l ++= Provided.spark ++ Seq(Test.scalaTest)
+  val sparkBase = l ++= Provided.spark ++ Seq(scalaTest) ++ Provided.sparkTestLib
 
   val sparkTestkit = l ++= Provided.spark ++ Provided.sparkTestLib ++ Seq(scalaTest)
 
@@ -142,9 +151,11 @@ object Dependencies {
   val grpc = l ++= Seq(
     "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion) ++ scalaPb
 
-  val springBootServing = l ++= Seq(springBoot, springBootActuator, commonsLang, Test.scalaTest, Test.springBootTest) ++ scalaPb
+  val springBootServing = l ++= Seq(springBoot, springBootActuator, commonsLang,
+    `logback-classic-dep` % "1.2.3", // remove once we can support JDK 17 and spring boot 3.1.0
+    Test.scalaTest, Test.springBootTest) ++ scalaPb
 
-  val benchmark = l ++= Seq(scalameter, scopt) ++ Compile.spark
+  val benchmark = l ++= Seq(scopt) ++ scalameter ++ Compile.spark
 
   val databricksRuntimeTestkit = l ++= Provided.spark
 

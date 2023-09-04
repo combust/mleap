@@ -70,7 +70,7 @@ object ExecuteTransform {
               }.getOrElse(Try(frame))
           }
       }
-    }.flatMap(identity)
+    }.flatten
   }
 }
 

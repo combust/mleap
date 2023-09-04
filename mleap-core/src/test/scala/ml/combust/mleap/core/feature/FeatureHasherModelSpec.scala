@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class FeatureHasherModelSpec  extends FunSpec {
+class FeatureHasherModelSpec  extends org.scalatest.funspec.AnyFunSpec {
 
   val schema = Seq(
     StructField("doubleCol", DataType(BasicType.Double, ScalarShape())),

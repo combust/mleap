@@ -1,7 +1,6 @@
 package ml.combust.mleap.benchmark
 
 import java.io.File
-
 import com.typesafe.config.Config
 import ml.combust.bundle.BundleFile
 import ml.combust.mleap.spark.SparkSupport._
@@ -9,22 +8,24 @@ import org.apache.spark.sql.SparkSession
 import org.scalameter._
 import org.scalameter.Key._
 
+import java.nio.file.Path
 import scala.collection.JavaConverters._
-import resource._
+import scala.util.Using
 
 /**
   * Created by hollinwilkins on 2/4/17.
   */
 class SparkTransformBenchmark extends Benchmark {
   override def benchmark(config: Config): Unit = {
-    val model = (for(bf <- managed(BundleFile(new File(config.getString("model-path"))))) yield {
+    val model = Using(BundleFile(Path.of(config.getString("model-path")))) { bf =>
       bf.loadSparkBundle()
-    }).tried.flatMap(identity).get.root
+    }.flatten.get.root
 
-    val spark = SparkSession.builder().
-      appName("Spark Benchmarks").
-      master("local[1]").
-      getOrCreate()
+    val spark = SparkSession.builder()
+      .appName("Spark Benchmarks")
+      .config("spark.ui.enabled", "false")
+      .master("local[1]")
+      .getOrCreate()
 
     val slowFrame = spark.sqlContext.read.format("avro").load(new File(config.getString("frame-path")).getAbsolutePath)
     val data = slowFrame.collect().toSeq

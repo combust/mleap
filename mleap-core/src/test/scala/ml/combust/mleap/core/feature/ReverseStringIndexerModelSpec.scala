@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class ReverseStringIndexerModelSpec extends FunSpec {
+class ReverseStringIndexerModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("reverse string indexer model") {
     val model = ReverseStringIndexerModel(Seq("one", "two", "three"))

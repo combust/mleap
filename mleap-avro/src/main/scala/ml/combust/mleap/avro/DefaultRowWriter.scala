@@ -10,7 +10,7 @@ import SchemaConverter._
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowWriter}
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.frame.Row
-import resource._
+import scala.util.Using
 
 import scala.util.Try
 
@@ -26,7 +26,7 @@ class DefaultRowWriter(override val schema: StructType) extends RowWriter {
   var record = new GenericData.Record(avroSchema)
 
   override def toBytes(row: Row, charset: Charset = BuiltinFormats.charset): Try[Array[Byte]] = {
-    (for(out <- managed(new ByteArrayOutputStream(1024))) yield {
+    Using(new ByteArrayOutputStream(1024)) { out =>
       encoder = EncoderFactory.get().binaryEncoder(out, encoder)
 
       var i = 0
@@ -38,6 +38,6 @@ class DefaultRowWriter(override val schema: StructType) extends RowWriter {
       encoder.flush()
 
       out.toByteArray
-    }).tried
+    }
   }
 }

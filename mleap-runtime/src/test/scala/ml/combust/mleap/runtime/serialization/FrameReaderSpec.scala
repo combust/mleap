@@ -2,9 +2,7 @@ package ml.combust.mleap.runtime.serialization
 
 import java.io.File
 
-import org.scalatest.FunSpec
-
-class FrameReaderSpec extends FunSpec {
+class FrameReaderSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("frame reader") {
     it("can read frame") {

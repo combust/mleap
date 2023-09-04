@@ -5,13 +5,13 @@ import java.io.{ByteArrayOutputStream, PrintStream}
 import ml.combust.mleap.core.types.{SchemaSpec, _}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.ByteString
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /** Base trait for testing LeapFrame implementations.
   *
   * @tparam LF LeapFrame type
   */
-trait LeapFrameSpec[LF <: LeapFrame[LF]] extends FunSpec {
+trait LeapFrameSpec[LF <: LeapFrame[LF]] extends org.scalatest.funspec.AnyFunSpec {
   val fields = Seq(StructField("test_string", ScalarType.String),
     StructField("test_double", ScalarType.Double))
   val schema: StructType = StructType(fields).get

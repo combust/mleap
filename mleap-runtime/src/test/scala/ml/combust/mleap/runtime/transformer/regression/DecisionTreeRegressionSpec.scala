@@ -7,13 +7,13 @@ import ml.combust.mleap.core.tree.{ContinuousSplit, InternalNode, LeafNode}
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.mleap.runtime.test.TestUtil
-import org.scalatest.FunSpec
-import resource.managed
+import org.scalatest.funspec.AnyFunSpec
+import scala.util.Using
 
 import java.io.File
 import java.net.URI
 
-class DecisionTreeRegressionSpec extends FunSpec {
+class DecisionTreeRegressionSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
@@ -40,7 +40,7 @@ class DecisionTreeRegressionSpec extends FunSpec {
       // serialization
       val fileName = s"${TestUtil.baseDir}/decision_tree_regression_saved_model.json.zip"
       val uri = new URI(s"jar:file:$fileName")
-      for (file <- managed(BundleFile(uri))) {
+      Using(BundleFile(uri)) { file =>
         transformer.writeBundle.name("bundle")
           .format(SerializationFormat.Json)
           .save(file)
@@ -48,9 +48,9 @@ class DecisionTreeRegressionSpec extends FunSpec {
 
       // de-serialization
       val file = new File(fileName)
-      val loadedTransformer = (for (bf <- managed(BundleFile(file))) yield {
+      val loadedTransformer = Using(BundleFile(file)) { bf =>
         bf.loadMleapBundle().get.root
-      }).tried.get.asInstanceOf[DecisionTreeRegression]
+      }.get.asInstanceOf[DecisionTreeRegression]
 
       // checks
       assert(transformer.inputSchema.fields equals (loadedTransformer.inputSchema.fields))

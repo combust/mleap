@@ -7,7 +7,7 @@ import ml.combust.mleap.json.JsonSupport._
 import ml.combust.mleap.runtime.frame.LeapFrame
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
 import spray.json._
-import resource._
+import scala.util.Using
 
 import scala.util.Try
 
@@ -16,7 +16,7 @@ import scala.util.Try
   */
 class DefaultFrameWriter[LF <: LeapFrame[LF]](frame: LF) extends FrameWriter {
   override def toBytes(charset: Charset = BuiltinFormats.charset): Try[Array[Byte]] = {
-    (for(out <- managed(new ByteArrayOutputStream())) yield {
+    Using(new ByteArrayOutputStream()) { out =>
       val serializers = frame.schema.fields.map(_.dataType).map(ValueSerializer.serializerForDataType)
       val dout = new DataOutputStream(out)
       val schemaBytes = frame.schema.toJson.prettyPrint.getBytes(BuiltinFormats.charset)
@@ -35,6 +35,6 @@ class DefaultFrameWriter[LF <: LeapFrame[LF]](frame: LF) extends FrameWriter {
 
       dout.flush()
       out.toByteArray
-    }).tried
+    }
   }
 }

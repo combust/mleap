@@ -4,12 +4,11 @@ import ml.combust.mleap.core.feature.MathUnaryModel
 import ml.combust.mleap.core.feature.UnaryOperation.Sin
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import org.scalatest.FunSpec
 
 /**
-  * Created by hollinwilkins on 12/27/16.
-  */
-class MathUnarySpec extends FunSpec {
+ * Created by hollinwilkins on 12/27/16.
+ */
+class MathUnarySpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(StructField("test_a", ScalarType.Double)).get
   val dataset = Seq(Row(42.0))
   val frame = DefaultLeapFrame(schema, dataset)

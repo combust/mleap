@@ -2,9 +2,8 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.FeatureHasherModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
 
-class FeatureHasherSpec extends FunSpec {
+class FeatureHasherSpec extends org.scalatest.funspec.AnyFunSpec {
 
   val inputSchema = Map(
     "input0" → StructField("doubleCol", DataType(BasicType.Double, ScalarShape())),

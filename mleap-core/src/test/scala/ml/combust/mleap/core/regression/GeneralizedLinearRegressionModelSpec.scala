@@ -2,9 +2,9 @@ package ml.combust.mleap.core.regression
 
 import ml.combust.mleap.core.types.{ScalarShape, ScalarType, StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class GeneralizedLinearRegressionModelSpec extends FunSpec {
+class GeneralizedLinearRegressionModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("generalized linear regression model") {
     val model = new GeneralizedLinearRegressionModel(Vectors.dense(1, 2, 3), 23, null)

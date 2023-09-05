@@ -5,12 +5,12 @@ import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.DenseTensor
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 9/30/16.
   */
-class KMeansSpec extends FunSpec {
+class KMeansSpec extends AnyFunSpec {
   val v1 = Vectors.dense(Array(1.0, 2.0, 55.0))
   val v2 = Vectors.dense(Array(11.0, 200.0, 55.0))
   val v3 = Vectors.dense(Array(100.0, 22.0, 55.0))

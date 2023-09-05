@@ -6,10 +6,12 @@ import java.nio.file.Files
 
 import ml.combust.mleap.executor.error.BundleException
 import ml.combust.mleap.executor.testkit.TestUtil
-import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.funspec.AsyncFunSpec
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
 
-class FileRepositorySpec extends FunSpec
+class FileRepositorySpec extends AsyncFunSpec
   with ScalaFutures
   with Matchers
   with BeforeAndAfterAll {
@@ -20,21 +22,22 @@ class FileRepositorySpec extends FunSpec
   describe("downloading a local bundle") {
     it("returns the local file path") {
       val path = repository.downloadBundle(TestUtil.lrUri)
-
-      whenReady(path) {
-        p => assert(Files.readAllBytes(new File(TestUtil.lrUri.getPath).toPath).sameElements(Files.readAllBytes(p)))
+      path map {
+        p =>
+          val bytes = Files.readAllBytes(new File(TestUtil.lrUri.getPath).toPath)
+          bytes should contain theSameElementsInOrderAs Files.readAllBytes(p)
       }
     }
 
     it("throws an exception when local file doesn't exist") {
-      whenReady(repository.downloadBundle(URI.create("does-not-exist")).failed) {
+      repository.downloadBundle(URI.create("does-not-exist")).failed map {
         ex => ex shouldBe a [BundleException]
       }
     }
 
     it("throws an exception with empty file path") {
-      whenReady(repository.downloadBundle(URI.create("")).failed) {
-        ex => ex shouldBe a [BundleException]
+      repository.downloadBundle(URI.create("")).failed map {
+        ex => ex shouldBe a[BundleException]
       }
     }
   }

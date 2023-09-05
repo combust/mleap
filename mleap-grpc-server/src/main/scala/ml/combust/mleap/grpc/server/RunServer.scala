@@ -28,8 +28,6 @@ class RunServer(config: Config)
       val coordinator = CoordinatedShutdown(system)
       this.coordinator = Some(coordinator)
 
-      implicit val materializer: Materializer = ActorMaterializer()
-
       val grpcServerConfig = new GrpcServerConfig(config.getConfig("default"))
       val mleapExecutor = MleapExecutor(system)
       val port: Int = config.getInt("port")

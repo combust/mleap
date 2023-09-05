@@ -3,12 +3,12 @@ package ml.combust.mleap.core.feature
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 4/26/17.
   */
-class InteractionModelSpec extends FunSpec {
+class InteractionModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("with all numeric inputs") {
 
     val encoderSpec: Array[Array[Int]] = Array(Array(1), Array(1, 1))

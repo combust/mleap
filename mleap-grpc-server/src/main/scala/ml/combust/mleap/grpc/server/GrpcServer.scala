@@ -1,7 +1,6 @@
 package ml.combust.mleap.grpc.server
 
 import java.util.concurrent.TimeUnit
-
 import io.grpc.stub.StreamObserver
 import ml.combust.mleap.executor.{CreateFrameFlowRequest, CreateRowFlowRequest, MleapExecutor}
 import ml.combust.mleap.pb._
@@ -12,7 +11,7 @@ import com.google.protobuf.ByteString
 import ml.combust.mleap.grpc.stream.GrpcAkkaStreams
 import ml.combust.mleap.grpc.TypeConverters._
 import akka.NotUsed
-import akka.stream.Materializer
+import akka.actor.ActorSystem
 import io.grpc
 import io.grpc.Context
 import ml.combust.mleap
@@ -23,14 +22,14 @@ import ml.combust.mleap.runtime.types.BundleTypeConverters._
 
 import scala.language.implicitConversions
 import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success, Try}
 
 class GrpcServer(mleapExecutor: MleapExecutor,
                  config: GrpcServerConfig)
-                (implicit ec: ExecutionContext,
-                 materializer: Materializer) extends Mleap {
+                (implicit system: ActorSystem) extends Mleap {
   private val DEFAULT_TIMEOUT: FiniteDuration = FiniteDuration(5, TimeUnit.SECONDS)
+  implicit val ec: ExecutionContext = system.dispatcher
 
   def getTimeout(ms: Long): FiniteDuration = if (ms == 0) {
     DEFAULT_TIMEOUT

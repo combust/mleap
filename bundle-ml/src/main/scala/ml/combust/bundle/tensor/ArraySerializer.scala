@@ -2,12 +2,10 @@ package ml.combust.bundle.tensor
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, DataInputStream, DataOutputStream}
 import java.nio.ByteBuffer
-
 import ml.combust.mleap.tensor.ByteString
-import resource._
 
 import scala.collection.mutable
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success, Try, Using}
 
 /**
   * Created by hollinwilkins on 1/15/17.
@@ -140,7 +138,7 @@ object DoubleArraySerializer extends ArraySerializer[Double] {
 
 object StringArraySerializer extends ArraySerializer[String] {
   override def write(arr: Array[String]): Array[Byte] = {
-    (for(out <- managed(new ByteArrayOutputStream())) yield {
+    Using(new ByteArrayOutputStream()) { out =>
       val dout = new DataOutputStream(out)
       arr.foreach {
         str =>
@@ -150,11 +148,11 @@ object StringArraySerializer extends ArraySerializer[String] {
 
       dout.flush()
       out.toByteArray
-    }).opt.get
+    }.toOption.get
   }
 
   override def read(arr: Array[Byte]): Array[String] = {
-    (for(in <- managed(new ByteArrayInputStream(arr))) yield {
+    Using(new ByteArrayInputStream(arr)) { in =>
       val din = new DataInputStream(in)
       val arr = mutable.ArrayBuilder.make[String]
 
@@ -172,13 +170,13 @@ object StringArraySerializer extends ArraySerializer[String] {
       }
 
       arr.result()
-    }).opt.get
+    }.toOption.get
   }
 }
 
 object ByteStringArraySerializer extends ArraySerializer[ByteString] {
   override def write(arr: Array[ByteString]): Array[Byte] = {
-    (for(out <- managed(new ByteArrayOutputStream())) yield {
+    Using(new ByteArrayOutputStream()) { out =>
       val dout = new DataOutputStream(out)
       arr.foreach {
         bs =>
@@ -188,11 +186,11 @@ object ByteStringArraySerializer extends ArraySerializer[ByteString] {
 
       dout.flush()
       out.toByteArray
-    }).opt.get
+    }.toOption.get
   }
 
   override def read(arr: Array[Byte]): Array[ByteString] = {
-    (for(in <- managed(new ByteArrayInputStream(arr))) yield {
+    Using(new ByteArrayInputStream(arr)) { in =>
       val din = new DataInputStream(in)
       val arr = mutable.ArrayBuilder.make[ByteString]
 
@@ -210,6 +208,6 @@ object ByteStringArraySerializer extends ArraySerializer[ByteString] {
       }
 
       arr.result()
-    }).opt.get
+    }.toOption.get
   }
 }

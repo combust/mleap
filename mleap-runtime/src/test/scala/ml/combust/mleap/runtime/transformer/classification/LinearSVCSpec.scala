@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.transformer.classification
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vectors
 import ml.combust.mleap.core.classification.LinearSVCModel
@@ -9,8 +9,7 @@ import ml.combust.mleap.core.classification.LinearSVCModel
   * Test spec for LinearSVC.
   * Note that Linear SVC is not a probabilistic classifier, so we use the basicClassifier() call.
   */
-class LinearSVCSpec extends FunSpec
-{
+class LinearSVCSpec extends AnyFunSpec {
     describe("input/output schema")
     {
         it("has the correct inputs and outputs")

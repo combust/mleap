@@ -1,28 +1,31 @@
 package ml.combust.mleap.tensorflow
 
 import ml.combust.bundle.BundleFile
-import ml.combust.bundle.serializer.{FileUtil, SerializationFormat}
+import ml.combust.bundle.dsl.Bundle
+import ml.combust.bundle.serializer.SerializationFormat
+import ml.combust.bundle.util.FileUtil
 import ml.combust.mleap.core.types.{NodeShape, StructField, StructType, TensorType}
 import ml.combust.mleap.runtime.MleapSupport._
-import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
+import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, Transformer}
 import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import ml.combust.mleap.tensorflow.converter.MleapConverter
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.types.TFloat32
 import org.tensorflow.{SavedModelBundle, Signature}
-import resource.managed
 
 import java.io.{ByteArrayOutputStream, File}
 import java.net.URI
 import java.nio.file.{Files, Paths}
 import java.util.zip.ZipOutputStream
 import scala.collection.JavaConverters._
+import scala.util.{Success, Try, Using}
 
 /**
   * Created by hollinwilkins on 1/13/17.
   */
-class TensorflowTransformerSpec extends FunSpec {
+class TensorflowTransformerSpec extends AnyFunSpec with Matchers {
 
   describe("with a scaling tensorflow model") {
     it("scales the vector using the model and returns the result") {
@@ -44,9 +47,9 @@ class TensorflowTransformerSpec extends FunSpec {
       val frame = DefaultLeapFrame(schema, dataset)
 
       val data = transformer.transform(frame).get.dataset
-      assert(data(0)(2) == Tensor.scalar(5.6f + 7.9f))
-      assert(data(1)(2) == Tensor.scalar(3.4f + 6.7f))
-      assert(data(2)(2) == Tensor.scalar(1.2f + 9.7f))
+      data(0)(2) shouldBe Tensor.scalar(5.6f + 7.9f)
+      data(1)(2) shouldBe Tensor.scalar(3.4f + 6.7f)
+      data(2)(2) shouldBe Tensor.scalar(1.2f + 9.7f)
 
       transformer.close()
     }
@@ -69,9 +72,8 @@ class TensorflowTransformerSpec extends FunSpec {
         if (zTensor != null) zTensor.close()
       }
       // load it back and export to bundle
-      val bundle = SavedModelBundle.load(testFolder.toString)
       val byteStream = new ByteArrayOutputStream()
-      try {
+      Using(SavedModelBundle.load(testFolder.toString)) { bundle =>
         val signatureDef = bundle.metaGraphDef.getSignatureDefOrThrow(Signature.DEFAULT_KEY)
         val inputMap = signatureDef.getInputsMap.asScala.map { case (k, v) => (k, v.getName) }
         val outputMap = signatureDef.getOutputsMap.asScala.map { case (k, v) => (k, v.getName) }
@@ -80,7 +82,12 @@ class TensorflowTransformerSpec extends FunSpec {
         val outputs = Seq((outputMap("reducedSum"), TensorType.Float()))
         val format = Some("saved_model")
         val zf = new ZipOutputStream(byteStream)
-        try FileUtil().zip(testFolder.toFile, zf) finally if (zf != null) zf.close()
+        try {
+          FileUtil.zip(testFolder, zf)
+        } finally {
+          if (zf != null)
+            zf.close()
+        }
         val model = TensorflowModel(
           inputs = inputs,
           outputs = outputs,
@@ -97,31 +104,27 @@ class TensorflowTransformerSpec extends FunSpec {
 
         // serialization
         val uri = new URI(s"jar:file:${TestUtil.baseDir}/tensorflow_saved_model.json.zip")
-        for (file <- managed(BundleFile(uri))) {
-          transformer.writeBundle.name("bundle")
-            .format(SerializationFormat.Json)
-            .save(file)
-        }
+        writeBundle(transformer, uri)
 
         // de-serialization
         val file = new File(s"${TestUtil.baseDir}/tensorflow_saved_model.json.zip")
-        val tfTransformer = (for (bf <- managed(BundleFile(file))) yield {
-          bf.loadMleapBundle().get.root
-        }).tried.get.asInstanceOf[TensorflowTransformer]
+        val Success(tfTransformer) = Using(BundleFile(file)) {
+          bf => bf.loadMleapBundle().get.root.asInstanceOf[TensorflowTransformer]
+        }
 
         val schema = StructType(StructField("input_a", TensorType.Float(2, 3))).get
         val dataset = Seq(Row(input), Row(input), Row(input))
         val frame = DefaultLeapFrame(schema, dataset)
 
         // checks
-        assert(transformer.inputSchema.fields equals (tfTransformer.inputSchema.fields))
-        assert(transformer.outputSchema.fields equals (tfTransformer.outputSchema.fields))
+        transformer.inputSchema.fields shouldBe tfTransformer.inputSchema.fields
+        transformer.outputSchema.fields shouldBe tfTransformer.outputSchema.fields
 
         val actualData = tfTransformer.transform(frame).get.select("my_result").get.dataset
-        assert(actualData(0)(0) == Tensor.scalar(reducedSum))
-        assert(actualData(1)(0) == Tensor.scalar(reducedSum))
-        assert(actualData(2)(0) == Tensor.scalar(reducedSum))
-      } finally if (bundle != null) bundle.close()
+        actualData(0)(0) shouldBe Tensor.scalar(reducedSum)
+        actualData(1)(0) shouldBe Tensor.scalar(reducedSum)
+        actualData(2)(0) shouldBe Tensor.scalar(reducedSum)
+      }// finally if (bundle != null) bundle.close()
     }
   }
 
@@ -146,25 +149,19 @@ class TensorflowTransformerSpec extends FunSpec {
 
       // serialization
       val uri = new URI(s"jar:file:${TestUtil.baseDir}/tensorflow.json.zip")
-      for (file <- managed(BundleFile(uri))) {
-        transformer.writeBundle.name("bundle")
-          .format(SerializationFormat.Json)
-          .save(file)
-      }
+      writeBundle(transformer, uri)
 
       // de-serialization
       val file = new File(s"${TestUtil.baseDir}/tensorflow.json.zip")
-      val tfTransformer = (for (bf <- managed(BundleFile(file))) yield {
-        bf.loadMleapBundle().get.root
-      }).tried.get.asInstanceOf[TensorflowTransformer]
+      val Success(tfTransformer) = loadBundle(file)
 
       // checks
-      assert(transformer.inputSchema.fields sameElements (tfTransformer.inputSchema.fields))
-      assert(transformer.outputSchema.fields sameElements (tfTransformer.outputSchema.fields))
+      transformer.inputSchema.fields should contain theSameElementsAs tfTransformer.inputSchema.fields
+      transformer.outputSchema.fields should contain theSameElementsAs tfTransformer.outputSchema.fields
 
       val actualData = tfTransformer.transform(frame).get.collect()
-      assert(actualData.head.getTensor[Float](0).toArray.toSeq sameElements expectedData.head.getTensor[Float](0).toArray.toSeq)
-      assert(actualData.head.getTensor[Float](1).toArray.toSeq sameElements expectedData.head.getTensor[Float](1).toArray.toSeq)
+      actualData.head.getTensor[Float](0).toArray should contain theSameElementsAs expectedData.head.getTensor[Float](0).toArray
+      actualData.head.getTensor[Float](1).toArray should contain theSameElementsAs expectedData.head.getTensor[Float](1).toArray
     }
 
     it("can create transformer and bundle from graph bytes") {
@@ -176,16 +173,27 @@ class TensorflowTransformerSpec extends FunSpec {
       val transformer = TensorflowTransformer(uid = "wine_quality", shape = shape, model = model)
 
       val uri = new URI(s"jar:file:${TestUtil.baseDir}/tensorflow2.json.zip")
-      for (file <- managed(BundleFile(uri))) {
-        transformer.writeBundle.name("bundle")
-          .format(SerializationFormat.Json)
-          .save(file)
-      }
+      writeBundle(transformer, uri)
 
       val file = new File(s"${TestUtil.baseDir}/tensorflow2.json.zip")
-      (for (bf <- managed(BundleFile(file))) yield {
-        bf.loadMleapBundle().get.root
-      }).tried.get.asInstanceOf[TensorflowTransformer]
+      Using(BundleFile(file)) {
+        bf => bf.loadMleapBundle().get.root.asInstanceOf[TensorflowTransformer]
+      }
+      loadBundle(file)
     }
+  }
+
+  private def loadBundle(file: File): Try[TensorflowTransformer] = {
+    Using(BundleFile(file)) {
+      bf => bf.loadMleapBundle().get.root.asInstanceOf[TensorflowTransformer]
+    }
+  }
+
+  private def writeBundle(transformer: TensorflowTransformer, uri: URI): Try[Bundle[Transformer]] = {
+    Using(BundleFile(uri)) { file =>
+      transformer.writeBundle.name("bundle")
+        .format(SerializationFormat.Json)
+        .save(file)
+    }.flatten
   }
 }

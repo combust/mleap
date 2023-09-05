@@ -5,11 +5,11 @@ import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.xgboost.runtime.testing.{BoosterUtils, BundleSerializationUtils, CachedDatasetUtils, FloatingPointApproximations, RegressionUtils}
 import ml.dmlc.xgboost4j.scala.Booster
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import XgbConverters._
 
 
-class XGBoostRegressionModelParitySpec extends FunSpec
+class XGBoostRegressionModelParitySpec extends org.scalatest.funspec.AnyFunSpec
   with BoosterUtils
   with CachedDatasetUtils
   with BundleSerializationUtils

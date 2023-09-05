@@ -100,10 +100,11 @@ Await.result(transformService.unloadModel(UnloadModelRequest(
 Find an example leap frame at `mleap-executor-testkit/src/main/resources/leap_frame/frame.airbnb.json`.
 
 ```scala
+import java.nio.file.Path
 import ml.combust.mleap.runtime.serialization.FrameReader
 
 // Load the leap frame from a file
-val frameFile = new File("/absolute/path/to/frame.json")
+val frameFile = Path.of("/absolute/path/to/frame.json")
 val frame = FrameReader().read(frameFile).get
 
 // Transform the leap frame using the airbnb model we loaded earlier

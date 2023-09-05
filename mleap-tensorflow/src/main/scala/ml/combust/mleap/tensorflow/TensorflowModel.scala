@@ -1,8 +1,8 @@
 package ml.combust.mleap.tensorflow
 
-import ml.combust.bundle.serializer.FileUtil
+import ml.combust.bundle.util.FileUtil
 import ml.combust.mleap.core.Model
-import ml.combust.mleap.core.types.{DataType, StructField, StructType, TensorType}
+import ml.combust.mleap.core.types.{StructField, StructType, TensorType}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.tensorflow.converter.{MleapConverter, TensorflowConverter}
 import org.tensorflow
@@ -11,7 +11,7 @@ import org.tensorflow.proto.framework.GraphDef
 import java.io.ByteArrayInputStream
 import java.nio.file.Files
 import java.util.zip.ZipInputStream
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.util.Try
 
@@ -95,9 +95,9 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
     val savedModelStream = new ZipInputStream(
       new ByteArrayInputStream(modelBytes)
     )
-    FileUtil().extract(savedModelStream, dest.toFile)
+    FileUtil.extract(savedModelStream, dest)
     val modelBundle = tensorflow.SavedModelBundle.load(dest.toString)
-    FileUtil().rmRF(dest.toFile)
+    FileUtil.rmRF(dest)
     (modelBundle.session, modelBundle.graph)
   }
 

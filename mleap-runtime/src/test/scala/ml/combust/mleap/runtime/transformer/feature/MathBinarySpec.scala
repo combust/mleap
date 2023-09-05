@@ -4,12 +4,11 @@ import ml.combust.mleap.core.feature.BinaryOperation._
 import ml.combust.mleap.core.feature.MathBinaryModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import org.scalatest.FunSpec
 
 /**
-  * Created by hollinwilkins on 12/27/16.
-  */
-class MathBinarySpec extends FunSpec {
+ * Created by hollinwilkins on 12/27/16.
+ */
+class MathBinarySpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(StructField("test_a", ScalarType.Double), StructField("test_b", ScalarType.Double)).get
   val dataset = Seq(Row(5.6, 7.9))
   val frame = DefaultLeapFrame(schema, dataset)
@@ -17,8 +16,8 @@ class MathBinarySpec extends FunSpec {
   describe("with a and b inputs") {
     val transformer = MathBinary(
       shape = NodeShape().withInput("input_a", "test_a").
-                    withInput("input_b", "test_b").
-              withStandardOutput("test_out"),
+        withInput("input_b", "test_b").
+        withStandardOutput("test_out"),
       model = MathBinaryModel(Divide, None, None))
 
     it("calculates the correct value") {
@@ -37,7 +36,7 @@ class MathBinarySpec extends FunSpec {
   describe("with a input") {
     val transformer = MathBinary(
       shape = NodeShape().withInput("input_a", "test_a").
-              withStandardOutput("test_out"),
+        withStandardOutput("test_out"),
       model = MathBinaryModel(Multiply, None, Some(3.333)))
 
     it("calculates the value using the b default") {
@@ -55,7 +54,7 @@ class MathBinarySpec extends FunSpec {
   describe("with b input") {
     val transformer = MathBinary(
       shape = NodeShape().withInput("input_b", "test_b").
-              withStandardOutput("test_out"),
+        withStandardOutput("test_out"),
       model = MathBinaryModel(Multiply, Some(3.333), None))
 
     it("calculates the value using the a default") {

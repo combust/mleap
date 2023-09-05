@@ -100,7 +100,7 @@ object MleapProject {
 
   lazy val xgboostRuntimeSettings = inConfig(Test)(Defaults.testSettings) ++ Seq(
     // xgboost has trouble with multi-threading so avoid parallel executions.
-    parallelExecution in Test := false
+     Test / parallelExecution := false,
   )
   lazy val xgboostRuntime = Project(
     id = "mleap-xgboost-runtime",
@@ -133,30 +133,45 @@ object MleapProject {
     base = file("mleap-executor-testkit")
   ).dependsOn(executor)
 
+  private val executorTestSettings = inConfig(Test)(Defaults.testSettings) ++ Seq(
+    // Supports classloading "magic" from the sbt.
+    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
+  )
   lazy val executorTests = Project(
     id = "mleap-executor-tests",
     base = file("mleap-executor-tests")
   ).dependsOn(executor, executorTestKit % "test")
+    .settings(executorTestSettings)
 
   lazy val grpc = Project(
     id = "mleap-grpc",
     base = file("mleap-grpc")
   ).dependsOn(`executor`)
 
+  private val grpcServerSettings = inConfig(Test)(Defaults.testSettings) ++ Seq(
+    // Supports classloading "magic" from the sbt.
+    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
+  )
   lazy val grpcServer = Project(
     id = "mleap-grpc-server",
     base = file("mleap-grpc-server")
-  ).dependsOn(grpc, executorTestKit % "test")
+  ).dependsOn(grpc, executorTestKit % "test").settings(grpcServerSettings)
 
   lazy val repositoryS3 = Project(
     id = "mleap-repository-s3",
     base = file("mleap-repository-s3")
   ).dependsOn(executor)
 
+  private val springBootSettings = inConfig(Test)(Defaults.testSettings) ++ Seq(
+    // spring-boot: avoiding tomcat's java.lang.Error: factory already defined
+    // refer to https://github.com/spring-projects/spring-boot/issues/21535
+    Test / fork := true,
+  )
+
   lazy val springBootServing = Project(
     id = "mleap-spring-boot",
     base = file("mleap-spring-boot")
-  ).dependsOn(executor)
+  ).dependsOn(executor).settings(springBootSettings)
 
   lazy val benchmark = Project(
     id = "mleap-benchmark",

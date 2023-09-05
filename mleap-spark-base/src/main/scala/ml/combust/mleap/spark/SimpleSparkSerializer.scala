@@ -6,7 +6,7 @@ import ml.combust.bundle.serializer.SerializationFormat
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.sql.DataFrame
-import resource._
+import scala.util.Using
 
 /**
   * Created by mikhail on 11/5/16.
@@ -22,16 +22,16 @@ class SimpleSparkSerializer() {
       map(d => SparkBundleContext.defaultContext.withDataset(d)).
       getOrElse(SparkBundleContext.defaultContext)
 
-    (for(file <- managed(BundleFile.load(path))) yield {
-      transformer.writeBundle.format(format).save(file).get
-    }).tried.get
+    Using(BundleFile.load(path)) { file =>
+      transformer.writeBundle.format(format).save(file)
+    }.flatten.get
   }
 
   def deserializeFromBundle(path: String): Transformer = {
     implicit val context: SparkBundleContext = SparkBundleContext.defaultContext
 
-    (for(file <- managed(BundleFile.load(path))) yield {
-      file.loadSparkBundle().get.root
-    }).tried.get
+    Using(BundleFile.load(path)) { file =>
+      file.loadSparkBundle()
+    }.flatten.get.root
   }
 }

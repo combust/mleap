@@ -8,9 +8,9 @@ import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 import MleapSupport._
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class MleapSupportSpec extends FunSpec {
+class MleapSupportSpec extends org.scalatest.funspec.AnyFunSpec {
   private val testDir = Files.createTempDirectory("MleapSupportSpec")
 
   private val stringIndexer = StringIndexer(shape = NodeShape().

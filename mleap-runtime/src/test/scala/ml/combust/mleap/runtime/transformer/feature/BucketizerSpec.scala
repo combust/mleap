@@ -3,12 +3,12 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.{BucketizerModel, HandleInvalid}
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 9/28/16.
   */
-class BucketizerSpec extends FunSpec {
+class BucketizerSpec extends AnyFunSpec {
   val schema = StructType(Seq(StructField("test_double", ScalarType.Double))).get
   val dataset = Seq(Row(11.0), Row(0.0), Row(55.0))
   val frame = DefaultLeapFrame(schema, dataset)

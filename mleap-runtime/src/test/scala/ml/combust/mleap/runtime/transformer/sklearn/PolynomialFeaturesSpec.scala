@@ -4,9 +4,9 @@ import ml.combust.mleap.core.sklearn.PolynomialFeaturesModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class PolynomialFeaturesSpec extends FunSpec {
+class PolynomialFeaturesSpec extends org.scalatest.funspec.AnyFunSpec {
 
   val transformer = PolynomialFeatures(shape = NodeShape.feature(
     inputCol = "test_vec",

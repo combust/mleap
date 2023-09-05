@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{ScalarType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class RegexIndexerModelSpec extends FunSpec {
+class RegexIndexerModelSpec extends org.scalatest.funspec.AnyFunSpec {
   private val indexer = RegexIndexerModel(Seq(
     ("""(?i)HELLO""".r.unanchored, 23),
     ("""(?i)NO""".r.unanchored, 32),

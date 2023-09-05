@@ -3,12 +3,11 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.{HandleInvalid, StringIndexerModel}
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
-import org.scalatest.FunSpec
 
 /**
-  * Created by hollinwilkins on 9/15/16.
-  */
-class StringIndexerSpec extends FunSpec {
+ * Created by hollinwilkins on 9/15/16.
+ */
+class StringIndexerSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(Seq(StructField("test_string", ScalarType.String))).get
   val dataset = Seq(Row("index1"), Row("index2"), Row("index3"))
   val frame = DefaultLeapFrame(schema, dataset)
@@ -31,15 +30,19 @@ class StringIndexerSpec extends FunSpec {
 
     describe("with invalid input column") {
       val stringIndexer2 = stringIndexer.copy(shape = NodeShape().withStandardInput("bad_input").
-              withStandardOutput("output"))
+        withStandardOutput("output"))
 
-      it("returns a Failure") { assert(stringIndexer2.transform(frame).isFailure) }
+      it("returns a Failure") {
+        assert(stringIndexer2.transform(frame).isFailure)
+      }
     }
 
     describe("with invalid string") {
       val frame2 = frame.copy(dataset = Seq(Row("bad_index")))
 
-      it("returns a Failure") { assert(stringIndexer.transform(frame2).isFailure) }
+      it("returns a Failure") {
+        assert(stringIndexer.transform(frame2).isFailure)
+      }
     }
 
     describe("with skip logic") {

@@ -1,13 +1,13 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{ScalarType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks
 
 /**
   * Created by hwilkins on 1/21/16.
   */
-class StringIndexerModelSpec extends FunSpec with TableDrivenPropertyChecks {
+class StringIndexerModelSpec extends org.scalatest.funspec.AnyFunSpec with TableDrivenPropertyChecks {
   describe("#apply") {
     it("returns the index of the string") {
       val indexer = StringIndexerModel(Array("hello", "there", "dude"))

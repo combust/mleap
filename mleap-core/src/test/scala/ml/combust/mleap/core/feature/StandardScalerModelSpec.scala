@@ -2,12 +2,12 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hwilkins on 1/21/16.
   */
-class StandardScalerModelSpec extends FunSpec {
+class StandardScalerModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("standard scaler with dense data") {
     describe("with mean") {
       val scaler = StandardScalerModel(None, Some(Vectors.dense(Array(50.0, 20.0, 30.0))))

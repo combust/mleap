@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.classification
 
 import ml.combust.mleap.core.types.{ScalarType, StructField, TensorType}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class DecisionTreeClassifierModelSpec extends FunSpec {
+class DecisionTreeClassifierModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("decision tree classifier model") {
     val model = DecisionTreeClassifierModel(null, 3, 2)

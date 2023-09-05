@@ -2,12 +2,12 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by mikhail on 9/25/16.
   */
-class ElementwiseProductModelSpec extends FunSpec{
+class ElementwiseProductModelSpec extends org.scalatest.funspec.AnyFunSpec{
   describe("elementwise product model") {
     val scaler = ElementwiseProductModel(Vectors.dense(Array(0.5, 1.0, 1.0)))
 

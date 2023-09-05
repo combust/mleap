@@ -19,8 +19,8 @@ import scalapb.json4s.{Parser, Printer}
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class JsonScoringSpec extends ScoringBase[String, String, String, String, String] {
 
-  lazy val printer = new Printer(includingDefaultValueFields = true, formattingLongAsNumber = true)
-  lazy val parser = new Parser()
+  private lazy val printer = new Printer().includingDefaultValueFields.formattingLongAsNumber
+  private lazy val parser = new Parser()
 
   override def createLoadModelRequest(modelName: String, uri:URI, createTmpFile: Boolean): HttpEntity[String] = {
     val request = LoadModelRequest(modelName = modelName,
@@ -111,12 +111,12 @@ class JsonScoringSpec extends ScoringBase[String, String, String, String, String
 }
 
 object JsonScoringSpec {
-  lazy val httpEntityWithJsonHeaders = new HttpEntity[Unit](jsonHeaders)
-
-  lazy val jsonHeaders = {
+  val jsonHeaders: HttpHeaders = {
     val headers = new HttpHeaders
     headers.add("Content-Type", "application/json")
     headers.add("timeout", "2000")
     headers
   }
+
+  val httpEntityWithJsonHeaders = new HttpEntity[Unit](jsonHeaders)
 }

@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{ScalarType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class StringMapModelSpec extends FunSpec {
+class StringMapModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   val model = StringMapModel(Map("label1" -> 1.0, "label2" -> 1.0, "label3" -> 2.0))
 

@@ -4,11 +4,11 @@ import biz.k11i.xgboost.Predictor
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
 import ml.combust.mleap.xgboost.runtime.testing.{BoosterUtils, BundleSerializationUtils, CachedDatasetUtils, ClassifierUtils, FloatingPointApproximations, RegressionUtils}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import XgbConverters._
 
 
-class XGBoostPredictorRegressionModelParitySpec extends FunSpec
+class XGBoostPredictorRegressionModelParitySpec extends org.scalatest.funspec.AnyFunSpec
   with BoosterUtils
   with CachedDatasetUtils
   with BundleSerializationUtils

@@ -2,9 +2,9 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.BucketedRandomProjectionLSHModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class BucketedRandomProjectionLSHSpec extends FunSpec {
+class BucketedRandomProjectionLSHSpec extends AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

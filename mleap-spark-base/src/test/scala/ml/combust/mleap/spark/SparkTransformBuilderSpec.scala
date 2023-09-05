@@ -8,7 +8,7 @@ import SparkSupport._
 import ml.combust.mleap.core.{Model, types}
 import ml.combust.mleap.core.types.{NodeShape, ScalarType, StructField}
 import ml.combust.mleap.runtime.frame.{FrameBuilder, Transformer}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 import scala.collection.JavaConverters._
 import scala.util.Try
@@ -36,7 +36,7 @@ case class MyTransformer() extends Transformer {
   }
 }
 
-class SparkTransformBuilderSpec extends FunSpec {
+class SparkTransformBuilderSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("transformer with multiple outputs") {
     it("works with Spark as well") {
       val spark = SparkSession.builder().

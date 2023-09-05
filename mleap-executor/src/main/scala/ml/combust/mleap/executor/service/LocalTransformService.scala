@@ -10,7 +10,7 @@ import ml.combust.mleap.executor._
 import ml.combust.mleap.executor.error.{ExecutorException, TimeoutException}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row, RowTransformer}
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration.FiniteDuration
 import scala.util.{Failure, Success, Try}
 
@@ -29,8 +29,7 @@ class LocalTransformService(loader: RepositoryBundleLoader,
     case _ => new ExecutorException(err)
   }
 
-  private def wrapExceptions[T](f: Future[T])
-                               (implicit ec: ExecutionContext): Future[T] = {
+  private def wrapExceptions[T](f: Future[T]): Future[T] = {
     f.transform(identity, wrapExceptions)
   }
 
@@ -82,19 +81,19 @@ class LocalTransformService(loader: RepositoryBundleLoader,
 
   override def createFrameFlow[Tag](request: CreateFrameFlowRequest)
                                    (implicit timeout: FiniteDuration): Flow[(StreamTransformFrameRequest, Tag), (Try[DefaultLeapFrame], Tag), NotUsed] = {
-    val actorSource = Source.lazily(
+    val actorSource = Source.lazySource(
       () =>
-        Source.fromFutureSource {
+        Source.futureSource {
           val streamActor = wrapExceptions((actor ? request)(timeout)).
             mapTo[(ActorRef, Future[Done])]
 
           streamActor.map(_._1).map {
             actor => Source.repeat(actor).mapMaterializedValue(_ => streamActor.flatMap(_._2))
           }
-        }.mapMaterializedValue(_.flatMap(identity))
-    ).mapMaterializedValue(_.flatMap(identity)).viaMat(KillSwitches.single)(Keep.both)
+        }.mapMaterializedValue(_.flatten)
+    ).mapMaterializedValue(_.flatten).viaMat(KillSwitches.single)(Keep.both)
 
-    Flow.fromGraph(GraphDSL.create(actorSource) {
+    Flow.fromGraph(GraphDSL.createGraph(actorSource) {
       implicit builder =>
         actorSource =>
           import GraphDSL.Implicits._
@@ -159,9 +158,9 @@ class LocalTransformService(loader: RepositoryBundleLoader,
 
   override def createRowFlow[Tag](request: CreateRowFlowRequest)
                                  (implicit timeout: FiniteDuration): Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag), NotUsed] = {
-    val actorSource = Source.lazily(
+    val actorSource = Source.lazySource(
       () =>
-        Source.fromFutureSource {
+        Source.futureSource {
           val streamActor = wrapExceptions(
             (actor ? request)(timeout).mapTo[(ActorRef, RowTransformer, Future[Done])]
           )
@@ -169,8 +168,8 @@ class LocalTransformService(loader: RepositoryBundleLoader,
           streamActor.map(_._1).map {
             actor => Source.repeat(actor).mapMaterializedValue(_ => streamActor.map(m => (m._2, m._3)))
           }
-        }.mapMaterializedValue(_.flatMap(identity))
-    ).mapMaterializedValue(_.flatMap(identity)).viaMat(KillSwitches.single)(Keep.both)
+        }.mapMaterializedValue(_.flatten)
+    ).mapMaterializedValue(_.flatten).viaMat(KillSwitches.single)(Keep.both)
 
     Flow.fromGraph(GraphDSL.create(actorSource) {
       implicit builder =>

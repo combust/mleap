@@ -2,9 +2,9 @@ package ml.combust.mleap.runtime.frame
 
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.MleapSupport._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class LeapFrameConverterSpec extends FunSpec {
+class LeapFrameConverterSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("LeapFrameConverter") {
     val expectedSchema = StructType(Seq(StructField("test_string", ScalarType.String),

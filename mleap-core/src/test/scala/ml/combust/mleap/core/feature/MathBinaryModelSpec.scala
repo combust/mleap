@@ -2,12 +2,12 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.feature.BinaryOperation._
 import ml.combust.mleap.core.types.{ScalarType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 12/27/16.
   */
-class MathBinaryModelSpec extends FunSpec {
+class MathBinaryModelSpec extends org.scalatest.funspec.AnyFunSpec {
   def binaryLike(operation: BinaryOperation,
                  name: String,
                  a: Double,

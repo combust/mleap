@@ -2,13 +2,10 @@ package ml.combust.bundle
 
 import java.net.URI
 import java.nio.file.{Files, Paths}
-
 import ml.combust.bundle.dsl.Bundle
-import ml.combust.bundle.fs.BundleFileSystem
-import ml.combust.bundle.serializer.{BundleSerializer, SerializationFormat}
+  import ml.combust.bundle.serializer.{BundleSerializer, SerializationFormat}
 
-import scala.util.Try
-import resource._
+import scala.util.{Try, Using}
 
 /**
   * Created by hollinwilkins on 12/24/16.
@@ -37,16 +34,16 @@ Transformer <: AnyRef](root: Transformer,
   def save(uri: URI)
           (implicit context: Context): Try[Bundle[Transformer]] = uri.getScheme match {
     case "jar" | "file" =>
-        (for (bf <- managed(BundleFile(uri))) yield {
+        Using(BundleFile(uri)) { bf =>
           save(bf).get
-        }).tried
+        }
     case _ =>
     val tmpDir = Files.createTempDirectory("bundle")
     val tmp = Paths.get(tmpDir.toString, "tmp.zip")
 
-    (for (bf <- managed(BundleFile(tmp.toFile))) yield {
+    Using(BundleFile(tmp.toFile)) { bf =>
       save(bf).get
-    }).tried.map {
+    }.map {
       r =>
         context.bundleRegistry.fileSystemForUri(uri).save(uri, tmp.toFile)
         r

@@ -3,12 +3,12 @@ package ml.combust.mleap.core.regression
 import ml.combust.mleap.core.test.TestUtil
 import ml.combust.mleap.core.types.{ScalarType, StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hwilkins on 1/21/16.
   */
-class RandomForestRegressionModelSpec extends FunSpec {
+class RandomForestRegressionModelSpec extends org.scalatest.funspec.AnyFunSpec {
   val tree1 = TestUtil.buildDecisionTreeRegression(0.5, 0, goLeft = true)
   val tree2 = TestUtil.buildDecisionTreeRegression(0.75, 1, goLeft = false)
   val tree3 = TestUtil.buildDecisionTreeRegression(0.1, 2, goLeft = true)

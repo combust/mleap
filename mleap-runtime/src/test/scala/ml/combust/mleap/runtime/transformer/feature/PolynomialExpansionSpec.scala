@@ -4,12 +4,11 @@ import ml.combust.mleap.core.feature.PolynomialExpansionModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
-import org.scalatest.FunSpec
 
 /**
-  * Created by mikhail on 10/16/16.
-  */
-class PolynomialExpansionSpec extends FunSpec {
+ * Created by mikhail on 10/16/16.
+ */
+class PolynomialExpansionSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
   val dataset = Seq(Row(Tensor.denseVector(Array(2.0, 3.0))))
   val frame = DefaultLeapFrame(schema, dataset)

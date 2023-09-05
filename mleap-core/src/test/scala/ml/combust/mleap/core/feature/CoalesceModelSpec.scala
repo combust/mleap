@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{ScalarType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class CoalesceModelSpec extends FunSpec {
+class CoalesceModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema"){
     val model = CoalesceModel(Seq(true, true, true))

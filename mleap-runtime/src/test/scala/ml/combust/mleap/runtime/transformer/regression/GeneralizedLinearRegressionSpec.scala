@@ -3,9 +3,9 @@ package ml.combust.mleap.runtime.transformer.regression
 import ml.combust.mleap.core.regression.GeneralizedLinearRegressionModel
 import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class GeneralizedLinearRegressionSpec extends FunSpec {
+class GeneralizedLinearRegressionSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs with prediction column only") {

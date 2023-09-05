@@ -2,10 +2,9 @@ package org.apache.spark.ml.parity
 
 import java.io.File
 import java.nio.file.{Files, Path}
-
 import org.apache.spark.ml.{PipelineModel, Transformer}
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.scalatest.{BeforeAndAfterAll, FunSpec}
+import org.scalatest.BeforeAndAfterAll
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.bundle.BundleFile
 import ml.combust.bundle.serializer.SerializationFormat
@@ -17,16 +16,19 @@ import ml.combust.mleap.runtime.function.UserDefinedFunction
 import org.apache.spark.ml.bundle.SparkBundleContext
 import ml.combust.mleap.spark.SparkSupport._
 import ml.combust.mleap.runtime.transformer.Pipeline
-import resource._
+
+import scala.util.Using
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.Row
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.ml.util.TestingUtils._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers._
 
 /**
   * Created by hollinwilkins on 10/30/16.
   */
-object SparkParityBase extends FunSpec {
+object SparkParityBase extends AnyFunSpec {
   val sparkRegistry = SparkBundleContext.defaultContext
   val mleapRegistry = MleapContext.defaultContext
 
@@ -60,17 +62,18 @@ object SparkParityBase extends FunSpec {
 
 object SparkEnv {
   lazy val spark = {
-    val session = SparkSession.builder().
-      appName("Spark/MLeap Parity Tests").
-      master("local[2]").
-      getOrCreate()
+    val session = SparkSession.builder()
+      .appName("Spark/MLeap Parity Tests")
+      .config("spark.ui.enabled", "false")
+      .master("local[2]")
+      .getOrCreate()
     session.sparkContext.setLogLevel("WARN")
     session
   }
 }
 
 
-abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
+abstract class SparkParityBase extends AnyFunSpec with BeforeAndAfterAll {
   lazy val baseDataset: DataFrame = SparkParityBase.dataset(spark)
   lazy val textDataset: DataFrame = SparkParityBase.textDataset(spark)
   lazy val recommendationDataset: DataFrame = SparkParityBase.recommendationDataset(spark)
@@ -95,9 +98,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
       val file = new File(s"${tempDirPath}/${getClass.getName}.zip")
 
-      for(bf <- managed(BundleFile(file))) {
-        transformer.writeBundle.format(SerializationFormat.Json).save(bf).get
-      }
+      Using(BundleFile(file)) { bf =>
+        transformer.writeBundle.format(SerializationFormat.Json).save(bf)
+      }.flatten
 
       bundleCache = Some(file)
       file
@@ -106,16 +109,16 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
 
   def mleapTransformer(transformer: Transformer)
                       (implicit context: SparkBundleContext): frame.Transformer = {
-    (for(bf <- managed(BundleFile(serializedModel(transformer)))) yield {
-      bf.loadMleapBundle().get.root
-    }).tried.get
+    Using(BundleFile(serializedModel(transformer))) { bf =>
+      bf.loadMleapBundle()
+    }.flatten.get.root
   }
 
   def deserializedSparkTransformer(transformer: Transformer)
                                   (implicit context: SparkBundleContext): Transformer = {
-    (for(bf <- managed(BundleFile(serializedModel(transformer)))) yield {
-      bf.loadSparkBundle().get.root
-    }).tried.get
+    Using(BundleFile(serializedModel(transformer))) { bf =>
+      bf.loadSparkBundle()
+    }.flatten.get.root
   }
 
   def assertModelTypesMatchTransformerTypes(model: Model, shape: NodeShape, exec: UserDefinedFunction): Unit = {
@@ -170,7 +173,9 @@ abstract class SparkParityBase extends FunSpec with BeforeAndAfterAll {
           case (actualElem: Float, expectedElem: Float) =>
             assert(actualElem ~== expectedElem relTol eps)
           case (actualElem, expectedElem) =>
-            assert(actualElem == expectedElem, s"Field ${actualAnswer.schema(rowIdx)} differs.")
+            withClue(s"Field ${actualAnswer.schema(rowIdx)} differs.") {
+              actualElem shouldBe expectedElem
+            }
         }
         rowIdx += 1
       case (actual: Row, expected: Row) =>

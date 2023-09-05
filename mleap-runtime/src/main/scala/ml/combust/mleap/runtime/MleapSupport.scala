@@ -7,7 +7,7 @@ import ml.combust.bundle.{BundleFile, BundleWriter}
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.frame.{LeapFrameConverter, Transformer}
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter, RowReader, RowWriter}
-import resource._
+import scala.util.Using
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
@@ -28,9 +28,9 @@ trait MleapSupport {
   implicit class URIBundleFileOps(uri: URI) {
     def loadMleapBundle()
                        (implicit context: MleapContext): Try[Bundle[Transformer]] = {
-      (for (bf <- managed(BundleFile.load(uri))) yield {
-        bf.load[MleapContext, Transformer]().get
-      }).tried
+      Using(BundleFile.load(uri)) { bf =>
+        bf.load[MleapContext, Transformer]()
+      }.flatten
     }
   }
 

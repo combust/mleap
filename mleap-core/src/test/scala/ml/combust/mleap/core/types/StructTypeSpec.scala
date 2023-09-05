@@ -1,23 +1,25 @@
 package ml.combust.mleap.core.types
 
-import java.io.{ByteArrayOutputStream, PrintStream}
+import org.scalatest.funsuite.AnyFunSuite
 
-import org.scalatest.{FunSuite, GivenWhenThen, TryValues}
+import java.io.{ByteArrayOutputStream, PrintStream}
+import org.scalatest.{GivenWhenThen, TryValues}
 
 import scala.util.Success
 
 /**
   * Created by pahsan on 3/8/16.
   */
-class StructTypeSpec extends FunSuite with GivenWhenThen with TryValues{
-  val fields = Seq(StructField("first", ScalarType.String),
-                   StructField("second", ScalarType.String),
-                   StructField("third", ScalarType.String),
-                   StructField("fourth", ScalarType.String),
-                   StructField("fifth", ScalarType.String)
+class StructTypeSpec extends AnyFunSuite with GivenWhenThen with TryValues{
+  private val fields = Seq(
+    StructField("first", ScalarType.String),
+    StructField("second", ScalarType.String),
+    StructField("third", ScalarType.String),
+    StructField("fourth", ScalarType.String),
+    StructField("fifth", ScalarType.String)
   )
 
-  val testStruct = StructType(fields).get
+  private val testStruct = StructType(fields).get
 
   test("getField should return the desired field wrapped in an Option") {
     assert(testStruct.getField("first").get.name == "first")

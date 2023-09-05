@@ -9,7 +9,7 @@ import org.apache.avro.generic.{GenericData, GenericDatumWriter}
 import SchemaConverter._
 import ml.combust.mleap.runtime.frame.LeapFrame
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameWriter}
-import resource._
+import scala.util.Using
 
 import scala.util.{Failure, Try}
 
@@ -20,7 +20,7 @@ class DefaultFrameWriter[LF <: LeapFrame[LF]](frame: LF) extends FrameWriter {
   val valueConverter = ValueConverter()
 
   override def toBytes(charset: Charset = BuiltinFormats.charset): Try[Array[Byte]] = {
-    (for(out <- managed(new ByteArrayOutputStream())) yield {
+    Using(new ByteArrayOutputStream()) { out =>
       val writers = frame.schema.fields.map(_.dataType).map(valueConverter.mleapToAvro)
       val avroSchema = frame.schema: Schema
       val record = new GenericData.Record(avroSchema)
@@ -44,6 +44,6 @@ class DefaultFrameWriter[LF <: LeapFrame[LF]](frame: LF) extends FrameWriter {
       writer.close()
 
       out.toByteArray
-    }).tried
+    }
   }
 }

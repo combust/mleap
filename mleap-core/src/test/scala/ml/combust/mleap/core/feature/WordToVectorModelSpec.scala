@@ -3,9 +3,9 @@ package ml.combust.mleap.core.feature
 import ml.combust.mleap.core.types.{BasicType, ListType, StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
 import org.scalactic.TolerantNumerics
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class WordToVectorModelSpec extends FunSpec {
+class WordToVectorModelSpec extends org.scalatest.funspec.AnyFunSpec {
   implicit val doubleEquality = TolerantNumerics.tolerantDoubleEquality(0.000001)
 
   describe("word to vector model") {

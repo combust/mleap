@@ -1,6 +1,6 @@
 package ml.combust.mleap
 
-import com.typesafe.sbt.GitPlugin.autoImport._
+import com.github.sbt.git.GitPlugin.autoImport._
 import sbt.Keys._
 import sbtbuildinfo.BuildInfoPlugin.autoImport._
 

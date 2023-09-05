@@ -5,7 +5,7 @@ import java.nio.charset.Charset
 
 import ml.combust.mleap.ClassLoaderUtil
 import ml.combust.mleap.runtime.frame.LeapFrame
-import resource._
+import scala.util.Using
 
 import scala.reflect.ClassTag
 import scala.util.Try
@@ -31,9 +31,9 @@ trait FrameWriter {
 
   def save(file: File): Try[Any] = save(file, BuiltinFormats.charset)
   def save(file: File, charset: Charset = BuiltinFormats.charset): Try[Any] = {
-    (for(out <- managed(new FileOutputStream(file))) yield {
+    Using(new FileOutputStream(file)) { out =>
       save(out, charset)
-    }).tried.flatMap(identity)
+    }.flatten
   }
 
   def save(out: OutputStream): Try[Any] = save(out, BuiltinFormats.charset)

@@ -2,12 +2,12 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by fshabbir on 12/1/16.
   */
-class BinarizerModelSpec extends FunSpec {
+class BinarizerModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("binarizer with several inputs"){
     val binarizer = BinarizerModel(0.3, TensorShape(3))
 

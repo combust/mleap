@@ -2,9 +2,9 @@ package ml.combust.mleap.core.sklearn
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class PolynomialFeaturesModelSpec extends FunSpec {
+class PolynomialFeaturesModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   val model = new PolynomialFeaturesModel("[x0,x1,x0^2,x0 x1,x1^2,x0^3,x0^2 x1,x0 x1^2,x1^3]")
 

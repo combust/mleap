@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.clustering
 
 import ml.combust.mleap.core.types.{ScalarType, StructField, TensorType}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class GaussianMixtureModelSpec extends FunSpec {
+class GaussianMixtureModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("gaussian mixture model") {
     val model = new GaussianMixtureModel(Array(null, null, null), Array(1, 2, 3))

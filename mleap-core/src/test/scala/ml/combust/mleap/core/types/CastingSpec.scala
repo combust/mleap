@@ -2,13 +2,13 @@ package ml.combust.mleap.core.types
 
 import ml.combust.mleap.tensor.{ByteString, Tensor, SparseTensor}
 import org.apache.spark.ml.linalg.{Vector => SparkVector, Vectors}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import scala.util.Success
 
 /**
   * Created by hollinwilkins on 9/18/17.
   */
-class CastingSpec extends FunSpec {
+class CastingSpec extends org.scalatest.funspec.AnyFunSpec {
   def createValue(base: BasicType, value: Double): Any = base match {
     case BasicType.Boolean => if (value == 0) false else true
     case BasicType.Byte => value.toByte

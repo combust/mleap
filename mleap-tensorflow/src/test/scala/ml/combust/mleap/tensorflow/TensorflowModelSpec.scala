@@ -1,10 +1,10 @@
 package ml.combust.mleap.tensorflow
 
-import ml.combust.bundle.serializer.FileUtil
+import ml.combust.bundle.util.FileUtil
 import ml.combust.mleap.core.types.TensorType
 import ml.combust.mleap.tensor.{DenseTensor, Tensor}
 import ml.combust.mleap.tensorflow.converter.MleapConverter
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.tensorflow.{SavedModelBundle, Signature}
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.types.TFloat32
@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
 /**
   * Created by hollinwilkins on 1/12/17.
   */
-class TensorflowModelSpec extends FunSpec {
+class TensorflowModelSpec extends AnyFunSpec {
 
   describe("with an adding tensorflow model") {
     it("adds two floats together") {
@@ -88,8 +88,13 @@ class TensorflowModelSpec extends FunSpec {
         val format = Some("saved_model")
         val byteStream = new ByteArrayOutputStream()
         val zf = new ZipOutputStream(byteStream)
-        try FileUtil().zip(testFolder.toFile, zf) finally if (zf != null) zf.close()
-        FileUtil().rmRF(testFolder.toFile)
+        try {
+          FileUtil.zip(testFolder, zf)
+        } finally {
+          if (zf != null)
+            zf.close()
+        }
+        FileUtil.rmRF(testFolder)
         val model = TensorflowModel(
           inputs = inputs,
           outputs = outputs,

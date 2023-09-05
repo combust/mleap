@@ -1,12 +1,12 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{BasicType, ScalarType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by mikhail on 9/19/16.
   */
-class BucketizerModelSpec extends FunSpec {
+class BucketizerModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("bucketizer") {
     val bucketizer = BucketizerModel(Array(0.0, 10.0, 20.0, 100.0))
 

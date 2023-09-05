@@ -2,9 +2,9 @@ package ml.combust.mleap.runtime.transformer.regression
 
 import ml.combust.mleap.core.regression.IsotonicRegressionModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class IsotonicRegressionSpec extends FunSpec {
+class IsotonicRegressionSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs without feature index") {

@@ -2,9 +2,9 @@ package ml.combust.mleap.core.clustering
 
 import breeze.linalg.{DenseMatrix, Matrix}
 import ml.combust.mleap.core.types.{StructField, TensorType}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class LDAModelSpec extends FunSpec {
+class LDAModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
 
   describe("lda model") {

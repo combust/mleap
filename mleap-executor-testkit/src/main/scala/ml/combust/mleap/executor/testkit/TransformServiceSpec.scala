@@ -1,7 +1,5 @@
 package ml.combust.mleap.executor.testkit
 
-import java.util.UUID
-
 import akka.actor.ActorSystem
 import akka.stream.{Materializer, ThrottleMode}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
@@ -11,20 +9,23 @@ import ml.combust.mleap.executor.error.{AlreadyExistsException, NotFoundExceptio
 import ml.combust.mleap.executor.service.TransformService
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.runtime.serialization.BuiltinFormats
-import org.scalatest.{FunSpecLike}
-import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funspec.AnyFunSpecLike
+import org.scalatest.time.{Millis, Seconds, Span}
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.Try
 
-trait TransformServiceSpec extends FunSpecLike
-  with ScalaFutures {
+trait TransformServiceSpec extends AnyFunSpecLike with ScalaFutures {
+  import scala.language.implicitConversions
+
+  override implicit def patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(150, Millis))
   def transformService: TransformService
   implicit def system: ActorSystem
-  implicit def materializer: Materializer
 
   private val frame = TestUtil.frame
   private val model1 = Model(
@@ -107,8 +108,8 @@ trait TransformServiceSpec extends FunSpecLike
       it("retrieves info for bundle") {
         val result = transformService.getBundleMeta(GetBundleMetaRequest("model1"))(5.second)
 
-        whenReady(result, Timeout(5.seconds)) {
-          info => assert(info.info.name == "pipeline_8d2ca5c4dd62")
+        ScalaFutures.whenReady(result) {
+          info:BundleMeta => assert(info.info.name == "pipeline_8d2ca5c4dd62")
         }
       }
     }
@@ -117,7 +118,7 @@ trait TransformServiceSpec extends FunSpecLike
       it("retrieves the model information") {
         val result = transformService.getModel(GetModelRequest("model1"))(5.second)
 
-        whenReady(result, Timeout(5.seconds)) {
+        whenReady(result, timeout(Span(5, Seconds))) {
           model => assert(model == model1)
         }
       }
@@ -127,7 +128,7 @@ trait TransformServiceSpec extends FunSpecLike
       it("retrieves the row stream information") {
         val result = transformService.getRowStream(GetRowStreamRequest("model1", "stream1"))(5.second)
 
-        whenReady(result, Timeout(5.seconds)) {
+        whenReady(result, timeout(Span(5, Seconds))) {
           rowStream => assert(rowStream == rowStream1)
         }
       }
@@ -162,7 +163,7 @@ trait TransformServiceSpec extends FunSpecLike
       it("retrieves the frame stream information") {
         val result = transformService.getFrameStream(GetFrameStreamRequest("model1", "stream2"))(5.second)
 
-        whenReady(result, Timeout(5.seconds)) {
+        whenReady(result, timeout(Span(5, Seconds))) {
           frameStream => assert(frameStream == frameStream1)
         }
       }
@@ -197,7 +198,7 @@ trait TransformServiceSpec extends FunSpecLike
         val result = transformService.transform(TransformFrameRequest("model1", frame))(5.seconds).
           flatMap(Future.fromTry)
 
-        whenReady(result, Timeout(5.seconds)) {
+        whenReady(result, timeout(Span(5, Seconds))) {
           transformed => assert(transformed.schema.hasField("price_prediction"))
         }
       }
@@ -222,7 +223,7 @@ trait TransformServiceSpec extends FunSpecLike
           joinMat(testFlow)(Keep.both).
           run()
 
-        whenReady(transformedRow, Timeout(10.seconds)) {
+        whenReady(transformedRow, timeout(Span(10, Seconds))) {
           row =>
             assert(row._1.get.get.getDouble(21) == 218.2767196535019)
             assert(row._2 == uuid)
@@ -322,7 +323,7 @@ trait TransformServiceSpec extends FunSpecLike
             rowStream.spec.schema,
             rowStream.outputSchema),
           1024
-        )(10.seconds, materializer, system.dispatcher)
+        )(10.seconds, Materializer(system), system.dispatcher)
 
         whenReady(client.transform(frame.dataset.head)) {
           row =>
@@ -353,7 +354,7 @@ trait TransformServiceSpec extends FunSpecLike
           joinMat(testFlow)(Keep.both).
           run()
 
-        whenReady(transformedFrame, Timeout(10.seconds)) {
+        whenReady(transformedFrame, timeout(Span(10, Seconds))) {
           frame =>
             assert(frame._1.get.dataset.head.getDouble(21) == 218.2767196535019)
             assert(frame._2 == uuid)

@@ -6,7 +6,7 @@ import java.nio.charset.Charset
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, RowReader}
 import ml.combust.mleap.core.types.StructType
 import ml.combust.mleap.runtime.frame.{ArrayRow, Row}
-import resource._
+import scala.util.Using
 
 import scala.util.Try
 
@@ -17,7 +17,7 @@ class DefaultRowReader(override val schema: StructType) extends RowReader {
   private val serializers = schema.fields.map(_.dataType).map(ValueSerializer.serializerForDataType)
 
   override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Try[Row] = {
-    (for(in <- managed(new ByteArrayInputStream(bytes))) yield {
+    Using(new ByteArrayInputStream(bytes)) { in =>
       val din = new DataInputStream(in)
       val row = ArrayRow(new Array[Any](schema.fields.length))
       var i = 0
@@ -26,6 +26,6 @@ class DefaultRowReader(override val schema: StructType) extends RowReader {
         i = i + 1
       }
       row
-    }).tried
+    }
   }
 }

@@ -3,9 +3,8 @@ package ml.combust.mleap.runtime.transformer.classification
 import ml.combust.mleap.core.classification.SupportVectorMachineModel
 import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
 
-class SupportVectorMachineSpec extends FunSpec {
+class SupportVectorMachineSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

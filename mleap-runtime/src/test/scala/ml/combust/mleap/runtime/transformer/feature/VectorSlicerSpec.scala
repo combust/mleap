@@ -2,9 +2,8 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.VectorSlicerModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
 
-class VectorSlicerSpec extends FunSpec {
+class VectorSlicerSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

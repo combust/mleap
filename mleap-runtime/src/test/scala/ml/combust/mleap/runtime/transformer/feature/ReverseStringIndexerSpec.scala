@@ -4,9 +4,8 @@ import ml.combust.mleap.core.feature.ReverseStringIndexerModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
-import org.scalatest.FunSpec
 
-class ReverseStringIndexerSpec extends FunSpec {
+class ReverseStringIndexerSpec extends org.scalatest.funspec.AnyFunSpec {
   val scalarFrame = DefaultLeapFrame(
     StructType(StructField("input", ScalarType.Double.nonNullable)).get,
     Seq(Row(1.0))

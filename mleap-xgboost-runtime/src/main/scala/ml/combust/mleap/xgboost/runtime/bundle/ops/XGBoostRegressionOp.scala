@@ -10,7 +10,7 @@ import ml.combust.mleap.bundle.ops.MleapOp
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.xgboost.runtime.{XGBoostRegression, XGBoostRegressionModel}
 import ml.dmlc.xgboost4j.scala.XGBoost
-import resource._
+import scala.util.Using
 
 /**
   * Created by hollinwilkins on 9/16/17.

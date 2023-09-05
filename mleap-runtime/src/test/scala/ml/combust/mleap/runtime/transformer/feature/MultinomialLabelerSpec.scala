@@ -4,27 +4,26 @@ import ml.combust.mleap.core.feature.{MultinomialLabelerModel, ReverseStringInde
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
-import org.scalatest.FunSpec
 
 /**
-  * Created by hollinwilkins on 1/18/17.
-  */
-class MultinomialLabelerSpec extends FunSpec {
+ * Created by hollinwilkins on 1/18/17.
+ */
+class MultinomialLabelerSpec extends org.scalatest.funspec.AnyFunSpec {
 
   val schema = StructType(Seq(StructField("test_vec", TensorType(BasicType.Double)))).get
   val dataset = Seq(Row(Tensor.denseVector(Array(0.0, 10.0, 20.0))))
   val frame = DefaultLeapFrame(schema, dataset)
   val transformer = MultinomialLabeler(
-    shape = NodeShape().withInput("features","test_vec").
-          withOutput("probabilities", "probs").
-          withOutput("labels", "labels"),
+    shape = NodeShape().withInput("features", "test_vec").
+      withOutput("probabilities", "probs").
+      withOutput("labels", "labels"),
     model = MultinomialLabelerModel(9.0, ReverseStringIndexerModel(Seq("hello1", "world2", "!3"))))
 
 
   describe("#transform") {
     it("outputs the labels and probabilities for all classes with a probability greater than the threshold") {
-      val frame2 = for(f <- transformer.transform(frame);
-                       f2 <- f.select("probs", "labels")) yield f2
+      val frame2 = for (f <- transformer.transform(frame);
+                        f2 <- f.select("probs", "labels")) yield f2
 
       assert(frame2.isSuccess)
       val data = frame2.get.dataset

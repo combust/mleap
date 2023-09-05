@@ -1,13 +1,13 @@
 package ml.combust.mleap.core.regression
 
 import ml.combust.mleap.core.types.{ScalarType, StructField, TensorType}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hwilkins on 1/21/16.
   */
-class LinearRegressionModelSpec extends FunSpec {
+class LinearRegressionModelSpec extends org.scalatest.funspec.AnyFunSpec {
   val linearRegression = LinearRegressionModel(Vectors.dense(Array(0.5, 0.75, 0.25)), .33)
 
   describe("#apply") {

@@ -2,11 +2,11 @@ package ml.combust.mleap.tensorflow.converter
 
 import ml.combust.mleap.core.types.TensorType
 import ml.combust.mleap.tensor.{ByteString, Tensor}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.tensorflow.types._
 import org.tensorflow.ndarray.Shape
 
-class MleapConverterSpec extends FunSpec {
+class MleapConverterSpec extends org.scalatest.funspec.AnyFunSpec {
   val random = new scala.util.Random
   val shape = Seq(3, 3, 3, 3, 3, 3, 3)
   val size = shape.product

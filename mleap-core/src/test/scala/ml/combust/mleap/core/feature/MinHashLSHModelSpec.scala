@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class MinHashLSHModelSpec extends FunSpec {
+class MinHashLSHModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("min has lsh model") {
     val model = MinHashLSHModel(Seq(), 3)

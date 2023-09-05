@@ -7,12 +7,12 @@ import ml.combust.bundle.test.TestSupport._
 import ml.combust.bundle.{BundleFile, BundleRegistry}
 import ml.combust.bundle.test.ops._
 import ml.combust.bundle.test.{TestBundleFileSystem, TestContext}
-import org.scalatest.FunSpec
-import resource.managed
+import org.scalatest.funspec.AnyFunSpec
+import scala.util.Using
 
 import scala.util.Random
 
-class BundleFileSystemSpec extends FunSpec {
+class BundleFileSystemSpec extends org.scalatest.funspec.AnyFunSpec {
   implicit val testContext = TestContext(BundleRegistry("test-registry").
     registerFileSystem(new TestBundleFileSystem))
 

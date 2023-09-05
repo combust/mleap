@@ -4,17 +4,15 @@ import java.io.{Closeable, File}
 import java.net.URI
 import java.nio.file.{FileSystem, FileSystems, Files, Path}
 import java.util.stream.Collectors
-
 import ml.combust.bundle.dsl.{Bundle, BundleInfo}
 import ml.combust.bundle.fs.BundleFileSystem
+import ml.combust.bundle.json.JsonSupport.bundleBundleInfoFormat
 import ml.combust.bundle.serializer.BundleSerializer
-import ml.combust.bundle.json.JsonSupport._
 import spray.json._
-import resource._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
-import scala.util.Try
+import scala.util.{Try, Using}
 
 /**
   * Created by hollinwilkins on 12/24/16.
@@ -38,6 +36,14 @@ object BundleFile {
 
   implicit def apply(uri: String): BundleFile = {
     apply(new URI(unbackslash(uri)))
+  }
+
+  implicit def apply(path: Path): BundleFile = {
+    if(path.getFileName.toString.endsWith("zip")) {
+      apply(s"jar:${path.toUri}")
+    } else {
+      apply(path.toUri)
+    }
   }
 
   implicit def apply(file: File): BundleFile = {
@@ -101,10 +107,12 @@ case class BundleFile(fs: FileSystem,
 
   def writeNote(name: String, note: String): Try[String] = {
     Files.createDirectories(fs.getPath(path.toString, "notes"))
-    (for(out <- managed(Files.newOutputStream(fs.getPath(path.toString, "notes", name)))) yield {
-      out.write(note.getBytes)
-      note
-    }).tried
+    Using(Files.newOutputStream(fs.getPath(path.toString, "notes", name))) {
+      out => {
+        out.write(note.getBytes)
+        note
+      }
+    }
   }
 
   def readNote(name: String): String = {

@@ -1,12 +1,12 @@
 package ml.combust.mleap.core.tree
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 import org.apache.spark.ml.linalg.Vectors
 
 /**
   * Created by hwilkins on 1/21/16.
   */
-class InternalNodeSpec extends FunSpec {
+class InternalNodeSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("#typeName") {
     it("is InternalNode") {  }
   }
@@ -32,7 +32,7 @@ class InternalNodeSpec extends FunSpec {
   }
 }
 
-class LeafNodeSpec extends FunSpec {
+class LeafNodeSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("#predictImpl") {
     it("returns itself") {
       val node = LeafNode(0.45)

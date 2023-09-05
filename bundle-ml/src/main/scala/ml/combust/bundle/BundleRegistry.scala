@@ -7,7 +7,7 @@ import ml.combust.bundle.fs.BundleFileSystem
 import ml.combust.bundle.op.{OpModel, OpNode}
 import ml.combust.mleap.ClassLoaderUtil
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /** Trait for classes that contain a bundle registry.
   *
@@ -39,7 +39,7 @@ object BundleRegistry {
 
     val br = ops.foldLeft(Map[String, OpNode[_, _, _]]()) {
       (m, opClass) =>
-        val opNode = cl.loadClass(opClass).newInstance().asInstanceOf[OpNode[_, _, _]]
+        val opNode = cl.loadClass(opClass).getDeclaredConstructor().newInstance().asInstanceOf[OpNode[_, _, _]]
         m + (opNode.Model.opName -> opNode)
     }.values.foldLeft(BundleRegistry(cl)) {
       (br, opNode) => br.register(opNode)

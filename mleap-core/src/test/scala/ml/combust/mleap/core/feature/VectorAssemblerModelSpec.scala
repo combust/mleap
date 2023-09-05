@@ -4,12 +4,12 @@ import java.math.BigDecimal
 
 import ml.combust.mleap.core.types._
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hwilkins on 1/21/16.
   */
-class VectorAssemblerModelSpec extends FunSpec {
+class VectorAssemblerModelSpec extends org.scalatest.funspec.AnyFunSpec {
   val assembler = VectorAssemblerModel(Seq(
     ScalarShape(), ScalarShape(),
     TensorShape(2),

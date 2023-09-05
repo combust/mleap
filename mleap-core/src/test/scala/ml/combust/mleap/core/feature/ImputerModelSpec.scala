@@ -1,9 +1,9 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{ScalarType, StructField}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class ImputerModelSpec extends FunSpec {
+class ImputerModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema"){
     val model = ImputerModel(12, 23.4, "mean")

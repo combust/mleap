@@ -5,12 +5,12 @@ import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 9/15/16.
   */
-class LinearRegressionSpec extends FunSpec {
+class LinearRegressionSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(Seq(StructField("features", TensorType(BasicType.Double)))).get
   val dataset = Seq(Row(Tensor.denseVector(Array(20.0, 10.0, 5.0))))
   val frame = DefaultLeapFrame(schema, dataset)

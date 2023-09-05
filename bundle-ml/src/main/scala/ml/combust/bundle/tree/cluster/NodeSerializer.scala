@@ -2,15 +2,13 @@ package ml.combust.bundle.tree.cluster
 
 import java.io.{BufferedReader, DataInputStream, InputStreamReader, _}
 import java.nio.file.{Files, Path}
-
 import ml.bundle.ctree.Node
 import ml.combust.bundle.BundleContext
 import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.bundle.tree.JsonSupport._
 import spray.json._
-import resource._
 
-import scala.util.Try
+import scala.util.{Try, Using}
 
 /**
   * Created by hollinwilkins on 12/26/16.
@@ -56,7 +54,7 @@ case class JsonFormatNodeReader(in: BufferedReader) extends FormatNodeReader {
 case class ProtoFormatNodeWriter(out: DataOutputStream) extends FormatNodeWriter {
   override def write(node: Node): Unit = {
     val size = node.serializedSize
-    for(writer <- managed(new ByteArrayOutputStream(size))) {
+    Using(new ByteArrayOutputStream(size)) { writer =>
       node.writeTo(writer)
       out.writeInt(size)
       out.write(writer.toByteArray)
@@ -79,16 +77,18 @@ case class ProtoFormatNodeReader(in: DataInputStream) extends FormatNodeReader {
 
 case class NodeSerializer[N: NodeWrapper](path: Path)
                                          (implicit bundleContext: BundleContext[_]) {
-  val extension = bundleContext.format match {
+  val extension: String = bundleContext.format match {
     case SerializationFormat.Json => "json"
     case SerializationFormat.Protobuf => "pb"
   }
-  val ntc = implicitly[NodeWrapper[N]]
+  val ntc: NodeWrapper[N] = implicitly[NodeWrapper[N]]
 
   def write(node: N): Unit = {
-    val open = () => Files.newOutputStream(path.getFileSystem.getPath(s"${path.toString}.$extension"))
-    for(writer <- managed(FormatNodeSerializer.writer(bundleContext.format, open()))) {
-      write(node, writer)
+    Using(Files.newOutputStream(path.getFileSystem.getPath(s"${path.toString}.$extension"))) {
+      out =>
+        Using(FormatNodeSerializer.writer(bundleContext.format, out)) {
+          writer => write(node, writer)
+        }
     }
   }
 
@@ -102,10 +102,10 @@ case class NodeSerializer[N: NodeWrapper](path: Path)
   }
 
   def read(): Try[N] = {
-    (for(in <- managed(Files.newInputStream(path.getFileSystem.getPath(s"${path.toString}.$extension")))) yield {
+    Using(Files.newInputStream(path.getFileSystem.getPath(s"${path.toString}.$extension"))) { in =>
       val reader = FormatNodeSerializer.reader(bundleContext.format, in)
       read(reader)
-    }).tried
+    }
   }
 
   def read(reader: FormatNodeReader): N = {

@@ -12,7 +12,7 @@ import org.apache.spark.ml.bundle.SparkBundleContext
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.mleap.TypeConverters
 import org.apache.spark.sql.types.StructType
-import resource._
+import scala.util.Using
 
 import scala.util.Try
 
@@ -32,9 +32,9 @@ trait SparkSupport {
   implicit class URIBundleFileOps(uri: URI) {
     def loadMleapBundle()
                        (implicit context: SparkBundleContext): Try[Bundle[Transformer]] = {
-      (for (bf <- managed(BundleFile.load(uri))) yield {
+      Using(BundleFile.load(uri)) { bf =>
         bf.load[SparkBundleContext, Transformer]().get
-      }).tried
+      }
     }
   }
 

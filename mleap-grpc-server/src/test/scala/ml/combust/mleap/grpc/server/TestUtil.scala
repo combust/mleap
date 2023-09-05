@@ -4,7 +4,6 @@ import java.io.File
 import java.net.URI
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import io.grpc.{ManagedChannel, Server}
 import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
@@ -30,7 +29,10 @@ object TestUtil {
 
   def createServer(system: ActorSystem) : Server = {
     val config = new GrpcServerConfig(ConfigFactory.load().getConfig("ml.combust.mleap.grpc.server.default"))
-    val ssd = MleapGrpc.bindService(new GrpcServer(MleapExecutor(system), config)(global, ActorMaterializer.create(system)), global)
+    val ssd = MleapGrpc.bindService(
+      new GrpcServer(MleapExecutor(system), config)(system),
+      system.dispatcher
+    )
     val builder = InProcessServerBuilder.forName(uniqueServerName)
     builder.directExecutor().addService(ssd).intercept(new ErrorInterceptor)
     val server = builder.build

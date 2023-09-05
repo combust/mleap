@@ -2,12 +2,12 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
 import org.apache.spark.ml.linalg.{DenseMatrix, Matrices, Vectors}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 10/12/16.
   */
-class PcaModelSpec extends FunSpec {
+class PcaModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("pca model") {
     val pc = new DenseMatrix(3, 2, Array[Double](1, -1, 2,
       0, -3, 1))

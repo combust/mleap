@@ -3,9 +3,9 @@ package ml.combust.mleap.runtime.transformer.clustering
 import breeze.linalg.{DenseMatrix, Matrix}
 import ml.combust.mleap.core.clustering.LocalLDAModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class LDASpec extends FunSpec {
+class LDASpec extends AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {

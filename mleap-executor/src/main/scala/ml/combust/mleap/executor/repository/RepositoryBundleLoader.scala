@@ -7,7 +7,7 @@ import ml.combust.bundle.dsl.Bundle
 import ml.combust.mleap.runtime.MleapContext
 import ml.combust.mleap.runtime.MleapSupport._
 import ml.combust.mleap.runtime.frame.Transformer
-import resource._
+import scala.util.Using
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -25,9 +25,9 @@ class RepositoryBundleLoader(repository: Repository,
 
     repository.downloadBundle(uri).flatMap {
       path =>
-        Future.fromTry((for(bf <- managed(BundleFile(path.toFile))) yield {
+        Future.fromTry(Using(BundleFile(path.toFile)) { bf =>
           bf.loadMleapBundle()
-        }).tried.flatMap(identity))
+        }.flatten)
     }
   }
 }

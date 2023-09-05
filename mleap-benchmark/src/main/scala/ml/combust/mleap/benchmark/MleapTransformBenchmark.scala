@@ -1,22 +1,18 @@
 package ml.combust.mleap.benchmark
 
 import java.io.File
-
 import com.typesafe.config.Config
-import ml.combust.bundle.BundleFile
 import ml.combust.mleap.runtime.serialization.{BuiltinFormats, FrameReader}
-import ml.combust.mleap.runtime.MleapSupport._
 import org.scalameter.{Bench, Gen}
-import resource._
+
+import java.nio.file.Path
 
 /**
   * Created by hollinwilkins on 2/4/17.
   */
 class MleapTransformBenchmark extends Benchmark {
   override def benchmark(config: Config): Unit = {
-    val model = (for(bf <- managed(BundleFile(new File(config.getString("model-path"))))) yield {
-      bf.loadMleapBundle()
-    }).tried.flatMap(identity).get.root
+    val model = mleapBundleForPath(Path.of(config.getString("model-path"))).root
     val frame = FrameReader(BuiltinFormats.json).read(new File(config.getString("frame-path"))).get
 
     val start = config.getInt("start")

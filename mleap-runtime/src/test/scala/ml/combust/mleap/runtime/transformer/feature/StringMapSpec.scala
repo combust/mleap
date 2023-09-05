@@ -3,12 +3,11 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.StringMapModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import org.scalatest.FunSpec
 
 /**
-  * Created by hollinwilkins on 1/5/17.
-  */
-class StringMapSpec extends FunSpec {
+ * Created by hollinwilkins on 1/5/17.
+ */
+class StringMapSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(Seq(StructField("test_string", ScalarType.String))).get
   val dataset = Seq(Row("index1"), Row("index2"), Row("index3"))
   val frame = DefaultLeapFrame(schema, dataset)
@@ -31,7 +30,9 @@ class StringMapSpec extends FunSpec {
     describe("with invalid string") {
       val frame2 = frame.copy(dataset = Seq(Row("bad_index")))
 
-      it("returns a Failure") { assert(stringMap.transform(frame2).isFailure) }
+      it("returns a Failure") {
+        assert(stringMap.transform(frame2).isFailure)
+      }
     }
   }
 

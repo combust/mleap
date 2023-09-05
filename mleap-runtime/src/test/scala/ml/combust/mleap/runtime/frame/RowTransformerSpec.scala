@@ -2,12 +2,12 @@ package ml.combust.mleap.runtime.frame
 
 import ml.combust.mleap.core.types.{ScalarType, StructType}
 import ml.combust.mleap.runtime.function.UserDefinedFunction
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 10/5/17.
   */
-class RowTransformerSpec extends FunSpec {
+class RowTransformerSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("non-shuffling transforms") {
     it("correctly transforms incoming rows") {
       val udf: UserDefinedFunction = (in: Double) => in + 42.0

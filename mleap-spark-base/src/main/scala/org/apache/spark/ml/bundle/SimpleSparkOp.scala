@@ -44,7 +44,7 @@ abstract class SimpleSparkOp[N <: Transformer](implicit ct: ClassTag[N]) extends
           |
           |implicit val sbc = SparkBundleContext().withDataset(transformedDataset)
           |
-          |for(bf <- managed(BundleFile(file))) {
+          |Using(BundleFile(file)) { bf =>
           |  sparkTransformer.writeBundle.format(SerializationFormat.Json).save(bf).get
           |}
           |```

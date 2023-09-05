@@ -5,12 +5,12 @@ import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.test.TestUtil
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 import ml.combust.mleap.tensor.Tensor
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 9/28/16.
   */
-class GBTRegressionSpec extends FunSpec {
+class GBTRegressionSpec extends org.scalatest.funspec.AnyFunSpec {
   val schema = StructType(Seq(StructField("features", TensorType(BasicType.Double)))).get
   val dataset = Seq(Row(Tensor.denseVector(Array(0.2, 0.7, 0.4))))
   val frame = DefaultLeapFrame(schema, dataset)

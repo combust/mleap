@@ -1,12 +1,12 @@
 package ml.combust.mleap.core.tree
 
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hwilkins on 1/20/16.
   */
-class CategoricalSplitSpec extends FunSpec {
+class CategoricalSplitSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("#shouldGoLeft") {
     describe("with features") {
       describe("when isLeft is true") {
@@ -78,7 +78,7 @@ class CategoricalSplitSpec extends FunSpec {
   }
 }
 
-class ContinuousSplitSpec extends FunSpec {
+class ContinuousSplitSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("#shouldGoLeft") {
     describe("with features") {
       describe("when below threshold") {

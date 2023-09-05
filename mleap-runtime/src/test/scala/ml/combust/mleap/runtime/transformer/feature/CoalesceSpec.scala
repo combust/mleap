@@ -3,12 +3,12 @@ package ml.combust.mleap.runtime.transformer.feature
 import ml.combust.mleap.core.feature.CoalesceModel
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hollinwilkins on 1/5/17.
   */
-class CoalesceSpec extends FunSpec {
+class CoalesceSpec extends AnyFunSpec {
   val schema = StructType(StructField("test1", ScalarType.Double),
     StructField("test2", ScalarType.Double),
     StructField("test3", ScalarType.Double),

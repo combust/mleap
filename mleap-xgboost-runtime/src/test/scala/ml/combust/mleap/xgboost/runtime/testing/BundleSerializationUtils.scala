@@ -8,7 +8,7 @@ import ml.combust.bundle.serializer.SerializationFormat
 import ml.combust.mleap.runtime.{MleapContext, frame}
 import ml.combust.mleap.runtime.frame.Transformer
 import ml.combust.mleap.xgboost.runtime.bundle.ops.{XGBoostClassificationOp, XGBoostPredictorClassificationOp, XGBoostPredictorRegressionOp, XGBoostRegressionOp}
-import resource.managed
+import scala.util.Using
 
 
 trait BundleSerializationUtils {
@@ -24,7 +24,7 @@ trait BundleSerializationUtils {
 
     val file = new File(s"${tempDirPath}/${this.getClass.getName}.zip")
 
-    for(bf <- managed(BundleFile(file))) {
+    Using(BundleFile(file)) { bf =>
       transformer.writeBundle.format(SerializationFormat.Json).save(bf).get
     }
     file
@@ -35,9 +35,9 @@ trait BundleSerializationUtils {
 
     import ml.combust.mleap.runtime.MleapSupport._
 
-    (for(bf <- managed(BundleFile(bundleFile))) yield {
-      bf.loadMleapBundle().get.root
-    }).tried.get
+    Using(BundleFile(bundleFile)) { bf =>
+      bf.loadMleapBundle()
+    }.flatten.get.root
   }
 
   def loadXGBoostPredictorFromBundle(bundleFile: File)

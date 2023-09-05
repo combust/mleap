@@ -6,7 +6,7 @@ import ml.combust.mleap.tensor.{ByteString, DenseTensor, SparseTensor, Tensor}
 import org.apache.avro.generic.GenericData
 import org.apache.avro.util.Utf8
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Created by hollinwilkins on 10/31/16.

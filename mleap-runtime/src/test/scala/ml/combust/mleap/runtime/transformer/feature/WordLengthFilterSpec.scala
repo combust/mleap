@@ -2,14 +2,13 @@ package ml.combust.mleap.runtime.transformer.feature
 
 import ml.combust.mleap.core.feature.WordLengthFilterModel
 import ml.combust.mleap.core.types._
-import org.scalatest.FunSpec
 
-class WordLengthFilterSpec extends FunSpec {
+class WordLengthFilterSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("input/output schema") {
     it("has the correct inputs and outputs") {
       val transformer = WordLengthFilter(shape = NodeShape().withStandardInput("input").
-              withStandardOutput("output"),
+        withStandardOutput("output"),
         model = new WordLengthFilterModel(5))
 
       assert(transformer.schema.fields ==

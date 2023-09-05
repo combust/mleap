@@ -1,12 +1,12 @@
 package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{ScalarType, StructField, TensorType}
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
   * Created by hwilkins on 1/21/16.
   */
-class OneHotEncoderModelSpec extends FunSpec {
+class OneHotEncoderModelSpec extends org.scalatest.funspec.AnyFunSpec {
   describe("encoder model") {
 
     val encoder = OneHotEncoderModel(Array(5))

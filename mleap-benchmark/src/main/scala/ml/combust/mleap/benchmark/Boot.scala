@@ -42,11 +42,11 @@ object Boot extends App {
     }.children(modelPath, framePath)
   }
 
-  parser.parse(args, ConfigFactory.empty()) match {
-    case Some(config) =>
-      Class.forName(config.getString("benchmark")).
-        newInstance().
-        asInstanceOf[Benchmark].benchmark(config)
-    case None => // do nothing
+  parser.parse(args, ConfigFactory.empty()).foreach { config =>
+      Class.forName(config.getString("benchmark"))
+        .getDeclaredConstructor()
+        .newInstance()
+        .asInstanceOf[Benchmark]
+        .benchmark(config)
   }
 }

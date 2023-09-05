@@ -2,9 +2,9 @@ package ml.combust.mleap.core.feature
 
 import ml.combust.mleap.core.types.{StructField, TensorType}
 import org.apache.spark.ml.linalg.Vectors
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class IDFModelSpec extends FunSpec {
+class IDFModelSpec extends org.scalatest.funspec.AnyFunSpec {
 
   describe("idf model") {
     val model = IDFModel(Vectors.dense(Array(1.0, 2.0)))

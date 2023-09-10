@@ -70,6 +70,10 @@ object FileUtil {
       if (entry.isDirectory) {
         Files.createDirectories(filePath)
       } else {
+        val destCanonical = dest.getCanonicalPath()
+        if (!filePath.getCanonicalPath().startsWith(destCanonical + File.separator)) {
+          throw new Exception("Entry is outside of the target dir: " + entry.getName)
+        }
         Using(Files.newOutputStream(filePath)) {
           out => writeData(in, out)
         }

@@ -2,7 +2,7 @@ package ml.combust.bundle.util
 
 import java.io.{IOException, InputStream, OutputStream}
 import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
+import java.nio.file.{FileVisitResult, Files, FileSystems, Path, SimpleFileVisitor}
 import java.util.Comparator
 import java.util.stream.Collectors
 import java.util.zip.{ZipEntry, ZipInputStream, ZipOutputStream}
@@ -71,7 +71,7 @@ object FileUtil {
         Files.createDirectories(filePath)
       } else {
         val destCanonical = dest.toRealPath()
-        if (!filePath.toRealPath().startsWith(destCanonical + File.separator)) {
+        if (!filePath.toRealPath().startsWith(destCanonical + FileSystems.getDefault().getSeparator())) {
           throw new Exception("Entry is outside of the target dir: " + entry.getName)
         }
         Using(Files.newOutputStream(filePath)) {

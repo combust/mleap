@@ -29,7 +29,7 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
                           ) extends Model with AutoCloseable {
 
   def apply(values: Tensor[_] *): Seq[Any] = {
-    val garbage: mutable.ArrayBuilder[tensorflow.Tensor] = mutable.ArrayBuilder.make[tensorflow.Tensor](ClassTag(classOf[Tensor[_]]))
+    val garbage: mutable.ArrayBuilder[tensorflow.Tensor] = mutable.ArrayBuilder.make[tensorflow.Tensor]
 
     val result = Try {
       val tensors = values.zip(inputs).map {

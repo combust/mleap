@@ -41,7 +41,7 @@ class DefaultFrameReader extends FrameReader {
         rows(i) = row
       }
 
-      DefaultLeapFrame(schema, rows)
+      DefaultLeapFrame(schema, rows.toSeq)
     }
   }
 }

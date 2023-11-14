@@ -1,8 +1,7 @@
-# Release 0.22.0-SNAPSHOT
+# 0.22.0 and later
 
-### Breaking Changes
+Newer versions are tracked via github's release notes.
 
-### What's Changed
 
 # Release 0.21.0
 

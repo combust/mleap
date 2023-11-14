@@ -45,6 +45,7 @@ but these are the configurations which are tested by mleap.
 
 | MLeap Version | Spark Version | Scala Version    | Java Version | Python Version | XGBoost Version | Tensorflow Version |
 |---------------|---------------|------------------|--------------|----------------|-----------------|--------------------|
+| 0.23.1        | 3.4.0         | 2.12.18          | 11           | 3.7, 3.8       | 1.7.6           | 2.10.1             |
 | 0.23.0        | 3.4.0         | 2.12.13          | 11           | 3.7, 3.8       | 1.7.3           | 2.10.1             |
 | 0.22.0        | 3.3.0         | 2.12.13          | 11           | 3.7, 3.8       | 1.6.1           | 2.7.0              |
 | 0.21.1        | 3.2.0         | 2.12.13          | 11           | 3.7            | 1.6.1           | 2.7.0              |
@@ -62,7 +63,7 @@ but these are the configurations which are tested by mleap.
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.23.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.23.1"
 ```
 
 #### Maven
@@ -71,7 +72,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.23.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.12</artifactId>
-    <version>0.23.0</version>
+    <version>0.23.1</version>
 </dependency>
 ```
 
@@ -80,7 +81,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.23.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.23.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.23.1"
 ```
 
 #### Maven
@@ -89,7 +90,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.23.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.12</artifactId>
-    <version>0.23.0</version>
+    <version>0.23.1</version>
 </dependency>
 ```
 
@@ -271,7 +272,7 @@ For more documentation, please see our [documentation](https://combust.github.io
 
 ## Building
 
-Please ensure you have sbt 1.9.3, java 11, scala 2.12.13
+Please ensure you have sbt 1.9.3, java 11, scala 2.12.18
 
 1. Initialize the git submodules `git submodule update --init --recursive`
 2. Run `sbt compile`
@@ -298,7 +299,7 @@ integration.
 
 See LICENSE and NOTICE file in this repository.
 
-Copyright 2016 Combust, Inc.
+Copyright 20 Combust, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

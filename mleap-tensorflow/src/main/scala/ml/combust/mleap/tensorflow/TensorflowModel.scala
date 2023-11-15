@@ -13,6 +13,7 @@ import java.nio.file.Files
 import java.util.zip.ZipInputStream
 import scala.jdk.CollectionConverters._
 import scala.collection.mutable
+import scala.reflect.ClassTag
 import scala.util.Try
 
 /**
@@ -28,7 +29,7 @@ case class TensorflowModel( @transient var graph: Option[tensorflow.Graph] = Non
                           ) extends Model with AutoCloseable {
 
   def apply(values: Tensor[_] *): Seq[Any] = {
-    val garbage: mutable.ArrayBuilder[tensorflow.Tensor] = mutable.ArrayBuilder.make[tensorflow.Tensor]()
+    val garbage: mutable.ArrayBuilder[tensorflow.Tensor] = mutable.ArrayBuilder.make[tensorflow.Tensor]
 
     val result = Try {
       val tensors = values.zip(inputs).map {

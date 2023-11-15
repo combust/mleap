@@ -12,11 +12,11 @@ class LeapFrameSupport {
   }
 
   def select(frame: DefaultLeapFrame, fieldNames: java.util.List[String]): DefaultLeapFrame = {
-    frame.select(fieldNames.asScala: _*).get
+    frame.select(fieldNames.asScala.toSeq: _*).get
   }
 
   def drop(frame: DefaultLeapFrame, names: java.util.List[String]): DefaultLeapFrame = {
-    frame.drop(names.asScala: _*).get
+    frame.drop(names.asScala.toSeq: _*).get
   }
 
   def getFields(schema: StructType): java.util.List[StructField]  = {

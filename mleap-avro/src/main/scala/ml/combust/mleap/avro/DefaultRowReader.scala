@@ -26,7 +26,7 @@ class DefaultRowReader(override val schema: StructType) extends RowReader {
   override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Try[Row] = Try {
     decoder = DecoderFactory.get().binaryDecoder(bytes, decoder)
     record = datumReader.read(record, decoder)
-    val row = ArrayRow(new Array[Any](schema.fields.length))
+    val row = ArrayRow((new Array[Any](schema.fields.length)).toSeq)
     for(i <- schema.fields.indices) { row.set(i, readers(i)(record.get(i))) }
     row
   }

@@ -24,7 +24,7 @@ case class ArrayRow(values: mutable.WrappedArray[Any]) extends Row {
   override def withValue(value: Any): ArrayRow = ArrayRow(values :+ value)
   override def withValues(values: Seq[Any]): ArrayRow = ArrayRow(this.values ++ values)
 
-  override def selectIndices(indices: Int *): ArrayRow = ArrayRow(indices.toArray.map(values))
+  override def selectIndices(indices: Int *): ArrayRow = ArrayRow(indices.toArray.map(values).toSeq)
 
   override def dropIndices(indices: Int *): ArrayRow = {
     val drops = Set(indices: _*)

@@ -22,7 +22,7 @@ services:
 
 language: scala
 scala:
-  - 2.12.18
+  - 2.13.11
 jdk:
   - openjdk11
 

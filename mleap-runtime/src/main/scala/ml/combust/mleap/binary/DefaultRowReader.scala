@@ -19,7 +19,7 @@ class DefaultRowReader(override val schema: StructType) extends RowReader {
   override def fromBytes(bytes: Array[Byte], charset: Charset = BuiltinFormats.charset): Try[Row] = {
     Using(new ByteArrayInputStream(bytes)) { in =>
       val din = new DataInputStream(in)
-      val row = ArrayRow(new Array[Any](schema.fields.length))
+      val row = ArrayRow((new Array[Any](schema.fields.length)).toSeq)
       var i = 0
       for(s <- serializers) {
         row.set(i, s.read(din))

@@ -4,4 +4,4 @@ scipy>=0.13.0b1
 pandas>=1.0.5
 scikit-learn~=1.0.0
 gensim<4.1.0
-urllib3==1.26.17
+urllib3==1.26.18

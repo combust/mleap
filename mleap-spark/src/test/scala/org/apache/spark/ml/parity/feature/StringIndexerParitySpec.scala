@@ -17,14 +17,13 @@ class StringIndexerParitySpec extends SparkParityBase {
     setInputCol("state").
     setOutputCol("state_index").setHandleInvalid("keep").
     fit(dataset)
-  val ignoreParams = Set("inputCol", "outputCol", "inputCols", "outputCols")
-  override val unserializedParams = Set("stringOrderType").union(ignoreParams)
+  override val unserializedParams = Set("stringOrderType")
 
   it("serializes/deserializes the Spark model properly with multiple in/out columns"){
     bundleCache = None
     // outputCol has a default value of "<uid>__output, so we ignore it in this test
     // since the uid will be different
-
+    val additionalIgnoreParams = Set("outputCol")
     val multiColTransformer = new StringIndexer().
       setInputCols(Array("state", "loan_title")).
       setOutputCols(Array("state_index", "loan_tile_index")).
@@ -33,7 +32,7 @@ class StringIndexerParitySpec extends SparkParityBase {
     val sparkTransformed = multiColTransformer.transform(baseDataset)
     implicit val sbc = SparkBundleContext().withDataset(sparkTransformed)
     val deserializedTransformer = deserializedSparkTransformer(multiColTransformer)
-    checkEquality(multiColTransformer, deserializedTransformer, ignoreParams)
+    checkEquality(multiColTransformer, deserializedTransformer, additionalIgnoreParams)
     equalityTest(sparkTransformed, deserializedTransformer.transform(baseDataset))
 
     bundleCache = None

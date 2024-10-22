@@ -1,0 +1,10 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/scala-sdkman:2": {
+      "version": "2.12.18",
+      "jdkVersion": "11",
+      "jdkDistro": "open"
+    }
+  }
+}

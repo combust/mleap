@@ -16,7 +16,7 @@ class MleapSupportSpec extends org.scalatest.funspec.AnyFunSpec {
   private val stringIndexer = StringIndexer(shape = NodeShape().
     withStandardInput("feature").
     withStandardOutput("feature_index"),
-    model = StringIndexerModel(Seq("label1", "label2")))
+    model = StringIndexerModel(Seq(Seq("label1", "label2"))))
 
   describe("URIBundleFileOps") {
     it("can save/load a bundle using a URI") {

@@ -10,48 +10,48 @@ import org.scalatest.prop.TableDrivenPropertyChecks
 class StringIndexerModelSpec extends org.scalatest.funspec.AnyFunSpec with TableDrivenPropertyChecks {
   describe("#apply") {
     it("returns the index of the string") {
-      val indexer = StringIndexerModel(Array("hello", "there", "dude"))
+      val indexer = StringIndexerModel(Seq(Array("hello", "there", "dude")))
 
-      assert(indexer("hello") == 0.0)
-      assert(indexer("there") == 1.0)
-      assert(indexer("dude") == 2.0)
+      assert(indexer(Seq("hello")).head == 0.0)
+      assert(indexer(Seq("there")).head == 1.0)
+      assert(indexer(Seq("dude")).head == 2.0)
     }
 
     it("throws NullPointerException when encounters NULL/None and handleInvalid is not keep") {
-      val indexer = StringIndexerModel(Array("hello"))
+      val indexer = StringIndexerModel(Seq(Array("hello")))
       assertThrows[NullPointerException](indexer(null))
     }
 
     it("throws NoSuchElementException when encounters unseen label and handleInvalid is not keep") {
-      val indexer = StringIndexerModel(Array("hello"))
-      val unseenLabels = Table("unknown1", "unknown2")
+      val indexer = StringIndexerModel(Seq(Array("hello")))
+      val unseenLabels = Table("label", "unknown1", "unknown2")
 
       forAll(unseenLabels) { (label: Any) =>
         intercept[NoSuchElementException] {
-          indexer(label)
+          indexer(Seq(label))
         }
       }
     }
 
     it("returns default index for HandleInvalid.keep mode") {
-      val indexer = StringIndexerModel(Array("hello", "there", "dude"), handleInvalid = HandleInvalid.Keep)
+      val indexer = StringIndexerModel(Seq(Array("hello", "there", "dude")), handleInvalid = HandleInvalid.Keep)
       val invalidLabels = Table("unknown", "other unknown", null, None)
 
       forAll(invalidLabels) { (label: Any) =>
-        assert(indexer(label) == 3.0)
+        assert(indexer(Seq(label)).head == 3.0)
       }
     }
   }
 
   describe("input/output schema") {
-    val indexer = StringIndexerModel(Array("hello", "there", "dude"))
+    val indexer = StringIndexerModel(Seq(Array("hello", "there", "dude")))
 
     it("has the right input schema") {
-      assert(indexer.inputSchema.fields == Seq(StructField("input", ScalarType.String)))
+      assert(indexer.inputSchema.fields == Seq(StructField("input0", ScalarType.String)))
     }
 
     it("has the right output schema") {
-      assert(indexer.outputSchema.fields == Seq(StructField("output", ScalarType.Double.nonNullable)))
+      assert(indexer.outputSchema.fields == Seq(StructField("output0", ScalarType.Double.nonNullable)))
     }
   }
 }

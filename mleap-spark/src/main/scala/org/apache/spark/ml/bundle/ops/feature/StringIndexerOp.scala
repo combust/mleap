@@ -10,21 +10,22 @@ import org.apache.spark.ml.feature.StringIndexerModel
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] with MultiInOutFormatSparkOp[StringIndexerModel] {
-  override val Model: OpModel[SparkBundleContext, StringIndexerModel] = new OpModel[SparkBundleContext, StringIndexerModel] {
+class StringIndexerOp extends MultiInOutFormatSparkOp[StringIndexerModel] {
+  override val Model: OpModel[SparkBundleContext, StringIndexerModel] = new MultiInOutOpModel[StringIndexerModel] {
     override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
 
     override def opName: String = Bundle.BuiltinOps.feature.string_indexer
 
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
-      var result = model.
+
+      var result = super.store(model, obj).
         withValue("labels_length", Value.int(obj.labelsArray.length)).
         withValue("handle_invalid", Value.string(obj.getHandleInvalid))
       obj.labelsArray.indices.foreach(
         i => result = result.withValue(s"labels_array_$i", Value.stringList(obj.labelsArray(i)))
       )
-      saveMultiInOutFormat(result, obj)
+      result
     }
 
     override def load(model: Model)
@@ -36,15 +37,14 @@ class StringIndexerOp extends SimpleSparkOp[StringIndexerModel] with MultiInOutF
       }
       else {
         val collectedLabels = new Array[Array[String]](label_length)
-        for ( i <- 0 to label_length - 1) {
+        for ( i <- 0 until label_length) {
           collectedLabels(i) = model.value(s"labels_array_$i").getStringList.toArray
         }
         collectedLabels
       }
 
-      val obj = new StringIndexerModel(labelsArray = labelsArray).
+      new StringIndexerModel(labelsArray = labelsArray).
         setHandleInvalid(model.value("handle_invalid").getString)
-      loadMultiInOutFormat(model, obj)
     }
   }
 

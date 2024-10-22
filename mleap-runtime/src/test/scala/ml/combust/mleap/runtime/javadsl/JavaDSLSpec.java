@@ -52,7 +52,7 @@ public class JavaDSLSpec {
             new NodeShape(new ListMap<>(), new ListMap<>()).
                     withStandardInput("string").
                     withStandardOutput("string_index"),
-            new StringIndexerModel(JavaConversions.asScalaBuffer(Collections.singletonList("hello")).toSeq(),
+            new StringIndexerModel(JavaConversions.asScalaBuffer(Collections.singletonList(JavaConversions.asScalaBuffer(Collections.singletonList("hello")).toSeq())).toSeq(),
                     HandleInvalid$.MODULE$.fromString("error", true)));
 
     DefaultLeapFrame buildFrame() {

@@ -14,9 +14,11 @@ class StringIndexerSpec extends org.scalatest.funspec.AnyFunSpec {
 
   val stringIndexer = StringIndexer(
     shape = NodeShape.feature(
+      inputPort="input0",
+      outputPort="output0",
       inputCol = "test_string",
       outputCol = "test_index"),
-    model = StringIndexerModel(Seq("index1", "index2", "index3")))
+    model = StringIndexerModel(Seq(Seq("index1", "index2", "index3"))))
 
   describe("#transform") {
     it("converts input string into an index") {
@@ -29,12 +31,16 @@ class StringIndexerSpec extends org.scalatest.funspec.AnyFunSpec {
     }
 
     describe("with invalid input column") {
-      val stringIndexer2 = stringIndexer.copy(shape = NodeShape().withStandardInput("bad_input").
-        withStandardOutput("output"))
+      val stringIndexer2 = stringIndexer.copy(shape = NodeShape.feature(
+        inputPort="input0",
+        outputPort="output0",
+        inputCol = "bad_input",
+        outputCol = "bad_output"))
 
       it("returns a Failure") {
         assert(stringIndexer2.transform(frame).isFailure)
       }
+
     }
 
     describe("with invalid string") {

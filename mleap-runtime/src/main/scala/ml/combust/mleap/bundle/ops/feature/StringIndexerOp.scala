@@ -22,8 +22,8 @@ class StringIndexerOp extends MleapOp[StringIndexer, StringIndexerModel] {
         val m = model.
           withValue("labels_length", Value.int(1)).
           withValue("handle_invalid", Value.string(obj.handleInvalid.asParamString))
-        obj.labels.zipWithIndex.foldLeft(m){
-          case (m, (label, i)) => m.withValue(s"labels_array_$i",  Value.stringList(label))
+        obj.labelsArray.zipWithIndex.foldLeft(m){
+          case (m, (labels, i)) => m.withValue(s"labels_array_$i",  Value.stringList(labels))
         }
     }
 
@@ -31,13 +31,13 @@ class StringIndexerOp extends MleapOp[StringIndexer, StringIndexerModel] {
                      (implicit context: BundleContext[MleapContext]): StringIndexerModel = {
       val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString(_)).getOrElse(HandleInvalid.default)
       val label_length = model.getValue("labels_length").map(_.getInt).getOrElse(-1)
-      val labels: Seq[Seq[String]] = label_length match {
+      val labelsArray: Array[Array[String]] = label_length match {
         case -1 =>
           // backawards compatibility with spark v2
-          Seq(model.value("labels").getStringList)
-        case _ =>  (0 until label_length).map(i=>model.value(s"labels_array_$i").getStringList)
+          Array(model.value("labels").getStringList.toArray)
+        case _ =>  (0 until label_length).map(i=>model.value(s"labels_array_$i").getStringList.toArray).toArray
       }
-      StringIndexerModel(labels = labels, handleInvalid = handleInvalid)
+      StringIndexerModel(labelsArray = labelsArray, handleInvalid = handleInvalid)
     }
   }
 

@@ -7,16 +7,22 @@ import ml.combust.mleap.core.types.{ScalarType, StructField, StructType}
   *
   * String indexer converts a string into an integer representation.
   *
-  * @param labels list of labels that can be indexed
+  * @param labelsArray Array of ordered list of labels, corresponding to indices to be assigned for each input
   * @param handleInvalid how to handle invalid values (unseen or NULL labels): 'error' (throw an error),
   *                      'skip' (skips invalid data)
   *                      or 'keep' (put invalid data in a special bucket at index labels.size
   */
-case class StringIndexerModel(labels: Seq[Seq[String]],
-                              handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
-  private val stringToIndex: Array[Map[String, Int]] = labels.map(_.zipWithIndex.toMap).toArray
+case class StringIndexerModel(labelsArray: Array[Array[String]],
+                              handleInvalid: HandleInvalid) extends Model {
+
+  private val stringToIndex: Array[Map[String, Int]] = labelsArray.map(_.zipWithIndex.toMap)
   private val keepInvalid = handleInvalid == HandleInvalid.Keep
-  private val invalidValue = labels.map(_.length)
+  private val invalidValue = labelsArray.map(_.length)
+
+
+
+  @deprecated("Use labelsArray instead")
+  def labels: Seq[String] = labelsArray(0).toSeq
 
   /** Convert all strings into its integer representation.
    *
@@ -59,22 +65,28 @@ case class StringIndexerModel(labels: Seq[Seq[String]],
   }
 
   /** Create a [[ml.combust.mleap.core.feature.ReverseStringIndexerModel]] from this model.
-    *
+    * ReverseStringIndexer only support one input
     * @return reverse string indexer of this string indexer
     */
-//  def toReverse: ReverseStringIndexerModel = ReverseStringIndexerModel(labels)
+  def toReverse: ReverseStringIndexerModel = ReverseStringIndexerModel(labelsArray(0))
 
   override def inputSchema: StructType = {
-    val f = labels.zipWithIndex.map {
+    val f = labelsArray.zipWithIndex.map {
       case (_, i) => StructField(s"input$i", ScalarType.String)
     }
     StructType(f).get
   }
 
   override def outputSchema: StructType = {
-    val f = labels.zipWithIndex.map {
+    val f = labelsArray.zipWithIndex.map {
       case (_, i) => StructField(s"output$i", ScalarType.Double.nonNullable)
     }
     StructType(f).get
   }
+}
+
+object StringIndexerModel {
+  def apply(labels: Seq[String], handleInvalid: HandleInvalid): StringIndexerModel = StringIndexerModel(Array(labels.toArray), handleInvalid)
+  def apply(labels: Seq[String]): StringIndexerModel = StringIndexerModel(Array(labels.toArray), HandleInvalid.Error)
+  def apply(labelsArray: Array[Array[String]]): StringIndexerModel =  StringIndexerModel(labelsArray,  HandleInvalid.Error)
 }

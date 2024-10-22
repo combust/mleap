@@ -18,7 +18,7 @@ class StringIndexerSpec extends org.scalatest.funspec.AnyFunSpec {
       outputPort="output0",
       inputCol = "test_string",
       outputCol = "test_index"),
-    model = StringIndexerModel(Seq(Seq("index1", "index2", "index3"))))
+    model = StringIndexerModel(Seq("index1", "index2", "index3")))
 
   describe("#transform") {
     it("converts input string into an index") {

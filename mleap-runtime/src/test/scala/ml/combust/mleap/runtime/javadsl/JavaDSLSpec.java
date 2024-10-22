@@ -1,7 +1,7 @@
 package ml.combust.mleap.runtime.javadsl;
 
 import ml.combust.mleap.core.feature.HandleInvalid$;
-import ml.combust.mleap.core.feature.StringIndexerModel;
+import ml.combust.mleap.core.feature.StringIndexerModel$;
 import ml.combust.mleap.core.types.*;
 import ml.combust.mleap.runtime.MleapContext;
 import ml.combust.mleap.runtime.frame.DefaultLeapFrame;
@@ -52,7 +52,7 @@ public class JavaDSLSpec {
             new NodeShape(new ListMap<>(), new ListMap<>()).
                     withStandardInput("string").
                     withStandardOutput("string_index"),
-            new StringIndexerModel(JavaConversions.asScalaBuffer(Collections.singletonList(JavaConversions.asScalaBuffer(Collections.singletonList("hello")).toSeq())).toSeq(),
+            StringIndexerModel$.MODULE$.apply(JavaConversions.asScalaBuffer(Collections.singletonList("hello")).toSeq(),
                     HandleInvalid$.MODULE$.fromString("error", true)));
 
     DefaultLeapFrame buildFrame() {

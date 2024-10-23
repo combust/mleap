@@ -17,7 +17,7 @@ case class StringIndexerModel(labelsArray: Seq[Seq[String]],
 
   private val stringToIndex: Array[Map[String, Int]] = labelsArray.map(_.zipWithIndex.toMap).toArray
   private val keepInvalid = handleInvalid == HandleInvalid.Keep
-  private val invalidValue = labelsArray.map(_.length)
+  private val invalidValues = labelsArray.map(_.length)
 
   @deprecated("Use labelsArray instead")
   def labels: Seq[String] = labelsArray.head
@@ -44,7 +44,7 @@ case class StringIndexerModel(labelsArray: Seq[Seq[String]],
    */
   private def encoder(value: Any, colIdx: Int): Int = if (value == null) {
     if (keepInvalid) {
-      invalidValue(colIdx)
+      invalidValues(colIdx)
     } else {
       throw new NullPointerException("StringIndexer encountered NULL value. " +
         s"To handle NULLS, set handleInvalid to ${HandleInvalid.Keep.asParamString}")
@@ -54,7 +54,7 @@ case class StringIndexerModel(labelsArray: Seq[Seq[String]],
     stringToIndex(colIdx).get(label) match {
       case Some(v) => v
       case None => if (keepInvalid) {
-        invalidValue(colIdx)
+        invalidValues(colIdx)
       } else {
         throw new NoSuchElementException(s"Unseen label: $label. To handle unseen labels, " +
           s"set handleInvalid to ${HandleInvalid.Keep.asParamString}")

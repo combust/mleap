@@ -17,8 +17,6 @@ class StringIndexerParitySpec extends SparkParityBase {
     setInputCol("state").
     setOutputCol("state_index").setHandleInvalid("keep").
     fit(dataset)
-
-
 }
 
 class MIOStringIndexerParitySpec extends  SparkParityBase {

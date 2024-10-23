@@ -9,6 +9,17 @@ import org.apache.spark.sql.DataFrame
 /**
   * Created by hollinwilkins on 10/30/16.
   */
+
+class MIOOneHotEncoderParitySpec extends SparkParityBase {
+  override val dataset: DataFrame = baseDataset.select("state")
+  override val sparkTransformer: Transformer = new Pipeline()
+      .setStages(Array(
+        new StringIndexer().setInputCol("state").setOutputCol("state_index"),
+        new OneHotEncoder().setInputCol("state_index").setOutputCol("state_oh")
+      )).fit(dataset)
+  override val unserializedParams: Set[String] = Set("stringOrderType")
+}
+
 class OneHotEncoderParitySpec extends SparkParityBase {
   override val dataset: DataFrame = baseDataset.select("state")
   override val sparkTransformer: Transformer =
@@ -24,21 +35,7 @@ class OneHotEncoderParitySpec extends SparkParityBase {
 
   override val unserializedParams = Set("stringOrderType")
 
-  it("serializes/deserializes the Spark model properly with one in/out column"){
-    bundleCache = None
-    val additionalIgnoreParams = Set("outputCol")
-    val pipeline = new Pipeline()
-      .setStages(Array(
-        new StringIndexer().setInputCol("state").setOutputCol("state_index"),
-        new OneHotEncoder().setInputCol("state_index").setOutputCol("state_oh")
-    )).fit(dataset)
-    val sparkTransformed = pipeline.transform(dataset)
-    implicit val sbc = SparkBundleContext().withDataset(sparkTransformed)
-    val deserializedTransformer = deserializedSparkTransformer(pipeline)
-    checkEquality(pipeline, deserializedTransformer, additionalIgnoreParams)
-    equalityTest(sparkTransformed, deserializedTransformer.transform(dataset))
-    bundleCache = None
-  }
+
 
   it("fails to instantiate if the Spark model sets inputCol and inputCols"){
     intercept[IllegalArgumentException] {

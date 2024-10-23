@@ -10,8 +10,8 @@ import org.apache.spark.ml.feature.StringIndexerModel
 /**
   * Created by hollinwilkins on 8/21/16.
   */
-class StringIndexerOp extends MultiInOutFormatSparkOp[StringIndexerModel] {
-  override val Model: OpModel[SparkBundleContext, StringIndexerModel] = new MultiInOutOpModel[StringIndexerModel] {
+class StringIndexerOp extends MultiInOutSparkOp[StringIndexerModel] {
+  override val Model: OpModel[SparkBundleContext, StringIndexerModel] = new OpModel[SparkBundleContext, StringIndexerModel] {
     override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
 
     override def opName: String = Bundle.BuiltinOps.feature.string_indexer
@@ -19,7 +19,7 @@ class StringIndexerOp extends MultiInOutFormatSparkOp[StringIndexerModel] {
     override def store(model: Model, obj: StringIndexerModel)
                       (implicit context: BundleContext[SparkBundleContext]): Model = {
 
-      var result = super.store(model, obj).
+      var result = model.
         withValue("labels_length", Value.int(obj.labelsArray.length)).
         withValue("handle_invalid", Value.string(obj.getHandleInvalid))
       obj.labelsArray.indices.foreach(

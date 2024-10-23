@@ -13,7 +13,7 @@ import ml.combust.mleap.runtime.types.BundleTypeConverters._
 /**
   * Created by fshabbir on 12/1/16.
   */
-class BinarizerOp extends MultiInOutFormatSparkOp[Binarizer] {
+class BinarizerOp extends MultiInOutSparkOp[Binarizer] {
   override val Model: OpModel[SparkBundleContext, Binarizer] = new OpModel[SparkBundleContext, Binarizer] {
     override val klazz: Class[Binarizer] = classOf[Binarizer]
 

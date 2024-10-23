@@ -1,17 +1,17 @@
 package ml.combust.mleap.bundle.ops.feature
 
 import ml.combust.bundle.BundleContext
-import ml.combust.mleap.core.feature.{HandleInvalid, StringIndexerModel}
-import ml.combust.mleap.runtime.transformer.feature.StringIndexer
-import ml.combust.bundle.op.OpModel
 import ml.combust.bundle.dsl._
-import ml.combust.mleap.bundle.ops.MleapOp
+import ml.combust.bundle.op.OpModel
+import ml.combust.mleap.bundle.ops.MultiInOutMleapOp
+import ml.combust.mleap.core.feature.{HandleInvalid, StringIndexerModel}
 import ml.combust.mleap.runtime.MleapContext
+import ml.combust.mleap.runtime.transformer.feature.StringIndexer
 
 /**
   * Created by hollinwilkins on 8/22/16.
   */
-class StringIndexerOp extends MleapOp[StringIndexer, StringIndexerModel] {
+class StringIndexerOp extends MultiInOutMleapOp[StringIndexer, StringIndexerModel] {
   override val Model: OpModel[MleapContext, StringIndexerModel] = new OpModel[MleapContext, StringIndexerModel] {
     override val klazz: Class[StringIndexerModel] = classOf[StringIndexerModel]
 
@@ -31,11 +31,11 @@ class StringIndexerOp extends MleapOp[StringIndexer, StringIndexerModel] {
                      (implicit context: BundleContext[MleapContext]): StringIndexerModel = {
       val handleInvalid = model.getValue("handle_invalid").map(_.getString).map(HandleInvalid.fromString(_)).getOrElse(HandleInvalid.default)
       val label_length = model.getValue("labels_length").map(_.getInt).getOrElse(-1)
-      val labelsArray: Array[Array[String]] = label_length match {
+      val labelsArray: Seq[Seq[String]] = label_length match {
         case -1 =>
           // backawards compatibility with spark v2
-          Array(model.value("labels").getStringList.toArray)
-        case _ =>  (0 until label_length).map(i=>model.value(s"labels_array_$i").getStringList.toArray).toArray
+          Seq(model.value("labels").getStringList)
+        case _ =>  (0 until label_length).map(i=>model.value(s"labels_array_$i").getStringList)
       }
       StringIndexerModel(labelsArray = labelsArray, handleInvalid = handleInvalid)
     }

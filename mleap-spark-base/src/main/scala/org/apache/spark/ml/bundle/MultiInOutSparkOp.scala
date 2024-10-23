@@ -5,22 +5,9 @@ import ml.combust.bundle.dsl._
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.param.ParamValidators
 import org.apache.spark.ml.param.shared._
-import ml.combust.bundle.op.OpModel
-
 import scala.reflect.ClassTag
 
-abstract class MultiInOutOpModel[N <: Transformer with HasInputCol with HasInputCols with HasOutputCol with HasOutputCols] extends  OpModel[SparkBundleContext, N] {
-  private def validateParams(obj: N): Unit = {
-    ParamValidators.checkSingleVsMultiColumnParams(obj, Seq(obj.inputCol), Seq(obj.inputCols))
-    ParamValidators.checkSingleVsMultiColumnParams(obj, Seq(obj.outputCol), Seq(obj.outputCols))
-  }
-  override def store(model: Model, obj: N)(implicit context: BundleContext[SparkBundleContext]): Model = {
-    validateParams(obj)
-    model
-  }
-}
-
-abstract class MultiInOutFormatSparkOp[
+abstract class MultiInOutSparkOp[
   N <: Transformer with HasInputCol with HasInputCols with HasOutputCol with HasOutputCols
 ](implicit ct: ClassTag[N]) extends  SimpleSparkOp[N] {
   import NodeShape._
@@ -29,6 +16,11 @@ abstract class MultiInOutFormatSparkOp[
     val n = sparkLoad(node.name, node.shape, model)
     SparkShapeLoader(node.shape, n, sparkInputs(n, node.shape), sparkOutputs(n, node.shape)).loadShape()
     n
+  }
+
+  override def shape(node: N)(implicit context: BundleContext[SparkBundleContext]): NodeShape = {
+    validateParams(node)
+    super.shape(node)
   }
 
   def sparkInputs(obj: N, shape: NodeShape): Seq[ParamSpec] = sparkInputs(shape.getInput(standardInputPort).isDefined, obj)
@@ -49,5 +41,10 @@ abstract class MultiInOutFormatSparkOp[
     Seq(ParamSpec(standardOutputPort, obj.outputCol))
   } else {
     Seq(ParamSpec(standardOutputPort, obj.outputCols))
+  }
+
+  private def validateParams(obj: N): Unit = {
+    ParamValidators.checkSingleVsMultiColumnParams(obj, Seq(obj.inputCol), Seq(obj.inputCols))
+    ParamValidators.checkSingleVsMultiColumnParams(obj, Seq(obj.outputCol), Seq(obj.outputCols))
   }
 }

@@ -12,7 +12,7 @@ import scala.util.Try
  */
 case class StringIndexer(override val uid: String = Transformer.uniqueName("string_indexer"),
                          override val shape: NodeShape,
-                         override val model: StringIndexerModel) extends Transformer with MultiInOutTransformer {
+                         override val model: StringIndexerModel) extends Transformer {
   private val outputs: Seq[String] = outputSchema.fields.map(_.name)
   private val inputs: Seq[String] = inputSchema.fields.map(_.name)
   private val inputSelector: StructSelector = StructSelector(inputs)

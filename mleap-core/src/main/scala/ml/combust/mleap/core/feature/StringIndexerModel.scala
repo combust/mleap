@@ -12,17 +12,15 @@ import ml.combust.mleap.core.types.{ScalarType, StructField, StructType}
   *                      'skip' (skips invalid data)
   *                      or 'keep' (put invalid data in a special bucket at index labels.size
   */
-case class StringIndexerModel(labelsArray: Array[Array[String]],
-                              handleInvalid: HandleInvalid) extends Model {
+case class StringIndexerModel(labelsArray: Seq[Seq[String]],
+                              handleInvalid: HandleInvalid = HandleInvalid.Error) extends Model {
 
-  private val stringToIndex: Array[Map[String, Int]] = labelsArray.map(_.zipWithIndex.toMap)
+  private val stringToIndex: Array[Map[String, Int]] = labelsArray.map(_.zipWithIndex.toMap).toArray
   private val keepInvalid = handleInvalid == HandleInvalid.Keep
   private val invalidValue = labelsArray.map(_.length)
 
-
-
   @deprecated("Use labelsArray instead")
-  def labels: Seq[String] = labelsArray(0).toSeq
+  def labels: Seq[String] = labelsArray.head
 
   /** Convert all strings into its integer representation.
    *
@@ -68,7 +66,10 @@ case class StringIndexerModel(labelsArray: Array[Array[String]],
     * ReverseStringIndexer only support one input
     * @return reverse string indexer of this string indexer
     */
-  def toReverse: ReverseStringIndexerModel = ReverseStringIndexerModel(labelsArray(0))
+  def toReverse: ReverseStringIndexerModel = {
+    require(labelsArray.length == 1)
+    ReverseStringIndexerModel(labelsArray.head)
+  }
 
   override def inputSchema: StructType = {
     val f = labelsArray.zipWithIndex.map {
@@ -79,14 +80,8 @@ case class StringIndexerModel(labelsArray: Array[Array[String]],
 
   override def outputSchema: StructType = {
     val f = labelsArray.zipWithIndex.map {
-      case (_, i) => StructField(s"output$i", ScalarType.Double.nonNullable)
+        case (_, i) => StructField(s"output$i", ScalarType.Double.nonNullable)
     }
     StructType(f).get
   }
-}
-
-object StringIndexerModel {
-  def apply(labels: Seq[String], handleInvalid: HandleInvalid): StringIndexerModel = StringIndexerModel(Array(labels.toArray), handleInvalid)
-  def apply(labels: Seq[String]): StringIndexerModel = StringIndexerModel(Array(labels.toArray), HandleInvalid.Error)
-  def apply(labelsArray: Array[Array[String]]): StringIndexerModel =  StringIndexerModel(labelsArray,  HandleInvalid.Error)
 }

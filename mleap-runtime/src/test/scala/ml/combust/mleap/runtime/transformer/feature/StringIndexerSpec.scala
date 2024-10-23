@@ -13,10 +13,10 @@ class StringIndexerSpec extends org.scalatest.funspec.AnyFunSpec {
   val frame = DefaultLeapFrame(schema, dataset)
 
   val stringIndexer = StringIndexer(
-    shape = NodeShape.feature(
-      inputCol = "test_string",
-      outputCol = "test_index"),
-    model = StringIndexerModel(Seq("index1", "index2", "index3")))
+    shape = NodeShape()
+      .withInput("input0", "test_string")
+      .withOutput("output0", "test_index"),
+    model = StringIndexerModel(Seq(Seq("index1", "index2", "index3"))))
 
   describe("#transform") {
     it("converts input string into an index") {
@@ -29,8 +29,8 @@ class StringIndexerSpec extends org.scalatest.funspec.AnyFunSpec {
     }
 
     describe("with invalid input column") {
-      val stringIndexer2 = stringIndexer.copy(shape = NodeShape().withStandardInput("bad_input").
-        withStandardOutput("output"))
+      val stringIndexer2 = stringIndexer.copy(shape = NodeShape().withInput("input0","bad_input").
+        withOutput("output0","output"))
 
       it("returns a Failure") {
         assert(stringIndexer2.transform(frame).isFailure)

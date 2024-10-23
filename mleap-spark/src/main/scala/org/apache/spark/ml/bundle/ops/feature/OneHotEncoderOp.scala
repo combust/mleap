@@ -34,7 +34,7 @@ object OneHotEncoderOp {
   }
 }
 
-class OneHotEncoderOp extends MultiInOutFormatSparkOp[OneHotEncoderModel] {
+class OneHotEncoderOp extends MultiInOutSparkOp[OneHotEncoderModel] {
   override val Model: OpModel[SparkBundleContext, OneHotEncoderModel] = new OpModel[SparkBundleContext, OneHotEncoderModel] {
     override val klazz: Class[OneHotEncoderModel] = classOf[OneHotEncoderModel]
 

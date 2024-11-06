@@ -18,6 +18,16 @@ class StringIndexerParitySpec extends SparkParityBase {
     setOutputCol("state_index").setHandleInvalid("keep").
     fit(dataset)
 }
+class StringIndexerNoOutputColParitySpec extends SparkParityBase {
+  override val dataset: DataFrame = baseDataset.select("state")
+  override val unserializedParams = Set("stringOrderType")
+
+  // setting to handle invalid to true
+  override val sparkTransformer: Transformer = new StringIndexer().
+    setInputCol("state").
+    setHandleInvalid("keep").
+    fit(dataset)
+}
 
 class MIOStringIndexerParitySpec extends  SparkParityBase {
   override val dataset: DataFrame = baseDataset.select("state", "loan_title")

@@ -18,15 +18,15 @@ abstract class MultiInOutSparkOp[N <: Transformer with HasInputCol with HasInput
     n
   }
 
-  def sparkInputs(obj: N, shape: NodeShape): Seq[ParamSpec] = sparkInputs(shape.getInput(standardInputPort).isDefined, obj)
+  def sparkInputs(obj: N, shape: NodeShape): Seq[ParamSpec] = sparkInputs(shape.getInput(standardInputPort+"0").isDefined, obj)
 
-  def sparkInputs(hasInputCol: Boolean, obj: N): Seq[ParamSpec] = if (hasInputCol) {
-    Seq(ParamSpec(standardInputPort, obj.inputCol))
-  } else {
+  def sparkInputs(hasInputCols: Boolean, obj: N): Seq[ParamSpec] = if (hasInputCols) {
     Seq(ParamSpec(standardInputPort, obj.inputCols))
+  } else {
+    Seq(ParamSpec(standardInputPort, obj.inputCol))
   }
 
-  def sparkOutputs(obj: N, shape: NodeShape): Seq[ParamSpec] = sparkOutputs(shape.getOutput(standardOutputPort).isDefined, obj)
+  def sparkOutputs(obj: N, shape: NodeShape): Seq[ParamSpec] = sparkOutputs(shape.getOutput(standardOutputPort+"0").isDefined, obj)
 
   override def shape(node: N)(implicit context: BundleContext[SparkBundleContext]): NodeShape = {
     validateParams(node)
@@ -38,13 +38,13 @@ abstract class MultiInOutSparkOp[N <: Transformer with HasInputCol with HasInput
     ParamValidators.checkSingleVsMultiColumnParams(obj, Seq(obj.outputCol), Seq(obj.outputCols))
   }
 
-  def sparkInputs(obj: N): Seq[ParamSpec] = sparkInputs(obj.isSet(obj.inputCol), obj)
+  def sparkInputs(obj: N): Seq[ParamSpec] = sparkInputs(obj.isSet(obj.inputCols), obj)
 
-  def sparkOutputs(obj: N): Seq[ParamSpec] = sparkOutputs(obj.isSet(obj.outputCol), obj)
+  def sparkOutputs(obj: N): Seq[ParamSpec] = sparkOutputs(obj.isSet(obj.outputCols), obj)
 
-  def sparkOutputs(hasOutputCol: Boolean, obj: N): Seq[ParamSpec] = if (hasOutputCol) {
-    Seq(ParamSpec(standardOutputPort, obj.outputCol))
-  } else {
+  def sparkOutputs(hasOutputCols: Boolean, obj: N): Seq[ParamSpec] = if (hasOutputCols) {
     Seq(ParamSpec(standardOutputPort, obj.outputCols))
+  } else {
+    Seq(ParamSpec(standardOutputPort, obj.outputCol))
   }
 }

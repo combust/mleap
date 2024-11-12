@@ -132,7 +132,6 @@ case class BundleFile(fs: FileSystem,
   }
 
   override def finalize(): Unit = {
-    super.finalize()
     close()
   }
 

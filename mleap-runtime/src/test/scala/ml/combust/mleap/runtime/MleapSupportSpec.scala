@@ -10,13 +10,13 @@ import MleapSupport._
 
 import org.scalatest.funspec.AnyFunSpec
 
-class MleapSupportSpec extends org.scalatest.funspec.AnyFunSpec {
+class MleapSupportSpec extends AnyFunSpec {
   private val testDir = Files.createTempDirectory("MleapSupportSpec")
 
   private val stringIndexer = StringIndexer(shape = NodeShape().
-    withStandardInput("feature").
-    withStandardOutput("feature_index"),
-    model = StringIndexerModel(Seq("label1", "label2")))
+    withInput("input0", "feature")
+    withOutput("output0", "feature_index"),
+    model = StringIndexerModel(Seq(Seq("label1", "label2"))))
 
   describe("URIBundleFileOps") {
     it("can save/load a bundle using a URI") {

@@ -1,6 +1,6 @@
 package ml.combust.mleap.runtime.javadsl;
 
-import ml.combust.mleap.core.feature.HandleInvalid$;
+import ml.combust.mleap.core.feature.HandleInvalid;
 import ml.combust.mleap.core.feature.StringIndexerModel;
 import ml.combust.mleap.core.types.*;
 import ml.combust.mleap.runtime.MleapContext;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ml.combust.mleap.tensor.ByteString;
 import org.junit.jupiter.api.Test;
-import scala.collection.JavaConversions;
+import scala.collection.JavaConverters;
 import scala.collection.immutable.ListMap;
 
 import java.io.File;
@@ -50,10 +50,10 @@ public class JavaDSLSpec {
     StringIndexer stringIndexer = new StringIndexer(
             "string_indexer",
             new NodeShape(new ListMap<>(), new ListMap<>()).
-                    withStandardInput("string").
-                    withStandardOutput("string_index"),
-            new StringIndexerModel(JavaConversions.asScalaBuffer(Collections.singletonList("hello")).toSeq(),
-                    HandleInvalid$.MODULE$.fromString("error", true)));
+                    withInput("input0", "string").
+                    withOutput("output0","string_index"),
+            new StringIndexerModel(JavaConverters.asScalaBuffer(Collections.singletonList(JavaConverters.asScalaBuffer(Collections.singletonList("hello")).toSeq())),
+                    HandleInvalid.Error$.MODULE$));
 
     DefaultLeapFrame buildFrame() {
         List<StructField> fields = Arrays.asList(frameBuilder.createField("bool", frameBuilder.createBoolean()),
@@ -101,7 +101,7 @@ public class JavaDSLSpec {
         assertEquals(row.getDouble(7), 44.5, 0.0000000000001);
         assertEquals(row.getByteString(8), new ByteString("hello_there".getBytes()));
         assertEquals(row.getList(9), Arrays.asList(23, 44, 55));
-        assertEquals(JavaConversions.mapAsJavaMap(row.getMap(10)), mapCol );
+        assertEquals(JavaConverters.mapAsJavaMap(row.getMap(10)), mapCol );
         List<Double> tensorValues = tensorSupport.toArray(row.getTensor(11));
         assertEquals(tensorValues, Arrays.asList(23d, 3d, 4d));
     }
@@ -117,7 +117,7 @@ public class JavaDSLSpec {
     @Test
     public void createTensorFieldWithDimension() {
         StructField tensorField = frameBuilder.createField("tensor", frameBuilder.createTensor(frameBuilder.createBasicByte(), Arrays.asList(1, 2), true));
-        assertEquals(((TensorType)tensorField.dataType()).dimensions().get(), JavaConversions.asScalaBuffer(Arrays.asList(1, 2)).toSeq());
+        assertEquals(((TensorType)tensorField.dataType()).dimensions().get(), JavaConverters.asScalaBuffer(Arrays.asList(1, 2)).toSeq());
     }
 
     @Test

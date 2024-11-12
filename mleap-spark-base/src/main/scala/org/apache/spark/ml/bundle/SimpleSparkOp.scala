@@ -30,27 +30,8 @@ abstract class SimpleSparkOp[N <: Transformer](implicit ct: ClassTag[N]) extends
 
   override def shape(node: N)
                     (implicit context: BundleContext[SparkBundleContext]): NodeShape = {
-    val dataset = context.context.dataset.getOrElse {
-      throw new IllegalArgumentException(
-        """
-          |Must provide a transformed data frame to MLeap for serializing a pipeline.
-          |The transformed data frame is used to extract data types and other metadata
-          |required for execution.
-          |
-          |Example usage:
-          |```
-          |val sparkTransformer: org.apache.spark.ml.Transformer
-          |val transformedDataset = sparkTransformer.transform(trainingDataset)
-          |
-          |implicit val sbc = SparkBundleContext().withDataset(transformedDataset)
-          |
-          |Using(BundleFile(file)) { bf =>
-          |  sparkTransformer.writeBundle.format(SerializationFormat.Json).save(bf).get
-          |}
-          |```
-        """.stripMargin)
-    }
-    SparkShapeSaver(dataset,
+    assert(context.context.dataset.isDefined, BundleHelper.sampleDataframeMessage(klazz))
+    SparkShapeSaver(context.context.dataset.get,
       node,
       sparkInputs(node),
       sparkOutputs(node)).asNodeShape

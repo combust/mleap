@@ -31,7 +31,7 @@ object FileUtil {
   def rmRF(toRemove: Path): Array[(String, Boolean)] = {
     def removeElement(path: Path): (String, Boolean) = {
       val result = Try {
-        Files.deleteIfExists(toRemove)
+        Files.deleteIfExists(path)
       } match {
         case Failure(_) => false
         case Success(value) => value

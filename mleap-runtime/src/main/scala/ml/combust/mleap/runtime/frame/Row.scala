@@ -16,7 +16,7 @@ object Row {
     * @param values values in the row
     * @return default row implementation with values
     */
-  def apply(values: Any *): Row = ArrayRow(values.toArray)
+  def apply(values: Any *): Row = ArrayRow(values.toArray.toSeq)
 }
 
 /** Base trait for row data.

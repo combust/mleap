@@ -43,7 +43,7 @@ object FormatModelSerializer {
 
 /** Object for serializing/deserializing model definitions with JSON.
   */
-case class JsonFormatModelSerializer(implicit hr: HasBundleRegistry) extends FormatModelSerializer {
+case class JsonFormatModelSerializer()(implicit hr: HasBundleRegistry) extends FormatModelSerializer {
   override def write(path: Path, model: Model): Unit = {
     Files.write(path, model.asBundle.toJson.prettyPrint.getBytes("UTF-8"))
   }
@@ -55,7 +55,7 @@ case class JsonFormatModelSerializer(implicit hr: HasBundleRegistry) extends For
 
 /** Object for serializing/deserializing model definitions with Protobuf.
   */
-case class ProtoFormatModelSerializer(implicit hr: HasBundleRegistry) extends FormatModelSerializer {
+case class ProtoFormatModelSerializer()(implicit hr: HasBundleRegistry) extends FormatModelSerializer {
   override def write(path: Path, model: Model): Unit = {
     Files.write(path, model.asBundle.toByteArray)
   }

@@ -17,7 +17,8 @@ object Common {
   lazy val defaultSettings = buildSettings ++ sonatypeSettings
 
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.12.18",
+    scalaVersion := "2.13.11",
+    crossScalaVersions := Seq("2.12.13", "2.13.11"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
     ThisBuild / libraryDependencySchemes +=
       "org.scala-lang.modules" %% "scala-collection-compat" % VersionScheme.Always,
@@ -31,7 +32,8 @@ object Common {
       } else {
         Seq()
       }
-    }
+    },
+    resolvers += "XGBoost4J Snapshot Repo" at "https://s3-us-west-2.amazonaws.com/xgboost-maven-repo/snapshot/"
   )
 
   lazy val mleapSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.mleap")

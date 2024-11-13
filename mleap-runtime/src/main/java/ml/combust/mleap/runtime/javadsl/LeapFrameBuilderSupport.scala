@@ -35,7 +35,7 @@ class LeapFrameBuilderSupport {
   def createByteString(): BasicType = BasicType.ByteString
 
   def createTensorDimensions(dims : java.util.List[Integer]): Option[Seq[Int]] = {
-    Some(dims.asScala.map(_.intValue()))
+    Some(dims.asScala.toSeq.map(_.intValue()))
   }
 
   def createSchema(json: String): StructType = json.parseJson.convertTo[StructType]

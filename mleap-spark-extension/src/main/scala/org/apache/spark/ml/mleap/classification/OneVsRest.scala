@@ -23,6 +23,7 @@ import java.util.UUID
 import ml.combust.mleap.core.annotation.SparkCode
 
 import scala.collection.JavaConverters._
+import scala.collection.parallel.CollectionConverters._
 import scala.language.existentials
 import org.apache.hadoop.fs.Path
 import org.json4s.{DefaultFormats, JObject, _}
@@ -355,7 +356,7 @@ final class OneVsRest @Since("1.4.0") (
     }
 
     // create k columns, one for each binary classifier.
-    val models = Range(0, numClasses).par.map { index =>
+    val models = (0 until numClasses).par.map { index =>
       // generate new label metadata for the binary problem.
       val newLabelMeta = BinaryAttribute.defaultAttr.withName("label").toMetadata()
       val labelColName = "mc2b$" + index

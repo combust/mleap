@@ -100,21 +100,21 @@ case class ValueConverter() {
 
         tt.base match {
           case BasicType.Boolean =>
-            Tensor.create(values.asInstanceOf[java.util.List[Boolean]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Boolean]].asScala.toArray, dimensions.toSeq, indices.map(_.toSeq.map(_.toSeq)))
           case BasicType.Byte =>
-            Tensor.create(values.asInstanceOf[ByteBuffer].array(), dimensions, indices)
+            Tensor.create(values.asInstanceOf[ByteBuffer].array(), dimensions.toSeq, indices.map(_.toSeq.map(_.toSeq)))
           case BasicType.Short =>
-            Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.map(_.toShort).toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.map(_.toShort).toArray, dimensions.toSeq, indices.map(_.toSeq.map(_.toSeq)))
           case BasicType.Int =>
-            Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.toArray, dimensions.toSeq, indices.map(_.toSeq.map(_.toSeq)))
           case BasicType.Long =>
-            Tensor.create(values.asInstanceOf[java.util.List[Long]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Long]].asScala.toArray, dimensions.toSeq, indices.map(_.toSeq.map(_.toSeq)))
           case BasicType.Float =>
-            Tensor.create(values.asInstanceOf[java.util.List[Float]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Float]].asScala.toArray, dimensions.toSeq, indices.map(_.toSeq.map(_.toSeq)))
           case BasicType.Double =>
-            Tensor.create(values.asInstanceOf[java.util.List[Double]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Double]].asScala.toArray, dimensions.toSeq, indices.map(_.toSeq.map(_.toSeq)))
           case BasicType.String =>
-            Tensor.create(values.asInstanceOf[java.util.List[String]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[String]].asScala.toArray, dimensions.toSeq, indices.map(_.toSeq.map(_.toSeq)))
           case tpe => throw new IllegalArgumentException(s"invalid base type for tensor $tpe")
         }
       }

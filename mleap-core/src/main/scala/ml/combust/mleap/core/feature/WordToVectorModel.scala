@@ -68,7 +68,7 @@ case class WordToVectorModel(wordIndex: Map[String, Int],
     wordIndex.map { case (word, ind) =>
       (word, wordVectors.slice(vectorSize * ind, vectorSize * ind + vectorSize))
     }
-  }.mapValues(Vectors.dense).map(identity)
+  }.mapValues(Vectors.dense).map(identity).toMap
 
   def apply(sentence: Seq[String]): Vector = {
     if (sentence.isEmpty) {

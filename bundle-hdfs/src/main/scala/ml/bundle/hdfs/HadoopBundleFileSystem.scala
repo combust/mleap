@@ -30,7 +30,7 @@ object HadoopBundleFileSystem {
   }
 
   def createSchemes(config: Config): Seq[String] = if (config.hasPath("schemes")) {
-    config.getStringList("schemes").asScala
+    config.getStringList("schemes").asScala.toSeq
   } else { Seq("hdfs") }
 }
 

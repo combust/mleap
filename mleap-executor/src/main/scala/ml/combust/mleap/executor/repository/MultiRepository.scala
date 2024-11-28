@@ -57,6 +57,6 @@ object MultiRepositoryProvider extends RepositoryProvider {
       Repository.fromConfig(rConfig)
     }
 
-    new MultiRepository(repositories)
+    new MultiRepository(repositories.toSeq)
   }
 }

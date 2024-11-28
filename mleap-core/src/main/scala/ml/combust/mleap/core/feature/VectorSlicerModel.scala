@@ -13,7 +13,7 @@ import org.apache.spark.ml.linalg.mleap.VectorUtil._
 case class VectorSlicerModel(indices: Array[Int],
                              namedIndices: Array[(String, Int)] = Array(),
                             inputSize: Int) extends Model {
-  val allIndices: Array[Int] = indices.union(namedIndices.map(_._2))
+  val allIndices: Array[Int] = indices.union(namedIndices.map(_._2)).toArray
 
   def apply(features: Vector): Vector = features match {
     case features: DenseVector => Vectors.dense(allIndices.map(features.apply))

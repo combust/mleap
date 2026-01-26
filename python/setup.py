@@ -35,11 +35,7 @@ REQUIRED_PACKAGES = [
       'six>=1.10.0',
       'scipy>=0.13.0b1',
       'pandas>=0.18.1',
-      'scikit-learn~=1.0.0',
-]
-
-TESTS_REQUIRED_PACKAGES = [
-      'nose-exclude>=0.5.0'
+      'scikit-learn~=1.0',
 ]
 
 setup(name='mleap',
@@ -51,7 +47,6 @@ setup(name='mleap',
       packages=find_packages(),
       zip_safe=False,
       install_requires=REQUIRED_PACKAGES,
-      tests_require=TESTS_REQUIRED_PACKAGES,
       python_requires=">=3.7",
       classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -65,5 +60,9 @@ setup(name='mleap',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
     ],
      )

@@ -1,5 +1,5 @@
 coverage
 ipdb
-nose
-nose-exclude>=0.5.0
-pyspark==3.3.0
+pyspark==3.4.4
+pytest
+pytest-cov

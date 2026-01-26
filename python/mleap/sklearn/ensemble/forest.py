@@ -15,8 +15,7 @@
 # limitations under the License.
 #
 
-from sklearn.ensemble.forest import RandomForestRegressor
-from sklearn.ensemble.forest import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from mleap.bundle.serialize import MLeapSerializer
 from mleap.bundle.serialize import Vector
 import mleap.sklearn.tree.tree
@@ -86,11 +85,11 @@ class SimpleSerializer(MLeapSerializer):
         # compile tuples of model attributes to serialize
         tree_weights = Vector([1.0 for x in range(0, len(transformer.estimators_))])
         attributes = list()
-        attributes.append(('num_features', transformer.n_features_))
+        attributes.append(('num_features', transformer.n_features_in_))
         attributes.append(('tree_weights', tree_weights))
         attributes.append(('trees', ["tree{}".format(x) for x in range(0, len(transformer.estimators_))]))
         if isinstance(transformer, RandomForestClassifier):
-            attributes.append(('num_classes', transformer.n_classes_)) # TODO: get number of classes from the transformer
+            attributes.append(('num_classes', len(transformer.classes_))) # TODO: get number of classes from the transformer
 
         self.serialize(transformer, path, model, attributes, inputs, outputs)
 

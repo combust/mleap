@@ -113,9 +113,9 @@ class SimpleSerializer(MLeapSerializer):
 
         # Define attributes
         attributes = list()
-        attributes.append(('num_features', transformer.n_features_))
+        attributes.append(('num_features', transformer.n_features_in_))
         if isinstance(transformer, DecisionTreeClassifier):
-            attributes.append(('num_classes', int(transformer.n_classes_)))
+            attributes.append(('num_classes', int(len(transformer.classes_))))
 
         inputs = []
         outputs = []

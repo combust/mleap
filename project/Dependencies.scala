@@ -9,8 +9,8 @@ object Dependencies {
 
   import DependencyHelpers._
 
-  val sparkVersion = "4.0.0"
-  val scalaTestVersion = "3.2.19"
+  val sparkVersion = "3.4.4"
+  val scalaTestVersion = "3.2.16"
   val scalaPbJson4sVersion = "0.11.1"
   val junitVersion = "5.9.2"
   val akkaVersion = "2.6.21" // Stay below akka v2.7.0 since they swapped to a BSL license

@@ -4,7 +4,6 @@ from pyspark.ml.util import JavaMLReadable, JavaMLWritable, _jvm
 from pyspark.ml.wrapper import JavaTransformer
 from pyspark.ml.param.shared import HasInputCol, HasOutputCol
 from pyspark.sql import DataFrame
-
 from mleap.pyspark.py2scala import jvm_scala_object
 
 
@@ -36,13 +35,7 @@ class StringMap(JavaTransformer, HasInputCol, HasOutputCol, JavaMLReadable, Java
 
         validate_args()
 
-        labels_scala_map = _jvm() \
-            .scala \
-            .collection \
-            .CollectionConverters \
-            .mapAsScalaMapConverter(labels) \
-            .asScala() \
-            .toMap(_jvm().scala.Predef.conforms())
+        labels_scala_map = _jvm().PythonUtils.toScalaMap(labels)
 
         handle_invalid_jvm = jvm_scala_object(
             _jvm().ml.combust.mleap.core.feature,

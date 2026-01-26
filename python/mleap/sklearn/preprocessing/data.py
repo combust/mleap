@@ -585,15 +585,17 @@ class StandardScalerSerializer(MLeapSerializer, MLeapDeserializer):
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
 
-        # Set Additional Attributes
+        # Convert lists to numpy arrays
         if 'mean_' in transformer.__dict__:
+            transformer.mean_ = np.asarray(transformer.mean_)
             transformer.with_mean = True
         else:
             transformer.with_mean = False
 
         if 'scale_' in transformer.__dict__:
+            transformer.scale_ = np.asarray(transformer.scale_)
             transformer.with_std = True
-            transformer.var = np.square(transformer.scale_)
+            transformer.var_ = np.square(transformer.scale_)
         else:
             transformer.with_std = False
 
@@ -646,19 +648,40 @@ class OneHotEncoderSerializer(MLeapSerializer, MLeapDeserializer):
     def deserialize_from_bundle(self, transformer, node_path, node_name):
 
         attributes_map = {
-            'size': 'categories_',
+            'size': 'n_categories',
             'handle_invalid': 'handle_unknown',
         }
 
         full_node_path = os.path.join(node_path, node_name)
         transformer = self.deserialize_single_input_output(transformer, full_node_path, attributes_map)
 
-        transformer.categories_ = np.asarray([range(transformer.categories_)])
+        # Get the size value before creating the categories
+        n_categories = transformer.n_categories if hasattr(transformer, 'n_categories') else transformer.categories_
+        
+        # Properly initialize OneHotEncoder with categories
+        categories_list = [np.arange(n_categories)]
+        transformer.categories_ = np.asarray(categories_list)
+        
         if transformer.handle_unknown == 'keep':
             transformer.handle_unknown = 'ignore'
+        
+        # Set other required internal attributes for newer scikit-learn
+        transformer._n_features_outs = [n_categories]
         transformer.drop_idx_ = None
-
-        transformer.sparse = False
+        transformer._infrequent_enabled = False
+        transformer._drop_idx_after_grouping = None
+        transformer.sparse_output_ = False
+        transformer.feature_names_in_ = np.array(['x0'])
+        transformer.n_features_in_ = 1
+        
+        # Override transform method to return dense output
+        original_transform = transformer.transform
+        def transform_dense(X):
+            result = original_transform(X)
+            if hasattr(result, 'todense'):
+                return result.todense()
+            return result
+        transformer.transform = transform_dense
 
         return transformer
 

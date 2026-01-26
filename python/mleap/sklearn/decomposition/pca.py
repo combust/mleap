@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-from sklearn.decomposition.pca import PCA
+from sklearn.decomposition import PCA
 from mleap.bundle.serialize import MLeapSerializer
 import uuid
 

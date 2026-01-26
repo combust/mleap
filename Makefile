@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 SBT ?= sbt
+export SBT_OPTS = -Xmx4G
 
 all: test
 
@@ -23,16 +24,13 @@ test_xgboost_runtime:
 test_xgboost_spark:
 	$(SBT) "+ mleap-xgboost-spark/test"
 
-.PHONY: test_python37
-test_python37:
-	source scripts/scala_classpath_for_python.sh && make -C python py37_test
-
-.PHONY: test_python38
-test_python38:
-	source scripts/scala_classpath_for_python.sh && make -C python py38_test
+test_python_%: 
+	source scripts/scala_classpath_for_python.sh && make -C python test_py$*
+	@echo "Python tests for $@ completed successfully"
 
 .PHONY: test_python
-test_python: test_python37 test_python38
+test_python:
+	source scripts/scala_classpath_for_python.sh && make -C python test
 	@echo "All python tests run successfully"
 
 .PHONY: test

@@ -12,4 +12,7 @@ unsafe.*
 .sbtopts
 .DS_Store
 .bsp/
-.bloop/
+.bloop
+.vscode/
+.metals/
+project/**/metals.sbt

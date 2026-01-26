@@ -31,10 +31,10 @@ class TestImputerExtension(unittest.TestCase):
     def setUp(self):
         self.df = pd.DataFrame([
             [0.85281608, 1.50669264],
-            [-1.04544152, np.NaN],
+            [-1.04544152, np.nan],
             [0.41515407, -0.29941475],
-            [np.NaN, -0.96775275],
-            [np.NaN, -0.85734022]
+            [np.nan, -0.96775275],
+            [np.nan, -0.85734022]
         ], columns=['a', 'b'])
         self.feature_extractor = FeatureExtractor(input_scalars=['a'], output_vector='a_extracted')
         self.tmp_dir = tempfile.mkdtemp(prefix="mleap.python.tests")

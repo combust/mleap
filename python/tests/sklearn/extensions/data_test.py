@@ -20,7 +20,7 @@ class ExtensionsTests(unittest.TestCase):
         def _set_nulls(df):
             row = df['index']
             if row in [2,5]:
-                return np.NaN
+                return np.nan
             return df.a
 
         imputer = Imputer(strategy='mean', input_features='a', output_features='a_imputed')

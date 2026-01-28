@@ -1,0 +1,81 @@
+name: Release to CodeArtifact
+
+run-name: Release MLeap to Tubi CodeArtifact
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to release from'
+        required: true
+        default: 'master'
+
+jobs:
+  release:
+    runs-on: [self-hosted, production, large]
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Clone and checkout
+        uses: actions/checkout@v3.5.2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Determine version and repo
+        id: version
+        run: |
+          # Read base version from version.sbt (format: ThisBuild / version := "x.x.x")
+          BASE_VERSION=$(sed -n 's/.*version := "\([^"]*\)".*/\1/p' version.sbt)
+          echo "base-version=$BASE_VERSION" >> "$GITHUB_OUTPUT"
+
+          # Get short git hash
+          SHORT_HASH=$(git rev-parse --short HEAD)
+          echo "short-hash=$SHORT_HASH" >> "$GITHUB_OUTPUT"
+
+          # Determine final version and target repo based on branch
+          BRANCH="${{ github.event.inputs.branch }}"
+          if [ "$BRANCH" == "master" ]; then
+            FINAL_VERSION="$BASE_VERSION"
+            REPO_NAME="maven-jvm"
+            echo "Publishing formal release version: $FINAL_VERSION to $REPO_NAME"
+          else
+            FINAL_VERSION="${BASE_VERSION}-${SHORT_HASH}"
+            REPO_NAME="maven-jvm-dev"
+            echo "Publishing snapshot version: $FINAL_VERSION to $REPO_NAME"
+          fi
+          echo "final-version=$FINAL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "repo-name=$REPO_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4.5.0
+        with:
+          java-version: 8
+          distribution: 'temurin'
+          cache: 'sbt'
+
+      - name: Get Sbt Global Settings
+        uses: adRise/sbt-global-settings@ci
+
+      - name: Publish to CodeArtifact
+        run: |
+          echo "Publishing version ${{ steps.version.outputs.final-version }} to ${{ steps.version.outputs.repo-name }}"
+          sbt -v \
+            "set ThisBuild / version := \"${{ steps.version.outputs.final-version }}\"" \
+            "set ThisBuild / publishTo := Some(codeArtifactRepo(\"${{ steps.version.outputs.repo-name }}\").value)" \
+            "+publish"
+        env:
+          JAVA_OPTS: -Xms4G -Xmx4G -Xss8M -XX:ReservedCodeCacheSize=256M -XX:+UseG1GC -Dfile.encoding=UTF-8
+
+      - name: Summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.event.inputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Base Version:** ${{ steps.version.outputs.base-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Published Version:** ${{ steps.version.outputs.final-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Repository:** ${{ steps.version.outputs.repo-name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Git Commit:** ${{ steps.version.outputs.short-hash }}" >> $GITHUB_STEP_SUMMARY

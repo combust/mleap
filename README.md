@@ -67,7 +67,7 @@ but these are the configurations which are tested by mleap.
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.23.4"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.24.0"
 ```
 
 #### Maven
@@ -85,7 +85,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.23.4"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.23.4"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.24.0"
 ```
 
 #### Maven

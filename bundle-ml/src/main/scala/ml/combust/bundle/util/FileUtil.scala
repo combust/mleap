@@ -46,7 +46,7 @@ object FileUtil {
             .sorted(Comparator.reverseOrder())
             .collect(Collectors.toList())
             .asScala
-            .map(removeElement(_))
+            .map(removeElement)
             .toArray
       }.getOrElse(Array.empty)
     } else {
@@ -72,7 +72,7 @@ object FileUtil {
       } else {
         val destCanonical = dest.toRealPath()
         val entryCanonical = filePath.toAbsolutePath().normalize()
-        if (!entryCanonical.startsWith(destCanonical + FileSystems.getDefault().getSeparator())) {
+        if (!entryCanonical.startsWith(destCanonical.toString() + FileSystems.getDefault().getSeparator())) {
           throw new Exception("Entry is outside of the target dir: " + entry.getName)
         }
         Using(Files.newOutputStream(filePath)) {

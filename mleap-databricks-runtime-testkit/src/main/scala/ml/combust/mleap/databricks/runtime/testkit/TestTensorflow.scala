@@ -15,7 +15,7 @@ class TestTensorflow(session: SparkSession) extends Runnable {
     val model = TensorflowModel(graph = Some(graph),
       inputs = Seq(("InputA", TensorType.Float()), ("InputB", TensorType.Float())),
       outputs = Seq(("MyResult", TensorType.Float())),
-      graphBytes = graph.toGraphDef.toByteArray
+      modelBytes = graph.toGraphDef.toByteArray
     )
     val shape = NodeShape().withInput("InputA", "input_a").
       withInput("InputB", "input_b").

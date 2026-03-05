@@ -209,7 +209,7 @@ jobs:
 
   ci-completion:
     runs-on: ubuntu-latest
-    needs: [mleap-executor-tests, mleap-benchmark-tests, mleap-sbt-tests, python37-tests, python38-tests, python39-tests, python310-tests, python311-tests, python312-tests, python313-tests]
+    needs: [mleap-executor-tests, mleap-benchmark-tests, mleap-sbt-tests, python39-tests, python310-tests, python311-tests, python312-tests, python313-tests]
     if: always() # Required so this runs even if a dependency fails
     steps:
       - name: Check overall status

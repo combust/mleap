@@ -16,15 +16,11 @@ RUN DEBIAN_FRONTEND=noninteractive  \
     python3-pip && \ 
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && apt-get install -y \
-    python3.7  \
-    python3.8  \
     python3.9  \
     python3.10  \
     python3.11  \
     python3.12  \
     python3.13  \
-    python3.7-distutils \
-    python3.8-distutils \
     python3.9-distutils \
     python3-distutils  \
     tox \

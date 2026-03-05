@@ -104,7 +104,7 @@ Documentation can be found on our mleap docs page:
 Contributions are welcome! Make sure all python tests pass.
 You can run them from the top-level makefile:
 ```bash
-make py37_test
+make test_python
 ```
 
 If you'd rather use the inner `python/Makefile`, remember to source SCALA_CLASS_PATH by running:

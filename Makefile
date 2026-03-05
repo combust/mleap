@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 SBT ?= sbt
+export SBT_OPTS = -Xmx4G
 
 all: test
 

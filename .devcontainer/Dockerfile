@@ -11,24 +11,27 @@ RUN DEBIAN_FRONTEND=noninteractive  \
     unzip \
     zip \
     git \
+    gpg \
     software-properties-common \
     python3-pip && \ 
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && apt-get install -y \
+    python3.7  \
+    python3.8  \
     python3.9  \
-    python3.9-distutils \
-    python3.9-venv \
     python3.10  \
-    python3.10-distutils \
-    python3.10-venv \
     python3.11  \
     python3.12  \
     python3.13  \
+    python3.7-distutils \
+    python3.8-distutils \
+    python3.9-distutils \
+    python3-distutils  \
     tox \
     && rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
-
+RUN pip install twine
 # ARG USERNAME=mleap
 # ARG USER_UID=1001
 # ARG USER_GID=$USER_UID

@@ -20,7 +20,7 @@ jobs:
       - run: make ci-release
         env:
           PGP_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          PGP_SECRET: ${{ secrets.GPG_SECRET }}
+          PGP_SECRET: ${{ secrets.GPG_SECRET_KEY }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
 

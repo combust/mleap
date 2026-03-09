@@ -34,7 +34,7 @@ object Common {
     resolvers ++= {
       if (isSnapshot.value) {
         Seq(
-          Resolver.sonatypeCentralSnapshots,
+          "Sonatype Central Snapshots" at "https://central.sonatype.com/repository/maven-snapshots/",
           "ASF Snapshots" at "https://repository.apache.org/content/groups/snapshots"
         )
       } else {

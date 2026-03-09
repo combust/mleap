@@ -30,7 +30,7 @@ case class SparkBundleContext(dataset: Option[DataFrame],
     val bundleRegistry2 = if (registerHdfs) {
       bundleRegistry.registerFileSystem(
         new HadoopBundleFileSystem(FileSystem.get(
-          dataset.sqlContext.sparkSession.sparkContext.hadoopConfiguration)))
+          dataset.sparkSession.sparkContext.hadoopConfiguration)))
     } else { bundleRegistry }
 
     copy(dataset = Some(dataset),

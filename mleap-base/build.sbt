@@ -1,6 +1,6 @@
 import ml.combust.mleap.{Dependencies, Common, BuildInfo}
 
-enablePlugins(BuildInfoPlugin, GitVersioning)
+enablePlugins(BuildInfoPlugin, GitPlugin)
 
 Common.defaultMleapSettings
 Dependencies.base

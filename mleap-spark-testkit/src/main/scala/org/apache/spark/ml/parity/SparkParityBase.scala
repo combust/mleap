@@ -65,7 +65,9 @@ object SparkEnv {
     val session = SparkSession.builder()
       .appName("Spark/MLeap Parity Tests")
       .config("spark.ui.enabled", "false")
-      .master("local[2]")
+      .master("local[4]")
+      .config("spark.executor.userClassPathFirst", "true")
+      .config("spark.driver.userClassPathFirst", "true")
       .getOrCreate()
     session.sparkContext.setLogLevel("WARN")
     session
@@ -199,7 +201,7 @@ abstract class SparkParityBase extends AnyFunSpec with BeforeAndAfterAll {
   }
 
   def checkParamsEquality(original: Transformer, deserialized: Transformer, additionalIgnore: Set[String]): Unit = {
-    val ignoredParams = unserializedParams.union(additionalIgnore)
+    val ignoredParams = unserializedParams.union(additionalIgnore).toSet
     assert(original.params.length == deserialized.params.length)
     original.params.zip(deserialized.params).foreach {
       case (param1, param2) => if(!ignoredParams.contains(param1.name)) {

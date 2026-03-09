@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ml.combust.mleap.tensor.ByteString;
 import org.junit.jupiter.api.Test;
-import scala.collection.JavaConverters;
+import scala.jdk.javaapi.CollectionConverters;
 import scala.collection.immutable.ListMap;
 
 import java.io.File;
@@ -52,7 +52,12 @@ public class JavaDSLSpec {
             new NodeShape(new ListMap<>(), new ListMap<>()).
                     withInput("input0", "string").
                     withOutput("output0","string_index"),
-            new StringIndexerModel(JavaConverters.asScalaBuffer(Collections.singletonList(JavaConverters.asScalaBuffer(Collections.singletonList("hello")).toSeq())),
+            new StringIndexerModel(
+                    scala.jdk.javaapi.CollectionConverters.asScala(
+                        Collections.singletonList(
+                            scala.jdk.javaapi.CollectionConverters.asScala(Collections.singletonList("hello")).toSeq()
+                        )
+                    ).toSeq(),
                     HandleInvalid.Error$.MODULE$));
 
     DefaultLeapFrame buildFrame() {
@@ -101,7 +106,7 @@ public class JavaDSLSpec {
         assertEquals(row.getDouble(7), 44.5, 0.0000000000001);
         assertEquals(row.getByteString(8), new ByteString("hello_there".getBytes()));
         assertEquals(row.getList(9), Arrays.asList(23, 44, 55));
-        assertEquals(JavaConverters.mapAsJavaMap(row.getMap(10)), mapCol );
+        assertEquals(CollectionConverters.asJava(row.getMap(10)), mapCol );
         List<Double> tensorValues = tensorSupport.toArray(row.getTensor(11));
         assertEquals(tensorValues, Arrays.asList(23d, 3d, 4d));
     }
@@ -117,7 +122,7 @@ public class JavaDSLSpec {
     @Test
     public void createTensorFieldWithDimension() {
         StructField tensorField = frameBuilder.createField("tensor", frameBuilder.createTensor(frameBuilder.createBasicByte(), Arrays.asList(1, 2), true));
-        assertEquals(((TensorType)tensorField.dataType()).dimensions().get(), JavaConverters.asScalaBuffer(Arrays.asList(1, 2)).toSeq());
+        assertEquals(((TensorType)tensorField.dataType()).dimensions().get(), CollectionConverters.asScala(Arrays.asList(1, 2)));
     }
 
     @Test

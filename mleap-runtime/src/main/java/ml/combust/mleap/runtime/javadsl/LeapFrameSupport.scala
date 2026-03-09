@@ -3,7 +3,7 @@ package ml.combust.mleap.runtime.javadsl
 import ml.combust.mleap.core.types.{StructField, StructType}
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class LeapFrameSupport {
 
@@ -12,11 +12,11 @@ class LeapFrameSupport {
   }
 
   def select(frame: DefaultLeapFrame, fieldNames: java.util.List[String]): DefaultLeapFrame = {
-    frame.select(fieldNames.asScala: _*).get
+    frame.select(fieldNames.asScala.toSeq: _*).get
   }
 
   def drop(frame: DefaultLeapFrame, names: java.util.List[String]): DefaultLeapFrame = {
-    frame.drop(names.asScala: _*).get
+    frame.drop(names.asScala.toSeq: _*).get
   }
 
   def getFields(schema: StructType): java.util.List[StructField]  = {

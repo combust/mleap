@@ -17,7 +17,7 @@ class MleapConverterSpec extends org.scalatest.funspec.AnyFunSpec {
 
   def combine[A](xs: Traversable[Traversable[A]]): Seq[Seq[A]] =
     xs.foldLeft(Seq(Seq.empty[A])) {
-      (x, y) => for (a <- x.view; b <- y) yield a :+ b
+      (x, y) => (for (a <- x.view; b <- y) yield a :+ b).toSeq
     }
 
   describe("round trip from mleap tensor to tensorflow tensor") {

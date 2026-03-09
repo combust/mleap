@@ -17,11 +17,12 @@ trait CachedDatasetUtils {
   private final val TrainDataMultinomialFilePath = "datasources/iris.scale.txt"
 
   // indexing_mode is necessary to tell xgboost that features start from 1, not 0 (xgboost default is 0)
+  // format parameter required for XGBoost 2.0+ when file extension is not standard
   val binomialDataset: DMatrix =
-    new DMatrix(this.getClass.getClassLoader.getResource(TrainDataFilePath).getFile + "?indexing_mode=1")
+    new DMatrix(this.getClass.getClassLoader.getResource(TrainDataFilePath).getFile + "?indexing_mode=1&format=libsvm")
 
   val multinomialDataset: DMatrix =
-    new DMatrix(this.getClass.getClassLoader.getResource(TrainDataMultinomialFilePath).getFile + "?indexing_mode=1")
+    new DMatrix(this.getClass.getClassLoader.getResource(TrainDataMultinomialFilePath).getFile + "?indexing_mode=1&format=libsvm")
 
   lazy val leapFrameBinomial: DefaultLeapFrame = leapFrameFromCSVFile(TrainDataFilePathCSV)
   lazy val leapFrameMultinomial: DefaultLeapFrame = leapFrameFromLibSVMFile(TrainDataMultinomialFilePath)
@@ -88,7 +89,7 @@ trait CachedDatasetUtils {
         array(labelColumnIndex) = row.getDouble(labelColumnIndex)
         array(featureColumnIndex) = row.getTensor[Double](featureColumnIndex).toDense
 
-        ArrayRow(array)
+        ArrayRow(array.toSeq)
       }
     }
 

@@ -19,7 +19,7 @@ class VectorAssemblerModelSpec extends org.scalatest.funspec.AnyFunSpec {
     it("assembles doubles and vectors into a new vector") {
       val expectedArray = Array(45.0, 76.8, 23.0, 45.6, 0.0, 22.3, 45.6, 0.0, 99.3)
 
-      assert(assembler(Array(45.0,
+      assert(assembler(Array[Any](45.0,
         new BigDecimal(76.8),
         Vectors.dense(Array(23.0, 45.6)),
         Vectors.sparse(5, Array(1, 2, 4), Array(22.3, 45.6, 99.3)))).toArray.sameElements(expectedArray))

@@ -68,53 +68,53 @@ case class ValueConverter() {
   def avroToMleapSimple(dataType: DataType): (Any) => Any = dataType match {
     case st: ScalarType => avroToMleapBasic(st.base)
     case at: ListType => at.base match {
-      case BasicType.Boolean => (value) => value.asInstanceOf[GenericData.Array[Boolean]].asScala
-      case BasicType.Byte => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.map(_.toByte)
-      case BasicType.Short => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.map(_.toShort)
-      case BasicType.Int => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala
-      case BasicType.Long => (value) => value.asInstanceOf[GenericData.Array[Long]].asScala
-      case BasicType.Float => (value) => value.asInstanceOf[GenericData.Array[Float]].asScala
-      case BasicType.Double => (value) => value.asInstanceOf[GenericData.Array[Double]].asScala
-      case BasicType.String => (value) => value.asInstanceOf[GenericData.Array[Utf8]].asScala.map(_.toString)
-      case BasicType.ByteString => (value) => value.asInstanceOf[GenericData.Array[ByteBuffer]].asScala.map(b => ByteString(b.array()))
+      case BasicType.Boolean => (value) => value.asInstanceOf[GenericData.Array[Boolean]].asScala.toSeq
+      case BasicType.Byte => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.map(_.toByte).toSeq
+      case BasicType.Short => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.map(_.toShort).toSeq
+      case BasicType.Int => (value) => value.asInstanceOf[GenericData.Array[Integer]].asScala.toSeq
+      case BasicType.Long => (value) => value.asInstanceOf[GenericData.Array[Long]].asScala.toSeq
+      case BasicType.Float => (value) => value.asInstanceOf[GenericData.Array[Float]].asScala.toSeq
+      case BasicType.Double => (value) => value.asInstanceOf[GenericData.Array[Double]].asScala.toSeq
+      case BasicType.String => (value) => value.asInstanceOf[GenericData.Array[Utf8]].asScala.map(_.toString).toSeq
+      case BasicType.ByteString => (value) => value.asInstanceOf[GenericData.Array[ByteBuffer]].asScala.map(b => ByteString(b.array())).toSeq
       case _ =>
         val atm = avroToMleapBasic(at.base)
-        (value) => value.asInstanceOf[GenericData.Array[_]].asScala.map(atm)
+        (value) => value.asInstanceOf[GenericData.Array[_]].asScala.map(atm).toSeq
     }
     case mt: MapType => (value) => {
       val kConverter = avroToMleapBasic(mt.key)
       val vConverter = avroToMleapBasic(mt.base)
       value.asInstanceOf[java.util.Map[_,_]].asScala.map {
         case (k, v) => kConverter(k) -> vConverter(v)
-      }
+      }.toMap
     }
     case tt: TensorType =>
       (value) => {
         val record = value.asInstanceOf[GenericData.Record]
-        val dimensions = record.get(tensorSchemaDimensionsIndex).asInstanceOf[java.util.List[Int]].asScala
+        val dimensions = record.get(tensorSchemaDimensionsIndex).asInstanceOf[java.util.List[Int]].asScala.toSeq
         val values = record.get(tensorSchemaValuesIndex)
         val indices = record.get(tensorSchemaIndicesIndex) match {
           case null => None
-          case is => Some(is.asInstanceOf[java.util.List[java.util.List[Int]]].asScala.map(_.asScala))
+          case is => Some(is.asInstanceOf[java.util.List[java.util.List[Int]]].asScala.map(_.asScala.toSeq).toSeq)
         }
 
         tt.base match {
           case BasicType.Boolean =>
-            Tensor.create(values.asInstanceOf[java.util.List[Boolean]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Boolean]].asScala.toSeq.toArray, dimensions, indices)
           case BasicType.Byte =>
             Tensor.create(values.asInstanceOf[ByteBuffer].array(), dimensions, indices)
           case BasicType.Short =>
-            Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.map(_.toShort).toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.map(_.toShort).toSeq.toArray, dimensions, indices)
           case BasicType.Int =>
-            Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Int]].asScala.toSeq.toArray, dimensions, indices)
           case BasicType.Long =>
-            Tensor.create(values.asInstanceOf[java.util.List[Long]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Long]].asScala.toSeq.toArray, dimensions, indices)
           case BasicType.Float =>
-            Tensor.create(values.asInstanceOf[java.util.List[Float]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Float]].asScala.toSeq.toArray, dimensions, indices)
           case BasicType.Double =>
-            Tensor.create(values.asInstanceOf[java.util.List[Double]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[Double]].asScala.toSeq.toArray, dimensions, indices)
           case BasicType.String =>
-            Tensor.create(values.asInstanceOf[java.util.List[String]].asScala.toArray, dimensions, indices)
+            Tensor.create(values.asInstanceOf[java.util.List[String]].asScala.toSeq.toArray, dimensions, indices)
           case tpe => throw new IllegalArgumentException(s"invalid base type for tensor $tpe")
         }
       }

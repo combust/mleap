@@ -6,10 +6,10 @@ import sbt._
 object MleapProject {
 
 
-  var rootSettings = Release.settings ++
+  var rootSettings =
     Common.buildSettings ++
-    Common.sonatypeSettings ++
-    Seq(publishArtifact := false)
+    Common.publishSettings ++
+    Seq(publish / skip := true)
 
   lazy val root = Project(
     id = "mleap",

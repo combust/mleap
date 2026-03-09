@@ -82,7 +82,7 @@ object Casting {
     (BasicType.String, BasicType.Double) -> { (v: String) => if (v == "null" || v == "") null else v.toDouble }
   ).map {
     case (k, v) => (k, v.asInstanceOf[(Any) => Any])
-  }
+  }.toMap
 
   def sparkVectorToMLeapTensor(sparkVector: SparkVector): Tensor[Double] = {
     sparkVector match {
@@ -167,21 +167,21 @@ object Casting {
             val vFn = vCast.get.get
             (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
               case (k, v) => (kFn(k), vFn(v))
-            }
+            }.toMap
           case (None, vCast: Some[Try[Any => Any]]) =>
             val vFn = vCast.get.get
             (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
               case (k, v) => (k, vFn(v))
-            }
+            }.toMap
           case (kCast: Some[Try[Any => Any]], None) =>
             val kFn = kCast.get.get
             (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
               case (k, v) => (kFn(k), v)
-            }
+            }.toMap
           case (None, None) =>
             (m: Any) => m.asInstanceOf[Map[Any, Any]].map {
               case (k, v) => (k, v)
-            }
+            }.toMap
           }
         Option(Try(mapCaster))
       case (_: ListType, _: TensorType) =>

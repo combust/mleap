@@ -41,7 +41,7 @@ class SparkTransformBenchmark extends Benchmark {
       val sizes: Gen[Int] = Gen.range("size")(start, end, step)
       val ranges: Gen[Range] = for(size <- sizes) yield 0 until size
       performance of "Range" in {
-        measure method "transform" config(exec.benchRuns -> benchRuns) in {
+        measure method "transform" in {
           using(ranges) in {
             r =>
               r.foreach {

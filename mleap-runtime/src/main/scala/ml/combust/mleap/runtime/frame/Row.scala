@@ -4,7 +4,7 @@ import ml.combust.mleap.runtime.frame.Row.RowSelector
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.{ByteString, Tensor}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /** Companion object for creating default rows.
   */
@@ -16,7 +16,7 @@ object Row {
     * @param values values in the row
     * @return default row implementation with values
     */
-  def apply(values: Any *): Row = ArrayRow(values.toArray)
+  def apply(values: Any *): Row = ArrayRow(values.toArray.toSeq)
 }
 
 /** Base trait for row data.
@@ -195,7 +195,10 @@ trait Row extends Iterable[Any] {
     * @tparam T inner type of the array
     * @return seq value
     */
-  def getSeq[T](index: Int): Seq[T] = get(index).asInstanceOf[Seq[T]]
+  def getSeq[T](index: Int): Seq[T] = get(index) match {
+    case seq: scala.collection.Seq[_] => seq.toSeq.asInstanceOf[Seq[T]]
+    case other => other.asInstanceOf[Seq[T]]
+  }
 
   /** Get value at index as an array.
     *
@@ -255,20 +258,40 @@ trait Row extends Iterable[Any] {
     udfValue(selectors: _*)(udf).asInstanceOf[Boolean]
   }
 
+  private def normalizeValue(value: Any): Any = value match {
+    case seq: scala.collection.mutable.Seq[_] => seq.toSeq
+    case other => other
+  }
+
   def udfValue(selectors: RowSelector *)(udf: UserDefinedFunction): Any = {
     udf.inputs.length match {
       case 0 =>
         udf.f.asInstanceOf[() => Any]()
       case 1 =>
-        udf.f.asInstanceOf[(Any) => Any](selectors.head(this))
+        val v0 = normalizeValue(selectors.head(this))
+        udf.f.asInstanceOf[(Any) => Any](v0)
       case 2 =>
-        udf.f.asInstanceOf[(Any, Any) => Any](selectors.head(this), selectors(1)(this))
+        val v0 = normalizeValue(selectors.head(this))
+        val v1 = normalizeValue(selectors(1)(this))
+        udf.f.asInstanceOf[(Any, Any) => Any](v0, v1)
       case 3 =>
-        udf.f.asInstanceOf[(Any, Any, Any) => Any](selectors.head(this), selectors(1)(this), selectors(2)(this))
+        val v0 = normalizeValue(selectors.head(this))
+        val v1 = normalizeValue(selectors(1)(this))
+        val v2 = normalizeValue(selectors(2)(this))
+        udf.f.asInstanceOf[(Any, Any, Any) => Any](v0, v1, v2)
       case 4 =>
-        udf.f.asInstanceOf[(Any, Any, Any, Any) => Any](selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this))
+        val v0 = normalizeValue(selectors.head(this))
+        val v1 = normalizeValue(selectors(1)(this))
+        val v2 = normalizeValue(selectors(2)(this))
+        val v3 = normalizeValue(selectors(3)(this))
+        udf.f.asInstanceOf[(Any, Any, Any, Any) => Any](v0, v1, v2, v3)
       case 5 =>
-        udf.f.asInstanceOf[(Any, Any, Any, Any, Any) => Any](selectors.head(this), selectors(1)(this), selectors(2)(this), selectors(3)(this), selectors(4)(this))
+        val v0 = normalizeValue(selectors.head(this))
+        val v1 = normalizeValue(selectors(1)(this))
+        val v2 = normalizeValue(selectors(2)(this))
+        val v3 = normalizeValue(selectors(3)(this))
+        val v4 = normalizeValue(selectors(4)(this))
+        udf.f.asInstanceOf[(Any, Any, Any, Any, Any) => Any](v0, v1, v2, v3, v4)
     }
   }
 

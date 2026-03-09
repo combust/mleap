@@ -169,7 +169,7 @@ case class RowTransformer private (inputSchema: StructType,
   def transformOption(row: Row): Option[ArrayRow] = {
     val arr = new Array[Any](maxSize)
     row.toArray.copyToArray(arr)
-    val arrRow = ArrayRow(arr)
+    val arrRow = ArrayRow(arr.toSeq)
 
     val r = transforms.foldLeft(Option(arrRow)) {
       (r, transform) => r.flatMap(transform)

@@ -5,7 +5,7 @@ import java.lang.Iterable
 import ml.combust.mleap.core.types.{BasicType, StructField, StructType}
 import ml.combust.mleap.runtime.function.{Selector, UserDefinedFunction}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Try}
 
 /** Class for storing a leap frame locally.

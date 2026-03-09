@@ -1,6 +1,6 @@
 package ml.combust.mleap.springboot
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 
 import akka.actor.InvalidActorNameException
 import com.fasterxml.jackson.core.JsonProcessingException

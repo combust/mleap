@@ -2,32 +2,41 @@ package ml.combust.mleap
 
 import sbt._
 import Keys._
-import com.jsuereth.sbtpgp.SbtPgp.autoImport._
-import com.jsuereth.sbtpgp.PgpKeys._
-import sbtrelease.ReleasePlugin.autoImport._
-import xerial.sbt.Sonatype.autoImport._
 
 object Common {
-  lazy val defaultMleapSettings = defaultSettings ++ mleapSettings ++ sonatypeSettings
-  lazy val defaultBundleSettings = defaultSettings ++ bundleSettings ++ sonatypeSettings
-  lazy val defaultMleapXgboostSparkSettings = defaultMleapSettings ++ sonatypeSettings
+  lazy val defaultMleapSettings = defaultSettings ++ mleapSettings
+  lazy val defaultBundleSettings = defaultSettings ++ bundleSettings
+  lazy val defaultMleapXgboostSparkSettings = defaultMleapSettings
   lazy val defaultMleapServingSettings = defaultMleapSettings ++ noPublishSettings
 
-
-  lazy val defaultSettings = buildSettings ++ sonatypeSettings
+  lazy val defaultSettings = buildSettings ++ publishSettings
 
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.12.18",
-    scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
+    scalaVersion := "2.13.16",
+    javacOptions ++= Seq("-source", "17", "-target", "17"),
+    scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-release", "17"),
+    Test / fork := true,
+    javaOptions ++= Seq(
+      "--add-opens", "java.base/java.nio=ALL-UNNAMED",
+      "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+      "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED",
+      "--add-opens", "java.base/java.util=ALL-UNNAMED"
+    ),
+    Test / javaOptions ++= Seq(
+      "--add-opens", "java.base/java.nio=ALL-UNNAMED",
+      "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+      "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED",
+      "--add-opens", "java.base/java.util=ALL-UNNAMED"
+    ),
     ThisBuild / libraryDependencySchemes +=
       "org.scala-lang.modules" %% "scala-collection-compat" % VersionScheme.Always,
     resolvers += Resolver.mavenLocal,
-    resolvers += Resolver.jcenterRepo,
     resolvers ++= {
-      // Only add Sonatype Snapshots if this version itself is a snapshot version
       if (isSnapshot.value) {
-        Resolver.sonatypeOssRepos("snapshots") :+
-          ("ASF Snapshots" at "https://repository.apache.org/content/groups/snapshots")
+        Seq(
+          Resolver.sonatypeCentralSnapshots,
+          "ASF Snapshots" at "https://repository.apache.org/content/groups/snapshots"
+        )
       } else {
         Seq()
       }
@@ -38,31 +47,25 @@ object Common {
   lazy val bundleSettings: Seq[Def.Setting[_]] = Seq(organization := "ml.combust.bundle")
 
   lazy val noPublishSettings: Seq[Def.Setting[_]] = Seq(
-    publishSigned / publishTo := None,
-    publishTo := None
+    publish / skip := true
   )
 
-  lazy val sonatypeSettings: Seq[Def.Setting[_]] = Seq(
-    sonatypeProfileName := "ml.combust",
-    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-    publishMavenStyle := true,
-    publishTo := Some({
-      if (isSnapshot.value) {
-        Opts.resolver.sonatypeOssSnapshots.head
-      } else {
-        Opts.resolver.sonatypeStaging
-      }
-    }),
+  // Metadata required for Maven Central — sbt-ci-release handles
+  // version, publishTo, publishMavenStyle, and credentials automatically.
+  lazy val publishSettings: Seq[Def.Setting[_]] = Seq(
     Test / publishArtifact := false,
     pomIncludeRepository := { _ => false },
     licenses := Seq("Apache 2.0 License" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
     homepage := Some(url("https://github.com/combust/mleap")),
-    scmInfo := Some(ScmInfo(url("https://github.com/combust/mleap.git"),
-      "scm:git:git@github.com:combust/mleap.git")),
-    developers := List(Developer("hollinwilkins",
-      "Hollin Wilkins",
-      "hollinrwilkins@gmail.com",
-      url("http://hollinwilkins.com")),
+    scmInfo := Some(ScmInfo(
+      url("https://github.com/combust/mleap.git"),
+      "scm:git:git@github.com:combust/mleap.git"
+    )),
+    developers := List(
+      Developer("hollinwilkins",
+        "Hollin Wilkins",
+        "hollinrwilkins@gmail.com",
+        url("http://hollinwilkins.com")),
       Developer("seme0021",
         "Mikhail Semeniuk",
         "mikhail@combust.ml",
@@ -70,6 +73,7 @@ object Common {
       Developer("ancasarb",
         "Anca Sarb",
         "sarb.anca@gmail.com",
-        url("https://www.linkedin.com/in/anca-sarb")))
+        url("https://www.linkedin.com/in/anca-sarb"))
+    )
   )
 }

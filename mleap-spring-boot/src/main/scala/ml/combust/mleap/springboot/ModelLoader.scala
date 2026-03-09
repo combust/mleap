@@ -1,7 +1,7 @@
 package ml.combust.mleap.springboot
 
 import TypeConverters._
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import ml.combust.mleap.pb
 import org.springframework.beans.factory.annotation.{Autowired, Value}

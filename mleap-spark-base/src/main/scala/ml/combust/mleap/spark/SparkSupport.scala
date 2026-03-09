@@ -57,7 +57,7 @@ trait SparkSupport {
         Row(values: _*)
       })
 
-      SparkLeapFrame(schema, data, dataset.sqlContext)
+      SparkLeapFrame(schema, data, dataset.sparkSession.sqlContext)
     }
 
     def mleapSchema: types.StructType = TypeConverters.sparkSchemaToMleapSchema(dataset)

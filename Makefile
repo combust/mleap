@@ -4,6 +4,10 @@ export SBT_OPTS = -Xmx4G
 
 all: test
 
+.PHONY: ci-release
+ci-release:
+	$(SBT) ci-release
+
 .PHONY: test_executor
 test_executor:
 	$(SBT) "+ mleap-executor-tests/test"

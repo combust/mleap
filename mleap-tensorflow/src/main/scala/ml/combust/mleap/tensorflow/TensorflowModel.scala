@@ -6,7 +6,7 @@ import ml.combust.mleap.core.types.{StructField, StructType, TensorType}
 import ml.combust.mleap.tensor.Tensor
 import ml.combust.mleap.tensorflow.converter.{MleapConverter, TensorflowConverter}
 import org.tensorflow
-import org.tensorflow.proto.framework.GraphDef
+import org.tensorflow.proto.GraphDef
 
 import java.io.ByteArrayInputStream
 import java.nio.file.Files

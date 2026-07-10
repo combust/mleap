@@ -24,23 +24,23 @@ object TensorflowConverter {
       tensor match {
         case u8: TUint8 =>
          val buffer = ByteBuffer.allocate(size)
-          u8.read(DataBuffers.of(buffer))
+          u8.copyTo(DataBuffers.of(buffer))
           DenseTensor(buffer.array, dimensions)
         case i32: TInt32 =>
          val buffer = IntBuffer.allocate(size)
-          i32.read(DataBuffers.of(buffer))
+          i32.copyTo(DataBuffers.of(buffer))
           DenseTensor(buffer.array, dimensions)
         case i64: TInt64=>
          val buffer = LongBuffer.allocate(size)
-          i64.read(DataBuffers.of(buffer))
+          i64.copyTo(DataBuffers.of(buffer))
           DenseTensor(buffer.array, dimensions)
         case f32: TFloat32 =>
          val buffer = FloatBuffer.allocate(size)
-          f32.read(DataBuffers.of(buffer))
+          f32.copyTo(DataBuffers.of(buffer))
           DenseTensor(buffer.array, dimensions)
         case f64: TFloat64 =>
          val buffer = DoubleBuffer.allocate(size)
-          f64.read(DataBuffers.of(buffer))
+          f64.copyTo(DataBuffers.of(buffer))
           DenseTensor(buffer.array, dimensions)
         case str: TString =>
           tensorType.base match {

@@ -122,7 +122,7 @@ import scala.util.Using
     .load(datasetName)
     .withColumn("test_double", col("test_double").cast("double"))
 
-  // User out-of-the-box Spark transformers like you normally would
+  // Use out-of-the-box Spark transformers like you normally would
   val stringIndexer = new StringIndexer().
     setInputCol("test_string").
     setOutputCol("test_index")

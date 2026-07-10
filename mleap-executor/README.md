@@ -2,7 +2,7 @@
 
 The MLeap Executor handles the following tasks:
 
-1. Loading bundles from the local file system and HTTP sources (as well as other sources by implementing the `Repository` trait.
+1. Loading bundles from the local file system and HTTP sources (as well as other sources by implementing the `Repository` trait).
 2. Loading models into memory for execution and unloading them when not being used.
 3. Single transform requests of leap frames.
 4. Streaming frame transforms with support for transform delays, throttling, idle timeouts, parallelism and buffering.
@@ -195,7 +195,7 @@ val rowStream = Await.result(transformService.createRowStream(CreateRowStreamReq
 
 ### Transforming Rows with a Row Flow
 
-A Row Flow attaches to a Row Stream in order to start executing transforms. The idle timeout, throttle, transform delay, and parallelism of the flow are all limited by the underlying stream. A row flow is represented by an Akka `Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag)]`. The Tag is an arbitrary object used to associate the request with the response, as they can be returns out of order.
+A Row Flow attaches to a Row Stream in order to start executing transforms. The idle timeout, throttle, transform delay, and parallelism of the flow are all limited by the underlying stream. A row flow is represented by an Akka `Flow[(StreamTransformRowRequest, Tag), (Try[Option[Row]], Tag)]`. The Tag is an arbitrary object used to associate the request with the response, as they can be returned out of order.
 
 ```scala
 val flow = executor.createRowFlow[Int](

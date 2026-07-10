@@ -3,6 +3,7 @@
 This package contains libraries to integrate MLeap with:
 * PySpark
 * Scikit-Learn
+* gensim (optional, Word2Vec serialization)
 * TensorFlow (coming soon)
 
 # Installation
@@ -93,6 +94,19 @@ A simple example is the `StandardScaler` transformer that normalizes the data gi
 Scikit-Learn pipelines, just like Spark Pipelines, can be serialized to an MLeap Bundle and deployed to an [MLeap runtime environment](https://combust.github.io/mleap-docs/mleap-runtime/).
 
 You can also take your scikit pipelines and deploy them to your Spark cluster, because MLeap can de-serialize them into a Spark ML Pipeline and execute them on data frames.
+
+## gensim Integration
+
+MLeap provides an optional integration that serializes a gensim `Word2Vec` model to Bundle.ML. `gensim` is not installed as a dependency of this package, so install it yourself if you want to use this integration.
+
+```python
+from gensim.models import Word2Vec
+import mleap.gensim.word2vec
+
+model = Word2Vec(sentences, vector_size=100)
+model.mlinit(input_features='sentence', prediction_column='word_vectors')
+model.serialize_to_bundle('/tmp', 'word2vec-pipeline')
+```
 
 ## Documentation
 

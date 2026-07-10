@@ -6,7 +6,7 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "4.0.2" // Upgraded for Spark 4.0 with Scala 2.13 and Java 17 support
+  val sparkVersion = "4.0.3" // Upgraded for Spark 4.0 with Scala 2.13 and Java 17 support
   val scalaTestVersion = "3.2.16"
   val scalaPbJson4sVersion = "0.11.1"
   val junitVersion = "5.9.2"

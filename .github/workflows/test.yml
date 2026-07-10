@@ -11,7 +11,7 @@ jobs:
     name: MLeap executor tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       
@@ -36,7 +36,7 @@ jobs:
     name: MLeap benchmark tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       
@@ -61,7 +61,7 @@ jobs:
     name: All other sbt tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       
@@ -86,7 +86,7 @@ jobs:
     name: Python 3.9 tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       
@@ -111,7 +111,7 @@ jobs:
     name: Python 3.10 tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       
@@ -136,7 +136,7 @@ jobs:
     name: Python 3.11 tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       
@@ -161,7 +161,7 @@ jobs:
     name: Python 3.12 tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       
@@ -186,7 +186,7 @@ jobs:
     name: Python 3.13 tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       
@@ -222,7 +222,7 @@ jobs:
     needs: [ci-completion]
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       

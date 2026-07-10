@@ -84,8 +84,8 @@ Linear Regression: ~23.7 microseconds (237/10000)
 
 MLeap row transformers take a lot of overhead out of transforming data
 by predefining the input and output schema of the rows you are
-transforming. This is the fastest execution mode MLeap provides, and it
-roughly 4x faster than the default transorms for our example pipelines.
+transforming. This is the fastest execution mode MLeap provides, and it is
+roughly 4x faster than the default transforms for our example pipelines.
 
 ```scala
 // For random forest pipeline

@@ -1,8 +1,8 @@
 # MLeap XGBoost Spark
 
-This is the XGBoost Spark integration for MLeap. It provides Bundle Ops for serializing/deserialize XGBoostClassificationModel and XGBoostRegressionModel to a Bundle.ML file.
+This is the XGBoost Spark integration for MLeap. It provides Bundle Ops for serializing and deserializing `XGBoostClassificationModel` and `XGBoostRegressionModel` to a Bundle.ML file.
 
-Make sure to set `ml.combust.mleap.version` to the desired MLeap version.
+Add the dependency to your project, setting `ml.combust.mleap.version` and `scala.binary.version` to the values you need.
 
 ```
 <dependency>
@@ -12,7 +12,7 @@ Make sure to set `ml.combust.mleap.version` to the desired MLeap version.
 </dependency>
 ```
 
-Once you have added `mleap-xgboost-spark` as a dependency to your project, you should be able to train an `XGBoostClassificationModel` or `XGBoostRegressionModel` using the `XGBoostEstimator`. You will then be able to export the classifier or regression to MLeap along with the rest of your Spark pipeline.
+Once you have added `mleap-xgboost-spark` as a dependency, train an `XGBoostClassificationModel` or `XGBoostRegressionModel` using the `XGBoostClassifier` or `XGBoostRegressor` estimator. You can then export the fitted model to MLeap along with the rest of your Spark pipeline.
 
 [Exporting Spark pipelines with MLeap](https://combust.github.io/mleap-docs/spark/)
 

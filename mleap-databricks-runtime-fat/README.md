@@ -8,22 +8,18 @@ to maven repos.
 
 ## Installation
 
-Requirements:
-
-1. `xgboost4j-spark` must be in the local M2 repository to build. [xgboost4j-spark installation](http://xgboost.readthedocs.io/en/latest/jvm/)
-
-After making sure `xgboost` is available to compilation, get a local copy of MLeap and build the Databricks ML Runtime Fat JAR.
+Get a local copy of MLeap and build the Databricks ML Runtime Fat JAR.
 
 ```
 # Use --recursive to get the submodule with MLeap protobuf definitions
 git clone --recursive https://github.com/combust/mleap.git
 cd mleap
 
-# Compile the Databrics Runtime Assembly JAR
+# Compile the Databricks Runtime assembly JAR
 sbt mleap-databricks-runtime-fat/assembly
 
-# Verify that it worked, you should see a file like: mleap-databricks-runtime-fat-assembly-<mleap version>-SNAPSHOT.jar
-ls mleap-databricks-runtime-fat/target/scala-2.11
+# Verify that it worked. You should see a file like: mleap-databricks-runtime-fat-assembly-<mleap version>.jar
+ls mleap-databricks-runtime-fat/target/scala-2.13
 ```
 
 ## Usage

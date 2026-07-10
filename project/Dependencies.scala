@@ -6,7 +6,7 @@ import Keys._
 object Dependencies {
   import DependencyHelpers._
 
-  val sparkVersion = "4.1.0" // Upgraded for Spark 4.1 with Scala 2.13 and Java 17 support
+  val sparkVersion = "4.1.1" // Upgraded for Spark 4.1 with Scala 2.13 and Java 17 support
   val scalaTestVersion = "3.2.16"
   val scalaPbJson4sVersion = "0.11.1"
   val junitVersion = "5.9.2"
@@ -18,7 +18,7 @@ object Dependencies {
   lazy val slf4jVersion = "2.0.6"
   lazy val awsSdkVersion = "1.12.470"
   lazy val scalaCollectionCompat = "2.8.1"
-  val tensorflowJavaVersion = "0.5.0" // Match Tensorflow 2.10.1 https://github.com/tensorflow/java/#tensorflow-version-support
+  val tensorflowJavaVersion = "1.0.0" // Match Tensorflow 2.16.2 https://github.com/tensorflow/java/#tensorflow-version-support
   val xgboostVersion = "2.0.3"
   val breezeVersion = "2.1.0"
   val hadoopVersion = "3.4.2" // matches spark 4.1
@@ -41,9 +41,10 @@ object Dependencies {
     val scalaReflect = ScalaVersionDependentModuleID.versioned("org.scala-lang" % "scala-reflect" % _)
     val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion
     val jTransform = "com.github.rwl" % "jtransforms" % "2.4.0" exclude("junit", "junit")
-    var tensorflowCoreApi = "org.tensorflow" % "tensorflow-core-api" % tensorflowJavaVersion
-    (Seq("") ++ tensorflowPlatforms).foreach(platform => tensorflowCoreApi = tensorflowCoreApi classifier platform)
-    val tensorflowDeps = Seq(tensorflowCoreApi)
+    val tensorflowCoreApi = "org.tensorflow" % "tensorflow-core-api" % tensorflowJavaVersion
+    var tensorflowCoreNative = "org.tensorflow" % "tensorflow-core-native" % tensorflowJavaVersion
+    tensorflowPlatforms.foreach(platform => tensorflowCoreNative = tensorflowCoreNative classifier platform)
+    val tensorflowDeps = Seq(tensorflowCoreApi, tensorflowCoreNative)
     val akkaTestKit = "com.typesafe.akka" %% "akka-testkit" % akkaVersion
     val akkaStreamTestKit = "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion
 

@@ -1,8 +1,8 @@
 <a href="https://combust.github.io/mleap-docs/"><img src="logo.png" alt="MLeap Logo" width="176" height="70" /></a>
 
-[![Gitter](https://badges.gitter.im/combust/mleap.svg)](https://gitter.im/combust/mleap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-[![Build Status](https://travis-ci.org/combust/mleap.svg?branch=master)](https://travis-ci.org/combust/mleap)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/ml.combust.mleap/mleap-base_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/ml.combust.mleap/mleap-base_2.12)
+[![Build Status](https://github.com/combust/mleap/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/combust/mleap/actions/workflows/test.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/ml.combust.mleap/mleap-base_2.13)](https://central.sonatype.com/artifact/ml.combust.mleap/mleap-base_2.13)
+[![PyPI](https://img.shields.io/pypi/v/mleap)](https://pypi.org/project/mleap/)
 
 Deploying machine learning data pipelines and algorithms should not be a time-consuming or difficult task. MLeap allows data scientists and engineers to deploy machine learning pipelines from Spark and Scikit-learn to a portable format and execution engine.
 
@@ -10,33 +10,20 @@ Deploying machine learning data pipelines and algorithms should not be a time-co
 
 Documentation is available at [https://combust.github.io/mleap-docs/](https://combust.github.io/mleap-docs/).
 
-Read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust-ml/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
+Read [Serializing a Spark ML Pipeline and Scoring with MLeap](https://github.com/combust/mleap/wiki/Serializing-a-Spark-ML-Pipeline-and-Scoring-with-MLeap) to gain a full sense of what is possible.
 
 ## Introduction
 
-Using the MLeap execution engine and serialization format, we provide a performant, portable and easy-to-integrate production library for machine learning data pipelines and algorithms.
+MLeap provides a performant, portable execution engine and serialization format (Bundle.ML) for machine learning pipelines. Train a pipeline with Spark or Scikit-learn, export it once, and execute it anywhere on the JVM without a dependency on Spark, sklearn, numpy, or pandas.
 
-For portability, we build our software on the JVM and only use serialization formats that are widely-adopted.
+Key features:
 
-We also provide a high level of integration with existing technologies.
-
-Our goals for this project are:
-
-1. Allow Researchers/Data Scientists and Engineers to continue to build data pipelines and train algorithms with Spark and Scikit-Learn
-2. Extend Spark/Scikit/TensorFlow by providing ML Pipelines serialization/deserialization to/from a common framework (Bundle.ML)
-3. Use MLeap Runtime to execute your pipeline and algorithm without dependenices on Spark or Scikit (numpy, pandas, etc)
-
-## Overview
-
-1. Core execution engine implemented in Scala
-2. [Spark](http://spark.apache.org/), PySpark and Scikit-Learn support
-3. Export a model with Scikit-learn or Spark and execute it using the MLeap Runtime (without dependencies on the Spark Context, or sklearn/numpy/pandas/etc)
-4. Choose from 2 portable serialization formats (JSON, Protobuf)
-5. Implement your own custom data types and transformers for use with MLeap data frames and transformer pipelines
-6. Extensive test coverage with full parity tests for Spark and MLeap pipelines
-7. Optional Spark transformer extension to extend Spark's default transformer offerings
-
-<img src="assets/images/single-runtime.jpg" alt="Unified Runtime"/>
+1. Core execution engine implemented in Scala, with [Spark](http://spark.apache.org/), PySpark, and Scikit-learn support.
+2. Export a Spark or Scikit-learn pipeline and run it on the lightweight MLeap Runtime.
+3. Two portable serialization formats: JSON and Protobuf.
+4. Custom data types and transformers for MLeap data frames and pipelines.
+5. Full parity tests between Spark and MLeap pipelines.
+6. Optional Spark transformer extension that adds to Spark's built-in transformers.
 
 ## Dependency Compatibility Matrix
 
@@ -45,6 +32,7 @@ but these are the configurations which are tested by mleap.
 
 | MLeap Version | Spark Version | Scala Version    | Java Version | Python Version | XGBoost Version | Tensorflow Version |
 |---------------|---------------|------------------|--------------|----------------|-----------------|--------------------|
+| 0.25.1        | 4.1.1         | 2.13.17          | 17           | 3.10 - 3.13    | 2.0.3           | 2.16.2             |
 | 0.25.0        | 4.1.0         | 2.13.17          | 17           | 3.10 - 3.13    | 2.0.3           | 2.10.1             |
 | 0.24.2        | 4.0.3         | 2.13.16          | 17           | 3.9 - 3.13     | 2.0.3           | 2.10.1             |
 | 0.24.1        | 4.0.2         | 2.13.16          | 17           | 3.9 - 3.13     | 2.0.3           | 2.10.1             |
@@ -70,7 +58,7 @@ but these are the configurations which are tested by mleap.
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.24.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.25.1"
 ```
 
 #### Maven
@@ -79,7 +67,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.24.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.13</artifactId>
-    <version>0.24.0</version>
+    <version>0.25.1</version>
 </dependency>
 ```
 
@@ -88,7 +76,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.24.0"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.24.0"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.25.1"
 ```
 
 #### Maven
@@ -97,7 +85,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.24.0"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.13</artifactId>
-    <version>0.24.0</version>
+    <version>0.25.1</version>
 </dependency>
 ```
 
@@ -196,7 +184,7 @@ label_encoder_tf = LabelEncoder(input_features=feature_extractor_tf.output_vecto
 reshape_le_tf = ReshapeArrayToN1()
 
 # Vector Assembler for x1 One Hot Encoder
-one_hot_encoder_tf = OneHotEncoder(sparse=False)
+one_hot_encoder_tf = OneHotEncoder(sparse_output=False)
 one_hot_encoder_tf.mlinit(prior_tf = label_encoder_tf, 
                           output_features = '{}_label_one_hot_encoded'.format(categorical_features[0]))
 
@@ -225,9 +213,9 @@ import ml.combust.bundle.BundleFile
 import ml.combust.mleap.runtime.MleapSupport._
 import scala.util.Using
 // load the Spark pipeline we saved in the previous section
-val bundle = Using(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip"))) { bundleFile =>
+val bundle = Using(BundleFile("jar:file:/tmp/simple-spark-pipeline.zip")) { bundleFile =>
   bundleFile.loadMleapBundle().get
-}).opt.get
+}.get
 
 // create a simple LeapFrame to transform
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Row}
@@ -275,14 +263,29 @@ For more documentation, please see our [documentation](https://combust.github.io
 * Use MLeap at your company and tell us what you think
 * Make a feature request or report a bug in github
 * Make a pull request for an existing feature request or bug report
-* Join the discussion of how to get MLeap into Spark as a dependency. Talk with us on Gitter (see link at top of README.md)
+* Open an issue or pull request on [GitHub](https://github.com/combust/mleap) to start a discussion
 
 ## Building
 
-Please ensure you have sbt 1.9.3, java 11, scala 2.12.18
+The recommended way to build and test is inside the devcontainer image, which
+pins the exact sbt, Java, Scala, and Python versions used by CI so you don't have
+to install or track them yourself.
 
-1. Initialize the git submodules `git submodule update --init --recursive`
-2. Run `sbt compile`
+1. Initialize the git submodules: `git submodule update --init --recursive`
+2. Build the image: `docker build -t mleap:ci .devcontainer`
+3. Run a build or the test suite inside it, with the repo mounted:
+
+```bash
+# compile
+docker run --rm -v "$PWD:/workspace" -w /workspace mleap:ci sbt compile
+
+# run the full test suite (same as CI)
+docker run --rm -v "$PWD:/workspace" -w /workspace mleap:ci make test
+```
+
+If you prefer to build directly on your host instead, install the sbt, Java, and
+Scala versions listed for the latest release in the compatibility matrix above,
+then run `sbt compile`.
 
 ## Thank You
 
@@ -294,6 +297,7 @@ integration.
 * Jason Sleight ([jsleight](https://github.com/jsleight))
 * Talal Riaz ([talalryz](https://github.com/talalryz))
 * Weichen Xu ([WeichenXu123](https://github.com/WeichenXu123))
+* Ludovic Trottier ([ltrottier-yelp](https://github.com/ltrottier-yelp))
 
 ## Past contributors
 * Hollin Wilkins (hollin@combust.ml)
@@ -306,7 +310,7 @@ integration.
 
 See LICENSE and NOTICE file in this repository.
 
-Copyright 20 Combust, Inc.
+Copyright Combust, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

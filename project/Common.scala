@@ -12,7 +12,7 @@ object Common {
   lazy val defaultSettings = buildSettings ++ publishSettings
 
   lazy val buildSettings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.13.17",
+    scalaVersion := "2.13.18",
     javacOptions ++= Seq("-source", "17", "-target", "17"),
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-release", "17"),
     Test / fork := true,

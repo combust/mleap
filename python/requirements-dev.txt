@@ -1,5 +1,5 @@
 coverage
 ipdb
-pyspark==4.1.1
+pyspark==4.1.2
 pytest
 pytest-cov

@@ -1,6 +1,6 @@
 package ml.combust.mleap.xgboost.runtime
 
-import biz.k11i.xgboost.Predictor
+import com.yelp.xgboost.Predictor
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
 import ml.combust.mleap.tensor.SparseTensor

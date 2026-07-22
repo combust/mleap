@@ -17,11 +17,15 @@ class XGBoostRegressionModelParitySpec extends SparkParityBase {
   private val xgboostParams: Map[String, Any] = Map(
     "objective" -> "reg:squaredlogerror",
     "missing" -> 0.0f,
-    "allow_non_zero_for_missing" -> true,
   )
 
   // These params are not needed for making predictions, so we don't serialize them
   override val unserializedParams = Set("labelCol", "evalMetric", "objective")
+
+  // The pure-JVM predictor regression path produces only the prediction column; leaf_prediction and
+  // contrib_prediction (a documented non-goal) are dropped, so exclude them from the comparison.
+  override val excludedColsForComparison =
+    Array[String]("leaf_prediction", "contrib_prediction")
 
   val dataset: DataFrame = {
     val sqlContext = spark.sqlContext

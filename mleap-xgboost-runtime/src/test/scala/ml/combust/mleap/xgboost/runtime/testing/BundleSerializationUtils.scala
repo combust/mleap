@@ -13,8 +13,14 @@ import scala.util.Using
 
 trait BundleSerializationUtils {
 
-  def serializeModelToMleapBundle(transformer: Transformer): File = {
+  def serializeModelToMleapBundle(transformer: Transformer)(implicit context: MleapContext): File = {
     import ml.combust.mleap.runtime.MleapSupport._
+
+    // The default registry now uses the predictor ops (reference.conf). Serializing the
+    // booster-backed XGBoostClassification/XGBoostRegression fixtures resolves the op by node class,
+    // so the booster ops must be registered for the store side.
+    context.bundleRegistry.register(new XGBoostClassificationOp())
+    context.bundleRegistry.register(new XGBoostRegressionOp())
 
     val tempDirPath = {
       val temp: Path = Files.createTempDirectory("xgboost-runtime-parity")
@@ -30,8 +36,8 @@ trait BundleSerializationUtils {
     file
   }
 
-  def loadMleapTransformerFromBundle(bundleFile: File)
-                                    (implicit context: MleapContext): frame.Transformer = {
+  private def loadBundle(bundleFile: File)
+                        (implicit context: MleapContext): frame.Transformer = {
 
     import ml.combust.mleap.runtime.MleapSupport._
 
@@ -40,16 +46,22 @@ trait BundleSerializationUtils {
     }.flatten.get.root
   }
 
+  /**
+   * Loads via the xgboost4j Booster ops. reference.conf now defaults to the predictor ops, so the
+   * booster ops are registered explicitly to exercise the JNI path (used as the parity reference).
+   */
+  def loadMleapTransformerFromBundle(bundleFile: File)
+                                    (implicit context: MleapContext): frame.Transformer = {
+    context.bundleRegistry.register(new XGBoostClassificationOp())
+    context.bundleRegistry.register(new XGBoostRegressionOp())
+    loadBundle(bundleFile)
+  }
+
+  /** Loads via the pure-JVM predictor ops (the default in reference.conf). */
   def loadXGBoostPredictorFromBundle(bundleFile: File)
                                     (implicit context: MleapContext): frame.Transformer = {
-
-    // Register a different Op to change the deserialization class between tests.
-    // Use to deserialize with Predictor rather than xgboost4j
     context.bundleRegistry.register(new XGBoostPredictorClassificationOp())
     context.bundleRegistry.register(new XGBoostPredictorRegressionOp())
-    val transformer = loadMleapTransformerFromBundle(bundleFile)
-    context.bundleRegistry.register(new XGBoostClassificationOp())  // revert to the original Op
-    context.bundleRegistry.register(new XGBoostRegressionOp())  // revert to the original Op
-    transformer
+    loadBundle(bundleFile)
   }
 }

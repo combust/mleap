@@ -10,4 +10,6 @@ libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % "0.11.13"
 
 addSbtPlugin("com.frugalmechanic" % "fm-sbt-s3-resolver" % "0.21.0")
 
+addSbtPlugin("pl.project13.scala" % "sbt-jmh" % "0.4.7")
+
 addDependencyTreePlugin

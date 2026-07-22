@@ -1,7 +1,8 @@
 package ml.combust.mleap.xgboost.runtime
 
 import ml.combust.mleap.core.classification.ProbabilisticClassificationModel
-import ml.combust.mleap.core.types.{ListType, ScalarType, StructType, TensorType}
+import ml.combust.mleap.core.types.{ScalarType, StructType, TensorType}
+import ml.combust.mleap.tensor.Tensor
 import ml.dmlc.xgboost4j.scala.{Booster, DMatrix}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import XgbConverters._
@@ -19,11 +20,11 @@ trait XGBoostClassificationModelBase extends ProbabilisticClassificationModel {
   override def predictProbabilities(features: Vector): Vector = predictProbabilities(features.asXGB)
   def predictProbabilities(data: DMatrix): Vector
 
-  def predictLeaf(features: Vector): Seq[Double] = predictLeaf(features.asXGB)
-  def predictLeaf(data: DMatrix): Seq[Double] = booster.predictLeaf(data, treeLimit = treeLimit).head.map(_.toDouble)
+  def predictLeaf(features: Vector): Tensor[Double] = predictLeaf(features.asXGB)
+  def predictLeaf(data: DMatrix): Tensor[Double] = Tensor.denseVector(booster.predictLeaf(data, treeLimit = treeLimit).head.map(_.toDouble))
 
-  def predictContrib(features: Vector): Seq[Double] = predictContrib(features.asXGB)
-  def predictContrib(data: DMatrix): Seq[Double] = booster.predictContrib(data, treeLimit = treeLimit).head.map(_.toDouble)
+  def predictContrib(features: Vector): Tensor[Double] = predictContrib(features.asXGB)
+  def predictContrib(data: DMatrix): Tensor[Double] = Tensor.denseVector(booster.predictContrib(data, treeLimit = treeLimit).head.map(_.toDouble))
 }
 
 case class XGBoostBinaryClassificationModel(override val booster: Booster,
@@ -84,11 +85,11 @@ case class XGBoostClassificationModel(impl: XGBoostClassificationModelBase) exte
 
   def predict(data: DMatrix): Double = impl.predict(data)
 
-  def predictLeaf(features: Vector): Seq[Double] = impl.predictLeaf(features)
-  def predictLeaf(data: DMatrix): Seq[Double] = impl.predictLeaf(data)
+  def predictLeaf(features: Vector): Tensor[Double] = impl.predictLeaf(features)
+  def predictLeaf(data: DMatrix): Tensor[Double] = impl.predictLeaf(data)
 
-  def predictContrib(features: Vector): Seq[Double] = impl.predictContrib(features)
-  def predictContrib(data: DMatrix): Seq[Double] = impl.predictContrib(data)
+  def predictContrib(features: Vector): Tensor[Double] = impl.predictContrib(features)
+  def predictContrib(data: DMatrix): Tensor[Double] = impl.predictContrib(data)
 
   override def predictProbabilities(features: Vector): Vector = impl.predictProbabilities(features)
   def predictProbabilities(data: DMatrix): Vector = impl.predictProbabilities(data)
@@ -101,6 +102,6 @@ case class XGBoostClassificationModel(impl: XGBoostClassificationModelBase) exte
   override def outputSchema: StructType = StructType("raw_prediction" -> TensorType.Double(numClasses),
     "probability" -> TensorType.Double(numClasses),
     "prediction" -> ScalarType.Double.nonNullable,
-    "leaf_prediction" -> ListType.Double,
-    "contrib_prediction" -> ListType.Double).get
+    "leaf_prediction" -> TensorType.Double(),
+    "contrib_prediction" -> TensorType.Double()).get
 }

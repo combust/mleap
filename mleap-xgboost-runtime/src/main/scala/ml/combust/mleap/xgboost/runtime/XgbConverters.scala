@@ -1,6 +1,6 @@
 package ml.combust.mleap.xgboost.runtime
 
-import biz.k11i.xgboost.util.FVec
+import com.yelp.xgboost.util.FVec
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 import ml.combust.mleap.xgboost.runtime.struct.FVecFactory
 import ml.dmlc.xgboost4j.LabeledPoint
@@ -20,12 +20,12 @@ trait XgbConverters {
       }
     }
 
-    def asXGBPredictor: FVec = {
+    def asXGBPredictor(treatsZeroAsNA: Boolean = false): FVec = {
       vector match {
         case sparseVector: SparseVector =>
-          FVecFactory.fromSparseVector(sparseVector)
+          FVecFactory.fromSparseVector(sparseVector, treatsZeroAsNA)
         case denseVector: DenseVector =>
-          FVecFactory.fromDenseVector(denseVector)
+          FVecFactory.fromDenseVector(denseVector, treatsZeroAsNA)
       }
     }
   }
@@ -41,13 +41,13 @@ trait XgbConverters {
       }
     }
 
-    def asXGBPredictor: FVec = {
+    def asXGBPredictor(treatsZeroAsNA: Boolean = false): FVec = {
       tensor match {
         case sparseTensor: SparseTensor[Double] =>
-          FVecFactory.fromSparseTensor(sparseTensor)
+          FVecFactory.fromSparseTensor(sparseTensor, treatsZeroAsNA)
 
         case denseTensor: DenseTensor[Double] =>
-          FVecFactory.fromDenseTensor(denseTensor)
+          FVecFactory.fromDenseTensor(denseTensor, treatsZeroAsNA)
       }
     }
   }

@@ -1,6 +1,6 @@
 package ml.combust.mleap.xgboost.runtime
 
-import biz.k11i.xgboost.util.FVec
+import com.yelp.xgboost.util.FVec
 import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.Tensor
@@ -21,7 +21,7 @@ case class XGBoostPredictorClassification(
     }.getOrElse((_: FVec) => None)
 
     val f = (features: Tensor[Double]) => {
-      val data: FVec = features.asXGBPredictor
+      val data: FVec = features.asXGBPredictor(model.treatsZeroAsNA)
       val rowData = Seq(probability(data).get)
       Row(rowData: _*)
     }

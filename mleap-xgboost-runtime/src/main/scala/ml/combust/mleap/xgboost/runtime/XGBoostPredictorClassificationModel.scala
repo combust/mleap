@@ -1,7 +1,7 @@
 package ml.combust.mleap.xgboost.runtime
 
-import biz.k11i.xgboost.Predictor
-import biz.k11i.xgboost.util.FVec
+import com.yelp.xgboost.Predictor
+import com.yelp.xgboost.util.FVec
 import ml.combust.mleap.core.classification.ProbabilisticClassificationModel
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import ml.combust.mleap.core.types.{StructType, TensorType}
@@ -12,23 +12,27 @@ trait XGBoostPredictorClassificationModelBase extends ProbabilisticClassificatio
   def predictor: Predictor
   def treeLimit: Int
 
-  override def predict(features: Vector): Double = predict(features.asXGBPredictor)
+  /** True when the model was trained with missing=0.0f, so 0.0 features are treated as absent. */
+  def treatsZeroAsNA: Boolean
+
+  override def predict(features: Vector): Double = predict(features.asXGBPredictor(treatsZeroAsNA))
   def predict(data: FVec): Double
 
-  override def predictRaw(features: Vector): Vector = predictRaw(features.asXGBPredictor)
+  override def predictRaw(features: Vector): Vector = predictRaw(features.asXGBPredictor(treatsZeroAsNA))
   def predictRaw(data: FVec): Vector
 
-  override def predictProbabilities(features: Vector): Vector = predictProbabilities(features.asXGBPredictor)
+  override def predictProbabilities(features: Vector): Vector = predictProbabilities(features.asXGBPredictor(treatsZeroAsNA))
   def predictProbabilities(data: FVec): Vector
 
-  def predictLeaf(features: Vector): Seq[Double] = predictLeaf(features.asXGBPredictor)
+  def predictLeaf(features: Vector): Seq[Double] = predictLeaf(features.asXGBPredictor(treatsZeroAsNA))
   def predictLeaf(data: FVec): Seq[Double] = predictor.predictLeaf(data, treeLimit).map(_.toDouble)
 }
 
 case class XGBoostPredictorBinaryClassificationModel(
       override val predictor: Predictor,
       override val numFeatures: Int,
-      override val treeLimit: Int) extends XGBoostPredictorClassificationModelBase {
+      override val treeLimit: Int,
+      override val treatsZeroAsNA: Boolean = false) extends XGBoostPredictorClassificationModelBase {
 
   override val numClasses: Int = 2
 
@@ -54,7 +58,8 @@ case class XGBoostPredictorMultinomialClassificationModel(
                        override val predictor: Predictor,
                        override val numClasses: Int,
                        override val numFeatures: Int,
-                       override val treeLimit: Int) extends XGBoostPredictorClassificationModelBase {
+                       override val treeLimit: Int,
+                       override val treatsZeroAsNA: Boolean = false) extends XGBoostPredictorClassificationModelBase {
 
   override def predict(data: FVec): Double = {
     probabilityToPrediction(predictProbabilities(data))
@@ -77,6 +82,7 @@ case class XGBoostPredictorClassificationModel(impl: XGBoostPredictorClassificat
   override val numClasses: Int = impl.numClasses
   override val numFeatures: Int = impl.numFeatures
   def treeLimit: Int = impl.treeLimit
+  def treatsZeroAsNA: Boolean = impl.treatsZeroAsNA
 
   def predictor: Predictor = impl.predictor
 

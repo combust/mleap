@@ -1,8 +1,8 @@
 # MLeap XGBoost Runtime
 
 We provide two implementations of XGBoost for use at runtime:
-- XGBoost4j (from `ml.dmlc.xgboost4j`): this is the official implementation backed by the native XGBoost library.
-- XGBoost-Predictor (from `ai.h2o.xgboost-predictor`): this is a much faster implementation written directly in Java.
+- XGBoost4j (from `ml.dmlc.xgboost4j`): the official implementation backed by the native XGBoost library.
+- XGBoost-Predictor (from `com.yelp:xgboost-predictor`): a much faster pure-JVM implementation with no JNI on the prediction hot path.
 
 By default, MLeap bundles are deserialized into XGBoost4j Booster objects.
 To use the Predictor implementation instead:

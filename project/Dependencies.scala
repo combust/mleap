@@ -19,7 +19,7 @@ object Dependencies {
   lazy val awsSdkVersion = "1.12.470"
   lazy val scalaCollectionCompat = "2.8.1"
   val tensorflowJavaVersion = "1.0.0" // Match Tensorflow 2.16.2 https://github.com/tensorflow/java/#tensorflow-version-support
-  val xgboostVersion = "2.0.3"
+  val xgboostVersion = "3.3.0"
   val breezeVersion = "2.1.0"
   val hadoopVersion = "3.4.2" // matches spark 4.1
   val platforms = "windows-x86_64,linux-x86_64,macosx-x86_64"
@@ -83,7 +83,9 @@ object Dependencies {
 
     val xgboostDep = "ml.dmlc" %% "xgboost4j" % xgboostVersion
     val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % xgboostVersion
-    val xgboostPredictorDep = "ai.h2o" % "xgboost-predictor" % "0.3.18" exclude("com.esotericsoftware.kryo", "kryo")
+    // The pure-JVM predictor engine (reader + tree traversal) lives in the standalone
+    // com.yelp:xgboost-predictor artifact and pulls jafama in transitively.
+    val xgboostPredictorDep = "com.yelp" % "xgboost-predictor" % "1.0.0"
 
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
 

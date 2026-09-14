@@ -1,6 +1,6 @@
 package ml.combust.mleap.xgboost.runtime
 
-import com.yelp.xgboost.util.FVec
+import com.yelp.xgboost.FVec
 import ml.combust.mleap.tensor.{DenseTensor, SparseTensor, Tensor}
 import ml.combust.mleap.xgboost.runtime.struct.FVecFactory
 import ml.dmlc.xgboost4j.LabeledPoint

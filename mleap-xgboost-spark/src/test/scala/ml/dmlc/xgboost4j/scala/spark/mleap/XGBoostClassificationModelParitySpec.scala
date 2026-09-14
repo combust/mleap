@@ -21,14 +21,6 @@ class XGBoostClassificationModelParitySpec extends SparkParityBase {
     sqlContext.sparkContext.textFile(this.getClass.getClassLoader.getResource("datasources/xgboost_training.csv").toString)
       .map(x => x.split(","))
       .map(line => PowerPlantTableForClassifier(line(0).toDouble, line(1).toDouble, line(2).toDouble, line(3).toDouble, line(4).toDouble.toInt % 2))
-      // The dataset ends with synthetic rows containing zero features that exist only to exercise
-      // missing-value handling (the model is trained with missing=0.0f). On those rows xgboost4j-spark's
-      // batch transform diverges from XGBoost's own per-row predict (it returns a near-constant
-      // probability, mishandling the missing sentinel in batch mode), whereas the pure-JVM predictor
-      // matches native per-row predict exactly. Missing-value parity vs the native Booster is covered in
-      // mleap-xgboost-runtime, so we drop these rows here to avoid asserting the incorrect Spark batch
-      // output. See XGBOOST_MIGRATION.md for the upstream follow-up.
-      .filter(r => r.AT != 0.0 && r.V != 0.0 && r.AP != 0.0 && r.RH != 0.0)
       .toDF
   }
 

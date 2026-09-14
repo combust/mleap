@@ -1,7 +1,7 @@
 package ml.combust.mleap.xgboost.runtime
 
 import com.yelp.xgboost.Predictor
-import com.yelp.xgboost.util.FVec
+import com.yelp.xgboost.FVec
 import ml.combust.mleap.core.classification.ProbabilisticClassificationModel
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import ml.combust.mleap.core.types.{StructType, TensorType}
@@ -37,15 +37,15 @@ case class XGBoostPredictorBinaryClassificationModel(
   override val numClasses: Int = 2
 
   def predict(data: FVec): Double =
-    Math.round(predictor.predict(data, false, treeLimit).head)
+    Math.round(predictor.predict(data, treeLimit).head)
 
   def predictProbabilities(data: FVec): Vector = {
-    val m = predictor.predict(data, false, treeLimit).head
+    val m = predictor.predict(data, treeLimit).head
     Vectors.dense(1 - m, m)
   }
 
   def predictRaw(data: FVec): Vector = {
-    val m = predictor.predict(data, true, treeLimit).head
+    val m = predictor.predictRaw(data, treeLimit).head
     Vectors.dense(- m, m)
   }
 
@@ -66,11 +66,11 @@ case class XGBoostPredictorMultinomialClassificationModel(
   }
 
   def predictProbabilities(data: FVec): Vector = {
-    Vectors.dense(predictor.predict(data,  false,  treeLimit).map(_.toDouble))
+    Vectors.dense(predictor.predict(data, treeLimit).map(_.toDouble))
   }
 
   def predictRaw(data: FVec): Vector = {
-    Vectors.dense(predictor.predict(data, true, treeLimit).map(_.toDouble))
+    Vectors.dense(predictor.predictRaw(data, treeLimit).map(_.toDouble))
   }
 
   override def rawToProbabilityInPlace(raw: Vector): Vector = {

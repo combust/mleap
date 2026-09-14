@@ -2,7 +2,7 @@ package ml.combust.mleap.xgboost.runtime.struct
 
 import java.{lang, util}
 
-import com.yelp.xgboost.util.FVec
+import com.yelp.xgboost.FVec
 import ml.combust.mleap.tensor.{SparseTensor, Tensor}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 
@@ -30,17 +30,20 @@ object FVecFactory {
    * from the feature vector rather than compared numerically. missing=NaN (the default) needs no
    * special handling because the FVec impl already treats NaN as absent.
    */
+  private def fromFloatArray(values: Array[Float], treatsZeroAsNA: Boolean): FVec =
+    if (treatsZeroAsNA) FVec.fromArrayWithZeroAsMissing(values) else FVec.fromArray(values)
+
   private def dropZeros(map: Map[Int, Float], treatsZeroAsNA: Boolean): Map[Int, Float] =
     if (treatsZeroAsNA) map.filter(_._2 != 0.0f) else map
 
   /** Vector factories */
   def fromSparseVector(sparseVector: SparseVector, treatsZeroAsNA: Boolean = false): FVec = {
     val scalaMap = dropZeros((sparseVector.indices zip sparseVector.values.toFloats).toMap, treatsZeroAsNA)
-    FVec.Transformer.fromMap(toJavaMap(scalaMap))
+    FVec.fromMap(toJavaMap(scalaMap))
   }
 
   def fromDenseVector(denseVector: DenseVector, treatsZeroAsNA: Boolean = false): FVec = {
-    FVec.Transformer.fromArray(denseVector.values.toFloats, treatsZeroAsNA)
+    fromFloatArray(denseVector.values.toFloats, treatsZeroAsNA)
   }
 
   /** MLeap Tensor factories */
@@ -49,12 +52,12 @@ object FVecFactory {
     val indices = sparseTensor.indices.map(_.head).toArray[Int]
 
     val scalaMap = dropZeros((indices zip sparseTensor.values.toFloats).toMap, treatsZeroAsNA)
-    FVec.Transformer.fromMap(toJavaMap(scalaMap))
+    FVec.fromMap(toJavaMap(scalaMap))
   }
 
   def fromDenseTensor(denseTensor: Tensor[Double], treatsZeroAsNA: Boolean = false): FVec = {
     assert(denseTensor.dimensions.size == 1, "must provide a mono-dimensional vector")
 
-    FVec.Transformer.fromArray(denseTensor.toArray.toFloats, treatsZeroAsNA)
+    fromFloatArray(denseTensor.toArray.toFloats, treatsZeroAsNA)
   }
 }

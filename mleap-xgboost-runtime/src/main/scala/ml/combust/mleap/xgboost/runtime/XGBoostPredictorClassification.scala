@@ -1,6 +1,6 @@
 package ml.combust.mleap.xgboost.runtime
 
-import com.yelp.xgboost.util.FVec
+import com.yelp.xgboost.FVec
 import ml.combust.mleap.core.types.NodeShape
 import ml.combust.mleap.runtime.function.UserDefinedFunction
 import ml.combust.mleap.tensor.Tensor

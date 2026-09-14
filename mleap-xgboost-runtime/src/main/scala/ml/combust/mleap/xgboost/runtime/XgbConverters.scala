@@ -8,16 +8,18 @@ import ml.dmlc.xgboost4j.scala.DMatrix
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 
 
+/**
+  * Sparse inputs are densified and the model's missing value is handed to the DMatrix, which is what
+  * xgboost4j-spark does at training time (XGBoostEstimator.toXGBLabeledPoint expands the features
+  * with Vector.toArray) and in XGBoostModel.transform. An index absent from a SparseVector is
+  * therefore an explicit 0.0 feature, and only the model's missing value decides whether XGBoost
+  * reads it as absent.
+  */
 trait XgbConverters {
   implicit class VectorOps(vector: Vector) {
-    def asXGB: DMatrix = {
-      vector match {
-        case SparseVector(_, indices, values) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, vector.size, indices, values.map(_.toFloat))))
-
-        case DenseVector(values) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, vector.size, null, values.map(_.toFloat))))
-      }
+    def asXGB(missing: Float = Float.NaN): DMatrix = {
+      new DMatrix(
+        Iterator(new LabeledPoint(0.0f, vector.size, null, vector.toArray.map(_.toFloat))), null, missing)
     }
 
     def asXGBPredictor(treatsZeroAsNA: Boolean = false): FVec = {
@@ -31,14 +33,9 @@ trait XgbConverters {
   }
 
   implicit class DoubleTensorOps(tensor: Tensor[Double]) {
-    def asXGB: DMatrix = {
-      tensor match {
-        case SparseTensor(indices, values, _) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, tensor.size, indices.map(_.head).toArray, values.map(_.toFloat))))
-
-        case DenseTensor(values, _) =>
-          new DMatrix(Iterator(new LabeledPoint(0.0f, tensor.size, null, tensor.toDense.rawValues.map(_.toFloat))))
-      }
+    def asXGB(missing: Float = Float.NaN): DMatrix = {
+      new DMatrix(
+        Iterator(new LabeledPoint(0.0f, tensor.size, null, tensor.toArray.map(_.toFloat))), null, missing)
     }
 
     def asXGBPredictor(treatsZeroAsNA: Boolean = false): FVec = {

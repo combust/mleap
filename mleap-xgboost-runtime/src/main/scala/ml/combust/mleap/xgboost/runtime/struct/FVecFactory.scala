@@ -1,19 +1,11 @@
 package ml.combust.mleap.xgboost.runtime.struct
 
-import java.{lang, util}
-
 import com.yelp.xgboost.FVec
 import ml.combust.mleap.tensor.{SparseTensor, Tensor}
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 
-import scala.collection.JavaConverters.mapAsJavaMapConverter
-
 
 object FVecFactory {
-  private def toJavaMap(map: Map[Int, Float]): util.Map[lang.Integer, lang.Float] = {
-    map.asJava.asInstanceOf[util.Map[lang.Integer, lang.Float]]
-  }
-
   /**
     *  NOTE: all these methods cast doubles to floats, because doubles result in compounding differences
     *  from the c++ implementation: https://github.com/komiya-atsushi/xgboost-predictor-java/issues/21
@@ -33,13 +25,14 @@ object FVecFactory {
   private def fromFloatArray(values: Array[Float], treatsZeroAsNA: Boolean): FVec =
     if (treatsZeroAsNA) FVec.fromArrayWithZeroAsMissing(values) else FVec.fromArray(values)
 
-  private def dropZeros(map: Map[Int, Float], treatsZeroAsNA: Boolean): Map[Int, Float] =
-    if (treatsZeroAsNA) map.filter(_._2 != 0.0f) else map
-
-  /** Vector factories */
+  /**
+   * Sparse inputs are densified because that is what xgboost4j-spark does at training time
+   * (XGBoostEstimator.toXGBLabeledPoint expands the features with Vector.toArray) and in
+   * XGBoostModel.transform. An index absent from a SparseVector is therefore an explicit 0.0
+   * feature, not a missing one, unless the model itself treats 0.0 as missing.
+   */
   def fromSparseVector(sparseVector: SparseVector, treatsZeroAsNA: Boolean = false): FVec = {
-    val scalaMap = dropZeros((sparseVector.indices zip sparseVector.values.toFloats).toMap, treatsZeroAsNA)
-    FVec.fromMap(toJavaMap(scalaMap))
+    fromFloatArray(sparseVector.toArray.toFloats, treatsZeroAsNA)
   }
 
   def fromDenseVector(denseVector: DenseVector, treatsZeroAsNA: Boolean = false): FVec = {
@@ -49,10 +42,8 @@ object FVecFactory {
   /** MLeap Tensor factories */
   def fromSparseTensor(sparseTensor: SparseTensor[Double], treatsZeroAsNA: Boolean = false): FVec = {
     assert(sparseTensor.dimensions.size == 1, "must provide a mono-dimensional vector")
-    val indices = sparseTensor.indices.map(_.head).toArray[Int]
 
-    val scalaMap = dropZeros((indices zip sparseTensor.values.toFloats).toMap, treatsZeroAsNA)
-    FVec.fromMap(toJavaMap(scalaMap))
+    fromFloatArray(sparseTensor.toArray.toFloats, treatsZeroAsNA)
   }
 
   def fromDenseTensor(denseTensor: Tensor[Double], treatsZeroAsNA: Boolean = false): FVec = {

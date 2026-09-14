@@ -30,7 +30,7 @@ class XGBoostPredictorClassificationModelParitySpec extends org.scalatest.funspe
         val mleapResult = mleapTransformer.transform(DefaultLeapFrame(leapFrameDataset.schema, Seq(r))).get
         val mleapProbabilityColIndex = mleapResult.schema.indexOf("probability").get
 
-        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[SparseTensor[Double]].asXGB
+        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[SparseTensor[Double]].asXGB()
         val boosterResult = booster.predict(singleRowDMatrix, false, 0).head
         val boosterProbability = Vectors.dense(boosterResult.map(_.toDouble)).toDense
 

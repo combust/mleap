@@ -25,7 +25,7 @@ case class XGBoostRegression(override val uid: String = Transformer.uniqueName("
     val all = Seq(prediction, leafPrediction, contribPrediction)
 
     val f = (features: Tensor[Double]) => {
-      val data = features.asXGB
+      val data = features.asXGB(model.missing)
       val rowData = all.map(_.apply(data)).filter(_.isDefined).map(_.get)
       Row(rowData: _*)
     }

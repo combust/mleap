@@ -136,7 +136,7 @@ class XGBoostBundleBackwardCompatSpec extends AnyFunSpec
 
       Seq(leapFrameBinomial, toDenseFeaturesLeapFrame(leapFrameBinomial)).foreach { frame =>
         val row = singleRowFrame(frame, 0)
-        val dm = row.dataset.head(frame.schema.indexOf("features").get).asInstanceOf[Tensor[Double]].asXGB
+        val dm = row.dataset.head(frame.schema.indexOf("features").get).asInstanceOf[Tensor[Double]].asXGB()
         val boosterProb = booster.predict(dm, false, 0).head(0).toDouble
         val p = probabilities(transformer.transform(row).get)
         assert(almostEqual(p(1), boosterProb))
@@ -150,7 +150,7 @@ class XGBoostBundleBackwardCompatSpec extends AnyFunSpec
       val transformer = roundTrip(classificationTransformer(predictorFrom(out.toByteArray), 3, numFeatures(leapFrameMultinomial)))
 
       val row = singleRowFrame(leapFrameMultinomial, 0)
-      val dm = row.dataset.head(leapFrameMultinomial.schema.indexOf("features").get).asInstanceOf[Tensor[Double]].asXGB
+      val dm = row.dataset.head(leapFrameMultinomial.schema.indexOf("features").get).asInstanceOf[Tensor[Double]].asXGB()
       val boosterProb = booster.predict(dm, false, 0).head.map(_.toDouble)
       val p = probabilities(transformer.transform(row).get)
       assert(almostEqualSequences(Seq(boosterProb), Seq(p)))

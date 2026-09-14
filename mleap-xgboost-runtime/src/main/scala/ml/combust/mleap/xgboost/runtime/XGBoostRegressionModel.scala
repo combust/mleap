@@ -11,14 +11,15 @@ import XgbConverters._
   */
 case class XGBoostRegressionModel(booster: Booster,
                                   numFeatures: Int,
-                                  treeLimit: Int) extends Model {
-  def predict(tensor: Tensor[Double]): Double = predict(tensor.asXGB)
+                                  treeLimit: Int,
+                                  missing: Float = Float.NaN) extends Model {
+  def predict(tensor: Tensor[Double]): Double = predict(tensor.asXGB(missing))
   def predict(data: DMatrix): Double = booster.predict(data, outPutMargin = false, treeLimit = treeLimit).head(0)
 
-  def predictLeaf(tensor: Tensor[Double]): Tensor[Double] = predictLeaf(tensor.asXGB)
+  def predictLeaf(tensor: Tensor[Double]): Tensor[Double] = predictLeaf(tensor.asXGB(missing))
   def predictLeaf(data: DMatrix): Tensor[Double] = Tensor.denseVector(booster.predictLeaf(data, treeLimit = treeLimit).head.map(_.toDouble))
 
-  def predictContrib(tensor: Tensor[Double]): Tensor[Double] = predictContrib(tensor.asXGB)
+  def predictContrib(tensor: Tensor[Double]): Tensor[Double] = predictContrib(tensor.asXGB(missing))
   def predictContrib(data: DMatrix): Tensor[Double] = Tensor.denseVector(booster.predictContrib(data, treeLimit = treeLimit).head.map(_.toDouble))
 
   override def inputSchema: StructType = StructType("features" -> TensorType.Double(numFeatures)).get

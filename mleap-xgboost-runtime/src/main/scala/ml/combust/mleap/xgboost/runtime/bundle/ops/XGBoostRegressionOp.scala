@@ -29,6 +29,7 @@ class XGBoostRegressionOp extends MleapOp[XGBoostRegression, XGBoostRegressionMo
       model
         .withValue("num_features", Value.int(obj.numFeatures))
         .withValue("tree_limit", Value.int(obj.treeLimit))
+        .withValue("missing", Value.float(obj.missing))
     }
 
     override def load(model: Model)
@@ -37,10 +38,13 @@ class XGBoostRegressionOp extends MleapOp[XGBoostRegression, XGBoostRegressionMo
       val booster = XGBoost.loadModel(new ByteArrayInputStream(bytes))
       val treeLimit = model.getValue("tree_limit")
         .map(_.getInt).getOrElse(0)
+      val missing = model.getValue("missing")
+        .map(_.getFloat).getOrElse(Float.NaN)
 
       XGBoostRegressionModel(booster,
         numFeatures = model.value("num_features").getInt,
-        treeLimit = treeLimit)
+        treeLimit = treeLimit,
+        missing = missing)
     }
   }
 

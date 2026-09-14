@@ -11,25 +11,29 @@ trait XGBoostClassificationModelBase extends ProbabilisticClassificationModel {
   def booster: Booster
   def treeLimit: Int
 
-  override def predict(features: Vector): Double = predict(features.asXGB)
+  /** The value XGBoost reads as absent, as the model was trained with (NaN unless set). */
+  def missing: Float
+
+  override def predict(features: Vector): Double = predict(features.asXGB(missing))
   def predict(data: DMatrix): Double
 
-  override def predictRaw(features: Vector): Vector = predictRaw(features.asXGB)
+  override def predictRaw(features: Vector): Vector = predictRaw(features.asXGB(missing))
   def predictRaw(data: DMatrix): Vector
 
-  override def predictProbabilities(features: Vector): Vector = predictProbabilities(features.asXGB)
+  override def predictProbabilities(features: Vector): Vector = predictProbabilities(features.asXGB(missing))
   def predictProbabilities(data: DMatrix): Vector
 
-  def predictLeaf(features: Vector): Tensor[Double] = predictLeaf(features.asXGB)
+  def predictLeaf(features: Vector): Tensor[Double] = predictLeaf(features.asXGB(missing))
   def predictLeaf(data: DMatrix): Tensor[Double] = Tensor.denseVector(booster.predictLeaf(data, treeLimit = treeLimit).head.map(_.toDouble))
 
-  def predictContrib(features: Vector): Tensor[Double] = predictContrib(features.asXGB)
+  def predictContrib(features: Vector): Tensor[Double] = predictContrib(features.asXGB(missing))
   def predictContrib(data: DMatrix): Tensor[Double] = Tensor.denseVector(booster.predictContrib(data, treeLimit = treeLimit).head.map(_.toDouble))
 }
 
 case class XGBoostBinaryClassificationModel(override val booster: Booster,
                                             override val numFeatures: Int,
-                                            override val treeLimit: Int) extends XGBoostClassificationModelBase {
+                                            override val treeLimit: Int,
+                                            override val missing: Float = Float.NaN) extends XGBoostClassificationModelBase {
   override val numClasses: Int = 2
 
   def predict(data: DMatrix): Double = {
@@ -54,7 +58,8 @@ case class XGBoostBinaryClassificationModel(override val booster: Booster,
 case class XGBoostMultinomialClassificationModel(override val booster: Booster,
                                                  override val numClasses: Int,
                                                  override val numFeatures: Int,
-                                                 override val treeLimit: Int) extends XGBoostClassificationModelBase {
+                                                 override val treeLimit: Int,
+                                                 override val missing: Float = Float.NaN) extends XGBoostClassificationModelBase {
 
   override def predict(data: DMatrix): Double = {
     probabilityToPrediction(predictProbabilities(data))
@@ -77,6 +82,7 @@ case class XGBoostClassificationModel(impl: XGBoostClassificationModelBase) exte
   override val numClasses: Int = impl.numClasses
   override val numFeatures: Int = impl.numFeatures
   def treeLimit: Int = impl.treeLimit
+  def missing: Float = impl.missing
 
   def booster: Booster = impl.booster
 

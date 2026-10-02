@@ -41,6 +41,6 @@ SHELL ["/bin/bash", "-c"]
 
 RUN curl -s "https://get.sdkman.io" | bash \
     && source "$HOME/.sdkman/bin/sdkman-init.sh" \
-    && sdk install scala 2.13.16 \
+    && sdk install scala 2.13.18 \
     && sdk install sbt
 ENV PATH=/root/.sdkman/candidates/scala/current/bin:/root/.sdkman/candidates/sbt/current/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

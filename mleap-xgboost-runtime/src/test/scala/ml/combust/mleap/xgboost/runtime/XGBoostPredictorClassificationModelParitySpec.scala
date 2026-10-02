@@ -1,6 +1,6 @@
 package ml.combust.mleap.xgboost.runtime
 
-import biz.k11i.xgboost.Predictor
+import com.yelp.xgboost.Predictor
 import ml.combust.mleap.core.types._
 import ml.combust.mleap.runtime.frame.{DefaultLeapFrame, Transformer}
 import ml.combust.mleap.tensor.SparseTensor
@@ -30,7 +30,7 @@ class XGBoostPredictorClassificationModelParitySpec extends org.scalatest.funspe
         val mleapResult = mleapTransformer.transform(DefaultLeapFrame(leapFrameDataset.schema, Seq(r))).get
         val mleapProbabilityColIndex = mleapResult.schema.indexOf("probability").get
 
-        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[SparseTensor[Double]].asXGB
+        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[SparseTensor[Double]].asXGB()
         val boosterResult = booster.predict(singleRowDMatrix, false, 0).head
         val boosterProbability = Vectors.dense(boosterResult.map(_.toDouble)).toDense
 

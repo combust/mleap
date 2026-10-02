@@ -166,7 +166,7 @@ abstract class SparkParityBase extends AnyFunSpec with BeforeAndAfterAll {
       case (actual: Vector, expected: Vector) =>
         assert(actual ~= expected relTol eps)
         rowIdx += 1
-      case (actual: Seq[_], expected: Seq[_]) =>
+      case (actual: scala.collection.Seq[_], expected: scala.collection.Seq[_]) =>
         assert(actual.length == expected.length, s"actual length ${actual.length} != " +
           s"expected length ${expected.length}")
         actual.zip(expected).foreach {

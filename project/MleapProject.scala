@@ -2,6 +2,7 @@ package ml.combust.mleap
 
 import sbt.Keys._
 import sbt._
+import pl.project13.scala.sbt.JmhPlugin
 
 object MleapProject {
 

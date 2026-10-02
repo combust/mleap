@@ -13,7 +13,7 @@ case class XGBoostPredictorRegression(override val uid: String = Transformer.uni
   override val exec: UserDefinedFunction = {
     UserDefinedFunction(
       // Since the Predictor is our performant implementation, we only compute prediction for performance reasons.
-      (features: Tensor[Double]) => model.predict(features.asXGBPredictor),
+      (features: Tensor[Double]) => model.predict(features.asXGBPredictor(model.treatsZeroAsNA)),
       outputSchema,
       inputSchema)
   }

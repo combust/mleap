@@ -32,8 +32,6 @@ assembly / assemblyShadeRules := Seq(
   "spire.**",
   "sourcecode.**",
   "buildinfo.**",
-  "ai.h2o.**",
-  "biz.k11i.**",
   "com.esotericsoftware.**",
   "net.jafama.**",
   "org.objectweb.**",

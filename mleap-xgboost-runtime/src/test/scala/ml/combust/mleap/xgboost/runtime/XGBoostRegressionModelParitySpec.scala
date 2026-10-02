@@ -26,7 +26,7 @@ class XGBoostRegressionModelParitySpec extends org.scalatest.funspec.AnyFunSpec
         val mleapResult = mleapTransformer.transform(DefaultLeapFrame(leapFrameDataset.schema, Seq(r))).get
         val mleapPredictionColIndex = mleapResult.schema.indexOf("prediction").get
 
-        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[Tensor[Double]].asXGB
+        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[Tensor[Double]].asXGB()
         val boosterResult = booster.predict(singleRowDMatrix, false, 0).head(0)
 
         assert (boosterResult == mleapResult.dataset.head.getDouble(mleapPredictionColIndex))

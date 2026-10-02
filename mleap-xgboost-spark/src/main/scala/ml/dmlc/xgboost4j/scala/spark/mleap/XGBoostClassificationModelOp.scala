@@ -31,16 +31,14 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
       } else None
 
       val out = Files.newOutputStream(context.file("xgboost.model"))
-      obj._booster.saveModel(out)
+      obj.nativeBooster.saveModel(out)
       val numFeatures = context.context.dataset.get.select(obj.getFeaturesCol).first.getAs[Vector](0).size
       model.withValue("thresholds", thresholds.map(_.toSeq).map(Value.doubleList)).
         withValue("num_classes", Value.int(obj.numClasses)).
         withValue("num_features", Value.int(numFeatures)).
-        withValue("tree_limit", Value.int(obj.getOrDefault(obj.treeLimit))).
         withValue("missing", Value.float(obj.getOrDefault(obj.missing))).
         withValue("infer_batch_size", Value.int(obj.getOrDefault(obj.inferBatchSize))).
         withValue("use_external_memory", Value.boolean(obj.getOrDefault(obj.useExternalMemory))).
-        withValue("allow_non_zero_for_missing", Value.boolean(obj.getOrDefault(obj.allowNonZeroForMissing))).
         withValue("objective", Value.string(obj.getOrDefault(obj.objective)))
     }
 
@@ -50,12 +48,10 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
         SXGBoost.loadModel(in)
       }.get
 
-      val xgb = new XGBoostClassificationModel("", model.value("num_classes").getInt, booster)
+      val xgb = new XGBoostClassificationModel("", model.value("num_classes").getInt, booster, None)
 
-      model.getValue("tree_limit").map(o => xgb.setTreeLimit(o.getInt))
       model.getValue("thresholds").map(o => xgb.setThresholds(o.getDoubleList.toArray))
       model.getValue("missing").map(o => xgb.setMissing(o.getFloat))
-      model.getValue("allow_non_zero_for_missing").map(o => xgb.setAllowNonZeroForMissing(o.getBoolean))
       model.getValue("infer_batch_size").map(o => xgb.setInferBatchSize(o.getInt))
       model.getValue("use_external_memory").map(o => xgb.set(xgb.useExternalMemory, o.getBoolean))
       model.getValue("objective").map(o => xgb.set(xgb.objective, o.getString))
@@ -66,12 +62,10 @@ class XGBoostClassificationModelOp extends SimpleSparkOp[XGBoostClassificationMo
   override def sparkLoad(uid: String,
                          shape: NodeShape,
                          model: XGBoostClassificationModel): XGBoostClassificationModel = {
-    val xgb = new XGBoostClassificationModel(uid, model.numClasses, model._booster)
+    val xgb = new XGBoostClassificationModel(uid, model.numClasses, model.nativeBooster, None)
     if(model.isSet(model.thresholds)) xgb.setThresholds(model.getOrDefault(model.thresholds))
     if(model.isSet(model.missing)) xgb.setMissing(model.getOrDefault(model.missing))
-    if(model.isSet(model.allowNonZeroForMissing)) xgb.setAllowNonZeroForMissing(model.getOrDefault(model.allowNonZeroForMissing))
     if(model.isSet(model.inferBatchSize)) xgb.setInferBatchSize(model.getOrDefault(model.inferBatchSize))
-    if(model.isSet(model.treeLimit)) xgb.setTreeLimit(model.getOrDefault(model.treeLimit))
     if(model.isSet(model.useExternalMemory)) xgb.set(xgb.useExternalMemory, model.getOrDefault(model.useExternalMemory))
     if(model.isSet(model.objective)) xgb.set(xgb.objective, model.getOrDefault(model.objective))
     xgb

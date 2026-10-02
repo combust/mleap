@@ -31,7 +31,7 @@ class XGBoostClassificationModelParitySpec extends org.scalatest.funspec.AnyFunS
         val mleapRawPredictionColIndex = mleapResult.schema.indexOf("raw_prediction").get
         val mleapProbabilityColIndex = mleapResult.schema.indexOf("probability").get
 
-        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[Tensor[Double]].asXGB
+        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[Tensor[Double]].asXGB()
 
         val boosterResult = booster.predict(singleRowDMatrix, false, 0).head(0)
 
@@ -73,7 +73,7 @@ class XGBoostClassificationModelParitySpec extends org.scalatest.funspec.AnyFunS
         val mleapRawPredictionColIndex = mleapResult.schema.indexOf("raw_prediction").get
         val mleapProbabilityColIndex = mleapResult.schema.indexOf("probability").get
 
-        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[SparseTensor[Double]].asXGB
+        val singleRowDMatrix = r(featuresColumnIndex).asInstanceOf[SparseTensor[Double]].asXGB()
 
         val boosterResult = booster.predict(singleRowDMatrix, false, 0).head
 

@@ -36,6 +36,10 @@ jobs:
         with:
           python-version: "3.10"
       - run: pip install twine wheel setuptools
+      - name: Set the Python version from the release tag
+        run: |
+          sed -i "s/^version = .*/version = \"${GITHUB_REF_NAME#v}\"/" python/mleap/version.py
+          grep -x "version = \"${GITHUB_REF_NAME#v}\"" python/mleap/version.py
       - run: make -C python upload
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}

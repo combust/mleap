@@ -85,7 +85,7 @@ object Dependencies {
     val xgboostSparkDep = "ml.dmlc" %% "xgboost4j-spark" % xgboostVersion
     // The pure-JVM predictor engine (reader + tree traversal) lives in the standalone
     // com.yelp:xgboost-predictor artifact, published on Maven Central with no dependencies.
-    val xgboostPredictorDep = "com.yelp" % "xgboost-predictor" % "1.0.1"
+    val xgboostPredictorDep = "com.yelp" % "xgboost-predictor" % "1.0.2"
 
     val hadoop = "org.apache.hadoop" % "hadoop-client" % hadoopVersion
 

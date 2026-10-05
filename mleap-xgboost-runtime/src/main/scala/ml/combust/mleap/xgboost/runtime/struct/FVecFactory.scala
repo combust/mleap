@@ -26,13 +26,15 @@ object FVecFactory {
     if (treatsZeroAsNA) FVec.fromArrayWithZeroAsMissing(values) else FVec.fromArray(values)
 
   /**
-   * Sparse inputs are densified because that is what xgboost4j-spark does at training time
-   * (XGBoostEstimator.toXGBLabeledPoint expands the features with Vector.toArray) and in
-   * XGBoostModel.transform. An index absent from a SparseVector is therefore an explicit 0.0
-   * feature, not a missing one, unless the model itself treats 0.0 as missing.
+   * Sparse inputs are read as their dense row, because that is what xgboost4j-spark scores at
+   * training time (XGBoostEstimator.toXGBLabeledPoint expands the features with Vector.toArray) and
+   * in XGBoostModel.transform. An index absent from a SparseVector is therefore an explicit 0.0
+   * feature, not a missing one, unless the model itself treats 0.0 as missing. FVec.fromSparse
+   * gives those semantics without materializing the dense row, so the cost follows the stored
+   * entries rather than the vector size.
    */
   def fromSparseVector(sparseVector: SparseVector, treatsZeroAsNA: Boolean = false): FVec = {
-    fromFloatArray(sparseVector.toArray.toFloats, treatsZeroAsNA)
+    FVec.fromSparse(sparseVector.indices, sparseVector.values, sparseVector.size, treatsZeroAsNA)
   }
 
   def fromDenseVector(denseVector: DenseVector, treatsZeroAsNA: Boolean = false): FVec = {
@@ -42,8 +44,8 @@ object FVecFactory {
   /** MLeap Tensor factories */
   def fromSparseTensor(sparseTensor: SparseTensor[Double], treatsZeroAsNA: Boolean = false): FVec = {
     assert(sparseTensor.dimensions.size == 1, "must provide a mono-dimensional vector")
-
-    fromFloatArray(sparseTensor.toArray.toFloats, treatsZeroAsNA)
+    val indices = sparseTensor.indices.map(_.head).toArray
+    FVec.fromSparse(indices, sparseTensor.values, sparseTensor.dimensions.head, treatsZeroAsNA)
   }
 
   def fromDenseTensor(denseTensor: Tensor[Double], treatsZeroAsNA: Boolean = false): FVec = {

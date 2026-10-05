@@ -28,6 +28,7 @@ class XGBoostClassificationOp extends MleapOp[XGBoostClassification, XGBoostClas
         .withValue("num_features", Value.int(obj.numFeatures))
         .withValue("num_classes", Value.int(obj.numClasses))
         .withValue("tree_limit", Value.int(obj.treeLimit))
+        .withValue("missing", Value.float(obj.missing))
     }
 
     override def load(model: Model)
@@ -39,11 +40,13 @@ class XGBoostClassificationOp extends MleapOp[XGBoostClassification, XGBoostClas
       val numFeatures = model.value("num_features").getInt
       val treeLimit = model.getValue("tree_limit")
         .map(_.getInt).getOrElse(0)
+      val missing = model.getValue("missing")
+        .map(_.getFloat).getOrElse(Float.NaN)
 
       val impl = if(numClasses == 2) {
-        XGBoostBinaryClassificationModel(booster, numFeatures, treeLimit)
+        XGBoostBinaryClassificationModel(booster, numFeatures, treeLimit, missing)
       } else {
-        XGBoostMultinomialClassificationModel(booster, numClasses, numFeatures, treeLimit)
+        XGBoostMultinomialClassificationModel(booster, numClasses, numFeatures, treeLimit, missing)
       }
 
       XGBoostClassificationModel(impl)

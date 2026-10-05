@@ -179,6 +179,12 @@ object MleapProject {
     base = file("mleap-benchmark")
   ).dependsOn(runtime, spark, avro)
 
+  lazy val xgboostBenchmark = Project(
+    id = "mleap-xgboost-benchmark",
+    base = file("mleap-xgboost-benchmark")
+  ).dependsOn(xgboostRuntime)
+  .enablePlugins(JmhPlugin)
+
   // Create underlying fat jar project as per: https://github.com/sbt/sbt-assembly#q-despite-the-concerned-friends-i-still-want-publish-fat-jars-what-advice-do-you-have
   lazy val databricksRuntimeFat = Project(
     id = "mleap-databricks-runtime-fat",

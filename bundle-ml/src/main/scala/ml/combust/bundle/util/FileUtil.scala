@@ -2,7 +2,7 @@ package ml.combust.bundle.util
 
 import java.io.{IOException, InputStream, OutputStream}
 import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.{FileVisitResult, Files, FileSystems, Path, SimpleFileVisitor}
+import java.nio.file.{FileVisitResult, Files, Path, SimpleFileVisitor}
 import java.util.Comparator
 import java.util.stream.Collectors
 import java.util.zip.{ZipEntry, ZipInputStream, ZipOutputStream}
@@ -67,19 +67,23 @@ object FileUtil {
     var entry = in.getNextEntry
     while (entry != null) {
       val filePath = dest.resolve(entry.getName)
+      validateZipEntry(dest, filePath, entry)
       if (entry.isDirectory) {
         Files.createDirectories(filePath)
       } else {
-        val destCanonical = dest.toRealPath()
-        val entryCanonical = filePath.toAbsolutePath().normalize()
-        if (!entryCanonical.startsWith(destCanonical.toString() + FileSystems.getDefault().getSeparator())) {
-          throw new Exception("Entry is outside of the target dir: " + entry.getName)
-        }
         Using(Files.newOutputStream(filePath)) {
           out => writeData(in, out)
         }
       }
       entry = in.getNextEntry
+    }
+  }
+
+  private def validateZipEntry(dest: Path, filePath: Path, entry: ZipEntry): Unit = {
+    val destCanonical = dest.toRealPath()
+    val entryCanonical = filePath.toAbsolutePath().normalize()
+    if (!entryCanonical.startsWith(destCanonical)) {
+      throw new Exception("Entry is outside of the target dir: " + entry.getName)
     }
   }
 

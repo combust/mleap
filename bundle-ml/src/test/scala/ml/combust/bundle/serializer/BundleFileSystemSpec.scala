@@ -2,11 +2,13 @@ package ml.combust.bundle.serializer
 
 import java.net.URI
 import java.nio.file.Files
+import java.util.zip.{ZipEntry, ZipOutputStream}
 
 import ml.combust.bundle.test.TestSupport._
 import ml.combust.bundle.{BundleFile, BundleRegistry}
 import ml.combust.bundle.test.ops._
 import ml.combust.bundle.test.{TestBundleFileSystem, TestContext}
+import ml.combust.bundle.util.FileUtil
 import org.scalatest.funspec.AnyFunSpec
 import scala.util.Using
 
@@ -32,6 +34,27 @@ class BundleFileSystemSpec extends org.scalatest.funspec.AnyFunSpec {
       val loaded = uri.loadBundle().get
 
       assert(loaded.root == lr)
+    }
+  }
+
+  describe("extracting zip files") {
+    it("rejects directory entries outside of the target directory") {
+      val tmpDir = Files.createTempDirectory("BundleFileSystemSpec")
+      val zipFile = tmpDir.resolve("malicious.zip")
+      val dest = tmpDir.resolve("dest")
+      val outside = tmpDir.resolve("outside")
+
+      Using(new ZipOutputStream(Files.newOutputStream(zipFile))) { out =>
+        out.putNextEntry(new ZipEntry("../outside/"))
+        out.closeEntry()
+      }.get
+
+      intercept[Exception] {
+        FileUtil.extract(zipFile, dest)
+      }
+
+      assert(!Files.exists(outside))
+      FileUtil.rmRF(tmpDir)
     }
   }
 }

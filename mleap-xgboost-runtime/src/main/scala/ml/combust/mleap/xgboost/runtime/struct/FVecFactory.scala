@@ -26,16 +26,25 @@ object FVecFactory {
     if (treatsZeroAsNA) FVec.fromArrayWithZeroAsMissing(values) else FVec.fromArray(values)
 
   /**
-   * Sparse inputs are read as their dense row, because that is what xgboost4j-spark scores at
-   * training time (XGBoostEstimator.toXGBLabeledPoint expands the features with Vector.toArray) and
-   * in XGBoostModel.transform. An index absent from a SparseVector is therefore an explicit 0.0
-   * feature, not a missing one, unless the model itself treats 0.0 as missing. FVec.fromSparse
-   * gives those semantics without materializing the dense row, so the cost follows the stored
-   * entries rather than the vector size.
+   * An index absent from a sparse input is missing, and a stored entry is a value. That is how
+   * XGBoost 1.7.6 trained and predicted, and how an xgboost4j-spark that hands the stored indices and
+   * values to the DMatrix trains and predicts. A model learns a
+   * missing feature as the default direction of each split, so reading a gap as 0.0 sends rows that
+   * are mostly gaps down the same trees. When the model treats 0.0 as missing (missing=0.0f) a stored
+   * 0.0 is missing as well, so it is left out.
    */
-  def fromSparseVector(sparseVector: SparseVector, treatsZeroAsNA: Boolean = false): FVec = {
-    FVec.fromSparse(sparseVector.indices, sparseVector.values, sparseVector.size, treatsZeroAsNA)
+  private def fromSparseEntries(indices: Array[Int], values: Array[Double], treatsZeroAsNA: Boolean): FVec = {
+    val entries = new java.util.HashMap[Integer, java.lang.Double](indices.length * 2)
+    var i = 0
+    while (i < indices.length) {
+      if (!(treatsZeroAsNA && values(i) == 0.0)) entries.put(indices(i), values(i))
+      i += 1
+    }
+    FVec.fromMap(entries)
   }
+
+  def fromSparseVector(sparseVector: SparseVector, treatsZeroAsNA: Boolean = false): FVec =
+    fromSparseEntries(sparseVector.indices, sparseVector.values, treatsZeroAsNA)
 
   def fromDenseVector(denseVector: DenseVector, treatsZeroAsNA: Boolean = false): FVec = {
     fromFloatArray(denseVector.values.toFloats, treatsZeroAsNA)
@@ -44,8 +53,7 @@ object FVecFactory {
   /** MLeap Tensor factories */
   def fromSparseTensor(sparseTensor: SparseTensor[Double], treatsZeroAsNA: Boolean = false): FVec = {
     assert(sparseTensor.dimensions.size == 1, "must provide a mono-dimensional vector")
-    val indices = sparseTensor.indices.map(_.head).toArray
-    FVec.fromSparse(indices, sparseTensor.values, sparseTensor.dimensions.head, treatsZeroAsNA)
+    fromSparseEntries(sparseTensor.indices.map(_.head).toArray, sparseTensor.values, treatsZeroAsNA)
   }
 
   def fromDenseTensor(denseTensor: Tensor[Double], treatsZeroAsNA: Boolean = false): FVec = {

@@ -9,17 +9,20 @@ import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector}
 
 
 /**
-  * Sparse inputs are densified and the model's missing value is handed to the DMatrix, which is what
-  * xgboost4j-spark does at training time (XGBoostEstimator.toXGBLabeledPoint expands the features
-  * with Vector.toArray) and in XGBoostModel.transform. An index absent from a SparseVector is
-  * therefore an explicit 0.0 feature, and only the model's missing value decides whether XGBoost
-  * reads it as absent.
+  * Sparse inputs keep their gaps. An index absent from a SparseVector or sparse Tensor is missing and a
+  * stored entry is a value, as in XGBoost 1.7.6 and in an xgboost4j-spark whose LabeledPoint carries
+  * the stored indices and values. The model's missing
+  * value is handed to the DMatrix, so with missing=0.0f the stored zeros are missing too.
   */
 trait XgbConverters {
   implicit class VectorOps(vector: Vector) {
     def asXGB(missing: Float = Float.NaN): DMatrix = {
-      new DMatrix(
-        Iterator(new LabeledPoint(0.0f, vector.size, null, vector.toArray.map(_.toFloat))), null, missing)
+      val point = vector match {
+        case sparse: SparseVector =>
+          new LabeledPoint(0.0f, sparse.size, sparse.indices, sparse.values.map(_.toFloat))
+        case dense => new LabeledPoint(0.0f, dense.size, null, dense.toArray.map(_.toFloat))
+      }
+      new DMatrix(Iterator(point), null, missing)
     }
 
     def asXGBPredictor(treatsZeroAsNA: Boolean = false): FVec = {
@@ -34,8 +37,13 @@ trait XgbConverters {
 
   implicit class DoubleTensorOps(tensor: Tensor[Double]) {
     def asXGB(missing: Float = Float.NaN): DMatrix = {
-      new DMatrix(
-        Iterator(new LabeledPoint(0.0f, tensor.size, null, tensor.toArray.map(_.toFloat))), null, missing)
+      val point = tensor match {
+        case sparse: SparseTensor[Double] =>
+          new LabeledPoint(
+            0.0f, sparse.dimensions.head, sparse.indices.map(_.head).toArray, sparse.values.map(_.toFloat))
+        case dense => new LabeledPoint(0.0f, dense.size, null, dense.toArray.map(_.toFloat))
+      }
+      new DMatrix(Iterator(point), null, missing)
     }
 
     def asXGBPredictor(treatsZeroAsNA: Boolean = false): FVec = {

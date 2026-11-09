@@ -16,10 +16,10 @@ import scala.util.Random
 
 /**
   * Per-row cost of turning a SparseVector into an FVec and scoring it with the pure-JVM predictor,
-  * for vectors of `width` features holding about 100 entries. Compares the map-backed FVec MLeap
-  * used before 0.25.3 (absent index means missing), the dense row (absent index is 0.0, cost
-  * proportional to `width`), and FVecFactory.fromSparseVector, which keeps the dense-row semantics
-  * through FVec.fromSparse at a cost proportional to the stored entries.
+  * for vectors of `width` features holding about 100 entries. Compares the map-backed FVec (absent
+  * index means missing), the dense row (absent index is 0.0, cost proportional to `width`), and
+  * FVecFactory.fromSparseVector, which builds the map-backed FVec so absent indices are missing at a
+  * cost proportional to the stored entries.
   *
   * Run with `sbt "mleap-xgboost-benchmark/Jmh/run -i 5 -wi 3 -f 1 -t 1 .*SparseFVecBenchmark.*"`.
   */

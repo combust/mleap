@@ -32,6 +32,7 @@ but these are the configurations which are tested by mleap.
 
 | MLeap Version | Spark Version | Scala Version    | Java Version | Python Version | XGBoost Version | Tensorflow Version |
 |---------------|---------------|------------------|--------------|----------------|-----------------|--------------------|
+| 0.26.0        | 4.1.2         | 2.13.18          | 17           | 3.10 - 3.13    | 3.4.0           | 2.16.2             |
 | 0.25.3        | 4.1.2         | 2.13.18          | 17           | 3.10 - 3.13    | 3.4.0           | 2.16.2             |
 | 0.25.2        | 4.1.2         | 2.13.18          | 17           | 3.10 - 3.13    | 2.0.3           | 2.16.2             |
 | 0.25.1        | 4.1.1         | 2.13.17          | 17           | 3.10 - 3.13    | 2.0.3           | 2.16.2             |
@@ -60,7 +61,7 @@ but these are the configurations which are tested by mleap.
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.25.2"
+libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.26.0"
 ```
 
 #### Maven
@@ -69,7 +70,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.25.2"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-runtime_2.13</artifactId>
-    <version>0.25.2</version>
+    <version>0.26.0</version>
 </dependency>
 ```
 
@@ -78,7 +79,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-runtime" % "0.25.2"
 #### SBT
 
 ```sbt
-libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.25.2"
+libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.26.0"
 ```
 
 #### Maven
@@ -87,7 +88,7 @@ libraryDependencies += "ml.combust.mleap" %% "mleap-spark" % "0.25.2"
 <dependency>
     <groupId>ml.combust.mleap</groupId>
     <artifactId>mleap-spark_2.13</artifactId>
-    <version>0.25.2</version>
+    <version>0.26.0</version>
 </dependency>
 ```
 
